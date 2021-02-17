@@ -2,6 +2,30 @@
 <head>
 </head>
 <body>
-<button>Login with Twitch</button>
+
+<center><button id="login">Login with Twitch</button></center>
+
+<script>
+const args = {
+	client_id: '<%= client_id %>',
+	redirect_uri: '<%= redirect_uri %>',
+	scope: '<%= scope %>',
+	response_type: 'code',
+	force_verify: true
+};
+
+const query_args = [];
+
+for (let key in args) {
+	query_args.push(encodeURIComponent(key) + '=' + encodeURIComponent(args[key]));
+}
+
+const query = query_args.join('&');
+
+document.getElementById('login').on('click', () => {
+	document.location.href = 'https://id.twitch.tv/oauth2/authorize?' + query;
+});
+
+</script>
 </body>
 </html>
