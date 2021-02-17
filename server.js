@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session)
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
@@ -15,11 +16,14 @@ app.use(express.static('public'))
 
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true },
-  genid: () => ULID.ulid()
+	secret: process.env.SESSION_SECRET,
+	resave: false,
+	saveUninitialized: true,
+	cookie: { secure: true },
+	genid: () => ULID.ulid(),
+	store: new MemoryStore({
+		checkPeriod: 86400000 // prune expired entries every 24h
+	})
 }));
 
 
@@ -40,6 +44,8 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/auth/twitch/callback', async (req, res) => {
+	console.log('received code', req.query.code);
+
 	const { body } = await got.post('https://id.twitch.tv/oauth2/token', {
 		json: {
 			client_id: process.env.TWITCH_CLIENT_ID,
@@ -53,7 +59,9 @@ app.get('/auth/twitch/callback', async (req, res) => {
 
 	req.session.twitch.token = body.data;
 
-	console.log(req.session.twitch.token);
+	console.log('token', req.session.twitch.token);
+
+	res.send('done');
 });
 
 app.get('/:room', (req, res) => {
