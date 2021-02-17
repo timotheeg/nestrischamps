@@ -35,7 +35,7 @@ app.get('/login', (req, res) => {
 	res.render('login', {
 		client_id: process.env.TWITCH_CLIENT_ID,
 		redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
-		scope: 'user_read_email channel_read_subscriptions'
+		scope: 'user:read:email'
 	});
 });
 
