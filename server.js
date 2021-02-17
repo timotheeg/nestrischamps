@@ -5,6 +5,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const { v4: uuidV4 } = require('uuid');
 const ULID = require('ulid');
+const got = require('got');
 
 const PORT = process.env.PORT || 5000;
 
@@ -27,6 +28,10 @@ app.get('/debug', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+	if (!req.session.twitch) {
+		req.session.twitch = {};
+	};
+
 	res.render('login', {
 		client_id: process.env.TWITCH_CLIENT_ID,
 		redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
@@ -34,11 +39,21 @@ app.get('/login', (req, res) => {
 	});
 });
 
-app.get('/auth/twitch/callback', (req, res) => {
-	req.query.code
-	req.query.scope
-	req.query.scope
-	// extract query string args and validate
+app.get('/auth/twitch/callback', async (req, res) => {
+	const { body } = await got.post('https://id.twitch.tv/oauth2/token', {
+		json: {
+			client_id: process.env.TWITCH_CLIENT_ID,
+			client_secret: process.env.TWITCH_CLIENT_SECRET,
+			code: req.query.code,
+			grant_type: 'authorization_code',
+			redirect_uri
+		},
+		responseType: 'json'
+	});
+
+	req.session.twitch.token = body.data;
+
+	console.log(req.session.twitch.token);
 });
 
 app.get('/:room', (req, res) => {
@@ -58,9 +73,11 @@ io.on('connection', socket => {
 
 server.listen(PORT);
 
+/*
 https://id.twitch.tv/oauth2/authorize?
 response_type=code
 &redirect_uri=https%3A%2F%2Fmaxoutclub.com%2Fauth%2Ftwitch%2Fcallback
 &scope=user%3Aread%3Aemail%20channel%3Aread%3Asubscriptions
 &client_id=kxu1nt4xee7vz4gsebiwy8cld0lfro
+/**/
 
