@@ -57,7 +57,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 		responseType: 'json'
 	});
 
-	const token = token_response.body.data;
+	const token = token_response.body;
 
 	req.session.twitch.token = token;
 
@@ -70,7 +70,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 		responseType: 'json'
 	});
 
-	res.json(user_response.body.data);
+	res.json(user_response.body);
 });
 
 app.get('/:room', (req, res) => {
