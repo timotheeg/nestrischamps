@@ -70,7 +70,21 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			},
 			responseType: 'json'
 		});
-		res.json(user_response.body);
+
+		req.session.twitch.user = user_response.body;
+
+		const user_data_response = await got.get('https://api.twitch.tv/helix/users', {
+			headers: {
+				'Client-Id': process.env.TWITCH_CLIENT_ID,
+				'Authorization': `Bearer ${token.access_token}`
+			},
+			searchParams: {
+				id: user_response.body.user_id
+			},
+			responseType: 'json'
+		});
+
+		res.json(user_data_response.body.data[0]);
 	}
 	catch(err) {
 		res.send('meh T_T');
