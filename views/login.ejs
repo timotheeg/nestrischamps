@@ -22,7 +22,7 @@ for (let key in args) {
 
 const query = query_args.join('&');
 
-document.getElementById('login').on('click', () => {
+document.getElementById('login').addEventListener('click', () => {
 	document.location.href = 'https://id.twitch.tv/oauth2/authorize?' + query;
 });
 
