@@ -57,9 +57,9 @@ app.get('/auth/twitch/callback', async (req, res) => {
 		responseType: 'json'
 	});
 
-	req.session.twitch.token = body.data;
-
 	console.log('response', response);
+
+	req.session.twitch.token = response.body.data;
 
 	res.json(response);
 });
