@@ -34,5 +34,4 @@ io.on('connection', socket => {
 	})
 })
 
-server.listen(PORT)
-mu
+server.listen(PORT);
