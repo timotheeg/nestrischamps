@@ -46,7 +46,7 @@ app.get('/login', (req, res) => {
 app.get('/auth/twitch/callback', async (req, res) => {
 	console.log('received code', req.query.code);
 
-	const { body } = await got.post('https://id.twitch.tv/oauth2/token', {
+	const response = await got.post('https://id.twitch.tv/oauth2/token', {
 		json: {
 			client_id: process.env.TWITCH_CLIENT_ID,
 			client_secret: process.env.TWITCH_CLIENT_SECRET,
@@ -59,9 +59,9 @@ app.get('/auth/twitch/callback', async (req, res) => {
 
 	req.session.twitch.token = body.data;
 
-	console.log('token', req.session.twitch.token);
+	console.log('response', response);
 
-	res.send('done');
+	res.json(response);
 });
 
 app.get('/:room', (req, res) => {
