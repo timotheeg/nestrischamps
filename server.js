@@ -64,10 +64,8 @@ app.get('/auth/twitch/callback', async (req, res) => {
 	console.log(token, token.access_token);
 
 	try {
-		const user_response = await got.get('https://api.twitch.tv/kraken/user', {
+		const user_response = await got.get('https://id.twitch.tv/oauth2/validate', {
 			headers: {
-				'Accept':        'application/vnd.twitchtv.v5+json',
-				'Client-ID':     process.env.TWITCH_CLIENT_ID,
 				'Authorization': `OAuth ${token.access_token}`
 			},
 			responseType: 'json'
@@ -75,10 +73,8 @@ app.get('/auth/twitch/callback', async (req, res) => {
 		res.json(user_response.body);
 	}
 	catch(err) {
-
+		res.send('meh T_T');
 	}
-
-
 });
 
 app.get('/:room', (req, res) => {
