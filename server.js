@@ -61,16 +61,24 @@ app.get('/auth/twitch/callback', async (req, res) => {
 
 	req.session.twitch.token = token;
 
-	const user_response = await got.get('https://api.twitch.tv/kraken/user', {
-		headers: {
-			'Accept':        'application/vnd.twitchtv.v5+json',
-			'Client-ID':     process.env.TWITCH_CLIENT_ID,
-			'Authorization': `OAuth ${token.access_token}`
-		},
-		responseType: 'json'
-	});
+	console.log(token, token.access_token);
 
-	res.json(user_response.body);
+	try {
+		const user_response = await got.get('https://api.twitch.tv/kraken/user', {
+			headers: {
+				'Accept':        'application/vnd.twitchtv.v5+json',
+				'Client-ID':     process.env.TWITCH_CLIENT_ID,
+				'Authorization': `OAuth ${token.access_token}`
+			},
+			responseType: 'json'
+		});
+		res.json(user_response.body);
+	}
+	catch(err) {
+
+	}
+
+
 });
 
 app.get('/:room', (req, res) => {
