@@ -46,7 +46,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			client_secret: process.env.TWITCH_CLIENT_SECRET,
 			code: req.query.code,
 			grant_type: 'authorization_code',
-			redirect_uri
+			redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`
 		},
 		responseType: 'json'
 	});
