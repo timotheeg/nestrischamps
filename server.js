@@ -93,8 +93,9 @@ app.get('/auth/twitch/callback', async (req, res) => {
 
 		const user_object = user_data_response.body.data[0];
 
+		// insert/update user
 		const db_client = await db_pool.connect();
-		const result = await db_client.query(
+		const insert_result = await db_client.query(
 			`INSERT INTO twitch_users
 			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
 			VALUES
@@ -114,12 +115,23 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			]
 		);
 
-		// at the very end, record user in session and return response
+		// query again to get the user secret
+		const query_secret_result = await db_client.query(
+			'SELECT secret FROM twitch_users WHERE id=$1;',
+			[ user_object.id, ]
+		);
+
+		console.log(query_secret_result.rows[0]);
+
+		const user_secret = query_secret_result.rows[0];
+
 		req.session.twitch.user = user_object;
 		res.json({
 			user_object,
-			db_record: result.rows[0]
+			user_secret,
 		});
+
+		user_object.secret = user_secret;
 	}
 	catch(err) {
 		console.error(err);
