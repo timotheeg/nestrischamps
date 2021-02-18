@@ -98,7 +98,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			`INSERT INTO twitch_users
 			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
 			VALUES
-			($1, $2, $3, $4, $5, $5, $6, $7, $7, $8, NOW(), NOW())
+			($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
 			ON CONFLICT(id)
 			DO UPDATE SET login=$2, email=$3, type=$5, description=$6, display_name=$7, profile_image_url=$8, last_login=NOW();
 			`,
