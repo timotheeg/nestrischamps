@@ -94,7 +94,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 		const user_object = user_data_response.body.data[0];
 
 		const db_client = await db_pool.connect();
-		const result = await client.query(
+		const result = await db_client.query(
 			`INSERT INTO twitch_users
 			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
 			VALUES
