@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["tetris", "statistics"],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -16,8 +16,12 @@
     "got": "^11.8.1",
     "memorystore": "^1.6.4",
     "peer": "^0.6.1",
+    "pg": "^8.5.1",
     "socket.io": "^3.1.1",
     "ulid": "^2.3.0",
     "uuid": "^8.3.2"
+  },
+  "engine": {
+    "node": "14.x"
   }
 }

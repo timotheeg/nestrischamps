@@ -1,3 +1,4 @@
+const { Pool } = require('pg');
 const express = require('express');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session)
@@ -9,6 +10,14 @@ const ULID = require('ulid');
 const got = require('got');
 
 const PORT = process.env.PORT || 5000;
+
+const db_pool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+	ssl: {
+		rejectUnauthorized: false
+	}
+});
+
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
@@ -71,8 +80,6 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			responseType: 'json'
 		});
 
-		req.session.twitch.user = user_response.body;
-
 		const user_data_response = await got.get('https://api.twitch.tv/helix/users', {
 			headers: {
 				'Client-Id': process.env.TWITCH_CLIENT_ID,
@@ -84,9 +91,40 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			responseType: 'json'
 		});
 
-		res.json(user_data_response.body.data[0]);
+		const user_object = user_data_response.body.data[0];
+
+		const db_client = await db_pool.connect();
+		const result = await client.query(
+			`INSERT INTO twitch_users
+			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
+			VALUES
+			($1, $2, $3, $4, $5, $5, $6, $7, $7, $8, NOW(), NOW());
+
+			ON CONFLICT(id)
+			DO
+				UPDATE SET login=$2, email=$3, type=$5, description=$6, display_name=$7, profile_image_url=$8, last_login=NOW();
+			`,
+			[
+				user_object.id,
+				user_object.login,
+				user_object.email,
+				ULID.ulid(),
+				user_object.type,
+				user_object.description,
+				user_object.display_name,
+				user_object.profile_image_url,
+			]
+		);
+
+		// at the very end, record user in session and return response
+		req.session.twitch.user = user_object;
+		res.json({
+			user_object,
+			db_record: result.rows[0]
+		});
 	}
 	catch(err) {
+		// TODO: Add status code 500 (or whatever)
 		res.send('meh T_T');
 	}
 });
