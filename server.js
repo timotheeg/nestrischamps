@@ -124,6 +124,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 		});
 	}
 	catch(err) {
+		consol.error(err);
 		// TODO: Add status code 500 (or whatever)
 		res.send('meh T_T');
 	}

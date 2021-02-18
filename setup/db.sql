@@ -11,7 +11,10 @@ CREATE TABLE twitch_users (
 	profile_image_url VARCHAR ( 255 ),
 
 	created_on TIMESTAMP NOT NULL,
-	last_login TIMESTAMP NOT NULL
+	last_login TIMESTAMP NOT NULL,
+
+	access_token VARCHAR( 128 ) NOT NULL,
+	refresh_token VARCHAR( 128 ) NOT NULL
 );
 
 CREATE TABLE scores (
