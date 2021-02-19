@@ -19,6 +19,15 @@ const db_pool = new Pool({
 });
 
 
+function assertSession(req, res, next) {
+	if (!req.session.user) {
+		res.redirect('/login');
+	}
+	else {
+		next();
+	}
+}
+
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
 
@@ -150,10 +159,15 @@ io.on('connection', socket => {
 });
 
 
-app.get('/ocr', (req, res) => {});
-app.get('/invite/:roomid', (req, res) => {});
-app.get('/admin', (req, res) => {});
-app.get('/view/:name/:secret', (req, res) => {});
+function dummy(res) {
+	res.send('dummy ok');
+}
+
+app.get('/ocr', assertSession, (req, res) => dummy(res) );
+app.get('/invite/:roomid', assertSession, (req, res) => dummy(res) );
+app.get('/admin', assertSession, (req, res) => dummy(res) );
+
+app.get('/view/:name/:secret', (req, res) => dummy(res) );
 
 server.listen(PORT);
 
