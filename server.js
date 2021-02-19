@@ -36,15 +36,11 @@ app.use(session({
 }));
 
 
-app.get('/debug', (req, res) => {
+app.get('/debug/session', (req, res) => {
 	res.send(JSON.stringify(req.session));
 });
 
 app.get('/login', (req, res) => {
-	if (!req.session.twitch) {
-		req.session.twitch = {};
-	};
-
 	res.render('login', {
 		client_id: process.env.TWITCH_CLIENT_ID,
 		redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
@@ -67,8 +63,6 @@ app.get('/auth/twitch/callback', async (req, res) => {
 	});
 
 	const token = token_response.body;
-
-	req.session.twitch.token = token;
 
 	console.log(token, token.access_token);
 
@@ -125,8 +119,11 @@ app.get('/auth/twitch/callback', async (req, res) => {
 
 		const user_secret = query_secret_result.rows[0];
 
-		req.session.twitch.user = user_object;
+		req.session.user = user_object; // do we need to store the access token?
+
 		res.json({
+			token,
+			user_response: user_response.body,
 			user_object,
 			user_secret,
 		});
@@ -155,13 +152,12 @@ io.on('connection', socket => {
 	})
 });
 
+
+app.get('/ocr', (req, res) => {});
+app.get('/invite/:roomid', (req, res) => {});
+app.get('/admin', (req, res) => {});
+app.get('/view/:name/:secret', (req, res) => {});
+
 server.listen(PORT);
 
-/*
-https://id.twitch.tv/oauth2/authorize?
-response_type=code
-&redirect_uri=https%3A%2F%2Fmaxoutclub.com%2Fauth%2Ftwitch%2Fcallback
-&scope=user%3Aread%3Aemail%20channel%3Aread%3Asubscriptions
-&client_id=kxu1nt4xee7vz4gsebiwy8cld0lfro
-/**/
 
