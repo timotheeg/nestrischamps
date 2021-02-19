@@ -117,7 +117,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 
 		console.log(query_secret_result.rows[0]);
 
-		const user_secret = query_secret_result.rows[0];
+		user_object.secret = query_secret_result.rows[0].secret;
 
 		req.session.user = user_object; // do we need to store the access token?
 
@@ -125,10 +125,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 			token,
 			user_response: user_response.body,
 			user_object,
-			user_secret,
 		});
-
-		user_object.secret = user_secret;
 	}
 	catch(err) {
 		console.error(err);
