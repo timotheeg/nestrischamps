@@ -7,15 +7,12 @@ const server = require('http').Server(app);
 const { v4: uuidV4 } = require('uuid');
 const ULID = require('ulid');
 const got = require('got');
+const WebSocket = require('ws');
 
-
-
-
-const io = require('socket.io')(server, {
-
-});
 
 const PORT = process.env.PORT || 5000;
+
+const wss = new WebSocket.Server({ clientTracking: false, noServer: true });
 
 const db_pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
@@ -39,7 +36,7 @@ app.use(express.static('public'));
 app.set('trust proxy', 1) // trust first proxy
 
 
-const session_middleware = session({
+const sessionMiddleware = session({
 	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: true,
@@ -50,8 +47,38 @@ const session_middleware = session({
 	})
 });
 
-app.use(session_middleware);
-io.use((socket, next) => session_middleware(socket.request, {}, next));
+app.use(sessionMiddleware);
+
+server.on('upgrade', function (request, socket, head) {
+  console.log('Parsing session from request...');
+
+  sessionMiddleware(request, {}, () => {
+    if (!request.session.user) {
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    console.log('Session is parsed!');
+
+    wss.handleUpgrade(request, socket, head, function (ws) {
+      wss.emit('connection', ws, request);
+    });
+  });
+});
+
+wss.on('connection', function (ws, request) {
+  const userId = request.session.user.id;
+
+  ws.on('message', function (message) {
+    //
+    // Here we can now use session parameters.
+    //
+    console.log(`Received message ${message} from user ${userId}`);
+  });
+
+  ws.on('close', function () {});
+});
 
 
 app.get('/debug/session', (req, res) => {
@@ -158,6 +185,7 @@ app.get('/:room', (req, res) => {
 });
 /**/
 
+/*
 io.on('connection', socket => {
 	try {
 		console.log('socket headers', socket.headers);
@@ -182,6 +210,7 @@ io.on('connection', socket => {
 		// TODO
 	});
 });
+/**/
 
 
 function dummy(res) {
