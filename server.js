@@ -4,10 +4,16 @@ const session = require('express-session');
 const MemoryStore = require('memorystore')(session)
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
 const { v4: uuidV4 } = require('uuid');
 const ULID = require('ulid');
 const got = require('got');
+
+
+
+
+const io = require('socket.io')(server, {
+
+});
 
 const PORT = process.env.PORT || 5000;
 
@@ -17,7 +23,6 @@ const db_pool = new Pool({
 		rejectUnauthorized: false
 	}
 });
-
 
 function assertSession(req, res, next) {
 	if (!req.session.user) {
@@ -177,6 +182,10 @@ app.get('/renderers', assertSession, (req, res) => {
 		},
 		secret: req.session.user.secret
 	});
+});
+
+app.get('/player_socket', assertSession, (req, res) => {
+	res.render('player_socket');
 });
 
 app.get('/view/:name/:secret', (req, res) => dummy(res) );

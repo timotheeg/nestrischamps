@@ -1,0 +1,15 @@
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io("ws://nestrischamps.herokuapp.com");
+
+setInterval(() => {
+	socket.emit('hello', 5000);
+});
+</script>
+</head>
+<body>
+
+</body>
+</html>
