@@ -37,7 +37,9 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 app.set('trust proxy', 1) // trust first proxy
-app.use(session({
+
+
+const session_middleware = session({
 	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: true,
@@ -46,7 +48,10 @@ app.use(session({
 	store: new MemoryStore({
 		checkPeriod: 86400000 // prune expired entries every 24h
 	})
-}));
+});
+
+app.use(session_middleware);
+io.use((socket, next) => session_middleware(socket.request, {}, next));
 
 
 app.get('/debug/session', (req, res) => {
@@ -171,7 +176,7 @@ io.on('connection', socket => {
 		})
 	});
 	socket.on('frame', data => {
-
+		console.log('frame data', typeof data, data);
 	});
 	socket.on('disconnect', () => {
 		// TODO
