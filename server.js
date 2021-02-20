@@ -28,9 +28,8 @@ function assertSession(req, res, next) {
 	}
 }
 
-app.set('view engine', 'ejs')
-app.use(express.static('public'))
-
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
@@ -143,9 +142,11 @@ app.get('/auth/twitch/callback', async (req, res) => {
 	}
 });
 
+/*
 app.get('/:room', (req, res) => {
 	res.render('room', { roomId: req.params.room })
 });
+/**/
 
 io.on('connection', socket => {
 	socket.on('join-room', (roomId, userId) => {
@@ -166,6 +167,17 @@ function dummy(res) {
 app.get('/ocr', assertSession, (req, res) => dummy(res) );
 app.get('/invite/:roomid', assertSession, (req, res) => dummy(res) );
 app.get('/admin', assertSession, (req, res) => dummy(res) );
+app.get('/renderers', assertSession, (req, res) => {
+	res.render('renderers', {
+		templates: {
+			single_layout: [
+			],
+			match_layout: [
+			]
+		},
+		secret: req.session.user.secret
+	});
+});
 
 app.get('/view/:name/:secret', (req, res) => dummy(res) );
 

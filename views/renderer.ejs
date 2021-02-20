@@ -1,0 +1,38 @@
+<html>
+<head>
+</head>
+<body>
+<p>Hi! On this page, you will find URLs for templates you can use in your OBS.</p>
+
+<p>This URLs identify <b>YOU</b> as a user, do NOT share them with anyone.</p>
+
+<p>There are many templates you can try. PLay around to get a sense of them all.</p>
+
+<p>Single player templates:</p>
+<ul>
+<li><a href="/template/classic/<%= secret %>">Classic</a></li>
+<li><a href="/template/das_trainer/<%= secret %>">Das Trainer</a></li>
+<li><a href="/template/das_trainer/<%= secret %>">Das Trainer</a></li>
+</ul>
+
+<p>Competition Layout:</p>
+<ul>
+<li><a href="/template/ctwc/<%= secret %>">CTWC</a></li>
+<li><a href="/template/ctjc/<%= secret %>">CTJC</a></li>
+</ul>
+
+<script>
+
+document.querySelectorAll('a').forEach(a => {
+	a.addEventListener('click', evt => {
+		evt.preventDefault();
+		navigator.clipboard.write(a.attributes.href).then(
+			() => alert('URL copied to clipboard'),
+			() => alert('Could not copy URL to clipboard')
+		);
+	});
+});
+
+</script>
+</body>
+</html>
