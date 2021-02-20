@@ -154,6 +154,8 @@ app.get('/:room', (req, res) => {
 /**/
 
 io.on('connection', socket => {
+	console.log(socket.request.user.login, 'has connected a producer');
+
 	socket.on('join-room', (roomId, userId) => {
 		socket.join(roomId)
 		socket.to(roomId).broadcast.emit('user-connected', userId)
@@ -161,7 +163,13 @@ io.on('connection', socket => {
 		socket.on('disconnect', () => {
 			socket.to(roomId).broadcast.emit('user-disconnected', userId)
 		})
-	})
+	});
+	socket.on('frame', data => {
+
+	});
+	socket.on('disconnect', () => {
+		// TODO
+	});
 });
 
 
