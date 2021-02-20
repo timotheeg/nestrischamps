@@ -154,7 +154,7 @@ app.get('/:room', (req, res) => {
 /**/
 
 io.on('connection', socket => {
-	console.log(socket.request.user.login, 'has connected a producer');
+	console.log(socket.request.session.user.login, 'has connected a producer');
 
 	socket.on('join-room', (roomId, userId) => {
 		socket.join(roomId)

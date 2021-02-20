@@ -2,7 +2,7 @@
 <head>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const socket = io("ws://nestrischamps.herokuapp.com");
+const socket = io("wss://nestrischamps.herokuapp.com");
 
 setInterval(() => {
 	socket.emit('hello', 5000);
