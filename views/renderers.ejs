@@ -12,10 +12,11 @@
 <ul>
 <li><a href="/template/classic/<%= secret %>">Classic</a></li>
 <li><a href="/template/das_trainer/<%= secret %>">Das Trainer</a></li>
-<li><a href="/template/das_trainer/<%= secret %>">Das Trainer</a></li>
+<li><a href="/template/simple_1p/<%= secret %>">Simple 1p layout</a></li>
+<li><a href="/template/invisible_tetris/<%= secret %>">Invisible Tetris</a></li>
 </ul>
 
-<p>Competition Layout:</p>
+<p>Competition Layouts:</p>
 <ul>
 <li><a href="/template/ctwc/<%= secret %>">CTWC</a></li>
 <li><a href="/template/ctjc/<%= secret %>">CTJC</a></li>
@@ -26,7 +27,7 @@
 document.querySelectorAll('a').forEach(a => {
 	a.addEventListener('click', evt => {
 		evt.preventDefault();
-		navigator.clipboard.write(a.attributes.href).then(
+		navigator.clipboard.write([new ClipboardItem({ 'text/plain': a.href })]).then(
 			() => alert('URL copied to clipboard'),
 			() => alert('Could not copy URL to clipboard')
 		);
