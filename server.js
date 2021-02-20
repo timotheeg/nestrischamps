@@ -154,7 +154,13 @@ app.get('/:room', (req, res) => {
 /**/
 
 io.on('connection', socket => {
-	console.log(socket.request.session.user.login, 'has connected a producer');
+	try {
+		console.log('socket headers', socket.headers);
+		console.log(socket.request.session.user.login, 'has connected a producer');
+	}
+	catch(err) {
+		console.log("Unable to retrieve user from session");
+	}
 
 	socket.on('join-room', (roomId, userId) => {
 		socket.join(roomId)
