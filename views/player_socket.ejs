@@ -1,12 +1,11 @@
 <html>
 <head>
-<script src="/socket.io/socket.io.js"></script>
 <script>
-const socket = io("wss://nestrischamps.herokuapp.com");
+const socket = new WebSocket("wss://nestrischamps.herokuapp.com");
 
 setInterval(() => {
-	socket.emit('hello', 5000);
-});
+	socket.send('hello there');
+}, 5000);
 </script>
 </head>
 <body>

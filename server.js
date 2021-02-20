@@ -71,9 +71,6 @@ wss.on('connection', function (ws, request) {
   const userId = request.session.user.id;
 
   ws.on('message', function (message) {
-    //
-    // Here we can now use session parameters.
-    //
     console.log(`Received message ${message} from user ${userId}`);
   });
 
