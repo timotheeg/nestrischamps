@@ -71,7 +71,8 @@ wss.on('connection', function (ws, request) {
   const userId = request.session.user.id;
 
   ws.on('message', function (message) {
-    console.log(`Received message ${message} from user ${userId}`);
+  	console.log(`Received message from user ${userId}`);
+    console.log(typeof message, message);
   });
 
   ws.on('close', function () {});

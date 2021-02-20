@@ -1,11 +1,13 @@
 <html>
 <head>
 <script>
+
 const socket = new WebSocket("wss://nestrischamps.herokuapp.com");
 
-setInterval(() => {
+const hello_ping = setInterval(() => {
 	socket.send('hello there');
 }, 5000);
+
 </script>
 </head>
 <body>
