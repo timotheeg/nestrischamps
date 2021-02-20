@@ -25,12 +25,24 @@
 <script>
 
 document.querySelectorAll('a').forEach(a => {
-	a.addEventListener('click', evt => {
+	a.addEventListener('click', async (evt) => {
 		evt.preventDefault();
-		navigator.clipboard.write([new ClipboardItem({ 'text/plain': a.href })]).then(
-			() => alert('URL copied to clipboard'),
-			() => alert('Could not copy URL to clipboard')
-		);
+
+		const result = await navigator.permissions.query({ name: 'clipboard-write' });
+
+		if (result.state === 'granted') {
+			const type = 'text/plain';
+			const blob = new Blob([a.ref], { type });
+			const data = [new ClipboardItem({ [type]: blob })];
+
+			try {
+				await navigator.clipboard.write(data);
+				alert('URL copied to clipboard');
+			}
+			catch(err) {
+				alert('Could not copy URL to clipboard')
+			}
+		}
 	});
 });
 
