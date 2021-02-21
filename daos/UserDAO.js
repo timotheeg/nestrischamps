@@ -17,6 +17,8 @@ class UserDAO {
 		}
 
 		this.addUser(user);
+
+		return user;
 	}
 
 	addUser(user) {
