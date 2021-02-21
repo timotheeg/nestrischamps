@@ -8,7 +8,7 @@ module.exports = {
 		resave: false,
 		saveUninitialized: true,
 		cookie: { secure: true },
-		genid: () => ULID.ulid(),
+		genid: ULID.ulid,
 		store: new MemoryStore({
 			checkPeriod: 86400000 // prune expired entries every 24h
 		})
