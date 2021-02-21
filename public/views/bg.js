@@ -27,7 +27,7 @@ for (let x = grid_x; x--; ) {
 		const piece = pieces.pop();
 		const img = new Image()
 
-		img.src = `./bg_pieces/${piece}.png`;
+		img.src = `/views/bg_pieces/${piece}.png`;
 
 		const pos_x = Math.round(border / 2 + span_x * (x - spread + 2 * spread * Math.random()));
 		const pos_y = Math.round(border + span_y * (y - spread + 2 * spread * Math.random()));
