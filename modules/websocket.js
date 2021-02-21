@@ -4,9 +4,9 @@ const Connection = require('./Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
-		console.log('WS: ', request.originalUrl);
+		console.log('WS: ', request.originalUrl, request.url);
 
-		const m = request.originalUrl.match(/^\/ws\/view\/(1p|mp)\/([a-z_-]+)\/([a-zA-Z0-9-]+)/);
+		const m = request.url.match(/^\/ws\/view\/(1p|mp)\/([a-z_-]+)\/([a-zA-Z0-9-]+)/);
 
 		request.is_secret_view = !!m;
 
