@@ -12,7 +12,7 @@
 
 <p>Single player templates:</p>
 <ul>
-<li><a href="/template/classic/<%= secret %>">Classic</a></li>
+<!--li><a href="/template/classic/<%= secret %>">Classic</a></li-->
 <li><a href="/template/das_trainer/<%= secret %>">Das Trainer</a></li>
 <li><a href="/template/simple_1p/<%= secret %>">Simple 1p layout</a></li>
 <li><a href="/template/invisible_tetris/<%= secret %>">Invisible Tetris</a></li>
@@ -24,10 +24,14 @@
 <li><a href="/template/ctjc/<%= secret %>">CTJC</a></li>
 </ul>
 
-
-
-<!--script>
+<script>
 document.querySelectorAll('a').forEach(a => {
+	const span = document.createElement('span');
+	span.innerText = `${a.textContent}:`
+
+	a.parentNode.insertBefore(span, a);
+	a.textContent = a.href;
+
 	a.addEventListener('click', async (evt) => {
 		evt.preventDefault();
 
@@ -35,7 +39,7 @@ document.querySelectorAll('a').forEach(a => {
 
 		if (result.state === 'granted') {
 			const type = 'text/plain';
-			const blob = new Blob([a.ref], { type });
+			const blob = new Blob([a.href], { type });
 			const data = [new ClipboardItem({ [type]: blob })];
 
 			try {
@@ -48,6 +52,6 @@ document.querySelectorAll('a').forEach(a => {
 		}
 	});
 });
-</script -->
+</script>
 </body>
 </html>

@@ -8,6 +8,8 @@ class MatchRoom extends Room {
 		super();
 
 		this.members = new Set();
+		this.player1 = null;
+		this.player2 = null;
 	}
 }
 
