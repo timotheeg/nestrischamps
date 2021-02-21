@@ -17,6 +17,11 @@ router.get('/', (req, res) => {
 router.get('/twitch/callback', async (req, res) => {
 	console.log('received code', req.query.code);
 
+	if (!req.query.code) {
+		res.send('Unable to authenticate');
+		return;
+	}
+
 	const token_response = await got.post('https://id.twitch.tv/oauth2/token', {
 		searchParams: {
 			client_id: process.env.TWITCH_CLIENT_ID,
