@@ -1,7 +1,7 @@
 class Connection {
-	constructor(port, host='127.0.0.1') {
-		this.port = port;
-		this.host = host;
+	constructor(host, path) {
+		this.host = host
+		this.path = path
 
 		this.connect        = this.connect.bind(this);
 		this._handleError   = this._handleError.bind(this);
@@ -20,8 +20,8 @@ class Connection {
 	}
 
 	_handleClose() {
-		this._clearSocket();
-		setTimeout(this.connect, 25);
+		this.clearSocket();
+		setTimeout(this.connect, 25); // TODO: exponential backoff
 	}
 
 	_clearSocket() {
@@ -40,7 +40,10 @@ class Connection {
 			this._clearSocket();
 		}
 
-		this.socket = new WebSocket(`ws://${this.host}:${this.port}`);
+		// match current page prototol
+		const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
+
+		this.socket = new WebSocket(`${wsp}://${this.host}/${this.path}`);
 
 		this.socket.addEventListener('error', this._handleError);
 		this.socket.addEventListener('close', this._handleClose);
