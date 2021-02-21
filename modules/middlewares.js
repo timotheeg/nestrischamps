@@ -1,5 +1,5 @@
 const session = require('express-session');
-const MemoryStore = require('memorystore')(session)
+const MemoryStore = require('memorystore')(session);
 
 module.exports = {
 	sessionMiddleware: session({
