@@ -45,10 +45,10 @@ class User {
 
 		conn.socket.on('close', () => {
 			this.connections.delete(conn);
-			checkScheduleDestroy();
+			this.checkScheduleDestroy();
 		});
 
-		checkScheduleDestroy();
+		this.checkScheduleDestroy();
 	}
 
 	checkScheduleDestroy() {
