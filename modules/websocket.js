@@ -1,8 +1,10 @@
-modules.exports = function init(server, app, wss) {
+const middlewares = require('./modules/middlewares');
+
+modules.exports = function init(server, wss) {
 	server.on('upgrade', function (request, socket, head) {
 		console.log('Parsing session from request...');
 
-		sessionMiddleware(request, {}, () => {
+		middlewares.assertSession(request, {}, () => {
 			if (!request.session.user) {
 				socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
 				socket.destroy();
