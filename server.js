@@ -5,10 +5,8 @@ const app = require('./modules/app');
 
 const server = require('http').Server(app);
 const wss = new WebSocket.Server({
-	path: '/ws',
 	clientTracking: false,
-	noServer: true,
-	followRedirects: true,
+	noServer: true
 });
 
 require('./modules/websocket.js')(server, wss);
