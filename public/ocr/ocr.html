@@ -97,13 +97,13 @@ fieldset.field pre {
 	font-size: 1em;
 }
 
+#connection,
 #wizard,
 #controls,
 #calibration,
 #color_matching {
 	display: none;
 }
-
 
 </style>
 </head>
@@ -156,7 +156,7 @@ fieldset.field pre {
 		</div>
 	</fieldset>
 
-	<fieldset>
+	<fieldset id="connection">
 		<legend>Server Connection</legend>
 		<div>Host <input type="text" id="conn_host" value="localhost"></input></div>
 		<div>Port <input type="number" id="conn_port" value="3337"></input></div>
@@ -184,13 +184,13 @@ fieldset.field pre {
 </div>
 <div id="templates"></div>
 
-<script src="./opencv.js"></script>
-<script src="./calibration.js"></script>
+<script src="/ocr/opencv.js"></script>
+<script src="/ocr/calibration.js"></script>
 <script src="/js/connection.js"></script>
-<script src="./image_tools.js"></script>
-<script src="./templates.js"></script>
-<script src="./palettes.js"></script>
-<script src="./TetrisOCR.js"></script>
+<script src="/ocr/image_tools.js"></script>
+<script src="/ocr/templates.js"></script>
+<script src="/ocr/palettes.js"></script>
+<script src="/ocr/TetrisOCR.js"></script>
 
 <script>
 // NTSC NES resolution: 256x224 -> 512x448
@@ -329,8 +329,8 @@ function connect() {
 	}
 
 	connection = new Connection(
-		conn_port.value,
-		conn_host.value
+		location.host,
+		`/ws${location.pathname}`
 	);
 }
 
