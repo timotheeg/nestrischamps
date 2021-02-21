@@ -54,6 +54,7 @@ module.exports = function init(server, wss) {
 				console.log(`WS: Retrieved user ${request.session.user.login} from session`);
 
 				wss.handleUpgrade(request, socket, head, function (ws) {
+					console.log('WS: handleUpgrade complete');
 					wss.emit('connection', ws, request);
 				});
 			});
