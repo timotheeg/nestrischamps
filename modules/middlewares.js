@@ -17,7 +17,7 @@ module.exports = {
 	assertSession(req, res, next) {
 		if (!req.session.user) {
 			req.session.auth_success_redirect = req.url;
-			res.redirect('/login');
+			res.redirect('/auth');
 		}
 		else {
 			next();
