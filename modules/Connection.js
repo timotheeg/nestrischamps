@@ -46,3 +46,5 @@ class Connection {
 		this.ping_to = clearTimeout(this.ping_int);
 	}
 }
+
+module.exports = Connection;
