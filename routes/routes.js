@@ -16,12 +16,6 @@ router.get('/invite/:roomid', middlewares.assertSession, (req, res) => dummy(res
 router.get('/admin', middlewares.assertSession, (req, res) => dummy(res) );
 router.get('/renderers', middlewares.assertSession, (req, res) => {
 	res.render('renderers', {
-		templates: {
-			single_layout: [
-			],
-			match_layout: [
-			]
-		},
 		secret: req.session.user.secret
 	});
 });

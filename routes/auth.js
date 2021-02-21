@@ -66,10 +66,14 @@ router.get('/twitch/callback', async (req, res) => {
 
 		const user = UserDAO.createUser(user_object);
 
+		console.log('Retrieved user', user);
+
 		req.session.user = {
 			id: user.id,
 			secret: user.secret
 		};
+
+		console.log('Stored session user as', req.session.user);
 
 		if (req.session.auth_success_redirect) {
 			res.redirect(req.session.auth_success_redirect)
