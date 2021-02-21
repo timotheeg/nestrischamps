@@ -43,7 +43,7 @@ class Connection {
 		// match current page prototol
 		const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
 
-		this.socket = new WebSocket(`${wsp}://${this.host}/${this.path}`);
+		this.socket = new WebSocket(`${wsp}://${this.host}${this.path}`);
 
 		this.socket.addEventListener('error', this._handleError);
 		this.socket.addEventListener('close', this._handleClose);

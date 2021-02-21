@@ -20,6 +20,10 @@ router.get('/renderers', middlewares.assertSession, (req, res) => {
 	});
 });
 
+router.get('/producer/:room?', middlewares.assertSession, (req, res) => {
+	res.sendFile('./public/ocr/ocr.html');
+});
+
 router.get('/player_socket', middlewares.assertSession, (req, res) => {
 	res.render('player_socket');
 });
