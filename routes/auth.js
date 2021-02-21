@@ -18,7 +18,7 @@ router.get('/twitch/callback', async (req, res) => {
 	console.log('received code', req.query.code);
 
 	if (!req.query.code) {
-		res.send('Unable to authenticate');
+		res.send(`Unable to authenticate [${req.query.error}]: ${req.query.error_description}`);
 		return;
 	}
 
