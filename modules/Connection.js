@@ -23,8 +23,14 @@ class Connection {
 		this.onHeartBeat();
 	}
 
+	send(message) {
+		if (this.socket) {
+			this.socket.send(message);
+		}
+	}
+
 	kick(reason) {
-		this.socket.send(['kick', reason]);
+		this.socket.send(JSON.stringify(['kick', reason]));
 		this.socket.removeAllListeners();
 		this.ping_to = clearInterval(this.ping_int);
 		this.kick_to = setTimeout(this.destroy, KICK_DESTROY_DELAY);

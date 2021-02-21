@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 class Room {
 	constructor(owner) {
 		this.owner = owner;
