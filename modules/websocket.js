@@ -74,8 +74,8 @@ module.exports = function init(server, wss) {
 
 			room.addView(connection);
 		}
-		else {
-
+		else if(request.originalUrl === '/ws/producer') {
+			user.getPrivateRoom().setProducer(connection);
 		}
 
 		ws.on('message', function (message) {

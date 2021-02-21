@@ -9,13 +9,13 @@ class PrivateRoom extends Room {
 		this.onProducerMesssage = this.onProducerMesssage.bind(this);
 	}
 
-	addProducer(connection) {
+	setProducer(connection) {
 		// producer can only be owner
-		if (socket.nestris.user.id != this.owner.id) return false; // throw?
+		if (connection.user.id != this.owner.id) return false; // throw?
 
 		// user is owner, he should take over connection
 		this.producers.forEach(connection => connection.kick('concurrency_limit'));
-		this.producers.clear();
+		this.producers.clear(); // there can be only one producer in a room
 
 		this.producers.add(connection);
 
