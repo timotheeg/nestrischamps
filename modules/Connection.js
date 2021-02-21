@@ -6,7 +6,6 @@ const KICK_DESTROY_DELAY = 3000; // allows UI to get message and know it should 
 const PING_INTERVAL = 15000;
 const PONG_TIMEOUT = 60000;
 
-
 class Connection {
 	constructor(user, socket) {
 		this.user = user;

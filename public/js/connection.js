@@ -1,8 +1,5 @@
 class Connection {
-	constructor(host, path) {
-		this.host = host
-		this.path = path
-
+	constructor() {
 		this.connect        = this.connect.bind(this);
 		this._handleError   = this._handleError.bind(this);
 		this._handleClose   = this._handleClose.bind(this);
@@ -43,7 +40,7 @@ class Connection {
 		// match current page prototol
 		const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
 
-		this.socket = new WebSocket(`${wsp}://${this.host}${this.path}`);
+		this.socket = new WebSocket(`${wsp}://${location.host}/ws${location.pathname}`);
 
 		this.socket.addEventListener('error', this._handleError);
 		this.socket.addEventListener('close', this._handleClose);

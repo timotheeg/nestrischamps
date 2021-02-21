@@ -8,6 +8,17 @@ class UserDAO {
 
 	constructor() {}
 
+	addUserFromData(user_data) {
+		const user = new User(user_data);
+
+		user.onExpired = () => {
+			user.closeRooms();
+			this.removeUser(user);
+		}
+
+		this.addUser(user);
+	}
+
 	addUser(user) {
 		this.users_by_id    .set(user.id,     user);
 		this.users_by_login .set(user.login,  user);
@@ -90,9 +101,8 @@ class UserDAO {
 				'SELECT * FROM twitch_users WHERE id=$1',
 				[ id ]
 			);
-			user = new User(result.rows[0]);
 
-			this.addUser(user);
+			this.addUserFromData(result.rows[0]);
 		}
 
 		return user;
@@ -107,9 +117,8 @@ class UserDAO {
 				'SELECT * FROM twitch_users WHERE login=$1',
 				[ login ]
 			);
-			user = new User(result.rows[0]);
 
-			this.addUser(user);
+			this.addUserFromData(result.rows[0]);
 		}
 
 		return user;
@@ -124,9 +133,10 @@ class UserDAO {
 				'SELECT * FROM twitch_users WHERE secret=$1',
 				[ secret ]
 			);
-			user = new User(result.rows[0]);
 
-			this.addUser(user);
+			// TODO: handle failure!
+
+			this.addUserFromData(result.rows[0]);
 		}
 
 		return user;

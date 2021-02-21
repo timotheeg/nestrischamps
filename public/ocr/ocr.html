@@ -328,10 +328,7 @@ function connect() {
 		connection.close();
 	}
 
-	connection = new Connection(
-		location.host,
-		`/ws${location.pathname}`
-	);
+	connection = new Connection();
 }
 
 conn_host.addEventListener('change', connect);

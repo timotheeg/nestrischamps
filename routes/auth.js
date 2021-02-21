@@ -66,11 +66,12 @@ router.get('/twitch/callback', async (req, res) => {
 
 		const user = await UserDAO.createUser(user_object);
 
-		console.log('Retrieved user', user);
+		console.log(`Retrieved user ${user.login} from Twitch authorisation`);
 
 		req.session.user = {
-			id: user.id,
-			secret: user.secret
+			id:     user.id,
+			login:  user.login,
+			secret: user.secret,
 		};
 
 		console.log('Stored session user as', req.session.user);
