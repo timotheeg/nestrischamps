@@ -80,12 +80,5 @@ module.exports = function init(server, wss) {
 		else if(request.url === '/ws/producer') {
 			user.getPrivateRoom().setProducer(connection);
 		}
-
-		ws.on('message', function (message) {
-			console.log(`Received message from user ${userId}`);
-			console.log(typeof message, message);
-		});
-
-		ws.on('close', function () {});
 	});
 };
