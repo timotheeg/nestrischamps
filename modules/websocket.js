@@ -1,6 +1,6 @@
-const middlewares = require('./modules/middlewares');
+const middlewares = require('./middlewares');
 
-modules.exports = function init(server, wss) {
+module.exports = function init(server, wss) {
 	server.on('upgrade', function (request, socket, head) {
 		console.log('Parsing session from request...');
 
