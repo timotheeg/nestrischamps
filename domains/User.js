@@ -43,7 +43,7 @@ class User {
 	addConnection(conn) {
 		this.connections.add(conn);
 
-		conn.socket.addListener('close', () => {
+		conn.socket.on('close', () => {
 			this.connections.delete(conn);
 			checkScheduleDestroy();
 		});

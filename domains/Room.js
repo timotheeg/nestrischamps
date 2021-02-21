@@ -10,8 +10,8 @@ class Room {
 	addView(connection) {
 		this.views.add(connection);
 
-		connection.socket.addListener('error', _.noop); // TODO: log
-		connection.socket.addListener('close', () => {
+		connection.socket.on('error', _.noop); // TODO: log
+		connection.socket.on('close', () => {
 			this.views.delete(connection);
 			connection.socket.removeAllListeners();
 		});

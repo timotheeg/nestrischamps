@@ -61,6 +61,8 @@ module.exports = function init(server, wss) {
 	});
 
 	wss.on('connection', async (ws, request) => {
+		console.log('WS: Connection!', request.session.user.id);
+
 		const user = await UserDAO.getUserById(request.session.user.id);
 		const connection = new Connection(user, ws);
 

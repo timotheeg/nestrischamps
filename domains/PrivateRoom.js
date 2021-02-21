@@ -19,8 +19,8 @@ class PrivateRoom extends Room {
 
 		this.producers.add(connection);
 
-		connection.socket.addListener('message', this.onProducerMesssage);
-		connection.socket.addListener('close', () => {
+		connection.socket.on('message', this.onProducerMesssage);
+		connection.socket.on('close', () => {
 			connection.socket.removeListener('message', this.onProducerMesssage);
 			this.producers.delete(connection);
 		});
