@@ -1,8 +1,10 @@
 const express = require('express');
-const router = express.Router();
+const ULID = require('ulid');
 const got = require('got');
 
 const UserDAO = require('../daos/UserDAO');
+
+const router = express.Router();
 
 router.get('/', (req, res) => {
 	res.render('login', {
