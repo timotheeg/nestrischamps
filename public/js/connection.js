@@ -20,7 +20,7 @@ class Connection {
 	}
 
 	_handleClose() {
-		this.clearSocket();
+		this._clearSocket();
 		setTimeout(this.connect, 25); // TODO: exponential backoff
 	}
 
