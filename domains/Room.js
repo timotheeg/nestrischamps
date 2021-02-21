@@ -16,6 +16,10 @@ class Room {
 			connection.socket.removeAllListeners();
 		});
 	}
+
+	close() {
+		// TODO: kick, disconnect, and remove all connections (views, producers, admins)
+	}
 }
 
 module.exports = Room;
