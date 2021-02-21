@@ -15,8 +15,8 @@ class User {
 		this.profile_image_url = user_object.profile_image_url;
 
 		// TODO: create rooms lazily
-		this.private_room = new PrivateRoom();
-		this.match_room = new MatchRoom();
+		this.private_room = new PrivateRoom(this);
+		this.match_room = new MatchRoom(this);
 
 		// keep track of all socket for the user
 		// dangerous, could lead to memory if not managed well
