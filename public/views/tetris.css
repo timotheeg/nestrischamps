@@ -1,0 +1,41 @@
+@font-face {
+	font-family: "Press Start";
+	src: url("/fonts/prstart.ttf");
+}
+
+@font-face {
+	font-family: "Press Start K";
+	src: url("/fonts/prstartk_nes_tetris_8.ttf");
+}
+
+html, body, table, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: "Press Start K", monospace;
+}
+
+#stream_bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1280px;
+	height: 720px;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.box {
+	position: absolute;
+	padding: 12px;
+	height: 40px;
+
+	color: white;
+	font-size: 16px;
+	line-height: 20px;
+	text-align: center;
+
+	border-image: url('/views/border.png');
+	border-image-slice: 10 10 10 10 fill;
+	border-image-width: 10px 10px;
+}

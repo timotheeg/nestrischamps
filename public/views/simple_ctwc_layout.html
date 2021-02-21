@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="tetris.css" />
+<style>
+html {
+	overflow: hidden;
+}
+#stream_bg {
+	background: black;
+	width: 461px;
+	height: 334px;
+}
+
+#playing_fields {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.box {
+	width: 95px;
+	height: 56px;
+	text-align: center;
+}
+
+.box .header {
+	font-size: 16px;
+	padding-bottom: 0.5em;
+}
+
+.box .content,
+.box .data {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.score,
+.next_piece,
+.lines,
+.level,
+.board,
+.tetris_rate,
+.efficiency
+ {
+	display: none;
+}
+
+.timer {
+	top: 2px;
+	left: 5px;
+	width: 428px;
+	text-align: center;
+	height: 27px;
+}
+
+.bounded {
+	border-style: dashed;
+	border-color: #505050;
+	border-width: 1px 0;
+}
+
+.running_trt {
+	padding: 12px 9px 9px;
+
+	width: 434px;
+	height: 138px;
+	top: 173px;
+	left: 5px;
+}
+
+.running_trt .value {
+	width: 434px;
+	height: 103px;
+	position: relative;
+}
+
+.drought {
+	width: 121px;
+	top: 79px;
+	height: 40px;
+	opacity: 0;
+	display: none;
+	color: red;
+	left: 156px;
+}
+
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought .value {
+	padding-bottom: 2px;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="stream_bg">
+<div id="bg_pieces"></div>
+
+<div id="playing_fields">
+<div class="box board"></div>
+<div class="box next_piece"></div>
+
+
+<!-- Player 1 -->
+
+<div class="box score">
+	<div class="header">SCORE</div>
+	<div class="content">000000</div>
+</div>
+
+<div class="box lines">
+	<div class="header">LINES</div>
+	<div class="content">000</div>
+</div>
+
+<div class="box level">
+	<div class="header">LEVEL</div>
+	<div class="content">000</div>
+</div>
+
+<div class="box timer">
+	<div class="content">02:00:00</div>
+</div>
+
+<div class="box efficiency">
+	<div class="header">EFF</div>
+	<div class="content">---</div>
+</div>
+
+
+<div class="box running_trt">
+	<div class="header">TETRIS RATE <span class="trt">--</span></div>
+	<div class="value bounded"></div>
+</div>
+
+<div class="box drought">
+	<div class="header">DROUGHT</div>
+	<div class="value">99</div>
+</div>
+
+</div><!-- End Playing Fields -->
+</div><!-- End Stream BG -->
+
+
+<!-- Audio -->
+
+<script src="constants.js"></script>
+<script src="utils.js"></script>
+<script src="connection.js"></script>
+<script src="Player.js"></script>
+<script >
+const player = new Player(
+	{
+		score:       document.querySelector(`.score .content`),
+		level:       document.querySelector(`.level .content`),
+		lines:       document.querySelector(`.lines .content`),
+		trt:         document.querySelector(`.running_trt .header .trt`),
+		eff:         document.querySelector(`.efficiency .content`),
+		running_trt: document.querySelector(`.running_trt .value`),
+		preview:     document.querySelector(`.next_piece`),
+		field:       document.querySelector(`.board`),
+		drought:     document.querySelector(`.drought .value`),
+	},
+	{
+		format_score: 0,
+		tetris_sound: 0,
+		reliable_field: 0,
+	}
+);
+
+player.drought_box = document.querySelector(`.drought`);
+
+player.onDroughtStart = () => {
+	console.log("onDroughtStart")
+	player.drought_box.classList.add('active');
+}
+
+player.onDroughtEnd = (count) => {
+	console.log("onDroughtEnd", count)
+	player.drought_box.classList.remove('active');
+}
+
+player.onGameStart = () => {
+	player.drought_box.classList.remove('active');
+}
+
+
+// timer management
+const ALLOWED_TIME = 2 * 60 * 60;
+const timer_el = document.querySelector(`.timer .content`);
+let start_time = 0;
+let timer = null;
+
+function startTimer(allowed) {
+	timer = clearInterval(timer);
+	start_time = Date.now();
+
+	const allowed_time = allowed || ALLOWED_TIME;
+
+	timer = setInterval(() => {
+		const elapsed = Math.floor((Date.now() - start_time) / 1000);
+		let remainder = allowed_time - elapsed;
+
+		if (remainder < 0) {
+			remainder = 0;
+			timer = clearInterval(timer);
+		}
+
+		hours = Math.floor(remainder / (60 * 60));
+		remainder = remainder % (60 * 60);
+		minutes = Math.floor(remainder / 60);
+		seconds = remainder % 60;
+
+		timer_el.textContent = `${hours}`.padStart(2, '0')
+			+ ':'
+			+ `${minutes}`.padStart(2, '0')
+			+ ':'
+			+ `${seconds}`.padStart(2, '0')
+		;
+
+	}, 500)
+}
+
+const API = {
+	frame(player_num, data) {
+		if (!data) {
+			data = player_num;
+		}
+
+		player.setFrame(data);
+	},
+
+	startTimer(allowed_time) {
+		startTimer(allowed_time);
+	}
+}
+
+const connection = new Connection(3339);
+
+connection.onMessage = function(frame) {
+	try{
+		const [method, ...args] = frame;
+
+		API[method].apply(API, args);
+	}
+	catch(e) {
+		console.error(e);
+	}
+};
+
+function onFrame(frame, debug) {
+	API.frame(1, frame, debug);
+}
+</script>
+
+<!-- script src="sample_frames/sample_frames_11.js"></script>
+<script src="debug.js"></script -->
+
+</body>
+<html>

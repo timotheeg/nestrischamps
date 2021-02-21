@@ -29,6 +29,8 @@ router.get('/player_socket', middlewares.assertSession, (req, res) => {
 	res.render('player_socket');
 });
 
-router.get('/view/:name/:secret', (req, res) => dummy(res) );
+router.get('/view/1p/:layout/:secret', (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/views/simple_1p_layout.html'));
+});
 
 module.exports = router;

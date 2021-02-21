@@ -1,0 +1,44 @@
+#goto_next_frame {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+}
+
+#goto_next_frame_debug {
+	position: absolute;
+	bottom: 0px;
+	left: 100px;
+}
+
+#play {
+	position: absolute;
+	bottom: 0px;
+	left: 500px;
+}
+
+#stop {
+	position: absolute;
+	bottom: 0px;
+	left: 550px;
+}
+
+#cur_frame, #next_frame {
+	font-family: monospace;
+	display: block;
+	font-size: 16px;
+	width: 500px;
+	height: 440px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+
+#next_frame {
+	top: 450px;
+}
+
+#skip {
+	position: absolute;
+	bottom: 0px;
+	left: 250px;
+}

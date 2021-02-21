@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="tetris.css" />
+<style>
+html {
+	overflow: hidden;
+}
+#stream_bg {
+	background: black;
+}
+
+#playing_fields {
+	position: absolute;
+	left: 485px;
+	top: 23px;
+}
+
+.box {
+	width: 95px;
+	height: 56px;
+	text-align: center;
+}
+
+.box .header {
+	font-size: 16px;
+	padding-bottom: 0.5em;
+}
+
+.box .content,
+.box .data {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.score {
+	top: 76px;
+	height: 60px;
+	left: -107px;
+	width: 168px;
+}
+
+.score .diff {
+	text-align: center;
+}
+
+.next_piece {
+	width: 104px;
+	height: 60px;
+	top: 6px;
+
+	--offset: 177px;
+	right: var(--offset)
+}
+
+.lines {
+	left: -107px;
+	top: 160px;
+}
+
+.level {
+	left: -107px;
+	top: 241px;
+}
+
+.board {
+	border-image: url('./big_border.png');
+	border-image-slice: 16 16 16 16 fill;
+	border-image-width: 16px 16px;
+	padding: 17px;
+	width: 237px;
+	height: 477px;
+	top: 76px;
+
+	--offset: 106px;
+	right: var(--offset)
+}
+
+.tetris_rate {
+	left: -107px;
+	top: 588px;
+}
+
+.efficiency {
+	left: -107px;
+	top: 507px;
+}
+
+.tetris_rate .content {
+	padding: 0 5px;
+}
+
+.running_trt {
+	padding: 9px;
+	width: 253px;
+	height: 62px;
+	top: 588px;
+
+	--offset: 106px;
+	right: var(--offset)
+}
+
+.drought {
+	width: 49px;
+	top: 12px;
+	height: 40px;
+	opacity: 0;
+	color: red;
+	display: none;
+
+	--pos: 304px;
+	right: var(--pos)
+}
+
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+</style>
+</head>
+<body>
+
+<div id="stream_bg">
+<div id="bg_pieces"></div>
+
+<div id="playing_fields">
+<div class="box board"></div>
+<div class="box next_piece"></div>
+
+
+<!-- Player 1 -->
+
+<div class="box score">
+	<div class="header">SCORE</div>
+	<div class="content">000000</div>
+</div>
+
+<div class="box lines">
+	<div class="header">LINES</div>
+	<div class="content">000</div>
+</div>
+
+<div class="box level">
+	<div class="header">LEVEL</div>
+	<div class="content">000</div>
+</div>
+
+<div class="box tetris_rate">
+	<div class="header">TRT</div>
+	<div class="content">---</div>
+</div>
+
+
+<div class="box efficiency">
+	<div class="header">EFF</div>
+	<div class="content">---</div>
+</div>
+
+
+<div class="box running_trt"></div>
+
+<div class="box drought">
+	<div class="header">DRT</div>
+	<div class="value">99</div>
+</div>
+
+
+</div><!-- End Playing Fields -->
+</div><!-- End Stream BG -->
+
+
+<!-- Audio -->
+
+<script src="constants.js"></script>
+<script src="utils.js"></script>
+<script src="connection.js"></script>
+<!-- script src="bg.js"></script -->
+<script src="Player.js"></script>
+<script >
+const player = new Player(
+	{
+		score:       document.querySelector(`.score .content`),
+		level:       document.querySelector(`.level .content`),
+		lines:       document.querySelector(`.lines .content`),
+		trt:         document.querySelector(`.tetris_rate .content`),
+		eff:         document.querySelector(`.efficiency .content`),
+		running_trt: document.querySelector(`.running_trt`),
+		preview:     document.querySelector(`.next_piece`),
+		field:       document.querySelector(`.board`),
+		drought:     document.querySelector(`.drought .value`),
+	},
+	{
+		format_score: 0,
+	}
+);
+
+player.drought_box = document.querySelector(`.drought`);
+
+player.onDroughtStart = () => {
+	console.log("onDroughtStart")
+	player.drought_box.classList.add('active');
+}
+
+player.onDroughtEnd = (count) => {
+	console.log("onDroughtEnd", count)
+	player.drought_box.classList.remove('active');
+}
+
+player.onGameStart = () => {
+	player.drought_box.classList.remove('active');
+}
+
+
+
+const frame_buffer = [];
+let combined_board = Array(20).fill().map(_ => Array(10).fill(0));
+let cur_board;
+let last_frame;
+let last_board;
+let game_id;
+let top_empty;
+let clear_animation_remaining_frames;
+
+
+function reset() {
+	combined_board = Array(20).fill().map(_ => Array(10).fill(0));
+	frame_buffer.length = 0;
+	last_frame = '';
+	last_board = null;
+	top_empty = true;
+	clear_animation_remaining_frames = 0;
+}
+
+reset();
+
+function toBoard(str) {
+	let field = str.split('').map(d => parseInt(d, 10));
+	const rows = Array(20).fill().map((v, i) => field.slice(i * 10, i * 10 + 10));
+
+	rows.num_block = str.replace(/0+/g, '').length;
+
+	return rows;
+}
+
+function boardToStr(board) {
+	return board.map(r => r.join('')).join('');
+}
+
+function isRowEmpty(row) {
+	return 0 === row.reduce((sum, v) => sum + v, 0);
+}
+
+function isRowPotentiallyFirstFrameOfClearAnimation(row) {
+	return (
+		   row[4] === 1
+		&& row[5] === 1
+		&& 2 === row.reduce((sum, v) => sum + v, 0)
+	);
+}
+
+function isRowPotentiallySecondFrameOfDoubleClearAnimation(row) {
+	return (
+		   row[3] === 1
+		&& row[4] === 1
+		&& row[5] === 1
+		&& row[6] === 1
+		&& 4 === row.reduce((sum, v) => sum + v, 0)
+	);
+}
+
+// detect first animation frame for singles, triples, tetris
+function isFirstFrameOfClearAnimation(board) {
+	if (board.num_block != 2
+		&& board.num_block != 4
+		&& board.num_block != 6
+		&& board.num_block != 8
+	) {
+		return false;
+	}
+
+	let row_indexes = [];
+
+	for (let ridx = 0; ridx < 20; ridx++) {
+		const row = board[ridx];
+
+		if (isRowEmpty(row)) {
+			continue;
+		}
+		else if (isRowPotentiallyFirstFrameOfClearAnimation(row)) {
+			row_indexes.push(ridx);
+		}
+		else {
+			return false;
+		}
+	}
+
+	if (row_indexes.length === 2) {
+		if (row_indexes[1] - row_indexes[0] === 1) {
+			// not guaranteed to be a first frame of clear animation
+			// it could also be an O piece
+			return false;
+		}
+	}
+
+	// K, here we know for sure we're in the first frame of a clear animation
+	return true;
+}
+
+function isSecondFrameOfDoubleClearAnimation(board) {
+	if (board.num_block != 8) {
+		return false;
+	}
+
+	for (let ridx = 0; ridx < 19; ridx++) {
+		const row = board[ridx];
+
+		if (isRowEmpty(row)) {
+			continue;
+		}
+		else if (isRowPotentiallySecondFrameOfDoubleClearAnimation(row)) {
+			return isRowPotentiallySecondFrameOfDoubleClearAnimation(board[++ridx]);
+		}
+
+		break;
+	}
+
+	return false;
+}
+
+const CLEAR_ANIMATION_FRAMES = 7;
+
+function startClearAnimation(remaining_frames, board) {
+
+
+	clear_animation_remaining_frames = remaining_frames;
+	clear_animation_covered = false;
+
+	clearedRowsIndexes = [];
+	board.forEach((row, idx) => {
+		if (row.some(cell => cell > 0)) {
+			clearedRowsIndexes.push(idx);
+		}
+	});
+}
+
+function handleFrame(frame) {
+	if (frame.gameid !== game_id) {
+		game_id = frame.gameid;
+		reset();
+	}
+
+	const last_board = peek(frame_buffer) && peek(frame_buffer)._board;
+
+	if (last_frame === frame.field) {
+		frame_buffer.push({
+			...frame,
+			field: peek(frame_buffer).field,
+			_board: peek(frame_buffer)._board,
+		});
+	}
+	else {
+		last_frame = frame.field;
+
+		let new_board = toBoard(frame.field);
+
+		frame._board = new_board;
+
+		if (clear_animation_remaining_frames-- > 0) {
+			new_board._clear = true;
+
+			if (clear_animation_covered || clear_animation_remaining_frames <= 0) {
+				// last frame of clear animation, we need to remove all empty lines
+				// MUST RUN BEFORE NEXT PIECE APPEARS!!!!
+
+				let empty_rows, filled_rows;
+
+				if (clear_animation_covered) {
+					empty_rows = combined_board.filter(row => row.every(cell => cell === 0));
+					filled_rows = combined_board.filter(row => row.some(cell => cell > 0));
+				}
+				else {
+					empty_rows = clearedRowsIndexes.map(_ => Array(10).fill(0));
+					filled_rows = combined_board.filter((row, idx) => !clearedRowsIndexes.includes(idx));
+				}
+
+				combined_board = [
+					...empty_rows,
+					...filled_rows
+				];
+			}
+			else {
+				if (new_board.num_block < 200) { // 200 is a flash, it means we're OCR-ing Trey's renderer
+					new_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+						if (cell === 1) {
+							combined_board[ridx][cidx] = 0;
+						}
+					}));
+				}
+			}
+
+			if (new_board.num_block && new_board.num_block < 200 && new_board.num_block % 10 === 0) {
+				// this is the frame where the line clear cover the entire horizontal breadth of the field
+				clear_animation_covered = 1;
+
+				// We force the remaining frames to 1, just in case
+				// Ensures we won't run the drop action twice
+				clear_animation_remaining_frames = 1;
+			}
+
+			cur_board = combined_board;
+		}
+		else if (new_board.num_block === 0) {
+			return; // ignore blank frames
+		}
+		else if (new_board.num_block === 200) {
+			// end frame of death animation
+			// OR
+			// tetris animation in field in Trey's renderer
+			startClearAnimation(10, new_board);
+
+			new_board._clear = true;
+
+			// record prev piece settling
+			last_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+				if (cell === 0) return;
+
+				combined_board[ridx][cidx] = cell + 3;
+			}));
+
+			cur_board = combined_board;
+		}
+		else if (isFirstFrameOfClearAnimation(new_board)) {
+			// preparing clear animation
+			startClearAnimation(CLEAR_ANIMATION_FRAMES - 1, new_board);
+
+			new_board._clear = true;
+
+			// record prev piece settling
+			last_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+				if (cell === 0) return;
+
+				combined_board[ridx][cidx] = cell + 3;
+			}));
+
+			// remove the block from the clear animation
+			new_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+				if (cell === 1) {
+					combined_board[ridx][cidx] = 0;
+				}
+			}));
+
+			cur_board = combined_board;
+		}
+		else if (isSecondFrameOfDoubleClearAnimation(new_board)) {
+			// preparing clear animation
+			startClearAnimation(CLEAR_ANIMATION_FRAMES - 2, new_board);
+
+			// we now need to correct the previous frame
+
+			new_board._clear = true;
+			last_board._clear = true;
+
+			const last_combined_board = peek(frame_buffer)._combined_board;
+
+			// 1. record prev piece settling
+			peek(frame_buffer, 1)._board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+				if (cell === 0) return;
+
+				last_combined_board[ridx][cidx] = cell + 3;
+			}));
+
+			// 2. remove "O piece hole" (it was part of the clear animation after all)
+			last_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+				if (cell === 1) {
+					last_combined_board[ridx][cidx] = 0;
+				}
+			}));
+
+			// 3. update past frame object
+			peek(frame_buffer).field = boardToStr(last_combined_board);
+
+			// 4. update new combined board
+			combined_board = last_combined_board;
+
+			// 5. and clear the blocks from the second frame of animation too
+			new_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+				if (cell === 1) {
+					combined_board[ridx][cidx] = 0;
+				}
+			}));
+
+			cur_board = combined_board;
+		}
+		else {
+			// piece is falling, we need to display its temporary location
+			const new_top_empty = new_board.slice(0, 2).filter(row => row.every(cell => cell === 0)).length === 2;
+
+			if (!new_top_empty && last_board && last_board.num_block == 4) { // we only settle pieces, not animation frames
+				// check if last_board's piece was below 16
+				last_top_idx = last_board.map((row, idx) => row.some(cell => cell > 0) ? idx : -1).find(v => v > -1);
+
+				if (last_top_idx > 3) {
+					// TODO: Find a better way to do this detection
+					// as it is, we do not record piece settling high, even if they are on the side, when we could actually detect them
+					// record prev piece settling
+					last_board.forEach((row, ridx) => row.forEach((cell, cidx) => {
+						if (cell === 0) return;
+
+						combined_board[ridx][cidx] = cell + 3;
+					}));
+				}
+			}
+
+			cur_board = combined_board.map((row, ridx) => [...row].map((cell, cidx) => {
+				return new_board[ridx][cidx] || cell;
+			}));
+		}
+
+		frame_buffer.push({
+			...frame,
+			field: boardToStr(cur_board),
+			_combined_board: cur_board,
+		});
+	}
+
+	if (frame_buffer.length >= 3) {
+		player.setFrame( frame_buffer.shift() );
+	}
+}
+
+
+var captured_frames = []
+
+const API = {
+	frame(data) {
+		// captured_frames.push(data);
+		try {
+			handleFrame(data);
+		}
+		catch(e) {
+			console.error(e);
+		}
+	}
+}
+
+const connection = new Connection(3339);
+
+connection.onMessage = function(frame) {
+	try{
+		const [method, ...args] = frame; // expect array of format [api_method_name, arg1, arg2, ...]
+
+		API[method].apply(API, args);
+	}
+	catch(e) {
+		console.error(e);
+	}
+};
+
+
+function onFrame(frame, debug) {
+	API.frame(frame, debug);
+}
+</script>
+
+<!-- script src="sample_frames/invisible_frames.2.js"></script>
+<script src="debug.js"></script -->
+
+</body>
+<html>
