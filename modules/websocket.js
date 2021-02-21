@@ -70,6 +70,7 @@ module.exports = function init(server, wss) {
 		user.addConnection(connection);
 
 		if (request.is_secret_view) {
+			console.log('Adding View', user.login, 'single?', request.tetris.view.single_player);
 			const room = request.tetris.view.single_player
 				? user.getPrivateRoom()
 				: user.getMatchRoom()
@@ -78,7 +79,11 @@ module.exports = function init(server, wss) {
 			room.addView(connection);
 		}
 		else if(request.url === '/ws/producer') {
+			console.log('Setting producer to private room');
 			user.getPrivateRoom().setProducer(connection);
+		}
+		else {
+			console.log('Unrecognized connection');
 		}
 	});
 };
