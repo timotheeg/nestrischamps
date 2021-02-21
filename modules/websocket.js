@@ -6,7 +6,7 @@ module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log('WS: ', request.url);
 
-		const m = request.url.match(/^\/ws\/view\/(1p|mp)\/([a-z_-]+)\/([a-zA-Z0-9-]+)/);
+		const m = request.url.match(/^\/ws\/view\/(1p|mp)\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
 
 		request.is_secret_view = !!m;
 
@@ -62,7 +62,7 @@ module.exports = function init(server, wss) {
 	});
 
 	wss.on('connection', async (ws, request) => {
-		console.log('WS: Connection!', request.session.user.id);
+		console.log('WS: Connection!', request.session.user.id, 'secret?', request.is_secret_view);
 
 		const user = await UserDAO.getUserById(request.session.user.id);
 		const connection = new Connection(user, ws);
