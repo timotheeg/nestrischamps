@@ -3,7 +3,7 @@ const DIGITS = "0123456789ABCDEF".split('');
 DIGITS.unshift('null');
 
 async function getTemplateData(digit) {
-	const response = await fetch(`./${digit.toLowerCase()}.png`);
+	const response = await fetch(`/ocr/${digit.toLowerCase()}.png`);
 	const blob = await response.blob();
 
 	return await createImageBitmap(blob);
