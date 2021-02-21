@@ -232,6 +232,9 @@ const API = {
 const connection = new Connection(3339);
 
 connection.onMessage = function(frame) {
+	player.setFrame(frame);
+	return;
+
 	try{
 		const [method, ...args] = frame;
 
