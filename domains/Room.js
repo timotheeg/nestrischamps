@@ -13,6 +13,7 @@ class Room {
 		connection.socket.addListener('error', _.noop); // TODO: log
 		connection.socket.addListener('close', () => {
 			this.views.delete(connection);
+			connection.socket.removeAllListeners();
 		});
 	}
 }
