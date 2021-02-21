@@ -4,7 +4,7 @@ const Connection = require('./Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
-		console.log('WS: ', request.originalUrl, request.url);
+		console.log('WS: ', request.url);
 
 		const m = request.url.match(/^\/ws\/view\/(1p|mp)\/([a-z_-]+)\/([a-zA-Z0-9-]+)/);
 
@@ -74,7 +74,7 @@ module.exports = function init(server, wss) {
 
 			room.addView(connection);
 		}
-		else if(request.originalUrl === '/ws/producer') {
+		else if(request.url === '/ws/producer') {
 			user.getPrivateRoom().setProducer(connection);
 		}
 
