@@ -102,7 +102,7 @@ class UserDAO {
 				[ id ]
 			);
 
-			this.addUserFromData(result.rows[0]);
+			user = this.addUserFromData(result.rows[0]);
 		}
 
 		return user;
@@ -118,7 +118,7 @@ class UserDAO {
 				[ login ]
 			);
 
-			this.addUserFromData(result.rows[0]);
+			user = this.addUserFromData(result.rows[0]);
 		}
 
 		return user;
@@ -135,8 +135,7 @@ class UserDAO {
 			);
 
 			// TODO: handle failure!
-
-			this.addUserFromData(result.rows[0]);
+			user = this.addUserFromData(result.rows[0]);
 		}
 
 		return user;
