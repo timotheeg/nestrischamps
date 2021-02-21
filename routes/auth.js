@@ -64,7 +64,7 @@ router.get('/twitch/callback', async (req, res) => {
 		user_object.token = token;
 		user_object.secret = ULID.ulid();
 
-		const user = UserDAO.createUser(user_object);
+		const user = await UserDAO.createUser(user_object);
 
 		console.log('Retrieved user', user);
 
