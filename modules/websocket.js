@@ -24,7 +24,7 @@ module.exports = function init(server, wss) {
 			// connection from the non-session-ed views (from OBS)
 			const user = await UserDAO.getUserBySecret(request.tetris.view.user_secret);
 
-			console.log(`WS: Retrieved user ${user.login} from view secret`);
+			console.log(`WS: Retrieved user ${user.login} from view secret`, request.tetris.view);
 
 			if (!request.session) {
 				request.session = {};
