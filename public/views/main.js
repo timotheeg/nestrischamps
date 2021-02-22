@@ -29,13 +29,26 @@ const API = {
 	frame:       onFrame,
 };
 
-const chat_and_pbs_conn = new Connection(3339);
+const chat_and_pbs_conn = new Connection();
 
 chat_and_pbs_conn.onMessage = function(frame) {
 	try{
-		const [type, ...args] = frame;
+		let method, args;
 
-		API[type](...args);
+		if (Array.isArray(frame)) {
+			[method, ...args] = frame;
+		}
+		else {
+			method = 'frame';
+
+			if (frame instanceof Uint8Array) {
+				frame = BinaryFrame.parse(frame);
+			}
+
+			args = [ frame ];
+		}
+
+		API[method](...args);
 	}
 	catch(e) {
 		// socket.close();
@@ -132,16 +145,17 @@ function onFrame(event, debug) {
 			stage_blocks:  0
 		},
 
-		score:         parseInt(event.score, 10),
-		lines:         parseInt(event.lines, 10),
-		level:         parseInt(event.level, 10),
-		cur_piece_das: dom.das ? parseInt(event.cur_piece_das, 10) : -1,
-		instant_das:   dom.das ? parseInt(event.instant_das, 10) : -1,
+		score:         event.score,
+		lines:         event.lines,
+		level:         event.level,
+		cur_piece_das: dom.das != null ? event.cur_piece_das : -1,
+		instant_das:   dom.das != null ? event.instant_das : -1,
 		cur_piece:     event.cur_piece,
 		next_piece:    event.preview,
 		stage: {
-			num_blocks: event.field.replace(/0+/g, '').length,
-			field:      event.field
+			num_blocks: event.field.reduce((acc, v) => acc + (v ? 1 : 0), 0),
+			field:      event.field,
+			field_string: event.field.join(''),
 		}
 	};
 
@@ -181,7 +195,7 @@ function onFrame(event, debug) {
 			reportGame(game);
 			pending_game = true;
 
-			renderStage(transformed.level, transformed.stage.field);
+			renderStage(transformed.level, transformed.stage);
 			return;
 		}
 
@@ -216,7 +230,7 @@ function onFrame(event, debug) {
 
 	// check if a change to cur_piece_stats
 	if (--pending_piece === 0) {
-		if (transformed.cur_piece && transformed.next_piece && !isNaN(transformed.cur_piece_das) && transformed.cur_piece_das <= 16) {
+		if (transformed.cur_piece && transformed.next_piece && transformed.cur_piece_das != null && transformed.cur_piece_das <= 16) {
 			game.onPiece(transformed);
 			renderPiece(transformed);
 
@@ -235,8 +249,8 @@ function onFrame(event, debug) {
 	if (--pending_line === 0) {
 		if (
 			transformed.score
-			&& !isNaN(transformed.lines)
-			&& !isNaN(transformed.level)
+			&& (transformed.lines != null)
+			&& (transformed.level != null)
 			&& diff.score >= 0
 			&& diff.cleared_lines >= 0
 		) {
@@ -259,8 +273,8 @@ function onFrame(event, debug) {
 		pending_line = pending_delay_frames;
 	}
 
-	if (!isNaN(transformed.level) && transformed.level != null) {
-		renderStage(transformed.level, transformed.stage.field);
+	if (transformed.level != null) {
+		renderStage(transformed.level, transformed.stage);
 		renderNextPiece(transformed.level, transformed.next_piece);
 	}
 
@@ -647,7 +661,7 @@ function renderPiece(event) {
 
 function renderInstantDas(das) {
 	if (!dom.das) return;
-	if (isNaN(das) || das < 0) return;
+	if ((das == null) || das < 0) return;
 
 	dom.das.instant.textContent = das.toString().padStart(2, '0');
 
@@ -866,9 +880,9 @@ function renderBlock(level, block_index, ctx, pos_x, pos_y) {
 
 let stage_currently_rendered = null;
 
-function renderStage(level, stage_string) {
+function renderStage(level, stage) {
 	const
-		stage_id = `${level}${stage_string}`;
+		stage_id = `${level}${stage.field_string}`;
 
 	if (stage_id === stage_currently_rendered) return;
 
@@ -876,7 +890,8 @@ function renderStage(level, stage_string) {
 
 	const
 		ctx = dom.stage.ctx,
-		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1);
+		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
+		field = stage.field;
 
 	ctx.clear();
 
@@ -884,7 +899,7 @@ function renderStage(level, stage_string) {
 		for (let y = 0; y < 20; y++) {
 			renderBlock(
 				level,
-				parseInt(stage_string[y * 10 + x], 10),
+				field[y * 10 + x],
 				ctx,
 				x * pixels_per_block,
 				y * pixels_per_block
@@ -898,7 +913,6 @@ let next_piece_currently_rendered = null;
 function renderNextPiece(level, next_piece) {
 	if (
 		level === null
-		|| isNaN(level)
 		|| !next_piece
 	) {
 		return;
