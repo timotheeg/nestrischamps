@@ -861,10 +861,9 @@ function trackAndSendFrames() {
 		// Dynamically load openCV we need to load opencv now
 		const script = document.createElement('script');
 
-		script.src = '/ocr/opencv.js';
-
 		await new Promise(resolve => {
 			script.onload = resolve;
+			script.src = '/ocr/opencv.js';
 		});
 
 		document.head.appendChild(script);
