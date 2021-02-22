@@ -864,9 +864,8 @@ function trackAndSendFrames() {
 		await new Promise(resolve => {
 			script.onload = resolve;
 			script.src = '/ocr/opencv.js';
+			document.head.appendChild(script);
 		});
-
-		document.head.appendChild(script);
 
 		await resetDevices();
 
