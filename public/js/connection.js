@@ -13,7 +13,15 @@ class Connection {
 	_handleError() {}
 
 	_handleMessage(event) {
-		this.onMessage(JSON.parse(event.data));
+		if (typeof event.data === 'string') {
+			this.onMessage(JSON.parse(event.data));
+		}
+		else if(event.data instanceof ArrayBuffer) {
+			this.onMessage(new Uint8Array(event.data));
+		}
+		else {
+			console.log('unknown message type');
+		}
 	}
 
 	_handleClose() {
@@ -42,6 +50,7 @@ class Connection {
 
 		this.socket = new WebSocket(`${wsp}://${location.host}/ws${location.pathname}`);
 
+		this.socket.binaryType = "arraybuffer";
 		this.socket.addEventListener('error', this._handleError);
 		this.socket.addEventListener('close', this._handleClose);
 		this.socket.addEventListener('message', this._handleMessage);
