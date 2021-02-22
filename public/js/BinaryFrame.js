@@ -203,8 +203,8 @@ class BinaryFrame {
 		if (pojo.score == 0xFFFFFF) pojo.score = null;
 		if (pojo.lines == 0b111111111) pojo.lines = null;
 		if (pojo.level == 0b1111111) pojo.level = null;
-		if (pojo.instant_das == 0b11111) pojo.level = null;
-		if (pojo.cur_piece_das == 0b11111) pojo.level = null;
+		if (pojo.instant_das == 0b11111) pojo.instant_das = null;
+		if (pojo.cur_piece_das == 0b11111) pojo.cur_piece_das = null;
 
 		PIECES.forEach(piece => {
 			if (pojo[piece] === 0xFF) {
@@ -235,3 +235,7 @@ BinaryFrame.GAME_TYPE = GAME_TYPE;
 return BinaryFrame;
 
 })();
+
+if (module.exports) {
+	module.exports = BinaryFrame;
+}

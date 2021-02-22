@@ -756,6 +756,7 @@ function trackAndSendFrames() {
 
 	tetris_ocr = new TetrisOCR(templates, palettes, config);
 
+	let start_time = Date.now();
 	let game_state = IN_GAME;
 	let gameid = 1;
 
@@ -778,7 +779,7 @@ function trackAndSendFrames() {
 		}
 
 		data.gameid = gameid;
-		data.ctime = Date.now();
+		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {
 			performance.mark('show_parts_start');
