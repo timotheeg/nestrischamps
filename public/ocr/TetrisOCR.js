@@ -266,13 +266,13 @@ class TetrisOCR extends EventTarget {
 
 	scanPieceStats(source_img) {
 		return {
-			t: this.ocrDigits(source_img, this.config.tasks.t),
-			j: this.ocrDigits(source_img, this.config.tasks.j),
-			z: this.ocrDigits(source_img, this.config.tasks.z),
-			o: this.ocrDigits(source_img, this.config.tasks.o),
-			s: this.ocrDigits(source_img, this.config.tasks.s),
-			l: this.ocrDigits(source_img, this.config.tasks.l),
-			i: this.ocrDigits(source_img, this.config.tasks.i),
+			T: this.ocrDigits(source_img, this.config.tasks.T),
+			J: this.ocrDigits(source_img, this.config.tasks.J),
+			Z: this.ocrDigits(source_img, this.config.tasks.Z),
+			O: this.ocrDigits(source_img, this.config.tasks.O),
+			S: this.ocrDigits(source_img, this.config.tasks.S),
+			L: this.ocrDigits(source_img, this.config.tasks.L),
+			I: this.ocrDigits(source_img, this.config.tasks.I),
 		};
 	}
 
