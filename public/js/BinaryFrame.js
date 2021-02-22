@@ -165,7 +165,7 @@ class BinaryFrame {
 		pojo.game_type = (f[bidx] & 0b11000) >> 3;
 		pojo.player_num = (f[bidx++] & 0b111);
 
-		pojo.game_id = (f[bidx++] << 8) | f[bidx++];
+		pojo.gameid = (f[bidx++] << 8) | f[bidx++];
 
 		pojo.ctime = (f[bidx++] << 24) | (f[bidx++] << 16) | (f[bidx++] << 8) | f[bidx++];
 
