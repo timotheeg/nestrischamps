@@ -769,7 +769,7 @@ function trackAndSendFrames() {
 			}
 		}
 		else {
-			if (data.score && data.lines) {
+			if (data.score != null && data.lines != null) {
 				game_state = IN_GAME;
 
 				if (data.score === 0 && (data.lines === 0 || data.lines === 25)) {
