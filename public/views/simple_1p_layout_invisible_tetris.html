@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="tetris.css" />
+<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 <style>
 html {
 	overflow: hidden;
@@ -64,7 +64,7 @@ html {
 }
 
 .board {
-	border-image: url('./big_border.png');
+	border-image: url('/views/big_border.png');
 	border-image-slice: 16 16 16 16 fill;
 	border-image-width: 16px 16px;
 	padding: 17px;
@@ -182,11 +182,11 @@ html {
 
 <!-- Audio -->
 
-<script src="constants.js"></script>
-<script src="utils.js"></script>
-<script src="connection.js"></script>
-<!-- script src="bg.js"></script -->
-<script src="Player.js"></script>
+<script src="/views/constants.js"></script>
+<script src="/views/utils.js"></script>
+<script src="/js/connection.js"></script>
+<script src="/views/bg.js"></script>
+<script src="/views/Player.js"></script>
 <script >
 const player = new Player(
 	{
@@ -558,7 +558,15 @@ const connection = new Connection(3339);
 
 connection.onMessage = function(frame) {
 	try{
-		const [method, ...args] = frame; // expect array of format [api_method_name, arg1, arg2, ...]
+		let method, args;
+
+		if (Array.isArray(frame)) {
+			[method, ...args] = frame;
+		}
+		else {
+			method = 'frame';
+			args = [ frame ];
+		}
 
 		API[method].apply(API, args);
 	}
