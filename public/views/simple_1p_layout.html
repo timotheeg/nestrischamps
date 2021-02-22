@@ -229,7 +229,7 @@ const API = {
 	}
 }
 
-const connection = new Connection(3339);
+const connection = new Connection();
 
 connection.onMessage = function(frame) {
 	try {
@@ -240,6 +240,11 @@ connection.onMessage = function(frame) {
 		}
 		else {
 			method = 'frame';
+
+			if (frame instanceof Uint8Array) {
+				frame = BinaryFrame.parse(frame);
+			}
+
 			args = [ frame ];
 		}
 
