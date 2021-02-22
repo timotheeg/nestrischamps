@@ -282,6 +282,7 @@ function updateDeviceList(devices) {
 }
 
 async function getConnectedDevices(type) {
+	await navigator.mediaDevices.getUserMedia({ video: true });
 	return (await navigator.mediaDevices.enumerateDevices())
 		.filter(device => device.kind === type && device.deviceId)
 }
