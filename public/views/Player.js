@@ -348,8 +348,9 @@ class Player {
 		}
 
 		// buils audio objects
+		// TODO: handle left-right channel
 		this.sounds = {
-			tetris: new Audio('./Tetris_Clear.mp3')
+			tetris: new Audio('/views/Tetris_Clear.mp3');
 		};
 
 		this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
@@ -433,13 +434,6 @@ class Player {
 		// noop
 	}
 
-	getScoreFromScoreString(score_str) {
-		const lead = parseInt(score_str.charAt(0), 16);
-		const tail = parseInt(score_str.slice(1), 10);
-
-		return (lead * 100000) + tail;
-	}
-
 	setAvatar(url) {
 		if (!url) {
 			// try local files...
@@ -458,9 +452,9 @@ class Player {
 	_getPieceStats(data) {
 		return PIECES.reduce(
 			(acc, piece) => {
-				const num = parseInt(data[piece], 10);
+				const num = data[piece];
 
-				if (isNaN(num)) {
+				if (num === null) {
 					throw new SyntaxError(`Invalid piece stat: [${piece}, ${data[piece]}`);
 				}
 
@@ -474,9 +468,9 @@ class Player {
 	}
 
 	setFrame(data) {
-		const lines = parseInt(data.lines, 10);
-		const level = parseInt(data.level, 10);
-		const num_blocks = data.field.replace(/0+/g, '').length;
+		const lines = data.lines;
+		const level = data.level;
+		const num_blocks = data.field.reduce((acc, v) => acc + (v ? 1 : 0), 0);
 
 		if (this.game_over && data.gameid == this.gameid) {
 			return;
@@ -501,16 +495,18 @@ class Player {
 			this.onGameStart();
 		}
 
-		['lines', 'level'].forEach(field => {
-			if (data[field]) {
-				this.dom[field].textContent = data[field];
-			}
-		});
+		if (data.lines != null) {
+			this.dom.lines.textContent = `${data.lines}`.padStart(3, '0');
+		}
+
+		if (data.level != null) {
+			this.dom.level.textContent = `${data.level}`.padStart(2, '0');
+		}
 
 		if (this.pending_piece) {
 			// console.log('pending piece', this.drought);
 
-			let cur_piece = this.prev_preview
+			let cur_piece = this.prev_preview;
 			let drought = this.drought;
 
 			do {
@@ -567,14 +563,16 @@ class Player {
 			while(false);
 		}
 
-		if (!isNaN(level)) {
+		if (level != null) {
 			this.level = level;
 
-			this.renderField(this.level, data.field);
+			const field_string = data.field.join('');
+
+			this.renderField(this.level, data.field, field_string);
 			this.renderPreview(this.level, data.preview);
 
 			if (this.options.reliable_field) {
-				this.updateField(data.field, num_blocks);
+				this.updateField(data.field, num_blocks, field_string);
 			}
 			else {
 				try {
@@ -596,21 +594,22 @@ class Player {
 			}
 
 			if (num_blocks === 200) {
+				// note, gameover can also be detected when top row of field is full
 				this.game_over = true;
 			}
 		}
 
 		if (this.pending_score) {
-			if (isNaN(lines) || !data.score) {
+			if (lines === null || data.score === null) {
 				return;
 			}
-
-			const score = this.getScoreFromScoreString(data.score);
 
 			// weird readings... wait one more frame
-			if (isNaN(score) || score < this.score || lines < this.lines) {
+			if (data.score < this.score || lines < this.lines) {
 				return;
 			}
+
+			const score = data.score;
 
 			this.score = score;
 			this.dom.score.textContent = this.options.format_score
@@ -646,14 +645,8 @@ class Player {
 			}
 		}
 
-		if (data.score) {
-			const score = this.getScoreFromScoreString(data.score);
-
-			if (isNaN(score)) {
-				return;
-			}
-
-			if (score != this.score) {
+		if (data.score != null) {
+			if (data.score != this.score) {
 				this.pending_score = true;
 			}
 		}
@@ -748,7 +741,7 @@ class Player {
 		});
 	}
 
-	updateField(field_string, num_blocks) {
+	updateField(field, num_blocks, field_string) {
 		if (field_string == this.field_string) return;
 
 		// state is considered valid, track data
@@ -817,7 +810,7 @@ class Player {
 		}
 	}
 
-	renderField(level, field_string) {
+	renderField(level, field, field_string) {
 		const stage_id = `${level}${field_string}`;
 
 		if (stage_id === this.current_field) return;
@@ -832,7 +825,7 @@ class Player {
 			for (let y = 0; y < 20; y++) {
 				renderBlock(
 					level,
-					parseInt(field_string[y * 10 + x], 10),
+					field[y * 10 + x],
 					this.field_pixel_size,
 					this.field_ctx,
 					x * pixels_per_block,
@@ -876,7 +869,6 @@ class Player {
 				pixel_size
 			);
 		}
-
 
 		// Show the individual line clear events
 		pixel_size = pixel_size_line_clear;
