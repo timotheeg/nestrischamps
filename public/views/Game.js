@@ -147,7 +147,7 @@ class Game {
 		das_stats.avg   =  das_stats.total / this.data.pieces.count;
 		das_stats[DAS_THRESHOLDS[das_stats.cur]]++; // great, ok, bad
 
-		this.board = new Board(event.stage.field);
+		this.board = new Board(event.stage.field_string); // TODO: rewrite board to use the field array
 
 		const piece_data = {
 			piece:      p,
