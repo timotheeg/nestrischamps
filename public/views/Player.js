@@ -350,7 +350,7 @@ class Player {
 		// buils audio objects
 		// TODO: handle left-right channel
 		this.sounds = {
-			tetris: new Audio('/views/Tetris_Clear.mp3');
+			tetris: new Audio('/views/Tetris_Clear.mp3')
 		};
 
 		this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
