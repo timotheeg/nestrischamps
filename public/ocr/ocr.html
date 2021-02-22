@@ -184,7 +184,6 @@ fieldset.field pre {
 </div>
 <div id="templates"></div>
 
-<script src="/ocr/opencv.js"></script>
 <script src="/ocr/calibration.js"></script>
 <script src="/js/connection.js"></script>
 <script src="/ocr/image_tools.js"></script>
@@ -1036,7 +1035,6 @@ function trackAndSendFrames() {
 
 
 (async function init() {
-	ocv = await cv;
 
 	// load external assets - could parrallelize
 	templates = await loadDigitTemplates();
@@ -1054,7 +1052,20 @@ function trackAndSendFrames() {
 		trackAndSendFrames();
 	}
 	else {
+		// Dynamically load openCV we need to load opencv now
+		const script = document.createElement('script');
+
+		script.src = '/ocr/opencv.js';
+
+		await new Promise(resolve => {
+			script.onload = resolve;
+		});
+
+		document.head.appendChild(script);
+
 		await resetDevices();
+
+		ocv = await cv;
 
 		// create default dummy waiting to be populated by user selection
 		config = { tasks: {} };
