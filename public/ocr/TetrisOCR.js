@@ -229,7 +229,7 @@ class TetrisOCR extends EventTarget {
 			res.cur_piece = this.scanCurPiece(source_img);
 		}
 
-		if (this.config.tasks.t) {
+		if (this.config.tasks.T) {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
 
