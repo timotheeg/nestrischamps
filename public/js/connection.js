@@ -57,7 +57,12 @@ class Connection {
 		}
 
 		try {
-			this.socket.send(JSON.stringify(data));
+			if (data instanceof Uint8Array) {
+				this.socket.send(data); // send binary frame
+			}
+			else {
+				this.socket.send(JSON.stringify(data));
+			}
 		}
 		catch(err) {}
 	}

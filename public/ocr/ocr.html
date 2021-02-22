@@ -191,6 +191,7 @@ fieldset.field pre {
 <script src="/ocr/templates.js"></script>
 <script src="/ocr/palettes.js"></script>
 <script src="/ocr/TetrisOCR.js"></script>
+<script src="/js/BinaryFrame.js"></script>
 
 <script>
 // NTSC NES resolution: 256x224 -> 512x448
@@ -956,14 +957,6 @@ function trackAndSendFrames() {
 
 	// TODO: better event system and name for frame data events
 	tetris_ocr.onMessage = async function(data) {
-		// make frame NESTrisOCR compatible
-		// TODO: update stats UI to take in numbers rather than strings
-		if (data.score !== null) data.score = `${data.score}`.padStart(6, '0');
-		if (data.level !== null) data.level = `${data.level}`.padStart(2, '0');
-		if (data.lines !== null) data.lines = `${data.lines}`.padStart(3, '0');
-
-		data.field = data.field.join('');
-
 		// replicate NESTrisOCR gameid logic
 		if (game_state === IN_GAME) {
 			if (data.score === null && data.lines === null) {
@@ -974,23 +967,13 @@ function trackAndSendFrames() {
 			if (data.score && data.lines) {
 				game_state = IN_GAME;
 
-				if (data.score === '000000' && (data.lines === '000' || data.lines === "025")) {
+				if (data.score === 0 && (data.lines === 0 || data.lines === 25)) {
 					gameid++;
 				}
 			}
 		}
 
 		data.gameid = gameid;
-
-		/*
-		// TODO: don't send consecutive identical frames
-		if (last_game_frame) {
-			for (let key in last_game_frame) {
-
-			}
-		}
-		/**/
-
 		data.ctime = Date.now();
 
 		if (show_parts.checked) {
@@ -1023,7 +1006,7 @@ function trackAndSendFrames() {
 		delete data.color1;
 		delete data.color2;
 
-		connection.send(data);
+		connection.send(BinaryFrame.encode(data));
 	}
 
 

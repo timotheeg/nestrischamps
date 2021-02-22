@@ -43,10 +43,12 @@ By using a 32 bit int, we allow for
 
 
 Notes: Some values, could be bundled into fewer bytes. For example:
+
 * lines: 9 bits
+* level: 6 bits
+
 * instant das: 5 bits
 * cur piece das: 5 bits
-* level: 6 bits
 * preview: 3 bits
 * cur piece: 3 bits
 
