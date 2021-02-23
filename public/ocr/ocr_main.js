@@ -189,7 +189,7 @@ go_btn.addEventListener('click', async (evt) => {
 	if (true || ow <= 0 || oh <= 0) {
 		console.log('Unable to match template');
 		ox = 0;
-		oh = 0;
+		oy = 0;
 		ow = video.videoWidth;
 		oh = video.videoHeight >> (do_deinterlace ? 1 : 0);
 	}
