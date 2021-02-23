@@ -860,7 +860,7 @@ function trackAndSendFrames() {
 	palettes = await loadPalettes();
 
 
-	showTemplates();
+	showTemplates(templates);
 	connect();
 
 	await updatePaletteList();
