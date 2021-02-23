@@ -22,6 +22,8 @@ function getCaptureCoordinates(template_id, capture_id) {
 	const local_matches = Array(matches.size()).fill().map((_, idx) => matches.get(idx));
 	local_matches.sort((a, b) => a.distance - b.distance);
 
+	console.log('matches', local_matches);
+
 	const src_pts = local_matches
 		.map(m => {
 			const pt = kp1.get(m.queryIdx).pt;
@@ -33,6 +35,9 @@ function getCaptureCoordinates(template_id, capture_id) {
 			const pt = kp2.get(m.trainIdx).pt;
 			return [pt.x, pt.y];
 		});
+
+	console.log(src_pts);
+	console.log(dst_pts);
 
 	const src_mat = ocv.matFromArray(src_pts.length, 1, ocv.CV_64FC2, [].concat(...src_pts));
 	const dst_mat = ocv.matFromArray(src_pts.length, 1, ocv.CV_64FC2, [].concat(...dst_pts));
