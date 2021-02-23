@@ -374,7 +374,7 @@ async function playVideoFromConfig() {
 		await playVideoFromScreenCap();
 	}
 	else {
-		do_deinterlace = false;
+		do_deinterlace = true;
 		await playVideoFromDevice(config.device_id);
 	}
 }
