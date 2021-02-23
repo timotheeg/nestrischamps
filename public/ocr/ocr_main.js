@@ -186,7 +186,7 @@ go_btn.addEventListener('click', async (evt) => {
 
 	let [ox, oy, ow, oh] = getCaptureCoordinates('reference_ui', 'video_capture');
 
-	if (ow <= 0 || oh <= 0) {
+	if (true || ow <= 0 || oh <= 0) {
 		console.log('Unable to match template');
 		ox = 0;
 		oh = 0;
