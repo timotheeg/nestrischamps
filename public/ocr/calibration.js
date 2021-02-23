@@ -23,12 +23,16 @@ function getCaptureCoordinates(template_id, capture_id) {
 	local_matches.sort((a, b) => a.distance - b.distance);
 
 	const src_pts = local_matches
-		.map(m => kp1.get(m.queryIdx).pt)
-		.map(pt => [pt.x, pt.y]);
+		.map(m => {
+			const pt = kp1.get(m.queryIdx).pt;
+			return [pt.x, pt.y];
+		});
 
 	const dst_pts = local_matches
-		.map(m => kp2.get(m.trainIdx).pt)
-		.map(pt => [pt.x, pt.y]);
+		.map(m => {
+			const pt = kp2.get(m.trainIdx).pt;
+			return [pt.x, pt.y];
+		});
 
 	const src_mat = ocv.matFromArray(src_pts.length, 1, ocv.CV_64FC2, [].concat(...src_pts));
 	const dst_mat = ocv.matFromArray(src_pts.length, 1, ocv.CV_64FC2, [].concat(...dst_pts));
