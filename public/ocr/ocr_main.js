@@ -194,8 +194,10 @@ go_btn.addEventListener('click', async (evt) => {
 		oh = video.videoHeight >> (do_deinterlace ? 1 : 0);
 	}
 	else {
-		console.log('Found offsets: ', ox, oy, ow, oh);
+		console.log('Found offsets!');
 	}
+
+	console.log('Using offsets: ', ox, oy, ow, oh);
 
 	const xscale = ow / reference_size[0];
 	const yscale = oh / reference_size[1];
@@ -207,10 +209,14 @@ go_btn.addEventListener('click', async (evt) => {
 
 		const crop = config.tasks[name].crop;
 
+		console.log(name, 'crop before', crop);
+
 		crop[0] = Math.round(ox + crop[0] * xscale);
 		crop[1] = Math.round(oy + crop[1] * yscale);
 		crop[2] = Math.round(crop[2] * xscale);
 		crop[3] = Math.round(crop[3] * yscale);
+
+		console.log(name, 'crop after', crop);
 	});
 
 	saveConfig(config);
