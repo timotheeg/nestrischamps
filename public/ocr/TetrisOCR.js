@@ -136,11 +136,12 @@ class TetrisOCR extends EventTarget {
 	getDigit(pixel_data, max_check_index, is_red) {
 		const sums = new Float64Array(max_check_index);
 		const size = pixel_data.length >>> 2;
+		const red_scale = 255/155; // scale red values as if capped at 155
 
 		for (let p_idx = size; p_idx--; ) {
 			const offset_idx = p_idx << 2;
 			const pixel_luma = is_red
-				? pixel_data[offset_idx] // only consider red component for luma
+				? pixel_data[offset_idx] * red_scale // only consider red component for luma, with scaling
 				: luma(
 					pixel_data[offset_idx],
 					pixel_data[offset_idx + 1],
