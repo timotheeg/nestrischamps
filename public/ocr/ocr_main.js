@@ -180,6 +180,10 @@ go_btn.addEventListener('click', async (evt) => {
 
 	video_capture.getContext('2d').drawImage(bitmap, 0, 0);
 
+	await new Promise(resolve => {
+		setTimeout(resolve, 0); // wait one tick for everything to be drawn nicely... just in case
+	});
+
 	let [ox, oy, ow, oh] = getCaptureCoordinates('reference_ui', 'video_capture');
 
 	if (ow <= 0 || oh <= 0) {
@@ -225,7 +229,7 @@ show_parts.addEventListener('change', evt => {
 
 function loadImage(img, src) {
 	return new Promise(resolve => {
-		img.onload = () => setTimeout(resolve, 0); // one extra tick of delay for good measure...
+		img.onload = resolve;
 		img.src = src;
 	});
 }
