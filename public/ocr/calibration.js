@@ -19,7 +19,7 @@ function getCaptureCoordinates(template_id, capture_id) {
 	const matches = new ocv.DMatchVector();
 	bf.match(des1, des2, matches);
 
-	const local_matches = (new Array(matches.size())).fill().map((_, idx) => matches.get(idx));
+	const local_matches = Array(matches.size()).fill().map((_, idx) => matches.get(idx));
 	local_matches.sort((a, b) => a.distance - b.distance);
 
 	const src_pts = local_matches
