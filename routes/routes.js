@@ -21,6 +21,10 @@ router.get('/renderers', middlewares.assertSession, (req, res) => {
 	});
 });
 
+router.get('/producer/local/player[12]', (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+});
+
 router.get('/producer/:room?', middlewares.assertSession, (req, res) => {
 	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
 });
