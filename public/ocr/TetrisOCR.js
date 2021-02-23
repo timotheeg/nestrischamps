@@ -141,7 +141,7 @@ class TetrisOCR extends EventTarget {
 		for (let p_idx = size; p_idx--; ) {
 			const offset_idx = p_idx << 2;
 			const pixel_luma = is_red
-				? pixel_data[offset_idx] * red_scale // only consider red component for luma, with scaling
+				? Math.min(pixel_data[offset_idx] * red_scale, 255) // only consider red component for luma, with scaling and capped
 				: luma(
 					pixel_data[offset_idx],
 					pixel_data[offset_idx + 1],
