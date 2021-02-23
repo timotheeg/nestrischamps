@@ -225,7 +225,7 @@ show_parts.addEventListener('change', evt => {
 
 function loadImage(img, src) {
 	return new Promise(resolve => {
-		img.onload = resolve;
+		img.onload = () => setTimeout(resolve, 0); // one extra tick of delay for good measure...
 		img.src = src;
 	});
 }
