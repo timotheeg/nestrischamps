@@ -175,7 +175,7 @@ go_btn.addEventListener('click', async (evt) => {
 	updateCanvasSizeIfNeeded(
 		video_capture,
 		video.videoWidth,
-		video.videoHeight >> (do_deinterlace ? 1 : 0)
+		video.videoHeight
 	);
 
 	video_capture.getContext('2d').drawImage(bitmap, 0, 0);
@@ -191,10 +191,15 @@ go_btn.addEventListener('click', async (evt) => {
 		ox = 0;
 		oy = 0;
 		ow = video.videoWidth;
-		oh = video.videoHeight >> (do_deinterlace ? 1 : 0);
+		oh = video.videoHeight;
 	}
 	else {
 		console.log('Found offsets!');
+	}
+
+	if (do_deinterlace) {
+		oy /= 2;
+		oh /= 2;
 	}
 
 	console.log('Using offsets: ', ox, oy, ow, oh);
