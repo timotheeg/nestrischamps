@@ -162,14 +162,8 @@ go_btn.addEventListener('click', async (evt) => {
 	await loadImage(reference_ui, rom_config.reference);
 
 	const bitmap = await createImageBitmap(video,
-		0, 0, video.videoWidth, video.videoHeight,
-		do_deinterlace
-			? {
-				resizeWidth: video.videoWidth,
-				resizeHeight: video.videoHeight >> 1,
-				resizeQuality: 'pixelated',
-			}
-			: {}
+		0, 0,
+		video.videoWidth, video.videoHeight
 	);
 
 	updateCanvasSizeIfNeeded(
