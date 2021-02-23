@@ -859,6 +859,8 @@ function trackAndSendFrames() {
 	templates = await loadDigitTemplates();
 	palettes = await loadPalettes();
 
+
+	showTemplates();
 	connect();
 
 	await updatePaletteList();
