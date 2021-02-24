@@ -7,9 +7,10 @@ const PING_INTERVAL = 15000;
 const PONG_TIMEOUT = 60000;
 
 class Connection {
-	constructor(user, socket) {
+	constructor(user, socket, peerid) {
 		this.user = user;
 		this.socket = socket;
+		this.peerid = peerid;
 
 		this.onHeartBeat = this.onHeartBeat.bind(this);
 		this.ping = this.ping.bind(this);
@@ -25,13 +26,24 @@ class Connection {
 
 	send(message) {
 		if (this.socket) {
+			if (Array.isArray(message)) {
+				message = JSON.stringify(message);
+			}
+			// else assumes binary
+
 			this.socket.send(message);
 		}
 	}
 
 	kick(reason) {
 		this.socket.send(JSON.stringify(['kick', reason]));
-		this.socket.removeAllListeners();
+
+		// remove specific listeners
+		this.socket.removeListeners('error', _.noop); // TODO: log?
+		this.socket.removeListeners('ping', this.onHeartBeat);
+		this.socket.removeListeners('pong', this.onHeartBeat);
+		this.socket.removeListeners('close', this.destroy);
+
 		this.ping_to = clearInterval(this.ping_int);
 		this.kick_to = setTimeout(this.destroy, KICK_DESTROY_DELAY);
 	}
@@ -50,6 +62,7 @@ class Connection {
 	destroy() {
 		this.is_alive = false;
 		this.ping_to = clearTimeout(this.ping_int);
+		this.socket.close();
 	}
 }
 

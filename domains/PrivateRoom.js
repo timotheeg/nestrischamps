@@ -5,8 +5,6 @@ const Room = require('./Room');
 class PrivateRoom extends Room {
 	constructor(owner) {
 		super(owner);
-
-		this.onProducerMesssage = this.onProducerMesssage.bind(this);
 	}
 
 	setProducer(connection) {
@@ -14,7 +12,7 @@ class PrivateRoom extends Room {
 		if (connection.user.id != this.owner.id) return false; // throw?
 
 		// user is owner, he should take over connection
-		this.producers.forEach(connection => connection.kick('concurrency_limit'));
+		this.producers.forEach(connection => connection.kick('concurrency_limit')); // clear all listeners
 		this.producers.clear(); // there can be only one producer in a room
 
 		this.producers.add(connection);
@@ -26,6 +24,7 @@ class PrivateRoom extends Room {
 		});
 	}
 
+	// straight passthrough from producer to view
 	onProducerMesssage(message) {
 		this.views.forEach(connection => connection.send(message));
 	}

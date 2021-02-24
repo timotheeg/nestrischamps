@@ -79,7 +79,7 @@ module.exports = function init(server, wss) {
 			player1.getPrivateRoom().setProducer(connection);
 		}
 		else if(request.url.startsWith('/ws/player')) {
-			player1.getMatchRoom().setProducer(connection);
+			player1.getMatchRoom().addProducer(connection);
 		}
 		else {
 			console.log('Unrecognized connection');

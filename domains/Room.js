@@ -5,9 +5,10 @@ class Room {
 		this.owner = owner;
 		this.producers = new Set();
 		this.views = new Set();
-	}
 
-	addProducer(connection) {}
+		this.onProducerMessage = this.onProducerMessage.bind(this);
+		this.onAdminMessage = this.onAdminMessage.bind(this);
+	}
 
 	addView(connection) {
 		this.views.add(connection);
@@ -22,6 +23,10 @@ class Room {
 	close() {
 		// TODO: kick, disconnect, and remove all connections (views, producers, admins)
 	}
+
+	addProducer(connection) {}
+	onProducerMessage() {}
+	onAdminMessage() {}
 }
 
 module.exports = Room;
