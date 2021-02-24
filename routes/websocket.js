@@ -1,4 +1,5 @@
 const middlewares = require('./middlewares');
+const layouts = require('./layouts');
 const UserDAO = require('../daos/UserDAO');
 const Connection = require('./Connection');
 
@@ -6,7 +7,7 @@ module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log('WS: ', request.url);
 
-		const m = request.url.match(/^\/ws\/view\/(1p|mp)\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
+		const m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
 
 		request.is_secret_view = !!m;
 
@@ -16,9 +17,9 @@ module.exports = function init(server, wss) {
 			}
 
 			request.tetris.view = {
-				single_player: m[1] == '1p',
-				layout_id:     m[2],
-				user_secret:   m[3],
+				single_player: layouts[m[1]][type] == '1p',
+				layout_id:     m[1],
+				user_secret:   m[2],
 			};
 
 			// connection from the non-session-ed views (from OBS)

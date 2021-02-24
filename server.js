@@ -9,6 +9,13 @@ const wss = new WebSocket.Server({
 	noServer: true
 });
 
-require('./modules/websocket.js')(server, wss);
+
+if (process.env.IS_PUBLIC_SERVER) {
+	require('./routes/websocket.js')(server, wss);
+}
+else {
+	require('./routes/local_websocket.js')(server, wss);
+}
+
 
 server.listen(process.env.PORT || 5000);
