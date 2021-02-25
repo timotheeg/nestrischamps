@@ -30,6 +30,15 @@ class TetrisCompetitionAPI {
 		getPlayer(player_num).setAvatar(avatar_url);
 	}
 
+	// Twitch like command aliases
+	setProfileImageURL(payer_num, avatar_url) {
+		this.setAvatar(payer_num, avatar_url);
+	}
+
+	setDisplayName(player_num, name) {
+		this.setName(player_num, name);
+	}
+
 	setFirstTo(num_games_to_win) {
 		this.first_to = num_games_to_win;
 
