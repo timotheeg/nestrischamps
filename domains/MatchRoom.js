@@ -5,61 +5,101 @@ const Room = require('./Room');
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
 
 class MatchRoom extends Room {
-	constructor() {
-		super();
+	constructor(owner) {
+		super(owner);
 
-		this.player1 = null;
-		this.player2 = null;
+		this.getProducerFields = this.getProducerFields.bind(this);
+
+		this.state = {
+			bestof: 3,
+			players: [
+				{
+					id: '',
+					login: '',
+					display_name: '',
+					profile_image_url: '',
+					victories: 0,
+				},
+				{
+					id: '',
+					login: '',
+					display_name: '',
+					profile_image_url: '',
+					victories: 0,
+				},
+			]
+		};
+
 		this.admin = null;
+
+		this.onAdminMessage = this.onAdminMessage.bind(this);
 	}
 
 	setAdmin(connection) {
-		// producer can only be owner
-		if (connection.user.id != this.owner.id) return false; // throw?
+		// Only owner can be admin
+		if (connection.user.id != this.owner.id) {
+			connection.kick('forbidden');
+			return;
+		}
 
-		// user is owner, he should take over connection
-		this.admin.kick('concurrency_limit');
-		this.admin.socket.removeAllListeners();
+		if (this.admin) {
+			this.admin.kick('concurrency_limit');
+		}
 
 		this.admin = connection;
 
-		connection.socket.on('message', this.onAdminMesssage);
-		connection.socket.on('close', () => {
-			connection.socket.removeListener('message', this.onAdminMesssage);
+		connection.on('message', this.onAdminMessage);
+		connection.on('close', () => {
 			if (this.admin == connection) {
 				this.admin = null;
 			}
 		});
+
+		// Send the room state to admin
+		this.sendStateToAdmin();
+	}
+
+	getProducer(user_id) {
+		return [ ...this.producers ].find(conn => conn.user.id === user_id);
+	}
+
+	getProducerFields(connection) {
+		return _.pick(connection.user, PRODUCER_FIELDS);
 	}
 
 	addProducer(connection) {
-		// check if user is already connected
-		const old_conn = [ ...this.producers ].find(conn => conn.user.id === connection.user.id);
+		// Check if user is already connected
+		const old_conn = this.getProducer(connection.user.id);
+
+		const inform_admin = !old_conn;
 
 		if (old_conn) {
-			connection.kick();
-			removeProducer(connection)
+			old_conn.kick('concurrency_limit');
+			this.removeProducer(old_conn, false);
 		}
 
 		this.producers.add(connection);
 
-		connection.socket.on('message', this.onProducerMesssage);
-		connection.socket.on('close', () => this.removeProducer(connection));
+		connection.on('message', message => this.onProducerMessage(connection, message));
+		connection.on('close', () => this.removeProducer(connection));
 
-		this.tellAdmin([
-			"addProducer",
-			_.pick(connection.user, PRODUCER_FIELDS)
-		]);
+		if (inform_admin) {
+			this.tellAdmin([
+				"_addProducer",
+				_.pick(connection.user, PRODUCER_FIELDS)
+			]);
+		}
 	}
 
-	removeProducer(connection) {
-		connection.socket.removeListener('message', this.onProducerMesssage);
+	removeProducer(connection, inform_admin=true) {
 		this.producers.delete(connection);
 
-		this.tellAdmin([
-			"removeProducer",
-			connection.user.id
-		]);
+		if (inform_admin) {
+			this.tellAdmin([
+				"_removeProducer",
+				connection.user.id
+			]);
+		}
 	}
 
 	// get state of the room:
@@ -69,10 +109,13 @@ class MatchRoom extends Room {
 	// list customization on avatars and names
 	getState() {
 		return {
-			producers: [ ...this.producers ].map(conn => _.pick(connection.user, PRODUCER_FIELDS)),
-			bestof: this.bestof,
-			player_map: this.player_map,
+			producers: [ ...this.producers ].map(this.getProducerFields),
+			state: this.state
 		};
+	}
+
+	sendStateToAdmin() {
+		this.tellAdmin(['state', this.getState()]);
 	}
 
 	tellAdmin(message) {
@@ -81,28 +124,141 @@ class MatchRoom extends Room {
 		this.admin.send(message);
 	}
 
+	assertValidPlayer(p_num) {
+		if (p_num === 0 || p_num === 1) return true;
+
+		throw new RangeError(`Player number is invalid (${p_num})`);
+	}
+
 	onAdminMessage(message) {
+		console.log('onAdminMessage', message);
+
 		const [command, ...args] = message;
+		let forward_to_views = true;
 
-		switch (command) {
-			case 'setPeer':
-				break;
+		console.log('command', command);
 
-			case 'setPlayer':
-				break;
+		try {
+			switch (command) {
+				case 'getState': {
+					forward_to_views = false;
+					this.sendStateToAdmin();
+				}
 
-			case 'setName':
-				break;
+				case 'setPlayer': {
+					console.log('matched');
+					console.log(this.getState());
 
-			case 'setAvatar':
-				break;
+					const [p_num, p_id] = args;
+					let player_data;
 
-			case 'setVictories':
-				break;
+					this.assertValidPlayer(p_num);
 
-			case 'setBestOf':
-				break;
+					if (this.state.players[0].id === p_id) {
+						player_data = this.state.players[0];
+					}
+					else if (this.state.players[1].id === p_id) {
+						player_data = this.state.players[1];
+					}
+					else {
+						const producer = this.getProducer(p_id);
+
+						if (producer) {
+							player_data = this.getProducerFields(producer);
+						}
+					}
+
+					if (!player_data) {
+						console.log('player not found');
+						return;
+					}
+
+					this.state.players[p_num] = {
+						...this.state.players[p_num],
+						...player_data,
+						victories: 0
+					};
+
+					// Send all data back to admin
+					this.sendStateToAdmin();
+
+					this.sendToViews(['setId',              p_num, player_data.id]);
+					this.sendToViews(['setLogin',           p_num, player_data.login]);
+					this.sendToViews(['setDisplayName',     p_num, player_data.display_name]);
+					this.sendToViews(['setProfileImageURL', p_num, player_data.profile_image_url]);
+
+					console.log(this.getState());
+
+					return;
+				}
+
+				case 'setDisplayName': {
+					const [p_num, name] = args;
+
+					this.assertValidPlayer(p_num);
+
+					this.players[p_num].display_name = name;
+					break;
+				}
+
+				case 'setProfileImageURL': {
+					const [p_num, url] = args;
+
+					this.assertValidPlayer(p_num);
+
+					this.players[p_num].profile_image_url = url;
+					break;
+				}
+
+				case 'resetVictories': {
+					this.state.players[0].victories = 0;
+					this.state.players[1].victories = 0;
+
+					break;
+				}
+
+				case 'setVictories': {
+					const [p_num, url] = args;
+
+					this.assertValidPlayer(p_num);
+
+					this.players[p_num].profile_image_url = url;
+					break;
+				}
+
+				case 'setBestOf': {
+					this.state.bestof = args[0];
+					break;
+				}
+
+				default: {
+					forward_to_views = false;
+				}
+			}
+
+			if (forward_to_views) {
+				this.sendToViews(message);
+			}
 		}
+		catch(err) {
+			console.error(err);
+		}
+	}
+
+	onProducerMessage(producer, message) {
+		// system where you can have one plyer
+		[0, 1].forEach(p_num => {
+			if (this.state.players[p_num].id === producer.user.id) {
+				if (message instanceof Uint8Array) {
+					message[0] |= p_num; // sets player number in header byte of binary message
+					this.sendToViews(message);
+				}
+				else {
+					message.player_num = p_num;
+					this.sendToViews(['frame', message]);
+				}
+			}
+		});
 	}
 }
 

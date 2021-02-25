@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="tetris.css" />
+<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 <style>
 html {
 	overflow: hidden;
@@ -108,7 +108,7 @@ html {
 }
 
 .board {
-	border-image: url('./big_border.png');
+	border-image: url('/views/big_border.png');
 	border-image-slice: 16 16 16 16 fill;
 	border-image-width: 16px 16px;
 	padding: 17px;
@@ -298,8 +298,8 @@ html {
 <script src="/views/utils.js"></script>
 <script src="/views/bg.js"></script>
 <script src="/js/connection.js"></script>
-<script src="/views/Player.js"></script>
 <script src="/js/BinaryFrame.js"></script>
+<script src="/views/Player.js"></script>
 <script >
 const players = [1, 2].map(num => new Player(
 	{
@@ -344,7 +344,7 @@ players.forEach((player, idx) => {
 });
 
 </script>
-<script src="competition.js"></script>
+<script src="/views/competition.js"></script>
 <script>
 
 const captured_frames = [];
@@ -392,13 +392,14 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 			.style.backgroundImage = `url(${url})`;
 	}
 
-	frame(player_num, data, debug) {
+	frame(data, debug) {
 		// captured_frames.push(data);
 
 		startFrame();
 
 		const
-			index       = player_num - 1,
+			player_num  = data.player_num,
+			index       = player_num,
 			player      = players[index],
 			otherPlayer = players[(index+1) % 2],
 			otherScore  = otherPlayer.getScore();

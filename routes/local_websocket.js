@@ -34,7 +34,7 @@ module.exports = function init(server, wss) {
 		}
 		else {
 			if (m = request.url.match(/^\/ws\/player([12])$/)) {
-				user = await UserDAO.getLocalPlayer(m[1]);
+				user = await UserDAO.getLocalPlayer(parseInt(m[1], 10));
 			}
 			else if (/^\/ws\/(admin|play)$/.test(request.url)) {
 				user = await UserDAO.getPlayer1();
@@ -80,6 +80,9 @@ module.exports = function init(server, wss) {
 		}
 		else if(request.url.startsWith('/ws/player')) {
 			player1.getMatchRoom().addProducer(connection);
+		}
+		else if(request.url.startsWith('/ws/admin')) {
+			player1.getMatchRoom().setAdmin(connection);
 		}
 		else {
 			console.log('Unrecognized connection');

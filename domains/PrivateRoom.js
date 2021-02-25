@@ -8,25 +8,26 @@ class PrivateRoom extends Room {
 	}
 
 	setProducer(connection) {
-		// producer can only be owner
-		if (connection.user.id != this.owner.id) return false; // throw?
+		// Only Owner can be Producer
+		if (connection.user.id != this.owner.id) {
+			connection.kick('not_allowed');
+			return false; // throw?
+		}
 
-		// user is owner, he should take over connection
-		this.producers.forEach(connection => connection.kick('concurrency_limit')); // clear all listeners
-		this.producers.clear(); // there can be only one producer in a room
+		// User is owner, new connection takes over any existing connections
+		this.producers.forEach(connection => connection.kick('concurrency_limit'));
+		this.producers.clear();
 
 		this.producers.add(connection);
 
-		connection.socket.on('message', this.onProducerMesssage);
-		connection.socket.on('close', () => {
-			connection.socket.removeListener('message', this.onProducerMesssage);
-			this.producers.delete(connection);
-		});
+		connection.on('message', this.onProducerMesssage);
+		connection.on('close', () => this.producers.delete(connection));
 	}
 
-	// straight passthrough from producer to view
+	// Straight passthrough from producer to view
+	// Basically, we assume producer is just sending game frames
 	onProducerMesssage(message) {
-		this.views.forEach(connection => connection.send(message));
+		this.sendToViews(message);
 	}
 }
 

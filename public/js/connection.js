@@ -17,7 +17,8 @@ class Connection {
 			this.onMessage(JSON.parse(event.data));
 		}
 		else if(event.data instanceof ArrayBuffer) {
-			this.onMessage(new Uint8Array(event.data));
+			const frame = BinaryFrame.parse(new Uint8Array(event.data));
+			this.onMessage(['frame', frame]);
 		}
 		else {
 			console.log('unknown message type');
