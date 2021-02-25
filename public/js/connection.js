@@ -21,7 +21,7 @@ class Connection {
 			this.onMessage(['frame', frame]);
 		}
 		else {
-			console.log('unknown message type');
+			console.log('Unknown message type');
 		}
 	}
 

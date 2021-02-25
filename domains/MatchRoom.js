@@ -5,14 +5,14 @@ const Room = require('./Room');
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
 
 class MatchRoom extends Room {
-	constructor(owner) {
+	constructor(owner, roomid) {
 		super(owner);
 
-		this.getProducerFields = this.getProducerFields.bind(this);
-
+		this.admin = null;
+		this.roomid = roomid;
 		this.state = {
 			bestof: 3,
-			players: [
+			players: [ // flat user objects
 				{
 					id: '',
 					login: '',
@@ -30,8 +30,7 @@ class MatchRoom extends Room {
 			]
 		};
 
-		this.admin = null;
-
+		this.getProducerFields = this.getProducerFields.bind(this);
 		this.onAdminMessage = this.onAdminMessage.bind(this);
 	}
 
@@ -50,17 +49,24 @@ class MatchRoom extends Room {
 
 		connection.on('message', this.onAdminMessage);
 		connection.on('close', () => {
-			if (this.admin == connection) {
+			if (this.admin == connection) { // only overwrite self (for potential race conditions)
 				this.admin = null;
 			}
 		});
 
-		// Send the room state to admin
 		this.sendStateToAdmin();
 	}
 
 	getProducer(user_id) {
-		return [ ...this.producers ].find(conn => conn.user.id === user_id);
+		const producers = this.producers.entries();
+
+		for (const producer of iterator) {
+			if (producer.user.id === user_id) {
+				return producer;
+			}
+		}
+
+		return null;
 	}
 
 	getProducerFields(connection) {
@@ -86,7 +92,7 @@ class MatchRoom extends Room {
 		if (inform_admin) {
 			this.tellAdmin([
 				"_addProducer",
-				_.pick(connection.user, PRODUCER_FIELDS)
+				this.getProducerFields(connection)
 			]);
 		}
 	}
@@ -136,8 +142,6 @@ class MatchRoom extends Room {
 		const [command, ...args] = message;
 		let forward_to_views = true;
 
-		console.log('command', command);
-
 		try {
 			switch (command) {
 				case 'getState': {
@@ -146,9 +150,6 @@ class MatchRoom extends Room {
 				}
 
 				case 'setPlayer': {
-					console.log('matched');
-					console.log(this.getState());
-
 					const [p_num, p_id] = args;
 					let player_data;
 
@@ -169,7 +170,7 @@ class MatchRoom extends Room {
 					}
 
 					if (!player_data) {
-						console.log('player not found');
+						console.log(`Room ${this.roomid}: Player not found`);
 						return;
 					}
 
@@ -250,7 +251,7 @@ class MatchRoom extends Room {
 		[0, 1].forEach(p_num => {
 			if (this.state.players[p_num].id === producer.user.id) {
 				if (message instanceof Uint8Array) {
-					message[0] |= p_num; // sets player number in header byte of binary message
+					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
 					this.sendToViews(message);
 				}
 				else {

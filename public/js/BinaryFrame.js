@@ -200,11 +200,11 @@ class BinaryFrame {
 
 		// we've extracted all the value, now checks for nulls
 
-		if (pojo.score == 0xFFFFFF) pojo.score = null;
-		if (pojo.lines == 0b111111111) pojo.lines = null;
-		if (pojo.level == 0b1111111) pojo.level = null;
-		if (pojo.instant_das == 0b11111) pojo.instant_das = null;
-		if (pojo.cur_piece_das == 0b11111) pojo.cur_piece_das = null;
+		if (pojo.score === 0xFFFFFF) pojo.score = null;
+		if (pojo.lines === 0b111111111) pojo.lines = null;
+		if (pojo.level === 0b1111111) pojo.level = null;
+		if (pojo.instant_das === 0b11111) pojo.instant_das = null;
+		if (pojo.cur_piece_das === 0b11111) pojo.cur_piece_das = null;
 
 		PIECES.forEach(piece => {
 			if (pojo[piece] === 0xFF) {
@@ -212,14 +212,14 @@ class BinaryFrame {
 			}
 		});
 
-		if (pojo.preview == 0b111) {
+		if (pojo.preview === 0b111) {
 			pojo.preview = null;
 		}
 		else {
 			pojo.preview = VALUE_TO_PIECE[pojo.preview];
 		}
 
-		if (pojo.cur_piece == 0b111) {
+		if (pojo.cur_piece === 0b111) {
 			pojo.cur_piece = null;
 		}
 		else {
