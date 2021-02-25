@@ -60,7 +60,7 @@ class MatchRoom extends Room {
 	getProducer(user_id) {
 		const producers = this.producers.entries();
 
-		for (const producer of iterator) {
+		for (const producer of producers) {
 			if (producer.user.id === user_id) {
 				return producer;
 			}
