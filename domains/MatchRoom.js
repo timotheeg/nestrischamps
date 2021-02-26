@@ -60,7 +60,9 @@ class MatchRoom extends Room {
 	getProducer(user_id) {
 		const producers = this.producers.entries();
 
-		for (const producer of producers) {
+		for (const entry of producers) {
+			const producer = entry[0];
+
 			if (producer.user.id === user_id) {
 				return producer;
 			}
@@ -137,8 +139,6 @@ class MatchRoom extends Room {
 	}
 
 	onAdminMessage(message) {
-		console.log('onAdminMessage', message);
-
 		const [command, ...args] = message;
 		let forward_to_views = true;
 
@@ -187,8 +187,6 @@ class MatchRoom extends Room {
 					this.sendToViews(['setLogin',           p_num, player_data.login]);
 					this.sendToViews(['setDisplayName',     p_num, player_data.display_name]);
 					this.sendToViews(['setProfileImageURL', p_num, player_data.profile_image_url]);
-
-					console.log(this.getState());
 
 					return;
 				}
@@ -255,8 +253,7 @@ class MatchRoom extends Room {
 					this.sendToViews(message);
 				}
 				else {
-					message.player_num = p_num;
-					this.sendToViews(['frame', message]);
+					this.sendToViews(['frame', p_num, message]);
 				}
 			}
 		});

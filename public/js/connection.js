@@ -18,7 +18,7 @@ class Connection {
 		}
 		else if(event.data instanceof ArrayBuffer) {
 			const frame = BinaryFrame.parse(new Uint8Array(event.data));
-			this.onMessage(['frame', frame]);
+			this.onMessage(['frame', frame.player_num, frame]);
 		}
 		else {
 			console.log('Unknown message type');

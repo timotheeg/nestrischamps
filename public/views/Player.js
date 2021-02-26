@@ -449,6 +449,14 @@ class Player {
 		this.setAvatar();
 	}
 
+	setName(id) {
+		this.id = id;
+	}
+
+	setLogin(login) {
+		this.login = login;
+	}
+
 	_getPieceStats(data) {
 		return PIECES.reduce(
 			(acc, piece) => {

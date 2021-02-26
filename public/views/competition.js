@@ -22,6 +22,10 @@ class TetrisCompetitionAPI {
 		this._repaintVictories(2);
 	}
 
+	setId(player_num, id) {
+		getPlayer(player_num).setId(id);
+	}
+
 	setName(player_num, name) {
 		getPlayer(player_num).setName(name);
 	}
@@ -102,7 +106,7 @@ class TetrisCompetitionAPI {
 
 	frame(player_num, data) {
 		const
-			index       = player_num - 1,
+			index       = player_num,
 			player      = players[index],
 			otherPlayer = players[(index+1) % 2],
 			otherScore  = otherPlayer.getScore();
