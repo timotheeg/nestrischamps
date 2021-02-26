@@ -17,7 +17,7 @@ module.exports = function init(server, wss) {
 			}
 
 			request.tetris.view = {
-				single_player: layouts[m[1]][type] == '1p',
+				single_player: layouts[m[1]].type == '1p',
 				layout_id:     m[1],
 				user_secret:   m[2],
 			};
