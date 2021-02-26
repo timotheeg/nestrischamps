@@ -14,7 +14,20 @@ class Connection {
 
 	_handleMessage(event) {
 		if (typeof event.data === 'string') {
-			this.onMessage(JSON.parse(event.data));
+			const data = JSON.parse(event.data);
+
+			if (Array.isArray(data)) {
+				// Connection-level command parsing
+				switch(data[0]) {
+					case '_kick': {
+						console.log('Socket kicked', data[1]);
+						this.close();
+						return;
+					}
+				}
+			}
+
+			this.onMessage(data);
 		}
 		else if(event.data instanceof ArrayBuffer) {
 			const frame = BinaryFrame.parse(new Uint8Array(event.data));
