@@ -1,41 +1,174 @@
 const dom = {
-	bestof:  document.querySelector('#bestof'),
-	p1_name:  document.querySelector('#bestof'),
-	p1_name:  document.querySelector('#bestof'),
+	roomid:          document.querySelector('#roomid'),
+	producer_count:  document.querySelector('#producer_count'),
+	logo:            document.querySelector('#logo input'),
+	bestof:          document.querySelector('#bestof'),
+	clear_victories: document.querySelector('#clear_victories'),
 };
 
-const connection = new Connection(4000);
-
-const state = {
-	maxBestof: 13,
-	bestof: 3,
-
-	victories: {
-		'1': 0,
-		'2': 0
-	},
-};
+const MAX_BEST_OF = 13;
 
 const remoteAPI = {
 	setBestOf: function(n) {
 		connection.send(['setBestOf', n]);
 	},
-	setVictories: function(player_num, num_wins) {
-		connection.send(['setVictories', player_num, num_wins]);
+	setPlayer: function(player_idx, user_id) {
+		connection.send(['setPlayer', player_idx, user_id]);
 	},
-	setName: function(player_num, name) {
-		connection.send(['setName', player_num, name]);
+	setVictories: function(player_idx, num_wins) {
+		connection.send(['setVictories', player_idx, num_wins]);
 	},
-	setAvatar: function(player_num, url) {
-		connection.send(['setAvatar', player_num, url]);
+	setWinner: function(player_idx) {
+		connection.send(['setWinner', player_idx]);
+	},
+	setDisplayName: function(player_idx, name) {
+		connection.send(['setDisplayName', player_idx, name]);
+	},
+	setProfileImageURL: function(player_idx, url) {
+		connection.send(['setProfileImageURL', player_idx, url]);
 	},
 	resetVictories: function() {
 		connection.send(['resetVictories']);
+	},
+	playVictoryAnimation: function(player_idx) {
+		connection.send(['playVictoryAnimation', player_idx]);
+	},
+	clearVictoryAnimation: function(player_idx) {
+		connection.send(['clearVictoryAnimation', player_idx]);
 	},
 	setLogo: function(url) {
 		connection.send(['setLogo', url]);
 	}
 };
+
+let players;
+let room_data;
+let connection;
+
+
+function getProducer(pid) {
+	return room_data.producers.find(producer => producer.id == pid);
+}
+
+class Player {
+	constructor(idx, dom) {
+		this.idx = idx;
+		this.dom = dom;
+
+		this.victories = 0;
+		this.bestof = -1;
+
+		// link dom events
+		this.dom.name.onchange
+			= this.dom.name.onkeyup
+			= this.dom.name.onblur
+			= () => {
+				remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
+			};
+
+		this.dom.avatar_url.onchange
+			= this.dom.avatar_url.onkeyup
+			= this.dom.avatar_url.onblur
+			= () => {
+				const avatar_url = this.dom.avatar_url.value.trim();
+
+				remoteAPI.setProfileImageURL(this.idx, avatar_url);
+				this.dom.avatar_img.src = avatar_url;
+			};
+
+		this.dom.producers.onchange = () => this._pickProducer(parseInt(this.dom.producers.value, 10));
+
+		this.dom.win_btn.onclick = () => {
+			remoteAPI.setWinner(this.idx);
+		}
+	}
+
+	setProducers(producers) {
+		this.dom.producers.innerHTML = '';
+
+		const option = document.createElement('option');
+		option.value = '-';
+		option.textContent = '-';
+		this.dom.producers.appendChild(option);
+
+		producers.forEach(producer => {
+			const option = document.createElement('option');
+			option.value = producer.id;
+			option.textContent = producer.login;
+
+			this.dom.producers.appendChild(option);
+		});
+	}
+
+	setBestOf(n) {
+		if (this.bestof === n) return;
+
+		this.bestof = n;
+
+		this.dom.victories.innerHTML = '';
+
+		const heart = '&#338';
+		const num_heart = Math.ceil(n / 2);
+		const items = ['-', ...Array(num_heart).fill(heart)];
+
+		items.forEach((content, idx) => {
+			const span = document.createElement('span');
+
+			span.innerHTML = content;
+			span.onclick = () => this._pickVictories(idx);
+
+			this.dom.victories.append(span);
+		});
+	}
+
+	_pickProducer(pid) {
+		remoteAPI.setPlayer(this.idx, pid);
+	}
+
+	setProducer(pid) {
+		const selected_pid = parseInt(this.dom.producers.value, 10);
+
+		if (selected_pid === pid) return;
+
+		const producer = getProducer(pid);
+
+		this.dom.producers.value = pid
+
+		if (!producer) return;
+
+		this.dom.name.value = producer.display_name;
+		this.dom.avatar_url.value = producer.profile_image_url;
+		this.dom.avatar_img.src = producer.profile_image_url;
+	}
+
+	_pickVictories(n) {
+		remoteAPI.setVictories(this.idx, n);
+	}
+
+	setVictories(n) {
+		if (this.victories == n) return;
+
+		this.victories = n;
+
+		this.dom.victories.querySelectorAll('span').forEach((span, idx) => {
+			if (idx && idx <= (n || 0)) {
+				span.classList.add('win');
+			}
+			else {
+				span.classList.remove('win');
+			}
+		});
+	}
+
+	setState(state) {
+		this.setVictories(state.victories);
+		this.setProducer(state.id);
+
+		this.dom.name.value = state.display_name;
+		this.dom.avatar_url.value = state.profile_image_url;
+		this.dom.avatar_img.src = state.profile_image_url;
+	}
+}
 
 function setBestOfOptions(n, selected) {
 	const select = dom.bestof;
@@ -51,130 +184,63 @@ function setBestOfOptions(n, selected) {
 
 		select.prepend(option);
 	}
-
-	select.onchange = function() {
-		const value = parseInt(this.value, 10);
-
-		console.log('Selecting Best of', value);
-		setBestOf(value);
-	}
 }
 
-function setBestOf(n) {
-	state.bestof = n;
+function setState(_room_data) {
+	room_data = _room_data;
 
-	const heart = '&#338';
-	const num_heart = Math.ceil(n / 2);
+	// room stats
+	room_data.producers.sort((a, b) => a < b);
 
-	[1, 2].forEach(player_num => {
-		const victories = document.querySelector(`#victories .p${player_num}`);
+	dom.producer_count.textContent = room_data.producers.length;
 
-		victories.innerHTML = '';
-
-		const items = new Array(num_heart + 1).join('.').split('').map(_ => heart);
-
-		items.unshift('-');
-
-		items.forEach((val, idx) => {
-			const span = document.createElement('span');
-
-			span.innerHTML = val;
-
-			span.onclick = function() {
-				setVictories(player_num, idx);
-			};
-
-			if (idx && idx <= state.victories[player_num]) {
-				span.classList.add('win');
-			}
-
-			victories.append(span);
-		});
-	});
-
-	remoteAPI.setBestOf(n);
-}
-
-function setVictories(player_num, num_wins) {
-	console.log('setVictories', player_num, num_wins);
-
-	state.victories[player_num] = num_wins;
-	setBestOf(state.bestof); // overkill but re-renders everything
-	remoteAPI.setVictories(player_num, num_wins);
-}
-
-function resetVictories() {
-	console.log('resetVictories');
-
-	for (let key in state.victories) {
-		state.victories[key] = 0;
-	}
-
-	setBestOf(state.bestof);
-
-	remoteAPI.resetVictories();
-}
-
-function reset() {
-	console.log('reset');
-
-	resetVictories();
-
-	[1, 2].forEach(player_num => {
-		const input = document.querySelector(`#names .p${player_num} input`);
-
-		input.value = '';
-		input.onchange();
+	players.forEach((player, idx) => {
+		player.setProducers(room_data.producers);
+		player.setBestOf(room_data.state.bestof);
+		player.setState(room_data.state.players[idx]);
 	});
 }
 
 function bootstrap() {
-	setBestOfOptions(state.maxBestof, state.bestof);
-	setBestOf(state.bestof);
+	players = [1, 2].map(num => new Player(num - 1, {
+		producers:  document.querySelector(`#producers .p${num} select`),
+		name:       document.querySelector(`#names .p${num} input`),
+		avatar_url: document.querySelector(`#avatar_urls .p${num} input`),
+		avatar_img: document.querySelector(`#avatars .p${num} img`),
+		victories:  document.querySelector(`#victories .p${num}`),
+		win_btn:    document.querySelector(`#wins .p${num} button`),
+	}));
 
-	[1, 2].forEach(player_num => {
-		const pName = document.querySelector(`#names .p${player_num} input`);
+	setBestOfOptions(MAX_BEST_OF, 3);
 
-		pName.onchange
-			= pName.onkeyup
-			= pName.onkeydown
-			= pName.onblur
-			= function() {
-				remoteAPI.setName(player_num, this.value.trim());
-			};
+	dom.roomid.textContent = location.pathname.split('/')[3] || '_default';
+	dom.producer_count.textContent = 0;
 
-		const pAvatar = document.querySelector(`#avatars .p${player_num} input`);
+	dom.bestof.onchange = () => remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
 
-		pAvatar.onchange
-			= pAvatar.onkeyup
-			= pAvatar.onkeydown
-			= pAvatar.onblur
-			= function() {
-				remoteAPI.setAvatar(player_num, this.value.trim());
-			};
-
-		const winBtn = document.querySelector(`#wins .p${player_num} button`);
-
-		winBtn.onclick = function() {
-			setVictories(player_num, state.victories[player_num] + 1);
-		};
-	});
-
-	const logo = document.querySelector(`#logo input`);
-
-	logo.onchange
+	dom.logo.onchange
 		= logo.onkeyup
 		= logo.onkeydown
 		= logo.onblur
-		= function() {
-			remoteAPI.setLogo(this.value.trim());
-		};
+		= () => remoteAPI.setLogo(dom.logo.value.trim());
 
+	dom.clear_victories.onclick = () => remoteAPI.resetVictories();
 
-	document.querySelector('#clear_victories').onclick = resetVictories;
-	document.querySelector('#reset').onclick = reset;
+	// =====
 
-	reset();
+	connection = new Connection();
+
+	connection.onMessage = function(message) {
+		const [command, ...args] = message;
+
+		switch (command) {
+			case 'state': {
+				setState(args[0]);
+				break;
+			}
+		}
+	};
 }
 
 bootstrap();
+

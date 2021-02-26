@@ -225,7 +225,7 @@ player.onGameStart = () => {
 
 
 const API = {
-	frame(data) {
+	frame(player_idx, data) {
 		player.setFrame(data);
 	}
 }
@@ -244,7 +244,7 @@ connection.onMessage = function(frame) {
 };
 
 function onFrame(frame, debug) {
-	API.frame(frame, debug);
+	API.frame(0, frame, debug);
 }
 </script>
 

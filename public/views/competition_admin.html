@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="tetris.css">
+<link rel="stylesheet" type="text/css" href="/views/tetris.css">
 <style>
 button, input, select, option {
 	margin: 0;
@@ -15,6 +15,10 @@ button, input, select, option {
 	width: auto;
 	height: auto;
 	margin: auto;
+}
+
+#room td {
+	padding: 0.5em 0 1em 0;
 }
 
 #num_games td {
@@ -49,7 +53,8 @@ button, input, select, option {
 	color: red;
 }
 
-input[type=text] {
+input[type=text],
+#producers select {
 	text-align: center;
 	box-sizing: border-box;
 	width: 100%;
@@ -57,11 +62,22 @@ input[type=text] {
 	font-size: 16px;
 }
 
+#producers select {
+	height: 32px; /* why though?? */
+	text-align-last: center;
+}
+
 button, select, option {
 	font-size: 16px;
 	line-height: 20px;
 	padding: 4px;
 	background: lightgrey;
+}
+
+#avatars img {
+	margin: 0.5em;
+	width: 60px;
+	height: 60px;
 }
 
 select {
@@ -73,6 +89,13 @@ select {
 
 <div class="box" id="wrapper">
 	<table>
+		<tr id="room">
+			<td colspan="2">
+				Room ID: <span id="roomid"></span>
+				<br />
+				Producers: <span id="producer_count"></span>
+			</td>
+		</tr>
 		<tr id="logo">
 			<td colspan="2">
 				<input type="text" class="logo" placeholder="logo url"/>
@@ -89,6 +112,14 @@ select {
 			<th>Player 1</th>
 			<th>Player 2</th>
 		</tr>
+		<tr id="producers">
+			<td class="p1">
+				<select></select>
+			</td>
+			<td class="p2">
+				<select></select>
+			</td>
+		</tr>
 		<tr id="names">
 			<td class="p1">
 				<input type="text" class="name" placeholder="name"/>
@@ -97,7 +128,7 @@ select {
 				<input type="text" class="name" placeholder="name"/>
 			</td>
 		</tr>
-		<tr id="avatars">
+		<tr id="avatar_urls">
 			<td class="p1">
 				<input type="text" class="avatar" placeholder="avatar url"/>
 			</td>
@@ -105,9 +136,17 @@ select {
 				<input type="text" class="avatar" placeholder="avatar url" />
 			</td>
 		</tr>
+		<tr id="avatars">
+			<td class="p1">
+				<img />
+			</td>
+			<td class="p2">
+				<img />
+			</td>
+		</tr>
 		<tr id="victories">
-			<td class="p1">0</td>
-			<td class="p2">0</td>
+			<td class="p1"></td>
+			<td class="p2"></td>
 		</tr>
 		<tr id="wins">
 			<td class="p1">
@@ -120,15 +159,14 @@ select {
 		<tr id="buttons">
 			<td colspan="2">
 				<button id="clear_victories">Clear Victories</button>
-				<button id="reset">Reset All</button>
 			</td>
 		</tr>
 	</table>
 
 </div>
 
-<script src="connection.js"></script>
-<script src="competition_admin.js"></script>
+<script src="/js/connection.js"></script>
+<script src="/views/competition_admin.js"></script>
 
 </body>
 <html>

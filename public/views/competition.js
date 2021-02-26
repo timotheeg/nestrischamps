@@ -1,11 +1,11 @@
 // very simple RPC system to allow server to send data to client
 
-function getPlayer(num) {
-	return players[num - 1];
+function getPlayer(idx) {
+	return players[idx];
 }
 
-function getOtherPlayer(num) {
-	return players[num % 2];
+function getOtherPlayer(idx) {
+	return players[(idx+1) % 2];
 }
 
 class TetrisCompetitionAPI {
@@ -16,38 +16,42 @@ class TetrisCompetitionAPI {
 	}
 
 	resetVictories() {
-		this.victories = {1:0, 2:0};
+		this.victories = [0, 0];
 
+		this._repaintVictories(0);
 		this._repaintVictories(1);
-		this._repaintVictories(2);
 	}
 
-	setId(player_num, id) {
-		getPlayer(player_num).setId(id);
+	setId(player_idx, id) {
+		getPlayer(player_idx).setId(id);
 	}
 
-	setName(player_num, name) {
-		getPlayer(player_num).setName(name);
+	setLogin(player_idx, login) {
+		getPlayer(player_idx).setLogin(login);
 	}
 
-	setAvatar(player_num, avatar_url) {
-		getPlayer(player_num).setAvatar(avatar_url);
+	setName(player_idx, name) {
+		getPlayer(player_idx).setName(name);
+	}
+
+	setAvatar(player_idx, avatar_url) {
+		getPlayer(player_idx).setAvatar(avatar_url);
 	}
 
 	// Twitch like command aliases
-	setProfileImageURL(payer_num, avatar_url) {
-		this.setAvatar(payer_num, avatar_url);
+	setProfileImageURL(player_idx, avatar_url) {
+		this.setAvatar(player_idx, avatar_url);
 	}
 
-	setDisplayName(player_num, name) {
-		this.setName(player_num, name);
+	setDisplayName(player_idx, name) {
+		this.setName(player_idx, name);
 	}
 
 	setFirstTo(num_games_to_win) {
 		this.first_to = num_games_to_win;
 
+		this.setVictories(0, this.victories[0]);
 		this.setVictories(1, this.victories[1]);
-		this.setVictories(2, this.victories[2]);
 
 		/*
 		if (this.victories[1] < this.first_to && this.victories[2] < this.first_to) {
@@ -61,25 +65,20 @@ class TetrisCompetitionAPI {
 		this.setFirstTo(Math.ceil(num_games / 2));
 	}
 
-	setVictories(player_num, num_victories) {
-		this.victories[player_num] = num_victories;
+	setVictories(player_idx, num_victories) {
+		this.victories[player_idx] = num_victories;
 
-		this._repaintVictories(player_num);
-
-		if (num_victories >= this.first_to) {
-			// global game winner
-			getPlayer(player_num).playWinnerAnimation();
-			getOtherPlayer(player_num).showLoserFrame();
-		}
+		this._repaintVictories(player_idx);
 	}
 
-	winner(player_num) {
-		this.setVictories(player_num, this.victories[player_num] + 1);
+	setWinner(player_idx) {
+		getPlayer(player_idx).playWinnerAnimation();
+		getOtherPlayer(player_idx).showLoserFrame();
 	}
 
-	_repaintVictories(player_num) {
-		const player = getPlayer(player_num);
-		const victories = this.victories[player_num]
+	_repaintVictories(player_idx) {
+		const player = getPlayer(player_idx);
+		const victories = this.victories[player_idx]
 
 		const hearts = player.dom.hearts;
 
@@ -104,11 +103,10 @@ class TetrisCompetitionAPI {
 		}
 	}
 
-	frame(player_num, data) {
+	frame(player_idx, data) {
 		const
-			index       = player_num,
-			player      = players[index],
-			otherPlayer = players[(index+1) % 2],
+			player      = getPlayer(player_idx),
+			otherPlayer = getOtherPlayer(player_idx),
 			otherScore  = otherPlayer.getScore();
 
 		player.setFrame(data);
@@ -135,5 +133,6 @@ connection.onMessage = function(frame) {
 	catch(e) {
 		// socket.close();
 		console.error(e);
+		console.log(frame);
 	}
 }

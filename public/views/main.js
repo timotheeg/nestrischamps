@@ -26,27 +26,14 @@ if (dom.das) {
 const API = {
 	message:     onMessage,
 	player_data: renderPastGamesAndPBs,
-	frame:       onFrame,
+	frame:       (idx, frame) => onFrame(frame),
 };
 
 const chat_and_pbs_conn = new Connection();
 
 chat_and_pbs_conn.onMessage = function(frame) {
 	try{
-		let method, args;
-
-		if (Array.isArray(frame)) {
-			[method, ...args] = frame;
-		}
-		else {
-			method = 'frame';
-
-			if (frame instanceof Uint8Array) {
-				frame = BinaryFrame.parse(frame);
-			}
-
-			args = [ frame ];
-		}
+		let [method, ...args] = frame;
 
 		API[method](...args);
 	}

@@ -20,7 +20,7 @@ class PrivateRoom extends Room {
 
 		this.producers.add(connection);
 
-		connection.on('message', this.onProducerMesssage);
+		connection.on('message', (message) => this.onProducerMesssage(message));
 		connection.on('close', () => this.producers.delete(connection));
 	}
 

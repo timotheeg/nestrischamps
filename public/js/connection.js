@@ -65,6 +65,7 @@ class Connection {
 		this.socket = new WebSocket(`${wsp}://${location.host}/ws${location.pathname}`);
 
 		this.socket.binaryType = "arraybuffer";
+
 		this.socket.addEventListener('error', this._handleError);
 		this.socket.addEventListener('close', this._handleClose);
 		this.socket.addEventListener('message', this._handleMessage);

@@ -33,13 +33,15 @@ module.exports = function init(server, wss) {
 
 		}
 		else {
+			console.log('hello', request.url);
 			if (m = request.url.match(/^\/ws\/player([12])$/)) {
 				user = await UserDAO.getLocalPlayer(parseInt(m[1], 10));
 			}
-			else if (/^\/ws\/(admin|play)$/.test(request.url)) {
+			else if (/^\/ws\/(play|room\/admin)$/.test(request.url)) {
 				user = await UserDAO.getPlayer1();
 			}
 			else {
+				console.log('Unauthorised');
 				socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); // TODO: can this redirect?
 				socket.destroy();
 				return;
@@ -81,7 +83,7 @@ module.exports = function init(server, wss) {
 		else if(request.url.startsWith('/ws/player')) {
 			player1.getMatchRoom().addProducer(connection);
 		}
-		else if(request.url.startsWith('/ws/admin')) {
+		else if(request.url.startsWith('/ws/room/admin')) {
 			player1.getMatchRoom().setAdmin(connection);
 		}
 		else {

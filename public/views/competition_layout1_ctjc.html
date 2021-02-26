@@ -392,16 +392,14 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 			.style.backgroundImage = `url(${url})`;
 	}
 
-	frame(data, debug) {
+	frame(player_idx, data, debug) {
 		// captured_frames.push(data);
 
 		startFrame();
 
 		const
-			player_num  = data.player_num,
-			index       = player_num,
-			player      = players[index],
-			otherPlayer = players[(index+1) % 2],
+			player      = players[player_idx],
+			otherPlayer = players[(player_idx+1) % 2],
 			otherScore  = otherPlayer.getScore();
 
 		if (debug) {

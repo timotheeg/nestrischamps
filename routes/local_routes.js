@@ -10,7 +10,9 @@ function dummy(res) {
 	res.send('dummy ok');
 }
 
-router.get('/admin', (req, res) => dummy(res) );
+router.get('/room/admin', (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
+});
 
 // match access
 router.get('/player[12]', (req, res) => {

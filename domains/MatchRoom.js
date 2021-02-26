@@ -9,7 +9,7 @@ class MatchRoom extends Room {
 		super(owner);
 
 		this.admin = null;
-		this.roomid = roomid;
+		this.roomid = roomid || '_default';
 		this.state = {
 			bestof: 3,
 			players: [ // flat user objects
@@ -92,10 +92,13 @@ class MatchRoom extends Room {
 		connection.on('close', () => this.removeProducer(connection));
 
 		if (inform_admin) {
+			/*
 			this.tellAdmin([
 				"_addProducer",
 				this.getProducerFields(connection)
 			]);
+			/**/
+			this.sendStateToAdmin();
 		}
 	}
 
@@ -103,10 +106,13 @@ class MatchRoom extends Room {
 		this.producers.delete(connection);
 
 		if (inform_admin) {
+			/*
 			this.tellAdmin([
 				"_removeProducer",
 				connection.user.id
 			]);
+			/**/
+			this.sendStateToAdmin();
 		}
 	}
 
@@ -141,12 +147,12 @@ class MatchRoom extends Room {
 	onAdminMessage(message) {
 		const [command, ...args] = message;
 		let forward_to_views = true;
+		let update_admin = true;
 
 		try {
 			switch (command) {
 				case 'getState': {
 					forward_to_views = false;
-					this.sendStateToAdmin();
 				}
 
 				case 'setPlayer': {
@@ -162,6 +168,8 @@ class MatchRoom extends Room {
 						player_data = this.state.players[1];
 					}
 					else {
+						console.log('Look up player', p_id)
+
 						const producer = this.getProducer(p_id);
 
 						if (producer) {
@@ -181,14 +189,13 @@ class MatchRoom extends Room {
 					};
 
 					// Send all data back to admin
-					this.sendStateToAdmin();
-
 					this.sendToViews(['setId',              p_num, player_data.id]);
 					this.sendToViews(['setLogin',           p_num, player_data.login]);
 					this.sendToViews(['setDisplayName',     p_num, player_data.display_name]);
 					this.sendToViews(['setProfileImageURL', p_num, player_data.profile_image_url]);
 
-					return;
+					forward_to_views= false;
+					break;
 				}
 
 				case 'setDisplayName': {
@@ -196,7 +203,8 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
-					this.players[p_num].display_name = name;
+					this.state.players[p_num].display_name = name;
+
 					break;
 				}
 
@@ -205,7 +213,8 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
-					this.players[p_num].profile_image_url = url;
+					this.state.players[p_num].profile_image_url = url;
+
 					break;
 				}
 
@@ -221,22 +230,35 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
-					this.players[p_num].profile_image_url = url;
+					this.state.players[p_num].victories = url;
+
 					break;
 				}
 
 				case 'setBestOf': {
 					this.state.bestof = args[0];
+
+					break;
+				}
+
+				case 'setWinner': {
+					update_admin = false;
+
 					break;
 				}
 
 				default: {
-					forward_to_views = false;
+					return;
 				}
 			}
 
 			if (forward_to_views) {
 				this.sendToViews(message);
+			}
+
+			// update admins with latest state
+			if (update_admin) {
+				this.sendStateToAdmin();
 			}
 		}
 		catch(err) {

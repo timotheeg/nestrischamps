@@ -4,7 +4,7 @@ const MemoryStore = require('memorystore')(session);
 
 module.exports = {
 	sessionMiddleware: session({
-		secret: process.env.SESSION_SECRET,
+		secret: process.env.SESSION_SECRET || ULID.ulid(),
 		resave: false,
 		saveUninitialized: true,
 		cookie: { secure: true },

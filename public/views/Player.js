@@ -449,7 +449,7 @@ class Player {
 		this.setAvatar();
 	}
 
-	setName(id) {
+	setId(id) {
 		this.id = id;
 	}
 
