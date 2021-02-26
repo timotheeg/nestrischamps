@@ -1,7 +1,7 @@
-const middlewares = require('./middlewares');
-const layouts = require('./layouts');
+const middlewares = require('../modules/middlewares');
+const layouts = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
-const Connection = require('./Connection');
+const Connection = require('../modules/Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
