@@ -115,7 +115,7 @@ module.exports = function init(server, wss) {
 			console.log(`Room: ${user.login}: Admin connecting`);
 			user.getMatchRoom().setAdmin(connection);
 		}
-		else if(request.url === '/ws/producer') {
+		else if(request.url === '/ws/room/producer') {
 			user.getPrivateRoom().setProducer(connection);
 		}
 		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
