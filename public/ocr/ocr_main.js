@@ -56,7 +56,7 @@ const configs = {
 	}
 };
 
-let do_deinterlace = true;
+let do_half_height = true;
 
 const
 	reference_ui     = document.querySelector('#reference_ui'),
@@ -191,7 +191,7 @@ go_btn.addEventListener('click', async (evt) => {
 		console.log('Found offsets!');
 	}
 
-	if (do_deinterlace) {
+	if (do_half_height) {
 		oy /= 2;
 		oh /= 2;
 	}
@@ -229,7 +229,7 @@ show_parts.addEventListener('change', evt => {
 	const display = show_parts.checked ? 'block' : 'none';
 
 	adjustments.style.display = display;
-	config.di_canvas.style.display = display;
+	config.source_canvas.style.display = display;
 });
 
 function loadImage(img, src) {
@@ -364,11 +364,11 @@ async function playVideoFromConfig() {
 		return;
 	}
 	else if (config.device_id === 'window') {
-		do_deinterlace = false;
+		do_half_height = false;
 		await playVideoFromScreenCap();
 	}
 	else {
-		do_deinterlace = true;
+		do_half_height = true;
 		await playVideoFromDevice(config.device_id);
 	}
 }
@@ -424,7 +424,7 @@ async function captureFrame() {
 		let bitmap;
 
 		// let's assume that pixelated resize of height divided 2 is the same as dropping every other row
-		// which is equivalent to the deinterlacing we want to do
+		// which is equivalent to deinterlacing *cough*
 
 		performance.mark('capture_start');
 		if (blob) {
@@ -442,7 +442,7 @@ async function captureFrame() {
 			// we do cheap deinterlacing with pixelated resize...
 			bitmap = await createImageBitmap(video,
 				0, 0, video.videoWidth, video.videoHeight,
-				do_deinterlace
+				do_half_height
 					? {
 						resizeWidth: video.videoWidth,
 						resizeHeight: video.videoHeight >> 1,
@@ -511,7 +511,7 @@ function resetConfig(config, task_name, task_crop) {
 	tetris_ocr.setConfig(config);
 
 	updateCanvasSizeIfNeeded(
-		config.di_canvas,
+		config.source_canvas,
 		config.capture_area.w,
 		config.capture_area.h
 	);
@@ -581,23 +581,23 @@ function addCropControls(parent, config, name, onChangeCallback) {
 }
 
 async function showParts(data) {
-	const half_di_height = Math.floor(config.deinterlaced_img.height);
+	const source_height = Math.floor(config.source_img.height);
 
-	if (!config.di_canvas) {
-		const di_canvas = document.createElement('canvas');
-		di_canvas.width = config.deinterlaced_img.width;
-		di_canvas.height = half_di_height;
-		capture.appendChild(di_canvas);
+	if (!config.source_canvas) {
+		const source_canvas = document.createElement('canvas');
+		source_canvas.width = config.source_img.width;
+		source_canvas.height = source_height;
+		capture.appendChild(source_canvas);
 
-		config.di_canvas = di_canvas;
+		config.source_canvas = source_canvas;
 	}
 
-	const di_ctx = config.di_canvas.getContext('2d');
+	const di_ctx = config.source_canvas.getContext('2d');
 
-	di_ctx.putImageData(config.deinterlaced_img,
+	di_ctx.putImageData(config.source_img,
 		0, 0,
 		0, 0,
-		config.deinterlaced_img.width, half_di_height
+		config.source_img.width, source_height
 	);
 
 	di_ctx.fillStyle = '#FFA50080';
@@ -669,7 +669,7 @@ async function showParts(data) {
 		task.crop_canvas_ctx.drawImage(cropped, 0, 0);
 		task.scale_canvas_ctx.drawImage(scaled, 0, 0);
 
-		// highlight captured areas in main deinterlaced image
+		// highlight captured areas in source image
 		const [x, y, w, h] = task.crop;
 		di_ctx.fillRect(x - x_offset, y - y_offset, w, h);
 
@@ -696,7 +696,6 @@ async function showParts(data) {
 function saveConfig(config) {
 	// need to drop non-serializable fields
 	const config_copy = {
-		deinterlace: config.deinterlace,
 		device_id: config.device_id,
 		palette: config.palette,
 		tasks: {}

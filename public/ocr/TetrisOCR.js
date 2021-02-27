@@ -5,7 +5,7 @@ const PATTERN_MAX_INDEXES = {
 };
 
 const PERF_METHODS = [
-	'deinterlace',
+	'getSourceImageData',
 	'scanScore',
 	'scanLevel',
 	'scanLines',
@@ -202,7 +202,7 @@ class TetrisOCR extends EventTarget {
 		performance.mark('draw_end');
 		performance.measure('draw_frame', 'start', 'draw_end');
 
-		const source_img = this.deinterlace(); // TODO rename
+		const source_img = this.getSourceImageData();
 
 		res.score = this.scanScore(source_img);
 		res.level = this.scanLevel(source_img);
@@ -277,7 +277,7 @@ class TetrisOCR extends EventTarget {
 		};
 	}
 
-	deinterlace() {
+	getSourceImageData() {
 		const pixels = this.capture_canvas_ctx.getImageData(
 			this.config.capture_area.x, this.config.capture_area.y,
 			this.config.capture_area.w, this.config.capture_area.h
@@ -296,7 +296,7 @@ class TetrisOCR extends EventTarget {
 		}
 		/**/
 
-		this.config.deinterlaced_img = pixels;
+		this.config.source_img = pixels;
 
 		return pixels;
 	}
