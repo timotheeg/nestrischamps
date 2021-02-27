@@ -130,8 +130,8 @@ module.exports = function init(server, wss) {
 				connection.kick('invalid_target');
 			}
 			else {
-				console.log(`Switchingon ${request.url.split('/')[4]}`);
-				switch(request.url.split('/')[4]) {
+				console.log(`Switching on ${request.url.split('/')[4]}`);
+				switch(request.url.split('/')[5]) {
 					case 'admin': {
 						console.log(`MatchRoom: ${target_user.login}: Admin connecting`);
 						target_user.getMatchRoom().setAdmin(connection);
