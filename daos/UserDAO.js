@@ -9,7 +9,7 @@ class UserDAO {
 	constructor() {}
 
 	addUserFromData(user_data) {
-		console.log('Adding user:', JSON.stringify(user_data));
+		// console.log('Adding user:', JSON.stringify(user_data));
 
 		const user = new User(user_data);
 
