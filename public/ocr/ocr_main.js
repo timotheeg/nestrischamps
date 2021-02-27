@@ -144,9 +144,11 @@ clear_config.addEventListener('click', evt => {
 	location.reload();
 });
 
+/*
 start_timer.addEventListener('click', evt => {
 	connection.send(['startTimer'])
-})
+});
+/**/
 
 go_btn.disabled = true;
 go_btn.addEventListener('click', async (evt) => {
