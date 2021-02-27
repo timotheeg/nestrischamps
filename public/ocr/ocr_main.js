@@ -57,6 +57,7 @@ const configs = {
 };
 
 let do_half_height = true;
+let use_animation_frames = true;
 
 const
 	reference_ui     = document.querySelector('#reference_ui'),
@@ -367,10 +368,12 @@ async function playVideoFromConfig() {
 	}
 	else if (config.device_id === 'window') {
 		do_half_height = false;
+		use_animation_frames = true;
 		await playVideoFromScreenCap();
 	}
 	else {
 		do_half_height = true;
+		use_animation_frames = false;
 		await playVideoFromDevice(config.device_id);
 	}
 }
@@ -382,7 +385,12 @@ let start_time_ms;
 let last_frame_time;
 
 async function startCapture(stream) {
-	capture_process = clearTimeout(capture_process);
+	if (use_animation_frames) {
+		window.cancelAnimationFrame(capture_process);
+	}
+	else {
+		clearTimeout(capture_process);
+	}
 
 	if (!stream) {
 		stream = video.srcObject;
@@ -461,9 +469,14 @@ async function captureFrame() {
 		console.error(err);
 	}
 
-	// schedule next async run, device wil hold till next frame 👍
-	// might need to do a animationFrame or 60fps interval 🤔
-	capture_process = setTimeout(captureFrame, 0);
+	if (use_animation_frames) {
+		capture_process = window.requestAnimationFrame(captureFrame);
+	}
+	else {
+		// schedule next async run, device wil hold till next frame 👍
+		// might need to do a animationFrame or 60fps interval 🤔
+		capture_process = setTimeout(captureFrame, 0);
+	}
 }
 
 function showTemplates(templates) {
