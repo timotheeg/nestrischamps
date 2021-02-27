@@ -112,10 +112,11 @@ module.exports = function init(server, wss) {
 			room.addView(connection);
 		}
 		else if(request.url === '/ws/room/admin') {
-			console.log(`Room: ${user.login}: Admin connecting`);
+			console.log(`MatchRoom: ${user.login}: Admin connecting`);
 			user.getMatchRoom().setAdmin(connection);
 		}
 		else if(request.url === '/ws/room/producer') {
+			console.log(`PrivateRoom: ${user.login}: Producer connecting`);
 			user.getPrivateRoom().setProducer(connection);
 		}
 		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
@@ -131,10 +132,12 @@ module.exports = function init(server, wss) {
 			else {
 				switch(request.url.split('/')[4]) {
 					case 'admin': {
+						console.log(`MatchRoom: ${target_user.login}: Admin connecting`);
 						target_user.getMatchRoom().setAdmin(connection);
 						break;
 					}
 					case 'producer': {
+						console.log(`MatchRoom: ${target_user.login}: Producer connecting: ${user.login}`);
 						target_user.getMatchRoom().addProducer(connection);
 						break;
 					}

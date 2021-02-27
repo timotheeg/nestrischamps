@@ -8,8 +8,6 @@
 
 <p>There are many templates you can try. Play around to get a sense of them all.</p>
 
-<p>Addresses get copied to clipboard by clicking on them.</p>
-
 <p>Single player layouts:</p>
 <dl>
 
@@ -19,13 +17,13 @@
 -->
 
 <dt>Das Trainer</dt>
-<dd><a href="/view/1p/das_trainer/<%= secret %>">-</a></dd>
+<dd><a href="/view/das_trainer/<%= secret %>">-</a></dd>
 
 <dt>Simple 1p</dt>
-<dd><a href="/view/1p/simple_1p/<%= secret %>">-</a></dd>
+<dd><a href="/view/simple_1p/<%= secret %>">-</a></dd>
 
 <dt>Invisible Tetris</dt>
-<dd><a href="/view/1p/invisible_tetris/<%= secret %>">-</a></dd>
+<dd><a href="/view/invisible_tetris/<%= secret %>">-</a></dd>
 
 </dl>
 
@@ -33,10 +31,10 @@
 <dl>
 
 <dt>CTWC</dt>
-<dd><a href="/view/mp/ctwc/<%= secret %>">-</a></dd>
+<dd><a href="/view/ctwc/<%= secret %>">-</a></dd>
 
 <dt>CTJC</dt>
-<dd><a href="/view/mp/ctjc/<%= secret %>">-</a></dd>
+<dd><a href="/view/ctjc/<%= secret %>">-</a></dd>
 
 </dl>
 
@@ -44,6 +42,7 @@
 document.querySelectorAll('a').forEach(a => {
 	a.textContent = a.href; // make the link show the fully quailified url
 
+	/*
 	a.addEventListener('click', async (evt) => {
 		evt.preventDefault();
 
@@ -63,6 +62,7 @@ document.querySelectorAll('a').forEach(a => {
 			}
 		}
 	});
+	/**/
 });
 </script>
 </body>
