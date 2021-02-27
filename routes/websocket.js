@@ -145,6 +145,11 @@ module.exports = function init(server, wss) {
 						target_user.getMatchRoom().addProducer(connection);
 						break;
 					}
+					case 'view': {
+						console.log(`MatchRoom: ${target_user.login}: View connecting by ${user.login}`);
+						target_user.getMatchRoom().addView(connection);
+						break;
+					}
 					default: {
 						console.log(`MatchRoom: ${target_user.login}: Producer connecting: ${user.login}`);
 						connection.kick('invalid_url');

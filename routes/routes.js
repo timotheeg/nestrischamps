@@ -48,6 +48,25 @@ router.get('/room/u/:login/producer', middlewares.assertSession, async (req, res
 	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
 });
 
+// This route should only be allowed by admin for non-owner
+router.get('/room/u/:login/view/:layout', middlewares.assertSession, async (req, res) => {
+	const target_user = await UserDAO.getUserByLogin(req.params.login);
+
+	if (!target_user) {
+		res.status(404).send('Target User Not found');
+		return;
+	}
+
+	const layout = layout_files[req.params.layout];
+
+	if (!layout) {
+		res.status(404).send('Layout Not found');
+		return;
+	}
+
+	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
+});
+
 router.get('/renderers', middlewares.assertSession, (req, res) => {
 	res.render('renderers', {
 		secret: req.session.user.secret
