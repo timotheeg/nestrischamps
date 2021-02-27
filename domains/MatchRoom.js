@@ -30,7 +30,6 @@ class MatchRoom extends Room {
 			]
 		};
 
-		this.getProducerFields = this.getProducerFields.bind(this);
 		this.onAdminMessage = this.onAdminMessage.bind(this);
 	}
 
@@ -75,6 +74,21 @@ class MatchRoom extends Room {
 		if (was_present && !is_replace_flow) {
 			this.sendStateToAdmin();
 		}
+	}
+
+	addView(connection) {
+		super.addView(connection);
+
+		// do a room state dump for this new view
+		connection.send(['setBestOf', this.state.bestof]);
+
+		this.state.players.forEach((player, pidx) => {
+			connection.send(['setId',              pidx, player.id]);
+			connection.send(['setLogin',           pidx, player.login]);
+			connection.send(['setDisplayName',     pidx, player.display_name]);
+			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);
+			connection.send(['setVictories',       pidx, player.victories]);
+		});
 	}
 
 	// get state of the room:
