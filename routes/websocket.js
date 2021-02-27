@@ -122,6 +122,8 @@ module.exports = function init(server, wss) {
 		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
 			const target_user = UserDAO.getUserByLogin(m[1]);
 
+			console.log(`Rerieved target user (from ${m[1]}) ${target_user.id} ${target_user.login}`);
+
 			if (!target_user) {
 				// TODO: do at Page or Upgrade level, not at websocket level
 				// Although websocket is closest to resolution
@@ -130,7 +132,7 @@ module.exports = function init(server, wss) {
 				connection.kick('invalid_target');
 			}
 			else {
-				console.log(`Switching on ${request.url.split('/')[4]}`);
+				console.log(`Switching on ${request.url.split('/')[5]}`);
 				switch(request.url.split('/')[5]) {
 					case 'admin': {
 						console.log(`MatchRoom: ${target_user.login}: Admin connecting`);
