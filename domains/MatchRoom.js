@@ -119,6 +119,7 @@ class MatchRoom extends Room {
 				case 'setPlayer': {
 					const [p_num, p_id] = args;
 					let player_data;
+					let player_id = `${p_id}`;
 
 					this.assertValidPlayer(p_num);
 
@@ -130,14 +131,14 @@ class MatchRoom extends Room {
 							profile_image_url: '/_',
 						}
 					}
-					else if (this.state.players[0].id === p_id) {
+					else if (this.state.players[0].id === player_id) {
 						player_data = this.state.players[0];
 					}
-					else if (this.state.players[1].id === p_id) {
+					else if (this.state.players[1].id === player_id) {
 						player_data = this.state.players[1];
 					}
 					else {
-						const producer = this.getProducer(p_id);
+						const producer = this.getProducer(player_id);
 
 						if (producer) {
 							player_data = this.getProducerFields(producer);
