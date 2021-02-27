@@ -16,14 +16,32 @@ module.exports = function init(server, wss) {
 				request.tetris = {};
 			}
 
+			const layout = layouts[m[1]];
+
+			if (!layout) {
+				// Why does the websocket cares about the layout?
+				// Answer: because it needs to know if the attachment target is private room or match room
+				// When connecting over room ids (in the future), that will not matter
+				// The room itself will know what type it is
+				socket.write('HTTP/1.1 404 Layout not found\r\n\r\n'); // TODO: can this redirect?
+				socket.destroy();
+				return;
+			}
+
 			request.tetris.view = {
-				single_player: layouts[m[1]].type == '1p',
+				single_player: layout.type == '1p',
 				layout_id:     m[1],
 				user_secret:   m[2],
 			};
 
 			// connection from the non-session-ed views (from OBS)
 			const user = await UserDAO.getUserBySecret(request.tetris.view.user_secret);
+
+			if (!user) {
+				socket.write('HTTP/1.1 404 User Not Found\r\n\r\n'); // TODO: can this redirect?
+				socket.destroy();
+				return;
+			}
 
 			console.log(`WS: Retrieved user ${user.login} from view secret`, request.tetris.view);
 
@@ -47,9 +65,21 @@ module.exports = function init(server, wss) {
 
 			middlewares.sessionMiddleware(request, {}, () => {
 				if (!request.session.user) {
-					socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); // TODO: can this redirect?
+					socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
 					socket.destroy();
 					return;
+				}
+
+				let m;
+
+				if (m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
+					const target_user = UserDAO.getUserByLogin(m[1]);
+
+					if (!target_user) {
+						socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
+						socket.destroy();
+						return;
+					}
 				}
 
 				console.log(`WS: Retrieved user ${request.session.user.login} from session`);
