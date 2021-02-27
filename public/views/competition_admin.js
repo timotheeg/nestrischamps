@@ -224,7 +224,7 @@ function bootstrap() {
 		= logo.onblur
 		= () => remoteAPI.setLogo(dom.logo.value.trim());
 
-	dom.clear_victories.onclick = () => remoteAPI.resetVictories();
+	dom.clear_victories.addEventListener('click', () => remoteAPI.resetVictories());
 
 	// =====
 

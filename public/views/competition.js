@@ -20,6 +20,8 @@ class TetrisCompetitionAPI {
 
 		this._repaintVictories(0);
 		this._repaintVictories(1);
+
+		players.forEach(player => player.clearField());
 	}
 
 	setId(player_idx, id) {
