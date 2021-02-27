@@ -103,7 +103,9 @@ class UserDAO {
 				[ id ]
 			);
 
-			user = this.addUserFromData(result.rows[0]);
+			if (result.rows.length) {
+				user = this.addUserFromData(result.rows[0]);
+			}
 		}
 
 		return user;
@@ -119,7 +121,9 @@ class UserDAO {
 				[ login ]
 			);
 
-			user = this.addUserFromData(result.rows[0]);
+			if (result.rows.length) {
+				user = this.addUserFromData(result.rows[0]);
+			}
 		}
 
 		return user;
@@ -135,8 +139,9 @@ class UserDAO {
 				[ secret ]
 			);
 
-			// TODO: handle failure!
-			user = this.addUserFromData(result.rows[0]);
+			if (result.rows.length) {
+				user = this.addUserFromData(result.rows[0]);
+			}
 		}
 
 		return user;

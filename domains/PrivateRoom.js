@@ -7,21 +7,14 @@ class PrivateRoom extends Room {
 		super(owner);
 	}
 
-	setProducer(connection) {
-		// Only Owner can be Producer
+	addProducer(connection) {
+		// Only Owners can be producer of their private room
 		if (connection.user.id != this.owner.id) {
 			connection.kick('not_allowed');
 			return false; // throw?
 		}
 
-		// User is owner, new connection takes over any existing connections
-		this.producers.forEach(connection => connection.kick('concurrency_limit'));
-		this.producers.clear();
-
-		this.producers.add(connection);
-
-		connection.on('message', (message) => this.onProducerMesssage(message));
-		connection.on('close', () => this.producers.delete(connection));
+		super.addProducer(connection);
 	}
 
 	// Straight passthrough from producer to view
@@ -30,5 +23,8 @@ class PrivateRoom extends Room {
 		this.sendToViews(message);
 	}
 }
+
+// API aliases:
+PrivateRoom.prototype.setProducer = PrivateRoom.prototype.addProducer;
 
 module.exports = PrivateRoom;

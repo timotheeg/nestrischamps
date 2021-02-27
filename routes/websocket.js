@@ -68,6 +68,8 @@ module.exports = function init(server, wss) {
 		const user = await UserDAO.getUserById(request.session.user.id);
 		const connection = new Connection(user, ws);
 
+		let m; // for url matching (if needed below)
+
 		user.addConnection(connection);
 
 		if (request.is_secret_view) {
@@ -79,9 +81,38 @@ module.exports = function init(server, wss) {
 
 			room.addView(connection);
 		}
+		else if(request.url === '/ws/room/admin') {
+			console.log(`Room: ${user.login}: Admin connecting`);
+			user.getMatchRoom().setAdmin(connection);
+		}
 		else if(request.url === '/ws/producer') {
-			console.log('Setting producer to private room');
 			user.getPrivateRoom().setProducer(connection);
+		}
+		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
+			const target_user = UserDAO.getUserByLogin(m[1]);
+
+			if (!target_user) {
+				// TODO: do at Page or Upgrade level, not at websocket level
+				// Although websocket is closest to resolution
+				// Page level *could* cause race conditions...
+				// Both Page level and Upgrade level could check for target User and throw 404s
+				connection.kick('invalid_target');
+			}
+			else {
+				switch(request.url.split('/')[4]) {
+					case 'admin': {
+						target_user.getMatchRoom().setAdmin(connection);
+						break;
+					}
+					case 'producer': {
+						target_user.getMatchRoom().addProducer(connection);
+						break;
+					}
+					default: {
+						connection.kick('invalid_url');
+					}
+				}
+			}
 		}
 		else {
 			console.log('Unrecognized connection');
