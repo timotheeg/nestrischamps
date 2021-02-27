@@ -1,10 +1,14 @@
+const EventEmitter = require('events');
+
 const PrivateRoom = require('./PrivateRoom');
 const MatchRoom = require('./MatchRoom');
 
-const USER_SESSION_TIMEOUT = 2 * 60 * 1000; // 1 minute before we destroy user! TODO: Make tunable
+const USER_SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes before we destroy user! TODO: Make tunable
 
-class User {
+class User extends EventEmitter{
 	constructor(user_object) {
+		super();
+
 		this.id = user_object.id;
 		this.login = user_object.login;
 		this.secret = user_object.secret;
@@ -43,7 +47,7 @@ class User {
 	addConnection(conn) {
 		this.connections.add(conn);
 
-		conn.socket.on('close', () => {
+		conn.on('close', () => {
 			this.connections.delete(conn);
 			this.checkScheduleDestroy();
 		});
@@ -54,14 +58,20 @@ class User {
 	checkScheduleDestroy() {
 		this.destroy_to = clearTimeout(this.destroy_to);
 
-		if (this.connections.size > 0) return;
+		if (this.connections.size > 0) return; // TODO: also check acticvity on the connections
 
 		// User has no connection, we'll schedule his/her destruction
-		this.destroy_to = setTimeout(() => this.onExpired(), USER_SESSION_TIMEOUT);
+		this.destroy_to = setTimeout(
+			this._onExpired,
+			USER_SESSION_TIMEOUT
+		);
 	}
 
-	// TODO: use EventEmitter instead
-	onExpired() {}
+	_onExpired() {
+		this.private_room.close("expired");
+		this.match_room.close("expired");
+		this.emit('expired');
+	}
 }
 
 module.exports = User;

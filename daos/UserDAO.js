@@ -11,10 +11,9 @@ class UserDAO {
 	addUserFromData(user_data) {
 		const user = new User(user_data);
 
-		user.onExpired = () => {
-			user.closeRooms();
+		user.on('expired', () => {
 			this.removeUser(user);
-		}
+		});
 
 		this.addUser(user);
 

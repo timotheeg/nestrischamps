@@ -57,61 +57,22 @@ class MatchRoom extends Room {
 		this.sendStateToAdmin();
 	}
 
-	getProducer(user_id) {
-		const producers = this.producers.entries();
-
-		for (const entry of producers) {
-			const producer = entry[0];
-
-			if (producer.user.id === user_id) {
-				return producer;
-			}
-		}
-
-		return null;
-	}
-
 	getProducerFields(connection) {
 		return _.pick(connection.user, PRODUCER_FIELDS);
 	}
 
 	addProducer(connection) {
-		// Check if user is already connected
-		const old_conn = this.getProducer(connection.user.id);
+		const is_new_user = super.addProducer(connection);
 
-		const inform_admin = !old_conn;
-
-		if (old_conn) {
-			old_conn.kick('concurrency_limit');
-			this.removeProducer(old_conn, false);
-		}
-
-		this.producers.add(connection);
-
-		connection.on('message', message => this.onProducerMessage(connection, message));
-		connection.on('close', () => this.removeProducer(connection));
-
-		if (inform_admin) {
-			/*
-			this.tellAdmin([
-				"_addProducer",
-				this.getProducerFields(connection)
-			]);
-			/**/
+		if (is_new_user) {
 			this.sendStateToAdmin();
 		}
 	}
 
-	removeProducer(connection, inform_admin=true) {
-		this.producers.delete(connection);
+	removeProducer(connection, is_replace_flow = false) {
+		const was_present = super.removeProducer(connection);
 
-		if (inform_admin) {
-			/*
-			this.tellAdmin([
-				"_removeProducer",
-				connection.user.id
-			]);
-			/**/
+		if (was_present && !is_replace_flow) {
 			this.sendStateToAdmin();
 		}
 	}
@@ -124,7 +85,7 @@ class MatchRoom extends Room {
 	getState() {
 		return {
 			producers: [ ...this.producers ].map(this.getProducerFields),
-			state: this.state
+			...this.state
 		};
 	}
 
@@ -279,6 +240,15 @@ class MatchRoom extends Room {
 				}
 			}
 		});
+	}
+
+	close(reason) {
+		super.close(reason);
+
+		if (this.admin) {
+			this.admin.kick(reason);
+			this.admin = null;
+		}
 	}
 }
 

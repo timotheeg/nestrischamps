@@ -196,8 +196,8 @@ function setState(_room_data) {
 
 	players.forEach((player, idx) => {
 		player.setProducers(room_data.producers);
-		player.setBestOf(room_data.state.bestof);
-		player.setState(room_data.state.players[idx]);
+		player.setBestOf(room_data.bestof);
+		player.setState(room_data.players[idx]);
 	});
 }
 
