@@ -38,10 +38,10 @@ class User extends EventEmitter{
 		return this.match_room;
 	}
 
-	closeRooms() {
+	closeRooms(reason) {
 		// send message to all connections in all rooms that rooms are going away
-		if (this.private_room) this.private_room.close();
-		if (this.match_room) this.match_room.close();
+		if (this.private_room) this.private_room.close(reason);
+		if (this.match_room) this.match_room.close(reason);
 	}
 
 	addConnection(conn) {
@@ -68,8 +68,7 @@ class User extends EventEmitter{
 	}
 
 	_onExpired() {
-		this.private_room.close("expired");
-		this.match_room.close("expired");
+		this.closeRooms('expired');
 		this.emit('expired');
 	}
 }

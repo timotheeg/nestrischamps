@@ -4,7 +4,7 @@ const router = express.Router();
 
 const middlewares = require('../modules/middlewares');
 const layout_files = require('../modules/layouts');
-const layout_files = require('../daos/UserDAO');
+const UserDAO = require('../daos/UserDAO');
 
 function dummy(res) {
 	res.send('dummy ok');
