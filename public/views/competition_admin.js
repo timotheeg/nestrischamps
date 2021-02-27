@@ -122,11 +122,7 @@ class Player {
 	}
 
 	_pickProducer(pid) {
-		const player_id = parseInt(pid, 10);
-
-		if (player_id) {
-			remoteAPI.setPlayer(this.idx, player_id);
-		}
+		remoteAPI.setPlayer(this.idx, parseInt(pid, 10));
 	}
 
 	setProducer(pid) {

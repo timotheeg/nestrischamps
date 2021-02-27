@@ -17,14 +17,14 @@ class MatchRoom extends Room {
 					id: '',
 					login: '',
 					display_name: '',
-					profile_image_url: '',
+					profile_image_url: '/_',
 					victories: 0,
 				},
 				{
 					id: '',
 					login: '',
 					display_name: '',
-					profile_image_url: '',
+					profile_image_url: '/_',
 					victories: 0,
 				},
 			]
@@ -122,15 +122,21 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
-					if (this.state.players[0].id === p_id) {
+					if (!p_id) {
+						player_data = {
+							id: '',
+							login: '',
+							display_name: '',
+							profile_image_url: '/_',
+						}
+					}
+					else if (this.state.players[0].id === p_id) {
 						player_data = this.state.players[0];
 					}
 					else if (this.state.players[1].id === p_id) {
 						player_data = this.state.players[1];
 					}
 					else {
-						console.log('Look up player', p_id)
-
 						const producer = this.getProducer(p_id);
 
 						if (producer) {
