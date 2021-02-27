@@ -97,9 +97,9 @@ module.exports = function init(server, wss) {
 
 		const user = await UserDAO.getUserById(request.session.user.id);
 
-		console.log(...UserDao.users_by_id.keys())
-		console.log(...UserDao.users_by_login.keys())
-		console.log(...UserDao.users_by_secret.keys())
+		console.log(...UserDAO.users_by_id.keys());
+		console.log(...UserDAO.users_by_login.keys());
+		console.log(...UserDAO.users_by_secret.keys());
 
 		const connection = new Connection(user, ws);
 
