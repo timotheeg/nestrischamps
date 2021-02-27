@@ -4,6 +4,7 @@ const router = express.Router();
 
 const middlewares = require('../modules/middlewares');
 const layout_files = require('../modules/layouts');
+const layout_files = require('../daos/UserDAO');
 
 function dummy(res) {
 	res.send('dummy ok');
@@ -13,18 +14,46 @@ router.get('/debug/session', (req, res) => {
 	res.send(JSON.stringify(req.session));
 });
 
-router.get('/ocr', middlewares.assertSession, (req, res) => dummy(res) );
-router.get('/invite/:roomid', middlewares.assertSession, (req, res) => dummy(res) );
-router.get('/admin', middlewares.assertSession, (req, res) => dummy(res) );
+router.get('/', (req, res) => {
+	res.render('intro');
+});
+
+router.get('/room/admin', middlewares.assertSession, (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
+});
+
+router.get('/room/u/:login/admin', middlewares.assertSession, (req, res) => {
+	const target_user = UserDAO.getUserByLogin(req.params.login);
+
+	if (!target_user) {
+		res.status(404).send('Target User Not found');
+		return;
+	}
+
+	res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
+});
+
+router.get('/room/producer', middlewares.assertSession, (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+});
+
+router.get('/room/u/:login/producer', middlewares.assertSession, (req, res) => {
+	const target_user = UserDAO.getUserByLogin(req.params.login);
+
+	if (!target_user) {
+		res.status(404).send('Target User Not found');
+		return;
+	}
+
+	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+});
+
 router.get('/renderers', middlewares.assertSession, (req, res) => {
 	res.render('renderers', {
 		secret: req.session.user.secret
 	});
 });
 
-router.get('/producer/:room?', middlewares.assertSession, (req, res) => {
-	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
-});
 
 // TODO: uniformalize the alyout and file names
 // TODO: AND uniformalize the way the layout understnd incoming data
