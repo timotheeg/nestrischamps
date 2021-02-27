@@ -265,9 +265,9 @@ function onFrame(event, debug) {
 		renderNextPiece(transformed.level, transformed.next_piece);
 	}
 
-	if (last_valid_state.stage.field == transformed.stage.field) return;
+	if (last_valid_state.stage.field_string == transformed.stage.field_string) return;
 
-	last_valid_state.stage.field = transformed.stage.field
+	last_valid_state.stage.field_string = transformed.stage.field_string;
 
 	if (line_animation_remaining_frames-- > 0) return;
 
