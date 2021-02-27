@@ -19,7 +19,7 @@ class PrivateRoom extends Room {
 
 	// Straight passthrough from producer to view
 	// Basically, we assume producer is just sending game frames
-	onProducerMesssage(message) {
+	onProducerMessage(connection, message) {
 		this.sendToViews(message);
 	}
 }

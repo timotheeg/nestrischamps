@@ -5,8 +5,6 @@ class Room {
 		this.owner = owner;
 		this.producers = new Set();
 		this.views = new Set();
-
-		this.onProducerMessage = this.onProducerMessage.bind(this);
 	}
 
 	addView(connection) {
