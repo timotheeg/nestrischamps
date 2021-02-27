@@ -96,6 +96,9 @@ module.exports = function init(server, wss) {
 		console.log('WS: Connection!', request.session.user.id, 'secret?', request.is_secret_view);
 
 		const user = await UserDAO.getUserById(request.session.user.id);
+
+		console.log('user', JSON.stringify(user));
+
 		const connection = new Connection(user, ws);
 
 		let m; // for url matching (if needed below)

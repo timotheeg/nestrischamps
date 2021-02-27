@@ -9,13 +9,12 @@ class User extends EventEmitter{
 	constructor(user_object) {
 		super();
 
-		this.id = user_object.id;
-		this.login = user_object.login;
-		this.secret = user_object.secret;
-		this.email = user_object.email;
-
-		this.display_name = user_object.display_name;
-		this.description = user_object.description;
+		this.id                = user_object.id;
+		this.login             = user_object.login;
+		this.secret            = user_object.secret;
+		this.email             = user_object.email;
+		this.display_name      = user_object.display_name;
+		this.description       = user_object.description;
 		this.profile_image_url = user_object.profile_image_url;
 
 		// TODO: create rooms lazily
