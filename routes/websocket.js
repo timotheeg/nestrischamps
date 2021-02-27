@@ -63,7 +63,7 @@ module.exports = function init(server, wss) {
 			// all other connections must be within a session!
 			// i.e. producers and admin connections
 
-			middlewares.sessionMiddleware(request, {}, () => {
+			middlewares.sessionMiddleware(request, {}, async () => {
 				if (!request.session.user) {
 					socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
 					socket.destroy();
@@ -73,7 +73,7 @@ module.exports = function init(server, wss) {
 				let m;
 
 				if (m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
-					const target_user = UserDAO.getUserByLogin(m[1]);
+					const target_user = await UserDAO.getUserByLogin(m[1]);
 
 					if (!target_user) {
 						socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
@@ -96,10 +96,6 @@ module.exports = function init(server, wss) {
 		console.log('WS: Connection!', request.session.user.id, 'secret?', request.is_secret_view);
 
 		const user = await UserDAO.getUserById(request.session.user.id);
-
-		console.log(...UserDAO.users_by_id.keys());
-		console.log(...UserDAO.users_by_login.keys());
-		console.log(...UserDAO.users_by_secret.keys());
 
 		const connection = new Connection(user, ws);
 
@@ -125,9 +121,9 @@ module.exports = function init(server, wss) {
 			user.getPrivateRoom().setProducer(connection);
 		}
 		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
-			const target_user = UserDAO.getUserByLogin(m[1]);
+			const target_user = await UserDAO.getUserByLogin(m[1]);
 
-			console.log(`Rerieved target user (from ${m[1]}) ${target_user.id} ${target_user.login} ${JSON.stringify(target_user)}`);
+			console.log(`Retrieved target user (from ${m[1]}) ${target_user.id} ${target_user.login}`);
 
 			if (!target_user) {
 				// TODO: do at Page or Upgrade level, not at websocket level

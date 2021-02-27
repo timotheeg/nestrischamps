@@ -22,8 +22,8 @@ router.get('/room/admin', middlewares.assertSession, (req, res) => {
 	res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
 });
 
-router.get('/room/u/:login/admin', middlewares.assertSession, (req, res) => {
-	const target_user = UserDAO.getUserByLogin(req.params.login);
+router.get('/room/u/:login/admin', middlewares.assertSession, async (req, res) => {
+	const target_user = await UserDAO.getUserByLogin(req.params.login);
 
 	if (!target_user) {
 		res.status(404).send('Target User Not found');
@@ -37,8 +37,8 @@ router.get('/room/producer', middlewares.assertSession, (req, res) => {
 	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
 });
 
-router.get('/room/u/:login/producer', middlewares.assertSession, (req, res) => {
-	const target_user = UserDAO.getUserByLogin(req.params.login);
+router.get('/room/u/:login/producer', middlewares.assertSession, async (req, res) => {
+	const target_user = await UserDAO.getUserByLogin(req.params.login);
 
 	if (!target_user) {
 		res.status(404).send('Target User Not found');
