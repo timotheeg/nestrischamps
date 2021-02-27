@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 	res.render('login', {
 		client_id: process.env.TWITCH_CLIENT_ID,
 		redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
-		scope: 'user:read:email'
+		scope: '', // 'user:read:email'
 	});
 });
 
