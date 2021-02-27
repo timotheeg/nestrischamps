@@ -53,6 +53,10 @@ class MatchRoom extends Room {
 			}
 		});
 
+		this.admin.send(['setOwner', {
+			id:    this.owner.id,
+			login: this.owner.login
+		}]);
 		this.sendStateToAdmin();
 	}
 

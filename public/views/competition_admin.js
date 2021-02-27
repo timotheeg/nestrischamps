@@ -4,6 +4,7 @@ const dom = {
 	logo:            document.querySelector('#logo input'),
 	bestof:          document.querySelector('#bestof'),
 	clear_victories: document.querySelector('#clear_victories'),
+	player_link:     document.querySelector('#player_link'),
 };
 
 const MAX_BEST_OF = 13;
@@ -236,6 +237,16 @@ function bootstrap() {
 		switch (command) {
 			case 'state': {
 				setState(args[0]);
+				break;
+			}
+
+			case 'setOwner': {
+				const owner = args[0];
+				const player_url = `${location.protocol}//${location.host}/room/u/${owner.login}/producer`;
+
+				dom.player_link.href = player_url;
+				dom.player_link.textContent = player_url;
+
 				break;
 			}
 		}
