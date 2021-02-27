@@ -130,6 +130,7 @@ module.exports = function init(server, wss) {
 				connection.kick('invalid_target');
 			}
 			else {
+				console.log(`Switchingon ${request.url.split('/')[4]}`);
 				switch(request.url.split('/')[4]) {
 					case 'admin': {
 						console.log(`MatchRoom: ${target_user.login}: Admin connecting`);
@@ -142,6 +143,7 @@ module.exports = function init(server, wss) {
 						break;
 					}
 					default: {
+						console.log(`MatchRoom: ${target_user.login}: Producer connecting: ${user.login}`);
 						connection.kick('invalid_url');
 					}
 				}
