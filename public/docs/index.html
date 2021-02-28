@@ -1,7 +1,21 @@
 <html>
 <head>
+<style>
+table {
+  border-collapse: collapse;
+}
+tr {
+  border-bottom: 1px solid #ccc;
+}
+th, td {
+  text-align: left;
+  padding: 4px;
+}
+</style>
 </head>
 <body>
+
+
 
 <p>NEStrisChamp works with the concepts of room. Each user has 2 rooms:</p>
 <ul>
@@ -38,7 +52,7 @@
 
 <p>Since views are typically setup in OBS, the URL needs to identify the room owner by itself, This is achieved by assigning a scret to each user that can placed in the URL. It's not super secure, but whatever, this tool is not hosting state secrets -_-</p>
 
-<p>http://nestrischamps.herokuapp.com/view/<b>LAYOUT_NAME</b>/<b>USER_SECRET</b></p>
+<p><a href="http://nestrischamps.herokuapp.com/view/simple_1p/USER_SECRET">http://nestrischamps.herokuapp.com/view/<b>LAYOUT_NAME</b>/<b>USER_SECRET</b></a></p>
 
 <p>The layouts available so far are as follow:</p>
 
@@ -52,11 +66,13 @@
 	</li>
 	<li>Multi Player
 		<ul>
-			<li>ctwc: A CTWC inspired layout</li>
-			<li>ctjc: a CTJC inspired layout</li>
+			<li><b>ctwc</b>: A CTWC inspired layout</li>
+			<li><b>ctjc</b>: a CTJC inspired layout</li>
 		</ul>
 	</li>
 </ul>
+
+<p>Your own renderer links are available <a href="http://nestrischamps.herokuapp.com/renderers">here</a>.</p>
 
 <p>Hopefully in the future, users will be able to contribute their own template.</p>
 
@@ -78,13 +94,13 @@
 
 <p>OCR is supported in browser for both device capture and screen capture.</p>
 
-<p>2 default rom are supported:</p>
+<p>2 default game roms are supported:</p>
 <ul>
 	<li><p>Classic Tetris</p><img src="./capture_classic.png" /></li>
 	<li><p><a href="https://www.romhacking.net/hacks/3761/">Das Trainer</a></p><img src="./capture_das_trainer.png" /></li>
 </ul>
 
-<p>The fields that need to be OCR-ed per rom are fixed.</p>
+<p>The fields that need to be OCR-ed per rom are fixed (see highlighted areas above)</p>
 
 <p>There is a built-in automatic calibrator but it doesn't work to well, so you should always ajust the areas selected for calibration to be as close as possible to the desired outcome.</p>
 
@@ -181,48 +197,158 @@
 
 <h1>Binary frame format</h1>
 
-<p>All captured frames are sent in binary and weight 72 bytes per frame. They have the following format:</p>
+<p>All captured frames are sent in binary and weight 576 bites (72 bytes) per frame. They have the format below.</p>
+
+<p>Game fields may be null (like das trainer's instant das when sending classic frames), in which case, the bits should all be set to 1.</p>
 
 <table>
 	<tr>
+		<th>&nbsp;</th>
 		<th>Purpose</th>
 		<th>Size</th>
 		<th>Description</th>
 	</tr>
 	<tr>
-		<td>Header</td>
-		<td>1 byte</td>
-		<td>Contains version (3 bits), game type (2 bits), player number (3 bits)</td>
+		<td>1</td>
+		<td>Version</td>
+		<td>3 bits</td>
+		<td>Specify the version of the format of binary frame. Currently 1.</td>
 	</tr>
 	<tr>
+		<td>2</td>
+		<td>Game type</td>
+		<td>2 bits</td>
+		<td>Specify the type of game the frame is for, so a parser may know which fields are expected to be null. So far: 1: CLASSIC - 2:DAS_TRAINER</td>
+	</tr>
+	<tr>
+		<td>3</td>
+		<td>Player number</td>
+		<td>3 bits</td>
+		<td>Specify which player this frame is for. Producers are expected to leave this at 0. While the frame broker may set the number to player 1 (0), or 2 (1), or more when layouts can supports having more players.</td>
+	</tr>
+	<tr>
+		<td>4</td>
 		<td>Game ID</td>
-		<td>2 bytes</td>
+		<td>16 bits</td>
 		<td>Starts at zero when producer starts. Increases by 1 at every game.</td>
 	</tr>
 	<tr>
+		<td>5</td>
 		<td>Client time</td>
-		<td>4 bytes</td>
+		<td>32 bits</td>
 		<td>Number of milliseconds since producer connected.</td>
 	</tr>
 	<tr>
+		<td>6</td>
 		<td>Score</td>
-		<td>3 bytes</td>
-		<td>Usigned int. All tetris possible score covered since 2<sup>24</sup>=16,777,216</td>
+		<td>24 bits</td>
+		<td>Unsigned int. Range: 16,777,216 (2<sup>24</sup>)</td>
 	</tr>
 	<tr>
-		<td>lines</td>
+		<td>7</td>
+		<td>Lines</td>
 		<td>9 bits</td>
-		<td>Usigned int. Allows 512 lines</td>
+		<td>Unsigned int. Range: 512</td>
+	</tr>
+	<tr>
+		<td>8</td>
+		<td>Level</td>
+		<td>7 bits</td>
+		<td>Unsigned int. Range: 128</td>
+	</tr>
+	<tr>
+		<td>9</td>
+		<td>Instant DAS</td>
+		<td>5 bits</td>
+		<td>Unsigned int. Das needs to record 17 values (0 to 16) + null.</td>
+	</tr>
+	<tr>
+		<td>10</td>
+		<td>Preview</td>
+		<td>3 bits</td>
+		<td>Represents the piece in preview as follow: 	0:T, 1:J, 2:Z, 3:O, 4:S, 5:L, 6:I, 7:null</td>
+	</tr>
+	<tr>
+		<td>11</td>
+		<td>Current Piece DAS</td>
+		<td>5 bits</td>
+		<td>Unsigned int.</td>
+	</tr>
+	<tr>
+		<td>12</td>
+		<td>Current Piece</td>
+		<td>3 bits</td>
+		<td>Piece in current piece area of Das Trainer. Same encoding as Preview.</td>
+	</tr>
+	<tr>
+		<td>13</td>
+		<td>T count</td>
+		<td>8 bits</td>
+		<td>Piece count for T piece</td>
+	</tr>
+	<tr>
+		<td>14</td>
+		<td>J count</td>
+		<td>8 bits</td>
+		<td>Piece count for J piece</td>
+	</tr>
+	<tr>
+		<td>15</td>
+		<td>Z count</td>
+		<td>8 bits</td>
+		<td>Piece count for Z piece</td>
+	</tr>
+	<tr>
+		<td>16</td>
+		<td>O count</td>
+		<td>8 bits</td>
+		<td>Piece count for O piece</td>
+	</tr>
+	<tr>
+		<td>17</td>
+		<td>S count</td>
+		<td>8 bits</td>
+		<td>Piece count for S piece</td>
+	</tr>
+	<tr>
+		<td>18</td>
+		<td>L count</td>
+		<td>8 bits</td>
+		<td>Piece count for L piece</td>
+	</tr>
+	<tr>
+		<td>19</td>
+		<td>I count</td>
+		<td>8 bits</td>
+		<td>Piece count for I piece</td>
+	</tr>
+	<tr>
+		<td>20</td>
+		<td>Field</td>
+		<td>400 bits</td>
+		<td>2 bits per block for the 200 blocks in the field. Starts from top-left and travels right-bottom.</td>
 	</tr>
 </table>
 
+<p>Below is the bit representation of the fields described above</p>
+
+<p><img src="./binary_frame.png" /></p>
+
+<p>See the <a href="https://nestrischamps.herokuapp.com/js/BinaryFrame.js">source file</a> for implementation details.</p>
+
+
+<h1>Ideas for improvements</h1>
+
+<p>As with any software, there's always more... "More, more, more, more, more" as the GOAT would say.</p>
+
 <ul>
-	<li>Header: 1 byte
-	<li>Header - Version: 3 bits
+	<li>Make this site look nice: some branding and fancy site styling</li>
+	<li>Let users contributes their own layout</li>
+	<li>Ability for producers to websocket connect to random servers and send their frames there (Do what you want style!)</li>
+	<li>Anonymous rooms</li>
+	<li>By-invite only room (restricted access)</li>
+	<li>Web RTC between the producers and View</li>
+	<li>Record the game in DB. If games are stored, it opens the door for replay, match up of any past games, and more (?). But storage requirements might be a pain. Say a game lasts 6mins, at 60fps, storage size requirement per game would be 6mins * 60secs * 60fps * 72bytes = 1,555,200 bytes (~1.5MB)</li>
 </ul>
-
-
-
-See the <a href="https://nestrischamps.herokuapp.com/js/BinaryFrame.js">source file</a> for details.
 </body>
 <html>
