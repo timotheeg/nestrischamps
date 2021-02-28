@@ -9,8 +9,8 @@ class ScoreDAO {
 		return {
 			current_player: user.login,
 			pbs: [
-				await this._getPBS(db_client, user, 18),
-				await this._getPBS(db_client, user, 19),
+				await this._getPBs(db_client, user, 18),
+				await this._getPBs(db_client, user, 19),
 			],
 			high_scores: {
 				overall: await this._getBestOverall(db_client, user),
