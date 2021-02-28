@@ -197,7 +197,9 @@ th, td {
 
 <h1>Binary frame format</h1>
 
-<p>All captured frames are sent in binary and weight 576 bites (72 bytes) per frame. They have the format below.</p>
+<p>All captured frames are sent in binary and weight 576 bites (72 bytes) per frame. ON a capture setup of 60fps, the game stream requirements are therefore 72*60 = 4,320 B/s (~4KB/s).</p>
+
+<p>They have the format below.</p>
 
 <p>Game fields may be null (like das trainer's instant das when sending classic frames), in which case, the bits should all be set to 1.</p>
 
