@@ -7,14 +7,14 @@ class ScoreDAO {
 		const db_client = await dbPool.connect();
 
 		return {
-			current_player,
+			current_player: user.login,
 			pbs: [
 				await ScoreDAO._getPBS(db_client, user, 18),
 				await ScoreDAO._getPBS(db_client, user, 19),
 			],
 			high_scores: {
-				overall: await ScoreDAO._getBestOverall(db_client, current_player),
-				today:   await ScoreDAO._getBestToday(db_client, current_player)
+				overall: await ScoreDAO._getBestOverall(db_client, user),
+				today:   await ScoreDAO._getBestToday(db_client, user)
 			}
 		};
 	}
