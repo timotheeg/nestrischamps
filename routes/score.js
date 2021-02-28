@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const middlewares = require('../modules/middlewares');
+const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
 
 router.get('/get_stats/:secret', async (req, res) => {
