@@ -111,7 +111,7 @@ class ScoreDAO {
 			]
 		);
 
-		return await ScoreDAO.getStats(user);
+		return await this.getStats(user);
 	}
 }
 
