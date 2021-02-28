@@ -347,7 +347,9 @@ function reportGame(game) {
 			{
 				method: 'POST', // *GET, POST, PUT, DELETE, etc.
 				mode: 'no-cors', // no-cors, cors, *same-origin
-				headers: new Headers({'content-type': 'application/json'}),
+				headers: {
+					'Content-Type': 'application/json'
+				},
 				body: JSON.stringify(game.data),
 			}
 		)
