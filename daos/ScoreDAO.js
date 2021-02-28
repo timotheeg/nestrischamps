@@ -74,7 +74,7 @@ class ScoreDAO {
 		return result.rows;
 	}
 
-	async reportGame(user, game_data) {
+	async recordGame(user, game_data) {
 		if (!game_data) return;
 
 		const db_client = await dbPool.connect();
@@ -102,16 +102,14 @@ class ScoreDAO {
 				user.id,
 				game_data.start_level,
 				game_data.end_level,
-				game_data.score        || 0,
-				game_data.lines        || 0,
-				game_data.tetris_rate  || 0,
-				game_data.num_droughts || 0,
-				game_data.max_drought  || 0,
-				game_data.das_avg      || 0
+				game_data.score,
+				game_data.lines,
+				game_data.tetris_rate,
+				game_data.num_droughts,
+				game_data.max_drought,
+				game_data.das_avg,
 			]
 		);
-
-		return await this.getStats(user);
 	}
 }
 
