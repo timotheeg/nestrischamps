@@ -9,6 +9,8 @@ const ScoreDAO = require('../daos/ScoreDAO');
 router.use(express.json());
 
 router.get('/get_stats/:secret', async (req, res) => {
+	console.log('get stats by secret');
+
 	const user = await UserDAO.getUserBySecret(req.params.secret);
 
 	if (!user) {
@@ -20,6 +22,8 @@ router.get('/get_stats/:secret', async (req, res) => {
 });
 
 router.get('/u/:login/get_stats', middlewares.assertSession, async (req, res) => {
+	console.log('get stats by login');
+
 	const user = await UserDAO.getUserByLogin(req.params.login);
 
 	if (!user) {
@@ -31,6 +35,8 @@ router.get('/u/:login/get_stats', middlewares.assertSession, async (req, res) =>
 });
 
 router.get('/get_stats', middlewares.assertSession, async (req, res) => {
+	console.log('get stats by session');
+
 	const user = await UserDAO.getUserById(req.session.user.id);
 
 	if (!user) {
@@ -43,6 +49,8 @@ router.get('/get_stats', middlewares.assertSession, async (req, res) => {
 
 
 router.post('/report_game/:secret', middlewares.assertSession, async (req, res) => {
+	console.log('report_game by secret');
+
 	const user = await UserDAO.getUserBySecret(req.params.secret);
 
 	if (!user) {
