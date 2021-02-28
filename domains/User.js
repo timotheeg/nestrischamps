@@ -61,7 +61,7 @@ class User extends EventEmitter{
 
 		// User has no connection, we'll schedule his/her destruction
 		this.destroy_to = setTimeout(
-			this._onExpired,
+			() => this._onExpired(),
 			USER_SESSION_TIMEOUT
 		);
 	}
