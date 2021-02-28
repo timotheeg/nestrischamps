@@ -11,6 +11,7 @@ app.use(middlewares.sessionMiddleware);
 
 if (process.env.IS_PUBLIC_SERVER) {
 	app.use('/auth', require('../routes/auth'));
+	app.use('/stats', require('../routes/score'));
 	app.use('', require('../routes/routes'));
 }
 else {

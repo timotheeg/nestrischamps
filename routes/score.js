@@ -5,7 +5,7 @@ const router = express.Router();
 const middlewares = require('../modules/middlewares');
 const ScoreDAO = require('../daos/ScoreDAO');
 
-router.get('/stats/get_stats/:secret', async (req, res) => {
+router.get('/get_stats/:secret', async (req, res) => {
 	const user = await UserDAO.getUserByLogin(secret);
 
 	if (!user) {
@@ -16,7 +16,7 @@ router.get('/stats/get_stats/:secret', async (req, res) => {
 	res.json(await ScoreDAO.getStats(user));
 });
 
-router.get('/stats/u/:login/get_stats', middlewares.assertSession, async (req, res) => {
+router.get('/u/:login/get_stats', middlewares.assertSession, async (req, res) => {
 	const user = await UserDAO.getUserByLogin(req.params.login);
 
 	if (!user) {
@@ -27,7 +27,7 @@ router.get('/stats/u/:login/get_stats', middlewares.assertSession, async (req, r
 	res.json(await ScoreDAO.getStats(user));
 });
 
-router.get('/stats/get_stats', middlewares.assertSession, async (req, res) => {
+router.get('/get_stats', middlewares.assertSession, async (req, res) => {
 	const user = await UserDAO.getUserById(req.session.id);
 
 	if (!user) {
@@ -39,7 +39,7 @@ router.get('/stats/get_stats', middlewares.assertSession, async (req, res) => {
 });
 
 
-router.post('/stats/report_game/:secret', middlewares.assertSession, async (req, res) => {
+router.post('/report_game/:secret', middlewares.assertSession, async (req, res) => {
 	const target_user = await UserDAO.getUserBySecret(req.params.secret);
 
 	if (!target_user) {
