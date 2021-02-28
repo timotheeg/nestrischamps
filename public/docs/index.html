@@ -347,7 +347,7 @@ th, td {
 	<li>Ability for producers to websocket connect to random servers and send their frames there (Do what you want style!)</li>
 	<li>Anonymous rooms</li>
 	<li>By-invite only room (restricted access)</li>
-	<li>Web RTC between the producers and View</li>
+	<li>Web RTC between the producers and view. nestrischamp would act as signaling coordinator. This could be useful, because heroku servers are in the US, so when players and commentators are all in EU or Asia for example, the game frames still go all around the frames, which is not efficient (to be tested if OBS Browser Source supports web RTC).</li>
 	<li>Record the game in DB. If games are stored, it opens the door for replay, match up of any past games, and more (?). But storage requirements might be a pain. Say a game lasts 6mins, at 60fps, storage size requirement per game would be 6mins * 60secs * 60fps * 72bytes = 1,555,200 bytes (~1.5MB)</li>
 </ul>
 </body>
