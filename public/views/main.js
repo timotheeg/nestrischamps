@@ -385,11 +385,11 @@ function renderPastGamesAndPBs(data) {
 
 		if (!row) return;
 
-		row.end_level.textContent =   record.end_level.toString().padStart(2, '0');
-		row.score.textContent =       record.score.toString().padStart(6, '0');
-		row.lines.textContent =       record.lines.toString().padStart(3, '0');
-		row.das_avg.textContent =     record.das_avg.toFixed(1).padStart(4, '0');
-		row.tetris_rate.textContent = getPercent(record.tetris_rate);
+		row.end_level.textContent =   (record.end_level || 0).toString().padStart(2, '0');
+		row.score.textContent =       (record.score || 0).toString().padStart(6, '0');
+		row.lines.textContent =       (record.lines || 0).toString().padStart(3, '0');
+		row.das_avg.textContent =     (record.das_avg || 0).toFixed(1).padStart(4, '0');
+		row.tetris_rate.textContent = getPercent(record.tetris_rate || 0);
 	});
 
 	// high scores
