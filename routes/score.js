@@ -7,7 +7,7 @@ const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
 
 router.get('/get_stats/:secret', async (req, res) => {
-	const user = await UserDAO.getUserByLogin(req.params.secret);
+	const user = await UserDAO.getUserBySecret(req.params.secret);
 
 	if (!user) {
 		res.status(404).send('User Not found');
