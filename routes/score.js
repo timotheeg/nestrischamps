@@ -29,7 +29,7 @@ router.get('/u/:login/get_stats', middlewares.assertSession, async (req, res) =>
 });
 
 router.get('/get_stats', middlewares.assertSession, async (req, res) => {
-	const user = await UserDAO.getUserById(req.session.id);
+	const user = await UserDAO.getUserById(req.session.user.id);
 
 	if (!user) {
 		res.status(404).send('User Not found');
