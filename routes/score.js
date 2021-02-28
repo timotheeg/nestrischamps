@@ -6,6 +6,8 @@ const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
 
+router.use(express.json());
+
 router.get('/get_stats/:secret', async (req, res) => {
 	const user = await UserDAO.getUserBySecret(req.params.secret);
 
