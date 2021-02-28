@@ -41,9 +41,9 @@ router.get('/get_stats', middlewares.assertSession, async (req, res) => {
 
 
 router.post('/report_game/:secret', middlewares.assertSession, async (req, res) => {
-	const target_user = await UserDAO.getUserBySecret(req.params.secret);
+	const user = await UserDAO.getUserBySecret(req.params.secret);
 
-	if (!target_user) {
+	if (!user) {
 		res.status(404).send('User Not found');
 		return;
 	}
