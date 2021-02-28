@@ -995,3 +995,4 @@ function renderNextPiece(level, next_piece) {
 		renderBlock(level, col_index, ctx, pos_x, pos_y);
 	});
 }
+
