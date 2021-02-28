@@ -324,7 +324,7 @@ function onFrame(event, debug) {
 function getStats() {
 	let m;
 
-	if (m = location.pathname.match(^/\/view\/[a-z0-9_-]+\/([A-Z0-9]+)/)) {
+	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([A-Z0-9]+)$/)) {
 		fetch(
 			`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
 			{ mode: 'no-cors' }
@@ -341,7 +341,7 @@ function reportGame(game) {
 	game.over = true;
 	game.reported = true;
 
-	if (m = location.pathname.match(^/\/view\/[a-z0-9_-]+\/([A-Z0-9]+)/)) {
+	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([A-Z0-9]+)$/)) {
 		fetch(
 			`${location.protocol}//${location.host}/stats/report_game/${m[1]}`,
 			{
