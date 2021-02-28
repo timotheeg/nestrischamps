@@ -1,0 +1,228 @@
+<html>
+<head>
+</head>
+<body>
+
+<p>NEStrisChamp works with the concepts of room. Each user has 2 rooms:</p>
+<ul>
+	<li>A single-player Private room - to capture your own game play.</li>
+	<li>A multi-player Match room - to organise and comment on other player matches.</li>
+</ul>
+
+<p>The key is for players to OCR their game frames into the correct room.</p>
+
+<p>For single player rooms, you just need to send your grame frameinto the room and into the view for their to be rendered.</p>
+
+<p>For Math room, you may invite as many people as you want to be producers, and you'll select who out of the room members gets to be player 1 and player 2.</p>
+
+<h1>Architecture and Terminology</h1>
+
+<p>In single player mode, frame data is passed straight from the producer into 1 or more views.</p>
+
+<p><img src="./architecture_1_player.png" /></p>
+
+<p>In competition mode, all producers emit data, but The room owner assigns a given producer to be player 1 and anotherproducer to be player 2. Only the game frame of these 2 players are sent to the views.</p>
+
+<p><img src="./architecture_2_players.png" /></p>
+
+<ul>
+<li>Room: A broker of connection, frame data, and commands</li>
+<li>Producer: an entity doing 1) OCR and 2) emitting frames into the room</li>
+<li>View: Receives the frame data and redraw the scene, can accept other commands (e.g. to set player names)</li>
+<li>Admin UI: For Multi player rooms, the admin room allow the room owner to control which producer are player 1 and player 2, Update the player names, and assign victories.</li>
+</ul>
+
+<h1>URL scheme</h1>
+
+<h2>Views</h2>
+
+<p>Since views are typically setup in OBS, the URL needs to identify the room owner by itself, This is achieved by assigning a scret to each user that can placed in the URL. It's not super secure, but whatever, this tool is not hosting state secrets -_-</p>
+
+<p>http://nestrischamps.herokuapp.com/view/<b>LAYOUT_NAME</b>/<b>USER_SECRET</b></p>
+
+<p>The layouts available so far are as follow:</p>
+
+<ul>
+	<li>Single Player
+		<ul>
+			<li><b>das_trainer</b>: a stats-heay interface</li>
+			<li><b>simple_1p</b>: a simple UI with Tetris rates and Droughts</li>
+			<li><b>invisible_tetris</b>: A renderer for Invisible Tetris</li>
+		</ul>
+	</li>
+	<li>Multi Player
+		<ul>
+			<li>ctwc: A CTWC inspired layout</li>
+			<li>ctjc: a CTJC inspired layout</li>
+		</ul>
+	</li>
+</ul>
+
+<p>Hopefully in the future, users will be able to contribute their own template.</p>
+
+<h2>Producer</h2>
+
+<p>To produce frame into your own private room, visit <a href="https://nestrischamps.herokuapp.com/room/producer">https://nestrischamps.herokuapp.com/room/producer</a></p>
+
+
+<p>To attach yourself as a producer to another user's room (typically the link will be passed to you an invitation), the links will be of the form</p>
+
+<p>http://nestrischamps.herokuapp.com/room/u/<b>TWITCH_USERNAME</b>/producer</p>
+
+<h2>Admin</h2>
+
+<p>To administer your competition room, visit <a href="https://nestrischamps.herokuapp.com/room/admin">https://nestrischamps.herokuapp.com/room/admin</a></p>
+
+
+<h1 id="ocr">OCR and Calibration</h1>
+
+<p>OCR is supported in browser for both device capture and screen capture.</p>
+
+<p>2 default rom are supported:</p>
+<ul>
+	<li><p>Classic Tetris</p><img src="./capture_classic.png" /></li>
+	<li><p><a href="https://www.romhacking.net/hacks/3761/">Das Trainer</a></p><img src="./capture_das_trainer.png" /></li>
+</ul>
+
+<p>The fields that need to be OCR-ed per rom are fixed.</p>
+
+<p>There is a built-in automatic calibrator but it doesn't work to well, so you should always ajust the areas selected for calibration to be as close as possible to the desired outcome.</p>
+
+<h2>Digits</h2>
+
+<p>The capture area should "hug" the digits on top, right, bottom, left, (using 0 as a reference), like this:</p>
+<ul>
+	<li><img src="./digits_2_0.png" /></li>
+	<li><img src="./digits_6_0.png" /></li>
+</ul>
+
+<p>Note that if you calibrate something that starts with a 1, the capture area should NOT hug the one on the left (notice the black strip on the left).</p>
+
+<ul>
+	<li><img src="./digits_18.png" /></li>
+</ul>
+
+<h2>Preview</h2>
+
+<p>To calibrate the preview properly, run the calibration in level 0 over multiple pieces, such that:</p>
+
+<ul>
+	<li><p>Pieces S, Z, L, J, T, O are "hugged" TOP and BOTTOM in the capture area</p>
+		<img src="./preview_s.png" />
+		<img src="./preview_z.png" />
+		<img src="./preview_l.png" />
+		<img src="./preview_j.png" />
+		<img src="./preview_t.png" />
+		<img src="./preview_o.png" />
+	</li>
+
+	<li><p>Piece I is "hugged" LEFT and RIGHT in the capture area</p>
+		<img src="./preview_i.png" />
+	</li>
+</ul>
+
+<p>"hugged" means there is no black border</p>
+
+<h2>Current Piece (DAS Trainer only)</h2>
+
+<p>To calibrate the preview properly, run the calibration in level 0 over multiple pieces, such that:</p>
+
+<ul>
+	<li><p>Pieces L, J are "hugged" TOP ONLY in the capture area (notice there's a black strip at the bottom)</p>
+		<img src="./cur_piece_l.png" />
+		<img src="./cur_piece_j.png" />
+	</li>
+	<li><p>Pieces S, Z, T, O are "hugged" BOTTOM ONLY in the capture area (notice there's a black strip on top)</p>
+		<img src="./cur_piece_s.png" />
+		<img src="./cur_piece_z.png" />
+		<img src="./cur_piece_t.png" />
+		<img src="./cur_piece_o.png" />
+	</li>
+
+	<li><p>Piece I is "hugged" LEFT and RIGHT in the capture area</p>
+		<img src="./cur_piece_i.png" />
+	</li>
+</ul>
+
+<h2>Color (Classic Tetris only)</h2>
+
+<p>Reading colors from the frame helps matching the block colors when scanning the field.</p>
+
+<p>The are 2 colors to read: color1 and color2, and they should be read from the pieces stats on the left by selecting one block from the J piece, and one block from the Z piece</p>
+
+<p>The blocks should be chosen like this</p>
+
+<p><img src="./statistics_colors.png" /></p>
+
+<p>The selection should not include any black border</p>
+
+<uL>
+	<li><img src="./color_1.png" /></li>
+	<li><img src="./color_2.png" /></li>
+</uL>
+
+<h2>Field</h2>
+
+<p>To calibrate the field capture, try to stak pieces on the left, right, and bottom,  and even to block the top-left and top-right.</p>
+
+<p>Having done that, hug the capture on the left and the top, and leave a thin black border on the bottom and right, like this:</p>
+
+<p><img src="./field.png" /></p>
+
+
+<h1 id="obs">OBS / Streamlabs setup</h1>
+
+<p>All layouts so far are 720p (1280x720), which is a good compromise of real estate vs. draw time and upload bandwidth requirements. But feel free to stretch the layout to fit a 1080p canva</p>
+
+<p>The Browser Source setup should look like this:</p>
+
+<p><img src="./streamlabs_browser_source.png" /></p>
+
+
+<h1>Binary frame format</h1>
+
+<p>All captured frames are sent in binary and weight 72 bytes per frame. They have the following format:</p>
+
+<table>
+	<tr>
+		<th>Purpose</th>
+		<th>Size</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>Header</td>
+		<td>1 byte</td>
+		<td>Contains version (3 bits), game type (2 bits), player number (3 bits)</td>
+	</tr>
+	<tr>
+		<td>Game ID</td>
+		<td>2 bytes</td>
+		<td>Starts at zero when producer starts. Increases by 1 at every game.</td>
+	</tr>
+	<tr>
+		<td>Client time</td>
+		<td>4 bytes</td>
+		<td>Number of milliseconds since producer connected.</td>
+	</tr>
+	<tr>
+		<td>Score</td>
+		<td>3 bytes</td>
+		<td>Usigned int. All tetris possible score covered since 2<sup>24</sup>=16,777,216</td>
+	</tr>
+	<tr>
+		<td>lines</td>
+		<td>9 bits</td>
+		<td>Usigned int. Allows 512 lines</td>
+	</tr>
+</table>
+
+<ul>
+	<li>Header: 1 byte
+	<li>Header - Version: 3 bits
+</ul>
+
+
+
+See the <a href="https://nestrischamps.herokuapp.com/js/BinaryFrame.js">source file</a> for details.
+</body>
+<html>
