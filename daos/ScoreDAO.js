@@ -75,6 +75,8 @@ class ScoreDAO {
 	}
 
 	async reportGame(user, game_data) {
+		if (!game_data) return;
+
 		const db_client = await dbPool.connect();
 
 		const result = await db_client.query(`

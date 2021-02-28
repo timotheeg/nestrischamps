@@ -48,6 +48,8 @@ router.post('/report_game/:secret', middlewares.assertSession, async (req, res) 
 		return;
 	}
 
+	console.log('received game', JSON.stringify(req.body));
+
 	await ScoreDAO.reportGame(user, req.body);
 
 	res.json(await ScoreDAO.getStats(user));
