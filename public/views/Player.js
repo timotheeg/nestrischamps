@@ -446,7 +446,6 @@ class Player {
 
 	setName(name) {
 		this.dom.name.textContent = this.player_name = name;
-		this.setAvatar();
 	}
 
 	setId(id) {
