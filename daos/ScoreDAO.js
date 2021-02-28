@@ -100,7 +100,6 @@ class ScoreDAO {
 			`,
 			[
 				user.id,
-				game_data.player_id,
 				game_data.start_level,
 				game_data.end_level,
 				game_data.score        || 0,

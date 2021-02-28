@@ -327,7 +327,9 @@ function getStats() {
 	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([A-Z0-9]+)$/)) {
 		fetch(
 			`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
-			{ mode: 'no-cors' }
+			{
+				// mode: 'no-cors'
+			}
 		)
 		.then(response => response.json())
 		.then(renderPastGamesAndPBs)
@@ -346,7 +348,7 @@ function reportGame(game) {
 			`${location.protocol}//${location.host}/stats/report_game/${m[1]}`,
 			{
 				method: 'POST', // *GET, POST, PUT, DELETE, etc.
-				mode: 'no-cors', // no-cors, cors, *same-origin
+				// mode: 'no-cors', // no-cors, cors, *same-origin
 				headers: {
 					'Content-Type': 'application/json'
 				},
