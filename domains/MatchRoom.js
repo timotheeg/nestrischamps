@@ -17,14 +17,14 @@ class MatchRoom extends Room {
 					id: '',
 					login: '',
 					display_name: '',
-					profile_image_url: '/_',
+					profile_image_url: '',
 					victories: 0,
 				},
 				{
 					id: '',
 					login: '',
 					display_name: '',
-					profile_image_url: '/_',
+					profile_image_url: '',
 					victories: 0,
 				},
 			]
