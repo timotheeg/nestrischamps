@@ -9,7 +9,7 @@ module.exports = {
 		type: '1p',
 	},
 	invisible_tetris: {
-		file: 'invisible_tetris',
+		file: 'simple_1p_layout_invisible_tetris',
 		type: '1p',
 	},
 
