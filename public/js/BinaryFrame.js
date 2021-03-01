@@ -3,7 +3,7 @@ const BinaryFrame = (function() {
 const FORMAT_VERSION = 1;
 
 const FRAME_SIZE_BY_VERSION = {
-	'1': 72,
+	'1': 71,
 };
 
 const GAME_TYPE = {
@@ -89,27 +89,34 @@ class BinaryFrame {
 			((sanitized.game_type & 0b11) << 3)
 		);
 
-		// gameid
+		// gameid - 16 bits
 		buffer[bidx++] = (sanitized.gameid & 0xFF00) >> 8;
 		buffer[bidx++] = (sanitized.gameid & 0x00FF) >> 0;
 
-		// ctime
-		buffer[bidx++] = (sanitized.ctime & 0xFF000000) >> 24;
-		buffer[bidx++] = (sanitized.ctime & 0x00FF0000) >> 16;
-		buffer[bidx++] = (sanitized.ctime & 0x0000FF00) >>  8;
-		buffer[bidx++] = (sanitized.ctime & 0x000000FF) >>  0;
+		// ctime - 28 bits
+		buffer[bidx++] = (sanitized.ctime & 0xFF00000) >> 20;
+		buffer[bidx++] = (sanitized.ctime & 0x00FF000) >> 12;
+		buffer[bidx++] = (sanitized.ctime & 0x0000FF0) >>  4;
+		buffer[bidx++] = (
+			((sanitized.ctime & 0x0F) << 4)
+			|
+			((sanitized.score & 0x1E0000) >> 17)
+		);
 
-		// score
-		buffer[bidx++] = (sanitized.score & 0xFF0000) >> 16;
-		buffer[bidx++] = (sanitized.score & 0x00FF00) >>  8;
-		buffer[bidx++] = (sanitized.score & 0x0000FF) >>  0;
+		// score - 21 bits
+		buffer[bidx++] = (sanitized.score & 0x1FE00) >> 9;
+		buffer[bidx++] = (sanitized.score & 0x001FE) >>  1;
+		buffer[bidx++] = (
+			((sanitized.score & 0b1) << 7)
+			|
+			((sanitized.lines & 0b111111100) >> 2)
+		);
 
 		// lines + level
-		buffer[bidx++] = (sanitized.lines & 0b111111110) >> 1;
 		buffer[bidx++] = (
-			((sanitized.lines & 0b1) << 7)
+			((sanitized.lines & 0b000000011) << 6)
 			|
-			(sanitized.level & 0b1111111)
+			(sanitized.level & 0b11111)
 		);
 
 		// instant_das + preview
@@ -167,12 +174,20 @@ class BinaryFrame {
 
 		pojo.gameid = (f[bidx++] << 8) | f[bidx++];
 
-		pojo.ctime = (f[bidx++] << 24) | (f[bidx++] << 16) | (f[bidx++] << 8) | f[bidx++];
+		pojo.ctime = (f[bidx++] << 20)
+			| (f[bidx++] << 12)
+			| (f[bidx++] << 4)
+			| ((f[bidx] & 0xF0) >> 4);
 
-		pojo.score = (f[bidx++] << 16) | (f[bidx++] << 8) | f[bidx++];
+		pojo.score = ((f[bidx++] & 0x0F) << 17)
+			| (f[bidx++] << 9)
+			| (f[bidx++] << 1)
+			| ((f[bidx] & 0b10000000) >> 7);
 
-		pojo.lines = (f[bidx++] << 1) | ((f[bidx] & 0b10000000) >> 7);
-		pojo.level = f[bidx++] & 0b1111111;
+		pojo.lines = ((f[bidx++] & 0b01111111) << 2)
+			| ((f[bidx] & 0b11000000) >> 6);
+
+		pojo.level = f[bidx++] & 0b0111111;
 
 		pojo.instant_das = (f[bidx] & 0b11111000) >> 3;
 		pojo.preview = f[bidx++] & 0b111;
@@ -200,9 +215,9 @@ class BinaryFrame {
 
 		// we've extracted all the value, now checks for nulls
 
-		if (pojo.score === 0xFFFFFF) pojo.score = null;
+		if (pojo.score === 0x1FFFFF) pojo.score = null;
 		if (pojo.lines === 0b111111111) pojo.lines = null;
-		if (pojo.level === 0b1111111) pojo.level = null;
+		if (pojo.level === 0b111111) pojo.level = null;
 		if (pojo.instant_das === 0b11111) pojo.instant_das = null;
 		if (pojo.cur_piece_das === 0b11111) pojo.cur_piece_das = null;
 

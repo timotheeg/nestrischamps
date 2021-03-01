@@ -214,7 +214,7 @@ th, td {
 
 <h1 id="binary_frame_format">Binary frame format</h1>
 
-<p>All captured frames are sent in binary and weight 576 bites (72 bytes) per frame. ON a capture setup of 60fps, the game stream requirements are therefore 72*60 = 4,320 B/s (~4KB/s).</p>
+<p>All captured frames are sent in binary and weight 568 bits (71 bytes) per frame. ON a capture setup of 60fps, the game stream requirements are therefore 71*60 = 4,260 B/s (~4KB/s).</p>
 
 <p>They have the format below.</p>
 
@@ -254,14 +254,14 @@ th, td {
 	<tr>
 		<td>5</td>
 		<td>Client time</td>
-		<td>32 bits</td>
-		<td>Number of milliseconds since producer connected.</td>
+		<td>28 bits</td>
+		<td>Number of milliseconds since producer connected. Range: ~74 hours</td>
 	</tr>
 	<tr>
 		<td>6</td>
 		<td>Score</td>
-		<td>24 bits</td>
-		<td>Unsigned int. Range: 16,777,216 (2<sup>24</sup>)</td>
+		<td>21 bits</td>
+		<td>Unsigned int. Range: 2,097,152 (2<sup>21</sup>)</td>
 	</tr>
 	<tr>
 		<td>7</td>
@@ -272,8 +272,8 @@ th, td {
 	<tr>
 		<td>8</td>
 		<td>Level</td>
-		<td>7 bits</td>
-		<td>Unsigned int. Range: 128</td>
+		<td>6 bits</td>
+		<td>Unsigned int. Range: 64</td>
 	</tr>
 	<tr>
 		<td>9</td>
