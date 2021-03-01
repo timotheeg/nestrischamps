@@ -361,6 +361,7 @@ th, td {
 <p>As with any software, there's always more... "More, more, more, more, more" as the GOAT would say.</p>
 
 <ul>
+	<li>Supply a stats-heavy layout for classic Tetris (not just for das trainer)</li>
 	<li>Make this site look nice: some branding and fancy site styling</li>
 	<li>Follow the usual web delivery best practices (pack assets, use cdn for static assts, etc.)</li>
 	<li>Let users contributes their own layout</li>
@@ -369,7 +370,7 @@ th, td {
 	<li>By-invite only room (restricted access)</li>
 	<li>Make producers only push game frames to websocket when room instructs</li>
 	<li>Web RTC between the producers and view. nestrischamp would act as signaling coordinator. This could be useful, because heroku servers are in the US, so when players and commentators are all in EU or Asia for example, the game frames still go all around the frames, which is not efficient (to be tested if OBS Browser Source supports web RTC).</li>
-	<li>Record the game in DB. If games are stored, it opens the door for replay, match up of any past games, and more (?). But storage requirements might be a pain. Say a game lasts 6mins, at 60fps, storage size requirement per game would be 6mins * 60secs * 60fps * 72bytes = 1,555,200 bytes (~1.5MB)</li>
+	<li>Record the game in DB. If games are stored, it opens the door for replay, match up of any past games, and more (?). But storage requirements might be a pain. Say a game lasts 6mins, at 60fps, storage size requirement per game would be 6mins * 60secs * 60fps * 71bytes = 1,533,600 bytes (~1.5MB)</li>
 </ul>
 </body>
 <html>
