@@ -544,7 +544,7 @@ function handleFrame(frame) {
 var captured_frames = []
 
 const API = {
-	frame(data) {
+	frame(player_num, data) {
 		// captured_frames.push(data);
 		try {
 			handleFrame(data);
@@ -559,20 +559,7 @@ const connection = new Connection();
 
 connection.onMessage = function(frame) {
 	try{
-		let method, args;
-
-		if (Array.isArray(frame)) {
-			[method, ...args] = frame;
-		}
-		else {
-			method = 'frame';
-
-			if (frame instanceof Uint8Array) {
-				frame = BinaryFrame.parse(frame);
-			}
-
-			args = [ frame ];
-		}
+		let [method, ...args] = frame;
 
 		API[method].apply(API, args);
 	}
