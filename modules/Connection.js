@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const EventEmitter = require('events');
 
-const KICK_DESTROY_DELAY = 3000; // allows UI to get message and know it should not attempt to reconnect
+const KICK_DESTROY_DELAY = 1000; // allows UI to get message and know it should not attempt to reconnect
 const PING_INTERVAL = 15000;
 const PONG_TIMEOUT = 60000;
 

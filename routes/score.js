@@ -6,8 +6,6 @@ const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
 
-router.use(express.json());
-
 router.get('/get_stats/:secret', async (req, res) => {
 	console.log('get stats by secret');
 
@@ -48,7 +46,7 @@ router.get('/get_stats', middlewares.assertSession, async (req, res) => {
 });
 
 
-router.post('/report_game/:secret', middlewares.assertSession, async (req, res) => {
+router.post('/report_game/:secret', middlewares.assertSession, express.json(), async (req, res) => {
 	console.log('report_game by secret');
 
 	const user = await UserDAO.getUserBySecret(req.params.secret);

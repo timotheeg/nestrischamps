@@ -5,7 +5,7 @@ const Connection = require('../modules/Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
-		console.log('WS: ', request.url);
+		console.log(`WS: ${request.url}`);
 
 		const m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
 
@@ -65,6 +65,7 @@ module.exports = function init(server, wss) {
 
 			middlewares.sessionMiddleware(request, {}, async () => {
 				if (!request.session.user) {
+					console.log(`WS: User session not found`);
 					socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
 					socket.destroy();
 					return;
@@ -76,6 +77,7 @@ module.exports = function init(server, wss) {
 					const target_user = await UserDAO.getUserByLogin(m[1]);
 
 					if (!target_user) {
+						console.log(`WS: Target User Not Found`);
 						socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
 						socket.destroy();
 						return;
@@ -93,7 +95,7 @@ module.exports = function init(server, wss) {
 	});
 
 	wss.on('connection', async (ws, request) => {
-		console.log('WS: Connection!', request.session.user.id, 'secret?', request.is_secret_view);
+		console.log('WS: Connection!', request.url, request.session.user.id, request.session.user.login);
 
 		const user = await UserDAO.getUserById(request.session.user.id);
 
@@ -104,7 +106,7 @@ module.exports = function init(server, wss) {
 		user.addConnection(connection);
 
 		if (request.is_secret_view) {
-			console.log('Adding View', user.login, 'single?', request.tetris.view.single_player);
+			console.log('WS: Adding View', user.login, 'single?', request.tetris.view.single_player);
 			const room = request.tetris.view.single_player
 				? user.getPrivateRoom()
 				: user.getMatchRoom()
@@ -113,11 +115,11 @@ module.exports = function init(server, wss) {
 			room.addView(connection);
 		}
 		else if(request.url === '/ws/room/admin') {
-			console.log(`MatchRoom: ${user.login}: Admin connecting`);
+			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getMatchRoom().setAdmin(connection);
 		}
 		else if(request.url === '/ws/room/producer') {
-			console.log(`PrivateRoom: ${user.login}: Producer connecting`);
+			console.log(`PrivateRoom: ${user.login}: Producer connected`);
 			user.getPrivateRoom().setProducer(connection);
 		}
 		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
@@ -136,22 +138,22 @@ module.exports = function init(server, wss) {
 				console.log(`Switching on ${request.url.split('/')[5]}`);
 				switch(request.url.split('/')[5]) {
 					case 'admin': {
-						console.log(`MatchRoom: ${target_user.login}: Admin connecting`);
+						console.log(`MatchRoom: ${target_user.login}: Admin connected`);
 						target_user.getMatchRoom().setAdmin(connection);
 						break;
 					}
 					case 'producer': {
-						console.log(`MatchRoom: ${target_user.login}: Producer connecting: ${user.login}`);
+						console.log(`MatchRoom: ${target_user.login}: Producer ${user.login} connected`);
 						target_user.getMatchRoom().addProducer(connection);
 						break;
 					}
 					case 'view': {
-						console.log(`MatchRoom: ${target_user.login}: View connecting by ${user.login}`);
+						console.log(`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`);
 						target_user.getMatchRoom().addView(connection);
 						break;
 					}
 					default: {
-						console.log(`MatchRoom: ${target_user.login}: Producer connecting: ${user.login}`);
+						console.log(`WS: Invalid URL`);
 						connection.kick('invalid_url');
 					}
 				}
@@ -159,6 +161,7 @@ module.exports = function init(server, wss) {
 		}
 		else {
 			console.log('Unrecognized connection');
+			connection.kick('invalid_url');
 		}
 	});
 };

@@ -1,6 +1,15 @@
 <html>
 <head>
-</head
+</head>
 <body>
+
+<h1>Hi <%= user_name %>!</h1>
+
+<p>Thanks for using NestrisChamps.</p>
+
+<p>Your view secret is <b><%= user_secret%></b>. <a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</p>
+
+<p><a href="/settings/clear_session">Clear Session</a> (= logout)</p>
+
 </body>
 </html>

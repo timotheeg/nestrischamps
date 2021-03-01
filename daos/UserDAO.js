@@ -73,24 +73,30 @@ class UserDAO {
 	}
 
 	async updateSecret(user, new_secret) {
-		// WARNING: potential race condition in this method
+		// WARNING: potential re-entrancy problem with this method
 		// WARNING: deal with it later
-		const old_secret = user.secret;
 
-		// update local memory store
-		this.users_by_secret.delete(user.secret);
-		user.secret = new_secret;
-		this.users_by_secret.set(user.secret, user);
+		try {
+			// then update DB ... dubious order, the whole thing should be a transaction
+			const db_client = await dbPool.connect();
+			const insert_result = await db_client.query(
+				`UPDATE twitch_users
+				set secret=$1
+				WHERE id=$2
+				`,
+				[ new_secret, user.id ]
+			);
 
-		// then update DB ... dubious order ...
-		const db_client = await dbPool.connect();
-		const insert_result = await db_client.query(
-			`UPDATE twitch_users
-			set secret=$1
-			WHERE id=$2
-			`,
-			[ user.secret, user.id ]
-		);
+			const old_secret = user.secret;
+
+			// TODO: add greater processing safety here
+			this.users_by_secret.delete(user.secret);
+			user.secret = new_secret;
+			this.users_by_secret.set(user.secret, user);
+		}
+		catch(err) {
+			console.log(`Unable to update secret for user ${user.login}`);
+		}
 
 		return user;
 	}
