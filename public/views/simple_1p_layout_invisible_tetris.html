@@ -225,9 +225,9 @@ player.onGameStart = () => {
 
 
 const frame_buffer = [];
-let combined_board = Array(20).fill().map(_ => Array(10).fill(0));
+let combined_board;
 let cur_board;
-let last_frame;
+let last_field_str;
 let last_board;
 let game_id;
 let top_empty;
@@ -237,7 +237,7 @@ let clear_animation_remaining_frames;
 function reset() {
 	combined_board = Array(20).fill().map(_ => Array(10).fill(0));
 	frame_buffer.length = 0;
-	last_frame = '';
+	last_field_str = '';
 	last_board = null;
 	top_empty = true;
 	clear_animation_remaining_frames = 0;
@@ -245,17 +245,16 @@ function reset() {
 
 reset();
 
-function toBoard(str) {
-	let field = str.split('').map(d => parseInt(d, 10));
+function fieldToBoard(field) {
 	const rows = Array(20).fill().map((v, i) => field.slice(i * 10, i * 10 + 10));
 
-	rows.num_block = str.replace(/0+/g, '').length;
+	rows.num_block = field.reduce((acc, v) => acc += v?1:0, 0);
 
 	return rows;
 }
 
-function boardToStr(board) {
-	return board.map(r => r.join('')).join('');
+function boardToField(board) {
+	return [].concat(...board);
 }
 
 function isRowEmpty(row) {
@@ -342,8 +341,6 @@ function isSecondFrameOfDoubleClearAnimation(board) {
 const CLEAR_ANIMATION_FRAMES = 7;
 
 function startClearAnimation(remaining_frames, board) {
-
-
 	clear_animation_remaining_frames = remaining_frames;
 	clear_animation_covered = false;
 
@@ -363,7 +360,9 @@ function handleFrame(frame) {
 
 	const last_board = peek(frame_buffer) && peek(frame_buffer)._board;
 
-	if (last_frame === frame.field) {
+	const field_str = frame.field.join('');
+
+	if (last_field_str === field_str) {
 		frame_buffer.push({
 			...frame,
 			field: peek(frame_buffer).field,
@@ -371,9 +370,9 @@ function handleFrame(frame) {
 		});
 	}
 	else {
-		last_frame = frame.field;
+		last_field_str = field_str;
 
-		let new_board = toBoard(frame.field);
+		let new_board = fieldToBoard(frame.field);
 
 		frame._board = new_board;
 
@@ -489,7 +488,7 @@ function handleFrame(frame) {
 			}));
 
 			// 3. update past frame object
-			peek(frame_buffer).field = boardToStr(last_combined_board);
+			peek(frame_buffer).field = boardToField(last_combined_board);
 
 			// 4. update new combined board
 			combined_board = last_combined_board;
@@ -530,7 +529,7 @@ function handleFrame(frame) {
 
 		frame_buffer.push({
 			...frame,
-			field: boardToStr(cur_board),
+			field: boardToField(cur_board),
 			_combined_board: cur_board,
 		});
 	}
