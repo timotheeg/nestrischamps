@@ -189,6 +189,8 @@ html {
 <script src="/views/Player.js"></script>
 <script src="/js/BinaryFrame.js"></script>
 <script >
+// Game Genie code: OXYOUO VNIPZN VNTPYN
+
 const player = new Player(
 	{
 		score:       document.querySelector(`.score .content`),
@@ -249,6 +251,8 @@ function fieldToBoard(field) {
 	const rows = Array(20).fill().map((v, i) => field.slice(i * 10, i * 10 + 10));
 
 	rows.num_block = field.reduce((acc, v) => acc += v?1:0, 0);
+
+	console.log(rows.num_block);
 
 	return rows;
 }
