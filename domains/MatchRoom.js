@@ -146,7 +146,7 @@ class MatchRoom extends Room {
 							id: '',
 							login: '',
 							display_name: '',
-							profile_image_url: '/_',
+							profile_image_url: '',
 						}
 					}
 					else if (this.state.players[0].id === player_id) {
