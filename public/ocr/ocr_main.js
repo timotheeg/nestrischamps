@@ -309,7 +309,6 @@ async function resetDevices() {
 
 navigator.mediaDevices.addEventListener('devicechange', resetDevices);
 
-
 async function playVideoFromDevice(device_id) {
 	try {
 		const constraints = {
@@ -380,17 +379,22 @@ async function playVideoFromConfig() {
 
 let capture_process, blob;
 let frame_count = 0;
-let frame_ms = 1000/30;
-let start_time_ms;
-let last_frame_time;
 
-async function startCapture(stream) {
+function updateFrameRate() {
+
+}
+
+function stopCapture() {
 	if (use_animation_frames) {
 		window.cancelAnimationFrame(capture_process);
 	}
 	else {
 		clearTimeout(capture_process);
 	}
+}
+
+async function startCapture(stream) {
+	stopCapture();
 
 	if (!stream) {
 		stream = video.srcObject;
@@ -418,17 +422,12 @@ async function startCapture(stream) {
 	}
 
 	frame_ms = 1000 / settings.frameRate;
-	start_time_ms = Date.now();
-	last_frame_time = start_time_ms;
+
 	captureFrame();
 }
 
 async function captureFrame() {
 	++frame_count;
-	const now = Date.now();
-
-	// perf_data.textContent = now - last_frame_time;
-	last_frame_time = now;
 
 	try {
 		let bitmap;
