@@ -56,6 +56,8 @@ const configs = {
 	}
 };
 
+const default_frame_rate = 60;
+
 let do_half_height = true;
 let use_animation_frames = true;
 
@@ -71,6 +73,7 @@ const
 	go_btn           = document.querySelector('#go'),
 
 	controls         = document.querySelector('#controls'),
+	capture_rate     = document.querySelector('#capture_rate'),
 	show_parts       = document.querySelector('#show_parts'),
 
 	conn_host        = document.querySelector('#conn_host'),
@@ -121,6 +124,8 @@ rom_selector.addEventListener('change', evt => {
 
 	checkActivateGoButton();
 });
+
+capture_rate.addEventListener('change', updateFrameRate);
 
 function checkActivateGoButton() {
 	// no need to check palette, if rom_selector has a value, then palette automatically has a valid value too
@@ -309,14 +314,14 @@ async function resetDevices() {
 
 navigator.mediaDevices.addEventListener('devicechange', resetDevices);
 
-async function playVideoFromDevice(device_id) {
+async function playVideoFromDevice(device_id, fps) {
 	try {
 		const constraints = {
 			audio: false,
 			video: {
 				width: { ideal: 640 },
 				height: { ideal: 480 },
-				frameRate: { ideal: 60 }
+				frameRate: { ideal: fps } // Should we always try to get the highest the card can support?
 			}
 		};
 
@@ -339,13 +344,13 @@ async function playVideoFromDevice(device_id) {
 	}
 }
 
-async function playVideoFromScreenCap() {
+async function playVideoFromScreenCap(fps) {
 	try {
 		const constraints = {
 			audio: false,
 			video: {
 				cursor: 'never',
-				frameRate: { ideal: 60 }
+				frameRate: { ideal: fps }
 			}
 		};
 
@@ -365,32 +370,40 @@ async function playVideoFromConfig() {
 	if (!config.device_id) {
 		return;
 	}
-	else if (config.device_id === 'window') {
+
+	if (config.device_id === 'window') {
 		do_half_height = false;
-		use_animation_frames = true;
-		await playVideoFromScreenCap();
+		await playVideoFromScreenCap(config.frame_rate);
 	}
 	else {
 		do_half_height = true;
-		use_animation_frames = false;
-		await playVideoFromDevice(config.device_id);
+		await playVideoFromDevice(config.device_id, config.frame_rate);
 	}
+
+	capture_rate.querySelectorAll('.device_only').forEach(elmt => elmt.hidden = config.device_id === 'window');
 }
 
 let capture_process, blob;
 let frame_count = 0;
 
-function updateFrameRate() {
+async function updateFrameRate() {
+	try {
+		video.srcObject.getVideoTracks()[0].stop();
+	}
+	catch(err) {}
 
+	stopCapture();
+
+	config.frame_rate = parseInt(capture_rate.value, 10);
+	saveConfig(config);
+
+	await playVideoFromConfig();
+
+	startCapture();
 }
 
 function stopCapture() {
-	if (use_animation_frames) {
-		window.cancelAnimationFrame(capture_process);
-	}
-	else {
-		clearTimeout(capture_process);
-	}
+	clearInterval(capture_process);
 }
 
 async function startCapture(stream) {
@@ -423,7 +436,8 @@ async function startCapture(stream) {
 
 	frame_ms = 1000 / settings.frameRate;
 
-	captureFrame();
+	console.log(`Setting capture interval for ${settings.frameRate}fps (i.e. ${frame_ms}ms per frame)`)
+	capture_process = setInterval(captureFrame, frame_ms);
 }
 
 async function captureFrame() {
@@ -466,15 +480,6 @@ async function captureFrame() {
 	}
 	catch(err) {
 		console.error(err);
-	}
-
-	if (use_animation_frames) {
-		capture_process = window.requestAnimationFrame(captureFrame);
-	}
-	else {
-		// schedule next async run, device wil hold till next frame 👍
-		// might need to do a animationFrame or 60fps interval 🤔
-		capture_process = setTimeout(captureFrame, 0);
 	}
 }
 
@@ -712,6 +717,7 @@ function saveConfig(config) {
 	const config_copy = {
 		device_id: config.device_id,
 		palette: config.palette,
+		frame_rate: config.frame_rate,
 		tasks: {}
 	};
 
@@ -748,7 +754,7 @@ function showFrameData(data) {
 
 		dt.textContent = name;
 		if (name === 'field') {
-			dd.textContent = `${data.field.slice(0, 30)}...`;
+			dd.textContent = data.field.slice(0, 30).join('');
 		}
 		else {
 			dd.textContent = value;
@@ -880,7 +886,10 @@ function trackAndSendFrames() {
 	if (hasConfig()) {
 		config = loadConfig();
 		await resetDevices();
+
+		capture_rate.value = config.frame_rate || default_frame_rate;
 		controls.style.display = 'block';
+
 		await playVideoFromConfig();
 		trackAndSendFrames();
 	}
@@ -896,10 +905,14 @@ function trackAndSendFrames() {
 
 		await resetDevices();
 
+		capture_rate.value = default_frame_rate;
+
 		ocv = await cv;
 
 		// create default dummy waiting to be populated by user selection
-		config = { tasks: {} };
+		config = {
+			frame_rate: default_frame_rate,
+			tasks: {} };
 		wizard.style.display = 'block';
 	}
 })();

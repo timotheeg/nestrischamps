@@ -102,6 +102,12 @@ fieldset.field pre {
 	display: none;
 }
 
+#ocr_results dd {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 </style>
 </head>
 
@@ -146,6 +152,17 @@ fieldset.field pre {
 		<div>
 			<label for="show_parts">Show Parts</label>
 			<input type="checkbox" id="show_parts" checked />
+		</div>
+
+		<div>
+			<label for="show_parts">Capture Rate</label>
+			<select id="capture_rate">
+				<option value="25">24 fps</option>
+				<option value="25">25 fps</option>
+				<option value="30">30 fps</option>
+				<option value="50">50 fps</option>
+				<option value="60">60 fps</option>
+			</select>
 		</div>
 		<div>
 			<button id="clear_config">Clear config and Restart</button>
