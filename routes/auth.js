@@ -46,6 +46,8 @@ router.get('/twitch/callback', async (req, res) => {
 			responseType: 'json'
 		});
 
+		console.log('Completed token validation: ', user_response.body.user_id);
+
 		// finally can get user data from user id
 		const user_data_response = await got.get('https://api.twitch.tv/helix/users', {
 			headers: {
@@ -57,6 +59,8 @@ router.get('/twitch/callback', async (req, res) => {
 			},
 			responseType: 'json'
 		});
+
+		console.log('Retrieved user data: ', user_data_response.body.data[0]);
 
 		const user_object = user_data_response.body.data[0];
 

@@ -35,8 +35,7 @@ class UserDAO {
 	}
 
 	async createUser(user_data) {
-		const db_client = await dbPool.connect();
-		const insert_result = await db_client.query(
+		const insert_result = await dbPool.query(
 			`INSERT INTO twitch_users
 			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
 			VALUES
@@ -65,8 +64,7 @@ class UserDAO {
 	async deleteUser(user) {
 		this.removeUser(user);
 
-		const db_client = await dbPool.connect();
-		const insert_result = await db_client.query(
+		const insert_result = await dbPool.query(
 			'DELETE FROM twitch_users WHERE id=$1;',
 			[ user.id ]
 		);
@@ -78,8 +76,7 @@ class UserDAO {
 
 		try {
 			// then update DB ... dubious order, the whole thing should be a transaction
-			const db_client = await dbPool.connect();
-			const insert_result = await db_client.query(
+			const insert_result = await dbPool.query(
 				`UPDATE twitch_users
 				set secret=$1
 				WHERE id=$2
@@ -105,8 +102,7 @@ class UserDAO {
 		let user = this.users_by_id.get(id);
 
 		if (!user || force_fetch) {
-			const db_client = await dbPool.connect();
-			const result = await db_client.query(
+			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE id=$1',
 				[ id ]
 			);
@@ -123,8 +119,7 @@ class UserDAO {
 		let user = this.users_by_login.get(login);
 
 		if (!user) {
-			const db_client = await dbPool.connect();
-			const result = await db_client.query(
+			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE login=$1',
 				[ login ]
 			);
@@ -141,8 +136,7 @@ class UserDAO {
 		let user = this.users_by_secret.get(secret);
 
 		if (!user) {
-			const db_client = await dbPool.connect();
-			const result = await db_client.query(
+			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE secret=$1',
 				[ secret ]
 			);

@@ -6,17 +6,27 @@ class ScoreDAO {
 	async getStats(user) {
 		const db_client = await dbPool.connect();
 
-		return {
-			current_player: user.login,
-			pbs: [
-				await this._getPBs(db_client, user, 18),
-				await this._getPBs(db_client, user, 19),
-			],
-			high_scores: {
-				overall: await this._getBestOverall(db_client, user),
-				today:   await this._getBestToday(db_client, user)
-			}
-		};
+		try {
+			return {
+				current_player: user.login,
+				pbs: [
+					await this._getPBs(db_client, user, 18),
+					await this._getPBs(db_client, user, 19),
+				],
+				high_scores: {
+					overall: await this._getBestOverall(db_client, user),
+					today:   await this._getBestToday(db_client, user)
+				}
+			};
+		}
+		catch(err) {
+			console.log('Error getting user stats');
+			console.error(err);
+			return {};
+		}
+		finally {
+			db_client.release();
+		}
 	}
 
 	async _getPBs(db_client, user, start_level) {
@@ -77,9 +87,7 @@ class ScoreDAO {
 	async recordGame(user, game_data) {
 		if (!game_data) return;
 
-		const db_client = await dbPool.connect();
-
-		const result = await db_client.query(`
+		const result = await dbPool.query(`
 			INSERT INTO scores
 			(
 				datetime,
