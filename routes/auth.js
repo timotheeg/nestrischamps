@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/twitch/callback', async (req, res) => {
-	console.log('received code', req.query.code);
+	console.log(`Twitch callback received with code [${req.query.code}]`);
 
 	if (!req.query.code) {
 		res.send(`Unable to authenticate [${req.query.error}]: ${req.query.error_description}`);
@@ -46,7 +46,7 @@ router.get('/twitch/callback', async (req, res) => {
 			responseType: 'json'
 		});
 
-		console.log('Completed token validation: ', user_response.body.user_id);
+		console.log(`Completed token validation for ${user_response.body.user_id}`);
 
 		// finally can get user data from user id
 		const user_data_response = await got.get('https://api.twitch.tv/helix/users', {
@@ -60,9 +60,9 @@ router.get('/twitch/callback', async (req, res) => {
 			responseType: 'json'
 		});
 
-		console.log('Retrieved user data: ', user_data_response.body.data[0]);
-
 		const user_object = user_data_response.body.data[0];
+
+		console.log(`Retrieved user data for ${user_response.body.user_id} (${user_object.login})`);
 
 		// augment use object with data we retrieve previously
 		user_object.token = token;
@@ -70,7 +70,7 @@ router.get('/twitch/callback', async (req, res) => {
 
 		const user = await UserDAO.createUser(user_object);
 
-		console.log(`Retrieved user ${user.login} from Twitch authorisation`);
+		console.log(`Retrieved user object from DB for ${user_response.body.user_id} (${user_object.login})`);
 
 		req.session.user = {
 			id:     user.id,
@@ -89,7 +89,7 @@ router.get('/twitch/callback', async (req, res) => {
 	}
 	catch(err) {
 		console.error(err);
-		res.status(500).send('meh T_T');
+		res.status(500).send(`meh T_T: ${err.message}`);
 	}
 });
 
