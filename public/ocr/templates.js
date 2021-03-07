@@ -18,7 +18,11 @@ async function loadDigitTemplates() {
 
 	const width = DIGITS.length * 8 + 1;
 	const height = 7;
-	const canvas = new OffscreenCanvas(width, height);
+	const canvas = document.createElement('canvas');
+
+	canvas.width = width;
+	canvas.height = height;
+
 	const ctx = canvas.getContext('2d');
 
 	ctx.imageSmoothingEnabled = false;
