@@ -41,7 +41,7 @@
 <p>If you'd like to change your secret, visit your <a href="/settings">settings</a> page to revoke the token (and generate a new one)</p>
 
 <script>
-document.querySelectorAll('a').forEach(a => {
+document.querySelectorAll('dd a').forEach(a => {
 	// Views are identified by their secrets and only get game frame data, we can supply the links over http and save SSL processing cost.
 	const http_link = a.href.replace(/^https:/, 'http:/');
 
