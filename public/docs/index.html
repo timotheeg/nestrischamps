@@ -50,9 +50,9 @@ th, td {
 
 <h2>Views</h2>
 
-<p>Since views are typically setup in OBS, the URL needs to identify the room owner by itself, This is achieved by assigning a scret to each user that can placed in the URL. It's not super secure, but whatever, this tool is not hosting state secrets -_-</p>
+<p>Since views are typically setup in OBS, the URL needs to identify the room owner by itself, This is achieved by assigning a secret to each user that can placed in the URL. It's not super secure, but whatever, this tool is not hosting state secrets -_-</p>
 
-<p><a href="http://nestrischamps.herokuapp.com/view/simple_1p/USER_SECRET">http://nestrischamps.herokuapp.com/view/<b>LAYOUT_NAME</b>/<b>USER_SECRET</b></a></p>
+<p>http://nestrischamps.herokuapp.com/view/<b>LAYOUT_NAME</b>/<b>USER_SECRET</b></p>
 
 <p>The layouts available so far are as follow:</p>
 
@@ -72,7 +72,7 @@ th, td {
 	</li>
 </ul>
 
-<p>At your first login, a secret would have been generated for you and added to your user record. You can see it in your personl renderer links which are available <a href="http://nestrischamps.herokuapp.com/renderers">here</a>.</p>
+<p>At your first login, a secret would have been generated for you and added to your user record. You can see it in your personl renderer links which are available <a href="https://nestrischamps.herokuapp.com/renderers">here</a>.</p>
 
 <p>Hopefully in the future, users will be able to contribute their own template.</p>
 
@@ -83,7 +83,7 @@ th, td {
 
 <p>To attach yourself as a producer to another user's room (typically the link will be passed to you an invitation), the links will be of the form</p>
 
-<p>http://nestrischamps.herokuapp.com/room/u/<b>TWITCH_USERNAME</b>/producer</p>
+<p>https://nestrischamps.herokuapp.com/room/u/<b>TWITCH_USERNAME</b>/producer</p>
 
 <h2>Admin</h2>
 
@@ -106,7 +106,7 @@ th, td {
 
 <p>In both cases, start a game at level 0 BEFORE you press the "Calibrate and Capture button". In Das trainer, pause as soon as the game starts click the button. In Classic Tetris, click as soon as the game starts. In both cases, keep your fingers crossed that the auto calibrator takes you close to the desired state, and then fine tune all the capture areas to be pixel perfect.</p>
 
-<p>Once calibration and tuning has been done, the capture window and the browser tab MUST be focused.</p>
+<p>Once calibration and tuning has been done, the capture window and the browser tab MUST stay focused.</p>
 
 
 <h2>Digits</h2>
@@ -219,11 +219,11 @@ th, td {
 
 <h1 id="binary_frame_format">Binary frame format</h1>
 
-<p>All captured frames are sent in binary and weight 568 bits (71 bytes) per frame. ON a capture setup of 60fps, the game stream requirements are therefore 71*60 = 4,260 B/s (~4KB/s).</p>
+<p>All captured frames are sent in binary and weight 568 bits (71 bytes) per frame. On a capture setup of 60fps, the game stream requirements are therefore 71*60 = 4,260 B/s (~4KB/s).</p>
 
 <p>They have the format below.</p>
 
-<p>Game fields may be null (like das trainer's instant das when sending classic frames), in which case, the bits should all be set to 1.</p>
+<p>Game fields may be null (like das trainer's instant das when sending classic frames), in which case the field's bits should all be set to 1.</p>
 
 <table>
 	<tr>
