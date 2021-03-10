@@ -10,11 +10,11 @@
 }
 
 .score {
-	width: 237px;
+	width: 247px;
 	height: 54px;
 	font-size: 24px;
 
-	--offset: 15px;
+	--offset: 10px;
 	right: var(--offset);
 }
 
@@ -22,8 +22,9 @@
 	display: inline-block;
 }
 .score .aligner div {
-	text-align: right;
+	text-align: left;
 	padding-top: 6px;
+	white-space: pre;
 }
 .winning {
 	color: #0eff0e;
@@ -32,35 +33,29 @@
 	color: #fd0009;
 }
 
-.next_piece {
-	width: 90px;
-	top: 62px;
-
-	--offset: 274px;
-	right: var(--offset);
-}
-
-.lines {
-	width: 90px;
-
-	--offset: 274px;
-	right: var(--offset);
-}
-
 .board {
+	border-image: url('/views/big_border.png');
+	border-image-slice: 16 16 16 16 fill;
+	border-image-width: 16px 16px;
+	padding: 17px;
 	width: 237px;
 	height: 477px;
 	top: 76px;
 
-	--offset: 15px;
+	--offset: 10px;
 	right: var(--offset);
 }
 
-.name {
-	width: 237px;
-	top: 575px;
+.board .level {
+	position: absolute;
+}
 
-	--offset: 15px;
+.name {
+	width: 247px;
+	height: 19px;
+	top: 585px;
+
+	--offset: 10px;
 	right: var(--offset);
 }
 
@@ -77,9 +72,9 @@
 .tetris_rate {
 	width: 50px;
 	height: 50px;
-	top: 637px;
+	top: 626px;
 
-	--offset: 274px;
+	--offset: 279px;
 	right: var(--offset);
 }
 
@@ -89,38 +84,30 @@
 
 .running_trt {
 	padding: 9px;
-	width: 243px;
+	width: 253px;
 	height: 56px;
-	top: 637px;
+	top: 626px;
 
-	--offset: 15px;
+	--offset: 10px;
 	right: var(--offset);
 }
 
-.level {
-	width: 40px;
+.board .level {
+	position: absolute;
+	z-index: 100;
+}
 
-	--offset: 386px;
-	right: var(--offset);
+.board .next_piece {
+	position: absolute;
+	width: 64px;
+	height: 32px;
+	right: 15px;
+	top: 17px;
+	z-index: 1;
 }
 
 .p2 {
 	left: var(--offset);
-}
-
-.divider {
-	position: absolute;
-	left: -15px;
-	width: 30px;
-	height: 710px;
-	background-color: #000;
-	color: #f8e889;
-	font-size: 16px;
-
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
 }
 
 .dev_null {
@@ -134,29 +121,13 @@
 <div id="stream_bg">
 <div id="playing_fields">
 
-<!-- divider -->
-
-<div class="divider">vs</div>
-
 <!-- Player 1 -->
 
 <div class="box score p1">
 	<div class="aligner">
-		<div class="main">000,000</div>
+		<div class="main"><span class="value"></span>-<span class="lines"></span></div>
 		<div class="diff winning">000,000</div>
 	</div>
-</div>
-
-<div class="box lines p1">
-	<div class="header">LINES</div>
-	<div class="content">000</div>
-</div>
-
-<div class="box next_piece p1"></div>
-
-<div class="box level p1">
-	<div class="header">LV</div>
-	<div class="content">00</div>
 </div>
 
 <div class="box tetris_rate p1">
@@ -168,30 +139,21 @@
 
 <div class="box name p1">
 	<div class="header">PLAYER 1</div>
-	<div class="content">&#338;&#338;&#338;</div>
+	<div class="content"></div>
 </div>
 
-<div class="box board p1"></div>
+<div class="box board p1">
+	<div class="level"></div>
+	<div class="next_piece"></div>
+</div>
 
 <!-- Player 2 -->
 
 <div class="box score p2">
 	<div class="aligner">
-		<div class="main">000,000</div>
+		<div class="main"><span class="value"></span>-<span class="lines"></span></div>
 		<div class="diff losing">000,000</div>
 	</div>
-</div>
-
-<div class="box lines p2">
-	<div class="header">LINES</div>
-	<div class="content">000</div>
-</div>
-
-<div class="box next_piece p2"></div>
-
-<div class="box level p2">
-	<div class="header">LV</div>
-	<div class="content">00</div>
 </div>
 
 <div class="box tetris_rate p2">
@@ -203,10 +165,13 @@
 
 <div class="box name p2">
 	<div class="header">PLAYER 2</div>
-	<div class="content">&#338;&#338;&#338;</div>
+	<div class="content"></div>
 </div>
 
-<div class="box board p2"></div>
+<div class="box board p2">
+	<div class="level"></div>
+	<div class="next_piece"></div>
+</div>
 
 
 <div class="dev_null"></div>
@@ -228,13 +193,13 @@
 const players = [1, 2].map(num => new CompetitionPlayer(
 	{
 		name:        document.querySelector(`.name.p${num} .header`),
-		score:       document.querySelector(`.score.p${num} .main`),
+		score:       document.querySelector(`.score.p${num} .main .value`),
 		diff:        document.querySelector(`.score.p${num} .diff`),
-		level:       document.querySelector(`.level.p${num} .content`),
-		lines:       document.querySelector(`.lines.p${num} .content`),
+		level:       document.querySelector(`.board.p${num} .level`),
+		lines:       document.querySelector(`.score.p${num} .main .lines`),
 		trt:         document.querySelector(`.tetris_rate.p${num} .content`),
 		running_trt: document.querySelector(`.running_trt.p${num}`),
-		preview:     document.querySelector(`.next_piece.p${num}`),
+		preview:     document.querySelector(`.board.p${num} .next_piece`),
 		field:       document.querySelector(`.board.p${num}`),
 		hearts:      document.querySelector(`.name.p${num} .content`),
 
@@ -245,7 +210,6 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		field_pixel_size: 3,
 		preview_pixel_size: 2,
 		running_trt_rtl: 0,
-		format_score: v => this.numberFormatter.format(v),
 	}
 ));
 </script>
@@ -254,12 +218,12 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 const API = new TetrisCompetitionAPI();
 
 function onFrame(frame, debug) {
-	API.frame(1, frame, debug);
+	API.frame(0, frame, debug);
 }
 </script>
 
-<!-- script src="sample_frames/sample_frames_16.js"></script>
-<script src="debug.js"></script -->
+<script src="/views/sample_frames/sample_frames_16.js"></script>
+<script src="/views/debug.js"></script>
 
 </body>
 <html>

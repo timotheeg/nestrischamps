@@ -321,6 +321,7 @@ const players = [1, 2].map(num => new Player(
 		running_trt_rtl: 0,
 		wins_rtl: num === 1,
 		reliable_field: 0,
+		format_score: v => this.numberFormatter.format(v),
 	}
 ));
 

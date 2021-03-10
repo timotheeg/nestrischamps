@@ -266,8 +266,18 @@ const DEFAULT_OPTIONS = {
 	wins_rtl: 0,
 	tetris_flashes: 1,
 	tetris_sound: 1,
-	format_score: 1,
 	reliable_field: 1,
+	format_score: v => {
+		if (v > 1000000) {
+			const tail = v % 1000000;
+			const head = Math.floor(v / 1000000);
+			v = `${head.toString(16)}${tail}`;
+		}
+		else {
+			v = `${v}`;
+		}
+		return v.padStart(6, ' ');
+	}
 };
 
 class Player {
@@ -619,10 +629,7 @@ class Player {
 			const score = data.score;
 
 			this.score = score;
-			this.dom.score.textContent = this.options.format_score
-				? this.numberFormatter.format(this.score)
-				: data.score
-			;
+			this.dom.score.textContent = this.options.format_score(this.score);
 			this.pending_score = false;
 
 			if (lines > this.lines) {

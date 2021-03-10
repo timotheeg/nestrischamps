@@ -27,9 +27,9 @@ class CompetitionPlayer extends Player {
 			this.dom.diff.classList.add('winning');
 		}
 
-		// compute a proper vvisual of the diff
+		// compute a proper visual of the diff
 		const absDiff = Math.abs(diff);
 
-		this.dom.diff.textContent = this.numberFormatter.format(absDiff);
+		this.dom.diff.textContent = this.options.format_score(absDiff);
 	}
 }

@@ -22,4 +22,8 @@ module.exports = {
 		file: 'competition_layout1_ctjc',
 		type: 'mp',
 	},
+	ctm: {
+		file: 'competition_ctm',
+		type: 'mp',
+	},
 };

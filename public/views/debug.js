@@ -45,7 +45,22 @@ function oneFrame(debug=false) {
 	document.querySelector('#cur_frame').value = frame1_txt;
 	document.querySelector('#next_frame').value = frame2_txt;
 
-	onFrame(frames[timeline_idx++], debug);
+	// update frame to be new format compatible
+	frame = frames[timeline_idx++]
+
+	frame.field = frame.field.split('').map(v => parseInt(v, 10))
+	frame.lines = parseInt(frame.lines, 10);
+	frame.level = parseInt(frame.level, 10);
+	frame.score = parseInt(frame.score, 10);
+	frame.T = parseInt(frame.T, 10);
+	frame.J = parseInt(frame.J, 10);
+	frame.Z = parseInt(frame.Z, 10);
+	frame.O = parseInt(frame.O, 10);
+	frame.S = parseInt(frame.S, 10);
+	frame.L = parseInt(frame.L, 10);
+	frame.I = parseInt(frame.I, 10);
+
+	onFrame(frame, debug);
 }
 
 function createElementFromHTML(htmlString) {
@@ -61,7 +76,7 @@ function createElementFromHTML(htmlString) {
 	const link = document.createElement('link');
 	link.rel = 'stylesheet';
 	link.type = 'text/css';
-	link.href = 'debug.css';
+	link.href = '/views/debug.css';
 	document.getElementsByTagName('HEAD')[0].appendChild(link);
 
 	// 2. prepend the debug elements to BODY
