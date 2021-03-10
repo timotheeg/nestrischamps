@@ -136,6 +136,8 @@ class MatchRoom extends Room {
 
 				case 'setPlayer': {
 					const [p_num, p_id] = args;
+					console.log('setPlayer()', p_id, typeof p_id)
+
 					let player_data;
 					let player_id = `${p_id}`;
 

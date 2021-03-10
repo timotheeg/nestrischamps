@@ -22,10 +22,14 @@ class Room {
 	}
 
 	getProducer(user_id) {
+		console.log('searching', user_id, typeof user_id)
+
 		const producers = this.producers.entries();
 
 		for (const entry of producers) {
 			const producer = entry[0];
+
+			console.log('checking', producer.user.id, typeof producer.user.id);
 
 			if (producer.user.id === user_id) {
 				return producer;

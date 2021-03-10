@@ -35,7 +35,7 @@ module.exports = function init(server, wss) {
 		else {
 			console.log('hello', request.url);
 			if (m = request.url.match(/^\/ws\/player([12])$/)) {
-				user = await UserDAO.getLocalPlayer(parseInt(m[1], 10));
+				user = await UserDAO.getLocalPlayer(m[1]);
 			}
 			else if (/^\/ws\/(play|room\/admin)$/.test(request.url)) {
 				user = await UserDAO.getPlayer1();

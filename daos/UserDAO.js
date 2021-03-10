@@ -154,11 +154,11 @@ class UserDAO {
 	// No interaction with DB
 
 	async getPlayer1() {
-		return this.getLocalPlayer(1);
+		return this.getLocalPlayer('1');
 	}
 
 	async getPlayer2() {
-		return this.getLocalPlayer(2);
+		return this.getLocalPlayer('2');
 	}
 
 	async getLocalPlayer(id) {
