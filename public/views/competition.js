@@ -31,7 +31,7 @@ function getTetrisDiff(p1, p2, use_pace_score) {
 	}
 
 	let tetrises = 0
-	let diff = abs(p1_score - p2_score)
+	let diff = Math.abs(p1_score - p2_score)
 
 	while (diff > 0) {
 		if (lines >= 126) { // below 126 lines, level doesn't change every 10 lines

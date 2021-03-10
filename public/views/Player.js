@@ -270,7 +270,7 @@ const DEFAULT_OPTIONS = {
 	reliable_field: 1,
 	format_score: (v, size) => {
 		if (!size) {
-			size = 6;
+			size = 7;
 		}
 
 		if (size == 6 && v >= 1000000) {
@@ -281,19 +281,20 @@ const DEFAULT_OPTIONS = {
 		else {
 			v = `${v}`;
 		}
+
 		return v.padStart(size, ' ');
 	},
 	format_tetris_diff: v => {
-		console.log('format_tetris_diff', v);
-		// ensure result is exactly  3 char long
-		if (v >= 10) {
-			v = `${Math.round(v)}`;
+		// ensure result is at most 4 char long
+		if (v >= 100) {
+			return Math.round(v);
+		}
+		else if (v >= 10) {
+			return v.toFixed(1);
 		}
 		else {
-			v = v.toFixed(1);
+			return v.toFixed(2);
 		}
-
-		return v.padStart(3,  ' ');
 	}
 };
 
