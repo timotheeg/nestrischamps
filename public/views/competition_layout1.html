@@ -225,6 +225,7 @@
 <script src="/views/CompetitionPlayer.js"></script>
 <script src="/js/BinaryFrame.js"></script>
 <script>
+const numberFormatter = new Intl.NumberFormat();
 const players = [1, 2].map(num => new CompetitionPlayer(
 	{
 		name:        document.querySelector(`.name.p${num} .header`),
@@ -245,7 +246,7 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		field_pixel_size: 3,
 		preview_pixel_size: 2,
 		running_trt_rtl: 0,
-		format_score: v => this.numberFormatter.format(v),
+		format_score: v => numberFormatter.format(v),
 	}
 ));
 </script>
@@ -258,8 +259,8 @@ function onFrame(frame, debug) {
 }
 </script>
 
-<!-- script src="sample_frames/sample_frames_16.js"></script>
-<script src="debug.js"></script -->
+<script src="/views/sample_frames/sample_frames_16.js"></script>
+<script src="/views/debug.js"></script>
 
 </body>
 <html>

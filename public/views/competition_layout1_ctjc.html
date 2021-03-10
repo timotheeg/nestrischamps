@@ -301,6 +301,7 @@ html {
 <script src="/js/BinaryFrame.js"></script>
 <script src="/views/Player.js"></script>
 <script >
+const numberFormatter = new Intl.NumberFormat();
 const players = [1, 2].map(num => new Player(
 	{
 		name:        document.querySelector(`.name > .p${num}`),
@@ -321,7 +322,7 @@ const players = [1, 2].map(num => new Player(
 		running_trt_rtl: 0,
 		wins_rtl: num === 1,
 		reliable_field: 0,
-		format_score: v => this.numberFormatter.format(v),
+		format_score: v => numberFormatter.format(v),
 	}
 ));
 
@@ -420,7 +421,7 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 			abs_diff = Math.abs(diff),
 			level_p1 = players[0].level,
 			level_p2 = players[1].level,
-			fmt = player.numberFormatter.format(abs_diff),
+			fmt = numberFormatter.format(abs_diff),
 			diff_elem = document.querySelector(`.diff`),
 			tdiff_elem = document.querySelector(`.tetris_diff`);
 
@@ -462,8 +463,8 @@ function onFrame(frame, debug) {
 }
 </script>
 
-<!-- script src="sample_frames/sample_frames_16.js"></script>
-<script src="debug.js"></script -->
+<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
+<script src="/views/debug.js"></script -->
 
 </body>
 <html>

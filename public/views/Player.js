@@ -297,8 +297,6 @@ class Player {
 		this.pieces = [];
 		this.clear_events = [];
 
-		this.numberFormatter = new Intl.NumberFormat();
-
 		const styles = getComputedStyle(dom.field);
 
 		// Avatar Block
