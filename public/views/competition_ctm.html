@@ -3,6 +3,9 @@
 <head>
 <link rel="stylesheet" type="text/css" href="/views/tetris.css">
 <style>
+#stream_bg {
+	background: black;
+}
 #playing_fields {
 	position: absolute;
 	left: 640px;
@@ -107,7 +110,7 @@
 	text-indent: 5px;
 }
 
-.name .content .win {
+.hearts .win {
 	color: #fb0204;
 }
 
@@ -212,6 +215,7 @@
 <body>
 
 <div id="stream_bg">
+<div id="bg_pieces"></div>
 <div id="playing_fields">
 
 <!-- Player 1 -->
@@ -320,6 +324,7 @@
 <script src="/views/constants.js"></script>
 <script src="/views/utils.js"></script>
 <script src="/views/Player.js"></script>
+<script src="/views/bg.js"></script>
 <script src="/js/connection.js"></script>
 <script src="/views/CompetitionPlayer.js"></script>
 <script src="/js/BinaryFrame.js"></script>
