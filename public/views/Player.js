@@ -262,6 +262,7 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y) {
 const DEFAULT_OPTIONS = {
 	field_pixel_size: 3,
 	preview_pixel_size: 3,
+	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
 	tetris_flashes: 1,
@@ -677,20 +678,36 @@ class Player {
 			ctx              = this.preview_ctx,
 			col_index        = PIECE_COLORS[preview],
 			pixels_per_block = this.preview_pixel_size * (7 + 1),
-			x_offset_3       = Math.ceil((ctx.canvas.width - pixels_per_block * 3) / 2),
 			positions        = [];
 
 		ctx.clear();
 
-		let
-			pos_x = 0,
-			pos_y = Math.ceil((ctx.canvas.height - pixels_per_block * 2) / 2),
-			x_idx = 0;
+		let pos_x, pos_y, x_offset_3;
+
+		if (this.options.preview_align == 'tr') {
+			// top-right alignment
+			pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 3);
+			pos_y = 0;
+			x_offset_3 = Math.ceil(ctx.canvas.width - pixels_per_block * 3);
+		}
+		else {
+			// default is center
+			pos_x      = 0;
+			pos_y      = Math.ceil((ctx.canvas.height - pixels_per_block * 2) / 2);
+			x_offset_3 = Math.ceil((ctx.canvas.width - pixels_per_block * 3) / 2);
+		}
+
+		let x_idx = 0;
 
 		switch(preview) {
 			case 'I':
-				pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 4) / 2);
-				pos_y = Math.ceil((ctx.canvas.height - pixels_per_block) / 2);
+				if (this.options.preview_align == 'tr') {
+					pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 4);
+				}
+				else {
+					pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 4) / 2);
+					pos_y = Math.ceil((ctx.canvas.height - pixels_per_block) / 2);
+				}
 
 				positions.push([pos_x + pixels_per_block * 0, pos_y]);
 				positions.push([pos_x + pixels_per_block * 1, pos_y]);
@@ -699,7 +716,12 @@ class Player {
 				break;
 
 			case 'O':
-				pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 2 + this.preview_pixel_size) / 2);
+				if (this.options.preview_align == 'tr') {
+					pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 2);
+				}
+				else {
+					pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 2 + this.preview_pixel_size) / 2);
+				}
 
 				positions.push([pos_x, pos_y]);
 				positions.push([pos_x, pos_y + pixels_per_block]);
