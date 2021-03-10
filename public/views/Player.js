@@ -268,16 +268,20 @@ const DEFAULT_OPTIONS = {
 	tetris_flashes: 1,
 	tetris_sound: 1,
 	reliable_field: 1,
-	format_score: v => {
-		if (v > 1000000) {
-			const tail = v % 1000000;
-			const head = Math.floor(v / 1000000);
-			v = `${head.toString(16)}${tail}`;
+	format_score: (v, size) => {
+		if (!size) {
+			size = 6;
+		}
+
+		if (size == 6 && v >= 1000000) {
+			const tail = `${v % 100000}`.padStart(5, '0');
+			const head = Math.floor(v / 100000);
+			v = `${head.toString(16).toUpperCase()}${tail}`;
 		}
 		else {
 			v = `${v}`;
 		}
-		return v.padStart(6, ' ');
+		return v.padStart(size, ' ');
 	},
 	format_tetris_diff: v => {
 		console.log('format_tetris_diff', v);
@@ -423,6 +427,7 @@ class Player {
 		this.score = 0;
 		this.lines = 0;
 		this.level = 0;
+		this.pace_score = this.getPaceScore();
 		this.drought = 0;
 		this.field_num_blocks = 0;
 		this.field_string = '';
@@ -442,7 +447,8 @@ class Player {
 		this.clearWinnerAnimation();
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
-		this.dom.score.textContent = this.options.format_score(0);
+		this.dom.score.textContent = this.options.format_score(this.score);
+		this.dom.pace.textContent = this.options.format_score(this.pace_score, 7);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
 	}
@@ -452,6 +458,10 @@ class Player {
 	}
 
 	setDiff(diff, t_diff) {
+		// implement in subclasses
+	}
+
+	setPaceDiff(diff, t_diff) {
 		// implement in subclasses
 	}
 
@@ -668,6 +678,9 @@ class Player {
 				this.renderRunningTRT();
 				this.lines = lines;
 			}
+
+			this.pace_score = this.getPaceScore();
+			this.dom.pace.textContent = this.options.format_score(this.pace_score, 7);
 		}
 
 		if (data.score != null) {
@@ -675,6 +688,10 @@ class Player {
 				this.pending_score = true;
 			}
 		}
+	}
+
+	getPaceScore() {
+		return this.score + PACE_POTENTIAL[this.lines].score;
 	}
 
 	renderPreview(level, preview) {

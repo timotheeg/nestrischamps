@@ -38,4 +38,25 @@ class CompetitionPlayer extends Player {
 		this.dom.diff.textContent = this.options.format_score(absDiff);
 		this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
 	}
+
+	setPaceDiff(diff, t_diff) {
+		if (diff < 0) {
+			this.dom.p_diff.classList.remove('winning');
+			this.dom.p_diff.classList.add('losing');
+			this.dom.pt_diff.classList.remove('winning');
+			this.dom.pt_diff.classList.add('losing');
+		}
+		else {
+			this.dom.p_diff.classList.remove('losing');
+			this.dom.p_diff.classList.add('winning');
+			this.dom.pt_diff.classList.remove('losing');
+			this.dom.pt_diff.classList.add('winning');
+		}
+
+		// compute a proper visual of the diff
+		const absDiff = Math.abs(diff);
+
+		this.dom.p_diff.textContent = this.options.format_score(absDiff);
+		this.dom.pt_diff.textContent = this.options.format_tetris_diff(t_diff);
+	}
 }

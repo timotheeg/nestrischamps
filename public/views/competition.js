@@ -163,12 +163,17 @@ class TetrisCompetitionAPI {
 		if (isNaN(score) || isNaN(otherScore)) return;
 
 		const diff = score - otherScore;
-
 		const t_diff = getTetrisDiff(player, otherPlayer);
 
 		// TODO: Ideally make t_diff sdame sign as diff for consistency
 		player.setDiff(diff, t_diff);
 		otherPlayer.setDiff(-diff, t_diff);
+
+		const p_diff = player.getPaceScore() - otherPlayer.getPaceScore();
+		const pt_diff = getTetrisDiff(player, otherPlayer, true);
+
+		player.setPaceDiff(p_diff, pt_diff);
+		otherPlayer.setPaceDiff(-p_diff, pt_diff);
 	}
 };
 
