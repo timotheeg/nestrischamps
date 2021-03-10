@@ -8,6 +8,51 @@ function getOtherPlayer(idx) {
 	return players[(idx+1) % 2];
 }
 
+function tetris_value(level) {
+	return 1200 * (level + 1);
+}
+
+function getTetrisDiff(p1, p2, use_pace_score) {
+	const p1_score = use_pace_score ? p1.pace_score : p1.score;
+	const p2_score = use_pace_score ? p2.pace_score : p2.score;
+
+	let lines, level;
+
+	if (p1_score > p2_score) {
+		level = p2.level;
+		lines = p2.lines;
+	}
+	else if (p2_score > p1_score) {
+		level = p1.level;
+		lines = p1.lines;
+	}
+	else {
+		return 0;
+	}
+
+	let tetrises = 0
+	let diff = abs(p1_score - p2_score)
+
+	while (diff > 0) {
+		if (lines >= 126) { // below 126 lines, level doesn't change every 10 lines
+			if (lines % 10 >= 6) { // the tetris is counted at end level, not start level
+				level += 1;
+			}
+		}
+
+		lines += 4;
+		tetrises += 1;
+
+		diff -= tetris_value(level);
+	}
+
+	//  correct the overshot
+	//  note: diff is negative, to this statement *reduces* the tetrises value
+	tetrises += diff / tetris_value(level);
+
+	return tetrises;
+}
+
 class TetrisCompetitionAPI {
 	constructor() {
 		this.first_to = 3; // defaults to Best of 5
@@ -117,10 +162,13 @@ class TetrisCompetitionAPI {
 
 		if (isNaN(score) || isNaN(otherScore)) return;
 
-		const diff  = score - otherScore;
+		const diff = score - otherScore;
 
-		player.setDiff(diff);
-		otherPlayer.setDiff(-diff);
+		const t_diff = getTetrisDiff(player, otherPlayer);
+
+		// TODO: Ideally make t_diff sdame sign as diff for consistency
+		player.setDiff(diff, t_diff);
+		otherPlayer.setDiff(-diff, t_diff);
 	}
 };
 
@@ -137,4 +185,4 @@ connection.onMessage = function(frame) {
 		console.error(e);
 		console.log(frame);
 	}
-}
+};

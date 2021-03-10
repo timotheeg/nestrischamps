@@ -278,6 +278,18 @@ const DEFAULT_OPTIONS = {
 			v = `${v}`;
 		}
 		return v.padStart(6, ' ');
+	},
+	format_tetris_diff: v => {
+		console.log('format_tetris_diff', v);
+		// ensure result is exactly  3 char long
+		if (v >= 10) {
+			v = `${Math.round(v)}`;
+		}
+		else {
+			v = v.toFixed(1);
+		}
+
+		return v.padStart(3,  ' ');
 	}
 };
 
@@ -430,7 +442,7 @@ class Player {
 		this.clearWinnerAnimation();
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
-		this.dom.score.textContent = '0';
+		this.dom.score.textContent = this.options.format_score(0);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
 	}
@@ -439,8 +451,8 @@ class Player {
 		return this.score;
 	}
 
-	setDiff() {
-		// noop
+	setDiff(diff, t_diff) {
+		// implement in subclasses
 	}
 
 	setAvatar(url) {

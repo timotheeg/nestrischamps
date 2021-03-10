@@ -6,7 +6,12 @@
 #playing_fields {
 	position: absolute;
 	left: 640px;
-	top: 4px;
+	top: 8px;
+}
+
+.aligner div {
+	display: inline-block;
+	white-space: pre;
 }
 
 .score {
@@ -18,13 +23,9 @@
 	right: var(--offset);
 }
 
-.score .aligner {
-	display: inline-block;
-}
 .score .aligner div {
 	text-align: left;
 	padding-top: 6px;
-	white-space: pre;
 }
 .winning {
 	color: #0eff0e;
@@ -50,10 +51,24 @@
 	position: absolute;
 }
 
+.pace_potential {
+	width: 120px;
+	height: 74px;
+
+	--offset: 279px;
+	right: var(--offset);
+}
+
+.pace_potential .header {
+	line-height: 12px;
+	font-size: 8px;
+	padding-bottom: 3px;
+}
+
 .name {
 	width: 247px;
 	height: 19px;
-	top: 585px;
+	top: 661px;
 
 	--offset: 10px;
 	right: var(--offset);
@@ -71,8 +86,8 @@
 
 .tetris_rate {
 	width: 50px;
-	height: 50px;
-	top: 626px;
+	height: 54px;
+	top: 585px;
 
 	--offset: 279px;
 	right: var(--offset);
@@ -85,8 +100,8 @@
 .running_trt {
 	padding: 9px;
 	width: 253px;
-	height: 56px;
-	top: 626px;
+	height: 60px;
+	top: 585px;
 
 	--offset: 10px;
 	right: var(--offset);
@@ -110,6 +125,39 @@
 	left: var(--offset);
 }
 
+.drought {
+	width: 50px;
+	top: 96px;
+	height: 40px;
+	opacity: 0;
+	color: red;
+	display: none;
+
+	--pos: 279px;
+	right: var(--pos)
+}
+
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought.p2 {
+	left: var(--pos)
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+
+
 .dev_null {
 	display: none;
 }
@@ -125,8 +173,17 @@
 
 <div class="box score p1">
 	<div class="aligner">
-		<div class="main"><span class="value"></span>-<span class="lines"></span></div>
-		<div class="diff winning">000,000</div>
+		<div class="main"><span class="value">000000</span>-<span class="lines">000</span></div>
+		<div class="diffs"><span class="diff"></span> <span class="tetris_diff"></span></div>
+	</div>
+</div>
+
+<div class="box pace_potential p1">
+	<div class="header">PACE POTENTIAL</div>
+	<div class="content aligner">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">   000</div>
 	</div>
 </div>
 
@@ -147,12 +204,27 @@
 	<div class="next_piece"></div>
 </div>
 
+<div class="box drought p1">
+	<div class="header">DRT</div>
+	<div class="value">99</div>
+</div>
+
+
 <!-- Player 2 -->
 
 <div class="box score p2">
 	<div class="aligner">
-		<div class="main"><span class="value"></span>-<span class="lines"></span></div>
-		<div class="diff losing">000,000</div>
+		<div class="main"><span class="value">000000</span>-<span class="lines">000</span></div>
+		<div class="diffs"><span class="diff"></span> <span class="tetris_diff"></span></div>
+	</div>
+</div>
+
+<div class="box pace_potential p2">
+	<div class="header">PACE POTENTIAL</div>
+	<div class="content aligner">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">   000</div>
 	</div>
 </div>
 
@@ -171,6 +243,11 @@
 <div class="box board p2">
 	<div class="level"></div>
 	<div class="next_piece"></div>
+</div>
+
+<div class="box drought p2">
+	<div class="header">DRT</div>
+	<div class="value">99</div>
 </div>
 
 
@@ -194,7 +271,6 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 	{
 		name:        document.querySelector(`.name.p${num} .header`),
 		score:       document.querySelector(`.score.p${num} .main .value`),
-		diff:        document.querySelector(`.score.p${num} .diff`),
 		level:       document.querySelector(`.board.p${num} .level`),
 		lines:       document.querySelector(`.score.p${num} .main .lines`),
 		trt:         document.querySelector(`.tetris_rate.p${num} .content`),
@@ -202,9 +278,15 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		preview:     document.querySelector(`.board.p${num} .next_piece`),
 		field:       document.querySelector(`.board.p${num}`),
 		hearts:      document.querySelector(`.name.p${num} .content`),
+		drought:     document.querySelector(`.drought.p${num} .value`),
 
 		eff:         DOM_DEV_NULL,
-		drought:     DOM_DEV_NULL,
+
+		diff:        document.querySelector(`.score.p${num} .diff`),
+		t_diff:      document.querySelector(`.score.p${num} .tetris_diff`),
+		pace:        document.querySelector(`.pace_potential.p${num} .value`),
+		p_diff:      document.querySelector(`.pace_potential.p${num} .diff`),
+		pt_diff:     document.querySelector(`.pace_potential.p${num} .tetris_diff`),
 	},
 	{
 		field_pixel_size: 3,
@@ -213,10 +295,90 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		running_trt_rtl: 0,
 	}
 ));
+
+players.forEach((player, idx) => {
+	player.drought_box = document.querySelector(`.drought.p${idx + 1}`);
+
+	player.onDroughtStart = () => {
+		console.log('onDroughtStart', idx + 1);
+		player.drought_box.classList.add('active');
+	}
+
+	player.onDroughtEnd = (count) => {
+		console.log('onDroughtEnd', idx + 1, count);
+		player.drought_box.classList.remove('active');
+	}
+
+	player.onGameStart = () => {
+		console.log('onGameStart', idx + 1);
+		player.drought_box.classList.remove('active');
+	}
+});
+
 </script>
 <script src="/views/competition.js"></script>
 <script>
-const API = new TetrisCompetitionAPI();
+
+class TetrisCompetitionAPI_CTM extends TetrisCompetitionAPI {
+	setLogo(url) { }
+
+	frame(player_idx, data, debug) {
+		// captured_frames.push(data);
+		const player = players[player_idx];
+
+		if (debug) {
+			debugger;
+		}
+
+		player.setFrame(data);
+
+		// TODO: only compute changes when there is a change!
+
+		const
+			score_p1 = players[0].getScore(),
+			score_p2 = players[1].getScore();
+
+		if (isNaN(score_p1) || isNaN(score_p2)) return;
+
+		const
+			diff = score_p1 - score_p2,
+			abs_diff = Math.abs(diff),
+			level_p1 = players[0].level,
+			level_p2 = players[1].level,
+			fmt = numberFormatter.format(abs_diff),
+			diff_elem = document.querySelector(`.diff`),
+			tdiff_elem = document.querySelector(`.tetris_diff`);
+
+		if (diff === 0) {
+			diff_elem.textContent = '<0>';
+			tdiff_elem.textContent = '<0T>';
+		}
+		else {
+			const player1_leading = diff > 0;
+			let tetris_value;
+
+			if (player1_leading) { // player 1 leading
+				tetris_value = SCORE_BASES[4] * (level_p2 + 1);
+			}
+			else {
+				tetris_value = SCORE_BASES[4] * (level_p2 + 1);
+			}
+
+			const tfmt = (abs_diff / tetris_value).toFixed(1);
+
+			if (player1_leading) {
+				diff_elem.textContent = `<${fmt}`;
+				tdiff_elem.textContent = `<${tfmt}T`;
+			}
+			else {
+				diff_elem.textContent = `${fmt}>`;
+				tdiff_elem.textContent = `${tfmt}T>`;
+			}
+		}
+	}
+}
+
+const API = new TetrisCompetitionAPI_CTM();
 
 function onFrame(frame, debug) {
 	API.frame(0, frame, debug);
