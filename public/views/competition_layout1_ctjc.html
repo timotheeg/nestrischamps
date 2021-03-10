@@ -416,14 +416,19 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 			score_p1 = players[0].getScore(),
 			score_p2 = players[1].getScore();
 
-		if (isNaN(score_p1) || isNaN(score_p2)) return;
+		if (isNaN(score_p1) || isNaN(score_p2)) {
+			return;
+		}
+
+		if (score_p1 === this.last_score_p1 && score_p2 === this.last_score_p2) {
+			return;
+		}
+
+		this.last_score_p1 = score_p1;
+		this.last_score_p2 = score_p2;
 
 		const
 			diff = score_p1 - score_p2,
-			abs_diff = Math.abs(diff),
-			level_p1 = players[0].level,
-			level_p2 = players[1].level,
-			fmt = numberFormatter.format(abs_diff),
 			diff_elem = document.querySelector(`.diff`),
 			tdiff_elem = document.querySelector(`.tetris_diff`);
 
@@ -432,17 +437,14 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 			tdiff_elem.textContent = '<0T>';
 		}
 		else {
-			const player1_leading = diff > 0;
-			let tetris_value;
+			const
+				player1_leading = diff > 0,
+				abs_diff = Math.abs(diff),
+				fmt = numberFormatter.format(abs_diff),
 
-			if (player1_leading) { // player 1 leading
-				tetris_value = SCORE_BASES[4] * (level_p2 + 1);
-			}
-			else {
-				tetris_value = SCORE_BASES[4] * (level_p2 + 1);
-			}
-
-			const tfmt = (abs_diff / tetris_value).toFixed(1);
+				tdiff = getTetrisDiff(player, otherPlayer),
+				tfmt = tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1)
+			;
 
 			if (player1_leading) {
 				diff_elem.textContent = `<${fmt}`;
