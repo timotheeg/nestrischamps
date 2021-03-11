@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="/view/tetris.css" />
+<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 <style>
 html {
 	overflow: hidden;
@@ -35,13 +35,8 @@ html {
 	line-height: 30px;
 }
 
-.score,
 .next_piece,
-.lines,
-.level,
-.board,
-.tetris_rate,
-.efficiency
+.board
  {
 	display: none;
 }
@@ -110,39 +105,15 @@ html {
 <body>
 
 <div id="stream_bg">
-<div id="bg_pieces"></div>
 
 <div id="playing_fields">
 <div class="box board"></div>
 <div class="box next_piece"></div>
 
 
-<!-- Player 1 -->
-
-<div class="box score">
-	<div class="header">SCORE</div>
-	<div class="content">000000</div>
-</div>
-
-<div class="box lines">
-	<div class="header">LINES</div>
-	<div class="content">000</div>
-</div>
-
-<div class="box level">
-	<div class="header">LEVEL</div>
-	<div class="content">000</div>
-</div>
-
 <div class="box timer">
 	<div class="content">02:00:00</div>
 </div>
-
-<div class="box efficiency">
-	<div class="header">EFF</div>
-	<div class="content">---</div>
-</div>
-
 
 <div class="box running_trt">
 	<div class="header">TETRIS RATE <span class="trt">--</span></div>
@@ -160,25 +131,27 @@ html {
 
 <!-- Audio -->
 
-<script src="/view/constants.js"></script>
-<script src="/view/utils.js"></script>
 <script src="/js/connection.js"></script>
-<script src="/view/Player.js"></script>
+<script src="/js/BinaryFrame.js"></script>
+<script src="/views/constants.js"></script>
+<script src="/views/utils.js"></script>
+<script src="/views/Player.js"></script>
 <script >
 const player = new Player(
 	{
-		score:       document.querySelector(`.score .content`),
-		level:       document.querySelector(`.level .content`),
-		lines:       document.querySelector(`.lines .content`),
+		score:       DOM_DEV_NULL,
+		level:       DOM_DEV_NULL,
+		lines:       DOM_DEV_NULL,
+		pace:        DOM_DEV_NULL,
+		eff:         DOM_DEV_NULL,
+
 		trt:         document.querySelector(`.running_trt .header .trt`),
-		eff:         document.querySelector(`.efficiency .content`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
 		drought:     document.querySelector(`.drought .value`),
 	},
 	{
-		format_score: 0,
 		tetris_sound: 0,
 		reliable_field: 0,
 	}
@@ -222,10 +195,12 @@ function startTimer(allowed) {
 			timer = clearInterval(timer);
 		}
 
-		hours = Math.floor(remainder / (60 * 60));
+		const hours = Math.floor(remainder / (60 * 60));
+
 		remainder = remainder % (60 * 60);
-		minutes = Math.floor(remainder / 60);
-		seconds = remainder % 60;
+
+		const minutes = Math.floor(remainder / 60);
+		const seconds = remainder % 60;
 
 		timer_el.textContent = `${hours}`.padStart(2, '0')
 			+ ':'
@@ -251,7 +226,7 @@ const API = {
 	}
 }
 
-const connection = new Connection(3339);
+const connection = new Connection();
 
 connection.onMessage = function(frame) {
 	try{
@@ -269,7 +244,7 @@ function onFrame(frame, debug) {
 }
 </script>
 
-<!-- script src="sample_frames/sample_frames_11.js"></script>
+<!-- script src="/views/sample_frames/sample_frames_11.js"></script>
 <script src="debug.js"></script -->
 
 </body>

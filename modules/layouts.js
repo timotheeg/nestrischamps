@@ -12,6 +12,10 @@ module.exports = {
 		file: 'simple_1p_layout_invisible_tetris',
 		type: '1p',
 	},
+	qualifier: {
+		file: 'qualifier',
+		type: '1p',
+	},
 
 	// multi player
 	ctwc: {
