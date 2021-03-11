@@ -8,8 +8,8 @@ html {
 }
 #stream_bg {
 	background: black;
-	width: 461px;
-	height: 334px;
+	width: 450px;
+	height: 455px;
 }
 
 #playing_fields {
@@ -41,12 +41,22 @@ html {
 	display: none;
 }
 
-.timer {
-	top: 2px;
+.timer,
+.pace {
+	top: 5px;
 	left: 5px;
-	width: 428px;
+	width: 418px;
 	text-align: center;
 	height: 27px;
+}
+
+.pace {
+	top: 247px;
+	height: 24px;
+}
+
+.pace .header {
+	padding-top: 2px;
 }
 
 .bounded {
@@ -58,13 +68,14 @@ html {
 .running_trt {
 	padding: 12px 9px 9px;
 
-	width: 434px;
-	height: 138px;
-	top: 173px;
+	width: 424px;
+	height: 133px;
+	top: 298px;
 	left: 5px;
 }
 
 .running_trt .value {
+	border-bottom: 0;
 	width: 434px;
 	height: 103px;
 	position: relative;
@@ -72,7 +83,7 @@ html {
 
 .drought {
 	width: 121px;
-	top: 79px;
+	top: 116px;
 	height: 40px;
 	opacity: 0;
 	display: none;
@@ -115,6 +126,10 @@ html {
 	<div class="content">02:00:00</div>
 </div>
 
+<div class="box pace">
+	<div class="header">PACE <span class="value">0000000</span></div>
+</div>
+
 <div class="box running_trt">
 	<div class="header">TETRIS RATE <span class="trt">--</span></div>
 	<div class="value bounded"></div>
@@ -142,9 +157,9 @@ const player = new Player(
 		score:       DOM_DEV_NULL,
 		level:       DOM_DEV_NULL,
 		lines:       DOM_DEV_NULL,
-		pace:        DOM_DEV_NULL,
 		eff:         DOM_DEV_NULL,
 
+		pace:        document.querySelector(`.pace .value`),
 		trt:         document.querySelector(`.running_trt .header .trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
