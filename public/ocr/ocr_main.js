@@ -791,6 +791,7 @@ function trackAndSendFrames() {
 	let start_time = Date.now();
 	let game_state = IN_GAME;
 	let gameid = 1;
+	let last_frame = { field:[] };
 
 	// TODO: better event system and name for frame data events
 	tetris_ocr.onMessage = async function(data) {
@@ -808,6 +809,10 @@ function trackAndSendFrames() {
 					gameid++;
 				}
 			}
+		}
+
+		if (game_state == IN_MENU) {
+			return; // really?
 		}
 
 		data.gameid = gameid;
@@ -842,6 +847,31 @@ function trackAndSendFrames() {
 
 		delete data.color1;
 		delete data.color2;
+
+		// only send frame if changed
+		check_equal:
+		do {
+			for (let key in data) {
+				if (key == 'ctime') continue;
+				if (key == 'field') {
+					if (!data.field.every((v, i) => last_frame.field[i] === v)) {
+						break check_equal;
+					}
+				}
+				else if (data[key] != last_frame[key]) {
+					break check_equal;
+				}
+			}
+
+			// all field equals do a sanity check on time
+			if (data.ctime - last_frame.ctime >= 500) break;
+
+			// no need to send frame
+			return;
+		}
+		while(false);
+
+		last_frame = data;
 
 		connection.send(BinaryFrame.encode(data));
 	}
