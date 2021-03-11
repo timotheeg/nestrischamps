@@ -20,13 +20,13 @@
 <dd><a href="/view/das_trainer/<%= secret %>">-</a></dd>
 
 <dt>Simple 1p</dt>
-<dd><a href="/view/simple_1p/<%= secret %>">-</a><br /><img src="/docs/layout/simple_1p.jpg" width="640"/></dd>
+<dd><a href="/view/simple_1p/<%= secret %>">-</a><br /><img src="/docs/layouts/simple_1p.jpg" width="640"/></dd>
 
 <dt>Invisible Tetris</dt>
 <dd><a href="/view/invisible_tetris/<%= secret %>">-</a></dd>
 
 <dt>Qualifier</dt>
-<dd><a href="/view/qualifier/<%= secret %>">-</a><br /><img src="/docs/layout/qualifier.jpg" width="225"/></dd>
+<dd><a href="/view/qualifier/<%= secret %>">-</a><br /><img src="/docs/layouts/qualifier.jpg" width="225"/></dd>
 
 </dl>
 
@@ -49,7 +49,7 @@
 <script>
 document.querySelectorAll('dd a').forEach(a => {
 	// Views are identified by their secrets and only get game frame data, we can supply the links over http and save SSL processing cost.
-	const http_link = a.href.replace(/^https:/, 'http:/');
+	const http_link = a.href.replace(/^https:/, 'http:');
 
 	a.href = http_link;
 	a.textContent = http_link; // make the link show the fully qualified url
