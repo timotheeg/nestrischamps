@@ -341,12 +341,12 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		field:       document.querySelector(`.board.p${num}`),
 		hearts:      document.querySelector(`.hearts.p${num}`),
 		drought:     document.querySelector(`.drought.p${num} .value`),
+		pace:        document.querySelector(`.pace_potential.p${num} .value`),
 
 		eff:         DOM_DEV_NULL,
 
 		diff:        document.querySelector(`.score.p${num} .diff`),
 		t_diff:      document.querySelector(`.score.p${num} .tetris_diff`),
-		pace:        document.querySelector(`.pace_potential.p${num} .value`),
 		p_diff:      document.querySelector(`.pace_potential.p${num} .diff`),
 		pt_diff:     document.querySelector(`.pace_potential.p${num} .tetris_diff`),
 	},
