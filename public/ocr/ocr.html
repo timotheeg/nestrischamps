@@ -98,6 +98,7 @@ fieldset.field pre {
 #controls,
 #calibration,
 #color_matching,
+#timer_control,
 #ocr_results {
 	display: none;
 }
@@ -165,9 +166,11 @@ fieldset.field pre {
 		<div>
 			<button id="clear_config">Clear config and Restart</button>
 		</div>
-		<!-- div>
+		<div id="timer_control">
 			<button id="start_timer">Start Timer</button>
-		</div -->
+			for
+			<input type="number" id="minutes" value="120" min="5" max="5949"></input> minutes
+		<div>
 	</fieldset>
 
 	<fieldset id="connection">

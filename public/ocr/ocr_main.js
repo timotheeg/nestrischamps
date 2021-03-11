@@ -75,6 +75,8 @@ const
 	controls         = document.querySelector('#controls'),
 	capture_rate     = document.querySelector('#capture_rate'),
 	show_parts       = document.querySelector('#show_parts'),
+	timer_control    = document.querySelector('#timer_control'),
+	start_timer      = document.querySelector('#start_timer'),
 
 	conn_host        = document.querySelector('#conn_host'),
 	conn_port        = document.querySelector('#conn_port'),
@@ -150,11 +152,12 @@ clear_config.addEventListener('click', evt => {
 	location.reload();
 });
 
-/*
 start_timer.addEventListener('click', evt => {
-	connection.send(['startTimer'])
+	// minutes are valid per markup restrictions
+	const minutes = parseInt(document.querySelector('#minutes').value, 10);
+
+	connection.send(['startTimer', minutes]);
 });
-/**/
 
 go_btn.disabled = true;
 go_btn.addEventListener('click', async (evt) => {
@@ -903,6 +906,10 @@ function trackAndSendFrames() {
 
 
 (async function init() {
+	// check if timer should be made visible
+	if (location.search.search('timer=1') >= 0) {
+		timer_control.style.display = 'block';
+	}
 
 	// load external assets - could parrallelize
 	templates = await loadDigitTemplates();
