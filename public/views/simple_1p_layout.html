@@ -18,7 +18,7 @@ html {
 
 .box {
 	width: 95px;
-	height: 56px;
+	height: 60px;
 	text-align: center;
 }
 
@@ -33,15 +33,14 @@ html {
 	line-height: 30px;
 }
 
-.score {
+.score, .pace {
 	top: 76px;
-	height: 60px;
 	left: -107px;
 	width: 168px;
 }
 
-.score .diff {
-	text-align: center;
+.pace {
+	top: 161px;
 }
 
 .next_piece {
@@ -55,12 +54,12 @@ html {
 
 .lines {
 	left: -107px;
-	top: 160px;
+	top: 246px;
 }
 
 .level {
 	left: -107px;
-	top: 241px;
+	top: 331px;
 }
 
 .board {
@@ -83,7 +82,7 @@ html {
 
 .efficiency {
 	left: -107px;
-	top: 507px;
+	top: 503px;
 }
 
 .tetris_rate .content {
@@ -93,7 +92,7 @@ html {
 .running_trt {
 	padding: 9px;
 	width: 253px;
-	height: 62px;
+	height: 66px;
 	top: 588px;
 
 	--offset: 106px;
@@ -147,6 +146,11 @@ html {
 	<div class="content">000000</div>
 </div>
 
+<div class="box pace">
+	<div class="header">PACE</div>
+	<div class="content">000000</div>
+</div>
+
 <div class="box lines">
 	<div class="header">LINES</div>
 	<div class="content">000</div>
@@ -154,7 +158,7 @@ html {
 
 <div class="box level">
 	<div class="header">LEVEL</div>
-	<div class="content">000</div>
+	<div class="content">00</div>
 </div>
 
 <div class="box tetris_rate">
@@ -192,6 +196,7 @@ html {
 const player = new Player(
 	{
 		score:       document.querySelector(`.score .content`),
+		pace:        document.querySelector(`.pace .content`),
 		level:       document.querySelector(`.level .content`),
 		lines:       document.querySelector(`.lines .content`),
 		trt:         document.querySelector(`.tetris_rate .content`),
@@ -200,8 +205,6 @@ const player = new Player(
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
 		drought:     document.querySelector(`.drought .value`),
-
-		pace:        DOM_DEV_NULL,
 	},
 	{
 		tetris_sound: 0,
