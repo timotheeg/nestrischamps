@@ -814,10 +814,6 @@ function trackAndSendFrames() {
 			}
 		}
 
-		if (game_state == IN_MENU) {
-			return; // really?
-		}
-
 		data.gameid = gameid;
 		data.ctime = Date.now() - start_time;
 
@@ -847,6 +843,10 @@ function trackAndSendFrames() {
 		showPerfData(perf);
 		performance.clearMarks();
 		performance.clearMeasures();
+
+		if (game_state == IN_MENU) {
+			return; // really?
+		}
 
 		delete data.color1;
 		delete data.color2;
