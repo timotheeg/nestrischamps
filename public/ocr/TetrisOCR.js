@@ -560,8 +560,8 @@ class TetrisOCR extends EventTarget {
 		task.scale_img.data.set(field_img.data);
 		/**/
 
-		// simple array for now
-		const field = [];
+		// Make a memory efficient array for our needs
+		const field = new Uint8Array(200);
 
 		// we read 4 judiciously positionned logical pixels per block
 		const pix_refs = [
@@ -634,7 +634,7 @@ class TetrisOCR extends EventTarget {
 					}
 				})
 
-				field.push(min_idx);
+				field[ridx * 10 + cidx] = min_idx;
 			}
 		}
 		/**/
