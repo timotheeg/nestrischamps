@@ -907,7 +907,7 @@ function trackAndSendFrames() {
 
 (async function init() {
 	// check if timer should be made visible
-	if (location.search.search('timer=1') >= 0) {
+	if (QueryString.timer) {
 		timer_control.style.display = 'block';
 	}
 

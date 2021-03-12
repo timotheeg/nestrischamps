@@ -6,9 +6,6 @@
 html {
 	overflow: hidden;
 }
-#stream_bg {
-	background: black;
-}
 
 #playing_fields {
 	position: absolute;
@@ -132,12 +129,10 @@ html {
 <body>
 
 <div id="stream_bg">
-<div id="bg_pieces"></div>
 
 <div id="playing_fields">
 <div class="box board"></div>
 <div class="box next_piece"></div>
-
 
 <!-- Player 1 -->
 
@@ -186,12 +181,14 @@ html {
 
 <!-- Audio -->
 
+<script src="/js/BinaryFrame.js"></script>
+<script src="/js/QueryString.js"></script>
 <script src="/views/constants.js"></script>
 <script src="/views/utils.js"></script>
 <script src="/js/connection.js"></script>
 <script src="/views/bg.js"></script>
 <script src="/views/Player.js"></script>
-<script src="/js/BinaryFrame.js"></script>
+
 <script >
 const player = new Player(
 	{

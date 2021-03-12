@@ -1,3 +1,9 @@
+(function() {
+
+if (QueryString.bg === '0') {
+	return;
+}
+
 const width = 1280;
 const height = 720;
 
@@ -19,13 +25,12 @@ while(num_bags--) {
 	pieces.push(...shuffle(PIECES.concat()));
 }
 
-const bg = document.querySelector('#bg_pieces');
-
+const bg = document.createElement('div');
 
 for (let x = grid_x; x--; ) {
 	for (let y = grid_y; y--; ) {
 		const piece = pieces.pop();
-		const img = new Image()
+		const img = new Image();
 
 		img.src = `/views/bg_pieces/${piece}.png`;
 
@@ -43,3 +48,11 @@ for (let x = grid_x; x--; ) {
 		bg.appendChild(img);
 	}
 }
+
+const parent = document.querySelector('#stream_bg');
+
+parent.style.backgroundColor = 'black';
+
+parent.prepend(bg);
+
+})();
