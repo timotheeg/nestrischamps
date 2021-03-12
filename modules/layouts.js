@@ -26,6 +26,10 @@ module.exports = {
 		file: 'competition_layout1_ctjc',
 		type: 'mp',
 	},
+	ctjc_pace: {
+		file: 'competition_layout1_ctjc_pace',
+		type: 'mp',
+	},
 	ctm: {
 		file: 'competition_ctm',
 		type: 'mp',
