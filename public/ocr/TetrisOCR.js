@@ -1,6 +1,9 @@
+const FRAME_BUFFER_SIZE = 1;
+
 const PATTERN_MAX_INDEXES = {
+	'A': 16,
 	'D': 11,
-	'T': 4,
+	'T': 5,
 	'B': 3
 };
 
@@ -70,6 +73,12 @@ class TetrisOCR extends EventTarget {
 		this.digit_img = new ImageData(14, 14); // 2x for better matching
 		this.block_img = new ImageData(7, 7);
 		this.small_block_img = new ImageData(5, 5);
+
+		this.last_frame = null;
+		this.frame_buffer = [];
+
+		this.score_fixer = new ScoreFixer();
+		this.level_fixer = new LevelFixer();
 
 		// decorate relevant methods to capture timings
 		PERF_METHODS
@@ -173,7 +182,7 @@ class TetrisOCR extends EventTarget {
 		this.capture_canvas.width = frame.width;
 		this.capture_canvas.height = frame.height;
 
-		this.capture_canvas_ctx = this.capture_canvas.getContext('2d');
+		this.capture_canvas_ctx = this.capture_canvas.getContext('2d', { alpha: false });
 		this.capture_canvas_ctx.imageSmoothingEnabled = 'false';
 
 		// On top of the capture context, we need one more canvas for the scaled field
@@ -186,7 +195,7 @@ class TetrisOCR extends EventTarget {
 		this.scaled_field_canvas.width = TASK_RESIZE.field[0];
 		this.scaled_field_canvas.height = TASK_RESIZE.field[1];
 
-		this.scaled_field_canvas_ctx = this.scaled_field_canvas.getContext('2d');
+		this.scaled_field_canvas_ctx = this.scaled_field_canvas.getContext('2d', { alpha: false });
 		this.scaled_field_canvas_ctx.imageSmoothingEnabled = 'false';
 	}
 
@@ -234,7 +243,23 @@ class TetrisOCR extends EventTarget {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
 
-		this.onMessage(res);
+
+		// the raw reads are done, now let's apply some correction and detection
+		if (res.lines == null || res.score == null || res.level == null) {
+			this.IN_GAME = false;
+		}
+		else if (!this.IN_GAME) {
+			// first frame of new game
+			// get state right away, although by right, we should wait one frame for the values to stabilize
+			this.IN_GAME = true;
+		}
+
+
+		this.frame_buffer.push(res);
+
+		if (this.frame_buffer.length > FRAME_BUFFER_SIZE) {
+			this.onMessage(this.frame_buffer.shift());
+		}
 	}
 
 	scanScore(source_img) {
@@ -314,7 +339,7 @@ class TetrisOCR extends EventTarget {
 
 	ocrDigits(source_img, task) {
 		const [x, y, w, h] = this.getCropCoordinates(task);
-		const digits = new Array(task.pattern.length);
+		const digits = Array(task.pattern.length);
 
 		crop(source_img, x, y, w, h, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);

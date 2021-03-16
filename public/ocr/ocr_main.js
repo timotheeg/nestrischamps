@@ -183,7 +183,7 @@ go_btn.addEventListener('click', async (evt) => {
 		video.videoHeight
 	);
 
-	video_capture.getContext('2d').drawImage(bitmap, 0, 0);
+	video_capture.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0);
 
 	await new Promise(resolve => {
 		setTimeout(resolve, 0); // wait one tick for everything to be drawn nicely... just in case
@@ -493,7 +493,7 @@ function showTemplates(templates) {
 		const canvas = document.createElement('canvas');
 		canvas.width = 14;
 		canvas.height = 14;
-		const ctx = canvas.getContext('2d');
+		const ctx = canvas.getContext('2d', { alpha: false });
 		const img = new ImageData(14, 14);
 		for (let p_idx=template.length; p_idx--; ) {
 			const luma = template[p_idx];
@@ -526,7 +526,7 @@ function resetConfig(config, task_name, task_crop) {
 			task_crop[2] * 2,
 			task_crop[3] * 2
 		);
-		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d');
+		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d', { alpha: false });
 	}
 
 	// set the new config
@@ -614,7 +614,7 @@ async function showParts(data) {
 		config.source_canvas = source_canvas;
 	}
 
-	const di_ctx = config.source_canvas.getContext('2d');
+	const di_ctx = config.source_canvas.getContext('2d', { alpha: false });
 
 	di_ctx.putImageData(config.source_img,
 		0, 0,
@@ -655,8 +655,8 @@ async function showParts(data) {
 			separator.textContent = ' ⟹ ';
 			holder.appendChild(separator);
 
-			task.crop_canvas_ctx = crop_canvas.getContext('2d');
-			task.scale_canvas_ctx = scale_canvas.getContext('2d');
+			task.crop_canvas_ctx = crop_canvas.getContext('2d', { alpha: false });
+			task.scale_canvas_ctx = scale_canvas.getContext('2d', { alpha: false });
 
 			task.crop_canvas_ctx.imageSmoothingEnabled = false;
 			task.scale_canvas_ctx.imageSmoothingEnabled = false;
