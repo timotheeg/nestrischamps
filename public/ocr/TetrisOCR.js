@@ -1,4 +1,5 @@
-const FRAME_BUFFER_SIZE = 1;
+const TetrisOCR = (function() {
+
 
 const PATTERN_MAX_INDEXES = {
 	'A': 16,
@@ -46,19 +47,6 @@ const TASK_RESIZE = {
 	piece_count:   [getDigitsWidth(3), 14],
 };
 
-// timing decorator
-function timingDecorator(name, func) { // func must be prebound
-	return function(...args) {
-		performance.mark(`start_${name}`);
-
-		const res = func(...args);
-
-		performance.mark(`end_${name}`);
-		performance.measure(name, `start_${name}`, `end_${name}`);
-
-		return res;
-	}
-}
 
 class TetrisOCR extends EventTarget {
 	static TASK_RESIZE = TASK_RESIZE;
@@ -73,12 +61,6 @@ class TetrisOCR extends EventTarget {
 		this.digit_img = new ImageData(14, 14); // 2x for better matching
 		this.block_img = new ImageData(7, 7);
 		this.small_block_img = new ImageData(5, 5);
-
-		this.last_frame = null;
-		this.frame_buffer = [];
-
-		this.score_fixer = new ScoreFixer();
-		this.level_fixer = new LevelFixer();
 
 		// decorate relevant methods to capture timings
 		PERF_METHODS
@@ -244,22 +226,7 @@ class TetrisOCR extends EventTarget {
 		}
 
 
-		// the raw reads are done, now let's apply some correction and detection
-		if (res.lines == null || res.score == null || res.level == null) {
-			this.IN_GAME = false;
-		}
-		else if (!this.IN_GAME) {
-			// first frame of new game
-			// get state right away, although by right, we should wait one frame for the values to stabilize
-			this.IN_GAME = true;
-		}
-
-
-		this.frame_buffer.push(res);
-
-		if (this.frame_buffer.length > FRAME_BUFFER_SIZE) {
-			this.onMessage(this.frame_buffer.shift());
-		}
+		this.onMessage(res);
 	}
 
 	scanScore(source_img) {
@@ -356,7 +323,7 @@ class TetrisOCR extends EventTarget {
 			digits[idx] = digit - 1;
 		}
 
-		return digits.reverse().reduce((acc, v, idx) => acc += v * Math.pow(10, idx), 0);
+		return digits;
 	}
 
 	/*
@@ -667,3 +634,7 @@ class TetrisOCR extends EventTarget {
 		return field;
 	}
 }
+
+return TetrisOCR;
+
+})();

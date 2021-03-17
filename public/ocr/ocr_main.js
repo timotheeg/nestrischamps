@@ -790,6 +790,9 @@ function trackAndSendFrames() {
 	}
 
 	tetris_ocr = new TetrisOCR(templates, palettes, config);
+	ocr_corrector = new OCRSanitizer(tetris_ocr, config);
+
+
 
 	let start_time = Date.now();
 	let game_state = IN_GAME;
