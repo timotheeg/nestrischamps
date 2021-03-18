@@ -1,16 +1,18 @@
 class LevelFixer {
 	constructor() {
-		this.last_good_label = null;
+		this.last_good_digits = null;
 	}
 
 	reset() {
-		this.last_good_label = null;
+		this.last_good_digits = null;
 	}
 
-	fix(label, value) {
-		if (label == null || this.last_good_label == null) {
-			this.last_good_label = label;
-			return [label, value];
+	fix(digits) {
+		const digits_copy = digits.concat();
+
+		if (this.last_good_digits == null) {
+			this.last_good_digits = digits_copy;
+			return digits_copy;
 		}
 
 		// level maps for 30 to 35
@@ -18,55 +20,67 @@ class LevelFixer {
 		// what's the logic? 🤔
 
 		// Fix the levels with no ambiguity
-		if (label == '1E') {
-			label = '33';
-			value = 33;
+		if (digits_copy[0] === 0x1 && digits_copy[1] === 0xE) { // 1E -> 33
+			digits_copy[0] = 0x3;
+			digits_copy[1] = 0x3;
 		}
-		else if (label == '32') {
-			label = '35';
-			value = 35;
+		else if (digits_copy[0] === 0x3 && digits_copy[1] === 0x2) { // 32 -> 35
+			digits_copy[1] = 0x5;
 		}
 
 		// fix the funny ones
 		else {
-			if (label == '00') {
-				if (this.last_good_label == '29' || this.last_good_label == '30') {
-					label = '30';
-					value = 30;
+			if (digits_copy[0] === 0x0 && digits_copy[1] === 0x0) {
+				if (
+					(this.last_good_digits[0] === 0x2 && this.last_good_digits[1] === 0x9)
+					||
+					(this.last_good_digits[0] === 0x3 && this.last_good_digits[1] === 0x0)
+				) {
+					digits_copy[0] = 0x3;
 				}
 			}
-			else if (label == '0A' || label == '04') {
-				if (this.last_good_label == '30' || this.last_good_label == '31') {
-					label = '31';
-					value = 31;
+			else if (digits_copy[0] === 0x0 && (digits_copy[1] === 0x4 || digits_copy[1] === 0xA))  {
+				if (this.last_good_digits[0] === 0x3 && (
+					this.last_good_digits[1] === 0x0
+					||
+					this.last_good_digits[1] === 0x1
+				)) {
+					digits_copy[0] = 0x3;
+					digits_copy[1] = 0x1;
 				}
 			}
-			else if (label == '14' || label == '1A') {
-				if (this.last_good_label == '31' || this.last_good_label == '32') {
-					label = '32';
-					value = 32;
+			else if (digits_copy[0] === 0x1 && (digits_copy[1] === 0x4 || digits_copy[1] === 0xA))  {
+				if (this.last_good_digits[0] === 0x3 && (
+					this.last_good_digits[1] === 0x1
+					||
+					this.last_good_digits[1] === 0x2
+				)) {
+					digits_copy[0] = 0x3;
+					digits_copy[1] = 0x2;
 				}
 			}
-			else if (label == '28' || label == '2B') {
-				if (this.last_good_label == '33' || this.last_good_label == '34' ) {
-					label = '34';
-					value = 34;
+			else if (digits_copy[0] === 0x2 && (digits_copy[2] === 0x8 || digits_copy[2] === 0xB))  {
+				if (this.last_good_digits[0] === 0x3 && (
+					this.last_good_digits[1] === 0x3
+					||
+					this.last_good_digits[1] === 0x4
+				)) {
+					digits_copy[0] = 0x3;
+					digits_copy[1] = 0x4;
 				}
 			}
 
 			// Fix all other A and B in second place, since they're impossible
-			if (label[1] == 'A') {
-				label = label[0] + '4';
-				value += (4-10);
+			if (digits_copy[1] === 0xA) {
+				digits_copy[1] = 0x4;
 			}
-			else if (label[1] == 'B') {
-				label = label[0] + '8';
-				value += (8-11);
+			else if (digits_copy[1] === 0xB) {
+				digits_copy[1] = 0x8;
 			}
 		}
 
-		this.last_good_label = label;
+		this.last_good_digits = digits_copy;
 
-		return [label, value];
+		return digits_copy;
 	}
 }
