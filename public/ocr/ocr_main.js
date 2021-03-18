@@ -1,9 +1,9 @@
 // NTSC NES resolution: 256x224 -> 512x448
 const reference_size = [512, 448];
 const reference_locations = {
-	score:         { crop: [384, 112, 94, 14], pattern: "DDDDDD" },
-	level:         { crop: [416, 320, 30, 14], pattern: "TD" },
-	lines:         { crop: [304, 32, 46, 14],  pattern: "TDD" },
+	score:         { crop: [384, 112, 94, 14], pattern: "ADDDDD" },
+	level:         { crop: [416, 320, 30, 14], pattern: "QA" },
+	lines:         { crop: [304, 32, 46, 14],  pattern: "QDD" },
 	field:         { crop: [192, 80, 160, 320] },
 	preview:       { crop: [384, 224, 62, 30] },
 	color1:        { crop: [76, 212, 10, 10] },
@@ -11,13 +11,13 @@ const reference_locations = {
 	instant_das:   { crop: [80, 64, 30, 14],  pattern: "BD" },
 	cur_piece_das: { crop: [112, 96, 30, 14], pattern: "BD" },
 	cur_piece:     { crop: [30, 89, 45, 23] },
-	T:             { crop: [96, 176, 46, 14], pattern: "BDD", red: true },
-	J:             { crop: [96, 208, 46, 14], pattern: "BDD", red: true },
-	Z:             { crop: [96, 240, 46, 14], pattern: "BDD", red: true },
-	O:             { crop: [96, 273, 46, 14], pattern: "BDD", red: true },
-	S:             { crop: [96, 304, 46, 14], pattern: "BDD", red: true },
-	L:             { crop: [96, 336, 46, 14], pattern: "BDD", red: true },
-	I:             { crop: [96, 368, 46, 14], pattern: "BDD", red: true },
+	T:             { crop: [96, 176, 46, 14], pattern: "TDD", red: true },
+	J:             { crop: [96, 208, 46, 14], pattern: "TDD", red: true },
+	Z:             { crop: [96, 240, 46, 14], pattern: "TDD", red: true },
+	O:             { crop: [96, 273, 46, 14], pattern: "TDD", red: true },
+	S:             { crop: [96, 304, 46, 14], pattern: "TDD", red: true },
+	L:             { crop: [96, 336, 46, 14], pattern: "TDD", red: true },
+	I:             { crop: [96, 368, 46, 14], pattern: "TDD", red: true },
 };
 
 const configs = {
@@ -59,7 +59,6 @@ const configs = {
 const default_frame_rate = 60;
 
 let do_half_height = true;
-let use_animation_frames = true;
 
 const
 	reference_ui     = document.querySelector('#reference_ui'),
@@ -95,6 +94,7 @@ let ocv;
 let templates;
 let palettes;
 let tetris_ocr;
+let ocr_corrector;
 let config;
 let connection;
 

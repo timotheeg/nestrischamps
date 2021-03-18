@@ -1,11 +1,11 @@
 const TetrisOCR = (function() {
 
-
 const PATTERN_MAX_INDEXES = {
-	'A': 16,
-	'D': 11,
-	'T': 5,
-	'B': 3
+	B: 3,  // null, 0, 1 (Binary)
+	T: 4,  // null, 0, 1, 2 (Ternary)
+	Q: 5,  // null, 0, 1, 2, 3 (Quaternary)
+	D: 11, // null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 (Digits)
+	A: 16, // null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F (Alphanums)
 };
 
 const PERF_METHODS = [
