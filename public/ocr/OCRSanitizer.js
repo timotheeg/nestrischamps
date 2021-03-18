@@ -68,7 +68,7 @@ class OCRSanitizer {
 				// if score readwas not pending, force a read now anyway to synchronize with the lines
 				this.pending_score = true;
 			}
-			else if (!OCRSanitizer.arrEqual(data.lines, last_frame.lines)) {
+			else if (!OCRSanitizer.arrEqual(data.lines, this.last_frame.lines)) {
 				this.pending_lines = true;
 
 				if (this.pending_score) {
@@ -90,7 +90,7 @@ class OCRSanitizer {
 
 			this.last_frame.score = data.score;
 		}
-		else if (!OCRSanitizer.arrEqual(data.score, last_frame.score)) {
+		else if (!OCRSanitizer.arrEqual(data.score, this.last_frame.score)) {
 			this.pendig_score = true;
 		}
 
@@ -125,7 +125,7 @@ class OCRSanitizer {
 				this.last_frame.cur_piece_das = data.cur_piece_das;
 				this.last_frame.cur_piece = data.cur_piece;
 			}
-			else if (!OCRSanitizer.arrEqual(data.cur_piece_das, last_frame.cur_piece_das)) {
+			else if (!OCRSanitizer.arrEqual(data.cur_piece_das, this.last_frame.cur_piece_das)) {
 				this.pending_piece = true;
 			}
 		}
@@ -144,7 +144,8 @@ class OCRSanitizer {
 	}
 
 	emitLastFrameData() {
-		// check if the fixers must be reset
+		// replicate NESTrisOCR gameid logic
+		// also check if the fixers must be reset
 		if (this.last_frame.lines == null || this.last_frame.score == null || this.last_frame.level == null) {
 			this.in_game = false;
 		}
@@ -176,8 +177,8 @@ class OCRSanitizer {
 			field:   this.last_frame.field,
 			preview: this.last_frame.preview,
 
-			score:   this.last_frame.score ? OCRSanitizer.digitsToValue(this.score_fixer.fix(this.last_frame.score)) : null,
-			level:   this.last_frame.level ? OCRSanitizer.digitsToValue(this.level_fixer.fix(this.last_frame.level)) : null,
+			score:   this.last_frame.score === null ? null : OCRSanitizer.digitsToValue(this.score_fixer.fix(this.last_frame.score)),
+			level:   this.last_frame.level === null ? null : OCRSanitizer.digitsToValue(this.level_fixer.fix(this.last_frame.level)),
 		};
 
 
@@ -189,6 +190,9 @@ class OCRSanitizer {
 			pojo.S = OCRSanitizer.digitsToValue(this.last_frame.S);
 			pojo.L = OCRSanitizer.digitsToValue(this.last_frame.L);
 			pojo.I = OCRSanitizer.digitsToValue(this.last_frame.I);
+
+			pojo.color1 = this.last_frame.color1;
+			pojo.color2 = this.last_frame.color2;
 		}
 		else {
 			popo.instant_das = OCRSanitizer.digitsToValue(this.last_frame.instant_das);
@@ -202,6 +206,8 @@ class OCRSanitizer {
 
 
 OCRSanitizer.digitsToValue = function digitsToValue(digits) {
+	if (digits === null) return null;
+
 	return digits.reverse().reduce((acc, v, idx) => acc += v * Math.pow(10, idx), 0);
 }
 

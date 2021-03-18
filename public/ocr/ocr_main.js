@@ -792,36 +792,17 @@ function trackAndSendFrames() {
 	tetris_ocr = new TetrisOCR(templates, palettes, config);
 	ocr_corrector = new OCRSanitizer(tetris_ocr, config);
 
-
-
 	let start_time = Date.now();
 	let game_state = IN_GAME;
 	let gameid = 1;
 	let last_frame = { field:[] };
 
 	// TODO: better event system and name for frame data events
-	tetris_ocr.onMessage = async function(data) {
-		// replicate NESTrisOCR gameid logic
-		if (game_state === IN_GAME) {
-			if (data.score === null && data.lines === null) {
-				game_state = IN_MENU;
-			}
-		}
-		else {
-			if (data.score != null && data.lines != null) {
-				game_state = IN_GAME;
-
-				if (data.score === 0 && (data.lines === 0 || data.lines === 25)) {
-					gameid++;
-				}
-			}
-		}
-
-		if (game_state == IN_MENU) {
+	ocr_corrector.onMessage = async function(data) {
+		if (data.score === null && data.lines === null) {
 			return; // really?
 		}
 
-		data.gameid = gameid;
 		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {
