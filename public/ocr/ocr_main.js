@@ -799,10 +799,6 @@ function trackAndSendFrames() {
 
 	// TODO: better event system and name for frame data events
 	ocr_corrector.onMessage = async function(data) {
-		if (data.score === null && data.lines === null) {
-			return; // really?
-		}
-
 		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {
@@ -834,6 +830,10 @@ function trackAndSendFrames() {
 
 		delete data.color1;
 		delete data.color2;
+
+		if (data.score === null && data.lines === null) {
+			return; // really? 🤔
+		}
 
 		// only send frame if changed
 		check_equal:
