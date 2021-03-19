@@ -189,8 +189,8 @@ class OCRSanitizer {
 			field:   this.last_frame.field,
 			preview: this.last_frame.preview,
 
-			score:   this.last_frame.score === null ? null : OCRSanitizer.digitsToValue(this.score_fixer.fix(this.last_frame.score)),
-			level:   this.last_frame.level === null ? null : OCRSanitizer.digitsToValue(this.level_fixer.fix(this.last_frame.level)),
+			score:   OCRSanitizer.digitsToValue(this.score_fixer.fix(this.last_frame.score)), // note: nulls are passthrough
+			level:   OCRSanitizer.digitsToValue(this.level_fixer.fix(this.last_frame.level)), // note: nulls are passthrough
 		};
 
 
