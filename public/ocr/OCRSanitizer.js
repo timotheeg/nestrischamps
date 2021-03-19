@@ -32,10 +32,10 @@ class OCRSanitizer {
 		this.score_fixer = new ScoreFixer();
 		this.level_fixer = new LevelFixer();
 
-		this.handleFirstFrame = this.handleFirstFrame.bind(this);
-		this.sanitize = timingDecorator('sanitize', this.sanitize.bind(this));
+		this._handleFirstFrame = this._handleFirstFrame.bind(this);
+		this._sanitize = this._sanitize.bind(this);
 
-		tetris_ocr.onMessage = this.handleFirstFrame;
+		tetris_ocr.onMessage = this._handleFirstFrame;
 
 		this.gameid = 1;
 		this.in_game = false;
@@ -49,14 +49,16 @@ class OCRSanitizer {
 		// class user to implement
 	}
 
-	handleFirstFrame(data) {
+	_handleFirstFrame(data) {
 		this.last_frame = { ...data }; // first frame is assumed "good" - because no choice!
 		this.previous_preview = data.preview; // used in das trainer to populate the current_frame
 
-		tetris_ocr.onMessage = this.sanitize;
+		tetris_ocr.onMessage = this._sanitize;
 	}
 
-	sanitize(data) {
+	_sanitize(data) {
+		performance.mark('start_sanitize');
+
 		do {
 			if (this.pending_lines) {
 				this.pending_lines = false;
@@ -98,9 +100,12 @@ class OCRSanitizer {
 
 		// mutually exclusive pendding_piece checks based on selected rom
 		if (this.config.tasks.T) {
-			// In classic rom, we can determine cur_piece as the previous preview
-			// that only fails on the first piece but works for all pieces thereafter
-			// TODO: compute the cur_piece into the frame for classic rom (maybe?)
+			// In classic rom, we have several way of determining the cur_piece
+			// 1. on piece change, cur_piece is the previous preview
+			// 2. on piece change, cur_piece if the piece with the last incremented counter
+			// So... Should this populate the cur_piece? it's not OCR...
+			// then again, the corrections are not really OCR too either
+			// TODO: populate cur_piece into the frame for classic rom (maybe?)
 			if (this.pending_piece) {
 				this.pending_piece = false;
 
@@ -122,13 +127,16 @@ class OCRSanitizer {
 				this.pending_piece = false;
 
 				this.last_frame.preview = data.preview;
-				this.last_frame.cur_piece_das = data.cur_piece_das;
 				this.last_frame.cur_piece = data.cur_piece;
+				this.last_frame.cur_piece_das = data.cur_piece_das;
 			}
 			else if (!OCRSanitizer.arrEqual(data.cur_piece_das, this.last_frame.cur_piece_das)) {
 				this.pending_piece = true;
 			}
 		}
+
+		performance.mark('end_sanitize');
+		performance.measure('sanitize', 'start_sanitize', 'end_sanitize');
 
 
 		// ==========
@@ -137,13 +145,17 @@ class OCRSanitizer {
 		// but that wouldbe fixed in the next step
 
 		// inform listener that a frame is ready
-		this.emitLastFrameData();
+		this._emitLastFrameData();
 
 		// Finally, record current frame for next iteration
+		// (and keep previous frame around in case we want to do more change comparison
+		this.previous_frame = this.last_frame;
 		this.last_frame = data;
 	}
 
-	emitLastFrameData() {
+	_emitLastFrameData() {
+		performance.mark('start_fix_and_convert');
+
 		// replicate NESTrisOCR gameid logic
 		// also check if the fixers must be reset
 		if (this.last_frame.lines == null || this.last_frame.score == null || this.last_frame.level == null) {
@@ -199,6 +211,9 @@ class OCRSanitizer {
 			popo.cur_piece_das = OCRSanitizer.digitsToValue(this.last_frame.cur_piece_das);
 			popo.cur_piece = this.last_frame.cur_piece;
 		}
+
+		performance.mark('end_fix_and_convert');
+		performance.measure('fix_and_convert', 'start_fix_and_convert', 'end_fix_and_convert');
 
 		this.onMessage(pojo);
 	}
