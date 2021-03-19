@@ -1,9 +1,9 @@
 // NTSC NES resolution: 256x224 -> 512x448
 const reference_size = [512, 448];
 const reference_locations = {
-	score:         { crop: [384, 112, 94, 14], pattern: "DDDDDD" },
-	level:         { crop: [416, 320, 30, 14], pattern: "TD" },
-	lines:         { crop: [304, 32, 46, 14],  pattern: "TDD" },
+	score:         { crop: [384, 112, 94, 14], pattern: "ADDDDD" },
+	level:         { crop: [416, 320, 30, 14], pattern: "QA" },
+	lines:         { crop: [304, 32, 46, 14],  pattern: "QDD" },
 	field:         { crop: [192, 80, 160, 320] },
 	preview:       { crop: [384, 224, 62, 30] },
 	color1:        { crop: [76, 212, 10, 10] },
@@ -11,13 +11,13 @@ const reference_locations = {
 	instant_das:   { crop: [80, 64, 30, 14],  pattern: "BD" },
 	cur_piece_das: { crop: [112, 96, 30, 14], pattern: "BD" },
 	cur_piece:     { crop: [30, 89, 45, 23] },
-	T:             { crop: [96, 176, 46, 14], pattern: "BDD", red: true },
-	J:             { crop: [96, 208, 46, 14], pattern: "BDD", red: true },
-	Z:             { crop: [96, 240, 46, 14], pattern: "BDD", red: true },
-	O:             { crop: [96, 273, 46, 14], pattern: "BDD", red: true },
-	S:             { crop: [96, 304, 46, 14], pattern: "BDD", red: true },
-	L:             { crop: [96, 336, 46, 14], pattern: "BDD", red: true },
-	I:             { crop: [96, 368, 46, 14], pattern: "BDD", red: true },
+	T:             { crop: [96, 176, 46, 14], pattern: "TDD", red: true },
+	J:             { crop: [96, 208, 46, 14], pattern: "TDD", red: true },
+	Z:             { crop: [96, 240, 46, 14], pattern: "TDD", red: true },
+	O:             { crop: [96, 273, 46, 14], pattern: "TDD", red: true },
+	S:             { crop: [96, 304, 46, 14], pattern: "TDD", red: true },
+	L:             { crop: [96, 336, 46, 14], pattern: "TDD", red: true },
+	I:             { crop: [96, 368, 46, 14], pattern: "TDD", red: true },
 };
 
 const configs = {
@@ -59,7 +59,6 @@ const configs = {
 const default_frame_rate = 60;
 
 let do_half_height = true;
-let use_animation_frames = true;
 
 const
 	reference_ui     = document.querySelector('#reference_ui'),
@@ -95,6 +94,7 @@ let ocv;
 let templates;
 let palettes;
 let tetris_ocr;
+let ocr_corrector;
 let config;
 let connection;
 
@@ -183,7 +183,7 @@ go_btn.addEventListener('click', async (evt) => {
 		video.videoHeight
 	);
 
-	video_capture.getContext('2d').drawImage(bitmap, 0, 0);
+	video_capture.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0);
 
 	await new Promise(resolve => {
 		setTimeout(resolve, 0); // wait one tick for everything to be drawn nicely... just in case
@@ -493,7 +493,7 @@ function showTemplates(templates) {
 		const canvas = document.createElement('canvas');
 		canvas.width = 14;
 		canvas.height = 14;
-		const ctx = canvas.getContext('2d');
+		const ctx = canvas.getContext('2d', { alpha: false });
 		const img = new ImageData(14, 14);
 		for (let p_idx=template.length; p_idx--; ) {
 			const luma = template[p_idx];
@@ -526,7 +526,7 @@ function resetConfig(config, task_name, task_crop) {
 			task_crop[2] * 2,
 			task_crop[3] * 2
 		);
-		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d');
+		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d', { alpha: false });
 	}
 
 	// set the new config
@@ -614,7 +614,7 @@ async function showParts(data) {
 		config.source_canvas = source_canvas;
 	}
 
-	const di_ctx = config.source_canvas.getContext('2d');
+	const di_ctx = config.source_canvas.getContext('2d', { alpha: false });
 
 	di_ctx.putImageData(config.source_img,
 		0, 0,
@@ -655,8 +655,8 @@ async function showParts(data) {
 			separator.textContent = ' ⟹ ';
 			holder.appendChild(separator);
 
-			task.crop_canvas_ctx = crop_canvas.getContext('2d');
-			task.scale_canvas_ctx = scale_canvas.getContext('2d');
+			task.crop_canvas_ctx = crop_canvas.getContext('2d', { alpha: false });
+			task.scale_canvas_ctx = scale_canvas.getContext('2d', { alpha: false });
 
 			task.crop_canvas_ctx.imageSmoothingEnabled = false;
 			task.scale_canvas_ctx.imageSmoothingEnabled = false;
@@ -790,6 +790,7 @@ function trackAndSendFrames() {
 	}
 
 	tetris_ocr = new TetrisOCR(templates, palettes, config);
+	ocr_corrector = new OCRSanitizer(tetris_ocr, config);
 
 	let start_time = Date.now();
 	let game_state = IN_GAME;
@@ -797,24 +798,7 @@ function trackAndSendFrames() {
 	let last_frame = { field:[] };
 
 	// TODO: better event system and name for frame data events
-	tetris_ocr.onMessage = async function(data) {
-		// replicate NESTrisOCR gameid logic
-		if (game_state === IN_GAME) {
-			if (data.score === null && data.lines === null) {
-				game_state = IN_MENU;
-			}
-		}
-		else {
-			if (data.score != null && data.lines != null) {
-				game_state = IN_GAME;
-
-				if (data.score === 0 && (data.lines === 0 || data.lines === 25)) {
-					gameid++;
-				}
-			}
-		}
-
-		data.gameid = gameid;
+	ocr_corrector.onMessage = async function(data) {
 		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {
@@ -844,12 +828,12 @@ function trackAndSendFrames() {
 		performance.clearMarks();
 		performance.clearMeasures();
 
-		if (game_state == IN_MENU) {
-			return; // really?
-		}
-
 		delete data.color1;
 		delete data.color2;
+
+		if (data.score === null && data.lines === null) {
+			return; // really? 🤔
+		}
 
 		// only send frame if changed
 		check_equal:

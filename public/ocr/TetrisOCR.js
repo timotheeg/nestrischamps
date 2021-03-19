@@ -1,7 +1,11 @@
+const TetrisOCR = (function() {
+
 const PATTERN_MAX_INDEXES = {
-	'D': 11,
-	'T': 4,
-	'B': 3
+	B: 3,  // null, 0, 1 (Binary)
+	T: 4,  // null, 0, 1, 2 (Ternary)
+	Q: 5,  // null, 0, 1, 2, 3 (Quaternary)
+	D: 11, // null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 (Digits)
+	A: 16, // null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F (Alphanums)
 };
 
 const PERF_METHODS = [
@@ -43,19 +47,6 @@ const TASK_RESIZE = {
 	piece_count:   [getDigitsWidth(3), 14],
 };
 
-// timing decorator
-function timingDecorator(name, func) { // func must be prebound
-	return function(...args) {
-		performance.mark(`start_${name}`);
-
-		const res = func(...args);
-
-		performance.mark(`end_${name}`);
-		performance.measure(name, `start_${name}`, `end_${name}`);
-
-		return res;
-	}
-}
 
 class TetrisOCR extends EventTarget {
 	static TASK_RESIZE = TASK_RESIZE;
@@ -173,7 +164,7 @@ class TetrisOCR extends EventTarget {
 		this.capture_canvas.width = frame.width;
 		this.capture_canvas.height = frame.height;
 
-		this.capture_canvas_ctx = this.capture_canvas.getContext('2d');
+		this.capture_canvas_ctx = this.capture_canvas.getContext('2d', { alpha: false });
 		this.capture_canvas_ctx.imageSmoothingEnabled = 'false';
 
 		// On top of the capture context, we need one more canvas for the scaled field
@@ -186,7 +177,7 @@ class TetrisOCR extends EventTarget {
 		this.scaled_field_canvas.width = TASK_RESIZE.field[0];
 		this.scaled_field_canvas.height = TASK_RESIZE.field[1];
 
-		this.scaled_field_canvas_ctx = this.scaled_field_canvas.getContext('2d');
+		this.scaled_field_canvas_ctx = this.scaled_field_canvas.getContext('2d', { alpha: false });
 		this.scaled_field_canvas_ctx.imageSmoothingEnabled = 'false';
 	}
 
@@ -233,6 +224,7 @@ class TetrisOCR extends EventTarget {
 		if (this.config.tasks.T) {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
+
 
 		this.onMessage(res);
 	}
@@ -314,7 +306,7 @@ class TetrisOCR extends EventTarget {
 
 	ocrDigits(source_img, task) {
 		const [x, y, w, h] = this.getCropCoordinates(task);
-		const digits = new Array(task.pattern.length);
+		const digits = Array(task.pattern.length);
 
 		crop(source_img, x, y, w, h, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);
@@ -331,7 +323,7 @@ class TetrisOCR extends EventTarget {
 			digits[idx] = digit - 1;
 		}
 
-		return digits.reverse().reduce((acc, v, idx) => acc += v * Math.pow(10, idx), 0);
+		return digits;
 	}
 
 	/*
@@ -642,3 +634,7 @@ class TetrisOCR extends EventTarget {
 		return field;
 	}
 }
+
+return TetrisOCR;
+
+})();
