@@ -207,9 +207,9 @@ class OCRSanitizer {
 			pojo.color2 = this.last_frame.color2;
 		}
 		else {
-			popo.instant_das = OCRSanitizer.digitsToValue(this.last_frame.instant_das);
-			popo.cur_piece_das = OCRSanitizer.digitsToValue(this.last_frame.cur_piece_das);
-			popo.cur_piece = this.last_frame.cur_piece;
+			pojo.instant_das = OCRSanitizer.digitsToValue(this.last_frame.instant_das);
+			pojo.cur_piece_das = OCRSanitizer.digitsToValue(this.last_frame.cur_piece_das);
+			pojo.cur_piece = this.last_frame.cur_piece;
 		}
 
 		performance.mark('end_fix_and_convert');
