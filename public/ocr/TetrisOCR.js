@@ -203,7 +203,18 @@ class TetrisOCR extends EventTarget {
 
 		// color are either supplied from palette or read, there's no other choice
 		if (this.palette) {
-			colors = this.palette[(res.level || 0) % 10];
+			// WARNING: level *may* be read incorrectly on transition frames
+			// Also: we haven't gone through the sanitization and correction pipeline here :(
+			let level;
+
+			if (res.level) {
+				level = res.level[0] * 10 + res.level[1];
+			}
+			else {
+				level = 0;
+			}
+
+			colors = this.palette[level % 10];
 		}
 		else {
 			// assume tasks color1 and color2 are set
