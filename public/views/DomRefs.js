@@ -31,6 +31,15 @@ class DomRefs {
 			value:   doc.querySelector('#level .value')
 		};
 
+		const pace = doc.querySelector('#pace');
+
+		if (pace) {
+			this.pace = {
+				element: pace,
+				value:   pace.querySelector('.content')
+			};
+		}
+
 		const lines = doc.querySelector('#lines');
 
 		if (lines) {

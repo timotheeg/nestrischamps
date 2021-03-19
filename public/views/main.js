@@ -683,6 +683,8 @@ function renderInstantDas(das) {
 }
 
 function renderDas() {
+	if (!dom.das) return;
+
 	dom.das.avg.textContent = game.data.das.avg.toFixed(1).padStart(4, '0');
 	dom.das.great.textContent = game.data.das.great.toString().padStart(3, '0');
 	dom.das.ok.textContent = game.data.das.ok.toString().padStart(3, '0');
@@ -795,86 +797,6 @@ function renderDas() {
 	}
 }
 
-function renderBlock(level, block_index, ctx, pos_x, pos_y) {
-	let color;
-
-	switch (block_index) {
-		case 1:
-			// inefficient because it draws the area twice
-			// check speed and optimize if necessary
-			color = LEVEL_COLORS[level % 10][0];
-
-			ctx.fillStyle = color;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE * 7,
-				BLOCK_PIXEL_SIZE * 7
-			);
-
-			ctx.fillStyle = 'white';
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE
-			);
-
-			ctx.fillRect(
-				pos_x + BLOCK_PIXEL_SIZE,
-				pos_y + BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE * 5,
-				BLOCK_PIXEL_SIZE * 5
-			);
-
-			break;
-
-		case 2:
-		case 3:
-			color = LEVEL_COLORS[level % 10][block_index - 2];
-
-			ctx.fillStyle = color;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE * 7,
-				BLOCK_PIXEL_SIZE * 7
-			);
-
-			ctx.fillStyle = 'white';
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE
-			);
-			ctx.fillRect(
-				pos_x + BLOCK_PIXEL_SIZE,
-				pos_y + BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE * 2,
-				BLOCK_PIXEL_SIZE
-			);
-			ctx.fillRect(
-				pos_x + BLOCK_PIXEL_SIZE,
-				pos_y + BLOCK_PIXEL_SIZE * 2,
-				BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE
-			);
-
-			break;
-
-		default:
-			/*
-			ctx.clearRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE * 7,
-				BLOCK_PIXEL_SIZE * 7
-			);
-			/**/
-	}
-}
-
 let stage_currently_rendered = null;
 
 function renderStage(level, stage) {
@@ -897,6 +819,7 @@ function renderStage(level, stage) {
 			renderBlock(
 				level,
 				field[y * 10 + x],
+				BLOCK_PIXEL_SIZE,
 				ctx,
 				x * pixels_per_block,
 				y * pixels_per_block
@@ -992,7 +915,14 @@ function renderNextPiece(level, next_piece) {
 	}
 
 	positions.forEach(([pos_x, pos_y]) => {
-		renderBlock(level, col_index, ctx, pos_x, pos_y);
+		renderBlock(
+			level,
+			col_index,
+			BLOCK_PIXEL_SIZE,
+			ctx,
+			pos_x,
+			pos_y
+		);
 	});
 }
 
