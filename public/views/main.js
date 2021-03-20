@@ -447,13 +447,16 @@ function renderPastGamesAndPBs(data) {
 		row.tetris_rate.textContent = getPercent(record.tetris_rate || 0);
 	});
 
+	// Disgusting hardcoded values below T_T
+	const num_scores_to_show = dom.high_scores.element.clientHeight > 200 ? 10 : 5;
+
 	// high scores
 	['today', 'overall'].forEach(category => {
 		if (data.high_scores[category].length <= 0) {
 			data.high_scores[category].push(null);
 		}
 
-		dom.high_scores[category].innerHTML = data.high_scores[category].slice(0, 5).map(record => {
+		dom.high_scores[category].innerHTML = data.high_scores[category].slice(0, num_scores_to_show).map(record => {
 			if (!record || record.start_level == null) {
 				record = {
 					score: 0,
@@ -464,7 +467,7 @@ function renderPastGamesAndPBs(data) {
 
 			return '<tr>' + [
 				record.start_level.toString().padStart(2, '0'),
-				record.score.toString().padStart(6, '0'),
+				record.score.toString().padStart(7, '0'),
 				getPercent(record.tetris_rate)
 			].map(content => `<td>${content}</td>`).join('') + '</tr>';
 
