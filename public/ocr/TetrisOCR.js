@@ -608,13 +608,15 @@ class TetrisOCR extends EventTarget {
 		/**/
 
 		/**/
+		const row_width = 9 * 8 + 7; // the last block in a row is one pixel less!
+
 		for (let ridx = 0; ridx < 20; ridx++) {
 			for (let cidx = 0; cidx < 10; cidx++) {
-				const block_offset = ((ridx * 10 * 8 * 8) + cidx * 8) * 4;
+				const block_offset = ((ridx * row_width * 8) + cidx * 8) * 4;
 
 				const channels = pix_refs
 					.map(([x, y]) => {
-						const col_idx = block_offset + y * 10 * 8 * 4 + x * 4;
+						const col_idx = block_offset + y * row_width * 4 + x * 4;
 						return field_img.data.subarray(col_idx, col_idx + 3);
 					})
 					.reduce((acc, col) => {
