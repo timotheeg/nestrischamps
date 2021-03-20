@@ -13,14 +13,14 @@ if (dom.das) {
 
 		das_label.style.color = color;
 	}
+}
 
-	for (const [type, color] of Object.entries(BOARD_COLORS)) {
-		const label = document.querySelector(`#board_stats .${type}`);
+for (const [type, color] of Object.entries(BOARD_COLORS)) {
+	const label = document.querySelector(`#board_stats .${type}`);
 
-		if (!label) continue;
+	if (!label) continue;
 
-		label.style.color = color;
-	}
+	label.style.color = color;
 }
 
 const API = {
