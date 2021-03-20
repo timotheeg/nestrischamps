@@ -8,6 +8,8 @@ class Game {
 
 		this.line_events = []; // entry will be added every time lines are cleared
 
+		const lines = event.lines || 0;
+
 		this.data = {
 			start_level: event.level,
 
@@ -16,7 +18,7 @@ class Game {
 
 			score: {
 				current:    event.score,
-				pace:       event.score + PACE_POTENTIAL[event.lines].score,
+				pace:       event.score + PACE_POTENTIAL[lines].score,
 				normalized: 0,
 				transition: null
 			},
@@ -45,7 +47,7 @@ class Game {
 			},
 
 			lines: {
-				count: event.lines,
+				count: lines,
 			},
 
 			points: {

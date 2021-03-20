@@ -441,7 +441,7 @@ function renderPastGamesAndPBs(data) {
 		if (!row) return;
 
 		row.end_level.textContent =   (record.end_level || 0).toString().padStart(2, '0');
-		row.score.textContent =       (record.score || 0).toString().padStart(7, ' ');
+		row.score.textContent =       (record.score || 0).toString().padStart(6, '0').padStart(7, ' ');
 		row.lines.textContent =       (record.lines || 0).toString().padStart(3, '0');
 		row.tetris_rate.textContent = getPercent(record.tetris_rate || 0);
 
@@ -475,7 +475,7 @@ function renderPastGamesAndPBs(data) {
 
 			return '<tr>' + [
 				record.start_level.toString().padStart(2, '0'),
-				record.score.toString().padStart(7, ' '),
+				record.score.toString().padStart(6, '0').padStart(7, ' '),
 				getPercent(record.tetris_rate)
 			].map(content => `<td>${content}</td>`).join('') + '</tr>';
 
@@ -505,14 +505,14 @@ function renderLine() {
 		dom.lines.count.textContent = line_count
 	}
 
-	dom.score.current.textContent = game.data.score.current.toString().padStart(7, ' ');
+	dom.score.current.textContent = game.data.score.current.toString().padStart(6, '0').padStart(7, ' ');
 
 	if (dom.pace) {
 		dom.pace.value.textContent = game.data.score.pace.toString();
 	}
 
 	if (game.data.score.transition) {
-		dom.score.transition.textContent = game.data.score.transition.toString().padStart(7, ' ');
+		dom.score.transition.textContent = game.data.score.transition.toString().padStart(6, '0').padStart(7, ' ');
 	}
 	else {
 		dom.score.transition.textContent = '------';
@@ -520,7 +520,7 @@ function renderLine() {
 
 	// lines and points
 	dom.lines_stats.count.textContent = line_count;
-	dom.points.count.textContent = game.data.score.current; // .toString().padStart(7, '0');
+	dom.points.count.textContent = game.data.score.current; // .toString().padStart(6, '0').padStart(7, ' ');
 
 	for (const [num_lines, values] of Object.entries(LINES)) {
 		const { name } = values;
@@ -529,7 +529,7 @@ function renderLine() {
 		dom.lines_stats[name].lines.textContent = game.data.lines[num_lines].lines.toString().padStart(3, '0');
 		dom.lines_stats[name].percent.textContent = getPercent(game.data.lines[num_lines].percent)
 
-		dom.points[name].count.textContent = game.data.points[num_lines].count.toString().padStart(7, ' ');
+		dom.points[name].count.textContent = game.data.points[num_lines].count.toString().padStart(6, '0').padStart(7, ' ');
 		dom.points[name].percent.textContent = getPercent(game.data.points[num_lines].percent);
 	}
 
