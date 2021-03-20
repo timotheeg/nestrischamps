@@ -51,7 +51,7 @@ class ScoreDAO {
 			FROM scores
 			WHERE player_id=$1
 			ORDER BY score DESC
-			LIMIT 7
+			LIMIT 10
 			`,
 			[ user.id ]
 		);
@@ -73,7 +73,7 @@ class ScoreDAO {
 			WHERE player_id=$1
 				AND datetime>=$2
 			ORDER BY score DESC
-			LIMIT 7
+			LIMIT 10
 			`,
 			[
 				user.id,
