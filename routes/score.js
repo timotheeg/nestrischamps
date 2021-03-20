@@ -46,8 +46,8 @@ router.get('/get_stats', middlewares.assertSession, async (req, res) => {
 });
 
 
-router.post('/report_game/:secret', middlewares.assertSession, express.json(), async (req, res) => {
-	console.log('report_game by secret');
+router.post('/report_game/:secret', express.json(), async (req, res) => {
+	console.log('Reporting game by secret');
 
 	const user = await UserDAO.getUserBySecret(req.params.secret);
 
@@ -55,6 +55,8 @@ router.post('/report_game/:secret', middlewares.assertSession, express.json(), a
 		res.status(404).send('User Not found');
 		return;
 	}
+
+	console.log(`Found user ${user.login}`);
 
 	let game_data = req.body;
 
@@ -76,6 +78,8 @@ router.post('/report_game/:secret', middlewares.assertSession, express.json(), a
 		return;
 	}
 
+	console.log('Game data is good');
+
 	try {
 		await ScoreDAO.recordGame(user, game_data);
 	}
@@ -84,7 +88,11 @@ router.post('/report_game/:secret', middlewares.assertSession, express.json(), a
 		console.error(err);
 	}
 
+	console.log('Game is recorded!');
+
 	res.json(await ScoreDAO.getStats(user));
+
+	console.log('Sent new scores back');
 });
 
 module.exports = router;
