@@ -533,7 +533,7 @@ function renderLine() {
 		dom.points[name].percent.textContent = getPercent(game.data.points[num_lines].percent);
 	}
 
-	dom.points.drops.count.textContent = game.data.points.drops.count.toString().padStart(7, ' ');
+	dom.points.drops.count.textContent = game.data.points.drops.count.toString().padStart(6, '0').padStart(7, ' ');
 	dom.points.drops.percent.textContent = getPercent(game.data.points.drops.percent);
 
 	dom.lines_stats.trt_ctx.clear();
