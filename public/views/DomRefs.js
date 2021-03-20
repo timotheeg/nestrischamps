@@ -103,7 +103,7 @@ class DomRefs {
 				score:       pbs.querySelector(`.${level_class} .score`),
 				lines:       pbs.querySelector(`.${level_class} .lines`),
 				das_avg:     pbs.querySelector(`.${level_class} .das_avg`),
-				das_avg:     pbs.querySelector(`.${level_class} .max_drought`),
+				max_drought: pbs.querySelector(`.${level_class} .max_drought`),
 				tetris_rate: pbs.querySelector(`.${level_class} .tetris_rate`),
 			};
 		});
