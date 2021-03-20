@@ -2,475 +2,13 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+<link rel="stylesheet" type="text/css" href="/views/stats-boxes.css" />
 <style>
-
-.box {
-	width: 105px;
-	height: 41px;
-	padding: 10px;
-
-	border-image: url('/views/border_no_black.png');
-	border-image-slice: 8 8 8 8 fill;
-	border-image-width: 8px 8px;
-}
-
-.box .header {
-	padding-bottom: 2px;
-}
-
-i {
-	font-size: 8px;
-	font-style: normal;
-
-}
-
-.external {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	color: grey;
-}
-
-.bounded {
-	border-style: dashed;
-	border-color: #505050;
-	border-width: 1px 0;
-}
-
-#tetris_rate {
-	left: 1021px;
-	top: 201px;
-	width: 238px;
-	height: 110px;
-	padding-right: 8px;
-	padding-left: 8px;
-}
-
-#pace {
-	left: 1021px;
-	top: 6px;
-	width: 234px;
-}
-
-#level {
-	left: 1150px;
-	top: 71px;
-}
-
-#lines {
-	left: 1021px;
-	top: 71px;
-}
-
-#efficiency {
-	left: 1021px;
-	top: 136px;
-}
-
-#burn {
-	left: 1150px;
-	top: 136px;
-}
-
-#score {
-	left: 760px;
-	top: 6px;
-	width: 124px;
-	height: 73px;
-	padding: 10px 8px;
-}
-
-#score .header {
-	padding-bottom: 6px;
-}
-
-#score .content {
-	text-align: left;
-}
-
-#score .content th {
-	font-size: 8px;
-	padding-right: 0px;
-}
-
-#droughts {
-	left: 760px;
-	top: 604px;
-	width: 241px;
-	height: 90px;
-	padding: 10px 8px;
-}
-
-#droughts .header {
-	padding-bottom: 6px;
-}
-
-#droughts .content {
-	text-align: left
-}
-
-.hgauge th {
-	font-size: 8px;
-}
-
-.hgauge .value {
-	padding-left: 2px;
-}
-
-.panic .current .value {
-	animation: panic_colorize_wr 0.65s infinite;
-	animation-direction: alternate;
-}
-
-.max_panic .current .value,
-.max_panic .max .value
-{
-	animation: panic_colorize_wr 0.65s infinite;
-	animation-direction: alternate;
-}
-
-@keyframes panic_colorize_wr {
-  from {color: white;}
-  to {color: red;}
-}
-
-
-#piece_stats {
-	left: 6px;
-	top: 316px;
-	width: 730px;
-	height: 144px;
-}
-
-#piece_stats .content {
-	font-size: 8px;
-	line-height: 8px;
-}
-
-#piece_stats .headers .header {
-	font-size: 16px;
-	line-height: 20px;
-	padding-bottom: 2px;
-}
-
-#piece_stats .content .headers th {
-	vertical-align: bottom;
-}
-
-#piece_stats .content .piece th {
-	display: inline-block;
-	background: url(/views/small_pieces_sprites.png);
-	background-repeat: no-repeat;
-	width: 23px;
-	height: 15px;
-}
-
-#piece_stats .content .piece th {
-	background-position-x: 0px;
-}
-
-#piece_stats.l0 .content .piece th {
-	background-position-x: -24px;
-}
-
-#piece_stats.l1 .content .piece th {
-	background-position-x: -48px;
-}
-
-#piece_stats.l2 .content .piece th {
-	background-position-x: -72px;
-}
-
-#piece_stats.l3 .content .piece th {
-	background-position-x: -96px;
-}
-
-#piece_stats.l4 .content .piece th {
-	background-position-x: -120px;
-}
-
-#piece_stats.l5 .content .piece th {
-	background-position-x: -144px;
-}
-
-#piece_stats.l6 .content .piece th {
-	background-position-x: -168px;
-}
-
-#piece_stats.l7 .content .piece th {
-	background-position-x: -192px;
-}
-
-#piece_stats.l8 .content .piece th {
-	background-position-x: -216px;
-}
-
-#piece_stats.l9 .content .piece th {
-	background-position-x: -240px;
-}
-
-
-#piece_stats .content .piece.T th {
-	background-position-y: 0px;
-}
-
-#piece_stats .content .piece.J th {
-	background-position-y: -16px;
-}
-
-#piece_stats .content .piece.Z th {
-	background-position-y: -32px;
-}
-
-#piece_stats .content .piece.O th {
-	background-position-y: -48px;
-}
-
-#piece_stats .content .piece.S th {
-	background-position-y: -64px;
-}
-
-#piece_stats .content .piece.L th {
-	background-position-y: -80px;
-}
-
-#piece_stats .content .piece.I th {
-	background-position-y: -96px;
-}
-
-#piece_stats .content .count {
-	padding-left: 9px;
-}
-
-#piece_stats .content .drought {
-	color: lightgrey;
-	padding-left: 4px;
-}
-
-#piece_stats .content .percent {
-	padding-right: 6px;
-	padding-left: 9px;
-}
-
-#piece_stats .content th.percent {
-	text-align: center;
-}
-
-#das {
-	left: 6px;
-	top: 484px;
-	width: 730px;
-	height: 78px;
-}
-
-#das .header {
-	padding-bottom: 6px;
-}
-
-#das .gauge canvas {
-	border-style: solid;
-	border-color: #505050;
-	border-width: 1px 1px;
-}
-
-#board_stats {
-	left: 6px;
-	top: 586px;
-	width: 730px;
-	height: 108px;
-}
-
-#board_stats .header {
-	padding-bottom: 5px;
-}
-
-#board_stats .header .info_labels {
-	font-size: 8px;
-}
-
-#board_stats .bounded {
-	border-width: 1px 0 0 0;
-}
-
-#lines_stats {
-	top: 6px;
-	left: 486px;
-	width: 250px;
-	height: 120px;
-}
 
 #lines_stats .header,
 #points .header {
 	padding-bottom: 6px;
 }
-
-#lines_stats th {
-	text-align: left;
-	font-size: 8px;
-}
-
-#lines_stats td {
-	text-align: left;
-	padding-left: 13px;
-}
-
-#lines_stats .tetris_rate {
-	padding-top: 9px;
-}
-
-#lines_stats .tetris_rate canvas {
-	border-style: dashed;
-	border-color: #505050;
-	border-width: 1px 0;
-}
-
-#points {
-	top: 150px;
-	left: 486px;
-	width: 250px;
-	height: 142px;
-}
-
-#points th {
-	text-align: left;
-	font-size: 8px;
-}
-
-#points .drops th {
-	color: #747474;
-}
-
-#points td {
-	text-align: left;
-	padding-left: 20px;
-}
-
-#stream_bg {
-	background-color: #000;
-}
-
-#tetris_stage {
-	top: 103px;
-	left: 760px;
-	width: 237px;
-	height: 477px;
-}
-
-#next_piece {
-	width: 97px;
-	height: 73px;
-	top: 6px;
-	left: 904px;
-	padding: 10px 8px;
-}
-
-#next_piece .header {
-	padding-bottom: 5px;
-}
-
-#video {
-	top: 335px;
-	left: 1021px;
-	width: 234px;
-	height: 128px;
-}
-
-#pbs {
-	top: 6px;
-	left: 6px;
-	width: 456px;
-	height: 85px;
-}
-
-#pbs .header {
-	padding-bottom: 0px;
-}
-
-#pbs .content {
-	margin: 0 auto;
-}
-
-#pbs th {
-	padding: 0;
-	font-size: 8px;
-	text-align: center;
-}
-
-#pbs td {
-	text-align: center;
-	padding: 0 10px;
-}
-
-#high_scores {
-	top: 115px;
-	left: 6px;
-	width: 456px;
-	height: 177px;
-}
-
-#high_scores table {
-	border-spacing: 1px;
-}
-
-#high_scores .header {
-	padding-bottom: 6px;
-}
-
-#high_scores td.today, #high_scores td.overall {
-	vertical-align: top;
-	width: 220px;
-}
-
-#high_scores td.today {
-	padding-right: 16px;
-}
-
-#high_scores th {
-	line-height: 16px;
-	font-size: 8px;
-	vertical-align: bottom;
-}
-
-#high_scores td td {
-	vertical-align: top;
-	padding: 0 4px;
-}
-
-#high_scores td table {
-	line-height: 21px;
-}
-
-#chat {
-	top: 436px;
-	left: 1021px;
-	width: 234px;
-	height: 258px;
-	overflow: hidden;
-}
-
-#chat .header {
-	padding-bottom: 6px;
-}
-
-#chat .content {
-	font-size: 10px;
-	line-height: 10px;
-	width: 100%;
-	height: 234px;
-	overflow: hidden;
-	text-align: left;
-}
-
-#chat .content p {
-	margin-top: 0;
-	margin-bottom: 6px;
-}
-
-#chat .content .text {
-	font-family: "Press Start", monospace;
-}
-
 
 </style>
 </head>
@@ -506,7 +44,7 @@ i {
 			<tr class="s18">
 				<td class="start_level">18</td>
 				<td class="end_level">--</td>
-				<td class="score">------</td>
+				<td class="score">-------</td>
 				<td class="lines">---</td>
 				<td class="das_avg">--.-</td>
 				<td class="tetris_rate">--%</td>
@@ -514,7 +52,7 @@ i {
 			<tr class="s19">
 				<td class="start_level">19</td>
 				<td class="end_level">--</td>
-				<td class="score">------</td>
+				<td class="score">  -----</td>
 				<td class="lines">---</td>
 				<td class="das_avg">--.-</td>
 				<td class="tetris_rate">--%</td>
@@ -818,32 +356,32 @@ i {
 </div>
 
 <div class="box" id="points">
-	<div class="header">POINTS <span class="count">000000</span></div>
+	<div class="header">POINTS <span class="count">0000000</span></div>
 	<div class="content">
 		<table>
 			<tr class="drops">
 				<th>Drops</th>
-				<td class="count">000000</td>
+				<td class="count"> 000000</td>
 				<td class="percent">00%</td>
 			</tr>
 			<tr class="singles">
 				<th>Singles</th>
-				<td class="count">000000</td>
+				<td class="count"> 000000</td>
 				<td class="percent">00%</td>
 			</tr>
 			<tr class="doubles">
 				<th>Doubles</th>
-				<td class="count">000000</td>
+				<td class="count"> 000000</td>
 				<td class="percent">00%</td>
 			</tr>
 			<tr class="triples">
 				<th>Triples</th>
-				<td class="count">000000</td>
+				<td class="count"> 000000</td>
 				<td class="percent">00%</td>
 			</tr>
 			<tr class="tetris">
 				<th>Tetris</th>
-				<td class="count">000000</td>
+				<td class="count"> 000000</td>
 				<td class="percent">00%</td>
 			</tr>
 		</table>

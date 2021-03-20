@@ -31,7 +31,7 @@ class ScoreDAO {
 
 	async _getPBs(db_client, user, start_level) {
 		const result = await db_client.query(`
-			SELECT start_level, end_level, score, lines, das_avg, tetris_rate
+			SELECT start_level, end_level, score, lines, das_avg, max_drought, tetris_rate
 			FROM scores
 			WHERE player_id=$1 and start_level=$2
 			ORDER BY score DESC

@@ -441,10 +441,18 @@ function renderPastGamesAndPBs(data) {
 		if (!row) return;
 
 		row.end_level.textContent =   (record.end_level || 0).toString().padStart(2, '0');
-		row.score.textContent =       (record.score || 0).toString().padStart(6, '0');
+		row.score.textContent =       (record.score || 0).toString().padStart(7, ' ');
 		row.lines.textContent =       (record.lines || 0).toString().padStart(3, '0');
-		row.das_avg.textContent =     (record.das_avg || 0).toFixed(1).padStart(4, '0');
 		row.tetris_rate.textContent = getPercent(record.tetris_rate || 0);
+
+
+		if (row.das_avg) {
+			row.das_avg.textContent = (record.das_avg || 0).toFixed(1).padStart(4, '0');
+		}
+
+		if (row.max_drought) {
+			row.max_drought.textContent = (record.max_drought || 0).toString().padStart(3, '0');
+		}
 	});
 
 	// Disgusting hardcoded values below T_T
@@ -467,7 +475,7 @@ function renderPastGamesAndPBs(data) {
 
 			return '<tr>' + [
 				record.start_level.toString().padStart(2, '0'),
-				record.score.toString().padStart(7, '0'),
+				record.score.toString().padStart(7, ' '),
 				getPercent(record.tetris_rate)
 			].map(content => `<td>${content}</td>`).join('') + '</tr>';
 
@@ -479,7 +487,7 @@ function renderPastGamesAndPBs(data) {
 function getPercent(ratio) {
 	const percent = Math.round(ratio * 100);
 
-	return percent >= 100 ? '100' : (percent).toString().padStart(2, '0') + '%';
+	return percent >= 100 ? '100' : percent.toString().padStart(2, '0') + '%';
 }
 
 function renderLine() {
@@ -497,22 +505,22 @@ function renderLine() {
 		dom.lines.count.textContent = line_count
 	}
 
-	dom.score.current.textContent = game.data.score.current.toString().padStart(7, '0');
+	dom.score.current.textContent = game.data.score.current.toString().padStart(7, ' ');
 
 	if (dom.pace) {
-		dom.pace.value.textContent = game.data.score.pace.toString().padStart(7, '0');
+		dom.pace.value.textContent = game.data.score.pace.toString();
 	}
 
 	if (game.data.score.transition) {
-		dom.score.transition.textContent = game.data.score.transition.toString().padStart(7, '0');
+		dom.score.transition.textContent = game.data.score.transition.toString().padStart(7, ' ');
 	}
 	else {
-		dom.score.transition.textContent = '-------';
+		dom.score.transition.textContent = '------';
 	}
 
 	// lines and points
 	dom.lines_stats.count.textContent = line_count;
-	dom.points.count.textContent = game.data.score.current.toString().padStart(6, '0');
+	dom.points.count.textContent = game.data.score.current; // .toString().padStart(7, '0');
 
 	for (const [num_lines, values] of Object.entries(LINES)) {
 		const { name } = values;
@@ -521,11 +529,11 @@ function renderLine() {
 		dom.lines_stats[name].lines.textContent = game.data.lines[num_lines].lines.toString().padStart(3, '0');
 		dom.lines_stats[name].percent.textContent = getPercent(game.data.lines[num_lines].percent)
 
-		dom.points[name].count.textContent = game.data.points[num_lines].count.toString().padStart(6, '0');
+		dom.points[name].count.textContent = game.data.points[num_lines].count.toString().padStart(7, ' ');
 		dom.points[name].percent.textContent = getPercent(game.data.points[num_lines].percent);
 	}
 
-	dom.points.drops.count.textContent = game.data.points.drops.count.toString().padStart(6, '0');
+	dom.points.drops.count.textContent = game.data.points.drops.count.toString().padStart(7, ' ');
 	dom.points.drops.percent.textContent = getPercent(game.data.points.drops.percent);
 
 	dom.lines_stats.trt_ctx.clear();
