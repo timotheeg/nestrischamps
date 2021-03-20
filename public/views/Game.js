@@ -16,6 +16,7 @@ class Game {
 
 			score: {
 				current:    event.score,
+				pace:       event.score + PACE_POTENTIAL[event.lines].score,
 				normalized: 0,
 				transition: null
 			},
@@ -185,7 +186,7 @@ class Game {
 
 				this.data.pieces.deviation_56 = Math.sqrt(Object.values(counts).reduce((sum, count) => sum + Math.pow(count/56 - 1/7, 2), 0) / PIECES.length);
 			}
-			}
+		}
 	}
 
 	onLine(event) {
@@ -234,7 +235,7 @@ class Game {
 			this.pieces[this.pieces.length - 1].lines = line_event;
 		}
 
-		// update percentages for everyone
+		// update percentages for all clear types
 		for (let clear_type = 4; clear_type; clear_type--) {
 			const point_stats = this.data.points[clear_type];
 			point_stats.percent = point_stats.count / event.score;
@@ -245,6 +246,7 @@ class Game {
 
 		// update score
 		this.data.score.current = event.score;
+		this.data.score.pace = event.score + PACE_POTENTIAL[event.lines].score;
 
 		// check transition score
 		if (event.level > this.data.level) {

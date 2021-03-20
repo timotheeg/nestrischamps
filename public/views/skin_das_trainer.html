@@ -6,12 +6,16 @@
 
 .box {
 	width: 105px;
-	height: 39px;
+	height: 41px;
 	padding: 10px;
 
 	border-image: url('/views/border_no_black.png');
 	border-image-slice: 8 8 8 8 fill;
 	border-image-width: 8px 8px;
+}
+
+.box .header {
+	padding-bottom: 2px;
 }
 
 i {
@@ -36,35 +40,37 @@ i {
 
 #tetris_rate {
 	left: 1021px;
-	top: 132px;
+	top: 201px;
 	width: 238px;
-	height: 128px;
+	height: 110px;
 	padding-right: 8px;
 	padding-left: 8px;
 }
 
-#tetris_rate .header {
-	padding-bottom: 4px;
+#pace {
+	left: 1021px;
+	top: 6px;
+	width: 234px;
 }
 
 #level {
 	left: 1150px;
-	top: 6px;
+	top: 71px;
 }
 
 #lines {
 	left: 1021px;
-	top: 6px;
+	top: 71px;
 }
 
 #efficiency {
 	left: 1021px;
-	top: 69px;
+	top: 136px;
 }
 
 #burn {
 	left: 1150px;
-	top: 69px;
+	top: 136px;
 }
 
 #score {
@@ -85,7 +91,7 @@ i {
 
 #score .content th {
 	font-size: 8px;
-	padding-right: 4px;
+	padding-right: 0px;
 }
 
 #droughts {
@@ -364,7 +370,7 @@ i {
 }
 
 #video {
-	top: 284px;
+	top: 335px;
 	left: 1021px;
 	width: 234px;
 	height: 128px;
@@ -375,6 +381,10 @@ i {
 	left: 6px;
 	width: 456px;
 	height: 85px;
+}
+
+#pbs .header {
+	padding-bottom: 0px;
 }
 
 #pbs .content {
@@ -606,7 +616,7 @@ i {
 
 <div class="box" id="tetris_rate">
 	<div class="header">TRT <span class="value">00%</span></div>
-	<div class="content"><canvas class="bounded" width="238" height="104" /></div>
+	<div class="content"><canvas class="bounded" width="238" height="89" /></div>
 </div>
 
 <div class="box" id="level">
@@ -633,12 +643,12 @@ i {
 	<div class="header">SCORE</div>
 	<table class="content">
 		<tr class="running">
-			<th>Ru</th>
-			<td class="value">000000</td>
+			<th>R</th>
+			<td class="value">0000000</td>
 		</tr>
 		<tr class="transition">
-			<th>Tr</th>
-			<td class="value">------</td>
+			<th>T</th>
+			<td class="value">-------</td>
 		</tr>
 	</table>
 </div>
@@ -766,6 +776,11 @@ i {
 	<div class="content"><canvas class="bounded" width="730" height="81" /></div>
 </div>
 
+<div class="box" id="pace">
+	<div class="header">PACE</div>
+	<div class="content">0000000</div>
+</div>
+
 <div class="box" id="lines_stats">
 	<div class="header">LINES <span class="count">000</span></div>
 	<div class="content">
@@ -840,6 +855,7 @@ i {
 <script src="/views/Game.js"></script>
 <script src="/views/DomRefs.js"></script>
 <script src="/js/BinaryFrame.js"></script>
+<script src="/views/renderBlock.js"></script>
 <script src="/views/main.js"></script>
 
 <!-- script src="sample_frames/last_session.js"></script>

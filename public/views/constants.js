@@ -115,7 +115,7 @@ function getPacePotential() {
 	// one time generation of score potential by line and best line clear strategy
 
 	function clearScore(clear, lines) {
-		// assumes 18 start: all liones before 130 are level 18 worth
+		// assumes 18 start: all lines before 130 are level 18 worth
 		if (clear + lines < 130) {
 			return 19 * SCORE_BASES[clear];
 		}

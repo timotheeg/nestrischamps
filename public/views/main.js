@@ -13,14 +13,14 @@ if (dom.das) {
 
 		das_label.style.color = color;
 	}
+}
 
-	for (const [type, color] of Object.entries(BOARD_COLORS)) {
-		const label = document.querySelector(`#board_stats .${type}`);
+for (const [type, color] of Object.entries(BOARD_COLORS)) {
+	const label = document.querySelector(`#board_stats .${type}`);
 
-		if (!label) continue;
+	if (!label) continue;
 
-		label.style.color = color;
-	}
+	label.style.color = color;
 }
 
 const API = {
@@ -107,7 +107,10 @@ let
 	gameid = -1,
 	last_valid_state = null,
 
-	pending_delay_frames = 3,
+	pending_delay_frames = 1,
+
+	last_piece_count = 0,
+	cur_piece = null,
 
 	pending_game = true,
 	pending_piece = -1,
@@ -116,6 +119,31 @@ let
 	line_animation_remaining_frames = 0,
 	pending_single = false,
 	game_frames = [];
+
+
+function getTotalPieceCount(event) {
+	return PIECES.reduce((acc, p) => acc + (event[p] || 0), 0);
+}
+
+function getCurPiece(transformed) {
+	if (transformed.cur_piece) return transformed.cur_piece;
+
+	if (transformed.total_piece_count === 1) {
+		return PIECES.find(p => transformed[p] === 1);
+	}
+
+	// compare with last valid_state
+	// return first difference (assumes +1 jump .. could verify that or print warning?)
+	// if there are frame drop, this may be incorrect...
+	const piece = PIECES.find(p => transformed[p] != last_valid_state[p]);
+
+	// piece may beundefined, at the beginning of capture for classic rom
+	// the capture starts mid-game, there's no cur_piece supplied
+	// the piece counts is arbitrary
+	// we *could* try to inspect the board, but that's much more complicated :/
+
+	return piece || 'I'; // Just pick something...
+}
 
 function onFrame(event, debug) {
 	// game_frames.push({ ...event });
@@ -135,10 +163,21 @@ function onFrame(event, debug) {
 		score:         event.score,
 		lines:         event.lines,
 		level:         event.level,
+
+		next_piece:    event.preview,
+
+		T: event.T,
+		J: event.J,
+		Z: event.Z,
+		O: event.O,
+		S: event.S,
+		L: event.L,
+		I: event.I,
+
 		cur_piece_das: dom.das != null ? event.cur_piece_das : -1,
 		instant_das:   dom.das != null ? event.instant_das : -1,
 		cur_piece:     event.cur_piece,
-		next_piece:    event.preview,
+
 		stage: {
 			num_blocks: event.field.reduce((acc, v) => acc + (v ? 1 : 0), 0),
 			field:      event.field,
@@ -197,10 +236,10 @@ function onFrame(event, debug) {
 	renderInstantDas(transformed.instant_das);
 
 	// quick check for das loss
-	if (transformed.cur_piece_das && transformed.instant_das === 0) {
+	if (dom.das && transformed.cur_piece_das && transformed.instant_das === 0) {
 		if (game.pieces.length) {
 			game.onDasLoss();
-			renderDas();
+			renderDasNBoardStats();
 		}
 	}
 
@@ -217,14 +256,30 @@ function onFrame(event, debug) {
 
 	// check if a change to cur_piece_stats
 	if (--pending_piece === 0) {
-		if (transformed.cur_piece && transformed.next_piece && transformed.cur_piece_das != null && transformed.cur_piece_das <= 16) {
+		transformed.total_piece_count = getTotalPieceCount(transformed);
+
+		if (transformed.next_piece && (
+			transformed.cur_piece
+			||
+			transformed.total_piece_count
+		)) {
+			transformed.cur_piece = getCurPiece(transformed);
+
 			game.onPiece(transformed);
 			renderPiece(transformed);
 
 			Object.assign(last_valid_state, {
-				cur_piece: transformed.cur_piece,
-				next_piece: transformed.next_piece,
-				cur_piece_das: transformed.cur_piece_das
+				cur_piece:     transformed.cur_piece,
+				next_piece:    transformed.next_piece,
+				cur_piece_das: transformed.cur_piece_das,
+
+				T: transformed.T,
+				J: transformed.J,
+				Z: transformed.Z,
+				O: transformed.O,
+				S: transformed.S,
+				L: transformed.L,
+				I: transformed.I,
 			});
 		}
 		else {
@@ -271,7 +326,7 @@ function onFrame(event, debug) {
 
 	if (line_animation_remaining_frames-- > 0) return;
 
-	if (diff.stage_blocks === 4) {
+	if (diff.stage_blocks === 4) { // TODO:
 		last_valid_state.stage = transformed.stage;
 		pending_piece = pending_delay_frames;
 	}
@@ -439,13 +494,17 @@ function renderLine() {
 		dom.lines.count.textContent = line_count
 	}
 
-	dom.score.current.textContent = game.data.score.current.toString().padStart(6, '0');
+	dom.score.current.textContent = game.data.score.current.toString().padStart(7, '0');
+
+	if (dom.pace) {
+		dom.pace.value.textContent = game.data.score.pace.toString().padStart(7, '0');
+	}
 
 	if (game.data.score.transition) {
-		dom.score.transition.textContent = game.data.score.transition.toString().padStart(6, '0');
+		dom.score.transition.textContent = game.data.score.transition.toString().padStart(7, '0');
 	}
 	else {
-		dom.score.transition.textContent = '------';
+		dom.score.transition.textContent = '-------';
 	}
 
 	// lines and points
@@ -649,9 +708,7 @@ function renderPiece(event) {
 	}
 
 	// das
-	if (dom.das) {
-		renderDas()
-	}
+	renderDasNBoardStats();
 
 	renderNextPiece(event.level, event.next_piece);
 }
@@ -682,20 +739,24 @@ function renderInstantDas(das) {
 	}
 }
 
-function renderDas() {
-	dom.das.avg.textContent = game.data.das.avg.toFixed(1).padStart(4, '0');
-	dom.das.great.textContent = game.data.das.great.toString().padStart(3, '0');
-	dom.das.ok.textContent = game.data.das.ok.toString().padStart(3, '0');
-	dom.das.bad.textContent = game.data.das.bad.toString().padStart(3, '0');
+function renderDasNBoardStats() {
+	if (dom.das) {
+		dom.das.avg.textContent = game.data.das.avg.toFixed(1).padStart(4, '0');
+		dom.das.great.textContent = game.data.das.great.toString().padStart(3, '0');
+		dom.das.ok.textContent = game.data.das.ok.toString().padStart(3, '0');
+		dom.das.bad.textContent = game.data.das.bad.toString().padStart(3, '0');
 
-	// assume same width for das and board stats
-	dom.das.ctx.clear();
+		// assume same width for das and board stats
+		dom.das.ctx.clear();
+	}
+
 	dom.board_stats.ctx.clear();
 
-	pixel_size = 4;
-	max_pixels = Math.floor(dom.das.ctx.canvas.width / (pixel_size + 1));
-	cur_x = 0;
-	to_draw = game.pieces.slice(-1 * max_pixels);
+	const pixel_size = 4;
+	const max_pixels = Math.floor(dom.board_stats.ctx.canvas.width / (pixel_size + 1));
+	const to_draw = game.pieces.slice(-1 * max_pixels);
+
+	let cur_x = 0;
 
 	dom.board_stats.ctx.fillStyle = BOARD_COLORS.floor;
 	dom.board_stats.ctx.fillRect(
@@ -706,28 +767,31 @@ function renderDas() {
 	);
 
 	for (let idx = 0; idx < to_draw.length; idx++) {
-		const
-			piece = to_draw[idx]
-			das = piece.das,
-			color = DAS_COLORS[ DAS_THRESHOLDS[das] ];
+		const piece = to_draw[idx];
 
-		if (piece.das_loss) {
-			dom.das.ctx.fillStyle = '#550000';
+		if (dom.das) {
+			const
+				das = piece.das,
+				color = DAS_COLORS[ DAS_THRESHOLDS[das] ];
+
+			if (piece.das_loss) {
+				dom.das.ctx.fillStyle = '#550000';
+				dom.das.ctx.fillRect(
+					idx * (pixel_size + 1),
+					0,
+					pixel_size,
+					pixel_size * 17
+				);
+			}
+
+			dom.das.ctx.fillStyle = color;
 			dom.das.ctx.fillRect(
 				idx * (pixel_size + 1),
-				0,
+				(16 - das) * (pixel_size - 1),
 				pixel_size,
-				pixel_size * 17
+				pixel_size
 			);
 		}
-
-		dom.das.ctx.fillStyle = color;
-		dom.das.ctx.fillRect(
-			idx * (pixel_size + 1),
-			(16 - das) * (pixel_size - 1),
-			pixel_size,
-			pixel_size
-		);
 
 		const board_stats = piece.board;
 
@@ -795,86 +859,6 @@ function renderDas() {
 	}
 }
 
-function renderBlock(level, block_index, ctx, pos_x, pos_y) {
-	let color;
-
-	switch (block_index) {
-		case 1:
-			// inefficient because it draws the area twice
-			// check speed and optimize if necessary
-			color = LEVEL_COLORS[level % 10][0];
-
-			ctx.fillStyle = color;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE * 7,
-				BLOCK_PIXEL_SIZE * 7
-			);
-
-			ctx.fillStyle = 'white';
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE
-			);
-
-			ctx.fillRect(
-				pos_x + BLOCK_PIXEL_SIZE,
-				pos_y + BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE * 5,
-				BLOCK_PIXEL_SIZE * 5
-			);
-
-			break;
-
-		case 2:
-		case 3:
-			color = LEVEL_COLORS[level % 10][block_index - 2];
-
-			ctx.fillStyle = color;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE * 7,
-				BLOCK_PIXEL_SIZE * 7
-			);
-
-			ctx.fillStyle = 'white';
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE
-			);
-			ctx.fillRect(
-				pos_x + BLOCK_PIXEL_SIZE,
-				pos_y + BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE * 2,
-				BLOCK_PIXEL_SIZE
-			);
-			ctx.fillRect(
-				pos_x + BLOCK_PIXEL_SIZE,
-				pos_y + BLOCK_PIXEL_SIZE * 2,
-				BLOCK_PIXEL_SIZE,
-				BLOCK_PIXEL_SIZE
-			);
-
-			break;
-
-		default:
-			/*
-			ctx.clearRect(
-				pos_x,
-				pos_y,
-				BLOCK_PIXEL_SIZE * 7,
-				BLOCK_PIXEL_SIZE * 7
-			);
-			/**/
-	}
-}
-
 let stage_currently_rendered = null;
 
 function renderStage(level, stage) {
@@ -897,6 +881,7 @@ function renderStage(level, stage) {
 			renderBlock(
 				level,
 				field[y * 10 + x],
+				BLOCK_PIXEL_SIZE,
 				ctx,
 				x * pixels_per_block,
 				y * pixels_per_block
@@ -992,7 +977,14 @@ function renderNextPiece(level, next_piece) {
 	}
 
 	positions.forEach(([pos_x, pos_y]) => {
-		renderBlock(level, col_index, ctx, pos_x, pos_y);
+		renderBlock(
+			level,
+			col_index,
+			BLOCK_PIXEL_SIZE,
+			ctx,
+			pos_x,
+			pos_y
+		);
 	});
 }
 

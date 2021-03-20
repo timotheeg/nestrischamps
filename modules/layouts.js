@@ -1,5 +1,9 @@
 module.exports = {
 	// single player
+	classic: {
+		file: 'skin_classic_tetris',
+		type: '1p',
+	},
 	das_trainer: {
 		file: 'skin_das_trainer',
 		type: '1p',
