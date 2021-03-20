@@ -36,7 +36,7 @@ const TASK_RESIZE = {
 	score:         [getDigitsWidth(6), 14],
 	level:         [getDigitsWidth(2), 14],
 	lines:         [getDigitsWidth(3), 14],
-	field:         [80, 160],
+	field:         [79, 159],
 	preview:       [31, 15],
 	cur_piece:     [23, 12],
 	instant_das:   [getDigitsWidth(2), 14],
