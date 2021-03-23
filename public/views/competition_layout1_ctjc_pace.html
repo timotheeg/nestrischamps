@@ -491,7 +491,7 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 				abs_diff = Math.abs(diff),
 				fmt = player.options.format_score(abs_diff),
 
-				tdiff = getTetrisDiff(players[0], players[1]),
+				tdiff = getTetrisDiff(players[0], players[1], true),
 				tfmt = player.options.format_tetris_diff(tdiff)
 			;
 
