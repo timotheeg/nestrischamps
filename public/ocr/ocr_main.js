@@ -4,7 +4,7 @@ const reference_locations = {
 	score:         { crop: [384, 112, 94, 14], pattern: "ADDDDD" },
 	level:         { crop: [416, 320, 30, 14], pattern: "QA" },
 	lines:         { crop: [304, 32, 46, 14],  pattern: "QDD" },
-	field:         { crop: [192, 80, 160, 320] },
+	field:         { crop: [192, 80, 158, 318] },
 	preview:       { crop: [384, 224, 62, 30] },
 	color1:        { crop: [76, 212, 10, 10] },
 	color2:        { crop: [76, 246, 10, 10] },
