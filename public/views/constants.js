@@ -70,7 +70,7 @@ const
 	],
 
 	TRANSITIONS = {
-		 0:  10,
+		 0:  10, // 300 - ((lvl+1) * 10 - v)
 		 1:  20,
 		 2:  30,
 		 3:  40,
@@ -104,42 +104,60 @@ const
 		I: 1
 	},
 
-	PACE_POTENTIAL = getPacePotential()
+	PACE_POTENTIAL = getPacePotentialForLevel(18, 130, 230) // getPacePotential()
 ;
 
 DAS_THRESHOLDS[-1] = 'absent';
 
 
-// TODO: store static map?
+
 function getPacePotential() {
-	// one time generation of score potential by line and best line clear strategy
+	const potentials = {};
 
-	function clearScore(clear, lines) {
-		// assumes 18 start: all lines before 130 are level 18 worth
-		if (clear + lines < 130) {
-			return 19 * SCORE_BASES[clear];
-		}
-		else {
-			const level = Math.floor((clear + lines + 60) / 10);
+	for (let [start_level, transition_lines] of Object.entries(TRANSITIONS)) {
+		start_level = parseInt(start_level, 10);
 
-			return (level + 1) * SCORE_BASES[clear];
-		}
+		const kill_screen_lines = 290 - (((start_level + 1) * 10) - transition_lines);
+
+		potentials[start_level] = getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines);
 	}
 
-	const best_clears = Array(234).fill('');
-	const max_scores = Array(230).fill(0);
-	const scoring_potential = {};
+	return potentials;
+}
 
-	for (let lines=230; lines--; ) {
-		let best_score = 0;
-		let best_clear = 1;
 
-		for (let clear=5; clear--; ) {
-			let new_score = clearScore(clear, lines);
+function getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines) {
+	// one time generation of score potential by line and best line clear strategy
 
-			if (clear + lines < 230) {
-				new_score += max_scores[clear + lines];
-			}
+	function clearScore(current_lines, clear) {
+		const target_lines = current_lines + clear;
+
+		let level;
+
+		if (target_lines < transition_lines) {
+			level = start_level + 1;
+		}
+		else {
+			level = start_level + 1 + Math.floor((target_lines - transition_lines) / 10);
+		}
+
+		return (level + 1) * SCORE_BASES[clear];
+	}
+
+	const done = { score: 0, clears: '' };
+
+	const potential = {
+		[kill_screen_lines+0]: done,
+		[kill_screen_lines+1]: done,
+		[kill_screen_lines+2]: done,
+		[kill_screen_lines+3]: done,
+	};
+
+	for (let lines = kill_screen_lines; lines--; ) {
+		let best_score = 0, best_clear;
+
+		for (let clear = 5; --clear > 0; ) {
+			const new_score = clearScore(lines, clear) + potential[clear + lines].score;
 
 			if (new_score > best_score) {
 				best_score = new_score;
@@ -147,14 +165,11 @@ function getPacePotential() {
 			}
 		}
 
-		max_scores[lines] = best_score;
-		best_clears[lines] = `${best_clear}${best_clears[lines + best_clear]}`;
-
-		scoring_potential[lines] = {
+		potential[lines] = {
 			score: best_score,
-			clears: best_clears[lines],
+			clears: `${best_clear}${potential[best_clear + lines].clears}`
 		};
 	}
 
-	return scoring_potential;
+	return potential;
 }
