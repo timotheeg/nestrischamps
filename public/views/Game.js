@@ -10,6 +10,15 @@ class Game {
 
 		const lines = event.lines || 0;
 
+		let pace_score;
+
+		try {
+			pace_score = event.score + PACE_POTENTIAL[event.level][lines];
+		}
+		catch(err) {
+			pace_score = event.score;
+		}
+
 		this.data = {
 			start_level: event.level,
 
@@ -18,7 +27,7 @@ class Game {
 
 			score: {
 				current:    event.score,
-				pace:       event.score + PACE_POTENTIAL[event.level][lines],
+				pace:       pace_score,
 				normalized: 0,
 				transition: null
 			},
@@ -248,7 +257,12 @@ class Game {
 
 		// update score
 		this.data.score.current = event.score;
-		this.data.score.pace = event.score + PACE_POTENTIAL[this.data.start_level][event.lines];
+		try {
+			this.data.score.pace = event.score + PACE_POTENTIAL[this.data.start_level][event.lines];
+		}
+		catch(err) {
+			this.data.score.pace = event.score;
+		}
 
 		// check transition score
 		if (event.level > this.data.level) {
