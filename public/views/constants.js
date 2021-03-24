@@ -110,51 +110,60 @@ const
 DAS_THRESHOLDS[-1] = 'absent';
 
 
-// TODO: store static map?
+
 function getPacePotential() {
-	// one time generation of score potential by line and best line clear strategy
+	const potentials = {};
 
-	function clearScore(clear, lines) {
-		// assumes 18 start: all lines before 130 are level 18 worth
-		if (clear + lines < 130) {
-			return 19 * SCORE_BASES[clear];
-		}
-		else {
-			const level = Math.floor((clear + lines + 60) / 10);
+	for (let [start_level, transition_lines] of Object.entries(TRANSITIONS)) {
+		start_level = parseInt(start_level, 10);
 
-			return (level + 1) * SCORE_BASES[clear];
-		}
+		const kill_screen_lines = 290 - (((start_level + 1) * 10) - transition_lines);
+
+		potentials[start_level] = getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines);
 	}
 
-	const best_clears = Array(234).fill('');
-	const max_scores = Array(230).fill(0);
-	const scoring_potential = {};
+	return potentials;
+}
 
-	for (let lines=230; lines--; ) {
+
+function getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines) {
+	// one time generation of score potential by line and best line clear strategy
+
+	function clearScore(current_lines, clear) {
+		const target_lines = current_lines + clear;
+
+		let level;
+
+		if (target_lines < transition_lines) {
+			level = start_level;
+		}
+		else {
+			level = start_level + 1 + Math.floor((target_lines - transition_lines) / 10);
+		}
+
+		return (level + 1) * SCORE_BASES[clear];
+	}
+
+	const potential = {
+		[kill_screen_lines+0]: 0,
+		[kill_screen_lines+1]: 0,
+		[kill_screen_lines+2]: 0,
+		[kill_screen_lines+3]: 0,
+	};
+
+	for (let lines = kill_screen_lines; lines--; ) {
 		let best_score = 0;
-		let best_clear = 1;
 
-		for (let clear=5; clear--; ) {
-			let new_score = clearScore(clear, lines);
-
-			if (clear + lines < 230) {
-				new_score += max_scores[clear + lines];
-			}
+		for (let clear = 4; clear > 0; clear--) {
+			const new_score = clearScore(lines, clear) + potential[clear + lines];
 
 			if (new_score > best_score) {
 				best_score = new_score;
-				best_clear = clear;
 			}
 		}
 
-		max_scores[lines] = best_score;
-		best_clears[lines] = `${best_clear}${best_clears[lines + best_clear]}`;
-
-		scoring_potential[lines] = {
-			score: best_score,
-			clears: best_clears[lines],
-		};
+		potential[lines] = best_score;
 	}
 
-	return scoring_potential;
+	return potential;
 }

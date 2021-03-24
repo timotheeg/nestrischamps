@@ -18,7 +18,7 @@ class Game {
 
 			score: {
 				current:    event.score,
-				pace:       event.score + PACE_POTENTIAL[lines].score,
+				pace:       event.score + PACE_POTENTIAL[event.level][lines],
 				normalized: 0,
 				transition: null
 			},
@@ -248,7 +248,7 @@ class Game {
 
 		// update score
 		this.data.score.current = event.score;
-		this.data.score.pace = event.score + PACE_POTENTIAL[event.lines].score;
+		this.data.score.pace = event.score + PACE_POTENTIAL[this.data.start_level][event.lines];
 
 		// check transition score
 		if (event.level > this.data.level) {

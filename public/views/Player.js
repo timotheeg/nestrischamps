@@ -232,6 +232,7 @@ class Player {
 	onDroughtStart() {}
 	onDroughtEnd() {}
 	onGameStart() {}
+	onGameOver() {}
 
 	onTetris() {
 		if (this.options.tetris_flashes) {
@@ -269,6 +270,7 @@ class Player {
 		this.preview = '';
 		this.score = 0;
 		this.lines = 0;
+		this.start_level = 0;
 		this.level = 0;
 		this.pace_score = this.getPaceScore();
 		this.drought = 0;
@@ -478,6 +480,7 @@ class Player {
 				// note, gameover can also be detected when top row of field is full
 				this.pace_score = score;
 				this.game_over = true;
+				this.onGameOver();
 			}
 		}
 
@@ -535,7 +538,7 @@ class Player {
 	}
 
 	getPaceScore() {
-		return this.score + PACE_POTENTIAL[this.lines].score;
+		return this.score + PACE_POTENTIAL[this.start_level][this.lines];
 	}
 
 	renderPreview(level, preview) {
