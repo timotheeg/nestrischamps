@@ -538,6 +538,10 @@ class Player {
 	}
 
 	getPaceScore() {
+		if (this.game_over) {
+			return this.score;
+		}
+
 		try {
 			return this.score + PACE_POTENTIAL[this.start_level][this.lines];
 		}

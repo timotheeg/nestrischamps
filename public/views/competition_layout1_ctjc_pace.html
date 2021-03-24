@@ -477,7 +477,7 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 		}
 
 		// then do pace diff
-		diff = players[0].pace_score - players[1].pace_score;
+		diff = players[0].getPaceScore() - players[1].getPaceScore();
 		diff_elem = document.querySelector(`.pace .diff`);
 		tdiff_elem = document.querySelector(`.pace .tetris_diff`);
 
