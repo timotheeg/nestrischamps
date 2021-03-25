@@ -156,7 +156,7 @@ start_timer.addEventListener('click', evt => {
 	// minutes are valid per markup restrictions
 	const minutes = parseInt(document.querySelector('#minutes').value, 10);
 
-	connection.send(['startTimer', minutes]);
+	connection.send(['startTimer', minutes * 60]);
 });
 
 go_btn.disabled = true;
@@ -379,7 +379,7 @@ async function playVideoFromConfig() {
 		await playVideoFromScreenCap(config.frame_rate);
 	}
 	else {
-		do_half_height = true;
+		do_half_height = true && !QueryString.disable_half_height;
 		await playVideoFromDevice(config.device_id, config.frame_rate);
 	}
 
