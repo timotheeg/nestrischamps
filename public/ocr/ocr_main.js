@@ -236,12 +236,31 @@ go_btn.addEventListener('click', async (evt) => {
 	controls.style.display = 'block';
 });
 
-show_parts.addEventListener('change', evt => {
+function onShowPartsChanged() {
 	const display = show_parts.checked ? 'block' : 'none';
 
 	adjustments.style.display = display;
 	config.source_canvas.style.display = display;
-});
+
+	if (show_parts.checked) {
+		resetShowPartsTimer();
+	}
+}
+
+show_parts.addEventListener('change', onShowPartsChanged);
+
+let hide_show_parts_timer;
+
+function hideParts() {
+	show_parts.checked = false;
+	onShowPartsChanged();
+}
+
+function resetShowPartsTimer() {
+	clearTimeout(hide_show_parts_timer);
+
+	hide_show_parts_timer = setTimeout(hideParts, 45000); // parts stop showing after 45s of static config
+}
 
 function loadImage(img, src) {
 	return new Promise(resolve => {
@@ -733,6 +752,8 @@ function saveConfig(config) {
 	}
 
 	localStorage.setItem('config', JSON.stringify(config_copy));
+
+	resetShowPartsTimer();
 }
 
 function hasConfig() {
@@ -886,6 +907,7 @@ function trackAndSendFrames() {
 	/**/
 
 	startCapture();
+	resetShowPartsTimer();
 }
 
 
