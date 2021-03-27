@@ -8,8 +8,8 @@ NESTrisChamps is composed of 3 main parts:
 * A browser Based OCR
 	* Supports both capture devices and screen capture
 	* Supports 2 roms: Classic Tetris, and [Das Trainer](https://www.romhacking.net/hacks/3761/)
-* A Server where OCR-ed game data is sent and rebroadcasted
-* A System of renderer to redraw game play from scratch
+* A Server to which OCR-ed game data is sent, and which rebroadcasts data
+* A System of renderers to redraw game play from scratch
 	* Crisp, pixel-perfect rendering
 	* Many stats computed in real time
 		* For reviewing one's own game footage after the fact
@@ -17,10 +17,9 @@ NESTrisChamps is composed of 3 main parts:
 		* For match commentators to make better commentary in real time
 
 
-Basically, when we have Tetris game data (as opposed to images), the tetris game can be re-rendered with custom layouts, and various statistics can be computed. When multiple player data are used, a competition UI can be built with score differential, etc.
+Basically, when we have Tetris game data (as opposed to images), the tetris game can be re-rendered with custom layouts, and various statistics can be computed. When multiple player data are used, a competition UI can be built with score differential and other comparative stats.
 
-NEsTrisChamps provides many renmdering layouts implemented in HTML+CSS+JavaScript at 720p resolution. This allows the templates to be dropped easily in [OBS](https://obsproject.com/) or [StreamLabs](https://streamlabs.com/) as [browser sources](https://obsproject.com/wiki/Sources-Guide#browsersource), and then adding player video stream or other sources like Twitch Chat on top of it.
-
+NEsTrisChamps provides many renmdering layouts implemented in HTML+CSS+JavaScript at 720p resolution. This allows the templates to be dropped easily in [OBS](https://obsproject.com/) or [StreamLabs](https://streamlabs.com/) as [Browser Sources](https://obsproject.com/wiki/Sources-Guide#browsersource), and then adding player video stream or other sources like Twitch Chat on top of it.
 
 To get started, visit the online docs here:
 https://nestrischamps.herokuapp.com/docs
@@ -48,7 +47,6 @@ UI "inspired" from, and improving on, [CTJC's layout](https://www.youtube.com/wa
 1 game demo video [here](https://www.youtube.com/watch?v=0cnpc64fveg)
 
 
-
 ### Invisible Tetris Renderer
 
 ![Full UI](./public/docs/layouts/invisible_tetris.jpg)
@@ -66,11 +64,9 @@ The 2 semi finals and the final match of CTWC 2019's Invisible Tetris Competitio
 
 ## Getting started
 
-NESTrisChamps only works in Chrome and Chromium atm (sorry!). Firefox might come soon, unlikely I will support edge unless someone contribute PRs.
+NESTrisChamps only works in Chrome and Chromium atm (sorry!). Firefox might come at some point. It is unlikely I will support MS Edge unless someone contribute PRs.
 
-Read [the documentation](https://nestrischamps.herokuapp.com/docs)
-
-Read this [calibration guide](https://docs.google.com/document/d/1W7g536D6hWxRWWMO667dOY1fOm5HaO3XxskNSq7MA-k/edit) created by [aGameScout](https://www.twitch.tv/agamescout)
+Read [the documentation](https://nestrischamps.herokuapp.com/docs).
 
 
 ### NEStrisChamps online
@@ -80,7 +76,10 @@ Read this [calibration guide](https://docs.google.com/document/d/1W7g536D6hWxRWW
 3. Visit your personal renderers page to copy the renderer URL [https://nestrischamps.herokuapp.com/renderers](https://nestrischamps.herokuapp.com/renderers). I recommend using the layout `simple_1p` for a start
 4. Start playing the renderer should render your game.
 
-Note: Both page **must** be in their own windows. The producer cannot be a in background tab, or chrome would throttle its performance and your capture will be all choppy.
+Note: Both pages **must** be in their own windows. The producer cannot be a in background tab, or chrome would throttle its processing, and your capture would be all choppy.
+
+Read this additional [calibration guide](https://docs.google.com/document/d/1W7g536D6hWxRWWMO667dOY1fOm5HaO3XxskNSq7MA-k/edit) created by [aGameScout](https://www.twitch.tv/agamescout).
+
 
 
 ### OBS
@@ -89,7 +88,9 @@ One you have connected your producer and renderer, you are ready to set up OBS o
 
 To do that, drop a Browser Source in OBS and use the renderer URL as-is. Make sure the Browser Source is set at 1280x720.
 
-Also, verify that Browser Source hardware acceleration is set.
+Also, verify that Browser Source hardware acceleration is set (under Advanced Settings).
+
+![Image of Browser SOurce Hardward Acceleration Setting](./public/docs/obs_browser_source_hardware_acceleration.jpg)
 
 
 ### Run locally
