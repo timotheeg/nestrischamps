@@ -543,7 +543,7 @@ class Player {
 		}
 
 		try {
-			return this.score + PACE_POTENTIAL[this.start_level][this.lines];
+			return this.score + (PACE_POTENTIAL[this.start_level][this.lines] || 0);
 		}
 		catch(err) {
 			return this.score;

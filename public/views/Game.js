@@ -13,7 +13,7 @@ class Game {
 		let pace_score;
 
 		try {
-			pace_score = event.score + PACE_POTENTIAL[event.level][lines];
+			pace_score = event.score + (PACE_POTENTIAL[event.level][lines] || 0);
 		}
 		catch(err) {
 			pace_score = event.score;
@@ -258,7 +258,7 @@ class Game {
 		// update score
 		this.data.score.current = event.score;
 		try {
-			this.data.score.pace = event.score + PACE_POTENTIAL[this.data.start_level][event.lines];
+			this.data.score.pace = event.score + (PACE_POTENTIAL[this.data.start_level][event.lines] || 0);
 		}
 		catch(err) {
 			this.data.score.pace = event.score;
