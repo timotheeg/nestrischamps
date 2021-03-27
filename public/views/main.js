@@ -114,7 +114,7 @@ let
 
 	pending_game = true,
 	pending_piece = -1,
-	fANIMATION = -1,
+	pending_line = -1,
 
 	line_animation_remaining_frames = 0,
 	pending_single = false,
