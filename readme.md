@@ -144,14 +144,15 @@ Capture device are presumed to produce interlaced output, which can create incor
 It ispossible to disable the half-height behaviour by adding the following query string argument in the producer page `?disable_half_height=1`.
 
 
-
-
-
 ## Contribute
 
-TODO
+The repo is a little bit of a mess (all parts). Apologies for that. Many issues and ideas for improvements are listed in the [github issues](https://github.com/timotheeg/nestrischamps/issues).
 
-Note: This repo is built by myself for myself. Meaning it works, but setting up and troubleshooting is a pain, much of the code is copy/pasted between templates, and there's no documentation on the servers, ports, etc. At some point I will make it clean to allow people to use it easily, and to contribute to it easily, but there's no ETA for that.
+Testing is also a mess, several functionality are not available when running in local server mode (basically everything touching the DB). That should come at some point, at the cost of added setup complexity.
+
+To test changes to the producer, renderer, admin room however, you can use the local setup.
+
+The code is sort of messy, and yet, I have some standards hidden in this mess, until I document them, please ask on [the discord server](https://discord.gg/gaCEe5aX) before submitting PRs.
 
 
 
