@@ -114,7 +114,7 @@ let
 
 	pending_game = true,
 	pending_piece = -1,
-	pending_line = -1,
+	fANIMATION = -1,
 
 	line_animation_remaining_frames = 0,
 	pending_single = false,
@@ -371,6 +371,8 @@ function onFrame(event, debug) {
 				break;
 
 			default:
+				// We ignore invalid block count diffs. In many cases these dut to interlace artefacts when the pieces rotate of move
+				// TODO: block count tracking can fall out of sync, breaking piece count events. CCan anything be done to restore a "clean" count and resume
 				pending_single = false;
 		}
 	}
