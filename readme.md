@@ -26,9 +26,9 @@ To get started, visit the online docs here:
 https://nestrischamps.herokuapp.com/docs
 
 
-### Sample Screenshots
+## Sample Screenshots
 
-#### Das Trainer Stats Layout
+### Das Trainer Stats Layout
 
 ![Full UI](./public/docs/layouts/das_trainer.jpg)
 
@@ -37,7 +37,7 @@ Documentation for sections of that UI is [here](https://github.com/timotheeg/NES
 1 game demo video [here](https://www.youtube.com/watch?v=OhNsuIUrRD0)
 
 
-#### CTJC Competition Layout
+### CTJC Competition Layout
 
 ![Full UI](./public/docs/layouts/ctjc_pace.jpg)
 
@@ -49,7 +49,7 @@ UI "inspired" from, and improving on, [CTJC's layout](https://www.youtube.com/wa
 
 
 
-#### Invisible Tetris Renderer
+### Invisible Tetris Renderer
 
 ![Full UI](./public/docs/layouts/invisible_tetris.jpg)
 
@@ -129,6 +129,9 @@ Note: If you know how to set up apps on your router (i.e. [port forwarding](http
 
 If you use the qualifier renderer to quaify for CTM or other online competitions, to start the timer, load your producer URL with an extra Query String argument like this [https://nestrischamps.herokuapp.com/room/producer?timer=1](https://nestrischamps.herokuapp.com/room/producer?timer=1)
 
+![Screenshot of Start Timer Button](./public/docs/start_timer.jpg)
+
+
 ### Don't draw background
 
 Many of the layouts have a black background with drak Yelow pieces drawn on them. If you'd rather have a transparent background, use the query string argument `?bg=0` to disable the background
@@ -138,6 +141,8 @@ Many of the layouts have a black background with drak Yelow pieces drawn on them
 Capture device are presumed to produce interlaced output, which can create incorrect reads. NESTrisChamps by default uses only one line in 2 to remove interlacing deffect. Some capture device ave built-in einterlacer and smoothener which render a slightly blurry output. WHile this liooks great, it's not well suited for the half-height option of NESTrisChamps.
 
 It ispossible to disable the half-height behaviour by adding the following query string argument in the producer page `?disable_half_height=1`.
+
+
 
 
 
