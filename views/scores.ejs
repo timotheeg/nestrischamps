@@ -1,0 +1,76 @@
+<html>
+<head>
+<style>
+table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+th, td {
+	text-align: center;
+	border: 1px solid black;
+	padding: 2px 4px;
+}
+</style>
+</head>
+<body>
+
+<h1>Your last 100 scores</h1>
+
+<!-- TODO: implement sort by field score and date -->
+<table>
+	<tr>
+		<th>Date</th>
+		<th>Start</th>
+		<th>End</th>
+		<th>Score</th>
+		<th>Lines</th>
+		<th>Tetris Rate</th>
+		<th>Num Droughts</th>
+		<th>Max Drought</th>
+		<th>DAS Avg</th>
+		<th>Actions</th>
+	</tr>
+	<% scores.forEach(score => { %>
+	<tr>
+		<td><%= score.datetime %></td>
+		<td><%= score.start_level %></td>
+		<td><%= score.end_level %></td>
+		<td><%= (score.score || 0).toString().padStart(6, '0') %></td>
+		<td><%= score.lines %></td>
+		<td><%= Math.round((score.tetris_rate || 0) * 100) %>%</td>
+		<td><%= score.num_droughts %></td>
+		<td><%= score.max_drought %></td>
+		<td><%= score.das_avg %></td>
+		<td><a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a></td>
+	</tr>
+	<% }); %>
+</table>
+
+<!-- TODO: implement pagination controls -->
+<div id="pages"></div>
+
+<script>
+document.querySelectorAll('a.delete_score').forEach(a => {
+	a.addEventListener('click', async (evt) => {
+		evt.preventDefault();
+
+		try {
+			await fetch(a.href, {
+				method: 'DELETE',
+				mode: 'cors',
+				credentials: 'same-origin'
+			});
+		}
+		catch(err) {
+			console.log('Unable to delete score');
+		}
+
+		location.reload(); // super inefficient, but whatever...
+	});
+});
+</script>
+
+</body>
+</html>

@@ -119,6 +119,32 @@ class ScoreDAO {
 			]
 		);
 	}
+
+	async getScorePage(user, sort_field='id', sort_order='desc', page_size=100, page_idx=0) {
+		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
+		const result = await dbPool.query(`
+				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg
+				FROM scores
+				WHERE player_id=$1
+				ORDER BY ${sort_field} ${sort_order}
+				LIMIT ${page_size} OFFSET ${page_size * page_idx}
+			`,
+			[ user.id ]
+		);
+
+		return result.rows;
+	}
+
+	async deleteScore(user, score_id) {
+		const result = await dbPool.query(`
+			DELETE FROM scores
+			WHERE player_id=$1 AND id=$2
+			`,
+			[ user.id, score_id ]
+		);
+
+		return result; // anything to extract from that?
+	}
 }
 
 module.exports = new ScoreDAO();

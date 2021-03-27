@@ -95,4 +95,21 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log('Sent new scores back');
 });
 
+router.get('/scores', middlewares.assertSession, async (req, res) => {
+	console.log(`Fetching user scores for ${req.session.user.id}`);
+
+	// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
+	const scores = await ScoreDAO.getScorePage(req.session.user);
+
+	res.render('scores', { scores });
+});
+
+router.delete('/scores/:id', middlewares.assertSession, async (req, res) => {
+	console.log(`User ${req.session.user.id} is deleting score ${req.params.id}`);
+
+	await ScoreDAO.deleteScore(req.session.user, req.params.id);
+
+	res.json({ status: 'ok' });
+});
+
 module.exports = router;
