@@ -47,7 +47,7 @@ tbody tr:nth-child(even) {
 		<td><%= score.end_level %></td>
 		<td><%= (score.score || 0).toString().padStart(6, '0') %></td>
 		<td><%= score.lines %></td>
-		<td><%= (score.tetris_rate || 0) * 100).toFixed(1) %>%</td>
+		<td><%= ((score.tetris_rate || 0) * 100).toFixed(1) %>%</td>
 		<td><%= score.num_droughts %></td>
 		<td><%= score.max_drought %></td>
 		<td><%= (score.das_avg || 0).toFixed(1) %></td>
