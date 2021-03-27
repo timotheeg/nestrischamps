@@ -10,8 +10,13 @@ table {
 th, td {
 	text-align: center;
 	border: 1px solid black;
-	padding: 2px 4px;
+	padding: 2px 1em;
 }
+
+tbody tr:nth-child(even) {
+  background-color: #ddd;
+}
+
 </style>
 </head>
 <body>
@@ -20,10 +25,11 @@ th, td {
 
 <!-- TODO: implement sort by field score and date -->
 <table>
+<thead>
 	<tr>
 		<th>Date</th>
-		<th>Start</th>
-		<th>End</th>
+		<th>Start Level</th>
+		<th>End Level</th>
 		<th>Score</th>
 		<th>Lines</th>
 		<th>Tetris Rate</th>
@@ -32,9 +38,11 @@ th, td {
 		<th>DAS Avg</th>
 		<th>Actions</th>
 	</tr>
+</thead>
+<tbody>
 	<% scores.forEach(score => { %>
 	<tr>
-		<td><%= score.datetime %></td>
+		<td><%= score.datetime.toISOString() %></td>
 		<td><%= score.start_level %></td>
 		<td><%= score.end_level %></td>
 		<td><%= (score.score || 0).toString().padStart(6, '0') %></td>
@@ -46,6 +54,7 @@ th, td {
 		<td><a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a></td>
 	</tr>
 	<% }); %>
+</tbody>
 </table>
 
 <!-- TODO: implement pagination controls -->
