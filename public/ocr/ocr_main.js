@@ -347,6 +347,12 @@ async function playVideoFromDevice(device_id, fps) {
 			}
 		};
 
+		// whhhyyyyyy???
+		if (navigator.userAgent.indexOf("Firefox/") > -1) {
+			constraints.video.width.ideal = 1280;
+			delete constraints.video.height;
+		}
+
 		if (device_id) {
 			constraints.video.deviceId = { exact: device_id };
 		}
@@ -467,38 +473,28 @@ async function captureFrame() {
 
 	try {
 		let bitmap;
+		let force_half_height = false;
 
 		// let's assume that pixelated resize of height divided 2 is the same as dropping every other row
 		// which is equivalent to deinterlacing *cough*
 
 		performance.mark('capture_start');
 		if (blob) {
+			force_half_height = true;
 			// images are known to be 720x480
 			bitmap = await createImageBitmap(blob,
-				0, 0, 720, 480,
-				{
-					resizeWidth: 720,
-					resizeHeight: 480 >> 1,
-					resizeQuality: 'pixelated',
-				}
+				0, 0, 720, 480
 			);
 		}
 		else {
 			// we do cheap deinterlacing with pixelated resize...
 			bitmap = await createImageBitmap(video,
 				0, 0, video.videoWidth, video.videoHeight,
-				do_half_height
-					? {
-						resizeWidth: video.videoWidth,
-						resizeHeight: video.videoHeight >> 1,
-						resizeQuality: 'pixelated',
-					}
-					: {}
 			);
 		}
 		performance.mark('capture_end');
 
-		tetris_ocr.processFrame(bitmap);
+		tetris_ocr.processFrame(bitmap, do_half_height || force_half_height);
 	}
 	catch(err) {
 		console.error(err);
@@ -694,21 +690,20 @@ async function showParts(data) {
 			holder.appendChild(text_result);
 		}
 
-		const cropped = await createImageBitmap(task.crop_img, 0, 0, task.crop_img.width, task.crop_img.height, {
-			resizeWidth: task.crop_img.width * 2,
-			resizeHeight: task.crop_img.height * 2,
-			resizeQuality: 'pixelated'
-		});
+		const cropped = await createImageBitmap(task.crop_img,
+			0, 0, task.crop_img.width, task.crop_img.height
+		);
+		const scaled = await createImageBitmap(task.scale_img,
+			0, 0, task.scale_img.width, task.scale_img.height
+		);
 
-		const scaled = await createImageBitmap(task.scale_img, 0, 0, task.scale_img.width, task.scale_img.height, {
-			resizeWidth: task.scale_img.width * 2,
-			resizeHeight: task.scale_img.height * 2,
-			resizeQuality: 'pixelated'
-		});
-
-		// draw task captured areas
-		task.crop_canvas_ctx.drawImage(cropped, 0, 0);
-		task.scale_canvas_ctx.drawImage(scaled, 0, 0);
+		// draw task captured areas at 2x scale
+		task.crop_canvas_ctx.drawImage(cropped,
+			0, 0, task.crop_img.width * 2, task.crop_img.height * 2
+		);
+		task.scale_canvas_ctx.drawImage(scaled,
+			0, 0, task.scale_img.width * 2, task.scale_img.height * 2
+		);
 
 		// highlight captured areas in source image
 		const [x, y, w, h] = task.crop;

@@ -158,14 +158,14 @@ class TetrisOCR extends EventTarget {
 		return min_idx;
 	}
 
-	initCaptureContext(frame) {
+	initCaptureContext(frame, half_height) {
 		this.capture_canvas = document.createElement('canvas');
 
 		this.capture_canvas.width = frame.width;
-		this.capture_canvas.height = frame.height;
+		this.capture_canvas.height = frame.height >> (half_height ? 1 : 0);
 
 		this.capture_canvas_ctx = this.capture_canvas.getContext('2d', { alpha: false });
-		this.capture_canvas_ctx.imageSmoothingEnabled = 'false';
+		this.capture_canvas_ctx.imageSmoothingEnabled = false;
 
 		// On top of the capture context, we need one more canvas for the scaled field
 		// because the performance of OffScreenCanvas are horrible, and same gvoes for the bicubic lib for any image that's not super small :(
@@ -178,18 +178,21 @@ class TetrisOCR extends EventTarget {
 		this.scaled_field_canvas.height = TASK_RESIZE.field[1];
 
 		this.scaled_field_canvas_ctx = this.scaled_field_canvas.getContext('2d', { alpha: false });
-		this.scaled_field_canvas_ctx.imageSmoothingEnabled = 'false';
+		this.scaled_field_canvas_ctx.imageSmoothingEnabled = true;
+		this.scaled_field_canvas_ctx.imageSmoothingQuality = 'medium';
 	}
 
-	async processFrame(frame) {
+	async processFrame(frame, half_height) {
 		if (!this.capture_canvas_ctx) {
-			this.initCaptureContext(frame);
+			this.initCaptureContext(frame, half_height);
 		}
 
 		const res = {};
 
 		performance.mark('start');
-		this.capture_canvas_ctx.drawImage(frame, 0, 0, frame.width, frame.height);
+		this.capture_canvas_ctx.drawImage(frame,
+			0, 0, frame.width, frame.height >> (half_height ? 1 : 0)
+		);
 		performance.mark('draw_end');
 		performance.measure('draw_frame', 'start', 'draw_end');
 
@@ -540,23 +543,18 @@ class TetrisOCR extends EventTarget {
 		crop(source_img, x, y, w, h, task.crop_img);
 
 		/*
+		// the 2 lines below show what's actually needed: a simple crop and scale on the source image
+		// but cubic scaling in JS is MUCH slower than with native code, so we use canvas instead
 		bicubic(task.crop_img, task.scale_img);
 		const field_img = task.scale_img;
 		/**/
 
 		/**/
 		// crop and scale with canva
-		const resized = await createImageBitmap(
-			source_img,
-			x, y, w, h,
-			{
-				resizeWidth: TASK_RESIZE.field[0],
-				resizeHeight: TASK_RESIZE.field[1],
-				resizeQuality: 'medium'
-			}
-		);
+		const original_field_img = await createImageBitmap(source_img, x, y, w, h);
 
-		this.scaled_field_canvas_ctx.drawImage(resized, 0, 0);
+		this.scaled_field_canvas_ctx.drawImage(original_field_img, 0, 0, ...TASK_RESIZE.field);
+
 		const field_img = this.scaled_field_canvas_ctx.getImageData(0, 0, ...TASK_RESIZE.field);
 
 		// writing into scale_img is not needed, but done anyway to share area with caller app
