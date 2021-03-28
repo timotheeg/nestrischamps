@@ -694,21 +694,18 @@ async function showParts(data) {
 			holder.appendChild(text_result);
 		}
 
-		const cropped = await createImageBitmap(task.crop_img, 0, 0, task.crop_img.width, task.crop_img.height, {
-			resizeWidth: task.crop_img.width * 2,
-			resizeHeight: task.crop_img.height * 2,
-			resizeQuality: 'pixelated'
-		});
-
-		const scaled = await createImageBitmap(task.scale_img, 0, 0, task.scale_img.width, task.scale_img.height, {
-			resizeWidth: task.scale_img.width * 2,
-			resizeHeight: task.scale_img.height * 2,
-			resizeQuality: 'pixelated'
-		});
+		const cropped = await createImageBitmap(task.crop_img, 0, 0, task.crop_img.width, task.crop_img.height);
+		const scaled = await createImageBitmap(task.scale_img, 0, 0, task.scale_img.width, task.scale_img.height);
 
 		// draw task captured areas
-		task.crop_canvas_ctx.drawImage(cropped, 0, 0);
-		task.scale_canvas_ctx.drawImage(scaled, 0, 0);
+		task.crop_canvas_ctx.drawImage(cropped
+			, 0, 0, task.crop_img.width, task.crop_img.height
+			, 0, 0, task.crop_img.width * 2, task.crop_img.height * 2
+		);
+		task.scale_canvas_ctx.drawImage(scaled
+			 , 0, 0, task.scale_img.width, task.scale_img.height
+			 , 0, 0, task.scale_img.width * 2, task.scale_img.height * 2
+		);
 
 		// highlight captured areas in source image
 		const [x, y, w, h] = task.crop;
