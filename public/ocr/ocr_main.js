@@ -347,6 +347,12 @@ async function playVideoFromDevice(device_id, fps) {
 			}
 		};
 
+		// whhhyyyyyy???
+		if (navigator.userAgent.indexOf("Firefox/") > -1) {
+			constraints.video.width.ideal = 1280;
+			delete constraints.video.height;
+		}
+
 		if (device_id) {
 			constraints.video.deviceId = { exact: device_id };
 		}
