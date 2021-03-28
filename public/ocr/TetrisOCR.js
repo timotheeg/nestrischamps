@@ -541,11 +541,10 @@ class TetrisOCR extends EventTarget {
 	async scanField(source_img, _colors) {
 		// Note: We work in the square of colors domain
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
-
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
+		const black_luma_limit = 25.0; // we're being optimistic here...
 		const colors = [
-			[0, 0, 0],
 			[0xFF, 0xFF, 0xFF],
 			..._colors
 		].map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
@@ -574,6 +573,12 @@ class TetrisOCR extends EventTarget {
 
 		// Make a memory efficient array for our needs
 		const field = new Uint8Array(200);
+
+		// shine pixels
+		const shine_pix_refs = [
+			[0, 0],
+			[1, 1]
+		];
 
 		// we read 4 judiciously positionned logical pixels per block
 		const pix_refs = [
@@ -623,6 +628,21 @@ class TetrisOCR extends EventTarget {
 			for (let cidx = 0; cidx < 10; cidx++) {
 				const block_offset = ((ridx * row_width * 8) + cidx * 8) * 4;
 
+				const has_shine = shine_pix_refs
+					.every(([x, y]) => {
+						const col_idx = block_offset + y * row_width * 4 + x * 4;
+						const col = field_img.data.subarray(col_idx, col_idx + 3);
+
+						return luma(...col) > black_luma_limit;
+					});
+
+				if (!has_shine) {
+					field[ridx * 10 + cidx] = 0; // we have black!
+					continue;
+				}
+
+				// K, it's not black! we must compare with the 3 colors (col1, col2, and white)
+
 				const channels = pix_refs
 					.map(([x, y]) => {
 						const col_idx = block_offset + y * row_width * 4 + x * 4;
@@ -648,7 +668,7 @@ class TetrisOCR extends EventTarget {
 					}
 				})
 
-				field[ridx * 10 + cidx] = min_idx;
+				field[ridx * 10 + cidx] = min_idx + 1; // +1 to account for black being 0
 			}
 		}
 		/**/
