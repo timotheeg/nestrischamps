@@ -239,6 +239,11 @@ class TetrisOCR extends EventTarget {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
 
+		// round the colors if needed
+		if (res.color1) {
+			res.color1 = res.color1.map(v => Math.round(v));
+			res.color2 = res.color2.map(v => Math.round(v));
+		}
 
 		this.onMessage(res);
 	}
@@ -505,6 +510,9 @@ class TetrisOCR extends EventTarget {
 	}
 
 	scanColor(source_img, task) {
+		// to get the average color, we take the average of squares, or it might be too dark
+		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
+
 		const [x, y, w, h] = this.getCropCoordinates(task);
 
 		crop(source_img, x, y, w, h, task.crop_img);
@@ -522,22 +530,25 @@ class TetrisOCR extends EventTarget {
 				return task.scale_img.data.subarray(col_idx, col_idx + 3);
 			})
 			.reduce((acc, col) => {
-				acc[0] += col[0];
-				acc[1] += col[1];
-				acc[2] += col[2];
+				acc[0] += col[0] * col[0];
+				acc[1] += col[1] * col[1];
+				acc[2] += col[2] * col[2];
 				return acc;
 			}, [0, 0, 0])
-			.map(v => Math.round(v / pix_refs.length));
+			.map(v => Math.sqrt(v / pix_refs.length));
 	}
 
 	async scanField(source_img, _colors) {
+		// Note: We work in the square of colors domain
+		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
+
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
 		const colors = [
 			[0, 0, 0],
 			[0xFF, 0xFF, 0xFF],
 			..._colors
-		];
+		].map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
 
 		// crop is not needed, but done anyway to share task captured area with caller app
 		crop(source_img, x, y, w, h, task.crop_img);
@@ -618,12 +629,12 @@ class TetrisOCR extends EventTarget {
 						return field_img.data.subarray(col_idx, col_idx + 3);
 					})
 					.reduce((acc, col) => {
-						acc[0] += col[0];
-						acc[1] += col[1];
-						acc[2] += col[2];
+						acc[0] += col[0] * col[0];
+						acc[1] += col[1] * col[1];
+						acc[2] += col[2] * col[2];
 						return acc;
 					}, [0, 0, 0])
-					.map(v => Math.round(v / pix_refs.length));
+					.map(v => v / pix_refs.length); // this is an average of squares!
 
 				let min_diff = 0xFFFFFFFF;
 				let min_idx = -1;
