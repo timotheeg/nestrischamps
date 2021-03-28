@@ -478,8 +478,9 @@ class Player {
 
 			if (num_blocks === 200) {
 				// note, gameover can also be detected when top row of field is full
-				this.pace_score = score;
 				this.game_over = true;
+				this.pace_score = this.getPaceScore();
+				this.dom.pace.textContent = this.options.format_score(this.pace_score, 7);
 				this.onGameOver();
 			}
 		}
