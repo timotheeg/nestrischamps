@@ -158,11 +158,11 @@ class TetrisOCR extends EventTarget {
 		return min_idx;
 	}
 
-	initCaptureContext(frame) {
+	initCaptureContext(frame, half_height) {
 		this.capture_canvas = document.createElement('canvas');
 
 		this.capture_canvas.width = frame.width;
-		this.capture_canvas.height = frame.height;
+		this.capture_canvas.height = frame.height >> (half_height ? 1 : 0);
 
 		this.capture_canvas_ctx = this.capture_canvas.getContext('2d', { alpha: false });
 		this.capture_canvas_ctx.imageSmoothingEnabled = false;
@@ -182,15 +182,17 @@ class TetrisOCR extends EventTarget {
 		this.scaled_field_canvas_ctx.imageSmoothingQuality = 'medium';
 	}
 
-	async processFrame(frame) {
+	async processFrame(frame, half_height) {
 		if (!this.capture_canvas_ctx) {
-			this.initCaptureContext(frame);
+			this.initCaptureContext(frame, half_height);
 		}
 
 		const res = {};
 
 		performance.mark('start');
-		this.capture_canvas_ctx.drawImage(frame, 0, 0, frame.width, frame.height);
+		this.capture_canvas_ctx.drawImage(frame,
+			0, 0, frame.width, frame.height >> (half_height ? 1 : 0)
+		);
 		performance.mark('draw_end');
 		performance.measure('draw_frame', 'start', 'draw_end');
 
