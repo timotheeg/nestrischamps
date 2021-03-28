@@ -543,7 +543,7 @@ class TetrisOCR extends EventTarget {
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
-		const black_luma_limit = 25.0; // we're being optimistic here...
+		const shine_luma_limit = 75; // Since shine is white, should this limit be higher?
 		const colors = [
 			[0xFF, 0xFF, 0xFF],
 			..._colors
@@ -576,8 +576,9 @@ class TetrisOCR extends EventTarget {
 
 		// shine pixels
 		const shine_pix_refs = [
-			[0, 0],
-			[1, 1]
+			[1, 1],
+			[1, 2],
+			[2, 1]
 		];
 
 		// we read 4 judiciously positionned logical pixels per block
@@ -629,11 +630,11 @@ class TetrisOCR extends EventTarget {
 				const block_offset = ((ridx * row_width * 8) + cidx * 8) * 4;
 
 				const has_shine = shine_pix_refs
-					.every(([x, y]) => {
+					.some(([x, y]) => {
 						const col_idx = block_offset + y * row_width * 4 + x * 4;
 						const col = field_img.data.subarray(col_idx, col_idx + 3);
 
-						return luma(...col) > black_luma_limit;
+						return luma(...col) > shine_luma_limit;
 					});
 
 				if (!has_shine) {
