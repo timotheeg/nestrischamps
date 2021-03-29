@@ -17,6 +17,15 @@ tbody tr:nth-child(even) {
   background-color: #ddd;
 }
 
+ul {
+	padding: 0;
+}
+
+li {
+	display: inline-block;
+	padding: 0 0.5em;
+}
+
 </style>
 </head>
 <body>
@@ -27,12 +36,12 @@ tbody tr:nth-child(even) {
 <table>
 <thead>
 	<tr>
-		<th>Date</th>
+		<th class="sorter" data-field="datetime">Date</th>
 		<th>Start Level</th>
 		<th>End Level</th>
-		<th>Score</th>
+		<th class="sorter" data-field="score">Score</th>
 		<th>Lines</th>
-		<th>Tetris Rate</th>
+		<th class="sorter" data-field="tetris_rate">Tetris Rate</th>
 		<th>Num Droughts</th>
 		<th>Max Drought</th>
 		<th>DAS Avg</th>
@@ -58,9 +67,22 @@ tbody tr:nth-child(even) {
 </table>
 
 <!-- TODO: implement pagination controls -->
-<div id="pages"></div>
+<ul id="pages">
+<% for (let page_idx=0; page_idx < num_pages; page_idx++) { %>
+	<li>
+		<% if (page_idx == pagination.page_idx) { %>
+			<%= page_idx + 1 %>
+		<% } else { %>
+			<a href='#'><%= page_idx + 1 %></a>
+		<% } %>
+	</li>
+<% }; %>
+</ul>
 
+<script src="/js/QueryString.js"></script>
 <script>
+const pagination = <%- JSON.stringify(pagination) %>;
+
 document.querySelectorAll('a.delete_score').forEach(a => {
 	a.addEventListener('click', async (evt) => {
 		evt.preventDefault();
@@ -79,6 +101,49 @@ document.querySelectorAll('a.delete_score').forEach(a => {
 		location.reload(); // super inefficient, but whatever...
 	});
 });
+
+const orders = ['desc', 'asc'];
+
+function load() {
+	location.href = `${location.pathname}${QueryString._build(pagination)}`;
+}
+
+document.querySelectorAll('th.sorter').forEach(th => {
+	const a = document.createElement('a');
+	a.href = '#';
+	a.textContent = th.textContent;
+	th.innerHTML = '';
+
+	a.addEventListener('click', evt => {
+		evt.preventDefault();
+
+		const field = th.dataset.field;
+
+		if (pagination.sort_field === field) {
+			const idx = orders.indexOf(pagination.sort_order);
+			pagination.sort_order = orders[(idx + 1) % orders.length];
+		}
+		else {
+			pagination.sort_field = field;
+			pagination.sort_order = orders[0];
+		}
+
+		pagination.page_idx = 0;
+		load();
+	});
+
+	th.appendChild(a);
+});
+
+document.querySelectorAll('li a').forEach(a => {
+	a.addEventListener('click', evt => {
+		evt.preventDefault();
+
+		pagination.page_idx = parseInt(a.textContent, 10) - 1;
+		load();
+	});
+});
+
 </script>
 
 </body>
