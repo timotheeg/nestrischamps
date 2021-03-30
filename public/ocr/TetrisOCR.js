@@ -47,6 +47,8 @@ const TASK_RESIZE = {
 	piece_count:   [getDigitsWidth(3), 14],
 };
 
+const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this limit be higher?
+
 
 class TetrisOCR extends EventTarget {
 	static TASK_RESIZE = TASK_RESIZE;
@@ -59,8 +61,7 @@ class TetrisOCR extends EventTarget {
 		this.setConfig(config);
 
 		this.digit_img = new ImageData(14, 14); // 2x for better matching
-		this.block_img = new ImageData(7, 7);
-		this.small_block_img = new ImageData(5, 5);
+		this.shine_img = new ImageData(2, 3);
 
 		// decorate relevant methods to capture timings
 		PERF_METHODS
@@ -346,25 +347,30 @@ class TetrisOCR extends EventTarget {
 	}
 
 	/*
-	 * Returns true if 70% of the pixels in the supplied image are not black.
+	 * Returns true if at least one of the pixel has a luma higher than threshold
 	 */
-	static isBlock(img, block_presence_threshold=0.7) {
-		const pixel_count = img.width * img.height;
-		const black_luma_limit = 15.0;
-		const img_data = img.data;
+	hasShine(img, x, y) {
+		// extract the shine area at the location supplied
+		const shine_width = 2;
+		crop(img, x, y, shine_width, 3, this.shine_img);
 
-		let sum = 0;
+		const img_data = this.shine_img.data;
+		const shine_pix_ref = [
+			[0, 0],
+			[1, 1],
+			[1, 2],
+		];
 
-		for (let idx=pixel_count; idx--; ) {
-			const offset_idx = idx << 2;
-			sum += luma(
+		return shine_pix_ref.some(([x, y]) => {
+			const offset_idx = (y * shine_width + x) << 2;
+			const pixel_luma = luma(
 				img_data[offset_idx],
 				img_data[offset_idx + 1],
 				img_data[offset_idx + 2],
-			) <  black_luma_limit ? 0 : 1;
-		};
+			)
 
-		return sum >= (pixel_count * block_presence_threshold);
+			return (pixel_luma > SHINE_LUMA_THRESHOLD);
+		});
 	}
 
 	scanPreview(source_img) {
@@ -375,27 +381,27 @@ class TetrisOCR extends EventTarget {
 		bicubic(task.crop_img, task.scale_img);
 
 		// Trying side i blocks
-		if (TetrisOCR.isBlock(crop(task.scale_img, 0, 3, 4, 7), 0.5)
-			&& TetrisOCR.isBlock(crop(task.scale_img, 27, 3, 4, 7), 0.5)
+		if (this.hasShine(task.scale_img, 0, 4)
+			&& this.hasShine(task.scale_img, 28, 4) // not top-left corner, but since I block are white, should work
 		) {
 			return 'I';
 		}
 
 		// now trying the 3x2 matrix for T, L, J, S, Z
 		const top_row = [
-			TetrisOCR.isBlock(crop(task.scale_img, 4, 0, 7, 7, this.block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 12, 0, 7, 7, this.block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 20, 0, 7, 7, this.block_img))
+			this.hasShine(task.scale_img, 4, 0),
+			this.hasShine(task.scale_img, 12, 0),
+			this.hasShine(task.scale_img, 20, 0)
 		];
 
 		if (top_row[0] && top_row[1] && top_row[2]) { // J, T, L
-			if (TetrisOCR.isBlock(crop(task.scale_img, 4, 8, 7, 7, this.block_img))) {
+			if (this.hasShine(task.scale_img, 4, 8)) {
 				return 'L';
 			}
-			if (TetrisOCR.isBlock(crop(task.scale_img, 12, 8, 7, 7, this.block_img))) {
+			if (this.hasShine(task.scale_img, 12, 8)) {
 				return 'T';
 			}
-			if (TetrisOCR.isBlock(crop(task.scale_img, 20, 8, 7, 7, this.block_img))) {
+			if (this.hasShine(task.scale_img, 20, 8)) {
 				return 'J';
 			}
 
@@ -403,16 +409,16 @@ class TetrisOCR extends EventTarget {
 		}
 
 		if (top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 4, 8, 7, 7, this.block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 12, 8, 7, 7, this.block_img))
+			if (this.hasShine(task.scale_img, 4, 8)
+				&& this.hasShine(task.scale_img, 12, 8)
 			) {
 				return 'S';
 			}
 		}
 
 		if (top_row[0] && top_row[1]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 12, 8, 7, 7, this.block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 20, 8, 7, 7, this.block_img))
+			if (this.hasShine(task.scale_img, 12, 8)
+				&& this.hasShine(task.scale_img, 20, 8)
 			) {
 				return 'Z';
 			}
@@ -420,10 +426,10 @@ class TetrisOCR extends EventTarget {
 
 		// lastly check for O
 		if (
-			TetrisOCR.isBlock(crop(task.scale_img, 8, 0, 7, 7, this.block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 16, 0, 7, 7, this.block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 8, 8, 7, 7, this.block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 16, 8, 7, 7, this.block_img))
+			this.hasShine(task.scale_img, 8, 0)
+			&& this.hasShine(task.scale_img, 16, 0)
+			&& this.hasShine(task.scale_img, 8, 8)
+			&& this.hasShine(task.scale_img, 16, 8)
 		) {
 			return 'O';
 		}
@@ -443,37 +449,37 @@ class TetrisOCR extends EventTarget {
 		bicubic(task.crop_img, task.scale_img);
 
 		// Trying side i blocks
-		if (TetrisOCR.isBlock(crop(task.scale_img, 0, 4, 2, 5), 0.5)
-			&& TetrisOCR.isBlock(crop(task.scale_img, 20, 4, 3, 5), 0.5)
+		if (this.hasShine(task.scale_img, 0, 4)
+			&& this.hasShine(task.scale_img, 20, 4)
 		) {
 			return 'I';
 		}
 
 		// now trying for L, J (top pixel alignment)
 		let top_row = [
-			TetrisOCR.isBlock(crop(task.scale_img, 2, 0, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 8, 0, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 14, 0, 5, 5, this.small_block_img))
+			this.hasShine(task.scale_img, 2, 0),
+			this.hasShine(task.scale_img, 8, 0),
+			this.hasShine(task.scale_img, 14, 0)
 		];
 
 		if (top_row[0] && top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 2, 6, 5, 5, this.small_block_img))) {
+			if (this.hasShine(task.scale_img, 2, 6)) {
 				return 'L';
 			}
-			if (TetrisOCR.isBlock(crop(task.scale_img, 14, 6, 5, 5, this.small_block_img))) {
+			if (this.hasShine(task.scale_img, 14, 6)) {
 				return 'J';
 			}
 		}
 
 		// checking S, Z, T
 		top_row = [
-			TetrisOCR.isBlock(crop(task.scale_img, 2, 1, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 8, 1, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 14, 1, 5, 5, this.small_block_img))
+			this.hasShine(task.scale_img, 2, 1),
+			this.hasShine(task.scale_img, 8, 1),
+			this.hasShine(task.scale_img, 14, 1)
 		];
 
 		if (top_row[0] && top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 8, 7, 5, 5, this.small_block_img))) {
+			if (this.hasShine(task.scale_img, 8, 7)) {
 				return 'T';
 			}
 
@@ -481,16 +487,16 @@ class TetrisOCR extends EventTarget {
 		}
 
 		if (top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 2, 7, 5, 5, this.small_block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 8, 7, 5, 5, this.small_block_img))
+			if (this.hasShine(task.scale_img, 2, 7)
+				&& this.hasShine(task.scale_img, 8, 7)
 			) {
 				return 'S';
 			}
 		}
 
 		if (top_row[0] && top_row[1]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 8, 7, 5, 5, this.small_block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 14, 7, 5, 5, this.small_block_img))
+			if (this.hasShine(task.scale_img, 8, 7)
+				&& this.hasShine(task.scale_img, 14, 7)
 			) {
 				return 'Z';
 			}
@@ -498,10 +504,10 @@ class TetrisOCR extends EventTarget {
 
 		// lastly check for O
 		if (
-			TetrisOCR.isBlock(crop(task.scale_img, 5, 1, 5, 5, this.small_block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 11, 1, 5, 5, this.small_block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 5, 7, 5, 5, this.small_block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 11, 7, 5, 5, this.small_block_img))
+			this.hasShine(task.scale_img, 5, 1)
+			&& this.hasShine(task.scale_img, 11, 1)
+			&& this.hasShine(task.scale_img, 5, 7)
+			&& this.hasShine(task.scale_img, 11, 7)
 		) {
 			return 'O';
 		}
@@ -543,9 +549,8 @@ class TetrisOCR extends EventTarget {
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
-		const shine_luma_limit = 75; // Since shine is white, should this limit be higher?
 		const colors = [
-			[0xFF, 0xFF, 0xFF],
+			[0xF0, 0xF0, 0xF0],
 			..._colors
 		].map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
 
@@ -634,7 +639,7 @@ class TetrisOCR extends EventTarget {
 						const col_idx = block_offset + y * row_width * 4 + x * 4;
 						const col = field_img.data.subarray(col_idx, col_idx + 3);
 
-						return luma(...col) > shine_luma_limit;
+						return luma(...col) > SHINE_LUMA_THRESHOLD;
 					});
 
 				if (!has_shine) {
