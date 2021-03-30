@@ -47,7 +47,7 @@ const TASK_RESIZE = {
 	piece_count:   [getDigitsWidth(3), 14],
 };
 
-const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this limit be higher?
+const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this threshold be higher?
 
 
 class TetrisOCR extends EventTarget {
