@@ -429,18 +429,28 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 
 		const
 			score_p1 = players[0].getScore(),
-			score_p2 = players[1].getScore();
+			score_p2 = players[1].getScore(),
+			pace_score_p1 = players[0].getPaceScore(),
+			pace_score_p2 = players[1].getPaceScore();
 
 		if (isNaN(score_p1) || isNaN(score_p2)) {
 			return;
 		}
 
-		if (score_p1 === this.last_score_p1 && score_p2 === this.last_score_p2) {
+		if (
+			   score_p1 === this.last_score_p1
+			&& score_p2 === this.last_score_p2
+			&& pace_score_p1 === this.last_pace_score_p1
+			&& pace_score_p2 === this.last_pace_score_p2
+		)
+		{
 			return;
 		}
 
 		this.last_score_p1 = score_p1;
 		this.last_score_p2 = score_p2;
+		this.last_pace_score_p1 = pace_score_p1;
+		this.last_pace_score_p2 = pace_score_p2;
 
 		// do score diff first
 
