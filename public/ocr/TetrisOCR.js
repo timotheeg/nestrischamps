@@ -113,6 +113,14 @@ class TetrisOCR extends EventTarget {
 
 			task.crop_img = new ImageData(w, h);
 			task.scale_img = new ImageData(...resize_tuple);
+
+			task.scale_canvas = document.createElement('canvas');
+			task.scale_canvas.width = resize_tuple[0];
+			task.scale_canvas.height = resize_tuple[1];
+
+			task.scale_canvas_ctx = task.scale_canvas.getContext('2d', { alpha: false });
+			task.scale_canvas_ctx.imageSmoothingEnabled = true;
+			task.scale_canvas_ctx.imageSmoothingQuality = 'medium';
 		}
 
 		this.config.capture_bounds = bounds;
@@ -196,7 +204,7 @@ class TetrisOCR extends EventTarget {
 		performance.mark('draw_end');
 		performance.measure('draw_frame', 'start', 'draw_end');
 
-		const source_img = this.getSourceImageData();
+		const source_img = {}; // this.getSourceImageData();
 
 		res.score = this.scanScore(source_img);
 		res.level = this.scanLevel(source_img);
@@ -324,11 +332,21 @@ class TetrisOCR extends EventTarget {
 	}
 
 	ocrDigits(source_img, task) {
-		const [x, y, w, h] = this.getCropCoordinates(task);
 		const digits = Array(task.pattern.length);
 
-		crop(source_img, x, y, w, h, task.crop_img);
-		bicubic(task.crop_img, task.scale_img);
+		if (true) {
+			task.scale_canvas_ctx.drawImage(this.capture_canvas
+				, ...task.crop
+				, 0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+			task.scale_img = task.scale_canvas_ctx.getImageData(
+				0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+		}
+		else {
+			crop(source_img, x, y, w, h, task.crop_img);
+			bicubic(task.crop_img, task.scale_img);
+		}
 
 		for (let idx=digits.length; idx--; ) {
 			const char = task.pattern[idx];
@@ -371,8 +389,19 @@ class TetrisOCR extends EventTarget {
 		const task = this.config.tasks.preview;
 		const [x, y, w, h] = this.getCropCoordinates(task);
 
-		crop(source_img, x, y, w, h, task.crop_img);
-		bicubic(task.crop_img, task.scale_img);
+		if (true) {
+			task.scale_canvas_ctx.drawImage(this.capture_canvas
+				, ...task.crop
+				, 0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+			task.scale_img = task.scale_canvas_ctx.getImageData(
+				0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+		}
+		else {
+			crop(source_img, x, y, w, h, task.crop_img);
+			bicubic(task.crop_img, task.scale_img);
+		}
 
 		// Trying side i blocks
 		if (TetrisOCR.isBlock(crop(task.scale_img, 0, 3, 4, 7), 0.5)
@@ -433,14 +462,25 @@ class TetrisOCR extends EventTarget {
 
 	scanCurPiece(source_img) {
 		const task = this.config.tasks.cur_piece;
-		const [x, y, w, h] = this.getCropCoordinates(task);
 
 		// curPieces are not vertically aligned on the op row
 		// L and J are rendered 1 pixel higher
 		// than S, Z, T, O
+		if (true) {
+			task.scale_canvas_ctx.drawImage(this.capture_canvas
+				, ...task.crop
+				, 0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+			task.scale_img = task.scale_canvas_ctx.getImageData(
+				0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+		}
+		else {
+			const [x, y, w, h] = this.getCropCoordinates(task);
 
-		crop(source_img, x, y, w, h, task.crop_img);
-		bicubic(task.crop_img, task.scale_img);
+			crop(source_img, x, y, w, h, task.crop_img);
+			bicubic(task.crop_img, task.scale_img);
+		}
 
 		// Trying side i blocks
 		if (TetrisOCR.isBlock(crop(task.scale_img, 0, 4, 2, 5), 0.5)
@@ -512,11 +552,21 @@ class TetrisOCR extends EventTarget {
 	scanColor(source_img, task) {
 		// to get the average color, we take the average of squares, or it might be too dark
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
+		if (true) {
+			task.scale_canvas_ctx.drawImage(this.capture_canvas
+				, ...task.crop
+				, 0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+			task.scale_img = task.scale_canvas_ctx.getImageData(
+				0, 0, task.scale_canvas.width, task.scale_canvas.height
+			);
+		}
+		else {
+			const [x, y, w, h] = this.getCropCoordinates(task);
 
-		const [x, y, w, h] = this.getCropCoordinates(task);
-
-		crop(source_img, x, y, w, h, task.crop_img);
-		bicubic(task.crop_img, task.scale_img);
+			crop(source_img, x, y, w, h, task.crop_img);
+			bicubic(task.crop_img, task.scale_img);
+		}
 
 		const pix_refs = [
 			[3, 2],
@@ -542,34 +592,19 @@ class TetrisOCR extends EventTarget {
 		// Note: We work in the square of colors domain
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 		const task = this.config.tasks.field;
-		const [x, y, w, h] = this.getCropCoordinates(task);
 		const shine_luma_limit = 75; // Since shine is white, should this limit be higher?
 		const colors = [
 			[0xFF, 0xFF, 0xFF],
 			..._colors
 		].map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
 
-		// crop is not needed, but done anyway to share task captured area with caller app
-		crop(source_img, x, y, w, h, task.crop_img);
-
-		/*
-		// the 2 lines below show what's actually needed: a simple crop and scale on the source image
-		// but cubic scaling in JS is MUCH slower than with native code, so we use canvas instead
-		bicubic(task.crop_img, task.scale_img);
-		const field_img = task.scale_img;
-		/**/
-
-		/**/
-		// crop and scale with canva
-		const original_field_img = await createImageBitmap(source_img, x, y, w, h);
-
-		this.scaled_field_canvas_ctx.drawImage(original_field_img, 0, 0, ...TASK_RESIZE.field);
-
-		const field_img = this.scaled_field_canvas_ctx.getImageData(0, 0, ...TASK_RESIZE.field);
-
-		// writing into scale_img is not needed, but done anyway to share area with caller app
-		task.scale_img.data.set(field_img.data);
-		/**/
+		task.scale_canvas_ctx.drawImage(this.capture_canvas
+			, ...task.crop
+			, 0, 0, task.scale_canvas.width, task.scale_canvas.height
+		);
+		task.scale_img = task.scale_canvas_ctx.getImageData(
+			0, 0, task.scale_canvas.width, task.scale_canvas.height
+		);
 
 		// Make a memory efficient array for our needs
 		const field = new Uint8Array(200);
@@ -632,7 +667,7 @@ class TetrisOCR extends EventTarget {
 				const has_shine = shine_pix_refs
 					.some(([x, y]) => {
 						const col_idx = block_offset + y * row_width * 4 + x * 4;
-						const col = field_img.data.subarray(col_idx, col_idx + 3);
+						const col = task.scale_img.data.subarray(col_idx, col_idx + 3);
 
 						return luma(...col) > shine_luma_limit;
 					});
@@ -647,7 +682,7 @@ class TetrisOCR extends EventTarget {
 				const channels = pix_refs
 					.map(([x, y]) => {
 						const col_idx = block_offset + y * row_width * 4 + x * 4;
-						return field_img.data.subarray(col_idx, col_idx + 3);
+						return task.scale_img.data.subarray(col_idx, col_idx + 3);
 					})
 					.reduce((acc, col) => {
 						acc[0] += col[0] * col[0];
