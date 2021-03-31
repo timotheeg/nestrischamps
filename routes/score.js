@@ -98,10 +98,42 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 router.get('/scores', middlewares.assertSession, async (req, res) => {
 	console.log(`Fetching user scores for ${req.session.user.id}`);
 
-	// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
-	const scores = await ScoreDAO.getScorePage(req.session.user);
+	const PAGE_SIZE = 100;
+	const ALLOWED_ORDER_FIELDS = ['datetime', 'score', 'tetris_rate'];
+	const ALLOWED_ORDER_DIRS = ['desc', 'asc'];
 
-	res.render('scores', { scores });
+	const options = {
+		sort_field: 'id',
+		sort_order: 'desc',
+		page_idx: 0,
+	};
+
+	// validate and get args from query
+	if (ALLOWED_ORDER_FIELDS.includes(req.query.sort_field)) {
+		options.sort_field = req.query.sort_field;
+	}
+
+	if (ALLOWED_ORDER_DIRS.includes(req.query.sort_order)) {
+		options.sort_order = req.query.sort_order;
+	}
+
+	if (/^\d+$/.test(req.query.page_idx)) {
+		options.page_idx = parseInt(req.query.page_idx, 10);
+	}
+
+	const num_scores = await getNumberOfScores(req.session.user);
+	const num_pages = Math.floor(num_scores / PAGE_SIZE);
+
+	options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages));
+
+	// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
+	const scores = await ScoreDAO.getScorePage(req.session.user, options);
+
+	res.render('scores', {
+		scores,
+		pagination: options,
+		num_pages: num_pages + 1
+	});
 });
 
 router.delete('/scores/:id', middlewares.assertSession, async (req, res) => {

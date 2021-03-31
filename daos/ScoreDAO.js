@@ -120,14 +120,35 @@ class ScoreDAO {
 		);
 	}
 
-	async getScorePage(user, sort_field='id', sort_order='desc', page_size=100, page_idx=0) {
+	async getNumberOfScores(user) {
+		const result = await dbPool.query(`
+				SELECT count(*)
+				FROM scores
+				WHERE player_id=$1
+			`,
+			[ user.id ]
+		);
+
+		return parseInt(result.rows[0].count, 10);
+	}
+
+	async getScorePage(user, options = {}) {
+		const options = {
+			sort_field: 'id',
+			sort_order: 'desc',
+			page_size: 100,
+			page_idx: 0,
+
+			...options
+		};
+
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
 		const result = await dbPool.query(`
 				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg
 				FROM scores
 				WHERE player_id=$1
-				ORDER BY ${sort_field} ${sort_order}
-				LIMIT ${page_size} OFFSET ${page_size * page_idx}
+				ORDER BY ${options.sort_field} ${options.sort_order}
+				LIMIT ${options.page_size} OFFSET ${options.page_size * options.page_idx}
 			`,
 			[ user.id ]
 		);

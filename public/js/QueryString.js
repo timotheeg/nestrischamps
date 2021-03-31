@@ -2,7 +2,17 @@
 
 const QueryString = (function () {
 
-	const store = {};
+	const store = {
+		_build: function(pojo) {
+			const res = [];
+
+			for (const [key, value] of Object.entries(pojo)) {
+				res.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+			}
+
+			return `?${res.join('&')}`;
+		}
+	};
 
 	location.search.slice(1)
 		.split('&')
