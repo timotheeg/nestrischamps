@@ -303,7 +303,7 @@ class Game {
 			duration: (this.end_ts || Date.now()) - this.start_ts,
 			timeline: {
 				lines: this.line_events.map(evt => evt.num_lines).join(''),
-				pieces: this.piece_events.map(evt => evt.piece).join('')
+				pieces: this.pieces.map(evt => evt.piece).join('')
 			}
 		};
 	}
