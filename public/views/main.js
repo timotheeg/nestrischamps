@@ -397,7 +397,7 @@ function getStats() {
 function reportGame(game) {
 	if (game.reported) return;
 
-	game.over = true;
+	game.setGameOver();
 	game.reported = true;
 
 	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([A-Z0-9]+)$/)) {
@@ -409,7 +409,7 @@ function reportGame(game) {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(game.data),
+				body: JSON.stringify(game.getReport()),
 			}
 		)
 		.then(response => response.json())
