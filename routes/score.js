@@ -121,7 +121,7 @@ router.get('/scores', middlewares.assertSession, async (req, res) => {
 		options.page_idx = parseInt(req.query.page_idx, 10);
 	}
 
-	const num_scores = await getNumberOfScores(req.session.user);
+	const num_scores = await ScoreDAO.getNumberOfScores(req.session.user);
 	const num_pages = Math.floor(num_scores / PAGE_SIZE);
 
 	options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages));
