@@ -297,17 +297,15 @@ class Game {
 
 	getReport() {
 		// Get the relevant data from the game report
-		const data = {
+		return {
 			...this.data,
 
 			duration: (this.end_ts || Date.now()) - this.start_ts,
 			timeline: {
-				lines: this.line_events.map(evt => evt.num_lines),
-				pieces: this.piece_events.map(evt => evt.piece)
+				lines: this.line_events.map(evt => evt.num_lines).join(''),
+				pieces: this.piece_events.map(evt => evt.piece).join('')
 			}
 		};
-
-		return data;
 	}
 
 	toString(encoding='json') {
