@@ -133,7 +133,7 @@ class ScoreDAO {
 	}
 
 	async getScorePage(user, options = {}) {
-		const options = {
+		options = {
 			sort_field: 'id',
 			sort_order: 'desc',
 			page_size: 100,
