@@ -2,6 +2,7 @@ class Game {
 	constructor(event) {
 		this.id = event.gameid;
 		this.over = false;
+		this.start_ts = Date.now();
 
 		// will store all pieces that have been played in the game
 		this.pieces = [];
@@ -287,6 +288,26 @@ class Game {
 
 	getScore(level, num_lines) {
 		return SCORE_BASES[num_lines] * (level + 1)
+	}
+
+	setGameOver() {
+		this.over = true;
+		this.end_ts = Date.now();
+	}
+
+	getReport() {
+		// Get the relevant data from the game report
+		const data = {
+			...this.data,
+
+			duration: (this.end_ts || Date.now()) - this.start_ts,
+			timeline: {
+				lines: this.line_events.map(evt => evt.num_lines),
+				pieces: this.piece_events.map(evt => evt.piece)
+			}
+		};
+
+		return data;
 	}
 
 	toString(encoding='json') {
