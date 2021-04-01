@@ -15,6 +15,7 @@ const PERF_METHODS = [
 	'scanLines',
 	'scanColor1',
 	'scanColor2',
+	'scanColor3',
 	'scanPreview',
 	'scanField',
 	'scanPieceStats',
@@ -43,6 +44,7 @@ const TASK_RESIZE = {
 	cur_piece_das: [getDigitsWidth(2), 14],
 	color1:        [5, 5],
 	color2:        [5, 5],
+	color3:        [5, 5],
 	stats:         [getDigitsWidth(3), 14 * 7 + 14 * 7], // height captures all the individual stats...
 	piece_count:   [getDigitsWidth(3), 14],
 };
@@ -222,9 +224,17 @@ class TetrisOCR extends EventTarget {
 		}
 		else {
 			// assume tasks color1 and color2 are set
-			res.color1 = this.scanColor1(source_img);
 			res.color2 = this.scanColor2(source_img);
-			colors = [res.color1, res.color2];
+			res.color3 = this.scanColor3(source_img);
+
+			if (this.config.tasks.color1) {
+				res.color1 = this.scanColor1(source_img);
+			}
+			else {
+				res.color1 = [0xF0, 0xF0, 0xF0];
+			}
+
+			colors = [res.color1, res.color2, res.color3];
 		}
 
 		res.field = await this.scanField(source_img, colors);
@@ -241,9 +251,9 @@ class TetrisOCR extends EventTarget {
 		}
 
 		// round the colors if needed
-		if (res.color1) {
-			res.color1 = res.color1.map(v => Math.round(v));
+		if (res.color2) {
 			res.color2 = res.color2.map(v => Math.round(v));
+			res.color3 = res.color3.map(v => Math.round(v));
 		}
 
 		this.onMessage(res);
@@ -261,12 +271,12 @@ class TetrisOCR extends EventTarget {
 		return this.ocrDigits(source_img, this.config.tasks.lines);
 	}
 
-	scanColor1(source_img) {
-		return this.scanColor(source_img, this.config.tasks.color1);
-	}
-
 	scanColor2(source_img) {
 		return this.scanColor(source_img, this.config.tasks.color2);
+	}
+
+	scanColor3(source_img) {
+		return this.scanColor(source_img, this.config.tasks.color3);
 	}
 
 	scanInstantDas(source_img) {
@@ -515,6 +525,34 @@ class TetrisOCR extends EventTarget {
 		return null;
 	}
 
+	scanColor1(source_img) {
+		const task = this.config.tasks.color1;
+		const [x, y, w, h] = this.getCropCoordinates(task);
+
+		crop(source_img, x, y, w, h, task.crop_img);
+		bicubic(task.crop_img, task.scale_img);
+
+		// we select the brightest pixel in the center 3x3 square of the
+		const row_width = task.scale_img.width;
+		let max_luma = -1;
+		let res;
+
+		// we check luma pixels on the inside only
+		for (let y = task.scale_img.height - 1; --y > 1; ) {
+			for (let x = task.scale_img.width - 1; --x > 1; ) {
+				const pix_offset = (y * row_width + x) << 2;
+				const cur_color = task.scale_img.data.subarray(pix_offset, pix_offset + 3);
+				const cur_luma = luma(...cur_color);
+
+				if (cur_luma > max_luma) {
+					res = cur_color;
+				}
+			}
+		}
+
+		return res;
+	}
+
 	scanColor(source_img, task) {
 		// to get the average color, we take the average of squares, or it might be too dark
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
@@ -524,6 +562,7 @@ class TetrisOCR extends EventTarget {
 		crop(source_img, x, y, w, h, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);
 
+		const row_width = task.scale_img.width;
 		const pix_refs = [
 			[3, 2],
 			[3, 3],
@@ -532,7 +571,7 @@ class TetrisOCR extends EventTarget {
 
 		return pix_refs
 			.map(([x, y]) => {
-				const col_idx = y * 5 * 4 + x * 4;
+				const col_idx = (y * row_width + x) << 2;
 				return task.scale_img.data.subarray(col_idx, col_idx + 3);
 			})
 			.reduce((acc, col) => {
@@ -549,10 +588,7 @@ class TetrisOCR extends EventTarget {
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
-		const colors = [
-			[0xF0, 0xF0, 0xF0],
-			..._colors
-		].map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
+		const colors = _colors.map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
 
 		// crop is not needed, but done anyway to share task captured area with caller app
 		crop(source_img, x, y, w, h, task.crop_img);

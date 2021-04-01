@@ -6,8 +6,9 @@ const reference_locations = {
 	lines:         { crop: [304, 32, 46, 14],  pattern: "QDD" },
 	field:         { crop: [192, 80, 158, 318] },
 	preview:       { crop: [384, 224, 62, 30] },
-	color1:        { crop: [76, 212, 10, 10] },
-	color2:        { crop: [76, 246, 10, 10] },
+	color1:        { crop: [76, 170, 10, 10] },
+	color2:        { crop: [76, 212, 10, 10] },
+	color3:        { crop: [76, 246, 10, 10] },
 	instant_das:   { crop: [80, 64, 30, 14],  pattern: "BD" },
 	cur_piece_das: { crop: [112, 96, 30, 14], pattern: "BD" },
 	cur_piece:     { crop: [30, 89, 45, 23] },
@@ -31,6 +32,7 @@ const configs = {
 			'preview',
 			'color1',
 			'color2',
+			'color3',
 			'T',
 			'J',
 			'Z',
@@ -536,12 +538,15 @@ function resetConfig(config, task_name, task_crop) {
 
 		// update display canvas with new data
 		const canvas = config.tasks[task_name].crop_canvas_ctx.canvas;
+		const scale_factor = task_name.startsWith('color') ? 4 : 2;
+
 		updateCanvasSizeIfNeeded(
 			canvas,
-			task_crop[2] * 2,
-			task_crop[3] * 2
+			task_crop[2] * scale_factor,
+			task_crop[3] * scale_factor
 		);
 		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d', { alpha: false });
+		config.tasks[task_name].crop_canvas_ctx.imageSmoothingEnabled = false;
 	}
 
 	// set the new config
@@ -565,6 +570,7 @@ function showColorControls(palettes, config) {
 	if (color_fieldset) {
 		document.querySelector(`fieldset.color1`).style.display = display;
 		document.querySelector(`fieldset.color2`).style.display = display;
+		document.querySelector(`fieldset.color3`).style.display = display;
 	}
 }
 
@@ -644,6 +650,7 @@ async function showParts(data) {
 
 	for (const name of Object.keys(data)) {
 		const task = config.tasks[name];
+		const scale_factor = name.startsWith('color') ? 4 : 2;
 
 		if (!task) continue;
 
@@ -653,8 +660,8 @@ async function showParts(data) {
 		if (!task.crop_canvas_ctx) {
 			// create canvas at 2x resolution to make it easier to see the areas
 			const crop_canvas = document.createElement('canvas');
-			crop_canvas.width = task.crop_img.width * 2;
-			crop_canvas.height = task.crop_img.height * 2;
+			crop_canvas.width = task.crop_img.width * scale_factor;
+			crop_canvas.height = task.crop_img.height * scale_factor;
 			holder.appendChild(crop_canvas);
 
 			separator = document.createElement('span');
@@ -662,8 +669,8 @@ async function showParts(data) {
 			holder.appendChild(separator);
 
 			const scale_canvas = document.createElement('canvas');
-			scale_canvas.width = task.scale_img.width * 2;
-			scale_canvas.height = task.scale_img.height * 2;
+			scale_canvas.width = task.scale_img.width * scale_factor;
+			scale_canvas.height = task.scale_img.height * scale_factor;
 			holder.appendChild(scale_canvas);
 
 			separator = document.createElement('span');
@@ -699,10 +706,10 @@ async function showParts(data) {
 
 		// draw task captured areas at 2x scale
 		task.crop_canvas_ctx.drawImage(cropped,
-			0, 0, task.crop_img.width * 2, task.crop_img.height * 2
+			0, 0, task.crop_img.width * scale_factor, task.crop_img.height * scale_factor
 		);
 		task.scale_canvas_ctx.drawImage(scaled,
-			0, 0, task.scale_img.width * 2, task.scale_img.height * 2
+			0, 0, task.scale_img.width * scale_factor, task.scale_img.height * scale_factor
 		);
 
 		// highlight captured areas in source image
@@ -846,6 +853,7 @@ function trackAndSendFrames() {
 
 		delete data.color1;
 		delete data.color2;
+		delete data.color3;
 
 		if (data.score === null && data.lines === null) {
 			return; // really? 🤔
@@ -923,6 +931,14 @@ function trackAndSendFrames() {
 
 	if (hasConfig()) {
 		config = loadConfig();
+
+		// transformation of color numbers for old configs
+		// TODO: delete when everyone is using the new config
+		if (config.color1 && !config.color3) {
+			config.color2 = config.color1;
+			config.color3 = config.color2;
+		}
+
 		await resetDevices();
 
 		capture_rate.value = config.frame_rate || default_frame_rate;

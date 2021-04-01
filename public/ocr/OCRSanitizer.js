@@ -205,6 +205,7 @@ class OCRSanitizer {
 
 			pojo.color1 = this.last_frame.color1;
 			pojo.color2 = this.last_frame.color2;
+			pojo.color3 = this.last_frame.color3;
 		}
 		else {
 			pojo.instant_das = OCRSanitizer.digitsToValue(this.last_frame.instant_das);
