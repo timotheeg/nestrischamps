@@ -1,4 +1,17 @@
 // NTSC NES resolution: 256x224 -> 512x448
+const LEVEL_COLORS = [
+	[ '#4A32FF', '#4AAFFE' ],
+	[ '#009600', '#6ADC00' ],
+	[ '#B000D4', '#FF56FF' ],
+	[ '#4A32FF', '#00E900' ],
+	[ '#C8007F', '#00E678' ],
+	[ '#00E678', '#968DFF' ],
+	[ '#C41E0E', '#666666' ],
+	[ '#8200FF', '#780041' ],
+	[ '#4A32FF', '#C41E0E' ],
+	[ '#C41E0E', '#F69B00' ],
+];
+
 const reference_size = [512, 448];
 const reference_locations = {
 	score:         { crop: [384, 112, 94, 14], pattern: "ADDDDD" },
@@ -755,7 +768,7 @@ async function showParts(data) {
 
 			let colors;
 
-			if (data.level) {
+			if (data.level != null) {
 				colors = ['#000000', '#ffffff', ...LEVEL_COLORS[data.level % 10]];
 			}
 			else if (data.color1) {
@@ -793,7 +806,7 @@ async function showParts(data) {
 }
 
 function toCol(col_tuple) {
-	return `#${col_tuple.map(v => v.toString(16).padStart(2, '0')).join('')}`;
+	return `#${[...col_tuple].map(v => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
 function saveConfig(config) {
