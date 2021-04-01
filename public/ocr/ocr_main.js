@@ -568,9 +568,13 @@ function showColorControls(palettes, config) {
 	const color_fieldset = document.querySelector(`fieldset.color1`);
 
 	if (color_fieldset) {
-		document.querySelector(`fieldset.color1`).style.display = display;
-		document.querySelector(`fieldset.color2`).style.display = display;
-		document.querySelector(`fieldset.color3`).style.display = display;
+		[1, 2, 3].forEach(num => {
+			const col_elmt = document.querySelector(`fieldset.color${num}`);
+
+			if (col_elmt) {
+				col_elmt.style.display = display;
+			}
+		});
 	}
 }
 
@@ -934,9 +938,11 @@ function trackAndSendFrames() {
 
 		// transformation of color numbers for old configs
 		// TODO: delete when everyone is using the new config
-		if (config.color1 && !config.color3) {
-			config.color2 = config.color1;
-			config.color3 = config.color2;
+		if (config.tasks.color1 && !config.tasks.color3) {
+			config.tasks.color3 = config.tasks.color2;
+			config.tasks.color2 = config.tasks.color1;
+
+			delete config.tasks.color1;
 		}
 
 		await resetDevices();
