@@ -756,7 +756,7 @@ async function showParts(data) {
 			let colors;
 
 			if (data.level) {
-				colors = ['#000000', '#ffffff', ...LEVEL_COLORS[level % 10]];
+				colors = ['#000000', '#ffffff', ...LEVEL_COLORS[data.level % 10]];
 			}
 			else if (data.color1) {
 				colors = ['#000000', toCol(data.color1), toCol(data.color2), toCol(data.color3)];
