@@ -538,14 +538,15 @@ class TetrisOCR extends EventTarget {
 		let res;
 
 		// we check luma pixels on the inside only
-		for (let y = task.scale_img.height - 1; --y > 1; ) {
-			for (let x = task.scale_img.width - 1; --x > 1; ) {
+		for (let y = task.scale_img.height - 1; --y; ) {
+			for (let x = task.scale_img.width - 1; --x; ) {
 				const pix_offset = (y * row_width + x) << 2;
 				const cur_color = task.scale_img.data.subarray(pix_offset, pix_offset + 3);
 				const cur_luma = luma(...cur_color);
 
 				if (cur_luma > max_luma) {
 					res = cur_color;
+					max_luma = cur_luma;
 				}
 			}
 		}
