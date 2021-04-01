@@ -696,6 +696,19 @@ async function showParts(data) {
 
 				holder.appendChild(color_result);
 			}
+			else if (name === 'field') {
+				const field_result = document.createElement('canvas');
+				field_result.width = 160;
+				field_result.height = 320;
+				field_result.classList.add('field_res');
+				field_result.style.display = 'inline-block';
+
+				const ctx = field_result.getContext('2d', { alpha: false });
+				ctx.fillStyle = '#000000';
+				ctx.fillRect(0, 0, 160, 230);
+
+				holder.appendChild(field_result);
+			}
 
 			const text_result = document.createElement('pre');
 			holder.appendChild(text_result);
@@ -731,13 +744,51 @@ async function showParts(data) {
 			holder.querySelector(`pre`).innerHTML = data[name] === null ? '&nbsp;' : data[name];
 		}
 		else {
-			const rows = [];
-			for (let ridx=0; ridx<20; ridx++) {
-				rows.push(data[name].slice(ridx * 10, ridx * 10 + 10));
+			const canvas = holder.querySelector(`.field_res`);
+			const ctx = canvas.getContext('2d', { alpha: false });
+			const size = 8;
+
+			let colors;
+
+			if (data.level) {
+				colors = ['#000000', '#ffffff', ...LEVEL_COLORS[level % 10]];
 			}
-			holder.querySelector(`pre`).textContent = rows.join('\n');
+			else if (data.color1) {
+				colors = ['#000000', toCol(data.color1), toCol(data.color2), toCol(data.color3)];
+			}
+
+			canvas.hidden = !!colors;
+
+			if (colors) {
+				holder.querySelector(`pre`).textContent = '';
+
+				for (let ridx=0; ridx<20; ridx++) {
+					const row = data[name].slice(ridx * 10, ridx * 10 + 10);
+
+					row.forEach((cell, cidx) => {
+						ctx.fillStyle = colors[cell || 0];
+						ctx.fillRect(
+							cidx * 16, ridx * 16, 14, 14
+						);
+					});
+				}
+			}
+			else {
+				const rows = [];
+
+				for (let ridx=0; ridx<20; ridx++) {
+					const row = data[name].slice(ridx * 10, ridx * 10 + 10);
+					rows.push(row.join(''));
+				}
+
+				holder.querySelector(`pre`).textContent = rows.join('\n');
+			}
 		}
 	}
+}
+
+function toCol(col_tuple) {
+	return `#${col_tuple.map(v => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
 function saveConfig(config) {
