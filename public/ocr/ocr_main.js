@@ -579,7 +579,12 @@ function showColorControls(palettes, config) {
 }
 
 function showConfigControls(templates, palettes, config) {
-	for (const [name, task] of Object.entries(config.tasks)) {
+	// use static display order
+	for (const name of Object.keys(reference_locations)) {
+		const task = config.tasks[name];
+
+		if (!task) continue;
+
 		const fieldset = document.createElement('fieldset');
 		fieldset.classList.add(name);
 
