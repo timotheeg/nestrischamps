@@ -300,6 +300,7 @@ class Game {
 		return {
 			...this.data,
 
+			gameid: this.id,
 			duration: (this.end_ts || Date.now()) - this.start_ts,
 			timeline: {
 				clears: this.line_events.map(evt => evt.num_lines).join(''),
