@@ -70,8 +70,8 @@ li {
 		<td><%= score.max_drought %></td>
 		<td><%= (score.das_avg || 0).toFixed(1) %></td>
 		<td>
-			<%= (Math.floor(score.duration / 1000 / 60) %>&prime;
-			<%= (Math.floor((score.duration / 1000) % 60) %>&Prime;
+			<%= Math.floor(score.duration / 1000 / 60) %>&prime;
+			<%= Math.floor((score.duration / 1000) % 60) %>&Prime;
 		</td>
 		<td>
 			<a class="details_score" href="/stats/scores/<%= score.id %>">details</a>
