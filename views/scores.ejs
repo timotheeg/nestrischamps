@@ -17,9 +17,14 @@ th, td {
 	padding: 2px 1em;
 }
 
-td {
+td, dd {
 	overflow-wrap: anywhere;
 }
+
+tr.details td {
+	text-align: left;
+}
+
 
 tbody tr:nth-child(even) {
   background-color: #ddd;
@@ -160,7 +165,7 @@ document.querySelectorAll('a.details_score').forEach(a => {
 
 		details_tr.appendChild(td);
 
-		parent_tr.insertAdjacentElement('beforebegin', details_tr);
+		parent_tr.insertAdjacentElement('afterend', details_tr);
 
 		try {
 			const response = await fetch(a.href, {
@@ -173,10 +178,10 @@ document.querySelectorAll('a.details_score').forEach(a => {
 
 			// TODO: derive stats again and show them
 			// TODO show pretty graphs
-			td.innerHTML = `
-				<div>Clears: ${data.clears}</div>
-				<div>Pieces: ${data.pieces}</div>
-			`;
+			td.innerHTML = `<dl>
+				<dt>Clears</dt><dd>${data.clears}</dd>
+				<dt>Pieces</dt><dd>${data.pieces}</dd>
+			</dl>`;
 		}
 		catch(err) {
 			console.log('Unable to show details');
