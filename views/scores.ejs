@@ -179,8 +179,8 @@ document.querySelectorAll('a.details_score').forEach(a => {
 			// TODO: derive stats again and show them
 			// TODO show pretty graphs
 			td.innerHTML = `<dl>
-				<dt>Clears</dt><dd>${data.clears}</dd>
-				<dt>Pieces</dt><dd>${data.pieces}</dd>
+				<dt>Clears</dt><dd>${data.clears || '-'}</dd>
+				<dt>Pieces</dt><dd>${data.pieces || '-'}</dd>
 			</dl>`;
 		}
 		catch(err) {
