@@ -69,7 +69,10 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 			tetris_rate:  game_data.lines[4].percent || 0,
 			num_droughts: game_data.i_droughts.count || 0,
 			max_drought:  game_data.i_droughts.max   || 0,
-			das_avg:      game_data.das.avg          || 0
+			das_avg:      game_data.das.avg          || 0,
+			duration:     game_data.duration         || 0,
+			clears:       game_data.clears           || '',
+			pieces:       game_data.pieces           || '',
 		};
 	}
 	catch (err) {
@@ -134,6 +137,12 @@ router.get('/scores', middlewares.assertSession, async (req, res) => {
 		pagination: options,
 		num_pages: num_pages + 1
 	});
+});
+
+router.get('/scores/:id', middlewares.assertSession, async (req, res) => {
+	const score = await ScoreDAO.deleteScore(req.session.user, req.params.id);
+
+	res.json(score);
 });
 
 router.delete('/scores/:id', middlewares.assertSession, async (req, res) => {

@@ -1,6 +1,10 @@
 <html>
 <head>
 <style>
+html, body {
+	font-family: Verdana, sans-serif;
+}
+
 table {
   table-layout: fixed;
   border-collapse: collapse;
@@ -11,6 +15,10 @@ th, td {
 	text-align: center;
 	border: 1px solid black;
 	padding: 2px 1em;
+}
+
+td {
+	overflow-wrap: anywhere;
 }
 
 tbody tr:nth-child(even) {
@@ -45,6 +53,7 @@ li {
 		<th>Num Droughts</th>
 		<th>Max Drought</th>
 		<th>DAS Avg</th>
+		<th>Duration</th>
 		<th>Actions</th>
 	</tr>
 </thead>
@@ -60,7 +69,15 @@ li {
 		<td><%= score.num_droughts %></td>
 		<td><%= score.max_drought %></td>
 		<td><%= (score.das_avg || 0).toFixed(1) %></td>
-		<td><a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a></td>
+		<td>
+			<%= (Math.floor(score.duration / 1000 / 60) %>&prime;
+			<%= (Math.floor((score.duration / 1000) % 60) %>&Prime;
+		</td>
+		<td>
+			<a class="details_score" href="/stats/scores/<%= score.id %>">details</a>
+			-
+			<a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a>
+		</td>
 	</tr>
 	<% }); %>
 </tbody>
@@ -98,7 +115,62 @@ document.querySelectorAll('a.delete_score').forEach(a => {
 			console.log('Unable to delete score');
 		}
 
-		location.reload(); // super inefficient, but whatever...
+		// remove record in place, dont reload whole list...
+		a.closest('tr').remove();
+
+		// Could also do:
+		// location.reload(); // but that's inefficient
+	});
+});
+
+document.querySelectorAll('a.details_score').forEach(a => {
+	a.addEventListener('click', async (evt) => {
+		evt.preventDefault();
+
+		// clear all prior details
+		document.querySelectorAll('tr.details').forEach(tr => tr.hidden = true);
+
+		const parent_tr = a.closest('tr');
+		const id = a.href.split('/').pop();
+		const details = document.querySelector(`tr#details_${id}`);
+
+		if (details) {
+			details.hidden = false;
+			return;
+		}
+
+		// details are not already loaded, fetch now and populate in page
+		const details_tr = document.createElement('tr');
+		details_tr.classList.add('details');
+		details_tr.setAttribute('id', `details_${id}`);
+
+		const td = document.createElement('td');
+		td.setAttribute('colspan', '11');
+		td.textContent = 'Loading...';
+
+		details_tr.appendChild(td);
+
+		parent_tr.insertAdjacentElement('beforebegin', details_tr);
+
+		try {
+			const response = await fetch(a.href, {
+				method: 'GET',
+				mode: 'cors',
+				credentials: 'same-origin'
+			});
+
+			const data = response.json();
+
+			// TODO: derive stats again and show them
+			// TODO show pretty graphs
+			td.innerHTML = `
+				<div>Clears: ${data.clears}</div>
+				<div>Pieces: ${data.pieces}</div>
+			`;
+		}
+		catch(err) {
+			console.log('Unable to show details');
+		}
 	});
 });
 
@@ -106,6 +178,16 @@ const orders = ['desc', 'asc'];
 
 function load() {
 	location.href = `${location.pathname}${QueryString._build(pagination)}`;
+}
+
+
+// show up and/or down arrow on active sorter
+try {
+	const sorter = document.querySelector(`th.sorter[data-field='${pagination.sort_field}']`);
+	sorter.textContent = `${sorter.textContent} ${pagination.sort_order === 'desc' ? '↓' : '↑'}`;
+}
+catch(err) {
+	console.log(err);
 }
 
 document.querySelectorAll('th.sorter').forEach(th => {
