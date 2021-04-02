@@ -59,9 +59,10 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log(`Found user ${user.login}`);
 
 	let game_data = req.body;
+	let normalized_report;
 
 	try {
-		game_data = {
+		normalized_report = {
 			start_level:  game_data.start_level,
 			end_level:    game_data.level,
 			score:        game_data.score.current    || 0,
@@ -71,9 +72,12 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 			max_drought:  game_data.i_droughts.max   || 0,
 			das_avg:      game_data.das.avg          || 0,
 			duration:     game_data.duration         || 0,
-			clears:       game_data.clears           || '',
-			pieces:       game_data.pieces           || '',
 		};
+
+		if (game_data.timeline) {
+			normalized_report.clears = game_data.timeline.clears || '';
+			normalized_report.pieces = game_data.timeline.pieces || '';
+		}
 	}
 	catch (err) {
 		console.error('Invalid game data');
@@ -84,7 +88,7 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log('Game data is good');
 
 	try {
-		await ScoreDAO.recordGame(user, game_data);
+		await ScoreDAO.recordGame(user, normalized_report);
 	}
 	catch(err) {
 		console.log('Unable to record game');
