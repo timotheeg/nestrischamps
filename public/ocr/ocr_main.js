@@ -716,14 +716,14 @@ async function showParts(data) {
 			}
 			else if (name === 'field') {
 				const field_result = document.createElement('canvas');
-				field_result.width = 160;
-				field_result.height = 320;
+				field_result.width = 158;
+				field_result.height = 318;
 				field_result.classList.add('field_res');
 				field_result.style.display = 'inline-block';
 
 				const ctx = field_result.getContext('2d', { alpha: false });
 				ctx.fillStyle = '#000000';
-				ctx.fillRect(0, 0, 160, 230);
+				ctx.fillRect(0, 0, 158, 318);
 
 				holder.appendChild(field_result);
 			}
