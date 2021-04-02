@@ -72,6 +72,7 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 			max_drought:  game_data.i_droughts.max   || 0,
 			das_avg:      game_data.das.avg          || 0,
 			duration:     game_data.duration         || 0,
+			transition:   game_data.score.transition || null,
 		};
 
 		if (game_data.timeline) {

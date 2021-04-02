@@ -22,9 +22,9 @@ td, dd {
 }
 
 tr.details td {
+	font-family; monospace;
 	text-align: left;
 }
-
 
 tbody tr:nth-child(even) {
   background-color: #ddd;
@@ -179,6 +179,7 @@ document.querySelectorAll('a.details_score').forEach(a => {
 			// TODO: derive stats again and show them
 			// TODO show pretty graphs
 			td.innerHTML = `<dl>
+				<dt>Transition</dt><dd>${data.transition ? data.transition.toString().padStart(6, '0') : '-'}</dd>
 				<dt>Clears</dt><dd>${data.clears || '-'}</dd>
 				<dt>Pieces</dt><dd>${data.pieces || '-'}</dd>
 			</dl>`;

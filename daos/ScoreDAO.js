@@ -102,11 +102,12 @@ class ScoreDAO {
 				das_avg,
 				duration,
 				clears,
-				pieces
+				pieces,
+				transition
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 			)
 			`,
 			[
@@ -122,6 +123,7 @@ class ScoreDAO {
 				game_data.duration,
 				game_data.clears,
 				game_data.pieces,
+				game_data.transition,
 			]
 		);
 	}
