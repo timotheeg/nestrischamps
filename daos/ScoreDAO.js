@@ -99,11 +99,14 @@ class ScoreDAO {
 				tetris_rate,
 				num_droughts,
 				max_drought,
-				das_avg
+				das_avg,
+				duration,
+				clears,
+				pieces
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 			)
 			`,
 			[
@@ -116,6 +119,9 @@ class ScoreDAO {
 				game_data.num_droughts,
 				game_data.max_drought,
 				game_data.das_avg,
+				game_data.duration,
+				game_data.clears,
+				game_data.pieces,
 			]
 		);
 	}
@@ -144,7 +150,7 @@ class ScoreDAO {
 
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
 		const result = await dbPool.query(`
-				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg
+				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration
 				FROM scores
 				WHERE player_id=$1
 				ORDER BY ${options.sort_field} ${options.sort_order}
@@ -165,6 +171,17 @@ class ScoreDAO {
 		);
 
 		return result; // anything to extract from that?
+	}
+
+	async getScore(user, score_id) {
+		const result = await dbPool.query(`
+			SELECT * FROM scores
+			WHERE player_id=$1 AND id=$2
+			`,
+			[ user.id, score_id ]
+		);
+
+		return result.rows[0]; // anything to extract from that?
 	}
 }
 
