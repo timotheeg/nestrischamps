@@ -1,4 +1,17 @@
 // NTSC NES resolution: 256x224 -> 512x448
+const LEVEL_COLORS = [
+	[ '#4A32FF', '#4AAFFE' ],
+	[ '#009600', '#6ADC00' ],
+	[ '#B000D4', '#FF56FF' ],
+	[ '#4A32FF', '#00E900' ],
+	[ '#C8007F', '#00E678' ],
+	[ '#00E678', '#968DFF' ],
+	[ '#C41E0E', '#666666' ],
+	[ '#8200FF', '#780041' ],
+	[ '#4A32FF', '#C41E0E' ],
+	[ '#C41E0E', '#F69B00' ],
+];
+
 const reference_size = [512, 448];
 const reference_locations = {
 	score:         { crop: [384, 112, 94, 14], pattern: "ADDDDD" },
@@ -6,8 +19,9 @@ const reference_locations = {
 	lines:         { crop: [304, 32, 46, 14],  pattern: "QDD" },
 	field:         { crop: [192, 80, 158, 318] },
 	preview:       { crop: [384, 224, 62, 30] },
-	color1:        { crop: [76, 212, 10, 10] },
-	color2:        { crop: [76, 246, 10, 10] },
+	color1:        { crop: [76, 170, 10, 10] },
+	color2:        { crop: [76, 212, 10, 10] },
+	color3:        { crop: [76, 246, 10, 10] },
 	instant_das:   { crop: [80, 64, 30, 14],  pattern: "BD" },
 	cur_piece_das: { crop: [112, 96, 30, 14], pattern: "BD" },
 	cur_piece:     { crop: [30, 89, 45, 23] },
@@ -31,6 +45,7 @@ const configs = {
 			'preview',
 			'color1',
 			'color2',
+			'color3',
 			'T',
 			'J',
 			'Z',
@@ -536,12 +551,15 @@ function resetConfig(config, task_name, task_crop) {
 
 		// update display canvas with new data
 		const canvas = config.tasks[task_name].crop_canvas_ctx.canvas;
+		const scale_factor = task_name.startsWith('color') ? 4 : 2;
+
 		updateCanvasSizeIfNeeded(
 			canvas,
-			task_crop[2] * 2,
-			task_crop[3] * 2
+			task_crop[2] * scale_factor,
+			task_crop[3] * scale_factor
 		);
 		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d', { alpha: false });
+		config.tasks[task_name].crop_canvas_ctx.imageSmoothingEnabled = false;
 	}
 
 	// set the new config
@@ -563,13 +581,23 @@ function showColorControls(palettes, config) {
 	const color_fieldset = document.querySelector(`fieldset.color1`);
 
 	if (color_fieldset) {
-		document.querySelector(`fieldset.color1`).style.display = display;
-		document.querySelector(`fieldset.color2`).style.display = display;
+		[1, 2, 3].forEach(num => {
+			const col_elmt = document.querySelector(`fieldset.color${num}`);
+
+			if (col_elmt) {
+				col_elmt.style.display = display;
+			}
+		});
 	}
 }
 
 function showConfigControls(templates, palettes, config) {
-	for (const [name, task] of Object.entries(config.tasks)) {
+	// use static display order
+	for (const name of Object.keys(reference_locations)) {
+		const task = config.tasks[name];
+
+		if (!task) continue;
+
 		const fieldset = document.createElement('fieldset');
 		fieldset.classList.add(name);
 
@@ -644,6 +672,7 @@ async function showParts(data) {
 
 	for (const name of Object.keys(data)) {
 		const task = config.tasks[name];
+		const scale_factor = name.startsWith('color') ? 4 : 2;
 
 		if (!task) continue;
 
@@ -653,8 +682,8 @@ async function showParts(data) {
 		if (!task.crop_canvas_ctx) {
 			// create canvas at 2x resolution to make it easier to see the areas
 			const crop_canvas = document.createElement('canvas');
-			crop_canvas.width = task.crop_img.width * 2;
-			crop_canvas.height = task.crop_img.height * 2;
+			crop_canvas.width = task.crop_img.width * scale_factor;
+			crop_canvas.height = task.crop_img.height * scale_factor;
 			holder.appendChild(crop_canvas);
 
 			separator = document.createElement('span');
@@ -662,8 +691,8 @@ async function showParts(data) {
 			holder.appendChild(separator);
 
 			const scale_canvas = document.createElement('canvas');
-			scale_canvas.width = task.scale_img.width * 2;
-			scale_canvas.height = task.scale_img.height * 2;
+			scale_canvas.width = task.scale_img.width * scale_factor;
+			scale_canvas.height = task.scale_img.height * scale_factor;
 			holder.appendChild(scale_canvas);
 
 			separator = document.createElement('span');
@@ -685,6 +714,19 @@ async function showParts(data) {
 
 				holder.appendChild(color_result);
 			}
+			else if (name === 'field') {
+				const field_result = document.createElement('canvas');
+				field_result.width = 160;
+				field_result.height = 320;
+				field_result.classList.add('field_res');
+				field_result.style.display = 'inline-block';
+
+				const ctx = field_result.getContext('2d', { alpha: false });
+				ctx.fillStyle = '#000000';
+				ctx.fillRect(0, 0, 160, 230);
+
+				holder.appendChild(field_result);
+			}
 
 			const text_result = document.createElement('pre');
 			holder.appendChild(text_result);
@@ -699,10 +741,10 @@ async function showParts(data) {
 
 		// draw task captured areas at 2x scale
 		task.crop_canvas_ctx.drawImage(cropped,
-			0, 0, task.crop_img.width * 2, task.crop_img.height * 2
+			0, 0, task.crop_img.width * scale_factor, task.crop_img.height * scale_factor
 		);
 		task.scale_canvas_ctx.drawImage(scaled,
-			0, 0, task.scale_img.width * 2, task.scale_img.height * 2
+			0, 0, task.scale_img.width * scale_factor, task.scale_img.height * scale_factor
 		);
 
 		// highlight captured areas in source image
@@ -720,13 +762,51 @@ async function showParts(data) {
 			holder.querySelector(`pre`).innerHTML = data[name] === null ? '&nbsp;' : data[name];
 		}
 		else {
-			const rows = [];
-			for (let ridx=0; ridx<20; ridx++) {
-				rows.push(data[name].slice(ridx * 10, ridx * 10 + 10));
+			const canvas = holder.querySelector(`.field_res`);
+			const ctx = canvas.getContext('2d', { alpha: false });
+			const size = 8;
+
+			let colors;
+
+			if (data.level != null) {
+				colors = ['#000000', '#ffffff', ...LEVEL_COLORS[data.level % 10]];
 			}
-			holder.querySelector(`pre`).textContent = rows.join('\n');
+			else if (data.color1) {
+				colors = ['#000000', toCol(data.color1), toCol(data.color2), toCol(data.color3)];
+			}
+
+			canvas.hidden = !!colors;
+
+			if (colors) {
+				holder.querySelector(`pre`).textContent = '';
+
+				for (let ridx=0; ridx<20; ridx++) {
+					const row = data[name].slice(ridx * 10, ridx * 10 + 10);
+
+					row.forEach((cell, cidx) => {
+						ctx.fillStyle = colors[cell || 0];
+						ctx.fillRect(
+							cidx * 16, ridx * 16, 14, 14
+						);
+					});
+				}
+			}
+			else {
+				const rows = [];
+
+				for (let ridx=0; ridx<20; ridx++) {
+					const row = data[name].slice(ridx * 10, ridx * 10 + 10);
+					rows.push(row.join(''));
+				}
+
+				holder.querySelector(`pre`).textContent = rows.join('\n');
+			}
 		}
 	}
+}
+
+function toCol(col_tuple) {
+	return `#${[...col_tuple].map(v => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
 function saveConfig(config) {
@@ -846,6 +926,7 @@ function trackAndSendFrames() {
 
 		delete data.color1;
 		delete data.color2;
+		delete data.color3;
 
 		if (data.score === null && data.lines === null) {
 			return; // really? 🤔
@@ -923,6 +1004,16 @@ function trackAndSendFrames() {
 
 	if (hasConfig()) {
 		config = loadConfig();
+
+		// transformation of color numbers for old configs
+		// TODO: delete when everyone is using the new config
+		if (config.tasks.color1 && !config.tasks.color3) {
+			config.tasks.color3 = config.tasks.color2;
+			config.tasks.color2 = config.tasks.color1;
+
+			delete config.tasks.color1;
+		}
+
 		await resetDevices();
 
 		capture_rate.value = config.frame_rate || default_frame_rate;

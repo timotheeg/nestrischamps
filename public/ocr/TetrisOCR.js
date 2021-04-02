@@ -15,6 +15,7 @@ const PERF_METHODS = [
 	'scanLines',
 	'scanColor1',
 	'scanColor2',
+	'scanColor3',
 	'scanPreview',
 	'scanField',
 	'scanPieceStats',
@@ -43,9 +44,12 @@ const TASK_RESIZE = {
 	cur_piece_das: [getDigitsWidth(2), 14],
 	color1:        [5, 5],
 	color2:        [5, 5],
+	color3:        [5, 5],
 	stats:         [getDigitsWidth(3), 14 * 7 + 14 * 7], // height captures all the individual stats...
 	piece_count:   [getDigitsWidth(3), 14],
 };
+
+const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this threshold be higher?
 
 
 class TetrisOCR extends EventTarget {
@@ -59,8 +63,7 @@ class TetrisOCR extends EventTarget {
 		this.setConfig(config);
 
 		this.digit_img = new ImageData(14, 14); // 2x for better matching
-		this.block_img = new ImageData(7, 7);
-		this.small_block_img = new ImageData(5, 5);
+		this.shine_img = new ImageData(2, 3);
 
 		// decorate relevant methods to capture timings
 		PERF_METHODS
@@ -221,9 +224,17 @@ class TetrisOCR extends EventTarget {
 		}
 		else {
 			// assume tasks color1 and color2 are set
-			res.color1 = this.scanColor1(source_img);
 			res.color2 = this.scanColor2(source_img);
-			colors = [res.color1, res.color2];
+			res.color3 = this.scanColor3(source_img);
+
+			if (this.config.tasks.color1) {
+				res.color1 = this.scanColor1(source_img);
+			}
+			else {
+				res.color1 = [0xF0, 0xF0, 0xF0];
+			}
+
+			colors = [res.color1, res.color2, res.color3];
 		}
 
 		res.field = await this.scanField(source_img, colors);
@@ -239,6 +250,11 @@ class TetrisOCR extends EventTarget {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
 
+		// round the colors if needed
+		if (res.color2) {
+			res.color2 = res.color2.map(v => Math.round(v));
+			res.color3 = res.color3.map(v => Math.round(v));
+		}
 
 		this.onMessage(res);
 	}
@@ -255,12 +271,12 @@ class TetrisOCR extends EventTarget {
 		return this.ocrDigits(source_img, this.config.tasks.lines);
 	}
 
-	scanColor1(source_img) {
-		return this.scanColor(source_img, this.config.tasks.color1);
-	}
-
 	scanColor2(source_img) {
 		return this.scanColor(source_img, this.config.tasks.color2);
+	}
+
+	scanColor3(source_img) {
+		return this.scanColor(source_img, this.config.tasks.color3);
 	}
 
 	scanInstantDas(source_img) {
@@ -341,25 +357,30 @@ class TetrisOCR extends EventTarget {
 	}
 
 	/*
-	 * Returns true if 70% of the pixels in the supplied image are not black.
+	 * Returns true if at least one of the pixel has a luma higher than threshold
 	 */
-	static isBlock(img, block_presence_threshold=0.7) {
-		const pixel_count = img.width * img.height;
-		const black_luma_limit = 15.0;
-		const img_data = img.data;
+	hasShine(img, x, y) {
+		// extract the shine area at the location supplied
+		const shine_width = 2;
+		crop(img, x, y, shine_width, 3, this.shine_img);
 
-		let sum = 0;
+		const img_data = this.shine_img.data;
+		const shine_pix_ref = [
+			[0, 0],
+			[1, 1],
+			[1, 2],
+		];
 
-		for (let idx=pixel_count; idx--; ) {
-			const offset_idx = idx << 2;
-			sum += luma(
+		return shine_pix_ref.some(([x, y]) => {
+			const offset_idx = (y * shine_width + x) << 2;
+			const pixel_luma = luma(
 				img_data[offset_idx],
 				img_data[offset_idx + 1],
 				img_data[offset_idx + 2],
-			) <  black_luma_limit ? 0 : 1;
-		};
+			)
 
-		return sum >= (pixel_count * block_presence_threshold);
+			return (pixel_luma > SHINE_LUMA_THRESHOLD);
+		});
 	}
 
 	scanPreview(source_img) {
@@ -370,27 +391,27 @@ class TetrisOCR extends EventTarget {
 		bicubic(task.crop_img, task.scale_img);
 
 		// Trying side i blocks
-		if (TetrisOCR.isBlock(crop(task.scale_img, 0, 3, 4, 7), 0.5)
-			&& TetrisOCR.isBlock(crop(task.scale_img, 27, 3, 4, 7), 0.5)
+		if (this.hasShine(task.scale_img, 0, 4)
+			&& this.hasShine(task.scale_img, 28, 4) // not top-left corner, but since I block are white, should work
 		) {
 			return 'I';
 		}
 
 		// now trying the 3x2 matrix for T, L, J, S, Z
 		const top_row = [
-			TetrisOCR.isBlock(crop(task.scale_img, 4, 0, 7, 7, this.block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 12, 0, 7, 7, this.block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 20, 0, 7, 7, this.block_img))
+			this.hasShine(task.scale_img, 4, 0),
+			this.hasShine(task.scale_img, 12, 0),
+			this.hasShine(task.scale_img, 20, 0)
 		];
 
 		if (top_row[0] && top_row[1] && top_row[2]) { // J, T, L
-			if (TetrisOCR.isBlock(crop(task.scale_img, 4, 8, 7, 7, this.block_img))) {
+			if (this.hasShine(task.scale_img, 4, 8)) {
 				return 'L';
 			}
-			if (TetrisOCR.isBlock(crop(task.scale_img, 12, 8, 7, 7, this.block_img))) {
+			if (this.hasShine(task.scale_img, 12, 8)) {
 				return 'T';
 			}
-			if (TetrisOCR.isBlock(crop(task.scale_img, 20, 8, 7, 7, this.block_img))) {
+			if (this.hasShine(task.scale_img, 20, 8)) {
 				return 'J';
 			}
 
@@ -398,16 +419,16 @@ class TetrisOCR extends EventTarget {
 		}
 
 		if (top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 4, 8, 7, 7, this.block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 12, 8, 7, 7, this.block_img))
+			if (this.hasShine(task.scale_img, 4, 8)
+				&& this.hasShine(task.scale_img, 12, 8)
 			) {
 				return 'S';
 			}
 		}
 
 		if (top_row[0] && top_row[1]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 12, 8, 7, 7, this.block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 20, 8, 7, 7, this.block_img))
+			if (this.hasShine(task.scale_img, 12, 8)
+				&& this.hasShine(task.scale_img, 20, 8)
 			) {
 				return 'Z';
 			}
@@ -415,10 +436,10 @@ class TetrisOCR extends EventTarget {
 
 		// lastly check for O
 		if (
-			TetrisOCR.isBlock(crop(task.scale_img, 8, 0, 7, 7, this.block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 16, 0, 7, 7, this.block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 8, 8, 7, 7, this.block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 16, 8, 7, 7, this.block_img))
+			this.hasShine(task.scale_img, 8, 0)
+			&& this.hasShine(task.scale_img, 16, 0)
+			&& this.hasShine(task.scale_img, 8, 8)
+			&& this.hasShine(task.scale_img, 16, 8)
 		) {
 			return 'O';
 		}
@@ -438,37 +459,37 @@ class TetrisOCR extends EventTarget {
 		bicubic(task.crop_img, task.scale_img);
 
 		// Trying side i blocks
-		if (TetrisOCR.isBlock(crop(task.scale_img, 0, 4, 2, 5), 0.5)
-			&& TetrisOCR.isBlock(crop(task.scale_img, 20, 4, 3, 5), 0.5)
+		if (this.hasShine(task.scale_img, 0, 4)
+			&& this.hasShine(task.scale_img, 20, 4)
 		) {
 			return 'I';
 		}
 
 		// now trying for L, J (top pixel alignment)
 		let top_row = [
-			TetrisOCR.isBlock(crop(task.scale_img, 2, 0, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 8, 0, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 14, 0, 5, 5, this.small_block_img))
+			this.hasShine(task.scale_img, 2, 0),
+			this.hasShine(task.scale_img, 8, 0),
+			this.hasShine(task.scale_img, 14, 0)
 		];
 
 		if (top_row[0] && top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 2, 6, 5, 5, this.small_block_img))) {
+			if (this.hasShine(task.scale_img, 2, 6)) {
 				return 'L';
 			}
-			if (TetrisOCR.isBlock(crop(task.scale_img, 14, 6, 5, 5, this.small_block_img))) {
+			if (this.hasShine(task.scale_img, 14, 6)) {
 				return 'J';
 			}
 		}
 
 		// checking S, Z, T
 		top_row = [
-			TetrisOCR.isBlock(crop(task.scale_img, 2, 1, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 8, 1, 5, 5, this.small_block_img)),
-			TetrisOCR.isBlock(crop(task.scale_img, 14, 1, 5, 5, this.small_block_img))
+			this.hasShine(task.scale_img, 2, 1),
+			this.hasShine(task.scale_img, 8, 1),
+			this.hasShine(task.scale_img, 14, 1)
 		];
 
 		if (top_row[0] && top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 8, 7, 5, 5, this.small_block_img))) {
+			if (this.hasShine(task.scale_img, 8, 7)) {
 				return 'T';
 			}
 
@@ -476,16 +497,16 @@ class TetrisOCR extends EventTarget {
 		}
 
 		if (top_row[1] && top_row[2]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 2, 7, 5, 5, this.small_block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 8, 7, 5, 5, this.small_block_img))
+			if (this.hasShine(task.scale_img, 2, 7)
+				&& this.hasShine(task.scale_img, 8, 7)
 			) {
 				return 'S';
 			}
 		}
 
 		if (top_row[0] && top_row[1]) {
-			if (TetrisOCR.isBlock(crop(task.scale_img, 8, 7, 5, 5, this.small_block_img))
-				&& TetrisOCR.isBlock(crop(task.scale_img, 14, 7, 5, 5, this.small_block_img))
+			if (this.hasShine(task.scale_img, 8, 7)
+				&& this.hasShine(task.scale_img, 14, 7)
 			) {
 				return 'Z';
 			}
@@ -493,10 +514,10 @@ class TetrisOCR extends EventTarget {
 
 		// lastly check for O
 		if (
-			TetrisOCR.isBlock(crop(task.scale_img, 5, 1, 5, 5, this.small_block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 11, 1, 5, 5, this.small_block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 5, 7, 5, 5, this.small_block_img))
-			&& TetrisOCR.isBlock(crop(task.scale_img, 11, 7, 5, 5, this.small_block_img))
+			this.hasShine(task.scale_img, 5, 1)
+			&& this.hasShine(task.scale_img, 11, 1)
+			&& this.hasShine(task.scale_img, 5, 7)
+			&& this.hasShine(task.scale_img, 11, 7)
 		) {
 			return 'O';
 		}
@@ -504,12 +525,52 @@ class TetrisOCR extends EventTarget {
 		return null;
 	}
 
-	scanColor(source_img, task) {
+	scanColor1(source_img) {
+		const task = this.config.tasks.color1;
 		const [x, y, w, h] = this.getCropCoordinates(task);
 
 		crop(source_img, x, y, w, h, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);
 
+		// we select the brightest pixel in the center 3x3 square of the
+		const row_width = task.scale_img.width;
+
+		let composite_white = [0, 0, 0];
+
+		// we check luma pixels on the inside only
+		for (let y = task.scale_img.height - 1; --y; ) {
+			for (let x = task.scale_img.width - 1; --x; ) {
+				const pix_offset = (y * row_width + x) << 2;
+				const cur_color = task.scale_img.data.subarray(pix_offset, pix_offset + 3);
+
+				composite_white[0] = Math.max(composite_white[0], cur_color[0]);
+				composite_white[1] = Math.max(composite_white[1], cur_color[1]);
+				composite_white[2] = Math.max(composite_white[2], cur_color[2]);
+			}
+		}
+
+		return composite_white;
+
+
+		/*
+		// possible alternative:
+		// compute color average for pixel references
+		[[1, 3], [2, 2], [3, 1], [3, 3]]
+		OR
+		[[1, 2], [2, 2], [3, 2], [3, 1], [3, 3]]
+		/**/
+	}
+
+	scanColor(source_img, task) {
+		// to get the average color, we take the average of squares, or it might be too dark
+		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
+
+		const [x, y, w, h] = this.getCropCoordinates(task);
+
+		crop(source_img, x, y, w, h, task.crop_img);
+		bicubic(task.crop_img, task.scale_img);
+
+		const row_width = task.scale_img.width;
 		const pix_refs = [
 			[3, 2],
 			[3, 3],
@@ -518,26 +579,24 @@ class TetrisOCR extends EventTarget {
 
 		return pix_refs
 			.map(([x, y]) => {
-				const col_idx = y * 5 * 4 + x * 4;
+				const col_idx = (y * row_width + x) << 2;
 				return task.scale_img.data.subarray(col_idx, col_idx + 3);
 			})
 			.reduce((acc, col) => {
-				acc[0] += col[0];
-				acc[1] += col[1];
-				acc[2] += col[2];
+				acc[0] += col[0] * col[0];
+				acc[1] += col[1] * col[1];
+				acc[2] += col[2] * col[2];
 				return acc;
 			}, [0, 0, 0])
-			.map(v => Math.round(v / pix_refs.length));
+			.map(v => Math.sqrt(v / pix_refs.length));
 	}
 
 	async scanField(source_img, _colors) {
+		// Note: We work in the square of colors domain
+		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
-		const colors = [
-			[0, 0, 0],
-			[0xFF, 0xFF, 0xFF],
-			..._colors
-		];
+		const colors = _colors.map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
 
 		// crop is not needed, but done anyway to share task captured area with caller app
 		crop(source_img, x, y, w, h, task.crop_img);
@@ -563,6 +622,13 @@ class TetrisOCR extends EventTarget {
 
 		// Make a memory efficient array for our needs
 		const field = new Uint8Array(200);
+
+		// shine pixels
+		const shine_pix_refs = [
+			[1, 1],
+			[1, 2],
+			[2, 1]
+		];
 
 		// we read 4 judiciously positionned logical pixels per block
 		const pix_refs = [
@@ -612,18 +678,33 @@ class TetrisOCR extends EventTarget {
 			for (let cidx = 0; cidx < 10; cidx++) {
 				const block_offset = ((ridx * row_width * 8) + cidx * 8) * 4;
 
+				const has_shine = shine_pix_refs
+					.some(([x, y]) => {
+						const col_idx = block_offset + y * row_width * 4 + x * 4;
+						const col = field_img.data.subarray(col_idx, col_idx + 3);
+
+						return luma(...col) > SHINE_LUMA_THRESHOLD;
+					});
+
+				if (!has_shine) {
+					field[ridx * 10 + cidx] = 0; // we have black!
+					continue;
+				}
+
+				// K, it's not black! we must compare with the 3 colors (col1, col2, and white)
+
 				const channels = pix_refs
 					.map(([x, y]) => {
 						const col_idx = block_offset + y * row_width * 4 + x * 4;
 						return field_img.data.subarray(col_idx, col_idx + 3);
 					})
 					.reduce((acc, col) => {
-						acc[0] += col[0];
-						acc[1] += col[1];
-						acc[2] += col[2];
+						acc[0] += col[0] * col[0];
+						acc[1] += col[1] * col[1];
+						acc[2] += col[2] * col[2];
 						return acc;
 					}, [0, 0, 0])
-					.map(v => Math.round(v / pix_refs.length));
+					.map(v => v / pix_refs.length); // this is an average of squares!
 
 				let min_diff = 0xFFFFFFFF;
 				let min_idx = -1;
@@ -637,7 +718,7 @@ class TetrisOCR extends EventTarget {
 					}
 				})
 
-				field[ridx * 10 + cidx] = min_idx;
+				field[ridx * 10 + cidx] = min_idx + 1; // +1 to account for black being 0
 			}
 		}
 		/**/
