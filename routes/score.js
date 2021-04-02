@@ -144,7 +144,8 @@ router.get('/scores', middlewares.assertSession, async (req, res) => {
 });
 
 router.get('/scores/:id', middlewares.assertSession, async (req, res) => {
-	const score = await ScoreDAO.deleteScore(req.session.user, req.params.id);
+	console.log(`User ${req.session.user.id} is getting score ${req.params.id}`);
+	const score = await ScoreDAO.getScore(req.session.user, req.params.id);
 
 	res.json(score);
 });
