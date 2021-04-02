@@ -63,8 +63,8 @@ li {
 		<td><%= score.datetime.toISOString() %></td>
 		<td><%= score.start_level %></td>
 		<td><%= score.end_level %></td>
-		<td><%= (score.score || 0).toString().padStart(6, '0') %></td>
-		<td><%= score.lines %></td>
+		<td class="score"><%= (score.score || 0).toString().padStart(6, '0') %></td>
+		<td class="lines"><%= score.lines %></td>
 		<td><%= ((score.tetris_rate || 0) * 100).toFixed(1) %>%</td>
 		<td><%= score.num_droughts %></td>
 		<td><%= score.max_drought %></td>
@@ -103,6 +103,16 @@ const pagination = <%- JSON.stringify(pagination) %>;
 document.querySelectorAll('a.delete_score').forEach(a => {
 	a.addEventListener('click', async (evt) => {
 		evt.preventDefault();
+
+		const parent_tr = a.closest('tr');
+		const score = parent_tr.querySelector('td.score').textContent;
+		const lines = parent_tr.querySelector('td.lines').textContent;
+
+		if (!window.confirm(
+			`Are you sure you want to delete score entry ${score} - ${lines}?`
+		)) {
+			return;
+		}
 
 		try {
 			await fetch(a.href, {
