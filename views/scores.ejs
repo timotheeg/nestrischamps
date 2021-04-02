@@ -174,7 +174,7 @@ document.querySelectorAll('a.details_score').forEach(a => {
 				credentials: 'same-origin'
 			});
 
-			const data = response.json();
+			const data = await response.json();
 
 			// TODO: derive stats again and show them
 			// TODO show pretty graphs
