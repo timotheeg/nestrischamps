@@ -534,24 +534,31 @@ class TetrisOCR extends EventTarget {
 
 		// we select the brightest pixel in the center 3x3 square of the
 		const row_width = task.scale_img.width;
-		let max_luma = -1;
-		let res;
+
+		let composite_white = [0, 0, 0];
 
 		// we check luma pixels on the inside only
 		for (let y = task.scale_img.height - 1; --y; ) {
 			for (let x = task.scale_img.width - 1; --x; ) {
 				const pix_offset = (y * row_width + x) << 2;
 				const cur_color = task.scale_img.data.subarray(pix_offset, pix_offset + 3);
-				const cur_luma = luma(...cur_color);
 
-				if (cur_luma > max_luma) {
-					res = cur_color;
-					max_luma = cur_luma;
-				}
+				composite_white[0] = Math.max(composite_white[0], cur_color[0]);
+				composite_white[1] = Math.max(composite_white[1], cur_color[1]);
+				composite_white[2] = Math.max(composite_white[2], cur_color[2]);
 			}
 		}
 
-		return res;
+		return composite_white;
+
+
+		/*
+		// possible alternative:
+		// compute color average for pixel references
+		[[1, 3], [2, 2], [3, 1], [3, 3]]
+		OR
+		[[1, 2], [2, 2], [3, 2], [3, 1], [3, 3]]
+		/**/
 	}
 
 	scanColor(source_img, task) {
