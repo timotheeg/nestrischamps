@@ -28,7 +28,7 @@ const reference_locations = {
 	T:             { crop: [96, 176, 46, 14], pattern: "TDD", red: true },
 	J:             { crop: [96, 208, 46, 14], pattern: "TDD", red: true },
 	Z:             { crop: [96, 240, 46, 14], pattern: "TDD", red: true },
-	O:             { crop: [96, 273, 46, 14], pattern: "TDD", red: true },
+	O:             { crop: [96, 272, 46, 14], pattern: "TDD", red: true },
 	S:             { crop: [96, 304, 46, 14], pattern: "TDD", red: true },
 	L:             { crop: [96, 336, 46, 14], pattern: "TDD", red: true },
 	I:             { crop: [96, 368, 46, 14], pattern: "TDD", red: true },
