@@ -1,4 +1,32 @@
 const _ = require('lodash');
+const Game = require('../modules/Game');
+
+
+
+function setGame(connection) {
+	if (connection.game) {
+		delete connection.game.onGameOver;
+		delete connection.game.onNewGame;
+		delete connection.game;
+	}
+
+	const game = new Game();
+
+	game.onGameOver = () => {
+		// TODO: report into DB
+		console.log('Game report', connection.user.id, game.getReport());
+	}
+
+	game.onNewGame = (frame) => {
+		console.log(`${connection.user.id} is starting a new game`);
+
+		setGame(connection); // sets a new game onto connection - Spaghetti code!
+
+		connection.game.setFrame(frame);
+	}
+
+	connection.game = game;
+}
 
 class Room {
 	constructor(owner) {
@@ -53,7 +81,17 @@ class Room {
 
 		this.producers.add(connection);
 
-		connection.on('message', message => this.onProducerMessage(connection, message));
+
+		connection.on('message', message => {
+			if (!connection.game) {
+				setGame(connection);
+			}
+
+			connection.game.setFrame(message); // this call may reset the game as side effect
+
+			this.onProducerMessage(connection, message)
+		});
+
 		connection.on('close', () => this.removeProducer(connection));
 
 		return is_new_user;

@@ -814,7 +814,6 @@ function toCol(col_tuple) {
 function saveConfig(config) {
 	// need to drop non-serializable fields
 	const config_copy = {
-		game_type: config.game_type,
 		device_id: config.device_id,
 		palette: config.palette,
 		frame_rate: config.frame_rate,
@@ -842,7 +841,13 @@ function loadConfig() {
 	const config = localStorage.getItem('config');
 
 	if (config) {
-		return JSON.parse(config);
+		const parsed = JSON.parse(config);
+
+		if (!parsed.hasOwnProperty('game_type')) {
+			parsed.game_type = parsed.tasks.T ? BinaryFrame.GAME_TYPE.CLASSIC : BinaryFrame.GAME_TYPE.DAS_TRAINER;
+		}
+
+		return parsed;
 	}
 }
 
@@ -898,6 +903,7 @@ function trackAndSendFrames() {
 
 	// TODO: better event system and name for frame data events
 	ocr_corrector.onMessage = async function(data) {
+		data.game_type = config.game_type || BinaryFrame.GAME_TYPE.CLASSIC;
 		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {

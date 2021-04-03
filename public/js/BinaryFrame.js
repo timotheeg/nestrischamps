@@ -251,6 +251,7 @@ return BinaryFrame;
 
 })();
 
-if (module && module.exports) {
+try {
 	module.exports = BinaryFrame;
 }
+catch(err) {}
