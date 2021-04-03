@@ -36,6 +36,7 @@ const reference_locations = {
 
 const configs = {
 	classic: {
+		game_type: BinaryFrame.GAME_TYPE.CLASSIC,
 		reference: '/ocr/reference_ui_classic.png',
 		fields: [
 			'score',
@@ -56,6 +57,7 @@ const configs = {
 		],
 	},
 	das_trainer: {
+		game_type: BinaryFrame.GAME_TYPE.DAS_TRAINER,
 		reference: '/ocr/reference_ui_das_trainer.png',
 		palette: 'easiercap',
 		fields: [
@@ -812,6 +814,7 @@ function toCol(col_tuple) {
 function saveConfig(config) {
 	// need to drop non-serializable fields
 	const config_copy = {
+		game_type: config.game_type,
 		device_id: config.device_id,
 		palette: config.palette,
 		frame_rate: config.frame_rate,
