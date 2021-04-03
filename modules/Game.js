@@ -5,6 +5,7 @@ const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
 class Game {
 	constructor() {
+		this.frame_count = 0;
 		this.data = null;
 		this.over = false;
 	}
@@ -13,7 +14,8 @@ class Game {
 		const data = BinaryFrame.parse(frame);
 
 		if (!this.data) {
-			// store transient info ad accumulators
+			// game initialization frame
+
 			this.gameid = data.gameid;
 			this.start_ts = Date.now();
 			this.start_level = data.level;
@@ -40,6 +42,8 @@ class Game {
 
 			return;
 		}
+
+		this.frame_count++;
 
 		if (data.gameid != this.gameid) {
 			// Note: this test could be done without parsing the whole message!
@@ -80,7 +84,10 @@ class Game {
 			// Game Over!
 			this.over = true;
 			this.end_ts = Date.now();
-			this.onGameOver();
+
+			if (this.frame_count > 1) {
+				this.onGameOver();
+			}
 		}
 	}
 

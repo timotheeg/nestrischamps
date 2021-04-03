@@ -58,6 +58,9 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 
 	console.log(`Found user ${user.login}`);
 
+	/*
+	// Game is reported server-ide now, no need to record here
+
 	let game_data = req.body;
 	let normalized_report;
 
@@ -97,6 +100,7 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	}
 
 	console.log('Game is recorded!');
+	/**/
 
 	res.json(await ScoreDAO.getStats(user));
 

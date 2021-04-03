@@ -19,15 +19,24 @@ if (process.env.IS_PUBLIC_SERVER) {
 else {
 	// Fake Pool for local access
 	// TODO: make a sqlite version
+
+	async function query(query, args) {
+		console.log('Executing query');
+		console.log(query);
+		console.log(args);
+
+		return {
+			rows: [ {} ]
+		};
+	}
+
 	module.exports = {
 		async connect() {
 			return {
-				async query() {
-					return {
-						rows: [ {} ]
-					};
-				}
+				query,
 			};
-		}
+		},
+
+		query,
 	};
 }

@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Game = require('../modules/Game');
-
+const ScoreDAO = require('../daos/ScoreDAO');
 
 
 function setGame(connection) {
@@ -12,9 +12,14 @@ function setGame(connection) {
 
 	const game = new Game();
 
-	game.onGameOver = () => {
-		// TODO: report into DB
-		console.log('Game report', connection.user.id, game.getReport());
+	game.onGameOver = async () => {
+		try {
+			await ScoreDAO.recordGame(connection.user, game.getReport());
+		}
+		catch(err) {
+			console.log('Unable to record game');
+			console.error(err);
+		}
 	}
 
 	game.onNewGame = (frame) => {
