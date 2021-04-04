@@ -25,6 +25,8 @@ const PERF_METHODS = [
 	'scanCurPiece',
 ];
 
+const DEFAULT_COLOR_0 = [0xF0, 0xF0, 0xF0];
+
 function getDigitsWidth(n) {
 	// width per digit is 8px times 2
 	// and for last digit, we ignore the 1px (times 2)
@@ -85,6 +87,8 @@ class TetrisOCR extends EventTarget {
 		this.config = config;
 		this.palette = this.palettes && this.palettes[config.palette]; // will reset to undefined when needed
 
+		this.fixPalette();
+
 		const bounds = {
 			top:    0xFFFFFFFF,
 			left:   0xFFFFFFFF,
@@ -125,6 +129,22 @@ class TetrisOCR extends EventTarget {
 			w: bounds.right - bounds.left,
 			h: bounds.bottom - bounds.top,
 		};
+	}
+
+	fixPalette() {
+		if (!this.palette) return;
+
+		this.palette = this.palette.map(colors => {
+			if (colors.length == 2) {
+				return [
+					DEFAULT_COLOR_0,
+					colors[0],
+					colors[1]
+				]
+			}
+
+			return colors;
+		});
 	}
 
 	getDigit(pixel_data, max_check_index, is_red) {
@@ -231,7 +251,7 @@ class TetrisOCR extends EventTarget {
 				res.color1 = this.scanColor1(source_img);
 			}
 			else {
-				res.color1 = [0xF0, 0xF0, 0xF0];
+				res.color1 = DEFAULT_COLOR_0;
 			}
 
 			colors = [res.color1, res.color2, res.color3];
@@ -531,6 +551,9 @@ class TetrisOCR extends EventTarget {
 
 		crop(source_img, x, y, w, h, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);
+
+		// I tried selecting the pixel with highest luma but that didn't work.
+		// On capture cards with heavy color bleeding, it's inaccurate.
 
 		// we select the brightest pixel in the center 3x3 square of the
 		const row_width = task.scale_img.width;
