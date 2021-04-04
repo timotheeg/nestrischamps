@@ -92,7 +92,11 @@ class Room {
 				setGame(connection);
 			}
 
-			connection.game.setFrame(message); // this call may reset the game as side effect
+
+			if (typeof message != 'string') {
+				// this is a game frame, we track it in the game instance
+				connection.game.setFrame(message); // this call may reset the game as side effect
+			}
 
 			this.onProducerMessage(connection, message)
 		});
