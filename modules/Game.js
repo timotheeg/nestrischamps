@@ -3,6 +3,9 @@ const BinaryFrame = require('../public/js/BinaryFrame');
 
 const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
+const LINE_CLEAR_IGNORE_FRAMES = 7;
+
+
 class Game {
 	constructor() {
 		this.frame_count = 0;
@@ -13,13 +16,24 @@ class Game {
 	setFrame(frame) {
 		const data = BinaryFrame.parse(frame);
 
+		if (this.score === null || this.lines === null || this.level === null) {
+			// not in game
+			return;
+		}
+
+		this.frame_count++;
+
 		if (!this.data) {
-			// game initialization frame
+			// Game initialization frame
+			// Assume good timing and record initial state from it as-is
+
+			this.IS_CLASSIC_ROM = data.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
 
 			this.gameid = data.gameid;
 			this.start_ts = Date.now();
 			this.start_level = data.level;
 
+			this.num_blocks = this._getNumBlocks(data); // assume correct...
 			this.num_pieces = 0;
 			this.prior_preview = null;
 
@@ -38,12 +52,12 @@ class Game {
 			this.pending_score = false;
 			this.pending_piece = true;
 
+			this.clear_animation_remaining_frames = 0;
+
 			this.data = data; // record frame as current state
 
 			return;
 		}
-
-		this.frame_count++;
 
 		if (data.gameid != this.gameid) {
 			// Note: this test could be done without parsing the whole message!
@@ -56,7 +70,7 @@ class Game {
 
 		if (this.pending_score) {
 			this.pending_score = false;
-			this.onScore(data); // update states
+			this.onScore(data); // updates state
 		}
 		else if (data.score != this.data.score) {
 			this.pending_score = true;
@@ -64,10 +78,10 @@ class Game {
 
 		if (this.pending_piece) {
 			this.pending_piece = false;
-			this.onPiece(data); // update states
+			this.onPiece(data); // updates state
 		}
 		else {
-			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
+			if (this.IS_CLASSIC_ROM) {
 				const num_pieces = this._getNumPieces(data);
 
 				if (num_pieces != this.num_pieces) {
@@ -75,7 +89,56 @@ class Game {
 				}
 			}
 			else {
-				// TODO; check field and block count
+				do {
+					if (this._isSameField(data)) break;
+
+					if (this.clear_animation_remaining_frames-- > 0) break;
+
+					const cur_num_blocks = this._getNumBlocks(data);
+					const block_diff = cur_num_blocks - this.num_blocks;
+
+					switch(block_diff) {
+						case 4:
+							this.data.field = field;
+							this.num_blocks = cur_num_blocks;
+							this.pending_piece = true;
+							break;
+
+						case -8:
+							this.onTetris();
+						case -6:
+							this.clear_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
+							this.num_blocks += (block_diff * 5); // equivalent to fast forward on how many blocks will have gone after the animation
+							break;
+
+						case -4:
+							if (this.pending_single) {
+								this.clear_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 2;
+								this.num_blocks -= 10;
+							}
+							else {
+								this.clear_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
+								this.num_blocks -= 20;
+							}
+
+							this.pending_single = false;
+							break;
+
+						case -2:
+							// -2 can happen on the first clear animation frame of a single
+							// -2 can also happen when the piece is at the top of the field and gets rotated and is then partially off field
+							// to differentiate the 2, we must wait for the next frame, if it goes to -4, then it is the clear animation continuing
+							this.pending_single = true;
+							break;
+
+						default:
+							// We ignore invalid block count diffs. In many cases these dut to interlace artefacts when the pieces rotate of move
+							// TODO: block count tracking can fall out of sync, breaking piece count events. CCan anything be done to restore a "clean" count and resume
+							pending_single = false;
+					}
+
+				}
+				while(false);
 			}
 		}
 
@@ -85,10 +148,18 @@ class Game {
 			this.over = true;
 			this.end_ts = Date.now();
 
-			if (this.frame_count > 1) {
+			if (this.frame_count > 2) {
 				this.onGameOver();
 			}
 		}
+	}
+
+	_isSameField(data) {
+		return data.field.every((cell, idx) => cell === this.data.field[idx]);
+	}
+
+	_getNumBlocks(data) {
+		return data.field.reduce((acc, cell) => acc + (cell ? 1 : 0), 0);
 	}
 
 	_getNumPieces(data) {
@@ -112,10 +183,11 @@ class Game {
 
 			// when line changes, level may have changed
 			if (data.level != this.data.level) {
+				this.data.level = data.level;
+
 				if (this.transition === null) {
 					this.transition = data.score;
 				}
-				this.data.level = data.level;
 			}
 		}
 	}
@@ -123,7 +195,7 @@ class Game {
 	onPiece(data) {
 		let cur_piece;
 
-		if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
+		if (this.IS_CLASSIC_ROM) {
 			if (this.num_pieces === 0) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
 			}
@@ -187,6 +259,7 @@ class Game {
 	}
 
 	// client app to overwrite
+	onTetris() {}
 	onGameOver() {}
 	onNewGame() {}
 }
