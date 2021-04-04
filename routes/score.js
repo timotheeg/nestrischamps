@@ -115,7 +115,7 @@ router.get('/scores', middlewares.assertSession, async (req, res) => {
 	const ALLOWED_ORDER_DIRS = ['desc', 'asc'];
 
 	const options = {
-		sort_field: 'id',
+		sort_field: 'datetime',
 		sort_order: 'desc',
 		page_idx: 0,
 	};
