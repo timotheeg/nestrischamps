@@ -250,3 +250,8 @@ BinaryFrame.GAME_TYPE = GAME_TYPE;
 return BinaryFrame;
 
 })();
+
+try {
+	module.exports = BinaryFrame;
+}
+catch(err) {}

@@ -36,6 +36,7 @@ const reference_locations = {
 
 const configs = {
 	classic: {
+		game_type: BinaryFrame.GAME_TYPE.CLASSIC,
 		reference: '/ocr/reference_ui_classic.png',
 		fields: [
 			'score',
@@ -56,6 +57,7 @@ const configs = {
 		],
 	},
 	das_trainer: {
+		game_type: BinaryFrame.GAME_TYPE.DAS_TRAINER,
 		reference: '/ocr/reference_ui_das_trainer.png',
 		palette: 'easiercap',
 		fields: [
@@ -839,7 +841,13 @@ function loadConfig() {
 	const config = localStorage.getItem('config');
 
 	if (config) {
-		return JSON.parse(config);
+		const parsed = JSON.parse(config);
+
+		if (!parsed.hasOwnProperty('game_type')) {
+			parsed.game_type = parsed.tasks.T ? BinaryFrame.GAME_TYPE.CLASSIC : BinaryFrame.GAME_TYPE.DAS_TRAINER;
+		}
+
+		return parsed;
 	}
 }
 
@@ -895,6 +903,7 @@ function trackAndSendFrames() {
 
 	// TODO: better event system and name for frame data events
 	ocr_corrector.onMessage = async function(data) {
+		data.game_type = config.game_type || BinaryFrame.GAME_TYPE.CLASSIC;
 		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {

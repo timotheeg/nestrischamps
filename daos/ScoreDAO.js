@@ -109,6 +109,7 @@ class ScoreDAO {
 			(
 				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 			)
+			RETURNING id
 			`,
 			[
 				user.id,
@@ -126,6 +127,8 @@ class ScoreDAO {
 				game_data.transition,
 			]
 		);
+
+		return result.rows[0].id;
 	}
 
 	async getNumberOfScores(user) {
@@ -142,7 +145,7 @@ class ScoreDAO {
 
 	async getScorePage(user, options = {}) {
 		options = {
-			sort_field: 'id',
+			sort_field: 'datetime',
 			sort_order: 'desc',
 			page_size: 100,
 			page_idx: 0,
