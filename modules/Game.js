@@ -60,7 +60,10 @@ class Game {
 		}
 
 		if (data.gameid != this.gameid) {
-			// Note: this test could be done without parsing the whole message!
+			if (!this.over) {
+				this._doGameOver();
+			}
+
 			this.onNewGame(frame);
 			return;
 		}
@@ -99,7 +102,7 @@ class Game {
 
 					switch(block_diff) {
 						case 4:
-							this.data.field = field;
+							this.data.field = data.field;
 							this.num_blocks = cur_num_blocks;
 							this.pending_piece = true;
 							break;
@@ -134,7 +137,7 @@ class Game {
 						default:
 							// We ignore invalid block count diffs. In many cases these dut to interlace artefacts when the pieces rotate of move
 							// TODO: block count tracking can fall out of sync, breaking piece count events. CCan anything be done to restore a "clean" count and resume
-							pending_single = false;
+							this.pending_single = false;
 					}
 
 				}
@@ -144,13 +147,16 @@ class Game {
 
 		// Check board for gameover event
 		if (!this.over && data.field.slice(0, 10).every(cell => cell)) {
-			// Game Over!
-			this.over = true;
-			this.end_ts = Date.now();
+			this._doGameOver();
+		}
+	}
 
-			if (this.frame_count > 2) {
-				this.onGameOver();
-			}
+	_doGameOver() {
+		this.over = true;
+		this.end_ts = Date.now();
+
+		if (this.frame_count > 2) {
+			this.onGameOver();
 		}
 	}
 
