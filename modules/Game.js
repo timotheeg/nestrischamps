@@ -240,7 +240,7 @@ class Game {
 		let das_avg = -1;
 
 		if (this.clears.length) {
-			tetris_rate = this.tetris_lines / this.clears.length;
+			tetris_rate = this.tetris_lines / this.data.lines;
 		}
 
 		if (this.pieces.length && this.das_total) {
