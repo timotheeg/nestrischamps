@@ -14,7 +14,9 @@ function setGame(connection) {
 
 	game.onGameOver = async () => {
 		try {
-			await ScoreDAO.recordGame(connection.user, game.getReport());
+			const score_id = await ScoreDAO.recordGame(connection.user, game.getReport());
+
+			console.log(`Recorded new game with id ${score_id}`);
 		}
 		catch(err) {
 			console.log('Unable to record game');
