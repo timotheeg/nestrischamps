@@ -1,28 +1,14 @@
 const _ = require('lodash');
 const Game = require('../modules/Game');
-const ScoreDAO = require('../daos/ScoreDAO');
 
 
 function setGame(connection) {
 	if (connection.game) {
-		delete connection.game.onGameOver;
 		delete connection.game.onNewGame;
 		delete connection.game;
 	}
 
-	const game = new Game();
-
-	game.onGameOver = async () => {
-		try {
-			const score_id = await ScoreDAO.recordGame(connection.user, game.getReport());
-
-			console.log(`Recorded new game with id ${score_id}`);
-		}
-		catch(err) {
-			console.log('Unable to record game');
-			console.error(err);
-		}
-	}
+	const game = new Game(connection.user);
 
 	game.onNewGame = (frame) => {
 		console.log(`${connection.user.id} is starting a new game`);

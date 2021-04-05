@@ -1,5 +1,14 @@
 // Minimum amount of game tracking to do server side to be able to report games
 const BinaryFrame = require('../public/js/BinaryFrame');
+const ScoreDAO = require('../daos/ScoreDAO');
+const ULID = require('ulid');
+
+// The below is to upload game frames to S3
+// That should be refactored into another file
+const { Upload } = require("@aws-sdk/lib-storage");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const stream = require('stream');
+const zlib = require('zlib');
 
 const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
@@ -7,7 +16,9 @@ const LINE_CLEAR_IGNORE_FRAMES = 7;
 
 
 class Game {
-	constructor() {
+	constructor(user) {
+		this.s3_key = `/games/${user.id}/${ULID.ulid()}`;
+		this.user = user;
 		this.frame_count = 0;
 		this.data = null;
 		this.over = false;
@@ -56,6 +67,8 @@ class Game {
 
 			this.data = data; // record frame as current state
 
+			this.saveFrame(frame);
+
 			return;
 		}
 
@@ -70,6 +83,8 @@ class Game {
 		else if (this.over) {
 			return;
 		}
+
+		this.saveFrame(frame);
 
 		const cur_num_blocks = this._getNumBlocks(data);
 
@@ -265,9 +280,26 @@ class Game {
 		};
 	}
 
+	saveFrame() {
+		if (process.env.SAVE_GAME_FRAMES) {
+
+		}
+	}
+
+	onGameOver() {
+		try {
+			const score_id = await ScoreDAO.recordGame(this.user, this.getReport());
+
+			console.log(`Recorded new game for user ${this.user.id} with id ${score_id}`);
+		}
+		catch(err) {
+			console.log('Unable to record game');
+			console.error(err);
+		}
+	}
+
 	// client app to overwrite
 	onTetris() {}
-	onGameOver() {}
 	onNewGame() {}
 }
 
