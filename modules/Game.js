@@ -71,6 +71,8 @@ class Game {
 			return;
 		}
 
+		const cur_num_blocks = this._getNumBlocks(data);
+
 		if (this.pending_score) {
 			this.pending_score = false;
 			this.onScore(data); // updates state
@@ -97,7 +99,6 @@ class Game {
 
 					if (this.clear_animation_remaining_frames-- > 0) break;
 
-					const cur_num_blocks = this._getNumBlocks(data);
 					const block_diff = cur_num_blocks - this.num_blocks;
 
 					switch(block_diff) {
@@ -145,8 +146,8 @@ class Game {
 			}
 		}
 
-		// Check board for gameover event
-		if (!this.over && data.field.slice(0, 10).every(cell => cell)) {
+		// Check board for gameover event (curtain has fallen)
+		if (!this.over && cur_num_blocks >= 200) {
 			this._doGameOver();
 		}
 	}
