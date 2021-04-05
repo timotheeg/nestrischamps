@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 
 const middlewares = require('../modules/middlewares');
+const UserDAO = require('../daos/UserDAO');
+const ScoreDAO = require('../daos/ScoreDAO');
+
 const layout_files = require('../modules/layouts');
 
 
@@ -34,5 +37,14 @@ router.get('/view/:layout', (req, res) => {
 
 	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
 });
+
+async function getScores(req, res) {
+	const user = await UserDAO.getPlayer1();
+
+	res.json(await ScoreDAO.getStats(user));
+}
+
+router.get('/stats/get_stats', getScores);
+router.get('/stats/report_game', getScores);
 
 module.exports = router;
