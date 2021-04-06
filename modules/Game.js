@@ -24,19 +24,19 @@ class Game {
 		this.over = false;
 		this.num_frames = 0;
 
-		if (process.env.SAVE_GAME_FRAMES) {
+		if (process.env.FF_SAVE_GAME_FRAMES) {
 			// We use ulid ids for games, and games get binned into part of the 10 bits timestamp
 			// this means each folder represents about ~9h, which should be about one siting
 			// the extension ngf stands for "Nestrischamps Game Frames"
 			const ulid = ULID.ulid();
-			this.frame_file = `/games/${user.id}/${ulid.slice(0, 5)}/${ulid.slice(5)}.ngf`;
+			this.frame_file = `games/${user.id}/${ulid.slice(0, 5)}/${ulid.slice(5)}.ngf`;
 
 			// Set up a streaming upload system to S3
 			this.frame_stream = new stream.PassThrough();
 
 			const upload = new Upload({
-				client: new S3Client({ region: process.env.GAME_FRAMES_REGION }), // ({ endpoint: spacesEndpoint  }),
-				leavePartsOnError: false, // optional manually handle dropped parts
+				client: new S3Client({ region: process.env.GAME_FRAMES_REGION }),
+				leavePartsOnError: false,
 				params: {
 					Bucket: process.env.GAME_FRAMES_BUCKET,
 					Key: this.frame_file,
@@ -45,7 +45,7 @@ class Game {
 					ContentType: 'application/nestrischamps-game-frames',
 					ContentEncoding: 'gzip',
 					ContentDisposition: 'attachment',
-					CacheControl: 'max-age: 315360000',
+					CacheControl: 'max-age=315360000',
 				}
 			});
 
@@ -205,7 +205,7 @@ class Game {
 		this.over = true;
 		this.end_ts = Date.now();
 
-		if (process.env.SAVE_GAME_FRAMES) {
+		if (process.env.FF_SAVE_GAME_FRAMES) {
 			this.frame_stream.end();
 		}
 
@@ -332,7 +332,7 @@ class Game {
 	saveFrame(frame) {
 		this.num_frames++;
 
-		if (process.env.SAVE_GAME_FRAMES) {
+		if (process.env.FF_SAVE_GAME_FRAMES) {
 			this.frame_stream.write(frame);
 		}
 	}
