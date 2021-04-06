@@ -110,11 +110,12 @@ document.querySelectorAll('a.delete_score').forEach(a => {
 		evt.preventDefault();
 
 		const parent_tr = a.closest('tr');
+		const id = a.href.split('/').pop();
 		const score = parent_tr.querySelector('td.score').textContent;
 		const lines = parent_tr.querySelector('td.lines').textContent;
 
 		if (!window.confirm(
-			`Are you sure you want to delete score entry ${score} - ${lines}?`
+			`Are you sure you want to delete score entry with score:${score} - lines:${lines}?`
 		)) {
 			return;
 		}
@@ -131,7 +132,12 @@ document.querySelectorAll('a.delete_score').forEach(a => {
 		}
 
 		// remove record in place, dont reload whole list...
-		a.closest('tr').remove();
+		parent_tr.remove();
+		// also remove the details row if it existed
+		try {
+			document.querySelector(`tr#details_${id}`).remove();
+		}
+		catch(err) { }
 
 		// Could also do:
 		// location.reload(); // but that's inefficient
@@ -182,6 +188,7 @@ document.querySelectorAll('a.details_score').forEach(a => {
 
 			// TODO: derive stats again and show them
 			// TODO show pretty graphs
+			// TODO: do safe dom insertion, don't use innerHTML (not done for now, because data *should* be safe)
 			td.innerHTML = `<dl>
 				<dt>Transition</dt><dd>${data.transition ? data.transition.toString().padStart(6, '0') : '-'}</dd>
 				<dt>Clears</dt><dd>${data.clears || '-'}</dd>
