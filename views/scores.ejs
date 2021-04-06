@@ -21,13 +21,17 @@ td, dd {
 	overflow-wrap: anywhere;
 }
 
+tbody tr.data:nth-of-type(even) {
+  background-color: #ddd;
+}
+
+tbody tr.details {
+  background-color: #eee;
+}
+
 tr.details td {
 	font-family: monospace;
 	text-align: left;
-}
-
-tbody tr:nth-child(even) {
-  background-color: #ddd;
 }
 
 ul {
@@ -64,7 +68,7 @@ li {
 </thead>
 <tbody>
 	<% scores.forEach(score => { %>
-	<tr>
+	<tr class="data">
 		<td><%= score.datetime.toISOString() %></td>
 		<td><%= score.start_level %></td>
 		<td><%= score.end_level %></td>
