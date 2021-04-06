@@ -134,17 +134,17 @@ router.get('/scores', middlewares.assertSession, async (req, res) => {
 	}
 
 	const num_scores = await ScoreDAO.getNumberOfScores(req.session.user);
-	const num_pages = Math.floor(num_scores / PAGE_SIZE);
+	const num_pages = Math.ceil(num_scores / PAGE_SIZE) || 1;
 
-	options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages));
+	options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages - 1));
 
 	// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
 	const scores = await ScoreDAO.getScorePage(req.session.user, options);
 
 	res.render('scores', {
 		scores,
+		num_pages,
 		pagination: options,
-		num_pages: num_pages + 1
 	});
 });
 
