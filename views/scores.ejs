@@ -21,12 +21,8 @@ td, dd {
 	overflow-wrap: anywhere;
 }
 
-tbody tr.data:nth-of-type(even) {
+tbody tr.even {
   background-color: #ddd;
-}
-
-tbody tr.details {
-  background-color: #eee;
 }
 
 tr.details td {
@@ -67,8 +63,8 @@ li {
 	</tr>
 </thead>
 <tbody>
-	<% scores.forEach(score => { %>
-	<tr class="data">
+	<% scores.forEach((score, idx) => { %>
+	<tr class="<%= idx % 2 ? 'odd': 'even' %>">
 		<td><%= score.datetime.toISOString() %></td>
 		<td><%= score.start_level %></td>
 		<td><%= score.end_level %></td>
@@ -162,6 +158,10 @@ document.querySelectorAll('a.details_score').forEach(a => {
 		const details_tr = document.createElement('tr');
 		details_tr.classList.add('details');
 		details_tr.setAttribute('id', `details_${id}`);
+
+		if (parent_tr.classList.contains('even')) {
+			details_tr.classList.add('even');
+		}
 
 		const td = document.createElement('td');
 		td.setAttribute('colspan', '11');
