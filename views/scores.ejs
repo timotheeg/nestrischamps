@@ -190,14 +190,26 @@ document.querySelectorAll('a.details_score').forEach(a => {
 
 			const data = await response.json();
 
-			// TODO: derive stats again and show them
-			// TODO show pretty graphs
-			// TODO: do safe dom insertion, don't use innerHTML (not done for now, because data *should* be safe)
-			td.innerHTML = `<dl>
-				<dt>Transition</dt><dd>${data.transition ? data.transition.toString().padStart(6, '0') : '-'}</dd>
-				<dt>Clears</dt><dd>${data.clears || '-'}</dd>
-				<dt>Pieces</dt><dd>${data.pieces || '-'}</dd>
-			</dl>`;
+			const details = {
+				Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
+				Clears: data.clears || '-',
+				Pieces: data.pieces || '-',
+			}
+
+			const dl = document.createElement('dl');
+
+			for (const [key, value] of Object.entries(details)) {
+				const dt = document.createElement('dt');
+				const dd = document.createElement('dd');
+
+				dt.textContent = key;
+				dd.textContent = value;
+
+				dl.appendChild(dt);
+				dl.appendChild(dd);
+			}
+
+			td.appendChild(dl);
 		}
 		catch(err) {
 			console.log('Unable to show details');
