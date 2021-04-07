@@ -80,6 +80,10 @@ li {
 		</td>
 		<td>
 			<a class="details_score" href="/stats/scores/<%= score.id %>">details</a>
+			<% if (score.frame_file) { %>
+			-
+			<a class="replay_score" href="/replay/simple_1p/<%= score.id %>">replay</a>
+			<% } %>
 			-
 			<a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a>
 		</td>
