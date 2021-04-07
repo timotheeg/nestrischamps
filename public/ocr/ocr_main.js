@@ -338,9 +338,18 @@ function updateDeviceList(devices) {
 }
 
 async function getConnectedDevices(type) {
-	// prompt for permission if needed
-	const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-	stream.getTracks()[0].stop();
+	try {
+		// prompt for permission if needed
+		// on windows, this requests the first available capture device and it may fail
+		// BUT if permission has been granted, then listing the devices below might still work
+		// SO, we wrap the device call in a try..catch, and ignore errors
+		const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+		stream.getTracks()[0].stop();
+	}
+	catch(err) {
+		// We log a warning but we do nothing
+		console.log(`Warning: could not open default capture device: $(err.message)`);
+	}
 
 	return (await navigator.mediaDevices.enumerateDevices())
 		.filter(device => device.kind === type && device.deviceId)
