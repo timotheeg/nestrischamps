@@ -52,7 +52,7 @@ class Game {
 			// set up some logging for game file upload
 			upload.done().then(
 				() => console.log(`Game file uploaded: ${this.frame_file}`),
-				(err) => console.log(`Unable to upload game file ${this.frame_file}`),
+				(err) => console.log(`Unable to upload game file ${this.frame_file}: ${err.message}`),
 			);
 		}
 	}
