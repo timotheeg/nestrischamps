@@ -243,6 +243,18 @@ class BinaryFrame {
 
 		return pojo;
 	}
+
+	static getCTime(buffer) {
+		const f = new Uint8Array(buffer);
+
+		let bidx = 3;
+
+		return (f[bidx++] << 20)
+			| (f[bidx++] << 12)
+			| (f[bidx++] << 4)
+			| ((f[bidx] & 0xF0) >> 4)
+		;
+	}
 }
 
 BinaryFrame.GAME_TYPE = GAME_TYPE;
