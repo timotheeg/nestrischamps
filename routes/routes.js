@@ -89,4 +89,16 @@ router.get('/view/:layout/:secret', (req, res) => {
 	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
 });
 
+router.get('/replay/:layout/:gamedef', (req, res) => {
+	const layout = layout_files[req.params.layout];
+
+	if (!layout) {
+		res.status(404).send('Not found');
+		return;
+	}
+
+	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
+});
+
+
 module.exports = router;
