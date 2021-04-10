@@ -1,3 +1,4 @@
+const BinaryFrame = require('../public/js/BinaryFrame');
 const ScoreDAO = require('../daos/ScoreDAO');
 const got = require('got');
 
@@ -8,6 +9,7 @@ class Replay {
 		this.player_num = player_num;
 		this.game_id_or_url = game_id_or_url;
 		this.frame_buffer = [];
+		this.done = false;
 
 		this.startStreaming();
 	}
@@ -16,7 +18,7 @@ class Replay {
 		let game_url;
 
 		if (typeof this.game_id_or_url === 'string') {
-			if (this.game_id_or_url.startsWitch('http')) {
+			if (this.game_id_or_url.startsWith('http')) {
 				game_url = this.game_id_or_url;
 			}
 			else {
@@ -33,14 +35,14 @@ class Replay {
 
 		this.game_stream.on('readable', () => {
 			do {
-				const buf = ins.read(71);
+				const buf = this.game_stream.read(71);
 
 				if (buf === null) {
 					return; // done!!
 				}
 
 				if (buf.length < 71) {
-					ins.unshift(buf);
+					this.game_stream.unshift(buf);
 					break;
 				}
 
@@ -51,13 +53,13 @@ class Replay {
 					this.start_ctime = data.ctime;
 				}
 
-				this.frames.push(buf);
+				this.frame_buffer.push(buf);
 
 				this.sendNextFrame();
 			}
 			while(true);
 
-			ins.read(0);
+			this.game_stream.read(0);
 		});
 
 		// TODO: Error handling close hand,ing on source and target, etc...
@@ -65,9 +67,9 @@ class Replay {
 
 	sendNextFrame() {
 		if (this.send_timeout) return;
-		if (frames.length <= 0) return;
+		if (this.frame_buffer.length <= 0) return;
 
-		const frame = new Uint8Array(frames.shift());
+		const frame = new Uint8Array(this.frame_buffer.shift());
 
 		frame[0] = (frame[0] & 0b11111000) | this.player_num;
 
@@ -84,3 +86,5 @@ class Replay {
 		}, send_delay);
 	}
 }
+
+module.exports = Replay;

@@ -1,10 +1,26 @@
 const layouts = require('../modules/layouts');
+const Replay = require('../domains/Replay');
 const UserDAO = require('../daos/UserDAO');
 const Connection = require('../modules/Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log('WS: ', request.url);
+
+		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?$/);
+
+		if (m) {
+			request.is_replay = true; // indicate no need to have user session
+			request.game1_id = m[2];
+			request.game2_id = m[4]; // may be null
+
+			wss.handleUpgrade(request, socket, head, function (ws) {
+				wss.emit('connection', ws, request);
+			});
+
+			return;
+		}
+
 
 		if (!request.session) {
 			request.session = {};
@@ -16,7 +32,7 @@ module.exports = function init(server, wss) {
 
 		let user;
 
-		let m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)/);
+		m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)/);
 
 		request.is_secret_view = !!m;
 
@@ -60,6 +76,23 @@ module.exports = function init(server, wss) {
 	});
 
 	wss.on('connection', async (ws, request) => {
+		if (request.is_replay) {
+			const connection = new Connection({id: 1}, ws);
+
+			new Replay(connection, 0, 'https://nestrischamps.s3-us-west-1.amazonaws.com/games/1/01F2Y/3FT34SEHGCNSKC4WA7DY6.ngf');
+
+			return;
+
+			if (request.game1_id) {
+				new Replay(connection, 0, parseInt(request.game1_id, 10));
+			}
+			if (request.game2_id) {
+				new Replay(connection, 1, parseInt(request.game2_id, 10));
+			}
+
+			return;
+		}
+
 		console.log('WS: Connection!', request.session.user.id, 'secret?', request.is_secret_view);
 
 		const player1 = await UserDAO.getPlayer1();

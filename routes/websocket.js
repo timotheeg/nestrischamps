@@ -1,13 +1,28 @@
 const middlewares = require('../modules/middlewares');
 const layouts = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
+const Replay = require('../domains/Replay');
 const Connection = require('../modules/Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log(`WS: ${request.url}`);
 
-		const m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
+		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?$/);
+
+		if (m) {
+			request.is_replay = true; // indicate no need to have user session
+			request.game1_id = m[2];
+			request.game2_id = m[4]; // may be null
+
+			wss.handleUpgrade(request, socket, head, function (ws) {
+				wss.emit('connection', ws, request);
+			});
+
+			return;
+		}
+
+		m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
 
 		request.is_secret_view = !!m;
 
@@ -95,6 +110,17 @@ module.exports = function init(server, wss) {
 	});
 
 	wss.on('connection', async (ws, request) => {
+		if (request.is_replay) {
+			if (request.game1_id) {
+				new Replay(connection, 0, parseInt(request.game1_id, 10));
+			}
+			if (request.game2_id) {
+				new Replay(connection, 1, parseInt(request.game2_id, 10));
+			}
+
+			return;
+		}
+
 		console.log('WS: Connection!', request.url, request.session.user.id, request.session.user.login);
 
 		const user = await UserDAO.getUserById(request.session.user.id);
