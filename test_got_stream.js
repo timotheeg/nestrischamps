@@ -15,14 +15,13 @@ ins.on('readable', () => {
 	do {
 		const buf = ins.read(71);
 
-		if (!buf) {
+		if (buf === null) {
 			return; // done!!
 		}
 
 		if (buf.length < 71) {
 			ins.unshift(buf);
-			ins.read(0);
-			return;
+			break;
 		}
 
 		if (!start_time) {
@@ -53,6 +52,8 @@ ins.on('readable', () => {
 		}
 	}
 	while(true);
+
+	ins.read(0);
 });
 
 function sendFrame() {
