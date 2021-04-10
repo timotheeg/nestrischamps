@@ -8,12 +8,20 @@ module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log(`WS: ${request.url}`);
 
-		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?$/);
+		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?/);
 
 		if (m) {
 			request.is_replay = true; // indicate no need to have user session
 			request.game1_id = m[2];
 			request.game2_id = m[4]; // may be null
+
+			request.speed = 1;
+
+			m = request.url.match(/speed=(\d+)/);
+
+			if (m) {
+				request.speed = parseInt(m[1], 10) || 1;
+			}
 
 			wss.handleUpgrade(request, socket, head, function (ws) {
 				wss.emit('connection', ws, request);
@@ -111,11 +119,12 @@ module.exports = function init(server, wss) {
 
 	wss.on('connection', async (ws, request) => {
 		if (request.is_replay) {
+
 			if (request.game1_id) {
-				new Replay(connection, 0, parseInt(request.game1_id, 10));
+				new Replay(connection, 0, parseInt(request.game1_id, 10), request.speed);
 			}
 			if (request.game2_id) {
-				new Replay(connection, 1, parseInt(request.game2_id, 10));
+				new Replay(connection, 1, parseInt(request.game2_id, 10), request.speed);
 			}
 
 			return;

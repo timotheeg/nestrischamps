@@ -5,14 +5,23 @@ const Connection = require('../modules/Connection');
 
 module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
-		console.log('WS: ', request.url);
+		console.log('WS: ', request.url, request.query);
 
-		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?$/);
+		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?/);
+
+
 
 		if (m) {
 			request.is_replay = true; // indicate no need to have user session
 			request.game1_id = m[2];
 			request.game2_id = m[4]; // may be null
+			request.speed = 1;
+
+			m = request.url.match(/speed=(\d+)/);
+
+			if (m) {
+				request.speed = parseInt(m[1], 10) || 1;
+			}
 
 			wss.handleUpgrade(request, socket, head, function (ws) {
 				wss.emit('connection', ws, request);
@@ -79,7 +88,7 @@ module.exports = function init(server, wss) {
 		if (request.is_replay) {
 			const connection = new Connection({id: 1}, ws);
 
-			new Replay(connection, 0, 'https://nestrischamps.s3-us-west-1.amazonaws.com/games/1/01F2Y/3FT34SEHGCNSKC4WA7DY6.ngf');
+			new Replay(connection, 0, 'https://nestrischamps.s3-us-west-1.amazonaws.com/games/1/01F2Y/3FT34SEHGCNSKC4WA7DY6.ngf', request.speed);
 
 			return;
 

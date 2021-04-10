@@ -4,10 +4,11 @@ const got = require('got');
 
 
 class Replay {
-	constructor(connection, player_num, game_id_or_url) {
+	constructor(connection, player_num, game_id_or_url, time_scale = 1) {
 		this.connection = connection;
 		this.player_num = player_num;
 		this.game_id_or_url = game_id_or_url;
+		this.time_scale = time_scale;
 		this.frame_buffer = [];
 		this.done = false;
 
@@ -73,7 +74,7 @@ class Replay {
 
 		frame[0] = (frame[0] & 0b11111000) | this.player_num;
 
-		const tdiff = BinaryFrame.getCTime(frame) - this.start_ctime;
+		const tdiff = Math.round((BinaryFrame.getCTime(frame) - this.start_ctime) / this.time_scale);
 		const frame_tick = this.start_time + tdiff;
 		const now = Date.now();
 
