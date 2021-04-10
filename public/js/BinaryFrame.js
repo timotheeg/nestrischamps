@@ -245,7 +245,14 @@ class BinaryFrame {
 	}
 
 	static getCTime(buffer) {
-		const f = new Uint8Array(buffer);
+		let f;
+
+		if (buffer instanceof Uint8Array) {
+			f = buffer;
+		}
+		else {
+			f = new Uint8Array(buffer);
+		}
 
 		let bidx = 3;
 

@@ -1,7 +1,7 @@
 const got = require('got');
 const BinaryFrame = require('./public/js/BinaryFrame');
 
-const ins = got.stream('https://nestrischamps.s3-us-west-1.amazonaws.com/games/1/01F2K/YYD4ZVCW0H39STT588SNP.ngf');
+const ins = got.stream('https://nestrischamps.s3-us-west-1.amazonaws.com/games/1/01F2X/KRFSYF8C0Q1YD75DDMS2H.ngf');
 
 
 const frames = [];

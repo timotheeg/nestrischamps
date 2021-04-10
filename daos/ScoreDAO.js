@@ -192,6 +192,17 @@ class ScoreDAO {
 
 		return result.rows[0]; // anything to extract from that?
 	}
+
+	async getAnonymousScore(score_id) {
+		const result = await dbPool.query(`
+			SELECT * FROM scores
+			WHERE id=$1
+			`,
+			[ score_id ]
+		);
+
+		return result.rows[0]; // anything to extract from that?
+	}
 }
 
 module.exports = new ScoreDAO();
