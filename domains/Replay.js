@@ -22,11 +22,12 @@ class Replay {
 				game_url = this.game_id_or_url;
 			}
 			else {
-				throw new Exception('Invaid Game URL');
+				throw new Exception('Invalid Game URL');
 			}
 		}
 		else {
-			const path = await ScoreDAO.getAnonymousScore().frame_file;
+			const game_id = this.game_id_or_url;
+			const path = await ScoreDAO.getAnonymousScore(game_id).frame_file;
 
 			game_url = `${process.env.GAME_FRAMES_BASEURL}${path}`;
 		}
@@ -41,12 +42,19 @@ class Replay {
 					return; // done!!
 				}
 
+				// Hardcoding 71 as frame size of the binary format
+				// Note that the format version might imply different frame length
+				// Ideally, on first data read, we'd check the header, check the version, and extract the frame size
+				// and then use that frame size for all subsequent reads
 				if (buf.length < 71) {
 					this.game_stream.unshift(buf);
 					break;
 				}
 
 				if (!this.start_time) {
+					// Parsing the frame may not be needed just to get ctime
+					// but we should also check the version format
+
 					const data = BinaryFrame.parse(buf);
 
 					this.start_time = Date.now();
