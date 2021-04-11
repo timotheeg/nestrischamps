@@ -338,7 +338,7 @@ class Player {
 				const num = data[piece];
 
 				if (num === null) {
-					throw new SyntaxError(`Invalid piece stat: [${piece}, ${data[piece]}`);
+					throw new SyntaxError(`Invalid piece stat: [${piece}, ${data[piece]}]`);
 				}
 
 				acc[piece] = num;
