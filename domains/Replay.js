@@ -28,10 +28,11 @@ class Replay {
 		}
 		else {
 			const game_id = this.game_id_or_url;
-			const path = await ScoreDAO.getAnonymousScore(game_id).frame_file;
+			const score_data = await ScoreDAO.getAnonymousScore(game_id);
+			const path = score_data.frame_file
 
 			if (!path) {
-				console.log(`Replay Error: No replay file found for gameid ${game_id}`);
+				console.log(`Replay Error: No replay file found for gameid ${game_id}:`, score_data);
 				return;
 			}
 
