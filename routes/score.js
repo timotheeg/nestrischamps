@@ -176,13 +176,14 @@ router.delete('/scores/:id', middlewares.assertSession, async (req, res) => {
 	if (score && score.frame_file) {
 		const s3_client = new S3Client({ region: process.env.GAME_FRAMES_REGION });
 
-		// fire and forget...
+		// fire and forget, and log
 		s3_client.send(new DeleteObjectCommand({
 			Bucket: process.env.GAME_FRAMES_BUCKET,
 			Key: score.frame_file,
-		}));
-
-		console.log(`Deleted game ${req.params.id}'s' file ${score.frame_file}`);
+		})).then(
+			() => console.log(`Deleted game ${req.params.id}'s' file ${score.frame_file}`),
+			(err) => console.log(`Unable to delete game ${req.params.id}'s' file ${score.frame_file}: ${err.message}`)
+		);
 	}
 
 	res.json({ status: 'ok' });
