@@ -197,7 +197,7 @@ document.querySelectorAll('a.details_score').forEach(a => {
 				Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
 				Clears: data.clears || '-',
 				Pieces: data.pieces || '-',
-			}
+			};
 
 			const dl = document.createElement('dl');
 
@@ -208,6 +208,22 @@ document.querySelectorAll('a.details_score').forEach(a => {
 				dt.textContent = key;
 				dd.textContent = value;
 
+				dl.appendChild(dt);
+				dl.appendChild(dd);
+			}
+
+			// write game file as link
+			if (data.frame_file_url) {
+				const dt = document.createElement('dt');
+				const dd = document.createElement('dd');
+				const a = document.createElement('a');
+
+				dt.textContent = 'Game Frame Files';
+
+				a.href = data.frame_file_url;
+				a.textContent = data.frame_file_url;
+
+				dd.appendChild(a);
 				dl.appendChild(dt);
 				dl.appendChild(dd);
 			}

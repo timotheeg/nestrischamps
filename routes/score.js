@@ -152,6 +152,14 @@ router.get('/scores/:id', middlewares.assertSession, async (req, res) => {
 	console.log(`User ${req.session.user.id} is getting score ${req.params.id}`);
 	const score = await ScoreDAO.getScore(req.session.user, req.params.id);
 
+	if (score) {
+		if (score.frame_file) {
+			score.frame_file_url = `${process.env.GAME_FRAMES_BASEURL}${score.frame_file}`;
+
+			delete score.frame_file;
+		}
+	}
+
 	res.json(score);
 });
 
