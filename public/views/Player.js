@@ -369,6 +369,10 @@ class Player {
 			this.gameid = data.gameid;
 			this.field_num_blocks = num_blocks;
 			this.start_level = level;
+			this.level = level;
+			this.lines = lines;
+			this.score = data.score;
+			this.pending_score = true;
 
 			if (data.cur_piece) {
 				// Ideally, we'd want to wait one frame to read cur_piece -_-
