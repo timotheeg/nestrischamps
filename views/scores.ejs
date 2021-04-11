@@ -228,6 +228,8 @@ document.querySelectorAll('a.details_score').forEach(a => {
 				dl.appendChild(dd);
 			}
 
+
+			td.innerHTML = ''; // clear the loading message
 			td.appendChild(dl);
 		}
 		catch(err) {
