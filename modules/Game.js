@@ -330,9 +330,8 @@ class Game {
 	}
 
 	saveFrame(frame) {
-		this.num_frames++;
-
 		if (process.env.FF_SAVE_GAME_FRAMES) {
+			this.num_frames++;
 			this.frame_stream.write(frame);
 		}
 	}
