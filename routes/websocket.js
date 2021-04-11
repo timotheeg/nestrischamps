@@ -23,8 +23,10 @@ module.exports = function init(server, wss) {
 				request.speed = parseInt(m[1], 10) || 1;
 			}
 
-			wss.handleUpgrade(request, socket, head, function (ws) {
-				wss.emit('connection', ws, request);
+			middlewares.sessionMiddleware(request, {}, async () => {
+				wss.handleUpgrade(request, socket, head, function (ws) {
+					wss.emit('connection', ws, request);
+				});
 			});
 
 			return;
@@ -119,6 +121,8 @@ module.exports = function init(server, wss) {
 
 	wss.on('connection', async (ws, request) => {
 		if (request.is_replay) {
+			const user = request.session.user || { id: 1 };
+			const connection = new Connection(user, ws);
 
 			if (request.game1_id) {
 				new Replay(connection, 0, parseInt(request.game1_id, 10), request.speed);
