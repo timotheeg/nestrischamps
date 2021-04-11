@@ -10,7 +10,6 @@ class Replay {
 		this.game_id_or_url = game_id_or_url;
 		this.time_scale = time_scale;
 		this.frame_buffer = [];
-		this.done = false;
 
 		this.startStreaming();
 	}
