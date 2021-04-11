@@ -190,6 +190,9 @@ document.querySelectorAll('a.details_score').forEach(a => {
 
 			const data = await response.json();
 
+			// TODO: derive stats again and show them
+			// TODO show pretty graphs
+
 			const details = {
 				Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
 				Clears: data.clears || '-',
