@@ -2,6 +2,9 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 
+const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+
+
 const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
@@ -166,7 +169,21 @@ router.get('/scores/:id', middlewares.assertSession, async (req, res) => {
 router.delete('/scores/:id', middlewares.assertSession, async (req, res) => {
 	console.log(`User ${req.session.user.id} is deleting score ${req.params.id}`);
 
+	const score = await ScoreDAO.getScore(req.session.user, req.params.id);
+
 	await ScoreDAO.deleteScore(req.session.user, req.params.id);
+
+	if (score && score.frame_file) {
+		const s3_client = new S3Client({ region: process.env.GAME_FRAMES_REGION });
+
+		// fire and forget...
+		s3_client.send(new DeleteObjectCommand({
+			Bucket: process.env.GAME_FRAMES_BUCKET,
+			Key: score.frame_file,
+		}));
+
+		console.log(`Deleted game ${req.params.id}'s' file ${score.frame_file}`);
+	}
 
 	res.json({ status: 'ok' });
 });

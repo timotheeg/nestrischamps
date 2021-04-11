@@ -6,7 +6,7 @@ const ULID = require('ulid');
 // The below is to upload game frames to S3
 // That should be refactored into another file
 const { Upload } = require("@aws-sdk/lib-storage");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client } = require("@aws-sdk/client-s3");
 const stream = require('stream');
 const zlib = require('zlib');
 
