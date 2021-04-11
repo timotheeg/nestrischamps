@@ -22,7 +22,8 @@ class Replay {
 				game_url = this.game_id_or_url;
 			}
 			else {
-				throw new Error(`Invalid Game URL: this.game_id_or_url`);
+				console.log(`Replay Error: Invalid Game URL: this.game_id_or_url`);
+				return;
 			}
 		}
 		else {
@@ -30,7 +31,8 @@ class Replay {
 			const path = await ScoreDAO.getAnonymousScore(game_id).frame_file;
 
 			if (!path) {
-				throw new Error(`No replay file found for gameid ${game_id}`);
+				console.log(`Replay Error: No replay file found for gameid ${game_id}`);
+				return;
 			}
 
 			game_url = `${process.env.GAME_FRAMES_BASEURL}${path}`;
