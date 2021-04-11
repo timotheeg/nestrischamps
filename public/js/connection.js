@@ -62,7 +62,7 @@ class Connection {
 		// match current page prototol
 		const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
 
-		this.socket = new WebSocket(`${wsp}://${location.host}/ws${location.pathname}`);
+		this.socket = new WebSocket(`${wsp}://${location.host}/ws${location.pathname}${location.search}`);
 
 		this.socket.binaryType = "arraybuffer";
 

@@ -1,5 +1,14 @@
 // Minimum amount of game tracking to do server side to be able to report games
 const BinaryFrame = require('../public/js/BinaryFrame');
+const ScoreDAO = require('../daos/ScoreDAO');
+const ULID = require('ulid');
+
+// The below is to upload game frames to S3
+// That should be refactored into another file
+const { Upload } = require("@aws-sdk/lib-storage");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const stream = require('stream');
+const zlib = require('zlib');
 
 const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
@@ -7,10 +16,45 @@ const LINE_CLEAR_IGNORE_FRAMES = 7;
 
 
 class Game {
-	constructor() {
+	constructor(user) {
+		this.frame_file = '';
+		this.user = user;
 		this.frame_count = 0;
 		this.data = null;
 		this.over = false;
+		this.num_frames = 0;
+
+		if (process.env.FF_SAVE_GAME_FRAMES) {
+			// We use ulid ids for games, and games get binned into part of the 10 bits timestamp
+			// this means each folder represents about ~9h, which should be about one siting
+			// the extension ngf stands for "Nestrischamps Game Frames"
+			const ulid = ULID.ulid();
+			this.frame_file = `games/${user.id}/${ulid.slice(0, 5)}/${ulid.slice(5)}.ngf`;
+
+			// Set up a streaming upload system to S3
+			this.frame_stream = new stream.PassThrough();
+
+			const upload = new Upload({
+				client: new S3Client({ region: process.env.GAME_FRAMES_REGION }),
+				leavePartsOnError: false,
+				params: {
+					Bucket: process.env.GAME_FRAMES_BUCKET,
+					Key: this.frame_file,
+					Body: this.frame_stream.pipe(zlib.createGzip()),
+					ACL: 'public-read',
+					ContentType: 'application/nestrischamps-game-frames',
+					ContentEncoding: 'gzip',
+					ContentDisposition: 'attachment',
+					CacheControl: 'max-age=315360000',
+				}
+			});
+
+			// set up some logging for game file upload
+			upload.done().then(
+				() => console.log(`Game file uploaded: ${this.frame_file}`),
+				(err) => console.log(`Unable to upload game file ${this.frame_file}: ${err.message}`),
+			);
+		}
 	}
 
 	setFrame(frame) {
@@ -56,6 +100,8 @@ class Game {
 
 			this.data = data; // record frame as current state
 
+			this.saveFrame(frame);
+
 			return;
 		}
 
@@ -67,9 +113,14 @@ class Game {
 			this.onNewGame(frame);
 			return;
 		}
-		else if (this.over) {
+
+		if (this.over) {
 			return;
 		}
+
+		this.saveFrame(frame);
+
+		const cur_num_blocks = this._getNumBlocks(data);
 
 		if (this.pending_score) {
 			this.pending_score = false;
@@ -97,7 +148,6 @@ class Game {
 
 					if (this.clear_animation_remaining_frames-- > 0) break;
 
-					const cur_num_blocks = this._getNumBlocks(data);
 					const block_diff = cur_num_blocks - this.num_blocks;
 
 					switch(block_diff) {
@@ -145,8 +195,8 @@ class Game {
 			}
 		}
 
-		// Check board for gameover event
-		if (!this.over && data.field.slice(0, 10).every(cell => cell)) {
+		// Check board for gameover event (curtain has fallen)
+		if (cur_num_blocks >= 200) {
 			this._doGameOver();
 		}
 	}
@@ -155,9 +205,21 @@ class Game {
 		this.over = true;
 		this.end_ts = Date.now();
 
-		if (this.frame_count > 2) {
-			this.onGameOver();
+		if (process.env.FF_SAVE_GAME_FRAMES) {
+			this.frame_stream.end();
 		}
+
+		if (this.frame_count <= 2) return;
+
+		ScoreDAO
+			.recordGame(this.user, this.getReport())
+			.then(
+				(score_id) => console.log(`Recorded new game for user ${this.user.id} with id ${score_id}`),
+				(err) => {
+					console.log('Unable to record game');
+					console.error(err);
+				}
+			);
 	}
 
 	_isSameField(data) {
@@ -261,12 +323,21 @@ class Game {
 
 			tetris_rate,
 			das_avg,
+
+			num_frames: this.num_frames,
+			frame_file: this.frame_file,
 		};
 	}
 
-	// client app to overwrite
-	onTetris() {}
+	saveFrame(frame) {
+		if (process.env.FF_SAVE_GAME_FRAMES) {
+			this.num_frames++;
+			this.frame_stream.write(frame);
+		}
+	}
+
 	onGameOver() {}
+	onTetris() {}
 	onNewGame() {}
 }
 

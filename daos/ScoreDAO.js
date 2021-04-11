@@ -103,11 +103,13 @@ class ScoreDAO {
 				duration,
 				clears,
 				pieces,
-				transition
+				transition,
+				num_frames,
+				frame_file
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
 			)
 			RETURNING id
 			`,
@@ -125,6 +127,8 @@ class ScoreDAO {
 				game_data.clears,
 				game_data.pieces,
 				game_data.transition,
+				game_data.num_frames,
+				game_data.frame_file,
 			]
 		);
 
@@ -155,7 +159,7 @@ class ScoreDAO {
 
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
 		const result = await dbPool.query(`
-				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration
+				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration, frame_file
 				FROM scores
 				WHERE player_id=$1
 				ORDER BY ${options.sort_field} ${options.sort_order}
@@ -184,6 +188,17 @@ class ScoreDAO {
 			WHERE player_id=$1 AND id=$2
 			`,
 			[ user.id, score_id ]
+		);
+
+		return result.rows[0]; // anything to extract from that?
+	}
+
+	async getAnonymousScore(score_id) {
+		const result = await dbPool.query(`
+			SELECT * FROM scores
+			WHERE id=$1
+			`,
+			[ score_id ]
 		);
 
 		return result.rows[0]; // anything to extract from that?
