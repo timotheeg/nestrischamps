@@ -123,6 +123,7 @@ module.exports = function init(server, wss) {
 			if (request.game1_id) {
 				new Replay(connection, 0, parseInt(request.game1_id, 10), request.speed);
 			}
+
 			if (request.game2_id) {
 				new Replay(connection, 1, parseInt(request.game2_id, 10), request.speed);
 			}
