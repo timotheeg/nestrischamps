@@ -26,8 +26,17 @@ CREATE TABLE scores (
 	num_droughts SMALLINT,
 	max_drought SMALLINT,
 	das_avg NUMERIC(10,8),
+	duration INTEGER DEFAULT 0,
+	clears VARCHAR(400) DEFAULT '',
+	pieces VARCHAR(1200) DEFAULT '',
+	transition INTEGER DEFAULT NULL,
+	num_frames INTEGER DEFAULT 0,
+	frame_file VARCHAR(256) DEFAULT '',
 
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)
 			REFERENCES twitch_users(id)
 );
+
+INSERT INTO twitch_users VALUES (1, 'player1', 'player1@nestrischamps.com', 'player1', '', '', 'Player 1', '', NOW(), NOW());
+INSERT INTO twitch_users VALUES (2, 'player2', 'player2@nestrischamps.com', 'player2', '', '', 'Player 2', '', NOW(), NOW());
