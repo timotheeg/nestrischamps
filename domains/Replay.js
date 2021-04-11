@@ -29,6 +29,10 @@ class Replay {
 			const game_id = this.game_id_or_url;
 			const path = await ScoreDAO.getAnonymousScore(game_id).frame_file;
 
+			if (!path) {
+				throw new Exception('No replay file found');
+			}
+
 			game_url = `${process.env.GAME_FRAMES_BASEURL}${path}`;
 		}
 
