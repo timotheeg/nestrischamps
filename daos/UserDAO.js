@@ -148,37 +148,6 @@ class UserDAO {
 
 		return user;
 	}
-
-
-	// Only used in local servers
-	// No interaction with DB
-
-	async getPlayer1() {
-		return this.getLocalPlayer('1');
-	}
-
-	async getPlayer2() {
-		return this.getLocalPlayer('2');
-	}
-
-	async getLocalPlayer(id) {
-		let user = this.users_by_id.get(id);
-
-		if (user) {
-			return user;
-		}
-
-		return this.addUserFromData({
-			id,
-			login: `player${id}`,
-			email: `player${id}@nestrischamp.com`,
-			secret: `nestrischamp${id}`,
-			type: 'foobar',
-			description: `player${id}`,
-			display_name: `player${id}`,
-			profile_image_url: '/dev/null'
-		});
-	}
 }
 
 module.exports = new UserDAO();

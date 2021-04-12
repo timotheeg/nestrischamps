@@ -6,13 +6,42 @@ const UserDAO = require('../daos/UserDAO');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-	res.render('login', {
-		client_id: process.env.TWITCH_CLIENT_ID,
-		redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
-		scope: '', // 'user:read:email'
+
+if (process.env.IS_PUBLIC_SERVER) {
+	router.get('/', (req, res) => {
+		res.render('login', {
+			client_id: process.env.TWITCH_CLIENT_ID,
+			redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
+			scope: '', // 'user:read:email'
+		});
 	});
-});
+}
+else {
+	router.get('/', (req, res) => {
+		res.render('local_login');
+	});
+
+	router.get('/set_session_player/:player_id', async (req, res) => {
+		const user = await UserDAO.getUserById(req.params.player_id);
+
+		console.log(`Retrieved local user object from DB for ${user.id} (${user.login})`);
+
+		req.session.user = {
+			id:     user.id,
+			login:  user.login,
+			secret: user.secret,
+		};
+
+		console.log('Stored session user as', req.session.user);
+
+		if (req.session.auth_success_redirect) {
+			res.redirect(req.session.auth_success_redirect)
+		}
+		else {
+			res.render('intro');
+		}
+	});
+}
 
 router.get('/twitch/callback', async (req, res) => {
 	console.log(`Twitch callback received with code [${req.query.code}]`);
