@@ -1,6 +1,8 @@
 const BinaryFrame = require('../public/js/BinaryFrame');
 const ScoreDAO = require('../daos/ScoreDAO');
 const got = require('got');
+const zlib = require('zlib');
+const path = require('path');
 
 
 class Replay {
@@ -15,11 +17,10 @@ class Replay {
 	}
 
 	async startStreaming() {
-		let game_url;
-
 		if (typeof this.game_id_or_url === 'string') {
 			if (this.game_id_or_url.startsWith('http')) {
-				game_url = this.game_id_or_url;
+				const game_url = this.game_id_or_url;
+				this.game_stream = got.stream(game_url);
 			}
 			else {
 				console.log(`Replay Error: Invalid Game URL: this.game_id_or_url`);
@@ -29,17 +30,30 @@ class Replay {
 		else {
 			const game_id = this.game_id_or_url;
 			const score_data = await ScoreDAO.getAnonymousScore(game_id);
-			const path = score_data.frame_file
+			const file_path = score_data.frame_file
 
-			if (!path) {
+			if (!file_path) {
 				console.log(`Replay Error: No replay file found for gameid ${game_id}:`, score_data);
 				return;
 			}
 
-			game_url = `${process.env.GAME_FRAMES_BASEURL}${path}`;
-		}
+			if (process.env.GAME_FRAMES_BUCKET) {
+				// data comes from S3
+				//https://nestrischamps.s3-us-west-1.amazonaws.com/
+				const base_url = `https://${process.env.GAME_FRAMES_BUCKET}.s3-${process.env.GAME_FRAMES_REGION}.amazonaws.com/`
 
-		this.game_stream = got.stream(game_url);
+				this.game_stream = got.stream(`${base_url}${file_path}`);
+			}
+			else {
+				// data comes from local file
+				this.game_stream = fs
+					.createReadStream(path.join(__dirname, '..', file_path))
+					.pipe(zlib.createGunzip());
+			}
+
+			game_url = `${process.env.GAME_FRAMES_BASEURL}${path}`;
+			this.game_stream = got.stream(game_url);
+		}
 
 		this.game_stream.on('readable', () => {
 			do {

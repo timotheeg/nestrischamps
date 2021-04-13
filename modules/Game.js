@@ -40,7 +40,7 @@ class Game {
 			// Set up a streaming upload system to S3
 			this.frame_stream = zlib.createGzip();
 
-			if (GAME_FRAMES_BUCKET) {
+			if (process.env.GAME_FRAMES_BUCKET) {
 				const upload = new Upload({
 					client: new S3Client({ region: process.env.GAME_FRAMES_REGION }),
 					leavePartsOnError: false,
