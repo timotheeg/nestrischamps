@@ -10,6 +10,9 @@ const { S3Client } = require("@aws-sdk/client-s3");
 const stream = require('stream');
 const zlib = require('zlib');
 
+const fs = require('fs');
+const path = require('path');
+
 const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
 const LINE_CLEAR_IGNORE_FRAMES = 7;
@@ -29,31 +32,43 @@ class Game {
 			// this means each folder represents about ~9h, which should be about one siting
 			// the extension ngf stands for "Nestrischamps Game Frames"
 			const ulid = ULID.ulid();
-			this.frame_file = `games/${user.id}/${ulid.slice(0, 5)}/${ulid.slice(5)}.ngf`;
+			const dir = `games/${user.id}/${ulid.slice(0, 5)}`;
+			const file = `${ulid.slice(5)}.ngf`;
+
+			this.frame_file = `${dir}/${file}`;
 
 			// Set up a streaming upload system to S3
-			this.frame_stream = new stream.PassThrough();
+			this.frame_stream = zlib.createGzip();
 
-			const upload = new Upload({
-				client: new S3Client({ region: process.env.GAME_FRAMES_REGION }),
-				leavePartsOnError: false,
-				params: {
-					Bucket: process.env.GAME_FRAMES_BUCKET,
-					Key: this.frame_file,
-					Body: this.frame_stream.pipe(zlib.createGzip()),
-					ACL: 'public-read',
-					ContentType: 'application/nestrischamps-game-frames',
-					ContentEncoding: 'gzip',
-					ContentDisposition: 'attachment',
-					CacheControl: 'max-age=315360000',
-				}
-			});
+			if (GAME_FRAMES_BUCKET) {
+				const upload = new Upload({
+					client: new S3Client({ region: process.env.GAME_FRAMES_REGION }),
+					leavePartsOnError: false,
+					params: {
+						Bucket: process.env.GAME_FRAMES_BUCKET,
+						Key: this.frame_file,
+						Body: this.frame_stream,
+						ACL: 'public-read',
+						ContentType: 'application/nestrischamps-game-frames',
+						ContentEncoding: 'gzip',
+						ContentDisposition: 'attachment',
+						CacheControl: 'max-age=315360000',
+					}
+				});
 
-			// set up some logging for game file upload
-			upload.done().then(
-				() => console.log(`Game file uploaded: ${this.frame_file}`),
-				(err) => console.log(`Unable to upload game file ${this.frame_file}: ${err.message}`),
-			);
+				// set up some logging for game file upload
+				upload.done().then(
+					() => console.log(`Game file uploaded: ${this.frame_file}`),
+					(err) => console.log(`Unable to upload game file ${this.frame_file}: ${err.message}`),
+				);
+			}
+			else if (!process.env.IS_PUBLIC_SERVER) {
+				// Saving on local filesystem
+				const full_dir = path.join(__dirname, '..', dir);
+
+				fs.mkdirSync(full_dir, {recurse: true}); // sync action is no good! Can we do without the sync? 😰
+				this.frame_stream.pipe(fs.createWriteStream(path.join(full_dir, file)));
+			}
 		}
 	}
 
