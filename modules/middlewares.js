@@ -7,11 +7,14 @@ module.exports = {
 		secret: process.env.SESSION_SECRET || ULID.ulid(),
 		resave: false,
 		saveUninitialized: true,
-		cookie: { secure: true },
+		cookie: {
+			secure: !!process.env.IS_PUBLIC_SERVER
+		},
 		genid: ULID.ulid,
 		store: new MemoryStore({
 			checkPeriod: 86400000 // prune expired entries every 24h
-		})
+		}),
+		name: 'nsid'
 	}),
 
 	assertSession(req, res, next) {

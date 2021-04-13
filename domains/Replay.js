@@ -3,6 +3,7 @@ const ScoreDAO = require('../daos/ScoreDAO');
 const got = require('got');
 const zlib = require('zlib');
 const path = require('path');
+const fs = require('fs');
 
 
 class Replay {
@@ -50,9 +51,6 @@ class Replay {
 					.createReadStream(path.join(__dirname, '..', file_path))
 					.pipe(zlib.createGunzip());
 			}
-
-			game_url = `${process.env.GAME_FRAMES_BASEURL}${path}`;
-			this.game_stream = got.stream(game_url);
 		}
 
 		this.game_stream.on('readable', () => {
