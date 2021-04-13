@@ -476,9 +476,9 @@ function renderPastGamesAndPBs(data) {
 			}
 
 			return '<tr>' + [
-				record.start_level.toString().padStart(2, '0'),
-				record.score.toString().padStart(6, '0').padStart(7, ' '),
-				getPercent(record.tetris_rate)
+				(record.start_level || 0).toString().padStart(2, '0'),
+				(record.score || 0).toString().padStart(6, '0').padStart(7, ' '),
+				getPercent(record.tetris_rate || 0)
 			].map(content => `<td>${content}</td>`).join('') + '</tr>';
 
 		}).join('');
