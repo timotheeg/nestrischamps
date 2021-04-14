@@ -226,8 +226,15 @@ class Game {
 
 		if (this.frame_count <= 2) return;
 
+		const report = this.getReport();
+
+		if (report.score == null) {
+			console.log('Block reporting of null score');
+			return;
+		}
+
 		ScoreDAO
-			.recordGame(this.user, this.getReport())
+			.recordGame(this.user, report)
 			.then(
 				(score_id) => console.log(`Recorded new game for user ${this.user.id} with id ${score_id}`),
 				(err) => {
