@@ -144,13 +144,70 @@ Capture device are presumed to produce interlaced output, which can create incor
 It ispossible to disable the half-height behaviour by adding the following query string argument in the producer page `?disable_half_height=1`.
 
 
+## Local Setup
+
+### Install nodejs
+
+Nestrischamps is a [nodejs](https://nodejs.org/en/) server application and UI. It can run on node 12 and above, but use 14+ if you can. Installation instruction for your OS are left for you to figure out.
+
+
+### Clone the project locally from git:
+```bash
+git clone git@github.com:timotheeg/nestrischamps.git
+```
+
+### Install nodejs dependencies
+
+```bash
+cd nestrischamps
+npm install
+```
+
+### Set up a postgres local DB
+
+Install a local [Postgres DB](https://www.postgresql.org/) (instruction on how to do that is left to you. Check documentation for your OS), and set it up by running the [sql setup commands](./setup/db.sql).
+
+### Set up your environment variables
+
+Create a file `.env` at the root of the project checkout folder. The following environment variables are required:
+
+```
+DATABASE_URL=postgres://<UNAME>:<PWD>@<HOST>:<PORT>/<DBNAME>
+FF_SAVE_GAME_FRAMES=1
+```
+
+The variable `DATABASE_URL` should basically contains a [connection URI](https://node-postgres.com/features/connecting#connection-uri), which should match your DB access.
+
+The variable `FF_SAVE_GAME_FRAMES=1` ensures that game files will saved locally (in the folder `games`. For replay if you want, of for further game analysis later if you are so enclined. If you do not want to save grame frames, remove the variable `FF_SAVE_GAME_FRAMES`
+
+
+### Run the server
+
+Sets environment variable and start the server
+```bash
+npm run start-linux
+```
+
+### Access the App
+
+The app is accessed locally just like the online live version of nestrischamps.
+
+The only thing the local versiopn des not support is Twitch logging.
+
+So, load the producer URL: [http://localhost:5000/room/producer](http://localhost:5000/room/producer), and click on the button `Login as Player 1` to set your session.
+
+Next, lLoad the renderer URL: [http://localhost:5000/renderes](http://localhost:5000/renderers), and copy the URL for the layout you want.
+
+Create a Browser source in OBS from that URL (again, just like in nestrischamps online mode).
+
+You're done! From here on, everything should be connected and working!
+
+
 ## Contribute
 
-The repo is a little bit of a mess (all parts). Apologies for that. Many issues and ideas for improvements are listed in the [github issues](https://github.com/timotheeg/nestrischamps/issues).
+To contribute, make sure you first set project to run locally, see previous section, such you can test your code before opening up PRs.
 
-Testing is also a mess, several functionality are not available when running in local server mode (basically everything touching the DB). That should come at some point, at the cost of added setup complexity.
-
-To test changes to the producer, renderer, admin room however, you can use the local setup.
+Many issues and ideas for improvements are listed in the [github issues](https://github.com/timotheeg/nestrischamps/issues).
 
 The code is sort of messy, and yet, I have some standards hidden in this mess, until I document them, please ask on [the discord server](https://discord.gg/gaCEe5aX) before submitting PRs.
 

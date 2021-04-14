@@ -9,14 +9,9 @@ app.set('trust proxy', 1) // trust first proxy (i.e. heroku) -- needed to get re
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(middlewares.sessionMiddleware);
 
-if (process.env.IS_PUBLIC_SERVER) {
-	app.use('/auth', require('../routes/auth'));
-	app.use('/stats', require('../routes/score'));
-	app.use('/settings', require('../routes/settings'));
-	app.use('', require('../routes/routes'));
-}
-else {
-	app.use('', require('../routes/local_routes'));
-}
+app.use('/auth', require('../routes/auth'));
+app.use('/stats', require('../routes/score'));
+app.use('/settings', require('../routes/settings'));
+app.use('', require('../routes/routes'));
 
 module.exports = app;

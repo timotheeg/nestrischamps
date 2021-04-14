@@ -1,0 +1,22 @@
+<html>
+<head>
+</head>
+<body>
+
+<center>
+	<button id="player1" class="player" data-player_id="1">Login as Player1</button>
+	<button id="player2" class="player" data-player_id="2">Login as Player2</button>
+</center>
+
+<script>
+document.querySelectorAll('button.player').forEach(elmt => {
+	elmt.addEventListener('click', (evt) => {
+		evt.preventDefault();
+
+		document.location.href = `/auth/set_session_player/${elmt.dataset.player_id}`;
+	});
+});
+
+</script>
+</body>
+</html>
