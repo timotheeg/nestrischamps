@@ -154,11 +154,11 @@ module.exports = function init(server, wss) {
 
 			room.addView(connection);
 		}
-		else if(request.url === '/ws/room/admin') {
+		else if(request.url.match(/^\/ws\/room\/admin(\?.*)?$/)) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getMatchRoom().setAdmin(connection);
 		}
-		else if(request.url === '/ws/room/producer') {
+		else if(request.url.match(/^\/ws\/room\/producer(\?.*)?$/)) {
 			console.log(`PrivateRoom: ${user.login}: Producer connected`);
 			user.getPrivateRoom().setProducer(connection);
 		}
