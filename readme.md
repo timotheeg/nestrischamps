@@ -96,6 +96,10 @@ Also, verify that Browser Source hardware acceleration is set (under Advanced Se
 
 ### Local Setup
 
+Warning: Local setup is for developpers and contributors. If you are a casual user, use [nestrischamps online](https://nestrischamps.herokuapp.com/) instead :)
+
+
+
 #### Install nodejs
 
 Nestrischamps is a [nodejs](https://nodejs.org/en/) server application and UI. It can run on node 12 and above, but use 14+ if you can. Installation instruction for your OS are left for you to figure out.
@@ -142,7 +146,7 @@ npm run start-linux
 
 The app is accessed locally just like the online live version of nestrischamps.
 
-The only thing the local versiopn des not support is Twitch logging.
+The only thing the local versiopn des not support is Twitch login.
 
 So, load the producer URL: [http://localhost:5000/room/producer](http://localhost:5000/room/producer), and click on the button `Login as Player 1` to set your session.
 
@@ -155,9 +159,8 @@ You're done! From here on, everything should be connected and working!
 
 #### Invite remote friends
 
-If you know how to set up apps on your router (i.e. [port forwarding](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide/), you can invite your friends to play on your local server. Make them access the producer URL, and ask  them to login as player 2 rather than player 1
+If you know how to set up apps on your router (i.e. [port forwarding](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide/), you can invite your friends to play on your local server. Make them access the producer URL, and ask them to login as player 2 rather than player 1.
 
-s
 
 ## "Hidden" options
 
