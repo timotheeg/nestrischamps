@@ -15,7 +15,7 @@ class ScoreDAO {
 				],
 				high_scores: {
 					overall: await this._getBestOverall(db_client, user),
-					today:   await this._getBestToday(db_client, user)
+					today:   await this._getBest24Hours(db_client, user)
 				}
 			};
 		}
@@ -79,6 +79,22 @@ class ScoreDAO {
 				user.id,
 				today.toISOString(),
 			]
+		);
+
+		return result.rows;
+	}
+
+	async _getBest24Hours(db_client, user) {
+		const result = await db_client.query(`
+			SELECT start_level, score, tetris_rate
+			FROM scores
+			WHERE player_id=$1
+				AND datetime >= NOW() - interval '24 hours'
+				AND datetime <= NOW()
+			ORDER BY score DESC
+			LIMIT 10
+			`,
+			[ user.id ]
 		);
 
 		return result.rows;
