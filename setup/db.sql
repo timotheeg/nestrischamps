@@ -38,5 +38,5 @@ CREATE TABLE scores (
 			REFERENCES twitch_users(id)
 );
 
-INSERT INTO twitch_users VALUES (1, 'player1', 'player1@nestrischamps.com', 'player1', '', '', 'Player 1', '', NOW(), NOW());
-INSERT INTO twitch_users VALUES (2, 'player2', 'player2@nestrischamps.com', 'player2', '', '', 'Player 2', '', NOW(), NOW());
+INSERT INTO twitch_users VALUES (1, 'player1', 'player1@nestrischamps.com', 'PLAYER1', '', '', 'Player 1', '', NOW(), NOW());
+INSERT INTO twitch_users VALUES (2, 'player2', 'player2@nestrischamps.com', 'PLAYER2', '', '', 'Player 2', '', NOW(), NOW());

@@ -381,7 +381,7 @@ function onFrame(event, debug) {
 function getStats() {
 	let m;
 
-	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([A-Z0-9]+)$/)) {
+	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/)) {
 		fetch(
 			`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
 			{
