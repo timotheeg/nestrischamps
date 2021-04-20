@@ -55,7 +55,7 @@ So TVs, emulator, and capture cards scale the native resolution to varying degre
 
 ![Classic UI at 640x480](./classic_640x480.png)
 
-This poses a problem for doing OCR and board and block scanning, because scaling added bluriness to the image. See the next box scaled up now:
+While this works great for human player, it poses a problem for doing OCR and board and block scanning, because scaling added bluriness to the image. See the next box scaled up now:
 
 ![Next box scaled up](./next_scaled_up.png)
 
