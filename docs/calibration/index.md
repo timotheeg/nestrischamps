@@ -75,6 +75,12 @@ Cropped Scaled up copy | Cropped Normalized copy | Cropped copy with region mark
 ![foo](./next_crop_2.png) | ![foo](./next_normalized_2.png) | ![foo](./next_normalized_2_w_markers.png)
 
 
+There are a few things to note here:
+
+1. Small areas like the shine or 1px borders are severly affecting by scaling. In the normalized view, the borders are not deep black at all.
+2. The center areas of the block are retaining their color
+
+
 ## Frame Scanning
 
 ### The Calibration UI
