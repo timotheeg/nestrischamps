@@ -12,6 +12,7 @@ Color 2 is the darker color of the level. Blocks contains the following elements
 * "Shine" on the top-left corner, over a 3x3 area
 
 Here is a sample at level 0:
+
 ![Color 2](./color2.png)
 
 ### Color 3
@@ -22,6 +23,7 @@ Color 2 is the darker color of the level. Blocks contains the following elements
 * "Shine" on the top-left corner, over a 3x3 area
 
 Here is a sample at level 0:
+
 ![Color 3](./color3.png)
 
 ### Color 1 (white)
@@ -29,6 +31,7 @@ Here is a sample at level 0:
 Color 1 is the white, and it is a white square with a border of color 2, and a shine pixel on the top-left corner
 
 Here is a sample at level 0:
+
 ![Color 3](./color1.png)
 
 
@@ -72,9 +75,6 @@ Cropped Scaled up copy | Cropped Normalized copy | Cropped copy with region mark
 ---------------------- | ----------------------- | -----------------------
 ![foo](./next_crop_1.png) | ![foo](./next_normalized_1.png) | ![foo](./next_normalized_1_w_markers.png)
 ![foo](./next_crop_2.png) | ![foo](./next_normalized_2.png) | ![foo](./next_normalized_2_w_markers.png)
-
-
-![Next box scaled up](./next_scaled_up.png)
 
 
 ## Frame Scanning

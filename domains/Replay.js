@@ -98,6 +98,17 @@ class Replay {
 
 		const frame = new Uint8Array(this.frame_buffer.shift());
 
+		if (true) {
+			this.send_timeout = setTimeout(() => {
+				this.send_timeout = null;
+				const str = JSON.stringify(BinaryFrame.parse(frame));
+				console.log(str);
+				this.connection.send(`${str}\n`);
+				this.sendNextFrame();
+			}, 0);
+			return;
+		}
+
 		frame[0] = (frame[0] & 0b11111000) | this.player_num;
 
 		const tdiff = Math.round((BinaryFrame.getCTime(frame) - this.start_ctime) / this.time_scale);
