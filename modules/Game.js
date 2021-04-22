@@ -300,7 +300,7 @@ class Game {
 		}
 		else {
 			cur_piece = data.cur_piece; // 💪
-			this.das_total = data.cur_piece_das;
+			this.das_total += data.cur_piece_das;
 		}
 
 		this.pieces.push(cur_piece);
