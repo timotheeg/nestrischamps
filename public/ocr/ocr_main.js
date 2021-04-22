@@ -78,30 +78,31 @@ const default_frame_rate = 60;
 let do_half_height = true;
 
 const
-	reference_ui     = document.querySelector('#reference_ui'),
-	video_capture    = document.querySelector('#video_capture'),
+	reference_ui       = document.querySelector('#reference_ui'),
+	video_capture      = document.querySelector('#video_capture'),
 
-	wizard           = document.querySelector('#wizard'),
-	device_selector  = document.querySelector('#device'),
-	color_matching   = document.querySelector('#color_matching'),
-	palette_selector = document.querySelector('#palette'),
-	rom_selector     = document.querySelector('#rom'),
-	go_btn           = document.querySelector('#go'),
+	wizard             = document.querySelector('#wizard'),
+	device_selector    = document.querySelector('#device'),
+	color_matching     = document.querySelector('#color_matching'),
+	palette_selector   = document.querySelector('#palette'),
+	rom_selector       = document.querySelector('#rom'),
+	go_btn             = document.querySelector('#go'),
 
-	controls         = document.querySelector('#controls'),
-	capture_rate     = document.querySelector('#capture_rate'),
-	show_parts       = document.querySelector('#show_parts'),
-	timer_control    = document.querySelector('#timer_control'),
-	start_timer      = document.querySelector('#start_timer'),
+	controls           = document.querySelector('#controls'),
+	capture_rate       = document.querySelector('#capture_rate'),
+	show_parts         = document.querySelector('#show_parts'),
+	shine_optimization = document.querySelector('#shine_optimization'),
+	timer_control      = document.querySelector('#timer_control'),
+	start_timer        = document.querySelector('#start_timer'),
 
-	conn_host        = document.querySelector('#conn_host'),
-	conn_port        = document.querySelector('#conn_port'),
-	video            = document.querySelector('#device_video'),
-	ocr_results      = document.querySelector('#ocr_results'),
-	frame_data       = document.querySelector('#frame_data'),
-	perf_data        = document.querySelector('#perf_data'),
-	capture          = document.querySelector('#capture'),
-	adjustments      = document.querySelector('#adjustments')
+	conn_host          = document.querySelector('#conn_host'),
+	conn_port          = document.querySelector('#conn_port'),
+	video              = document.querySelector('#device_video'),
+	ocr_results        = document.querySelector('#ocr_results'),
+	frame_data         = document.querySelector('#frame_data'),
+	perf_data          = document.querySelector('#perf_data'),
+	capture            = document.querySelector('#capture'),
+	adjustments        = document.querySelector('#adjustments')
 ;
 
 const IN_GAME = {};
