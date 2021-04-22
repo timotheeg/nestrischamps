@@ -111,28 +111,28 @@ class User extends EventEmitter{
 	}
 
 	async _connectToTwitchChat() {
-		if (!this.chat_client || !this.token) {
+		if (this.chat_client || !this.token) {
 			return;
 		}
 
 		const auth = new RefreshableAuthProvider(
 			new StaticAuthProvider(
 				process.env.TWITCH_CLIENT_ID,
-				this.token.accessToken,
+				this.token.access_token,
 			),
 			{
 				clientSecret: process.env.TWITCH_CLIENT_SECRET,
-				refreshToken: this.token.refreshToken,
+				refreshToken: this.token.refresh_token,
 				expiry: this.token.expiry,
 				onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
-					token.accessToken = accessToken;
-					token.refreshToken = refreshToken;
+					token.access_token = access_token;
+					token.refresh_token = refresh_token;
 					token.expiry = expiryDate;
 				}
 			}
 		);
 
-		this.chat_client = new Chat_client(auth, {
+		this.chat_client = new ChatClient(auth, {
 			channels: [ this.login ],
 			readOnly: true,
 		});
@@ -143,15 +143,12 @@ class User extends EventEmitter{
 				return;
 			}
 
-			// compatibility format with previous version
-			const chatter = {
+			this._send(['message', {
 				user:         user,
 				username:     user,
 				display_name: user,
 				message:      message || ''
-			}
-
-			this._send(['message', chatter]);
+			}]);
 		});
 
 		this.chat_client.onSub((channel, user) => {
