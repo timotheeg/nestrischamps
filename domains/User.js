@@ -94,7 +94,8 @@ class User extends EventEmitter{
 	_send(msg) {
 		const msg_str = JSON.stringify(msg);
 
-		for (const connection in this.connections) {
+		// TODO: maybe no need to send to producer and admin connections? 🤔
+		for (const connection of this.connections) {
 			connection.send(msg_str);
 		}
 	}

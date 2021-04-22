@@ -249,6 +249,10 @@ function bootstrap() {
 
 				break;
 			}
+
+			default: {
+				console.log(`Received unknow command ${command}`);
+			}
 		}
 	};
 }
