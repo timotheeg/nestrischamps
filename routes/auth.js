@@ -64,8 +64,6 @@ router.get('/twitch/callback', async (req, res) => {
 
 	const token = token_response.body;
 
-	console.log(token, token.access_token);
-
 	try {
 		// must validate token to get user id
 		const user_response = await got.get('https://id.twitch.tv/oauth2/validate', {
@@ -94,12 +92,13 @@ router.get('/twitch/callback', async (req, res) => {
 		console.log(`Retrieved user data for ${user_response.body.user_id} (${user_object.login})`);
 
 		// augment use object with data we retrieve previously
-		user_object.token = token;
 		user_object.secret = ULID.ulid();
 
 		const user = await UserDAO.createUser(user_object);
 
 		console.log(`Retrieved user object from DB for ${user_response.body.user_id} (${user_object.login})`);
+
+		user.setTwitchToken(token);
 
 		req.session.user = {
 			id:     user.id,
