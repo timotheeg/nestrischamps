@@ -71,8 +71,6 @@ class Connection extends EventEmitter {
 	}
 
 	_onMessage(message) {
-		// this._onHeartBeat(); // not needed - too many messages?
-
 		if (message instanceof Uint8Array) {
 			this.emit('message', message);
 		}

@@ -230,7 +230,9 @@ player.onGameStart = () => {
 const API = {
 	frame(player_idx, data) {
 		player.setFrame(data);
-	}
+	},
+
+	message() {} // noop
 }
 
 const connection = new Connection();
