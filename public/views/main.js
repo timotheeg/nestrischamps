@@ -98,6 +98,8 @@ function onMessage(entry) {
 	dom.chat.element.appendChild(p);
 
 	dom.chat.element.scrollTop = dom.chat.element.scrollHeight - dom.chat.element.clientHeight;
+
+	speak(entry);
 }
 
 const LINE_CLEAR_IGNORE_FRAMES = 7;
