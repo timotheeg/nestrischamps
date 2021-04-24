@@ -100,6 +100,7 @@ router.get('/twitch/callback', async (req, res) => {
 
 		user.setTwitchToken(token);
 
+		req.session.token = token;
 		req.session.user = {
 			id:     user.id,
 			login:  user.login,

@@ -7,6 +7,7 @@ const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
 
 router.use(middlewares.assertSession);
+router.use(middlewares.checkToken);
 
 router.get('/', async (req, res) => {
 	const user = await UserDAO.getUserById(req.session.user.id);

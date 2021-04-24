@@ -139,6 +139,9 @@ module.exports = function init(server, wss) {
 
 		const user = await UserDAO.getUserById(request.session.user.id);
 
+		// synchronize session token if needed
+		await middlewares.checkToken(request, {});
+
 		const connection = new Connection(user, ws);
 
 		let m; // for url matching (if needed below)

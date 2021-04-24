@@ -14,6 +14,8 @@ CREATE TABLE twitch_users (
 	last_login TIMESTAMP NOT NULL
 );
 
+CREATE INDEX IDX_users_email ON twitch_users (email);
+
 CREATE TABLE scores (
 	id SERIAL PRIMARY KEY,
 	datetime TIMESTAMP NOT NULL,
@@ -38,5 +40,21 @@ CREATE TABLE scores (
 			REFERENCES twitch_users(id)
 );
 
+CREATE INDEX IDX_scores_player_datetime ON scores (player_id, datetime);
+CREATE INDEX IDX_scores_player_score ON scores (player_id, score);
+CREATE INDEX IDX_scores_datetime ON scores (datetime);
+
+CREATE TABLE sessions (
+	sid varchar NOT NULL COLLATE "default",
+	sess json NOT NULL,
+	expire timestamp(6) NOT NULL
+)
+WITH (OIDS=FALSE);
+
+ALTER TABLE sessions ADD CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE;
+
+CREATE INDEX IDX_session_expire ON sessions (expire);
+
 INSERT INTO twitch_users VALUES (1, 'player1', 'player1@nestrischamps.com', 'PLAYER1', '', '', 'Player 1', '', NOW(), NOW());
 INSERT INTO twitch_users VALUES (2, 'player2', 'player2@nestrischamps.com', 'PLAYER2', '', '', 'Player 2', '', NOW(), NOW());
+

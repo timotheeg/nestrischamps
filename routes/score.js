@@ -22,31 +22,39 @@ router.get('/get_stats/:secret', async (req, res) => {
 	res.json(await ScoreDAO.getStats(user));
 });
 
-router.get('/u/:login/get_stats', middlewares.assertSession, async (req, res) => {
-	console.log('get stats by login');
+router.get('/u/:login/get_stats',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log('get stats by login');
 
-	const user = await UserDAO.getUserByLogin(req.params.login);
+		const user = await UserDAO.getUserByLogin(req.params.login);
 
-	if (!user) {
-		res.status(404).send('User Not found');
-		return;
+		if (!user) {
+			res.status(404).send('User Not found');
+			return;
+		}
+
+		res.json(await ScoreDAO.getStats(user));
 	}
+);
 
-	res.json(await ScoreDAO.getStats(user));
-});
+router.get('/get_stats',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log('get stats by session');
 
-router.get('/get_stats', middlewares.assertSession, async (req, res) => {
-	console.log('get stats by session');
+		const user = await UserDAO.getUserById(req.session.user.id);
 
-	const user = await UserDAO.getUserById(req.session.user.id);
+		if (!user) {
+			res.status(404).send('User Not found');
+			return;
+		}
 
-	if (!user) {
-		res.status(404).send('User Not found');
-		return;
+		res.json(await ScoreDAO.getStats(user));
 	}
-
-	res.json(await ScoreDAO.getStats(user));
-});
+);
 
 
 router.post('/report_game/:secret', express.json(), async (req, res) => {
@@ -110,83 +118,95 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log('Sent new scores back');
 });
 
-router.get('/scores', middlewares.assertSession, async (req, res) => {
-	console.log(`Fetching user scores for ${req.session.user.id}`);
+router.get('/scores',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log(`Fetching user scores for ${req.session.user.id}`);
 
-	const PAGE_SIZE = 100;
-	const ALLOWED_ORDER_FIELDS = ['datetime', 'score', 'tetris_rate'];
-	const ALLOWED_ORDER_DIRS = ['desc', 'asc'];
+		const PAGE_SIZE = 100;
+		const ALLOWED_ORDER_FIELDS = ['datetime', 'score', 'tetris_rate'];
+		const ALLOWED_ORDER_DIRS = ['desc', 'asc'];
 
-	const options = {
-		sort_field: 'datetime',
-		sort_order: 'desc',
-		page_idx: 0,
-	};
+		const options = {
+			sort_field: 'datetime',
+			sort_order: 'desc',
+			page_idx: 0,
+		};
 
-	// validate and get args from query
-	if (ALLOWED_ORDER_FIELDS.includes(req.query.sort_field)) {
-		options.sort_field = req.query.sort_field;
-	}
-
-	if (ALLOWED_ORDER_DIRS.includes(req.query.sort_order)) {
-		options.sort_order = req.query.sort_order;
-	}
-
-	if (/^\d+$/.test(req.query.page_idx)) {
-		options.page_idx = parseInt(req.query.page_idx, 10);
-	}
-
-	const num_scores = await ScoreDAO.getNumberOfScores(req.session.user);
-	const num_pages = Math.ceil(num_scores / PAGE_SIZE) || 1;
-
-	options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages - 1));
-
-	// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
-	const scores = await ScoreDAO.getScorePage(req.session.user, options);
-
-	res.render('scores', {
-		scores,
-		num_pages,
-		pagination: options,
-	});
-});
-
-router.get('/scores/:id', middlewares.assertSession, async (req, res) => {
-	console.log(`User ${req.session.user.id} is getting score ${req.params.id}`);
-	const score = await ScoreDAO.getScore(req.session.user, req.params.id);
-
-	if (score) {
-		if (score.frame_file) {
-			score.frame_file_url = `${process.env.GAME_FRAMES_BASEURL}${score.frame_file}`;
-
-			delete score.frame_file;
+		// validate and get args from query
+		if (ALLOWED_ORDER_FIELDS.includes(req.query.sort_field)) {
+			options.sort_field = req.query.sort_field;
 		}
+
+		if (ALLOWED_ORDER_DIRS.includes(req.query.sort_order)) {
+			options.sort_order = req.query.sort_order;
+		}
+
+		if (/^\d+$/.test(req.query.page_idx)) {
+			options.page_idx = parseInt(req.query.page_idx, 10);
+		}
+
+		const num_scores = await ScoreDAO.getNumberOfScores(req.session.user);
+		const num_pages = Math.ceil(num_scores / PAGE_SIZE) || 1;
+
+		options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages - 1));
+
+		// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
+		const scores = await ScoreDAO.getScorePage(req.session.user, options);
+
+		res.render('scores', {
+			scores,
+			num_pages,
+			pagination: options,
+		});
 	}
+);
 
-	res.json(score);
-});
+router.get('/scores/:id',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log(`User ${req.session.user.id} is getting score ${req.params.id}`);
+		const score = await ScoreDAO.getScore(req.session.user, req.params.id);
 
-router.delete('/scores/:id', middlewares.assertSession, async (req, res) => {
-	console.log(`User ${req.session.user.id} is deleting score ${req.params.id}`);
+		if (score) {
+			if (score.frame_file) {
+				score.frame_file_url = `${process.env.GAME_FRAMES_BASEURL}${score.frame_file}`;
 
-	const score = await ScoreDAO.getScore(req.session.user, req.params.id);
+				delete score.frame_file;
+			}
+		}
 
-	await ScoreDAO.deleteScore(req.session.user, req.params.id);
-
-	if (score && score.frame_file) {
-		const s3_client = new S3Client({ region: process.env.GAME_FRAMES_REGION });
-
-		// fire and forget, and log
-		s3_client.send(new DeleteObjectCommand({
-			Bucket: process.env.GAME_FRAMES_BUCKET,
-			Key: score.frame_file,
-		})).then(
-			() => console.log(`Deleted game ${req.params.id}'s' file ${score.frame_file}`),
-			(err) => console.log(`Unable to delete game ${req.params.id}'s' file ${score.frame_file}: ${err.message}`)
-		);
+		res.json(score);
 	}
+);
 
-	res.json({ status: 'ok' });
-});
+router.delete('/scores/:id',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log(`User ${req.session.user.id} is deleting score ${req.params.id}`);
+
+		const score = await ScoreDAO.getScore(req.session.user, req.params.id);
+
+		await ScoreDAO.deleteScore(req.session.user, req.params.id);
+
+		if (score && score.frame_file) {
+			const s3_client = new S3Client({ region: process.env.GAME_FRAMES_REGION });
+
+			// fire and forget, and log
+			s3_client.send(new DeleteObjectCommand({
+				Bucket: process.env.GAME_FRAMES_BUCKET,
+				Key: score.frame_file,
+			})).then(
+				() => console.log(`Deleted game ${req.params.id}'s' file ${score.frame_file}`),
+				(err) => console.log(`Unable to delete game ${req.params.id}'s' file ${score.frame_file}: ${err.message}`)
+			);
+		}
+
+		res.json({ status: 'ok' });
+	}
+);
 
 module.exports = router;
