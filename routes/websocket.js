@@ -121,7 +121,7 @@ module.exports = function init(server, wss) {
 
 	wss.on('connection', async (ws, request) => {
 		if (request.is_replay) {
-			const user = request.session.user || { id: 1 };
+			const user = (request.session && request.session.user) || { id: 1 };
 			const connection = new Connection(user, ws);
 
 			if (request.game1_id) {
