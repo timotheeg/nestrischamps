@@ -64,6 +64,14 @@ class User extends EventEmitter{
 		// in memory only, not in DB
 		this.token = token;
 		this.token.expiry = new Date(Date.now() + token.expires_in * 1000);
+
+		if (this.connections.length) {
+			this._connectToTwitchChat();
+		}
+	}
+
+	hasTwitchToken() {
+		return !!this.token;
 	}
 
 	addConnection(conn) {
@@ -75,7 +83,6 @@ class User extends EventEmitter{
 		});
 
 		this.checkScheduleDestroy();
-
 		this._connectToTwitchChat();
 	}
 
@@ -126,6 +133,7 @@ class User extends EventEmitter{
 				refreshToken: this.token.refresh_token,
 				expiry: this.token.expiry,
 				onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
+					// How to update the session object(s) directly?
 					token.access_token = access_token;
 					token.refresh_token = refresh_token;
 					token.expiry = expiryDate;
