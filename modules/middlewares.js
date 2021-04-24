@@ -32,32 +32,28 @@ module.exports = {
 	},
 
 	async checkToken(req, res, next) {
-		if (!req.session || !req.session.user) {
-			next();
-			return;
-		}
-
-		// bit of a hack, we check the user object and set the token if needed
-		// we assume that the token is in thee session!
 		const user = await UserDAO.getUserById(req.session.user.id);
 
-		if (!user.hasTwitchToken()) {
-			user.setTwitchToken(req.session.token);
-		}
-		else {
-			// verify if the user token has been refreshed and if the session should be updated accordingly
-			const utoken = user.token;
-			const stoken = req.session.token;
+		if (req.session.token) {
+			if (!user.hasTwitchToken()) {
+				// assumes session has token!
+				user.setTwitchToken(req.session.token);
+			}
+			else {
+				// verify if the user token has been refreshed and if the session should be updated accordingly
+				const utoken = user.token;
+				const stoken = req.session.token;
 
-			if (utoken.access_token != stoken.access_token) {
-				// set the session token to be the same as user token
-				req.session.token = {
-					...utoken,
-					expires_in: Math.max(0, Math.round((utoken.expiry.getTime() - Date.now()) / 1000))
-				};
+				if (utoken.access_token != stoken.access_token) {
+					// set the session token to be the same as user token
+					req.session.token = utoken;
+				}
 			}
 		}
+		else if (user.hasTwitchToken()) {
+			req.session.token = user.token;
+		}
 
-		next();
+		if (next) next();
 	}
 };

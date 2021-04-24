@@ -18,60 +18,84 @@ router.get('/', (req, res) => {
 	res.render('intro');
 });
 
-router.get('/room/admin', middlewares.assertSession, (req, res) => {
-	res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
-});
-
-router.get('/room/u/:login/admin', middlewares.assertSession, async (req, res) => {
-	const target_user = await UserDAO.getUserByLogin(req.params.login);
-
-	if (!target_user) {
-		res.status(404).send('Target User Not found');
-		return;
+router.get('/room/admin',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	(req, res) => {
+		res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
 	}
+);
 
-	res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
-});
+router.get('/room/u/:login/admin',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		const target_user = await UserDAO.getUserByLogin(req.params.login);
 
-router.get('/room/producer', middlewares.assertSession, (req, res) => {
-	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
-});
+		if (!target_user) {
+			res.status(404).send('Target User Not found');
+			return;
+		}
 
-router.get('/room/u/:login/producer', middlewares.assertSession, async (req, res) => {
-	const target_user = await UserDAO.getUserByLogin(req.params.login);
-
-	if (!target_user) {
-		res.status(404).send('Target User Not found');
-		return;
+		res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
 	}
+);
 
-	res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
-});
+router.get('/room/producer',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	(req, res) => {
+		res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+	}
+);
+
+router.get('/room/u/:login/producer',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		const target_user = await UserDAO.getUserByLogin(req.params.login);
+
+		if (!target_user) {
+			res.status(404).send('Target User Not found');
+			return;
+		}
+
+		res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+	}
+);
 
 // This route should only be allowed by admin for non-owner
-router.get('/room/u/:login/view/:layout', middlewares.assertSession, async (req, res) => {
-	const target_user = await UserDAO.getUserByLogin(req.params.login);
+router.get('/room/u/:login/view/:layout',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		const target_user = await UserDAO.getUserByLogin(req.params.login);
 
-	if (!target_user) {
-		res.status(404).send('Target User Not found');
-		return;
+		if (!target_user) {
+			res.status(404).send('Target User Not found');
+			return;
+		}
+
+		const layout = layout_files[req.params.layout];
+
+		if (!layout) {
+			res.status(404).send('Layout Not found');
+			return;
+		}
+
+		res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
 	}
+);
 
-	const layout = layout_files[req.params.layout];
-
-	if (!layout) {
-		res.status(404).send('Layout Not found');
-		return;
-	}
-
-	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
-});
-
-router.get('/renderers', middlewares.assertSession, (req, res) => {
+router.get('/renderers',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	(req, res) => {
 	res.render('renderers', {
-		secret: req.session.user.secret
-	});
-});
+			secret: req.session.user.secret
+		});
+	}
+);
 
 
 // TODO: uniformalize the alyout and file names

@@ -137,6 +137,7 @@ class User extends EventEmitter{
 					token.access_token = access_token;
 					token.refresh_token = refresh_token;
 					token.expiry = expiryDate;
+					token.expires_in = Math.max(0, Math.floor((expiryDate.getTime() - Date.now()) / 1000));
 				}
 			}
 		);
