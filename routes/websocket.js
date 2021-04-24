@@ -89,7 +89,7 @@ module.exports = function init(server, wss) {
 			// i.e. producers and admin connections
 
 			middlewares.sessionMiddleware(request, {}, async () => {
-				if (!request.session.user) {
+				if (!request.session || !request.session.user) {
 					console.log(`WS: User session not found`);
 					socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
 					socket.destroy();
