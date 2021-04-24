@@ -1,6 +1,8 @@
 const session = require('express-session');
 const ULID = require('ulid');
 const MemoryStore = require('memorystore')(session);
+const dbPool = require('./db');
+const pgSession = require('connect-pg-simple')(session);
 
 module.exports = {
 	sessionMiddleware: session({
@@ -11,8 +13,9 @@ module.exports = {
 			secure: !!process.env.IS_PUBLIC_SERVER
 		},
 		genid: ULID.ulid,
-		store: new MemoryStore({
-			checkPeriod: 86400000 // prune expired entries every 24h
+		store: new pgSession({
+			pool:      dbPool,
+			tableName: 'sessions',
 		}),
 		name: 'nsid'
 	}),
