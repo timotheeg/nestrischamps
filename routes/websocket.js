@@ -80,10 +80,6 @@ module.exports = function init(server, wss) {
 				secret: user.secret,
 			};
 
-			if (user.token) {
-				request.session.token = user.token;
-			}
-
 			wss.handleUpgrade(request, socket, head, function (ws) {
 				wss.emit('connection', ws, request);
 			});
@@ -144,7 +140,7 @@ module.exports = function init(server, wss) {
 		const user = await UserDAO.getUserById(request.session.user.id);
 
 		// synchronize session token if needed
-		await checkToken(request, {});
+		await middlewares.checkToken(request, {});
 
 		const connection = new Connection(user, ws);
 
