@@ -159,6 +159,21 @@ function connect() {
 	}
 
 	connection = new Connection();
+
+	connection.onMessage= function(frame) {
+		try{
+			let [method, ...args] = frame;
+
+			switch(method) {
+				case 'message': {
+					speak(args[0]);
+				}
+			}
+		}
+		catch(e) {
+			console.error(e);
+		}
+	}
 }
 
 conn_host.addEventListener('change', connect);
