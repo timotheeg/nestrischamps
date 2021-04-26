@@ -503,7 +503,7 @@ async function startCapture(stream) {
 		ocr_results.style.display = 'flex';
 	}
 
-	frame_ms = 1000 / settings.frameRate;
+	const frame_ms = 1000 / settings.frameRate;
 
 	console.log(`Setting capture interval for ${settings.frameRate}fps (i.e. ${frame_ms}ms per frame)`)
 	capture_process = setInterval(captureFrame, frame_ms);

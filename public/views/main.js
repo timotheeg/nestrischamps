@@ -641,9 +641,9 @@ function renderPiece(event) {
 
 	pixel_size = 2;
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
-	color     = 'orange';
 
 	const
+		color        = 'orange',
 		cur_drought  = game.data.i_droughts.cur,
 		cur_ctx      = dom.droughts.cur.ctx,
 
@@ -685,7 +685,7 @@ function renderPiece(event) {
 	// but this will do for now
 	last_ctx.clear();
 	last_ctx.fillStyle = color;
-	for (idx = Math.min(last_drought, max_pixels); idx-- > 0; ) {
+	for (let idx = Math.min(last_drought, max_pixels); idx-- > 0; ) {
 		last_ctx.fillRect(
 			idx * (pixel_size + 1),
 			0,
