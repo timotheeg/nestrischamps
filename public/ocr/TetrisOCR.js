@@ -25,7 +25,8 @@ const PERF_METHODS = [
 	'scanCurPiece',
 ];
 
-const DEFAULT_COLOR_0 = [0xF0, 0xF0, 0xF0];
+const DEFAULT_COLOR_0 = [0x00, 0x00, 0x00];
+const DEFAULT_COLOR_1 = [0xF0, 0xF0, 0xF0];
 
 function getDigitsWidth(n) {
 	// width per digit is 8px times 2
@@ -137,7 +138,7 @@ class TetrisOCR extends EventTarget {
 		this.palette = this.palette.map(colors => {
 			if (colors.length == 2) {
 				return [
-					DEFAULT_COLOR_0,
+					DEFAULT_COLOR_1,
 					colors[0],
 					colors[1]
 				]
@@ -253,14 +254,14 @@ class TetrisOCR extends EventTarget {
 				res.color1 = this.scanColor1(source_img);
 			}
 			else {
-				res.color1 = DEFAULT_COLOR_0;
+				res.color1 = DEFAULT_COLOR_1;
 			}
 
 			colors = [res.color1, res.color2, res.color3];
 		}
 
 		if (res.level[1] != 6 && res.level[1] != 7) {
-			colors.unshift([0, 0, 0]); // add black
+			colors.unshift(DEFAULT_COLOR_0); // add black
 		}
 
 		res.field = await this.scanField(source_img, colors);
