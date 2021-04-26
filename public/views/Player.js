@@ -574,13 +574,11 @@ class Player {
 
 		if (this.options.preview_align == 'tr') {
 			// top-right alignment
-			pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 3);
 			pos_y = 0;
 			x_offset_3 = Math.ceil(ctx.canvas.width - pixels_per_block * 3);
 		}
 		else {
 			// default is center
-			pos_x      = 0;
 			pos_y      = Math.ceil((ctx.canvas.height - pixels_per_block * 2) / 2);
 			x_offset_3 = Math.ceil((ctx.canvas.width - pixels_per_block * 3) / 2);
 		}
@@ -623,7 +621,7 @@ class Player {
 				// top line is the same for both pieces
 				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
 				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
-				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
+				positions.push([x_offset_3 + x_idx   * pixels_per_block, pos_y]);
 
 				if (preview == 'L') {
 					x_idx = 0;
@@ -764,7 +762,6 @@ class Player {
 	renderRunningTRT() {
 		const
 			ctx = this.running_trt_ctx,
-			rtl = this.render_running_trt_rtl,
 			current_trt = peek(this.clear_events).trt,
 			pixel_size_line_clear = 4,
 			pixel_size_baseline = 2;
@@ -807,7 +804,6 @@ class Player {
 
 		for (let idx = len; idx--;) {
 			const { cleared, trt } = to_draw[idx];
-			const lines_data = LINES[cleared]
 			const color = LINES[cleared] ? LINES[cleared].color : 'grey';
 
 			ctx.fillStyle = color;

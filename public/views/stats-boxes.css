@@ -170,12 +170,9 @@ i {
 	display: inline-block;
 	background: url(/views/small_pieces_sprites.png);
 	background-repeat: no-repeat;
+	background-position-x: 0px;
 	width: 23px;
 	height: 15px;
-}
-
-#piece_stats .content .piece th {
-	background-position-x: 0px;
 }
 
 #piece_stats.l0 .content .piece th {
