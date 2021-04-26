@@ -4,7 +4,7 @@ function splitField(field) {
 	let rows = [], idx=0;
 
 	do {
-		row = field.substr(idx, 10);
+		const row = field.substr(idx, 10);
 		rows.push(row);
 		idx += 10
 	}
@@ -24,7 +24,7 @@ function oneFrame(debug=false) {
 	delete frame1_copy.field;
 	delete frame2_copy.field;
 
-	frame1_txt = ''
+	const frame1_txt = ''
 		+ timeline_idx
 		+ ' '
 		+ field1.replace(/0+/g, '').length
@@ -33,7 +33,7 @@ function oneFrame(debug=false) {
 		+ ' '
 		+ splitField(field1);
 
-	frame2_txt = ''
+	const frame2_txt = ''
 		+ (timeline_idx + 1)
 		+ ' '
 		+ field2.replace(/0+/g, '').length
@@ -46,7 +46,7 @@ function oneFrame(debug=false) {
 	document.querySelector('#next_frame').value = frame2_txt;
 
 	// update frame to be new format compatible
-	frame = frames[timeline_idx++]
+	const frame = frames[timeline_idx++];
 
 	frame.field = frame.field.split('').map(v => parseInt(v, 10))
 	frame.lines = parseInt(frame.lines, 10);

@@ -1,8 +1,6 @@
 const dbPool = require('../modules/db');
 
 class ScoreDAO {
-	constructor() {}
-
 	async getStats(user) {
 		const db_client = await dbPool.connect();
 
@@ -188,14 +186,12 @@ class ScoreDAO {
 	}
 
 	async deleteScore(user, score_id) {
-		const result = await dbPool.query(`
+		return dbPool.query(`
 			DELETE FROM scores
 			WHERE player_id=$1 AND id=$2
 			`,
 			[ user.id, score_id ]
 		);
-
-		return result; // anything to extract from that?
 	}
 
 	async getScore(user, score_id) {
@@ -206,7 +202,7 @@ class ScoreDAO {
 			[ user.id, score_id ]
 		);
 
-		return result.rows[0]; // anything to extract from that?
+		return result.rows[0];
 	}
 
 	async getAnonymousScore(score_id) {
@@ -217,7 +213,7 @@ class ScoreDAO {
 			[ score_id ]
 		);
 
-		return result.rows[0]; // anything to extract from that?
+		return result.rows[0];
 	}
 }
 

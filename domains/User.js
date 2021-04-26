@@ -149,7 +149,7 @@ class User extends EventEmitter{
 
 		this.chat_client.onMessage((channel, user, message) => {
 			if (is_spam(message)) {
-				// Bot.ban(user, 'spam'); // TODO: find API to do that
+				// TODO: find API to do ban user automatically
 				return;
 			}
 

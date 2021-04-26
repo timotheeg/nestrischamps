@@ -6,11 +6,7 @@ class UserDAO {
 	users_by_login = new Map();
 	users_by_secret = new Map();
 
-	constructor() {}
-
 	addUserFromData(user_data) {
-		// console.log('Adding user:', JSON.stringify(user_data));
-
 		const user = new User(user_data);
 
 		user.on('expired', () => {
@@ -35,7 +31,7 @@ class UserDAO {
 	}
 
 	async createUser(user_data) {
-		const insert_result = await dbPool.query(
+		await dbPool.query(
 			`INSERT INTO twitch_users
 			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
 			VALUES
@@ -58,13 +54,13 @@ class UserDAO {
 		// we force fetch to:
 		// 1) get the correct data shape
 		// 2) ensure we get the latest secret
-		return await this.getUserById(user_data.id);
+		return this.getUserById(user_data.id);
 	}
 
 	async deleteUser(user) {
 		this.removeUser(user);
 
-		const insert_result = await dbPool.query(
+		await dbPool.query(
 			'DELETE FROM twitch_users WHERE id=$1;',
 			[ user.id ]
 		);
@@ -76,15 +72,13 @@ class UserDAO {
 
 		try {
 			// then update DB ... dubious order, the whole thing should be a transaction
-			const insert_result = await dbPool.query(
+			await dbPool.query(
 				`UPDATE twitch_users
 				set secret=$1
 				WHERE id=$2
 				`,
 				[ new_secret, user.id ]
 			);
-
-			const old_secret = user.secret;
 
 			// TODO: add greater processing safety here
 			this.users_by_secret.delete(user.secret);

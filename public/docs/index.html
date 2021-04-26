@@ -1,5 +1,7 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+<title>NestrisChamps documentation</title>
 <style>
 table {
   border-collapse: collapse;
@@ -33,11 +35,11 @@ th, td {
 
 <p>In single player mode, frame data is passed straight from the producer into 1 or more views.</p>
 
-<p><img src="./architecture_1_player.png" /></p>
+<p><img alt="Architecture for 1 player" src="./architecture_1_player.png" /></p>
 
 <p>In competition mode, all producers emit data, but The room owner assigns a given producer to be player 1 and anotherproducer to be player 2. Only the game frame of these 2 players are sent to the views.</p>
 
-<p><img src="./architecture_2_players.png" /></p>
+<p><img alt="Architecture for 2 players" src="./architecture_2_players.png" /></p>
 
 <ul>
 <li>Room: A broker of connection, frame data, and commands</li>
@@ -52,26 +54,26 @@ th, td {
 
 <p>Since views are typically setup in OBS, the URL needs to identify the room owner by itself, This is achieved by assigning a secret to each user that can placed in the URL. It's not super secure, but whatever, this tool is not hosting state secrets -_-</p>
 
-<p>http://nestrischamps.herokuapp.com/view/<b>LAYOUT_NAME</b>/<b>USER_SECRET</b></p>
+<p>http://nestrischamps.herokuapp.com/view/<strong>LAYOUT_NAME</strong>/<strong>USER_SECRET</strong></p>
 
 <p>The layouts available so far are as follow:</p>
 
 <ul>
 	<li>Single Player
 		<ul>
-			<li><b>classic</b>: a stats-heay interface for classic rom</li>
-			<li><b>das_trainer</b>: a stats-heay interface for the DAS trainer rom</li>
-			<li><b>simple_1p</b>: a simple UI with Tetris rates and Droughts</li>
-			<li><b>invisible_tetris</b>: A renderer for Invisible Tetris</li>
-			<li><b>qualifier</b>: Minimalistics stats to add to your Stencil</li>
+			<li><strong>classic</strong>: a stats-heay interface for classic rom</li>
+			<li><strong>das_trainer</strong>: a stats-heay interface for the DAS trainer rom</li>
+			<li><strong>simple_1p</strong>: a simple UI with Tetris rates and Droughts</li>
+			<li><strong>invisible_tetris</strong>: A renderer for Invisible Tetris</li>
+			<li><strong>qualifier</strong>: Minimalistics stats to add to your Stencil</li>
 		</ul>
 	</li>
 	<li>Multi Player
 		<ul>
-			<li><b>ctwc</b>: A CTWC inspired layout</li>
-			<li><b>ctjc</b>: a CTJC inspired layout</li>
-			<li><b>ctjc_pace</b>: a CTJC inspired layout with pace metric</li>
-			<li><b>ctm</b>: a CTM inspired layout</li>
+			<li><strong>ctwc</strong>: A CTWC inspired layout</li>
+			<li><strong>ctjc</strong>: a CTJC inspired layout</li>
+			<li><strong>ctjc_pace</strong>: a CTJC inspired layout with pace metric</li>
+			<li><strong>ctm</strong>: a CTM inspired layout</li>
 		</ul>
 	</li>
 </ul>
@@ -91,7 +93,7 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>To attach yourself as a producer to another user's room (typically the link will be passed to you as an invitation), the links will be of the form</p>
 
-<p>https://nestrischamps.herokuapp.com/room/u/<b>TWITCH_USERNAME</b>/producer</p>
+<p>https://nestrischamps.herokuapp.com/room/u/<strong>TWITCH_USERNAME</strong>/producer</p>
 
 <h2>Admin</h2>
 
@@ -104,8 +106,8 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>2 default game roms are supported:</p>
 <ul>
-	<li><p>Classic Tetris</p><img src="./capture_classic.png" /></li>
-	<li><p><a href="https://www.romhacking.net/hacks/3761/">Das Trainer</a></p><img src="./capture_das_trainer.png" /></li>
+	<li><p>Classic Tetris</p><img alt="Capture for Classic Tetris ROM" src="./capture_classic.png" /></li>
+	<li><p><a href="https://www.romhacking.net/hacks/3761/">Das Trainer</a></p><img alt="Capture for Das Trainer Tetris ROM" src="./capture_das_trainer.png" /></li>
 </ul>
 
 <p>The fields that need to be OCR-ed per rom are fixed (see highlighted areas above)</p>
@@ -121,14 +123,14 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>The capture area should "hug" the digits on top, right, bottom, left, (using 0 as a reference), like this:</p>
 <ul>
-	<li><img src="./digits_2_0.png" /></li>
-	<li><img src="./digits_6_0.png" /></li>
+	<li><img alt="Capture area for 2 digits" src="./digits_2_0.png" /></li>
+	<li><img alt="Capture area for 6 digits" src="./digits_6_0.png" /></li>
 </ul>
 
 <p>Note that if you calibrate something that starts with a 1, the capture area should NOT hug the one on the left (notice the black strip on the left).</p>
 
 <ul>
-	<li><img src="./digits_18.png" /></li>
+	<li><img alt="Capture area for 18" src="./digits_18.png" /></li>
 </ul>
 
 <h2>Preview</h2>
@@ -137,16 +139,16 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <ul>
 	<li><p>Pieces S, Z, L, J, T, O are "hugged" TOP and BOTTOM in the capture area</p>
-		<img src="./preview_s.png" />
-		<img src="./preview_z.png" />
-		<img src="./preview_l.png" />
-		<img src="./preview_j.png" />
-		<img src="./preview_t.png" />
-		<img src="./preview_o.png" />
+		<img alt="Capture area for S preview" src="./preview_s.png" />
+		<img alt="Capture area for Z preview" src="./preview_z.png" />
+		<img alt="Capture area for L preview" src="./preview_l.png" />
+		<img alt="Capture area for J preview" src="./preview_j.png" />
+		<img alt="Capture area for T preview" src="./preview_t.png" />
+		<img alt="Capture area for O preview" src="./preview_o.png" />
 	</li>
 
 	<li><p>Piece I is "hugged" LEFT and RIGHT in the capture area</p>
-		<img src="./preview_i.png" />
+		<img alt="Capture area for I preview" src="./preview_i.png" />
 	</li>
 </ul>
 
@@ -158,18 +160,18 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <ul>
 	<li><p>Pieces L, J are "hugged" TOP ONLY in the capture area (notice there's a black strip at the bottom)</p>
-		<img src="./cur_piece_l.png" />
-		<img src="./cur_piece_j.png" />
+		<img alt="Capture area for L current piece" src="./cur_piece_l.png" />
+		<img alt="Capture area for J current piece" src="./cur_piece_j.png" />
 	</li>
 	<li><p>Pieces S, Z, T, O are "hugged" BOTTOM ONLY in the capture area (notice there's a black strip on top)</p>
-		<img src="./cur_piece_s.png" />
-		<img src="./cur_piece_z.png" />
-		<img src="./cur_piece_t.png" />
-		<img src="./cur_piece_o.png" />
+		<img alt="Capture area for S current piece" src="./cur_piece_s.png" />
+		<img alt="Capture area for Z current piece" src="./cur_piece_z.png" />
+		<img alt="Capture area for T current piece" src="./cur_piece_t.png" />
+		<img alt="Capture area for O current piece" src="./cur_piece_o.png" />
 	</li>
 
 	<li><p>Piece I is "hugged" LEFT and RIGHT in the capture area</p>
-		<img src="./cur_piece_i.png" />
+		<img alt="Capture area for I current piece" src="./cur_piece_i.png" />
 	</li>
 </ul>
 
@@ -181,14 +183,14 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>The blocks should be chosen like this</p>
 
-<p><img src="./statistics_colors.png" /></p>
+<p><img alt="Piece statistics panel highlighting color blocks" src="./statistics_colors.png" /></p>
 
 <p>The selection should not include any black border, but color1 should include the block's border. They should look like this</p>
 
 <uL>
-	<li><img src="./color_1.png" /></li>
-	<li><img src="./color_2.png" /></li>
-	<li><img src="./color_3.png" /></li>
+	<li><img alt="Capture area for color 1" src="./color_1.png" /></li>
+	<li><img alt="Capture area for color 2" src="./color_2.png" /></li>
+	<li><img alt="Capture area for color 3" src="./color_3.png" /></li>
 </uL>
 
 <h2>Field</h2>
@@ -197,7 +199,7 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>Having done that, hug the capture on right, left, top, bottom. do not leave black borders at the bottom and right!, like this:</p>
 
-<p><img src="./field.png" /></p>
+<p><img alt="Capture area for field" src="./field.png" /></p>
 
 
 <h1 id="obs">OBS / Streamlabs setup</h1>
@@ -206,12 +208,12 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>The Browser Source setup should look like this:</p>
 
-<p><img src="./streamlabs_browser_source.png" /></p>
+<p><img alt="OBS browser source configuration panel" src="./streamlabs_browser_source.png" /></p>
 
 
 <h1 id="admin">Administering a Room</h1>
 
-<p><img src="./admin_ui.png" /></p>
+<p><img alt="Admin UI" src="./admin_ui.png" /></p>
 
 <p>In the admin panel, you get to see who is connected to the room, and select the desired producers as player 1 and player 2</p>
 
@@ -236,10 +238,10 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <table>
 	<tr>
-		<th>&nbsp;</th>
-		<th>Purpose</th>
-		<th>Size</th>
-		<th>Description</th>
+		<th scope="col">&nbsp;</th>
+		<th scope="col">Purpose</th>
+		<th scope="col">Size</th>
+		<th scope="col">Description</th>
 	</tr>
 	<tr>
 		<td>1</td>
@@ -365,7 +367,7 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 
 <p>Below is the bit representation of the fields described above</p>
 
-<p><img src="./binary_frame.png" /></p>
+<p><img alt="Binary frame format representation" src="./binary_frame.png" /></p>
 
 <p>See the <a href="https://nestrischamps.herokuapp.com/js/BinaryFrame.js">source file</a> for implementation details.</p>
 
@@ -377,4 +379,4 @@ http://nestrischamps.herokuapp.com/view/LAYOUT_NAME/SECRET?bg=0
 <p>The list of TODO items is tracked as <a href="https://github.com/timotheeg/nestrischamps/issues">issues in the github project</a>. Feel free to open feature requests and bug reports there. There's no ETA and guarantee on when anything might get done though, so patience is key :).</p>
 
 </body>
-<html>
+</html>

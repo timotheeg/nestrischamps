@@ -45,7 +45,7 @@ function getCaptureCoordinates(template_id, capture_id) {
 	const transform = ocv.findHomography(src_mat, dst_mat, ocv.RANSAC, 5.0);
 	const size = template.size();
 
-	boundary_pts = ocv.matFromArray(2, 1, ocv.CV_64FC2, [
+	const boundary_pts = ocv.matFromArray(2, 1, ocv.CV_64FC2, [
 		0, 0,
 		size.width, size.height,
 	]);

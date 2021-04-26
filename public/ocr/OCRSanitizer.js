@@ -224,7 +224,7 @@ class OCRSanitizer {
 OCRSanitizer.digitsToValue = function digitsToValue(digits) {
 	if (digits === null) return null;
 
-	return digits.reduce((acc, v, idx) => acc += v * Math.pow(10, digits.length - idx - 1), 0);
+	return digits.reduce((acc, v, idx) => acc + v * Math.pow(10, digits.length - idx - 1), 0);
 }
 
 OCRSanitizer.arrEqual = function arrEqual(arr1, arr2) {

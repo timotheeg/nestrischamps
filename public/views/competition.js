@@ -144,9 +144,9 @@ class TetrisCompetitionAPI {
 				heart.classList.add('win');
 			}
 
-			hearts
-				[player.render_wins_rtl ? 'prepend' : 'appendChild']
-				(heart);
+			const insert_method = player.render_wins_rtl ? 'prepend' : 'appendChild';
+
+			hearts[insert_method](heart);
 		}
 	}
 
@@ -175,7 +175,7 @@ class TetrisCompetitionAPI {
 		player.setPaceDiff(p_diff, pt_diff);
 		otherPlayer.setPaceDiff(-p_diff, pt_diff);
 	}
-};
+}
 
 const connection = new Connection(4003);
 

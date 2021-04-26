@@ -3,7 +3,7 @@
 
 const speak = (function() {
 
-const noop = () => {};
+function noop() {}
 
 if (QueryString.tts != '1') {
 	return noop;
@@ -37,7 +37,7 @@ function getVoices() {
 		return;
 	}
 
-	voices = shuffle(all_voices.filter(v => v.lang.split('-')[0] == 'en'));
+	voices = shuffle(all_voices.filter(v => v.lang.split('-')[0] === lang));
 }
 
 function hasVoice(username) {
@@ -65,7 +65,7 @@ function speakNext() {
 
 	const chatter = speak_queue.shift();
 	const voice = getUserVoice(chatter.username);
-	const utterance = new SpeechSynthesisUtterance((chatter.message || '').replace(URL, 'link'));
+	const utterance = new SpeechSynthesisUtterance((chatter.message || '').replace(URL_RE, 'link'));
 
 	utterance.voice = voice;
 

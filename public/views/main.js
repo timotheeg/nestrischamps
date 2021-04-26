@@ -38,7 +38,6 @@ chat_and_pbs_conn.onMessage = function(frame) {
 		API[method](...args);
 	}
 	catch(e) {
-		// socket.close();
 		console.error(e);
 	}
 }
@@ -62,8 +61,6 @@ function onTetris() {
 	}
 
 	const tetris_animation_ID = window.requestAnimationFrame(steps);
-
-	// TODO play sound
 }
 
 const user_colors = {};
@@ -204,7 +201,7 @@ function onFrame(event, debug) {
 
 		clearStage();
 		renderPiece(transformed);
-		renderLine(transformed);
+		renderLine();
 
 		last_valid_state = { ...transformed };
 
@@ -326,7 +323,7 @@ function onFrame(event, debug) {
 
 	if (line_animation_remaining_frames-- > 0) return;
 
-	if (diff.stage_blocks === 4) { // TODO:
+	if (diff.stage_blocks === 4) {
 		last_valid_state.stage = transformed.stage;
 		pending_piece = pending_delay_frames;
 	}
@@ -641,9 +638,9 @@ function renderPiece(event) {
 
 	pixel_size = 2;
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
-	color     = 'orange';
 
 	const
+		color        = 'orange',
 		cur_drought  = game.data.i_droughts.cur,
 		cur_ctx      = dom.droughts.cur.ctx,
 
@@ -685,7 +682,7 @@ function renderPiece(event) {
 	// but this will do for now
 	last_ctx.clear();
 	last_ctx.fillStyle = color;
-	for (idx = Math.min(last_drought, max_pixels); idx-- > 0; ) {
+	for (let idx = Math.min(last_drought, max_pixels); idx-- > 0; ) {
 		last_ctx.fillRect(
 			idx * (pixel_size + 1),
 			0,
