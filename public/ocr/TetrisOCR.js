@@ -547,9 +547,9 @@ class TetrisOCR extends EventTarget {
 
 	scanColor1(source_img) {
 		const task = this.config.tasks.color1;
-		const [x, y, w, h] = this.getCropCoordinates(task);
+		const xywh_coordinates = this.getCropCoordinates(task);
 
-		crop(source_img, x, y, w, h, task.crop_img);
+		crop(source_img, ...xywh_coordinates, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);
 
 		// I tried selecting the pixel with highest luma but that didn't work.
@@ -588,9 +588,9 @@ class TetrisOCR extends EventTarget {
 		// to get the average color, we take the average of squares, or it might be too dark
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 
-		const [x, y, w, h] = this.getCropCoordinates(task);
+		const xywh_coordinates = this.getCropCoordinates(task);
 
-		crop(source_img, x, y, w, h, task.crop_img);
+		crop(source_img, ...xywh_coordinates, task.crop_img);
 		bicubic(task.crop_img, task.scale_img);
 
 		const row_width = task.scale_img.width;
@@ -699,7 +699,7 @@ class TetrisOCR extends EventTarget {
 				let min_idx = -1;
 
 				colors.forEach((col, col_idx) => {
-					const sum = col.reduce((acc, c, idx) => acc += (c - channels[idx]) * (c - channels[idx]), 0);
+					const sum = col.reduce((acc, c, idx) => acc + (c - channels[idx]) * (c - channels[idx]), 0);
 
 					if (sum < min_diff) {
 						min_diff = sum;

@@ -38,7 +38,6 @@ chat_and_pbs_conn.onMessage = function(frame) {
 		API[method](...args);
 	}
 	catch(e) {
-		// socket.close();
 		console.error(e);
 	}
 }
@@ -62,8 +61,6 @@ function onTetris() {
 	}
 
 	const tetris_animation_ID = window.requestAnimationFrame(steps);
-
-	// TODO play sound
 }
 
 const user_colors = {};
@@ -326,7 +323,7 @@ function onFrame(event, debug) {
 
 	if (line_animation_remaining_frames-- > 0) return;
 
-	if (diff.stage_blocks === 4) { // TODO:
+	if (diff.stage_blocks === 4) {
 		last_valid_state.stage = transformed.stage;
 		pending_piece = pending_delay_frames;
 	}

@@ -94,7 +94,7 @@ class Game {
 
 	setFrame(frame) {
 		// TODO Game should understand frame sequences
-		// Consunmer app should track when a new game starts and instantiate a new game
+		// Consumer app should track when a new game starts and instantiate a new game
 	}
 
 	onDasLoss() {
@@ -111,7 +111,6 @@ class Game {
 		this.data.pieces[p].count++;
 
 		// computation for the variance
-		let ideal_count = this.data.pieces.count / PIECES.length;
 		let distance_square = 0;
 
 		PIECES.forEach(name => {
@@ -178,10 +177,9 @@ class Game {
 		if (len > 28) {
 			// compute the 28 and 56 deviation
 			// TODO: compute over "true" bags, that would always yield 0 deviation in modern tetrises
-			let ideal_count = 28 / PIECES.length;
-
 			const counts = {};
-			const pieces = PIECES.forEach(name => counts[name] = 0);
+
+			PIECES.forEach(name => counts[name] = 0);
 
 			for (let offset=28; offset>0; offset--) {
 				counts[game.pieces[len - offset].piece]++;
@@ -190,8 +188,6 @@ class Game {
 			this.data.pieces.deviation_28 = Math.sqrt(Object.values(counts).reduce((sum, count) => sum + Math.pow(count/28 - 1/7, 2), 0) / PIECES.length);
 
 			if (this.data.pieces.count >= 56) {
-				ideal_count = 56 / PIECES.length;
-
 				for (let offset=28; offset>0; offset--) {
 					counts[game.pieces[len - 28 - offset].piece]++;
 				}
