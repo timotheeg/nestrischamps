@@ -204,7 +204,7 @@ function onFrame(event, debug) {
 
 		clearStage();
 		renderPiece(transformed);
-		renderLine(transformed);
+		renderLine();
 
 		last_valid_state = { ...transformed };
 

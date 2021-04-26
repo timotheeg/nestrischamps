@@ -132,6 +132,7 @@ class MatchRoom extends Room {
 			switch (command) {
 				case 'getState': {
 					forward_to_views = false;
+					break;
 				}
 
 				case 'setPlayer': {

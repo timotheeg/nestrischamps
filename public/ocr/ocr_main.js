@@ -790,7 +790,6 @@ async function showParts(data) {
 		else {
 			const canvas = holder.querySelector(`.field_res`);
 			const ctx = canvas.getContext('2d', { alpha: false });
-			const size = 8;
 
 			let colors;
 
@@ -921,7 +920,6 @@ function trackAndSendFrames() {
 	ocr_corrector = new OCRSanitizer(tetris_ocr, config);
 
 	let start_time = Date.now();
-	let game_state = IN_GAME;
 	let gameid = 1;
 	let last_frame = { field:[] };
 
@@ -949,7 +947,7 @@ function trackAndSendFrames() {
 		performance.mark('process_over');
 		performance.measure('total', 'capture_start', 'process_over');
 
-		const measures = performance.getEntriesByType("measure").forEach(m => {
+		performance.getEntriesByType("measure").forEach(m => {
 			perf[m.name] =  m.duration.toFixed(3);
 		});
 

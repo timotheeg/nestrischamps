@@ -379,10 +379,10 @@ class TetrisOCR extends EventTarget {
 	/*
 	 * Returns true if at least one of the pixel has a luma higher than threshold
 	 */
-	hasShine(img, x, y) {
+	hasShine(img, block_x, block_y) {
 		// extract the shine area at the location supplied
 		const shine_width = 2;
-		crop(img, x, y, shine_width, 3, this.shine_img);
+		crop(img, block_x, block_y, shine_width, 3, this.shine_img);
 
 		const img_data = this.shine_img.data;
 		const shine_pix_ref = [
@@ -733,7 +733,7 @@ class TetrisOCR extends EventTarget {
 				let min_idx = -1;
 
 				colors.forEach((col, col_idx) => {
-					const sum = col.reduce((sum, c, idx) => sum += (c - channels[idx]) * (c - channels[idx]), 0);
+					const sum = col.reduce((acc, c, idx) => acc += (c - channels[idx]) * (c - channels[idx]), 0);
 
 					if (sum < min_diff) {
 						min_diff = sum;
