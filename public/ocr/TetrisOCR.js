@@ -641,7 +641,7 @@ class TetrisOCR extends EventTarget {
 
 		/**/
 		// crop and scale with canva
-		const original_field_img = await createImageBitmap(source_img, x, y, w, h);
+		const original_field_img = await createImageBitmap(source_img, ...xywh_coordinates);
 
 		this.scaled_field_canvas_ctx.drawImage(original_field_img, 0, 0, ...TASK_RESIZE.field);
 
