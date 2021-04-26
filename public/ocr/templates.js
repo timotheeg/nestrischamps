@@ -6,7 +6,7 @@ async function getTemplateData(digit) {
 	const response = await fetch(`/ocr/${digit.toLowerCase()}.png`);
 	const blob = await response.blob();
 
-	return await createImageBitmap(blob);
+	return createImageBitmap(blob);
 }
 
 async function loadDigitTemplates() {

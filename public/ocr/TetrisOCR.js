@@ -618,11 +618,11 @@ class TetrisOCR extends EventTarget {
 		// Note: We work in the square of colors domain
 		// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 		const task = this.config.tasks.field;
-		const [x, y, w, h] = this.getCropCoordinates(task);
+		const xywh_coordinates = this.getCropCoordinates(task);
 		const colors = _colors.map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
 
 		// crop is not needed, but done anyway to share task captured area with caller app
-		crop(source_img, x, y, w, h, task.crop_img);
+		crop(source_img, ...xywh_coordinates, task.crop_img);
 
 		/*
 		// the 2 lines below show what's actually needed: a simple crop and scale on the source image
@@ -661,40 +661,6 @@ class TetrisOCR extends EventTarget {
 			[4, 2]
 		];
 
-		/*
-		for (let ridx = 0; ridx < 20; ridx++) {
-			for (let cidx = 0; cidx < 10; cidx++) {
-				const blockX = cidx * 8;
-				const blockY = ridx * 8;
-				const destCoords = pix_refs.map(([dx, dy]) => [blockX + dx, blockY + dy]);
-
-				const channels = getBicubicPixels(task.crop_img, TASK_RESIZE.field, destCoords)
-					.reduce((acc, col) => {
-						acc[0] += col[0];
-						acc[1] += col[1];
-						acc[2] += col[2];
-						return acc;
-					}, [0, 0, 0])
-					.map(v => Math.round(v / pix_refs.length));
-
-				let min_diff = 0xFFFFFFFF;
-				let min_idx = -1;
-
-				colors.forEach((col, col_idx) => {
-					const sum = col.reduce((sum, c, idx) => sum += (c - channels[idx]) * (c - channels[idx]), 0);
-
-					if (sum < min_diff) {
-						min_diff = sum;
-						min_idx = col_idx;
-					}
-				})
-
-				field.push(min_idx);
-			}
-		}
-		/**/
-
-		/**/
 		const row_width = 9 * 8 + 7; // the last block in a row is one pixel less!
 
 		for (let ridx = 0; ridx < 20; ridx++) {

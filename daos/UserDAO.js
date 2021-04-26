@@ -6,8 +6,6 @@ class UserDAO {
 	users_by_login = new Map();
 	users_by_secret = new Map();
 
-	constructor() {}
-
 	addUserFromData(user_data) {
 		const user = new User(user_data);
 
@@ -56,7 +54,7 @@ class UserDAO {
 		// we force fetch to:
 		// 1) get the correct data shape
 		// 2) ensure we get the latest secret
-		return await this.getUserById(user_data.id);
+		return this.getUserById(user_data.id);
 	}
 
 	async deleteUser(user) {
