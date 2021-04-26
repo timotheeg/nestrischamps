@@ -25,7 +25,8 @@ const PERF_METHODS = [
 	'scanCurPiece',
 ];
 
-const DEFAULT_COLOR_0 = [0xF0, 0xF0, 0xF0];
+const DEFAULT_COLOR_0 = [0x00, 0x00, 0x00];
+const DEFAULT_COLOR_1 = [0xF0, 0xF0, 0xF0];
 
 function getDigitsWidth(n) {
 	// width per digit is 8px times 2
@@ -137,7 +138,7 @@ class TetrisOCR extends EventTarget {
 		this.palette = this.palette.map(colors => {
 			if (colors.length == 2) {
 				return [
-					DEFAULT_COLOR_0,
+					DEFAULT_COLOR_1,
 					colors[0],
 					colors[1]
 				]
@@ -227,10 +228,12 @@ class TetrisOCR extends EventTarget {
 
 		let colors;
 
+		// WARNING: We need to use the level for color and board reads
+		// WARNING: level *may* be read incorrectly when changing value
+		// TODO: Store source_img, and level and board should be read after the 1-frame sanitization pipeline
+
 		// color are either supplied from palette or read, there's no other choice
 		if (this.palette) {
-			// WARNING: level *may* be read incorrectly on transition frames
-			// Also: we haven't gone through the sanitization and correction pipeline here :(
 			let level;
 
 			if (res.level) {
@@ -251,10 +254,14 @@ class TetrisOCR extends EventTarget {
 				res.color1 = this.scanColor1(source_img);
 			}
 			else {
-				res.color1 = DEFAULT_COLOR_0;
+				res.color1 = DEFAULT_COLOR_1;
 			}
 
 			colors = [res.color1, res.color2, res.color3];
+		}
+
+		if (res.level[1] != 6 && res.level[1] != 7) {
+			colors.unshift(DEFAULT_COLOR_0); // add black
 		}
 
 		res.field = await this.scanField(source_img, colors);
@@ -620,6 +627,7 @@ class TetrisOCR extends EventTarget {
 		const task = this.config.tasks.field;
 		const [x, y, w, h] = this.getCropCoordinates(task);
 		const colors = _colors.map(([r, g, b]) => [r*r, g*g, b*b]); // we square the reference colors
+		const index_offset = _colors.length == 4 ? 0 : 1; // length of colors is either 3 or 4
 
 		// crop is not needed, but done anyway to share task captured area with caller app
 		crop(source_img, x, y, w, h, task.crop_img);
@@ -710,11 +718,9 @@ class TetrisOCR extends EventTarget {
 					});
 
 				if (!has_shine) {
-					field[ridx * 10 + cidx] = 0; // we have black!
+					field[ridx * 10 + cidx] = 0; // we have black for sure!
 					continue;
 				}
-
-				// K, it's not black! we must compare with the 3 colors (col1, col2, and white)
 
 				const channels = pix_refs
 					.map(([x, y]) => {
@@ -741,7 +747,7 @@ class TetrisOCR extends EventTarget {
 					}
 				})
 
-				field[ridx * 10 + cidx] = min_idx + 1; // +1 to account for black being 0
+				field[ridx * 10 + cidx] = min_idx + index_offset;
 			}
 		}
 		/**/
