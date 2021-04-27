@@ -226,8 +226,6 @@ class TetrisOCR extends EventTarget {
 		res.level = this.scanLevel(source_img);
 		res.lines = this.scanLines(source_img);
 
-		let colors;
-
 		// WARNING: We need to use the level for color and board reads
 		// WARNING: level *may* be read incorrectly when changing value
 		// TODO: Store source_img, and level and board should be read after the 1-frame sanitization pipeline
@@ -243,7 +241,7 @@ class TetrisOCR extends EventTarget {
 				level = 0;
 			}
 
-			colors = this.palette[level % 10];
+			[res.color1, res.color2, res.color3] = this.palette[level % 10];
 		}
 		else {
 			// assume tasks color1 and color2 are set
@@ -256,11 +254,11 @@ class TetrisOCR extends EventTarget {
 			else {
 				res.color1 = DEFAULT_COLOR_1;
 			}
-
-			colors = [res.color1, res.color2, res.color3];
 		}
 
-		if (res.level[1] != 6 && res.level[1] != 7) {
+		const colors = [res.color1, res.color2, res.color3];
+
+		if (res.level && res.level[1] != 6 && res.level[1] != 7) {
 			colors.unshift(DEFAULT_COLOR_0); // add black
 		}
 
