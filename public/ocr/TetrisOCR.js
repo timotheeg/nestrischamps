@@ -228,8 +228,6 @@ class TetrisOCR extends EventTarget {
 
 		const level_units = res.level == null ? 0 : res.level[1];
 
-		let colors;
-
 		// WARNING: We need to use the level for color and board reads
 		// WARNING: level *may* be read incorrectly when changing value
 		// TODO: Store source_img, and level and board should be read after the 1-frame sanitization pipeline
