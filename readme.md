@@ -107,7 +107,7 @@ Nestrischamps is a [nodejs](https://nodejs.org/en/) server application and UI. I
 
 #### Clone the project locally from git:
 ```bash
-git clone git@github.com:timotheeg/nestrischamps.git
+git clone https://github.com/timotheeg/nestrischamps.git
 ```
 
 #### Install nodejs dependencies
