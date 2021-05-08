@@ -177,7 +177,7 @@ class TetrisCompetitionAPI {
 	}
 }
 
-const connection = new Connection(4003);
+const connection = new Connection();
 
 connection.onMessage = function(frame) {
 	try{
