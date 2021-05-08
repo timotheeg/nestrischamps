@@ -1,5 +1,15 @@
 class Connection {
-	constructor() {
+	constructor(uri=null) {
+		if (uri) {
+			this.uri = uri;
+		}
+		else {
+			// match current page prototol (secure / insecure)
+			const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
+
+			this.uri = `${wsp}://${location.host}/ws${location.pathname}${location.search}`;
+		}
+
 		this.connect        = this.connect.bind(this);
 		this._handleError   = this._handleError.bind(this);
 		this._handleClose   = this._handleClose.bind(this);
@@ -59,10 +69,7 @@ class Connection {
 			this._clearSocket();
 		}
 
-		// match current page prototol
-		const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
-
-		this.socket = new WebSocket(`${wsp}://${location.host}/ws${location.pathname}${location.search}`);
+		this.socket = new WebSocket(this.uri);
 
 		this.socket.binaryType = "arraybuffer";
 
