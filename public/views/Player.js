@@ -101,6 +101,20 @@ const BORDER_BLOCKS = [
 	}
 */
 
+const DEFAULT_DOM_REFS = {
+	score:       DOM_DEV_NULL,
+	pace_tr:     DOM_DEV_NULL,
+	pace_game:   DOM_DEV_NULL,
+	level:       DOM_DEV_NULL,
+	lines:       DOM_DEV_NULL,
+	trt:         DOM_DEV_NULL,
+	eff:         DOM_DEV_NULL,
+	running_trt: DOM_DEV_NULL,
+	preview:     DOM_DEV_NULL,
+	field:       DOM_DEV_NULL,
+	drought:     DOM_DEV_NULL,
+};
+
 const DEFAULT_OPTIONS = {
 	field_pixel_size: 3,
 	preview_pixel_size: 3,
@@ -142,10 +156,13 @@ const DEFAULT_OPTIONS = {
 
 class Player {
 	constructor(dom, options) {
-		this.dom = dom;
+		this.dom = {
+			...DEFAULT_DOM_REFS,
+			...dom,
+		};
 		this.options = {
 			...DEFAULT_OPTIONS,
-			...options
+			...options,
 		};
 
 		this.field_pixel_size = this.options.field_pixel_size || this.options.pixel_size;
@@ -229,6 +246,7 @@ class Player {
 	}
 
 	onPiece() {}
+	onTransition() {}
 	onDroughtStart() {}
 	onDroughtEnd() {}
 	onGameStart() {}
@@ -272,7 +290,9 @@ class Player {
 		this.lines = 0;
 		this.start_level = 0;
 		this.level = 0;
-		this.pace_score = this.getPaceScore();
+		this.transition = null;
+		this.game_pace_score = this.getGamePaceScore();
+		this.tr_pace_score = this.getTransitionPaceScore();
 		this.drought = 0;
 		this.field_num_blocks = 0;
 		this.field_string = '';
@@ -293,7 +313,8 @@ class Player {
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
 		this.dom.score.textContent = this.options.format_score(this.score);
-		this.dom.pace.textContent = this.options.format_score(this.pace_score, 7);
+		this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 6);
+		this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
 	}
@@ -466,7 +487,6 @@ class Player {
 					const piece_stats = this._getPieceStats(data);
 
 					if (this.piece_stats) {
-
 						if (this.piece_stats.count != piece_stats.count) {
 							this.pending_piece = true;
 						}
@@ -483,8 +503,13 @@ class Player {
 			if (num_blocks === 200) {
 				// note, gameover can also be detected when top row of field is full
 				this.game_over = true;
-				this.pace_score = this.getPaceScore();
-				this.dom.pace.textContent = this.options.format_score(this.pace_score, 7);
+
+				this.tr_pace_score = this.getTransitionPaceScore();
+				this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 7);
+
+				this.game_pace_score = this.getGamePaceScore();
+				this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
+
 				this.onGameOver();
 			}
 		}
@@ -529,10 +554,20 @@ class Player {
 				this.dom.eff.textContent = (Math.round(eff) || 0).toString().padStart(3, '0');
 				this.renderRunningTRT();
 				this.lines = lines;
+
+				if (level != this.start_level && this.transition === null) {
+					this.transition = this.score;
+					this.onTransition();
+				}
 			}
 
-			this.pace_score = this.getPaceScore();
-			this.dom.pace.textContent = this.options.format_score(this.pace_score, 7);
+			if (this.transition === null) {
+				this.tr_pace_score = this.getTransitionPaceScore();
+				this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 6);
+			}
+
+			this.game_pace_score = this.getGamePaceScore();
+			this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
 		}
 
 		if (data.score != null) {
@@ -542,12 +577,24 @@ class Player {
 		}
 	}
 
-	getPaceScore() {
+	getGamePaceScore() {
 		if (this.game_over) {
 			return this.score;
 		}
 
 		return this.score + getPotential(this.start_level, POTENTIAL.GAME, this.lines);
+	}
+
+	getTransitionPaceScore() {
+		if (this.game_over) {
+			return this.score;
+		}
+		else if (this.transition === null) {
+			return this.score + getPotential(this.start_level, POTENTIAL.TRANSITION, this.lines);
+		}
+		else {
+			return this.transition;
+		}
 	}
 
 	renderPreview(level, preview) {
