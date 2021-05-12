@@ -547,12 +547,7 @@ class Player {
 			return this.score;
 		}
 
-		try {
-			return this.score + (PACE_POTENTIAL[this.start_level][this.lines] || 0);
-		}
-		catch(err) {
-			return this.score;
-		}
+		return this.score + getPotential(this.start_level, POTENTIAL.GAME, this.lines);
 	}
 
 	renderPreview(level, preview) {

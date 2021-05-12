@@ -104,14 +104,19 @@ const
 		I: 1
 	},
 
-	PACE_POTENTIAL = getPacePotential()
+	POTENTIAL = {
+		GAME: 0,
+		TRANSITION: 1,
+	},
+
+	PACE_POTENTIAL = _getPacePotential()
 ;
 
 DAS_THRESHOLDS[-1] = 'absent';
 
 
 
-function getPacePotential() {
+function _getPacePotential() {
 	const potentials = {};
 
 	for (let [start_level, transition_lines] of Object.entries(TRANSITIONS)) {
@@ -119,14 +124,14 @@ function getPacePotential() {
 
 		const kill_screen_lines = 290 - (((start_level + 1) * 10) - transition_lines);
 
-		potentials[start_level] = getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines);
+		potentials[start_level] = _getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines);
 	}
 
 	return potentials;
 }
 
 
-function getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines) {
+function _getPacePotentialForLevel(start_level, transition_lines, kill_screen_lines) {
 	// one time generation of score potential by line and best line clear strategy
 
 	function clearScore(current_lines, clear) {
@@ -144,7 +149,7 @@ function getPacePotentialForLevel(start_level, transition_lines, kill_screen_lin
 		return (level + 1) * SCORE_BASES[clear];
 	}
 
-	const potential = {
+	const game_potential = {
 		[kill_screen_lines+0]: 0,
 		[kill_screen_lines+1]: 0,
 		[kill_screen_lines+2]: 0,
@@ -155,15 +160,48 @@ function getPacePotentialForLevel(start_level, transition_lines, kill_screen_lin
 		let best_score = 0;
 
 		for (let clear = 4; clear > 0; clear--) {
-			const new_score = clearScore(lines, clear) + potential[clear + lines];
+			const new_score = clearScore(lines, clear) + game_potential[clear + lines];
 
 			if (new_score > best_score) {
 				best_score = new_score;
 			}
 		}
 
-		potential[lines] = best_score;
+		game_potential[lines] = best_score;
 	}
 
-	return potential;
+	const transition_potential = {
+		[transition_lines+0]: 0,
+		[transition_lines+1]: 0,
+		[transition_lines+2]: 0,
+		[transition_lines+3]: 0,
+	};
+
+	for (let lines = transition_lines; lines--; ) {
+		let best_score = 0;
+
+		for (let clear = 4; clear > 0; clear--) {
+			const new_score = clearScore(lines, clear) + transition_potential[clear + lines];
+
+			if (new_score > best_score) {
+				best_score = new_score;
+			}
+		}
+
+		transition_potential[lines] = best_score;
+	}
+
+	return {
+		[POTENTIAL.GAME]: game_potential,
+		[POTENTIAL.TRANSITION]: transition_potential,
+	};
+}
+
+function getPotential(start_level, type, lines) {
+	try {
+		return PACE_POTENTIAL[start_level][type][lines];
+	}
+	catch(err) {
+		return 0;
+	}
 }

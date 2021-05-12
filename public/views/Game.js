@@ -10,25 +10,18 @@ class Game {
 		this.line_events = []; // entry will be added every time lines are cleared
 
 		const lines = event.lines || 0;
-
-		let pace_score;
-
-		try {
-			pace_score = event.score + (PACE_POTENTIAL[event.level][lines] || 0);
-		}
-		catch(err) {
-			pace_score = event.score;
-		}
+		const score = event.score || 0;
+		const level = event.level || 0;
 
 		this.data = {
-			start_level: event.level,
+			start_level: level,
 
-			level: event.level,
+			level: level,
 			burn:  0,
 
 			score: {
-				current:    event.score,
-				pace:       pace_score,
+				current:    score,
+				pace:       score + getPotential(level, POTENTIAL.GAME, lines),
 				normalized: 0,
 				transition: null
 			},
@@ -254,12 +247,7 @@ class Game {
 
 		// update score
 		this.data.score.current = event.score;
-		try {
-			this.data.score.pace = event.score + (PACE_POTENTIAL[this.data.start_level][event.lines] || 0);
-		}
-		catch(err) {
-			this.data.score.pace = event.score;
-		}
+		this.data.score.pace = event.score + getPotential(this.data.start_level, POTENTIAL.GAME, event.lines);
 
 		// check transition score
 		if (event.level > this.data.level) {
