@@ -233,20 +233,16 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 	{
 		name:        document.querySelector(`.name.p${num} .header`),
 		score:       document.querySelector(`.score.p${num} .main`),
-		diff:        document.querySelector(`.score.p${num} .diff`),
 		level:       document.querySelector(`.level.p${num} .content`),
 		lines:       document.querySelector(`.lines.p${num} .content`),
 		trt:         document.querySelector(`.tetris_rate.p${num} .content`),
 		running_trt: document.querySelector(`.running_trt.p${num}`),
 		preview:     document.querySelector(`.next_piece.p${num}`),
 		field:       document.querySelector(`.board.p${num}`),
+
+		diff:        document.querySelector(`.score.p${num} .diff`),
 		hearts:      document.querySelector(`.name.p${num} .content`),
-
-		eff:         DOM_DEV_NULL,
-		drought:     DOM_DEV_NULL,
 		t_diff:      DOM_DEV_NULL,
-
-		pace:        DOM_DEV_NULL,
 		p_diff:      DOM_DEV_NULL,
 		pt_diff:     DOM_DEV_NULL,
 	},
