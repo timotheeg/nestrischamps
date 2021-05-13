@@ -169,11 +169,11 @@ class TetrisCompetitionAPI {
 		player.setDiff(diff, t_diff);
 		otherPlayer.setDiff(-diff, t_diff);
 
-		const p_diff = player.getPaceScore() - otherPlayer.getPaceScore();
+		const p_diff = player.getGamePaceScore() - otherPlayer.getGamePaceScore();
 		const pt_diff = getTetrisDiff(player, otherPlayer, true);
 
-		player.setPaceDiff(p_diff, pt_diff);
-		otherPlayer.setPaceDiff(-p_diff, pt_diff);
+		player.setGamePaceDiff(p_diff, pt_diff);
+		otherPlayer.setGamePaceDiff(-p_diff, pt_diff);
 	}
 }
 

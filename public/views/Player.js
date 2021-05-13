@@ -327,7 +327,7 @@ class Player {
 		// implement in subclasses
 	}
 
-	setPaceDiff(diff, t_diff) {
+	setGamePaceDiff(diff, t_diff) {
 		// implement in subclasses
 	}
 

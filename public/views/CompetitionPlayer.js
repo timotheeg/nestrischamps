@@ -39,7 +39,7 @@ class CompetitionPlayer extends Player {
 		this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
 	}
 
-	setPaceDiff(diff, t_diff) {
+	setGamePaceDiff(diff, t_diff) {
 		if (diff < 0) {
 			this.dom.p_diff.classList.remove('winning');
 			this.dom.p_diff.classList.add('losing');
