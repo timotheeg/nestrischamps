@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const PrivateRoom = require('./PrivateRoom');
 const MatchRoom = require('./MatchRoom');
+const MatchRoom = require('./Producer');
 
 // Twitch stuff
 const TwitchAuth = require('twitch-auth');
@@ -37,6 +38,8 @@ class User extends EventEmitter{
 		// TODO: create rooms lazily
 		this.private_room = new PrivateRoom(this);
 		this.match_room = new MatchRoom(this);
+
+		this.producer = new Producer(this);
 
 		// keep track of all socket for the user
 		// dangerous, could lead to memory if not managed well

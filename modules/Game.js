@@ -277,6 +277,7 @@ class Game {
 
 				if (this.transition === null) {
 					this.transition = data.score;
+					this.onTransition();
 				}
 			}
 		}
@@ -358,8 +359,10 @@ class Game {
 		}
 	}
 
+	// TODO: change callbacks to emit events instead
 	onGameOver() {}
 	onTetris() {}
+	onTransition() {}
 	onNewGame() {}
 }
 
