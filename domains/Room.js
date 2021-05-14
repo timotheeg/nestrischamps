@@ -1,31 +1,12 @@
 const _ = require('lodash');
-const Game = require('../modules/Game');
-
-
-function setGame(connection) {
-	if (connection.game) {
-		delete connection.game.onNewGame;
-		delete connection.game;
-	}
-
-	const game = new Game(connection.user);
-
-	game.onNewGame = (frame) => {
-		console.log(`${connection.user.id} is starting a new game`);
-
-		setGame(connection); // sets a new game onto connection - Spaghetti code!
-
-		connection.game.setFrame(frame);
-	}
-
-	connection.game = game;
-}
 
 class Room {
 	constructor(owner) {
 		this.owner = owner;
-		this.producers = new Set();
-		this.views = new Set();
+		this.producers = new Set(); // users
+		this.views = new Set(); // connections
+
+		this.message_forwarders = new Map();
 	}
 
 	addView(connection) {
@@ -42,68 +23,47 @@ class Room {
 		this.views.forEach(connection => connection.send(message));
 	}
 
-	getProducer(user_id) {
-		console.log('searching', user_id, typeof user_id)
-
-		const producers = this.producers.entries();
-
-		for (const entry of producers) {
-			const producer = entry[0];
-
-			console.log('checking', producer.user.id, typeof producer.user.id);
-
-			if (producer.user.id === user_id) {
-				return producer;
-			}
-		}
-
-		return null;
+	hasProducer(user) {
+		return this.producer.has(user);
 	}
 
-	addProducer(connection) {
-		// There can only be one producer per user in a room
-		// Last connection wins
-		const old_connection = this.getProducer(connection.user.id);
-		let is_new_user = true;
+	addProducer(user) {
+		const is_new_user = !this.hasProducer(user);
 
-		if (old_connection) {
-			old_connection.kick('concurrency_limit');
-			this.removeProducer(old_connection, true);
-			is_new_user = false;
+		if (!is_new_user) {
+			this.producers.add(user);
+
+			const forwarder = (message) => {
+				this.onProducerMessage(user, message);
+			};
+
+			this.message_forwarders.set(user, forwarder);
+			user.getProducer().on('message', forwarder);
 		}
-
-		this.producers.add(connection);
-
-
-		connection.on('message', message => {
-			if (!connection.game) {
-				setGame(connection);
-			}
-
-
-			if (message instanceof Uint8Array) {
-				// this is a game frame, we track it in the game instance
-				connection.game.setFrame(message); // this call may reset the game as side effect
-			}
-
-			this.onProducerMessage(connection, message)
-		});
-
-		connection.on('close', () => this.removeProducer(connection));
 
 		return is_new_user;
 	}
 
-	removeProducer(connection) {
-		return this.producers.delete(connection);
+	removeProducer(user) {
+		if (this.hasProducer(user)) {
+			const forwarder = this.message_forwarders.get(user);
+
+			user.getProducer().removeListener('message', forwarder);
+
+			this.message_forwarders.delete(user);
+			this.producers.delete(user);
+		}
 	}
 
 	close(reason) {
 		this.views.forEach(connection => connection.kick(reason));
 		this.views.clear();
 
-		this.producers.forEach(connection => connection.kick(reason));
-		this.producers.clear();
+		// dodgy iteration that empties the collection as it goes -_-
+		this.producers.forEach(user => {
+			this.removeProducer(user);
+		});
+		this.producers.clear(); // not needed, but added for clarity
 	}
 
 	onProducerMessage() {}

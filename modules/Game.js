@@ -72,6 +72,12 @@ class Game {
 		}
 	}
 
+	end() {
+		if (!this.over) {
+			this._doGameOver();
+		}
+	}
+
 	setFrame(frame) {
 		const data = BinaryFrame.parse(frame);
 
@@ -121,10 +127,7 @@ class Game {
 		}
 
 		if (data.gameid != this.gameid) {
-			if (!this.over) {
-				this._doGameOver();
-			}
-
+			this.end();
 			this.onNewGame(frame);
 			return;
 		}
@@ -212,7 +215,7 @@ class Game {
 
 		// Check board for gameover event (curtain has fallen)
 		if (cur_num_blocks >= 200) {
-			this._doGameOver();
+			this.end();
 		}
 	}
 
