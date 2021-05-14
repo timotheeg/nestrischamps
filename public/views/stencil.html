@@ -17,7 +17,7 @@ html {
 	left: 0;
 	width: 823px;
 	height: 720px;
-	background: url('/ocr/reference_ui_classic.png');
+	background: url('/views/stencil_bg.png');
 	background-repeat: no-repeat;
 	background-size: 823px 720px;
 }
@@ -27,8 +27,7 @@ html {
 	font-size: 24.8px;
 	font-family: "Press Start K";
 	letter-spacing: 1px;
-	opacity: 0.5;
-	color: red;
+	color: white;
 }
 
 #nestris_ui .lines {
@@ -53,6 +52,7 @@ html {
 
 #nestris_ui .stat {
 	left: 154px;
+	color: #d82901;
 }
 
 #nestris_ui .stat.T {
@@ -198,10 +198,20 @@ html {
 	line-height: 30px;
 }
 
-.next_piece,
-.board
- {
-	display: none;
+.next_piece {
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	top: 337px;
+	left: 617px;
+}
+
+.board {
+	position: absolute;
+	width: 256px;
+	height: 515px;
+	top: 131px;
+	left: 309px;
 }
 
 .timer,
@@ -211,6 +221,10 @@ html {
 	width: 418px;
 	text-align: center;
 	height: 27px;
+}
+
+.timer {
+	display: none;
 }
 
 .pace {
@@ -303,19 +317,18 @@ html {
 		<p class="piece L"></p>
 		<p class="piece I"></p>
 	</div>
+
+	<div class="board"></div>
+	<div class="next_piece"></div>
 </div>
 
 <div id="playing_fields">
-<div class="box board"></div>
-<div class="box next_piece"></div>
-
-
 <div class="box timer">
 	<div class="content">02:00:00</div>
 </div>
 
 <div class="box pace">
-	<div class="header">PACE <span class="value">0000000</span></div>
+	<div class="header">POTENTIAL <span class="value">0000000</span></div>
 </div>
 
 <div class="box running_trt">
@@ -343,7 +356,10 @@ html {
 <script >
 const player = new Player(
 	{
-		pace:        document.querySelector(`.pace .value`),
+		lines:       document.querySelector(`label.lines`),
+		score:       document.querySelector(`label.score`),
+		level:       document.querySelector(`label.level`),
+		pace_game:   document.querySelector(`.pace .value`),
 		trt:         document.querySelector(`.running_trt .header .trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
@@ -351,8 +367,19 @@ const player = new Player(
 		drought:     document.querySelector(`.drought .value`),
 	},
 	{
+		field_pixel_size: 3.2,
+		preview_pixel_size: 3.2,
+
 		tetris_sound: 0,
 		reliable_field: 0,
+
+		format_score: (v) => {
+			const tail = `${v % 100000}`.padStart(5, '0');
+			const head = Math.floor(v / 100000);
+			v = `${head.toString(16).toUpperCase()}${tail}`;
+
+			return v.padStart(6, '0');
+		}
 	}
 );
 
@@ -380,6 +407,8 @@ let start_time = 0;
 let timer = null;
 
 function startTimer(allowed) {
+	document.querySelector('.timer').style.display = 'block';
+
 	timer = clearInterval(timer);
 	start_time = Date.now();
 
@@ -411,6 +440,8 @@ function startTimer(allowed) {
 	}, 500)
 }
 
+const piece_stats = document.querySelector('#piece_stats');
+
 const API = {
 	frame(player_num, data) {
 		if (!data) {
@@ -418,6 +449,11 @@ const API = {
 		}
 
 		player.setFrame(data);
+
+		// Update the piece stats...
+		// Can we optimize this instead of doing it at every frame?
+		piece_stats.className = '';
+		piece_stats.classList.add(`l${(player.level || 0) % 10}`);
 	},
 
 	startTimer(allowed_time) {
