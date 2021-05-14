@@ -20,6 +20,10 @@ module.exports = {
 		file: 'qualifier',
 		type: '1p',
 	},
+	stencil: {
+		file: 'stencil',
+		type: '1p',
+	},
 
 	// multi player
 	ctwc: {
