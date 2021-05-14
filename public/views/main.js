@@ -495,8 +495,15 @@ function renderLine() {
 
 	dom.score.current.textContent = game.data.score.current.toString().padStart(6, '0').padStart(7, ' ');
 
-	if (dom.pace) {
-		dom.pace.value.textContent = game.data.score.pace.toString();
+	if (dom.potential) {
+		if (game.data.score.transition === null) {
+			dom.potential.header.textContent = 'TRAN POTENTIAL';
+			dom.potential.value.textContent = game.data.score.tr_potential.toString();
+		}
+		else {
+			dom.potential.header.textContent = 'GAME POTENTIAL';
+			dom.potential.value.textContent = game.data.score.potential.toString();
+		}
 	}
 
 	if (game.data.score.transition) {
