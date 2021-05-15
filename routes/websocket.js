@@ -144,6 +144,8 @@ module.exports = function init(server, wss) {
 
 		const connection = new Connection(user, ws);
 
+		const pathname = url.parse(request.url).pathname;
+
 		let m; // for url matching (if needed below)
 
 		user.addConnection(connection);
@@ -157,15 +159,15 @@ module.exports = function init(server, wss) {
 
 			room.addView(connection);
 		}
-		else if(request.url.match(/^\/ws\/room\/admin(\?.*)?$/)) {
+		else if(pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getMatchRoom().setAdmin(connection);
 		}
-		else if(request.url.match(/^\/ws\/room\/producer(\?.*)?$/)) {
+		else if(pathname.startsWith('/ws/room/producer')) {
 			console.log(`PrivateRoom: ${user.login}: Producer connected`);
 			user.getPrivateRoom().setProducer(connection);
 		}
-		else if(m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
+		else if(m = pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
 			const target_user = await UserDAO.getUserByLogin(m[1]);
 
 			console.log(`Retrieved target user (from ${m[1]}) ${target_user.id} ${target_user.login}`);
@@ -178,8 +180,11 @@ module.exports = function init(server, wss) {
 				connection.kick('invalid_target');
 			}
 			else {
-				console.log(`Switching on ${request.url.split('/')[5]}`);
-				switch(request.url.split('/')[5]) {
+				const connection_type = pathname.split('/')[5];
+
+				console.log(`Switching on ${connection_type}`);
+
+				switch(connection_type) {
 					case 'admin': {
 						console.log(`MatchRoom: ${target_user.login}: Admin connected`);
 						target_user.getMatchRoom().setAdmin(connection);
