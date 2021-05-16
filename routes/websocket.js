@@ -1,3 +1,4 @@
+const URL = require('url');
 const middlewares = require('../modules/middlewares');
 const layouts = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
@@ -144,7 +145,7 @@ module.exports = function init(server, wss) {
 
 		const connection = new Connection(user, ws);
 
-		const pathname = url.parse(request.url).pathname;
+		const pathname = URL.parse(request.url).pathname;
 
 		let m; // for url matching (if needed below)
 
