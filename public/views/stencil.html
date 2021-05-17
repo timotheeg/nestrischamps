@@ -200,9 +200,9 @@ html {
 
 .next_piece {
 	position: absolute;
-	width: 100px;
-	height: 100px;
-	top: 337px;
+	width: 103px;
+	height: 106px;
+	top: 332px;
 	left: 617px;
 }
 
@@ -308,7 +308,7 @@ html {
 	<label class="value stat L">000</label>
 	<label class="value stat I">000</label>
 
-	<div id="piece_stats" class="l1">
+	<div id="piece_stats" class="l0">
 		<p class="piece T"></p>
 		<p class="piece J"></p>
 		<p class="piece Z"></p>
@@ -427,19 +427,20 @@ function getPB() {
 	}
 }
 
+function updateLevel() {
+	piece_stats.className = '';
+	piece_stats.classList.add(`l${(player.level || 0) % 10}`);
+}
+
 player.onGameOver = getPB;
+player.onLevel = updateLevel;
 
 getPB();
 
 player.onGameStart = () => {
 	player.drought_box.classList.remove('active');
+	updateLevel();
 }
-
-player.onLevel = () => {
-	piece_stats.className = '';
-	piece_stats.classList.add(`l${(player.level || 0) % 10}`);
-}
-
 
 // timer management
 const ALLOWED_TIME = 2 * 60 * 60;
