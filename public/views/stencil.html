@@ -363,43 +363,6 @@ function format_score(v) {
 	return v_str.padStart(6, '0');
 }
 
-const player = new Player(
-	{
-		lines:       document.querySelector(`label.lines`),
-		score:       document.querySelector(`label.score`),
-		level:       document.querySelector(`label.level`),
-		pace_game:   document.querySelector(`.pace .value`),
-		trt:         document.querySelector(`.running_trt .header .trt`),
-		running_trt: document.querySelector(`.running_trt .value`),
-		preview:     document.querySelector(`.next_piece`),
-		field:       document.querySelector(`.board`),
-		drought:     document.querySelector(`.drought .value`),
-
-		pb:          document.querySelector(`label.top`),
-	},
-	{
-		field_pixel_size: 3.2,
-		preview_pixel_size: 3.2,
-
-		tetris_sound: 0,
-		reliable_field: 0,
-
-		format_score,
-	}
-);
-
-player.drought_box = document.querySelector(`.drought`);
-
-player.onDroughtStart = () => {
-	console.log("onDroughtStart")
-	player.drought_box.classList.add('active');
-}
-
-player.onDroughtEnd = (count) => {
-	console.log("onDroughtEnd", count)
-	player.drought_box.classList.remove('active');
-}
-
 function getPB() {
 	let m;
 
@@ -422,7 +385,7 @@ function getPB() {
 		})
 		.catch(err => 0)
 		.then(pb => {
-			player.dom.pb.textContent = format_score(pb || 0);
+			custom_doms.pb.textContent = format_score(pb || 0);
 		});
 	}
 }
@@ -432,15 +395,62 @@ function updateLevel() {
 	piece_stats.classList.add(`l${(player.level || 0) % 10}`);
 }
 
+
+const player = new Player(
+	{
+		lines:       document.querySelector(`label.lines`),
+		score:       document.querySelector(`label.score`),
+		level:       document.querySelector(`label.level`),
+		pace_game:   document.querySelector(`.pace .value`),
+		trt:         document.querySelector(`.running_trt .header .trt`),
+		running_trt: document.querySelector(`.running_trt .value`),
+		preview:     document.querySelector(`.next_piece`),
+		field:       document.querySelector(`.board`),
+		drought:     document.querySelector(`.drought .value`),
+	},
+	{
+		field_pixel_size: 3.2,
+		preview_pixel_size: 3.2,
+		tetris_sound: 0,
+		format_score,
+	}
+);
+
+const custom_doms = {
+	pb:          document.querySelector(`label.top`),
+	drought_box: document.querySelector(`.drought`),
+	piece_stats: {},
+};
+
+PIECES.forEach(p => {
+	custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
+});
+
+player.onDroughtStart = () => {
+	console.log("onDroughtStart")
+	custom_doms.drought_box.classList.add('active');
+}
+
+player.onDroughtEnd = (count) => {
+	console.log("onDroughtEnd", count)
+	custom_doms.drought_box.classList.remove('active');
+}
+
+player.onGameStart = () => {
+	custom_doms.drought_box.classList.remove('active');
+	updateLevel();
+}
+
+player.onPiece = () => {
+	PIECES.forEach(p => {
+		custom_doms.piece_stats[p].textContent = player.piece_stats[p].toString().padStart(3, '0');
+	});
+}
+
 player.onGameOver = getPB;
 player.onLevel = updateLevel;
 
 getPB();
-
-player.onGameStart = () => {
-	player.drought_box.classList.remove('active');
-	updateLevel();
-}
 
 // timer management
 const ALLOWED_TIME = 2 * 60 * 60;

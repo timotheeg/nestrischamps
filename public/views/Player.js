@@ -284,6 +284,8 @@ class Player {
 		this.pending_piece = false;
 		this.pending_single = false;
 
+		// TODO use the Game Class T_T
+
 		this.pieces.length = 0;
 		this.clear_events.length = 0;
 		this.preview = '';
@@ -297,6 +299,8 @@ class Player {
 		this.drought = 0;
 		this.field_num_blocks = 0;
 		this.field_string = '';
+
+		this.piece_stats =  PIECES.reduce((acc, p) => (acc[p] = 0, acc), {count:0});
 
 		this.lines_trt = 0;
 		this.total_eff = 0;
@@ -420,12 +424,22 @@ class Player {
 
 			do {
 				if (this.options.reliable_field) {
-					if (cur_piece === 'I') {
-						drought = 0;
+					if (this.piece_stats.hasOwnProperty(cur_piece)) {
+						this.piece_stats[cur_piece]++;
+						this.piece_stats.count++;
+
+						if (cur_piece === 'I') {
+							drought = 0;
+						}
+						else {
+							drought++;
+						}
 					}
+					/*
 					else {
-						drought++;
+						// errr...... -_-
 					}
+					*/
 				}
 				else {
 					try {
@@ -444,10 +458,9 @@ class Player {
 							// unknown state, we'll simply store it as new valid state
 						}
 
-						this.piece_stats = piece_stats;
+						Object.assign(this.piece_stats, piece_stats);
 					}
 					catch(e) {
-						console.error(e);
 						break;
 					}
 				}
@@ -467,6 +480,7 @@ class Player {
 				this.dom.drought.textContent = this.drought;
 				this.pending_piece = false;
 				this.prev_preview = data.preview;
+
 				this.onPiece(cur_piece);
 			}
 			while(false);
@@ -487,6 +501,8 @@ class Player {
 			this.renderPreview(this.level, data.preview);
 
 			if (this.options.reliable_field) {
+				// as a side effect, updateField() will set
+				// pending_piece to true if necessary
 				this.updateField(data.field, num_blocks, field_string);
 			}
 			else {
@@ -503,7 +519,6 @@ class Player {
 					}
 				}
 				catch(e) {
-					console.error(e);
 				}
 			}
 
