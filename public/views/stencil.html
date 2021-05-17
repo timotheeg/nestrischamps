@@ -354,6 +354,15 @@ html {
 <script src="/views/renderBlock.js"></script>
 <script src="/views/Player.js"></script>
 <script >
+
+function format_score(v) {
+	const tail = `${v % 100000}`.padStart(5, '0');
+	const head = Math.floor(v / 100000);
+	const v_str = `${head.toString(16).toUpperCase()}${tail}`;
+
+	return v_str.padStart(6, '0');
+}
+
 const player = new Player(
 	{
 		lines:       document.querySelector(`label.lines`),
@@ -365,6 +374,8 @@ const player = new Player(
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
 		drought:     document.querySelector(`.drought .value`),
+
+		pb:          document.querySelector(`label.top`),
 	},
 	{
 		field_pixel_size: 3.2,
@@ -373,13 +384,7 @@ const player = new Player(
 		tetris_sound: 0,
 		reliable_field: 0,
 
-		format_score: (v) => {
-			const tail = `${v % 100000}`.padStart(5, '0');
-			const head = Math.floor(v / 100000);
-			v = `${head.toString(16).toUpperCase()}${tail}`;
-
-			return v.padStart(6, '0');
-		}
+		format_score,
 	}
 );
 
@@ -395,8 +400,44 @@ player.onDroughtEnd = (count) => {
 	player.drought_box.classList.remove('active');
 }
 
+function getPB() {
+	let m;
+
+	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/)) {
+		fetch(
+			`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
+			{
+				cache: 'no-cache',
+				headers: {
+					'Cache-Control': 'no-cache'
+				}
+				// mode: 'no-cors'
+			}
+		)
+		.then(response => response.json())
+		.then(data => data.high_scores.overall[0].score)
+		.catch(err => {
+			console.error(err);
+			return player.score;
+		})
+		.catch(err => 0)
+		.then(pb => {
+			player.dom.pb.textContent = format_score(pb || 0);
+		});
+	}
+}
+
+player.onGameOver = getPB;
+
+getPB();
+
 player.onGameStart = () => {
 	player.drought_box.classList.remove('active');
+}
+
+player.onLevel = () => {
+	piece_stats.className = '';
+	piece_stats.classList.add(`l${(player.level || 0) % 10}`);
 }
 
 
@@ -449,11 +490,6 @@ const API = {
 		}
 
 		player.setFrame(data);
-
-		// Update the piece stats...
-		// Can we optimize this instead of doing it at every frame?
-		piece_stats.className = '';
-		piece_stats.classList.add(`l${(player.level || 0) % 10}`);
 	},
 
 	startTimer(allowed_time) {

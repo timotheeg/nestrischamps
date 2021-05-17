@@ -246,6 +246,7 @@ class Player {
 	}
 
 	onPiece() {}
+	onLevel() {}
 	onTransition() {}
 	onDroughtStart() {}
 	onDroughtEnd() {}
@@ -472,7 +473,13 @@ class Player {
 		}
 
 		if (level != null) {
+			const is_level_change = level != this.level;
+
 			this.level = level;
+
+			if (is_level_change) {
+				this.onLevel();
+			}
 
 			const field_string = data.field.join('');
 
