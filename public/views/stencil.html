@@ -15,162 +15,163 @@ html {
 	overflow: hidden;
 	top: 0;
 	left: 0;
-	width: 823px;
-	height: 720px;
+	width: 512px;
+	height: 448px;
 	background: url('/views/stencil_bg.png');
 	background-repeat: no-repeat;
-	background-size: 823px 720px;
+	background-size: 512px 448px;
+	transform-origin: top left;
+	transform: scale(1.6071428571428572);
 }
 
 #nestris_ui label {
 	position: absolute;
-	font-size: 24.8px;
+	font-size: 16px;
 	font-family: "Press Start K";
-	letter-spacing: 1px;
 	color: white;
 }
 
 #nestris_ui .lines {
-	top: 52px;
-	left: 489px;
+	top: 32px;
+	left: 304px;
 }
 
 #nestris_ui .top {
-	top: 103px;
-	left: 617px;
+	top: 64px;
+	left: 384px;
 }
 
 #nestris_ui .score {
-	top: 180px;
-	left: 617px;
+	top: 112px;
+	left: 384px;
 }
 
 #nestris_ui .level {
-	top: 515px;
-	left: 669px;
+	top: 320px;
+	left: 416px;
 }
 
 #nestris_ui .stat {
-	left: 154px;
+	left: 96px;
 	color: #d82901;
 }
 
 #nestris_ui .stat.T {
-	top: 283px;
+	top: 176px;
 }
 
 #nestris_ui .stat.J {
-	top: 333px;
+	top: 208px;
 }
 
 #nestris_ui .stat.Z {
-	top: 386px;
+	top: 240px;
 }
 
 #nestris_ui .stat.O {
-	top: 438px;
+	top: 272px;
 }
 
 #nestris_ui .stat.S {
-	top: 488px;
+	top: 304px;
 }
 
 #nestris_ui .stat.L {
-	top: 539px;
+	top: 336px;
 }
 
 #nestris_ui .stat.I {
-	top: 591px;
+	top: 368px;
 }
 
 
 #piece_stats .piece {
 	position: absolute;
-	left: 74px;
+	left: 48px;
 	display: inline-block;
 	background: url(/views/pieces_sprites.png);
 	background-repeat: no-repeat;
 	background-position-x: 0px;
-	width: 78px;
-	height: 38px;
+	width: 46px;
+	height: 22px;
 	margin: 0;
 	padding: 0;
 }
 
 #piece_stats.l0 .piece {
-	background-position-x: -75px;
+	background-position-x: -48px;
 }
 
 #piece_stats.l1 .piece {
-	background-position-x: -152px;
+	background-position-x: -96px;
 }
 
 #piece_stats.l2 .piece {
-	background-position-x: -229px;
+	background-position-x: -144px;
 }
 
 #piece_stats.l3 .piece {
-	background-position-x: -306px;
+	background-position-x: -192px;
 }
 
 #piece_stats.l4 .piece {
-	background-position-x: -383px;
+	background-position-x: -240px;
 }
 
 #piece_stats.l5 .piece {
-	background-position-x: -461px;
+	background-position-x: -288px;
 }
 
 #piece_stats.l6 .piece {
-	background-position-x: -539px;
+	background-position-x: -336px;
 }
 
 #piece_stats.l7 .piece {
-	background-position-x: -616px;
+	background-position-x: -384px;
 }
 
 #piece_stats.l8 .piece {
-	background-position-x: -693px;
+	background-position-x: -432px;
 }
 
 #piece_stats.l9 .piece {
-	background-position-x: -770px;
+	background-position-x: -480px;
 }
 
 
 #piece_stats .piece.T {
-	background-position-y: 0px;
-	top: 270px;
+	background-position-y: -2px;
+	top: 170px;
 }
 
 #piece_stats .piece.J {
-	background-position-y: -49px;
-	top: 320px;
+	background-position-y: -32px;
+	top: 200px;
 }
 
 #piece_stats .piece.Z {
-	background-position-y: -104px;
-	top: 375px;
+	background-position-y: -66px;
+	top: 234px;
 }
 
 #piece_stats .piece.O {
-	background-position-y: -157px;
-	top: 427px;
+	background-position-y: -98px;
+	top: 266px;
 }
 
 #piece_stats .piece.S {
-	background-position-y: -206px;
-	top: 477px;
+	background-position-y: -130px;
+	top: 298px;
 }
 
 #piece_stats .piece.L {
-	background-position-y: -257px;
-	top: 526px;
+	background-position-y: -160px;
+	top: 328px;
 }
 
 #piece_stats .piece.I {
-	background-position-y: -307px;
-	top: 576px;
+	background-position-y: -192px;
+	top: 360px;
 }
 
 
@@ -200,18 +201,18 @@ html {
 
 .next_piece {
 	position: absolute;
-	width: 103px;
-	height: 106px;
-	top: 332px;
-	left: 617px;
+	width: 62px;
+	height: 30px;
+	top: 224px;
+	left: 384px;
 }
 
 .board {
 	position: absolute;
-	width: 256px;
-	height: 515px;
-	top: 131px;
-	left: 309px;
+	width: 160px;
+	height: 320px;
+	top: 80px;
+	left: 192px;
 }
 
 .timer,
@@ -409,8 +410,9 @@ const player = new Player(
 		drought:     document.querySelector(`.drought .value`),
 	},
 	{
-		field_pixel_size: 3.2,
-		preview_pixel_size: 3.2,
+		field_pixel_size: 2,
+		preview_pixel_size: 2,
+		tetris_flash: 0,
 		tetris_sound: 0,
 		format_score,
 	}

@@ -121,7 +121,7 @@ const DEFAULT_OPTIONS = {
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
-	tetris_flashes: 1,
+	tetris_flash: 1,
 	tetris_sound: 1,
 	reliable_field: 1,
 	format_score: (v, size) => {
@@ -254,7 +254,8 @@ class Player {
 	onGameOver() {}
 
 	onTetris() {
-		if (this.options.tetris_flashes) {
+		if (this.options.tetris_flash
+	) {
 			let remaining_frames = 12;
 
 			const steps = () => {
