@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+<style>
+html {
+	overflow: hidden;
+}
+#stream_bg {
+	background: black;
+}
+
+#nestris_ui {
+	position: absolute;
+	overflow: hidden;
+	top: 0;
+	left: 0;
+	width: 512px;
+	height: 448px;
+	background: url('/views/stencil_bg.png');
+	background-repeat: no-repeat;
+	background-size: 512px 448px;
+	transform-origin: top left;
+	transform: scale(1.6071428571428572);
+}
+
+#nestris_ui label {
+	position: absolute;
+	font-size: 16px;
+	font-family: "Press Start K";
+	color: white;
+}
+
+#nestris_ui .lines {
+	top: 32px;
+	left: 304px;
+}
+
+#nestris_ui .top {
+	top: 64px;
+	left: 384px;
+}
+
+#nestris_ui .score {
+	top: 112px;
+	left: 384px;
+}
+
+#nestris_ui .level {
+	top: 320px;
+	left: 416px;
+}
+
+#nestris_ui .stat {
+	left: 96px;
+	color: #d82901;
+}
+
+#nestris_ui .stat.T {
+	top: 176px;
+}
+
+#nestris_ui .stat.J {
+	top: 208px;
+}
+
+#nestris_ui .stat.Z {
+	top: 240px;
+}
+
+#nestris_ui .stat.O {
+	top: 272px;
+}
+
+#nestris_ui .stat.S {
+	top: 304px;
+}
+
+#nestris_ui .stat.L {
+	top: 336px;
+}
+
+#nestris_ui .stat.I {
+	top: 368px;
+}
+
+
+#piece_stats .piece {
+	position: absolute;
+	left: 48px;
+	display: inline-block;
+	background: url(/views/pieces_sprites.png);
+	background-repeat: no-repeat;
+	background-position-x: 0px;
+	width: 46px;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+}
+
+#piece_stats.l0 .piece {
+	background-position-x: -48px;
+}
+
+#piece_stats.l1 .piece {
+	background-position-x: -96px;
+}
+
+#piece_stats.l2 .piece {
+	background-position-x: -144px;
+}
+
+#piece_stats.l3 .piece {
+	background-position-x: -192px;
+}
+
+#piece_stats.l4 .piece {
+	background-position-x: -240px;
+}
+
+#piece_stats.l5 .piece {
+	background-position-x: -288px;
+}
+
+#piece_stats.l6 .piece {
+	background-position-x: -336px;
+}
+
+#piece_stats.l7 .piece {
+	background-position-x: -384px;
+}
+
+#piece_stats.l8 .piece {
+	background-position-x: -432px;
+}
+
+#piece_stats.l9 .piece {
+	background-position-x: -480px;
+}
+
+
+#piece_stats .piece.T {
+	background-position-y: -2px;
+	top: 170px;
+}
+
+#piece_stats .piece.J {
+	background-position-y: -32px;
+	top: 200px;
+}
+
+#piece_stats .piece.Z {
+	background-position-y: -66px;
+	top: 234px;
+}
+
+#piece_stats .piece.O {
+	background-position-y: -98px;
+	top: 266px;
+}
+
+#piece_stats .piece.S {
+	background-position-y: -130px;
+	top: 298px;
+}
+
+#piece_stats .piece.L {
+	background-position-y: -160px;
+	top: 328px;
+}
+
+#piece_stats .piece.I {
+	background-position-y: -192px;
+	top: 360px;
+}
+
+
+
+#playing_fields {
+	position: absolute;
+	left: 825px;
+	top: 260px;
+}
+
+.box {
+	width: 95px;
+	height: 56px;
+	text-align: center;
+}
+
+.box .header {
+	font-size: 16px;
+	padding-bottom: 0.5em;
+}
+
+.box .content,
+.box .data {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.next_piece {
+	position: absolute;
+	width: 64px;
+	height: 32px;
+	top: 224px;
+	left: 384px;
+}
+
+.board {
+	position: absolute;
+	width: 160px;
+	height: 320px;
+	top: 80px;
+	left: 192px;
+}
+
+.timer,
+.pace {
+	top: 5px;
+	left: 5px;
+	width: 418px;
+	text-align: center;
+	height: 27px;
+}
+
+.timer {
+	display: none;
+}
+
+.pace {
+	top: 247px;
+	height: 24px;
+}
+
+.pace .header {
+	padding-top: 2px;
+}
+
+.bounded {
+	border-style: dashed;
+	border-color: #505050;
+	border-width: 1px 0;
+}
+
+.running_trt {
+	padding: 12px 9px 9px;
+
+	width: 424px;
+	height: 133px;
+	top: 298px;
+	left: 5px;
+}
+
+.running_trt .value {
+	border-bottom: 0;
+	width: 434px;
+	height: 103px;
+	position: relative;
+}
+
+.drought {
+	width: 121px;
+	top: 116px;
+	height: 40px;
+	opacity: 0;
+	display: none;
+	color: red;
+	left: 156px;
+}
+
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought .value {
+	padding-bottom: 2px;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="stream_bg">
+
+<div id="nestris_ui">
+	<label class="value lines">000</label>
+	<label class="value top">000000</label>
+	<label class="value score">000000</label>
+	<label class="value level">00</label>
+
+	<label class="value stat T">000</label>
+	<label class="value stat J">000</label>
+	<label class="value stat Z">000</label>
+	<label class="value stat O">000</label>
+	<label class="value stat S">000</label>
+	<label class="value stat L">000</label>
+	<label class="value stat I">000</label>
+
+	<div id="piece_stats" class="l0">
+		<p class="piece T"></p>
+		<p class="piece J"></p>
+		<p class="piece Z"></p>
+		<p class="piece O"></p>
+		<p class="piece S"></p>
+		<p class="piece L"></p>
+		<p class="piece I"></p>
+	</div>
+
+	<div class="board"></div>
+	<div class="next_piece"></div>
+</div>
+
+<div id="playing_fields">
+<div class="box timer">
+	<div class="content">02:00:00</div>
+</div>
+
+<div class="box pace">
+	<div class="header">POTENTIAL <span class="value">0000000</span></div>
+</div>
+
+<div class="box running_trt">
+	<div class="header">TETRIS RATE <span class="trt">--</span></div>
+	<div class="value bounded"></div>
+</div>
+
+<div class="box drought">
+	<div class="header">DROUGHT</div>
+	<div class="value">99</div>
+</div>
+
+</div><!-- End Playing Fields -->
+</div><!-- End Stream BG -->
+
+
+<!-- Audio -->
+
+<script src="/js/connection.js"></script>
+<script src="/js/BinaryFrame.js"></script>
+<script src="/views/constants.js"></script>
+<script src="/views/utils.js"></script>
+<script src="/views/renderBlock.js"></script>
+<script src="/views/Player.js"></script>
+<script >
+
+function format_score(v) {
+	const tail = `${v % 100000}`.padStart(5, '0');
+	const head = Math.floor(v / 100000);
+	const v_str = `${head.toString(16).toUpperCase()}${tail}`;
+
+	return v_str.padStart(6, '0');
+}
+
+function getPB() {
+	let m;
+
+	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/)) {
+		fetch(
+			`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
+			{
+				cache: 'no-cache',
+				headers: {
+					'Cache-Control': 'no-cache'
+				}
+				// mode: 'no-cors'
+			}
+		)
+		.then(response => response.json())
+		.then(data => data.high_scores.overall[0].score)
+		.catch(err => {
+			console.error(err);
+			return player.score;
+		})
+		.catch(err => 0)
+		.then(pb => {
+			custom_doms.pb.textContent = format_score(pb || 0);
+		});
+	}
+}
+
+function updateLevel() {
+	piece_stats.className = '';
+	piece_stats.classList.add(`l${(player.level || 0) % 10}`);
+}
+
+
+const player = new Player(
+	{
+		lines:       document.querySelector(`label.lines`),
+		score:       document.querySelector(`label.score`),
+		level:       document.querySelector(`label.level`),
+		pace_game:   document.querySelector(`.pace .value`),
+		trt:         document.querySelector(`.running_trt .header .trt`),
+		running_trt: document.querySelector(`.running_trt .value`),
+		preview:     document.querySelector(`.next_piece`),
+		field:       document.querySelector(`.board`),
+		drought:     document.querySelector(`.drought .value`),
+	},
+	{
+		field_pixel_size: 2,
+		preview_pixel_size: 2,
+		tetris_flash: 0,
+		tetris_sound: 0,
+		format_score,
+	}
+);
+
+const custom_doms = {
+	pb:          document.querySelector(`label.top`),
+	drought_box: document.querySelector(`.drought`),
+	piece_stats: {},
+};
+
+PIECES.forEach(p => {
+	custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
+});
+
+player.onDroughtStart = () => {
+	console.log("onDroughtStart")
+	custom_doms.drought_box.classList.add('active');
+}
+
+player.onDroughtEnd = (count) => {
+	console.log("onDroughtEnd", count)
+	custom_doms.drought_box.classList.remove('active');
+}
+
+player.onGameStart = () => {
+	custom_doms.drought_box.classList.remove('active');
+	updateLevel();
+}
+
+player.onPiece = () => {
+	PIECES.forEach(p => {
+		custom_doms.piece_stats[p].textContent = player.piece_stats[p].toString().padStart(3, '0');
+	});
+}
+
+player.onGameOver = getPB;
+player.onLevel = updateLevel;
+
+getPB();
+
+// timer management
+const ALLOWED_TIME = 2 * 60 * 60;
+const timer_el = document.querySelector(`.timer .content`);
+let start_time = 0;
+let timer = null;
+
+function startTimer(allowed) {
+	document.querySelector('.timer').style.display = 'block';
+
+	timer = clearInterval(timer);
+	start_time = Date.now();
+
+	const allowed_time = allowed || ALLOWED_TIME;
+
+	timer = setInterval(() => {
+		const elapsed = Math.floor((Date.now() - start_time) / 1000);
+		let remainder = allowed_time - elapsed;
+
+		if (remainder < 0) {
+			remainder = 0;
+			timer = clearInterval(timer);
+		}
+
+		const hours = Math.floor(remainder / (60 * 60));
+
+		remainder = remainder % (60 * 60);
+
+		const minutes = Math.floor(remainder / 60);
+		const seconds = remainder % 60;
+
+		timer_el.textContent = `${hours}`.padStart(2, '0')
+			+ ':'
+			+ `${minutes}`.padStart(2, '0')
+			+ ':'
+			+ `${seconds}`.padStart(2, '0')
+		;
+
+	}, 500)
+}
+
+const piece_stats = document.querySelector('#piece_stats');
+
+const API = {
+	frame(player_num, data) {
+		if (!data) {
+			data = player_num;
+		}
+
+		player.setFrame(data);
+	},
+
+	startTimer(allowed_time) {
+		startTimer(allowed_time);
+	},
+
+	message() {} // noop
+}
+
+const connection = new Connection();
+
+connection.onMessage = function(frame) {
+	try{
+		const [method, ...args] = frame;
+
+		API[method].apply(API, args);
+	}
+	catch(e) {
+		console.error(e);
+	}
+};
+
+function onFrame(frame, debug) {
+	API.frame(1, frame, debug);
+}
+</script>
+
+<!-- script src="/views/sample_frames/sample_frames_11.js"></script>
+<script src="debug.js"></script -->
+
+</body>
+<html>
