@@ -102,17 +102,18 @@ const BORDER_BLOCKS = [
 */
 
 const DEFAULT_DOM_REFS = {
-	score:       DOM_DEV_NULL,
-	pace_tr:     DOM_DEV_NULL,
-	pace_game:   DOM_DEV_NULL,
-	level:       DOM_DEV_NULL,
-	lines:       DOM_DEV_NULL,
-	trt:         DOM_DEV_NULL,
-	eff:         DOM_DEV_NULL,
-	running_trt: DOM_DEV_NULL,
-	preview:     DOM_DEV_NULL,
-	field:       DOM_DEV_NULL,
-	drought:     DOM_DEV_NULL,
+	score:          DOM_DEV_NULL,
+	pace_tr:        DOM_DEV_NULL,
+	pace_game:      DOM_DEV_NULL,
+	eff_projection: DOM_DEV_NULL,
+	level:          DOM_DEV_NULL,
+	lines:          DOM_DEV_NULL,
+	trt:            DOM_DEV_NULL,
+	eff:            DOM_DEV_NULL,
+	running_trt:    DOM_DEV_NULL,
+	preview:        DOM_DEV_NULL,
+	field:          DOM_DEV_NULL,
+	drought:        DOM_DEV_NULL,
 };
 
 const DEFAULT_OPTIONS = {
@@ -305,6 +306,7 @@ class Player {
 
 		this.lines_trt = 0;
 		this.total_eff = 0;
+		this.eff_projection = o;
 
 		this.gameid = -1;
 		this.game_over = false;
@@ -321,6 +323,7 @@ class Player {
 		this.dom.score.textContent = this.options.format_score(this.score);
 		this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 6);
 		this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
+		this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
 	}
@@ -533,6 +536,9 @@ class Player {
 				this.game_pace_score = this.getGamePaceScore();
 				this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
 
+				this.eff_projection = this.getEffProjection();
+				this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
+
 				this.onGameOver();
 			}
 		}
@@ -580,6 +586,7 @@ class Player {
 
 				if (level != this.start_level && this.transition === null) {
 					this.transition = this.score;
+					this.tr_pace_score = this.score;
 					this.onTransition();
 				}
 			}
@@ -591,6 +598,9 @@ class Player {
 
 			this.game_pace_score = this.getGamePaceScore();
 			this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
+
+			this.eff_projection = this.getEffProjection();
+			this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
 		}
 
 		if (data.score != null) {
@@ -618,6 +628,41 @@ class Player {
 		else {
 			return this.transition;
 		}
+	}
+
+	// TODO: Use a exponentially smoothed
+	getEffProjection() {
+		if (this.game_over) {
+			return this.score;
+		}
+
+		const eff = this.total_eff / this.lines;
+		const transition_lines = TRANSITIONS[this.start_level];
+		const kill_screen_lines = 290 - (((this.start_level + 1) * 10) - transition_lines);
+
+		let current_level;
+		let current_level_lines;
+		let num_levels;
+
+		if (this.transition === null) {
+			current_level = this.start_level;
+			current_level_lines = transition_lines - this.lines - 1;
+			num_levels = Math.floor((kill_screen_lines - transition_lines) / 10);
+
+		}
+		else {
+			current_level = this.level; // is it wise to rely on this.level
+			current_level_lines = 10 - (this.lines % 10) - 1;
+			num_levels = Math.floor((kill_screen_lines - this.lines) / 10);
+		}
+
+		return this.score + eff * (
+			current_level_lines * (current_level + 1)
+			+
+			5 * num_levels * (current_level + 2 + 28 + 1) // sum of consecutive numbers formula for levels 19-28
+			+
+			3 * (29 + 1) // add 3 lines into kill screen
+		);
 	}
 
 	renderPreview(level, preview) {
