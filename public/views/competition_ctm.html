@@ -70,7 +70,7 @@
 	right: var(--offset);
 }
 
-.pace_potential {
+.pace {
 	width: 112px;
 	height: 74px;
 
@@ -78,14 +78,18 @@
 	right: var(--offset);
 }
 
-.pace_potential .header {
+.pace .header {
 	line-height: 12px;
 	font-size: 8px;
 	padding-bottom: 3px;
 }
 
-.pace_potential .content {
+.pace .content {
 	text-align: right;
+}
+
+.pace.eff_projection {
+	top: 96px;
 }
 
 .name {
@@ -223,8 +227,17 @@
 	</div>
 </div>
 
-<div class="box pace_potential p1">
-	<div class="header">PACE POTENTIAL</div>
+<div class="box pace game_potential p1">
+	<div class="header">GAME POTENTIAL</div>
+	<div class="content">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">000</div>
+	</div>
+</div>
+
+<div class="box pace eff_projection p1">
+	<div class="header">EFF PROJECTION</div>
 	<div class="content">
 		<div class="value">000000</div>
 		<div class="diff">000000</div>
@@ -270,8 +283,17 @@
 	</div>
 </div>
 
-<div class="box pace_potential p2">
-	<div class="header">PACE POTENTIAL</div>
+<div class="box pace game_potential p2">
+	<div class="header">GAME POTENTIAL</div>
+	<div class="content">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">000</div>
+	</div>
+</div>
+
+<div class="box pace eff_projection p2">
+	<div class="header">EFF PROJECTION</div>
 	<div class="content">
 		<div class="value">000000</div>
 		<div class="diff">000000</div>
@@ -335,14 +357,15 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		field:       document.querySelector(`.board.p${num}`),
 		hearts:      document.querySelector(`.hearts.p${num}`),
 		drought:     document.querySelector(`.drought.p${num} .value`),
-		pace_game:   document.querySelector(`.pace_potential.p${num} .value`),
+		pace_game:   document.querySelector(`.game_potential.p${num} .value`),
 
 		eff:         DOM_DEV_NULL,
+		eff_projection: document.querySelector(`.eff_projection.p${num} .value`),
 
 		diff:        document.querySelector(`.score.p${num} .diff`),
 		t_diff:      document.querySelector(`.score.p${num} .tetris_diff`),
-		p_diff:      document.querySelector(`.pace_potential.p${num} .diff`),
-		pt_diff:     document.querySelector(`.pace_potential.p${num} .tetris_diff`),
+		p_diff:      document.querySelector(`.game_potential.p${num} .diff`),
+		pt_diff:     document.querySelector(`.game_potential.p${num} .tetris_diff`),
 	},
 	{
 		field_pixel_size: 3,

@@ -165,7 +165,7 @@ class TetrisCompetitionAPI {
 		const diff = score - otherScore;
 		const t_diff = getTetrisDiff(player, otherPlayer);
 
-		// TODO: Ideally make t_diff sdame sign as diff for consistency
+		// TODO: Ideally make t_diff same sign as diff for consistency
 		player.setDiff(diff, t_diff);
 		otherPlayer.setDiff(-diff, t_diff);
 

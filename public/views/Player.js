@@ -306,7 +306,7 @@ class Player {
 
 		this.lines_trt = 0;
 		this.total_eff = 0;
-		this.eff_projection = o;
+		this.eff_projection = 0;
 
 		this.gameid = -1;
 		this.game_over = false;
