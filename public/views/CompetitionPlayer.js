@@ -59,4 +59,25 @@ class CompetitionPlayer extends Player {
 		this.dom.p_diff.textContent = this.options.format_score(absDiff);
 		this.dom.pt_diff.textContent = this.options.format_tetris_diff(t_diff);
 	}
+
+	setEffProjectionDiff(diff, t_diff) {
+		if (diff < 0) {
+			this.dom.ep_diff.classList.remove('winning');
+			this.dom.ep_diff.classList.add('losing');
+			this.dom.ept_diff.classList.remove('winning');
+			this.dom.ept_diff.classList.add('losing');
+		}
+		else {
+			this.dom.ep_diff.classList.remove('losing');
+			this.dom.ep_diff.classList.add('winning');
+			this.dom.ept_diff.classList.remove('losing');
+			this.dom.ept_diff.classList.add('winning');
+		}
+
+		// compute a proper visual of the diff
+		const absDiff = Math.abs(diff);
+
+		this.dom.ep_diff.textContent = this.options.format_score(absDiff);
+		this.dom.ept_diff.textContent = this.options.format_tetris_diff(t_diff);
+	}
 }

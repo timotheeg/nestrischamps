@@ -154,7 +154,7 @@
 
 .drought {
 	width: 50px;
-	top: 96px;
+	top: 192px;
 	height: 40px;
 	opacity: 0;
 	color: red;
@@ -364,8 +364,12 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 
 		diff:        document.querySelector(`.score.p${num} .diff`),
 		t_diff:      document.querySelector(`.score.p${num} .tetris_diff`),
+
 		p_diff:      document.querySelector(`.game_potential.p${num} .diff`),
 		pt_diff:     document.querySelector(`.game_potential.p${num} .tetris_diff`),
+
+		ep_diff:     document.querySelector(`.eff_projection.p${num} .diff`),
+		ept_diff:    document.querySelector(`.eff_projection.p${num} .tetris_diff`),
 	},
 	{
 		field_pixel_size: 3,

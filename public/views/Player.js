@@ -632,7 +632,7 @@ class Player {
 
 	// TODO: Use a exponentially smoothed
 	getEffProjection() {
-		if (this.game_over) {
+		if (this.game_over || !this.lines) {
 			return this.score;
 		}
 
@@ -656,13 +656,15 @@ class Player {
 			num_levels = Math.floor((kill_screen_lines - this.lines) / 10);
 		}
 
-		return this.score + eff * (
+		const projection = this.score + eff * (
 			current_level_lines * (current_level + 1)
 			+
 			5 * num_levels * (current_level + 2 + 28 + 1) // sum of consecutive numbers formula for levels 19-28
 			+
 			3 * (29 + 1) // add 3 lines into kill screen
 		);
+
+		return Math.round(projection);
 	}
 
 	renderPreview(level, preview) {

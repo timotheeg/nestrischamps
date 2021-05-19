@@ -12,17 +12,19 @@ function tetris_value(level) {
 	return 1200 * (level + 1);
 }
 
-function getTetrisDiff(p1, p2, use_pace_score) {
-	const p1_score = use_pace_score ? p1.pace_score : p1.score;
-	const p2_score = use_pace_score ? p2.pace_score : p2.score;
+function getTetrisDiff(p1, p2, score_field = 'score') {
+	const p1_score = p1[score_field];
+	const p2_score = p2[score_field];
 
-	let lines, level;
+	let lines, level, transition;
 
 	if (p1_score > p2_score) {
+		transition = TRANSITIONS[p2.start_level];
 		level = p2.level;
 		lines = p2.lines;
 	}
 	else if (p2_score > p1_score) {
+		transition = TRANSITIONS[p1.start_level];
 		level = p1.level;
 		lines = p1.lines;
 	}
@@ -33,8 +35,9 @@ function getTetrisDiff(p1, p2, use_pace_score) {
 	let tetrises = 0
 	let diff = Math.abs(p1_score - p2_score)
 
+	// TODO: Make this work for any start_level
 	while (diff > 0) {
-		if (lines >= 126) { // below 126 lines, level doesn't change every 10 lines
+		if (lines >= (transition - 4)) { // below transition, level doesn't change every 10 lines
 			if (lines % 10 >= 6) { // the tetris is counted at end level, not start level
 				level += 1;
 			}
@@ -169,11 +172,23 @@ class TetrisCompetitionAPI {
 		player.setDiff(diff, t_diff);
 		otherPlayer.setDiff(-diff, t_diff);
 
-		const p_diff = player.getGamePaceScore() - otherPlayer.getGamePaceScore();
-		const pt_diff = getTetrisDiff(player, otherPlayer, true);
+		try {
+			const p_diff = player.getGamePaceScore() - otherPlayer.getGamePaceScore();
+			const pt_diff = getTetrisDiff(player, otherPlayer, 'pace_score');
 
-		player.setGamePaceDiff(p_diff, pt_diff);
-		otherPlayer.setGamePaceDiff(-p_diff, pt_diff);
+			player.setGamePaceDiff(p_diff, pt_diff);
+			otherPlayer.setGamePaceDiff(-p_diff, pt_diff);
+		}
+		catch(e) {}
+
+		try {
+			const ep_diff = player.getEffProjection() - otherPlayer.getEffProjection();
+			const ept_diff = getTetrisDiff(player, otherPlayer, 'eff_projection');
+
+			player.setEffProjectionDiff(ep_diff, ept_diff);
+			otherPlayer.setEffProjectionDiff(-ep_diff, ept_diff);
+		}
+		catch(e) {}
 	}
 }
 
