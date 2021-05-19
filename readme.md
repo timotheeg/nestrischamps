@@ -166,7 +166,7 @@ If you know how to set up apps on your router (i.e. [port forwarding](https://ww
 
 ### Start Timer button
 
-If you use the qualifier renderer to quaify for CTM or other online competitions, to start the timer, load your producer URL with an extra Query String argument like this [https://nestrischamps.herokuapp.com/room/producer?timer=1](https://nestrischamps.herokuapp.com/room/producer?timer=1)
+If you use the Stencil renderer to qualify for CTM or other online competitions, to start the timer, load your producer URL with an extra Query String argument like this [https://nestrischamps.herokuapp.com/room/producer?timer=1](https://nestrischamps.herokuapp.com/room/producer?timer=1)
 
 ![Screenshot of Start Timer Button](./public/docs/start_timer.jpg)
 
@@ -176,9 +176,9 @@ Many of the layouts have a black background with drak Yelow pieces drawn on them
 
 ### Don't use Half Height
 
-Capture device are presumed to produce interlaced output, which can create incorrect reads. NESTrisChamps by default uses only one line in 2 to remove interlacing deffect. Some capture device ave built-in einterlacer and smoothener which render a slightly blurry output. WHile this liooks great, it's not well suited for the half-height option of NESTrisChamps.
+Capture devices are presumed to produce interlaced output, which can create incorrect reads. NESTrisChamps by default uses only one line in 2 to remove interlacing deffect. Some capture device have built-in deinterlacer and smoothener which render a slightly blurry output. While this looks great, it's not well suited for the half-height system of NESTrisChamps.
 
-It ispossible to disable the half-height behaviour by adding the following query string argument in the producer page `?disable_half_height=1`.
+It is possible to disable the half-height behaviour by adding the following query string argument in the producer page `?disable_half_height=1`.
 
 
 ## Contribute
