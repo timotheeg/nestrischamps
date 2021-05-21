@@ -37,7 +37,7 @@ html, body, table, tr, th, td {
 	line-height: 20px;
 	text-align: center;
 
-	border-image: url('/views/border.png');
+	border-image-source: url('/views/border.png');
 	border-image-slice: 10 10 10 10 fill;
 	border-image-width: 10px 10px;
 }

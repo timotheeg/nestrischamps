@@ -17,7 +17,7 @@ html {
 	left: 0;
 	width: 512px;
 	height: 448px;
-	background: url('/views/stencil_bg.png');
+	background: url('/views/stencil_champs_bg.png');
 	background-repeat: no-repeat;
 	background-size: 512px 448px;
 	transform-origin: top left;
@@ -174,8 +174,6 @@ html {
 	top: 360px;
 }
 
-
-
 #playing_fields {
 	position: absolute;
 	left: 825px;
@@ -189,7 +187,6 @@ html {
 }
 
 .box .header {
-	font-size: 16px;
 	padding-bottom: 0.5em;
 }
 
@@ -197,6 +194,33 @@ html {
 .box .data {
 	font-size: 24px;
 	line-height: 30px;
+}
+
+.box.ui {
+	border-image-source: none;
+	padding: 16px;
+	line-height: 16px;
+
+}
+
+.box.ui .header {
+	padding: 0;
+
+}
+
+.eff {
+	top: 384px;
+	left: 384px;
+}
+
+.runway {
+	top: 46px;
+	left: 32px;
+}
+
+.projection {
+	top: 82px;
+	left: 32px;
 }
 
 .next_piece {
@@ -228,15 +252,6 @@ html {
 	display: none;
 }
 
-.pace {
-	top: 247px;
-	height: 24px;
-}
-
-.pace .header {
-	padding-top: 2px;
-}
-
 .bounded {
 	border-style: dashed;
 	border-color: #505050;
@@ -260,13 +275,17 @@ html {
 }
 
 .drought {
-	width: 121px;
-	top: 116px;
-	height: 40px;
-	opacity: 0;
-	display: none;
-	color: red;
-	left: 156px;
+	position: absolute;
+	background: black;
+	font-family: "Press Start K", monospace;
+	font-size: 16px;
+	color: #d82901;
+
+	padding: 8px 2px;
+	top: 126px;
+	left: 36px;
+	width: 120px;
+	height: 20px;
 }
 
 .drought .header {
@@ -275,17 +294,6 @@ html {
 
 .drought .value {
 	padding-bottom: 2px;
-}
-
-.drought.active {
-	display: block;
-	animation: fadeIn ease 1s;
-	animation-fill-mode: forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
 }
 
 
@@ -300,6 +308,9 @@ html {
 	<label class="value top">000000</label>
 	<label class="value score">000000</label>
 	<label class="value level">00</label>
+	<label class="value eff">000</label>
+	<label class="value runway">00000</label>
+	<label class="value projection">00000</label>
 
 	<label class="value stat T">000</label>
 	<label class="value stat J">000</label>
@@ -321,6 +332,11 @@ html {
 
 	<div class="board"></div>
 	<div class="next_piece"></div>
+
+	<div class="drought">
+		DRT <span class="value">000</span>
+	</div>
+
 </div>
 
 <div id="playing_fields">
@@ -328,18 +344,9 @@ html {
 	<div class="content">02:00:00</div>
 </div>
 
-<div class="box pace">
-	<div class="header">POTENTIAL <span class="value">0000000</span></div>
-</div>
-
 <div class="box running_trt">
 	<div class="header">TETRIS RATE <span class="trt">--</span></div>
 	<div class="value bounded"></div>
-</div>
-
-<div class="box drought">
-	<div class="header">DROUGHT</div>
-	<div class="value">99</div>
 </div>
 
 </div><!-- End Playing Fields -->
@@ -402,12 +409,15 @@ const player = new Player(
 		lines:       document.querySelector(`label.lines`),
 		score:       document.querySelector(`label.score`),
 		level:       document.querySelector(`label.level`),
-		pace_game:   document.querySelector(`.pace .value`),
+		pace_game:   document.querySelector(`label.runway`),
 		trt:         document.querySelector(`.running_trt .header .trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
 		drought:     document.querySelector(`.drought .value`),
+
+		eff:            document.querySelector(`label.eff`),
+		eff_projection: document.querySelector(`label.projection`),
 	},
 	{
 		field_pixel_size: 2,
@@ -430,16 +440,16 @@ PIECES.forEach(p => {
 
 player.onDroughtStart = () => {
 	console.log("onDroughtStart")
-	custom_doms.drought_box.classList.add('active');
+	custom_doms.drought_box.hidden = false;
 }
 
 player.onDroughtEnd = (count) => {
 	console.log("onDroughtEnd", count)
-	custom_doms.drought_box.classList.remove('active');
+	custom_doms.drought_box.hidden = true;
 }
 
 player.onGameStart = () => {
-	custom_doms.drought_box.classList.remove('active');
+	custom_doms.drought_box.hidden = true;
 	updateLevel();
 }
 
