@@ -493,8 +493,6 @@ class Player {
 				if (this.piece_stats.frame.count != piece_stats.count) {
 					this.pending_piece = true;
 				}
-
-				Object.assign(this.piece_stats.frame, piece_stats); // for immediate display if needed
 			}
 			else {
 				allow_field_piece_spawn_detection = true;
