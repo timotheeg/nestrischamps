@@ -455,7 +455,7 @@ class Player {
 					this.piece_stats.board.count--;
 				}
 				else {
-					const i_diff = piece_stats.I - this.piece_stats.I;
+					const i_diff = piece_stats.I - this.piece_stats.frame.I;
 
 					if (i_diff === 0) {
 						drought_change = diff; // expected to be +1 in most cases
