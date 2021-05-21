@@ -424,13 +424,9 @@ class Player {
 		if (this.pending_piece) {
 			this.pending_piece = false;
 
-			// console.log('pending piece', this.drought);
-
 			let cur_piece = data.cur_piece || this.prev_preview;
 			let has_change = true;
 			let drought_change;
-
-			// compute piece stats and drought count from board first
 
 			this.piece_stats.board[cur_piece]++;
 			this.piece_stats.board.count++;
@@ -447,9 +443,16 @@ class Player {
 			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
 				const piece_stats = this._getPieceStats(data);
 				const diff = piece_stats.count - this.piece_stats.frame.count
+				const sane_state = PIECES.every(piece => piece_stats[piece] >= this.piece_stats.frame[piece]);
 
-				if (!diff) {
-					has_change = false; // should not happen ??
+				has_change = sane_state && diff;
+
+				if (!has_change) {
+					// frame stats are not good, we should wait a bit more for valid data to come?
+					// revert the changes
+					this.pending_piece = true;
+					this.piece_stats.board[cur_piece]--;
+					this.piece_stats.board.count--;
 				}
 				else {
 					const i_diff = piece_stats.I - this.piece_stats.I;
@@ -462,9 +465,9 @@ class Player {
 						drought_change = -this.drought;
 						cur_piece = 'I';
 					}
-				}
 
-				Object.assign(this.piece_stats.frame, piece_stats);
+					Object.assign(this.piece_stats.frame, piece_stats);
+				}
 			}
 
 			if (has_change) {
@@ -490,11 +493,7 @@ class Player {
 		}
 		else {
 			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
-				const piece_stats = this._getPieceStats(data);
-
-				if (this.piece_stats.frame.count != piece_stats.count) {
-					this.pending_piece = true;
-				}
+				this.pending_piece = PIECES.some(piece => this.piece_stats.frame[piece] != data[piece]);
 			}
 			else {
 				allow_field_piece_spawn_detection = true;

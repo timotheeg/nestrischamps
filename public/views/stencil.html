@@ -435,6 +435,8 @@ const custom_doms = {
 	piece_stats: {},
 };
 
+custom_doms.drought_box.hidden = true;
+
 PIECES.forEach(p => {
 	custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
 });
