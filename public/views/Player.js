@@ -255,8 +255,7 @@ class Player {
 	onGameOver() {}
 
 	onTetris() {
-		if (this.options.tetris_flash
-	) {
+		if (this.options.tetris_flash) {
 			let remaining_frames = 12;
 
 			const steps = () => {
@@ -291,6 +290,7 @@ class Player {
 		this.pieces.length = 0;
 		this.clear_events.length = 0;
 		this.preview = '';
+		this.prev_preview = 'I';
 		this.score = 0;
 		this.lines = 0;
 		this.start_level = 0;
@@ -302,7 +302,10 @@ class Player {
 		this.field_num_blocks = 0;
 		this.field_string = '';
 
-		this.piece_stats =  PIECES.reduce((acc, p) => (acc[p] = 0, acc), {count:0});
+		this.piece_stats = {
+			frame: PIECES.reduce((acc, p) => (acc[p] = 0, acc), { count: 0 }),
+			board: PIECES.reduce((acc, p) => (acc[p] = 0, acc), { count: 0 }),
+		};
 
 		this.lines_trt = 0;
 		this.total_eff = 0;
@@ -367,12 +370,8 @@ class Player {
 			(acc, piece) => {
 				const num = data[piece];
 
-				if (num === null) {
-					throw new SyntaxError(`Invalid piece stat: [${piece}, ${data[piece]}]`);
-				}
-
-				acc[piece] = num;
-				acc.count += num;
+				acc[piece] = num === null ? this.piece_stats.frame[piece] : num;
+				acc.count += acc[piece];
 
 				return acc;
 			},
@@ -383,7 +382,9 @@ class Player {
 	setFrame(data) {
 		const lines = data.lines;
 		const level = data.level;
+
 		const num_blocks = data.field.reduce((acc, v) => acc + (v ? 1 : 0), 0);
+		const field_string = data.field.join('');
 
 		if (this.game_over && data.gameid == this.gameid) {
 			return;
@@ -403,11 +404,7 @@ class Player {
 			this.lines = lines;
 			this.score = data.score;
 			this.pending_score = true;
-
-			if (data.cur_piece) {
-				// Ideally, we'd want to wait one frame to read cur_piece -_-
-				this.prev_preview = data.cur_piece;
-			}
+			this.prev_preview = data.cur_piece || data.preview || 'I';
 
 			this.onGameStart();
 		}
@@ -420,54 +417,55 @@ class Player {
 			this.dom.level.textContent = `${data.level}`.padStart(2, '0');
 		}
 
+		let allow_field_piece_spawn_detection = false;
+
 		if (this.pending_piece) {
+			this.pending_piece = false;
+
 			// console.log('pending piece', this.drought);
 
-			let cur_piece = this.prev_preview;
-			let drought = this.drought;
+			let cur_piece = data.cur_piece || this.prev_preview;
+			let has_change = true;
+			let drought_change;
 
-			do {
-				if (this.options.reliable_field) {
-					if (this.piece_stats.hasOwnProperty(cur_piece)) {
-						this.piece_stats[cur_piece]++;
-						this.piece_stats.count++;
+			// compute piece stats and drought count from board first
 
-						if (cur_piece === 'I') {
-							drought = 0;
-						}
-						else {
-							drought++;
-						}
-					}
-					/*
-					else {
-						// errr...... -_-
-					}
-					*/
+			this.piece_stats.board[cur_piece]++;
+			this.piece_stats.board.count++;
+
+			if (cur_piece === 'I') {
+				drought_change = -this.drought;
+			}
+			else {
+				drought_change = 1;
+			}
+
+			// for classic rom, we get piece data from piece stats
+			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
+				const piece_stats = this._getPieceStats(data);
+				const diff = piece_stats.count - this.piece_stats.frame.count
+
+				if (!diff) {
+					has_change = false; // should not happen ??
 				}
 				else {
-					try {
-						const piece_stats = this._getPieceStats(data);
-						const diff = piece_stats.count - this.piece_stats.count
-						const i_diff = piece_stats.I - this.piece_stats.I;
+					const i_diff = piece_stats.I - this.piece_stats.I;
 
-						if (i_diff === 0) {
-							drought += diff;
-						}
-						else if (diff === 1) {
-							cur_piece = 'I';
-							drought = 0;
-						}
-						else {
-							// unknown state, we'll simply store it as new valid state
-						}
-
-						Object.assign(this.piece_stats, piece_stats);
+					if (i_diff === 0) {
+						drought_change = diff; // expected to be +1 in most cases
+						cur_piece = PIECES.find(piece => piece_stats[piece] != this.piece_stats.frame[piece]);
 					}
-					catch(e) {
-						break;
+					else {
+						drought_change = -this.drought;
+						cur_piece = 'I';
 					}
 				}
+
+				Object.assign(this.piece_stats.frame, piece_stats);
+			}
+
+			if (has_change) {
+				const drought = this.drought + drought_change;
 
 				if (drought === 0) {
 					if (this.drought >= 13) {
@@ -482,12 +480,24 @@ class Player {
 
 				this.drought = drought;
 				this.dom.drought.textContent = this.drought;
-				this.pending_piece = false;
 				this.prev_preview = data.preview;
 
 				this.onPiece(cur_piece);
 			}
-			while(false);
+		}
+		else {
+			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
+				const piece_stats = this._getPieceStats(data);
+
+				if (this.piece_stats.frame.count != piece_stats.count) {
+					this.pending_piece = true;
+				}
+
+				Object.assign(this.piece_stats.frame, piece_stats); // for immediate display if needed
+			}
+			else {
+				allow_field_piece_spawn_detection = true;
+			}
 		}
 
 		if (level != null) {
@@ -498,49 +508,28 @@ class Player {
 			if (is_level_change) {
 				this.onLevel();
 			}
+		}
 
-			const field_string = data.field.join('');
+		this.renderField(this.level, data.field, field_string);
+		this.renderPreview(this.level, data.preview);
 
-			this.renderField(this.level, data.field, field_string);
-			this.renderPreview(this.level, data.preview);
+		if (num_blocks === 200) {
+			// note, gameover can also be detected when top row of field is full
+			this.game_over = true;
 
-			if (this.options.reliable_field) {
-				// as a side effect, updateField() will set
-				// pending_piece to true if necessary
-				this.updateField(data.field, num_blocks, field_string);
-			}
-			else {
-				try {
-					const piece_stats = this._getPieceStats(data);
+			this.tr_pace_score = this.getTransitionPaceScore();
+			this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 7);
 
-					if (this.piece_stats) {
-						if (this.piece_stats.count != piece_stats.count) {
-							this.pending_piece = true;
-						}
-					}
-					else {
-						this.piece_stats = piece_stats;
-					}
-				}
-				catch(e) {
-				}
-			}
+			this.game_pace_score = this.getGamePaceScore();
+			this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
 
-			if (num_blocks === 200) {
-				// note, gameover can also be detected when top row of field is full
-				this.game_over = true;
+			this.eff_projection = this.getEffProjection();
+			this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
 
-				this.tr_pace_score = this.getTransitionPaceScore();
-				this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 7);
-
-				this.game_pace_score = this.getGamePaceScore();
-				this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
-
-				this.eff_projection = this.getEffProjection();
-				this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
-
-				this.onGameOver();
-			}
+			this.onGameOver();
+		}
+		else {
+			this.updateField(data.field, num_blocks, field_string, allow_field_piece_spawn_detection);
 		}
 
 		if (this.pending_score) {
@@ -602,8 +591,7 @@ class Player {
 			this.eff_projection = this.getEffProjection();
 			this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
 		}
-
-		if (data.score != null) {
+		else if (data.score != null) {
 			if (data.score != this.score) {
 				this.pending_score = true;
 			}
@@ -750,7 +738,7 @@ class Player {
 		});
 	}
 
-	updateField(field, num_blocks, field_string) {
+	updateField(field, num_blocks, field_string, allow_setting_pending_piece) {
 		if (field_string == this.field_string) return;
 
 		// state is considered valid, track data
@@ -762,7 +750,11 @@ class Player {
 
 		if (block_diff === 4) {
 			this.field_num_blocks = num_blocks;
-			this.pending_piece = true;
+
+			if (allow_setting_pending_piece) {
+				this.pending_piece = true;
+			}
+
 			return;
 		}
 
@@ -775,15 +767,10 @@ class Player {
 		// while still being at the top of the field with some block moved out of view
 
 		switch(block_diff) {
-			case -16:
-				// second frame of tetris (Trey's tetris Flash messed up the frames)
-				this.onTetris();
-				this.clear_animation_remaining_frames = CLEAR_ANIMATION_NUM_FRAMES - 2;
-				this.field_num_blocks -= 40;
-				break;
-
 			case -8:
-				this.onTetris();
+				if (this.reliable_field) {
+					this.onTetris();
+				}
 			case -6:
 				// indicate animation for triples and tetris
 				this.clear_animation_remaining_frames = CLEAR_ANIMATION_NUM_FRAMES - 1;
