@@ -444,8 +444,12 @@ player.onGameStart = () => {
 }
 
 player.onPiece = () => {
+	const is_classic = player.last_frame.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
+
+	const piece_stats = player.piece_stats[is_classic ? 'frame' : 'board'];
+
 	PIECES.forEach(p => {
-		custom_doms.piece_stats[p].textContent = player.piece_stats[p].toString().padStart(3, '0');
+		custom_doms.piece_stats[p].textContent = piece_stats[p].toString().padStart(3, '0');
 	});
 }
 

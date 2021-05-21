@@ -380,15 +380,16 @@ class Player {
 	}
 
 	setFrame(data) {
-		const lines = data.lines;
-		const level = data.level;
-
-		const num_blocks = data.field.reduce((acc, v) => acc + (v ? 1 : 0), 0);
-		const field_string = data.field.join('');
-
 		if (this.game_over && data.gameid == this.gameid) {
 			return;
 		}
+
+		const lines = data.lines;
+		const level = data.level;
+		const num_blocks = data.field.reduce((acc, v) => acc + (v ? 1 : 0), 0);
+		const field_string = data.field.join('');
+
+		this.last_frame = data;
 
 		if (data.gameid != this.gameid) {
 			// new game!
