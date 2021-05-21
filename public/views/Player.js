@@ -442,6 +442,7 @@ class Player {
 			}
 
 			// for classic rom, we get piece data from piece stats
+			// TODO: Add more resilience here (wait for good data)
 			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
 				const piece_stats = this._getPieceStats(data);
 				const diff = piece_stats.count - this.piece_stats.frame.count
