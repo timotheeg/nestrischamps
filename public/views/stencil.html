@@ -425,6 +425,7 @@ const player = new Player(
 		tetris_flash: 0,
 		tetris_sound: 0,
 		format_score,
+		format_drought: v => v.toString().padStart(3, '0'),
 	}
 );
 

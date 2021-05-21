@@ -152,7 +152,8 @@ const DEFAULT_OPTIONS = {
 		else {
 			return v.toFixed(2);
 		}
-	}
+	},
+	format_drought: v => v
 };
 
 class Player {
@@ -481,7 +482,7 @@ class Player {
 				}
 
 				this.drought = drought;
-				this.dom.drought.textContent = this.drought;
+				this.dom.drought.textContent = this.options.format_drought(this.drought);
 				this.prev_preview = data.preview;
 
 				this.onPiece(cur_piece);
