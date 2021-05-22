@@ -360,13 +360,19 @@ html {
 
 <!-- Audio -->
 
+<script src="/js/QueryString.js"></script>
+<script src="/views/constants.js"></script>
 <script src="/js/connection.js"></script>
 <script src="/js/BinaryFrame.js"></script>
-<script src="/views/constants.js"></script>
 <script src="/views/utils.js"></script>
 <script src="/views/renderBlock.js"></script>
 <script src="/views/Player.js"></script>
 <script >
+
+if (QueryString.bg === '0') {
+	document.querySelector(`#stream_bg`).style.background = 'transparent';
+}
+
 
 function format_score(v) {
 	const tail = `${v % 100000}`.padStart(5, '0');
