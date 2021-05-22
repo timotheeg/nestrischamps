@@ -17,7 +17,7 @@ html {
 	left: 0;
 	width: 512px;
 	height: 448px;
-	background: url('/views/stencil_bg.png');
+	background: url('/views/stencil_champs_bg.png');
 	background-repeat: no-repeat;
 	background-size: 512px 448px;
 	transform-origin: top left;
@@ -182,8 +182,12 @@ html {
 
 .box {
 	width: 95px;
-	height: 39px;
+	height: 56px;
 	text-align: center;
+}
+
+.box .header {
+	padding-bottom: 0.5em;
 }
 
 .box .content,
@@ -205,25 +209,23 @@ html {
 }
 
 .eff {
-	top: 236px;
-	left: 5px;
+	top: 392px;
+	left: 448px;
 }
 
-.burn {
-	top: 174px;
-	left: 5px;
+.trt {
+	top: 368px;
+	left: 448px;
 }
 
 .runway {
-	top: 174px;
-	left: 123px;
-	width: 300px;
+	top: 46px;
+	left: 32px;
 }
 
 .projection {
-	top: 236px;
-	left: 123px;
-	width: 300px;
+	top: 82px;
+	left: 32px;
 }
 
 .next_piece {
@@ -269,10 +271,6 @@ html {
 	left: 5px;
 }
 
-.running_trt .header {
-	padding-bottom: 0.5em;
-}
-
 .running_trt .value {
 	border-bottom: 0;
 	width: 424px;
@@ -314,6 +312,10 @@ html {
 	<label class="value top">000000</label>
 	<label class="value score">000000</label>
 	<label class="value level">00</label>
+	<label class="value eff">000</label>
+	<label class="value trt">000</label>
+	<label class="value runway">00000</label>
+	<label class="value projection">00000</label>
 
 	<label class="value stat T">000</label>
 	<label class="value stat J">000</label>
@@ -347,28 +349,8 @@ html {
 	<div class="content">02:00:00</div>
 </div>
 
-<div class="box eff">
-	<div class="header">EFF</div>
-	<div class="value">000</div>
-</div>
-
-<div class="box burn">
-	<div class="header">BRN</div>
-	<div class="value">0</div>
-</div>
-
-<div class="box runway">
-	<div class="header">RUNWAY</div>
-	<div class="value">000000</div>
-</div>
-
-<div class="box projection">
-	<div class="header">PROJECTION</div>
-	<div class="value">000000</div>
-</div>
-
 <div class="box running_trt">
-	<div class="header">TETRIS RATE <span class="value">000</span></div>
+	<div class="header">RUNNING TETRIS RATE</div>
 	<div class="value bounded"></div>
 </div>
 
@@ -435,16 +417,15 @@ const player = new Player(
 		lines:       document.querySelector(`label.lines`),
 		score:       document.querySelector(`label.score`),
 		level:       document.querySelector(`label.level`),
+		runway_game: document.querySelector(`label.runway`),
 		trt:         document.querySelector(`label.trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
 		drought:     document.querySelector(`.drought .value`),
 
-		eff:         document.querySelector(`.eff .value`),
-		burn:        document.querySelector(`.burn .value`),
-		runway_game: document.querySelector(`.runway .value`),
-		projection:  document.querySelector(`.projection .value`),
+		eff:         document.querySelector(`label.eff`),
+		projection:  document.querySelector(`label.projection`),
 	},
 	{
 		field_pixel_size: 2,
