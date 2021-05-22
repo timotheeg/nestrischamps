@@ -98,6 +98,27 @@ class ScoreDAO {
 		return result.rows;
 	}
 
+	async getPB(user, since=0) {
+		const result = await dbPool.query(`
+				SELECT score
+				FROM scores
+				WHERE player_id=$1
+				AND datetime>=$2
+			`,
+			[
+				user.id,
+				since
+			]
+		);
+
+		try {
+			return parseInt(result.rows[0].score, 10);
+		}
+		catch(err) {
+			return 0;
+		}
+	}
+
 	async recordGame(user, game_data) {
 		if (!game_data) return;
 
