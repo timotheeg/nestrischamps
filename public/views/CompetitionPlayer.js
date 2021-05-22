@@ -39,45 +39,45 @@ class CompetitionPlayer extends Player {
 		this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
 	}
 
-	setGamePaceDiff(diff, t_diff) {
+	setGameRunwayDiff(diff, t_diff) {
 		if (diff < 0) {
-			this.dom.p_diff.classList.remove('winning');
-			this.dom.p_diff.classList.add('losing');
-			this.dom.pt_diff.classList.remove('winning');
-			this.dom.pt_diff.classList.add('losing');
+			this.dom.runway_diff.classList.remove('winning');
+			this.dom.runway_diff.classList.add('losing');
+			this.dom.runway_t_diff.classList.remove('winning');
+			this.dom.runway_t_diff.classList.add('losing');
 		}
 		else {
-			this.dom.p_diff.classList.remove('losing');
-			this.dom.p_diff.classList.add('winning');
-			this.dom.pt_diff.classList.remove('losing');
-			this.dom.pt_diff.classList.add('winning');
+			this.dom.runway_diff.classList.remove('losing');
+			this.dom.runway_diff.classList.add('winning');
+			this.dom.runway_t_diff.classList.remove('losing');
+			this.dom.runway_t_diff.classList.add('winning');
 		}
 
 		// compute a proper visual of the diff
 		const absDiff = Math.abs(diff);
 
-		this.dom.p_diff.textContent = this.options.format_score(absDiff);
-		this.dom.pt_diff.textContent = this.options.format_tetris_diff(t_diff);
+		this.dom.runway_diff.textContent = this.options.format_score(absDiff);
+		this.dom.runway_t_diff.textContent = this.options.format_tetris_diff(t_diff);
 	}
 
-	setEffProjectionDiff(diff, t_diff) {
+	setProjectionDiff(diff, t_diff) {
 		if (diff < 0) {
-			this.dom.ep_diff.classList.remove('winning');
-			this.dom.ep_diff.classList.add('losing');
-			this.dom.ept_diff.classList.remove('winning');
-			this.dom.ept_diff.classList.add('losing');
+			this.dom.projection_diff.classList.remove('winning');
+			this.dom.projection_diff.classList.add('losing');
+			this.dom.projection_t_diff.classList.remove('winning');
+			this.dom.projection_t_diff.classList.add('losing');
 		}
 		else {
-			this.dom.ep_diff.classList.remove('losing');
-			this.dom.ep_diff.classList.add('winning');
-			this.dom.ept_diff.classList.remove('losing');
-			this.dom.ept_diff.classList.add('winning');
+			this.dom.projection_diff.classList.remove('losing');
+			this.dom.projection_diff.classList.add('winning');
+			this.dom.projection_t_diff.classList.remove('losing');
+			this.dom.projection_t_diff.classList.add('winning');
 		}
 
 		// compute a proper visual of the diff
 		const absDiff = Math.abs(diff);
 
-		this.dom.ep_diff.textContent = this.options.format_score(absDiff);
-		this.dom.ept_diff.textContent = this.options.format_tetris_diff(t_diff);
+		this.dom.projection_diff.textContent = this.options.format_score(absDiff);
+		this.dom.projection_t_diff.textContent = this.options.format_tetris_diff(t_diff);
 	}
 }

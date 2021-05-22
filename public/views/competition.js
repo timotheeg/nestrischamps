@@ -173,20 +173,20 @@ class TetrisCompetitionAPI {
 		otherPlayer.setDiff(-diff, t_diff);
 
 		try {
-			const p_diff = player.getGamePaceScore() - otherPlayer.getGamePaceScore();
+			const p_diff = player.getGameRunwayScore() - otherPlayer.getGameRunwayScore();
 			const pt_diff = getTetrisDiff(player, otherPlayer, 'game_pace_score');
 
-			player.setGamePaceDiff(p_diff, pt_diff);
-			otherPlayer.setGamePaceDiff(-p_diff, pt_diff);
+			player.setGameRunwayDiff(p_diff, pt_diff);
+			otherPlayer.setGameRunwayDiff(-p_diff, pt_diff);
 		}
 		catch(e) {}
 
 		try {
-			const ep_diff = player.getEffProjection() - otherPlayer.getEffProjection();
-			const ept_diff = getTetrisDiff(player, otherPlayer, 'eff_projection');
+			const ep_diff = player.getProjection() - otherPlayer.getProjection();
+			const ept_diff = getTetrisDiff(player, otherPlayer, 'projection');
 
-			player.setEffProjectionDiff(ep_diff, ept_diff);
-			otherPlayer.setEffProjectionDiff(-ep_diff, ept_diff);
+			player.setProjectionDiff(ep_diff, ept_diff);
+			otherPlayer.setProjectionDiff(-ep_diff, ept_diff);
 		}
 		catch(e) {}
 	}

@@ -42,7 +42,7 @@ html {
 }
 
 .timer,
-.pace {
+.runway {
 	top: 5px;
 	left: 5px;
 	width: 418px;
@@ -50,12 +50,12 @@ html {
 	height: 27px;
 }
 
-.pace {
+.runway {
 	top: 247px;
 	height: 24px;
 }
 
-.pace .header {
+.runway .header {
 	padding-top: 2px;
 }
 
@@ -126,8 +126,8 @@ html {
 	<div class="content">02:00:00</div>
 </div>
 
-<div class="box pace">
-	<div class="header">PACE <span class="value">0000000</span></div>
+<div class="box runway">
+	<div class="header">RUNWAY <span class="value">0000000</span></div>
 </div>
 
 <div class="box running_trt">
@@ -155,7 +155,7 @@ html {
 <script >
 const player = new Player(
 	{
-		pace:        document.querySelector(`.pace .value`),
+		runway_game: document.querySelector(`.runway .value`),
 		trt:         document.querySelector(`.running_trt .header .trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),

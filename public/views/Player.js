@@ -102,18 +102,18 @@ const BORDER_BLOCKS = [
 */
 
 const DEFAULT_DOM_REFS = {
-	score:          DOM_DEV_NULL,
-	pace_tr:        DOM_DEV_NULL,
-	pace_game:      DOM_DEV_NULL,
-	eff_projection: DOM_DEV_NULL,
-	level:          DOM_DEV_NULL,
-	lines:          DOM_DEV_NULL,
-	trt:            DOM_DEV_NULL,
-	eff:            DOM_DEV_NULL,
-	running_trt:    DOM_DEV_NULL,
-	preview:        DOM_DEV_NULL,
-	field:          DOM_DEV_NULL,
-	drought:        DOM_DEV_NULL,
+	score:       DOM_DEV_NULL,
+	runway_tr:   DOM_DEV_NULL,
+	runway_game: DOM_DEV_NULL,
+	projection:  DOM_DEV_NULL,
+	level:       DOM_DEV_NULL,
+	lines:       DOM_DEV_NULL,
+	trt:         DOM_DEV_NULL,
+	eff:         DOM_DEV_NULL,
+	running_trt: DOM_DEV_NULL,
+	preview:     DOM_DEV_NULL,
+	field:       DOM_DEV_NULL,
+	drought:     DOM_DEV_NULL,
 };
 
 const DEFAULT_OPTIONS = {
@@ -297,8 +297,8 @@ class Player {
 		this.start_level = 0;
 		this.level = 0;
 		this.transition = null;
-		this.game_pace_score = this.getGamePaceScore();
-		this.tr_pace_score = this.getTransitionPaceScore();
+		this.game_runway_score = this.getGameRunwayScore();
+		this.tr_runway_score = this.getTransitionRunwayScore();
 		this.drought = 0;
 		this.field_num_blocks = 0;
 		this.field_string = '';
@@ -310,7 +310,7 @@ class Player {
 
 		this.lines_trt = 0;
 		this.total_eff = 0;
-		this.eff_projection = 0;
+		this.projection = 0;
 
 		this.gameid = -1;
 		this.game_over = false;
@@ -325,9 +325,9 @@ class Player {
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
 		this.dom.score.textContent = this.options.format_score(this.score);
-		this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 6);
-		this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
-		this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
+		this.dom.runway_tr.textContent = this.options.format_score(this.tr_runway_score, 6);
+		this.dom.runway_game.textContent = this.options.format_score(this.game_runway_score, 7);
+		this.dom.projection.textContent = this.options.format_score(this.projection, 7);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
 	}
@@ -340,7 +340,7 @@ class Player {
 		// implement in subclasses
 	}
 
-	setGamePaceDiff(diff, t_diff) {
+	setGameRunwayDiff(diff, t_diff) {
 		// implement in subclasses
 	}
 
@@ -517,14 +517,14 @@ class Player {
 			// note, gameover can also be detected when top row of field is full
 			this.game_over = true;
 
-			this.tr_pace_score = this.getTransitionPaceScore();
-			this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 7);
+			this.tr_runway_score = this.getTransitionRunwayScore();
+			this.dom.runway_tr.textContent = this.options.format_score(this.tr_runway_score, 7);
 
-			this.game_pace_score = this.getGamePaceScore();
-			this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
+			this.game_runway_score = this.getGameRunwayScore();
+			this.dom.runway_game.textContent = this.options.format_score(this.game_runway_score, 7);
 
-			this.eff_projection = this.getEffProjection();
-			this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
+			this.projection = this.getProjection();
+			this.dom.projection.textContent = this.options.format_score(this.projection, 7);
 
 			this.onGameOver();
 		}
@@ -575,21 +575,21 @@ class Player {
 
 				if (level != this.start_level && this.transition === null) {
 					this.transition = this.score;
-					this.tr_pace_score = this.score;
+					this.tr_runway_score = this.score;
 					this.onTransition();
 				}
 			}
 
 			if (this.transition === null) {
-				this.tr_pace_score = this.getTransitionPaceScore();
-				this.dom.pace_tr.textContent = this.options.format_score(this.tr_pace_score, 6);
+				this.tr_runway_score = this.getTransitionRunwayScore();
+				this.dom.runway_tr.textContent = this.options.format_score(this.tr_runway_score, 6);
 			}
 
-			this.game_pace_score = this.getGamePaceScore();
-			this.dom.pace_game.textContent = this.options.format_score(this.game_pace_score, 7);
+			this.game_runway_score = this.getGameRunwayScore();
+			this.dom.runway_game.textContent = this.options.format_score(this.game_runway_score, 7);
 
-			this.eff_projection = this.getEffProjection();
-			this.dom.eff_projection.textContent = this.options.format_score(this.eff_projection, 7);
+			this.projection = this.getProjection();
+			this.dom.projection.textContent = this.options.format_score(this.projection, 7);
 		}
 		else if (data.score != null) {
 			if (data.score != this.score) {
@@ -598,20 +598,20 @@ class Player {
 		}
 	}
 
-	getGamePaceScore() {
+	getGameRunwayScore() {
 		if (this.game_over) {
 			return this.score;
 		}
 
-		return this.score + getPotential(this.start_level, POTENTIAL.GAME, this.lines);
+		return this.score + getRunway(this.start_level, RUNWAY.GAME, this.lines);
 	}
 
-	getTransitionPaceScore() {
+	getTransitionRunwayScore() {
 		if (this.game_over) {
 			return this.score;
 		}
 		else if (this.transition === null) {
-			return this.score + getPotential(this.start_level, POTENTIAL.TRANSITION, this.lines);
+			return this.score + getRunway(this.start_level, RUNWAY.TRANSITION, this.lines);
 		}
 		else {
 			return this.transition;
@@ -619,14 +619,14 @@ class Player {
 	}
 
 	// TODO: Use a exponentially smoothed
-	getEffProjection() {
+	getProjection() {
 		if (this.game_over) {
 			return this.score;
 		}
 
 		const eff = (this.lines ? this.total_eff / this.lines : 300) / 300;
 
-		return Math.floor(this.score + eff * getPotential(this.start_level, POTENTIAL.GAME, this.lines));
+		return Math.floor(this.score + eff * getRunway(this.start_level, RUNWAY.GAME, this.lines));
 	}
 
 	renderPreview(level, preview) {

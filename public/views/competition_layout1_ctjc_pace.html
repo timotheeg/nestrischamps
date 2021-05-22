@@ -67,20 +67,20 @@ html {
 }
 
 .score,
-.pace {
+.runway {
 	top: 7px;
 	height: 144px;
 	left: -107px;
 }
 
-.pace {
+.runway {
 	top: 175px;
 }
 
 .score .diff,
 .score .tetris_diff,
-.pace .diff,
-.pace .tetris_diff {
+.runway .diff,
+.runway .tetris_diff {
 	text-align: center;
 }
 
@@ -243,8 +243,8 @@ html {
 	</div>
 </div>
 
-<div class="box pace">
-	<div class="header">PACE</div>
+<div class="box runway">
+	<div class="header">RUNWAY</div>
 	<div class="data">
 		<div class="p1">000000</div>
 		<div class="diff">0000</div>
@@ -333,7 +333,7 @@ const players = [1, 2].map(num => new Player(
 		drought:     document.querySelector(`.drought.p${num} .value`),
 		hearts:      document.querySelector(`.wins .p${num}`),
 
-		pace_game:   document.querySelector(`.pace .p${num}`),
+		runway_game:   document.querySelector(`.runway .p${num}`),
 	},
 	{
 		field_pixel_size: 3,
@@ -473,10 +473,10 @@ class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
 			}
 		}
 
-		// then do pace diff
-		diff = players[0].getPaceScore() - players[1].getPaceScore();
-		diff_elem = document.querySelector(`.pace .diff`);
-		tdiff_elem = document.querySelector(`.pace .tetris_diff`);
+		// then do runway diff
+		diff = players[0].getGameRunwayScore() - players[1].getGameRunwayScore();
+		diff_elem = document.querySelector(`.runway .diff`);
+		tdiff_elem = document.querySelector(`.runway .tetris_diff`);
 
 		if (diff === 0) {
 			diff_elem.textContent = '<0>';

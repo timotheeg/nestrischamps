@@ -239,8 +239,7 @@ html {
 	left: 192px;
 }
 
-.timer,
-.pace {
+.timer {
 	top: 5px;
 	left: 5px;
 	width: 418px;
@@ -409,7 +408,7 @@ const player = new Player(
 		lines:       document.querySelector(`label.lines`),
 		score:       document.querySelector(`label.score`),
 		level:       document.querySelector(`label.level`),
-		pace_game:   document.querySelector(`label.runway`),
+		runway_game: document.querySelector(`label.runway`),
 		trt:         document.querySelector(`.running_trt .header .trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
@@ -417,7 +416,7 @@ const player = new Player(
 		drought:     document.querySelector(`.drought .value`),
 
 		eff:            document.querySelector(`label.eff`),
-		eff_projection: document.querySelector(`label.projection`),
+		projection: document.querySelector(`label.projection`),
 	},
 	{
 		field_pixel_size: 2,

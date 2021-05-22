@@ -30,13 +30,13 @@ html {
 	line-height: 30px;
 }
 
-.score, .pace {
+.score, .runway {
 	top: 76px;
 	left: -107px;
 	width: 168px;
 }
 
-.pace {
+.runway {
 	top: 161px;
 }
 
@@ -141,13 +141,13 @@ html {
 	<div class="content">000000</div>
 </div>
 
-<div class="box pace game">
-	<div class="header">GAME PACE</div>
+<div class="box runway game">
+	<div class="header">GAME RUNWAY</div>
 	<div class="content">000000</div>
 </div>
 
-<div class="box pace transition">
-	<div class="header">TR PACE</div>
+<div class="box runway transition">
+	<div class="header">TR RUNWAY</div>
 	<div class="content">000000</div>
 </div>
 
@@ -199,8 +199,8 @@ html {
 const player = new Player(
 	{
 		score:       document.querySelector(`.score .content`),
-		pace_tr:     document.querySelector(`.pace.transition .content`),
-		pace_game:   document.querySelector(`.pace.game .content`),
+		runway_tr:   document.querySelector(`.runway.transition .content`),
+		runway_game: document.querySelector(`.runway.game .content`),
 		level:       document.querySelector(`.level .content`),
 		lines:       document.querySelector(`.lines .content`),
 		trt:         document.querySelector(`.tetris_rate .content`),
@@ -217,7 +217,7 @@ const player = new Player(
 );
 
 player.drought_box = document.querySelector(`.drought`);
-player.pace_tr_box = document.querySelector(`.pace.transition`);
+player.runway_tr_box = document.querySelector(`.runway.transition`);
 
 player.onDroughtStart = () => {
 	console.log("onDroughtStart")
@@ -230,12 +230,12 @@ player.onDroughtEnd = (count) => {
 }
 
 player.onTransition = player.onGameOver = () => {
-	player.pace_tr_box.hidden = true;
+	player.runway_tr_box.hidden = true;
 }
 
 player.onGameStart = () => {
 	player.drought_box.classList.remove('active');
-	player.pace_tr_box.hidden = false;
+	player.runway_tr_box.hidden = false;
 }
 
 const API = {

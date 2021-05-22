@@ -70,7 +70,7 @@
 	right: var(--offset);
 }
 
-.pace {
+.runway, .projection {
 	width: 112px;
 	height: 74px;
 
@@ -78,17 +78,17 @@
 	right: var(--offset);
 }
 
-.pace .header {
+.runway .header, .projection .header  {
 	line-height: 12px;
 	font-size: 8px;
 	padding-bottom: 3px;
 }
 
-.pace .content {
+.runway .content, .projection .content {
 	text-align: right;
 }
 
-.pace.eff_projection {
+.projection {
 	top: 96px;
 }
 
@@ -233,7 +233,7 @@
 	</div>
 </div>
 
-<div class="box pace runway p1">
+<div class="box runway p1">
 	<div class="header">RUNWAY</div>
 	<div class="content">
 		<div class="value">000000</div>
@@ -242,8 +242,8 @@
 	</div>
 </div>
 
-<div class="box pace eff_projection p1">
-	<div class="header">EFF PROJECTION</div>
+<div class="box projection p1">
+	<div class="header">PROJECTION</div>
 	<div class="content">
 		<div class="value">000000</div>
 		<div class="diff">000000</div>
@@ -294,7 +294,7 @@
 	</div>
 </div>
 
-<div class="box pace runway p2">
+<div class="box runway p2">
 	<div class="header">RUNWAY</div>
 	<div class="content">
 		<div class="value">000000</div>
@@ -303,8 +303,8 @@
 	</div>
 </div>
 
-<div class="box pace eff_projection p2">
-	<div class="header">EFF PROJECTION</div>
+<div class="box projection p2">
+	<div class="header">PROJECTION</div>
 	<div class="content">
 		<div class="value">000000</div>
 		<div class="diff">000000</div>
@@ -373,19 +373,19 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		field:       document.querySelector(`.board.p${num}`),
 		hearts:      document.querySelector(`.hearts.p${num}`),
 		drought:     document.querySelector(`.drought.p${num} .value`),
-		pace_game:   document.querySelector(`.runway.p${num} .value`),
+		runway_game: document.querySelector(`.runway.p${num} .value`),
 		eff:         document.querySelector(`.eff.p${num} .value`),
 
-		eff_projection: document.querySelector(`.eff_projection.p${num} .value`),
+		projection:  document.querySelector(`.projection.p${num} .value`),
 
 		diff:        document.querySelector(`.score.p${num} .diff`),
 		t_diff:      document.querySelector(`.score.p${num} .tetris_diff`),
 
-		p_diff:      document.querySelector(`.runway.p${num} .diff`),
-		pt_diff:     document.querySelector(`.runway.p${num} .tetris_diff`),
+		runway_diff:   document.querySelector(`.runway.p${num} .diff`),
+		runway_t_diff: document.querySelector(`.runway.p${num} .tetris_diff`),
 
-		ep_diff:     document.querySelector(`.eff_projection.p${num} .diff`),
-		ept_diff:    document.querySelector(`.eff_projection.p${num} .tetris_diff`),
+		projection_diff:   document.querySelector(`.projection.p${num} .diff`),
+		projection_t_diff: document.querySelector(`.projection.p${num} .tetris_diff`),
 	},
 	{
 		field_pixel_size: 3,
