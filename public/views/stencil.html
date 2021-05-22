@@ -368,7 +368,7 @@ html {
 </div>
 
 <div class="box running_trt">
-	<div class="header">TETRIS RATE <span class="value">000</span></div>
+	<div class="header">TETRIS RATE <span class="trt">000</span></div>
 	<div class="value bounded"></div>
 </div>
 
@@ -435,7 +435,7 @@ const player = new Player(
 		lines:       document.querySelector(`label.lines`),
 		score:       document.querySelector(`label.score`),
 		level:       document.querySelector(`label.level`),
-		trt:         document.querySelector(`label.trt`),
+		trt:         document.querySelector(`.running_trt .trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
