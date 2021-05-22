@@ -33,7 +33,9 @@ router.get('/pb/:secret', async (req, res) => {
 	console.log('PB request', req.query.since, Date.now());
 
 	if (/^\d+$/.test(req.query.since)) {
-		since = parseInt(req.query.since, 10);
+		// since is supplied in ms since epoch
+		// but we need it in second since epoch
+		since = Math.floor(parseInt(req.query.since, 10) / 1000);
 	}
 
 	res.json(await ScoreDAO.getPB(user, since));
