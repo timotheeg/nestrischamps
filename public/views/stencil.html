@@ -209,8 +209,13 @@ html {
 }
 
 .eff {
-	top: 384px;
-	left: 384px;
+	top: 392px;
+	left: 448px;
+}
+
+.trt {
+	top: 368px;
+	left: 448px;
 }
 
 .runway {
@@ -308,6 +313,7 @@ html {
 	<label class="value score">000000</label>
 	<label class="value level">00</label>
 	<label class="value eff">000</label>
+	<label class="value trt">000</label>
 	<label class="value runway">00000</label>
 	<label class="value projection">00000</label>
 
@@ -344,7 +350,7 @@ html {
 </div>
 
 <div class="box running_trt">
-	<div class="header">TETRIS RATE <span class="trt">--</span></div>
+	<div class="header">RUNNING TETRIS RATE</div>
 	<div class="value bounded"></div>
 </div>
 
@@ -409,14 +415,14 @@ const player = new Player(
 		score:       document.querySelector(`label.score`),
 		level:       document.querySelector(`label.level`),
 		runway_game: document.querySelector(`label.runway`),
-		trt:         document.querySelector(`.running_trt .header .trt`),
+		trt:         document.querySelector(`label.trt`),
 		running_trt: document.querySelector(`.running_trt .value`),
 		preview:     document.querySelector(`.next_piece`),
 		field:       document.querySelector(`.board`),
 		drought:     document.querySelector(`.drought .value`),
 
-		eff:            document.querySelector(`label.eff`),
-		projection: document.querySelector(`label.projection`),
+		eff:         document.querySelector(`label.eff`),
+		projection:  document.querySelector(`label.projection`),
 	},
 	{
 		field_pixel_size: 2,
