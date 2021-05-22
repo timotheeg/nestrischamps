@@ -81,7 +81,7 @@ class Room {
 			}
 
 
-			if (typeof message != 'string') {
+			if (message instanceof Uint8Array) {
 				// this is a game frame, we track it in the game instance
 				connection.game.setFrame(message); // this call may reset the game as side effect
 			}
