@@ -24,6 +24,10 @@ module.exports = {
 		file: 'stencil',
 		type: '1p',
 	},
+	stencilplus: {
+		file: 'stencilplus',
+		type: '1p',
+	},
 
 	// multi player
 	ctwc: {

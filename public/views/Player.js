@@ -114,6 +114,7 @@ const DEFAULT_DOM_REFS = {
 	preview:     DOM_DEV_NULL,
 	field:       DOM_DEV_NULL,
 	drought:     DOM_DEV_NULL,
+	burn:        DOM_DEV_NULL,
 };
 
 const DEFAULT_OPTIONS = {
@@ -302,6 +303,7 @@ class Player {
 		this.drought = 0;
 		this.field_num_blocks = 0;
 		this.field_string = '';
+		this.burn = 0;
 
 		this.piece_stats = {
 			frame: PIECES.reduce((acc, p) => (acc[p] = 0, acc), { count: 0 }),
@@ -330,6 +332,7 @@ class Player {
 		this.dom.projection.textContent = this.options.format_score(this.projection, 7);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
+		this.dom.burn.textContent = 0;
 	}
 
 	getScore() {
@@ -557,6 +560,10 @@ class Player {
 					if (!this.options.reliable_field) {
 						this.onTetris();
 					}
+					this.burn = 0;
+				}
+				else {
+					this.burn += cleared;
 				}
 
 				const line_value = cleared <= 4 ? EFF_LINE_VALUES[cleared] : EFF_LINE_VALUES[1];
@@ -568,6 +575,7 @@ class Player {
 				const eff = this.total_eff / lines;
 
 				this.clear_events.push({ trt, eff, cleared });
+				this.dom.burn.textContent = this.burn;
 				this.dom.trt.textContent = getPercent(trt);
 				this.dom.eff.textContent = (Math.round(eff) || 0).toString().padStart(3, '0');
 				this.renderRunningTRT();

@@ -10,8 +10,6 @@ const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
 
 router.get('/get_stats/:secret', async (req, res) => {
-	console.log('get stats by secret');
-
 	const user = await UserDAO.getUserBySecret(req.params.secret);
 
 	if (!user) {
@@ -20,6 +18,23 @@ router.get('/get_stats/:secret', async (req, res) => {
 	}
 
 	res.json(await ScoreDAO.getStats(user));
+});
+
+router.get('/pb/:secret', async (req, res) => {
+	const user = await UserDAO.getUserBySecret(req.params.secret);
+
+	if (!user) {
+		res.status(404).send('User Not found');
+		return;
+	}
+
+	let since = 0;
+
+	if (/^\d+$/.test(req.query.since)) {
+		since = parseInt(req.query.since, 10);
+	}
+
+	res.json(await ScoreDAO.getPB(user, since));
 });
 
 router.get('/u/:login/get_stats',
