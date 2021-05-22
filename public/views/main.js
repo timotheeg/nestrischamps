@@ -495,14 +495,14 @@ function renderLine() {
 
 	dom.score.current.textContent = game.data.score.current.toString().padStart(6, '0').padStart(7, ' ');
 
-	if (dom.potential) {
+	if (dom.runway) {
 		if (game.data.score.transition === null) {
-			dom.potential.header.textContent = 'TRAN POTENTIAL';
-			dom.potential.value.textContent = game.data.score.tr_potential.toString();
+			dom.runway.header.textContent = 'TRAN RUNWAY';
+			dom.runway.value.textContent = game.data.score.tr_runway.toString();
 		}
 		else {
-			dom.potential.header.textContent = 'GAME POTENTIAL';
-			dom.potential.value.textContent = game.data.score.potential.toString();
+			dom.runway.header.textContent = 'GAME RUNWAY';
+			dom.runway.value.textContent = game.data.score.runway.toString();
 		}
 	}
 

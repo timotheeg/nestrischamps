@@ -20,11 +20,11 @@ class Game {
 			burn:  0,
 
 			score: {
-				current:      score,
-				potential:    score + getPotential(level, POTENTIAL.GAME, lines),
-				tr_potential: score + getPotential(level, POTENTIAL.TRANSITION, lines),
-				normalized:   0,
-				transition:   null
+				current:    score,
+				runway:     score + getRunway(level, RUNWAY.GAME, lines),
+				tr_runway:  score + getRunway(level, RUNWAY.TRANSITION, lines),
+				normalized: 0,
+				transition: null
 			},
 
 			i_droughts: {
@@ -248,18 +248,18 @@ class Game {
 
 		// update score
 		this.data.score.current = event.score;
-		this.data.score.potential = event.score + getPotential(this.data.start_level, POTENTIAL.GAME, event.lines);
+		this.data.score.runway = event.score + getRunway(this.data.start_level, RUNWAY.GAME, event.lines);
 
 		// check transition score
 		if (event.level > this.data.level) {
 			if (this.data.score.transition === null && event.level === this.data.start_level + 1) {
 				this.data.score.transition = event.score;
-				this.data.score.tr_potential = event.score;
+				this.data.score.tr_runway = event.score;
 			}
 		}
 
 		if (this.data.score.transition === null) {
-			this.data.score.tr_potential = event.score + getPotential(this.data.start_level, POTENTIAL.TRANSITION, event.lines);
+			this.data.score.tr_runway = event.score + getRunway(this.data.start_level, RUNWAY.TRANSITION, event.lines);
 		}
 
 		// update level

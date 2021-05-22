@@ -132,7 +132,7 @@ function _getRunways() {
 
 
 function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
-	// one time generation of score potential by line and best line clear strategy
+	// one time generation of score runways by line and best line clear strategy
 
 	function clearScore(current_lines, clear) {
 		const target_lines = current_lines + clear;
@@ -149,7 +149,7 @@ function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
 		return (level + 1) * SCORE_BASES[clear];
 	}
 
-	const game_runway{
+	const game_runway = {
 		[kill_screen_lines+0]: 0,
 		[kill_screen_lines+1]: 0,
 		[kill_screen_lines+2]: 0,
@@ -160,17 +160,17 @@ function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
 		let best_score = 0;
 
 		for (let clear = 4; clear > 0; clear--) {
-			const new_score = clearScore(lines, clear) + game_runway;
+			const new_score = clearScore(lines, clear) + game_runway[clear + lines];
 
 			if (new_score > best_score) {
 				best_score = new_score;
 			}
 		}
 
-		game_runway;
+		game_runway[lines] = best_score;
 	}
 
-	const transition_runway{
+	const transition_runway = {
 		[transition_lines+0]: 0,
 		[transition_lines+1]: 0,
 		[transition_lines+2]: 0,
@@ -181,14 +181,14 @@ function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
 		let best_score = 0;
 
 		for (let clear = 4; clear > 0; clear--) {
-			const new_score = clearScore(lines, clear) + transition_runway;
+			const new_score = clearScore(lines, clear) + transition_runway[clear + lines];
 
 			if (new_score > best_score) {
 				best_score = new_score;
 			}
 		}
 
-		transition_runway;
+		transition_runway[lines] = best_score;
 	}
 
 	return {

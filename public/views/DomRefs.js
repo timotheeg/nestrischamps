@@ -31,13 +31,13 @@ class DomRefs {
 			value:   doc.querySelector('#level .value')
 		};
 
-		const potential = doc.querySelector('#potential');
+		const runway = doc.querySelector('#runway');
 
-		if (potential) {
-			this.potential = {
-				element: potential,
-				header:  potential.querySelector('.header'),
-				value:   potential.querySelector('.content'),
+		if (runway) {
+			this.runway = {
+				element: runway,
+				header:  runway.querySelector('.header'),
+				value:   runway.querySelector('.content'),
 			};
 		}
 
