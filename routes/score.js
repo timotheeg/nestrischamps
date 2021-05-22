@@ -30,6 +30,8 @@ router.get('/pb/:secret', async (req, res) => {
 
 	let since = 0;
 
+	console.log('PB request', req.query.since, Date.now());
+
 	if (/^\d+$/.test(req.query.since)) {
 		since = parseInt(req.query.since, 10);
 	}
