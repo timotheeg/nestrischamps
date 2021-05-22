@@ -102,8 +102,10 @@ class ScoreDAO {
 		const result = await dbPool.query(`
 				SELECT score
 				FROM scores
-				WHERE player_id=$1
-				AND datetime>=$2
+				WHERE player_id = $1
+				AND datetime >= to_timestamp($2)
+				ORDER BY score DESC
+				LIMIT 1
 			`,
 			[
 				user.id,
