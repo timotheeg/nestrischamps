@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body {
+	padding: 0;
+	margin: 0;
+}
+
+* {
+	font-family: monospace;
+}
+
+#stream_bg {
+	width: 1920px;
+	height: 1080px;
+	overflow: hidden;
+}
+
+#playing_fields {
+	display: flex;
+}
+
+#board, #stats, #custom {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 2;
+}
+#stats {
+	flex-grow: 1;
+}
+
+#stats dl {
+	font-size: 32px;
+}
+
+#stats dd {
+	font-weight: bold;
+	font-size: 44px;
+}
+
+#board .content {
+	padding: 0;
+	margin: 0;
+	font-size: 44px;
+}
+
+</style>
+</head>
+<body>
+
+<div id="stream_bg">
+
+<div id="playing_fields">
+
+<fieldset id="board">
+	<legend>Board</legend>
+	<pre class="content"></pre>
+</fieldset>
+
+<fieldset id="stats">
+	<legend>Stats</legend>
+	<dl></dl>
+</fieldset>
+
+<fieldset id="custom">
+	<legend>Custom Stuff</legend>
+	<dl></dl>
+</fieldset>
+
+</div><!-- End Playing Fields -->
+</div><!-- End Stream BG -->
+
+
+<!-- Audio -->
+
+<script src="/js/BinaryFrame.js"></script>
+<script src="/js/QueryString.js"></script>
+<script src="/views/constants.js"></script>
+<script src="/views/utils.js"></script>
+<script src="/js/connection.js"></script>
+<script src="/views/bg.js"></script>
+<script src="/views/renderBlock.js"></script>
+<script src="/views/Player.js"></script>
+
+<script>
+
+const board_content = document.querySelector(`#board .content`);
+const stats_dl = document.querySelector(`#stats dl`);
+const player_fields = {
+};
+
+[
+	'score',
+	'lines',
+	'level',
+	'next',
+	'trt',
+	'eff',
+	'burn',
+	'drought',
+	'runway_tr',
+	'runway_game',
+	'projection',
+]
+.forEach(field => {
+	const dt = document.createElement('dt');
+	dt.textContent = field.replace('_', ' ').toUpperCase();
+
+	const dd = document.createElement('dd');
+
+	player_fields[field] = dd;
+
+	stats_dl.appendChild(dt);
+	stats_dl.appendChild(dd);
+});
+
+
+
+const player = new Player(
+	player_fields,
+	{
+		tetris_sound: 0,
+		reliable_field: 0
+	}
+);
+
+/*
+player.drought_box = document.querySelector(`.drought`);
+player.runway_tr_box = document.querySelector(`.runway.transition`);
+
+player.onDroughtStart = () => {
+	console.log("onDroughtStart")
+	player.drought_box.classList.add('active');
+}
+
+player.onDroughtEnd = (count) => {
+	console.log("onDroughtEnd", count)
+	player.drought_box.classList.remove('active');
+}
+
+player.onTransition = player.onGameOver = () => {
+	player.runway_tr_box.hidden = true;
+}
+
+player.onGameStart = () => {
+	player.drought_box.classList.remove('active');
+	player.runway_tr_box.hidden = false;
+}
+/**/
+
+const API = {
+	frame(player_idx, data) {
+		player.setFrame(data);
+
+		// also try
+		// https://www.fileformat.info/info/unicode/block/geometric_shapes/utf8test.htm
+		const plaintext_field = data.field.map(cell => {
+			switch(cell) {
+				case 0: return ' ';
+				case 1: return '#';
+				case 2: return '*';
+				case 3: return '@';
+			}
+		});
+
+		let rows = Array(20);
+
+		for (let i=0; i<20; i++) {
+			row = plaintext_field.slice(i*10, (i+1)*10).join('');
+
+			rows[i] = row;
+		}
+
+		board_content.textContent = rows.join('\n');
+		player_fields.next.textContent = data.preview || '';
+	},
+
+	message() {} // noop
+}
+
+const connection = new Connection();
+
+connection.onMessage = function(frame) {
+	try {
+		const [method, ...args] = frame;
+
+		API[method].apply(API, args);
+	}
+	catch(e) {
+		console.error(e);
+	}
+};
+
+function onFrame(frame, debug) {
+	API.frame(0, frame, debug);
+}
+</script>
+
+<!-- script src="sample_frames/sample_frames_11.js"></script>
+<script src="debug.js"></script -->
+
+</body>
+<html>

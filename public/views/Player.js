@@ -111,8 +111,8 @@ const DEFAULT_DOM_REFS = {
 	trt:         DOM_DEV_NULL,
 	eff:         DOM_DEV_NULL,
 	running_trt: DOM_DEV_NULL,
-	preview:     DOM_DEV_NULL,
-	field:       DOM_DEV_NULL,
+	preview:     document.createElement('div'),
+	field:       document.createElement('div'),
 	drought:     DOM_DEV_NULL,
 	burn:        DOM_DEV_NULL,
 };
@@ -176,7 +176,7 @@ class Player {
 		this.pieces = [];
 		this.clear_events = [];
 
-		const styles = getComputedStyle(dom.field);
+		const styles = getComputedStyle(this.dom.field);
 
 		// Avatar Block
 		this.avatar = document.createElement('div');
@@ -192,7 +192,7 @@ class Player {
 			backgroundPosition: '50% 50%',
 			filter:              'brightness(0.20)'
 		});
-		dom.field.appendChild(this.avatar);
+		this.dom.field.appendChild(this.avatar);
 
 		// Field Flash
 		this.field_bg = document.createElement('div');
@@ -204,14 +204,14 @@ class Player {
 			width:    `${css_size(styles.width) + this.field_pixel_size * 2}px`,
 			height:   `${css_size(styles.height) + this.field_pixel_size * 2}px`
 		});
-		dom.field.appendChild(this.field_bg);
+		this.dom.field.appendChild(this.field_bg);
 
 		// set up field and preview canvas
 		['field', 'preview', 'running_trt']
 			.forEach(name => {
 				console.log(name);
 
-				const styles = getComputedStyle(dom[name]);
+				const styles = getComputedStyle(this.dom[name]);
 				const canvas = document.createElement('canvas');
 
 				canvas.style.position = 'absolute';
@@ -221,7 +221,7 @@ class Player {
 				canvas.setAttribute('width', styles.width);
 				canvas.setAttribute('height', styles.height);
 
-				dom[name].appendChild(canvas);
+				this.dom[name].appendChild(canvas);
 
 				this[`${name}_ctx`] = canvas.getContext('2d');
 			});
@@ -255,8 +255,9 @@ class Player {
 	onDroughtEnd() {}
 	onGameStart() {}
 	onGameOver() {}
+	onTetris() {}
 
-	onTetris() {
+	_doTetris() {
 		if (this.options.tetris_flash) {
 			let remaining_frames = 12;
 
@@ -276,6 +277,8 @@ class Player {
 		if (this.options.tetris_sound) {
 			this.sounds.tetris.play();
 		}
+
+		this.onTetris();
 	}
 
 	clearTetrisAnimation() {
@@ -558,7 +561,7 @@ class Player {
 					this.lines_trt += 4;
 
 					if (!this.options.reliable_field) {
-						this.onTetris();
+						this._doTetris();
 					}
 					this.burn = 0;
 				}
@@ -777,7 +780,7 @@ class Player {
 		switch(block_diff) {
 			case -8:
 				if (this.reliable_field) {
-					this.onTetris();
+					this._doTetris();
 				}
 			case -6:
 				// indicate animation for triples and tetris
