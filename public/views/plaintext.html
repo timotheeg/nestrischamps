@@ -16,9 +16,6 @@ html, body {
 	height: 720px;
 	overflow: hidden;
 	background: white;
-}
-
-#playing_fields {
 	display: flex;
 }
 
@@ -81,8 +78,6 @@ dd {
 
 <div id="stream_bg">
 
-<div id="playing_fields">
-
 <fieldset id="board">
 	<legend>Board</legend>
 	<pre class="content"></pre>
@@ -105,7 +100,6 @@ dd {
 
 </fieldset>
 
-</div><!-- End Playing Fields -->
 </div><!-- End Stream BG -->
 
 
@@ -151,8 +145,6 @@ const player_fields = {
 	stats_dl.appendChild(dd);
 });
 
-
-
 const player = new Player(
 	player_fields,
 	{
@@ -173,36 +165,10 @@ player.onPiece = piece => {
 	document.querySelector('dd.pieces').textContent = player.pieces.join('');
 }
 
-/*
-player.drought_box = document.querySelector(`.drought`);
-player.runway_tr_box = document.querySelector(`.runway.transition`);
-
-player.onDroughtStart = () => {
-	console.log("onDroughtStart")
-	player.drought_box.classList.add('active');
-}
-
-player.onDroughtEnd = (count) => {
-	console.log("onDroughtEnd", count)
-	player.drought_box.classList.remove('active');
-}
-
-player.onTransition = player.onGameOver = () => {
-	player.runway_tr_box.hidden = true;
-}
-
-player.onGameStart = () => {
-	player.drought_box.classList.remove('active');
-	player.runway_tr_box.hidden = false;
-}
-/**/
-
 const API = {
 	frame(player_idx, data) {
 		player.setFrame(data);
 
-		// also try
-		// https://www.fileformat.info/info/unicode/block/geometric_shapes/utf8test.htm
 		const plaintext_field = data.field.map(cell => {
 			const char = cell > 2 ? '$' : cell > 1 ? '@' : cell > 0 ? '#' : ' ';
 
@@ -240,9 +206,6 @@ function onFrame(frame, debug) {
 	API.frame(0, frame, debug);
 }
 </script>
-
-<!-- script src="sample_frames/sample_frames_11.js"></script>
-<script src="debug.js"></script -->
 
 </body>
 <html>
