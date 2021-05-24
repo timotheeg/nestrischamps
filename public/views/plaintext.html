@@ -8,12 +8,12 @@ html, body {
 }
 
 * {
-	font-family: monospace;
+	font-family: "Courier New", "Andale Mono", AndaleMono, monospace;
 }
 
 #stream_bg {
-	width: 1920px;
-	height: 1080px;
+	width: 1280px;
+	height: 720px;
 	overflow: hidden;
 }
 
@@ -22,29 +22,56 @@ html, body {
 }
 
 #board, #stats, #custom {
-	display: flex;
 	flex-direction: row;
-	flex-grow: 2;
-}
-#stats {
-	flex-grow: 1;
+	flex-grow: 0;
+	flex-shrink: 0;
 }
 
-#stats dl {
-	font-size: 32px;
+#stats {
+	flex-basis: 230px;
+}
+
+dl {
+	font-size: 20px;
+	padding: 0 25px;
+}
+
+dt {
+	text-transform: uppercase;
+}
+
+dd {
+	font-weight: bold;
+	word-wrap: break-word;
+	word-break: break-all;
+	overflow-wrap: break-word;
+	margin-inline-start: 30px;
 }
 
 #stats dd {
+	font-size: 28px;
+}
+
+#board {
+	flex-basis: 326px;
 	font-weight: bold;
-	font-size: 44px;
 }
 
 #board .content {
 	padding: 0;
 	margin: 0;
-	font-size: 44px;
+	font-size: 30px;
 	letter-spacing: 8px;
-	margin-left: 50px;
+	margin: 0 25px 0 20px;
+}
+
+#board .content span {
+	border: solid 1px grey;
+	border-collapse: collapse;
+}
+
+#custom {
+	flex-basis: 626px;
 }
 
 </style>
@@ -67,7 +94,14 @@ html, body {
 
 <fieldset id="custom">
 	<legend>Custom Stuff</legend>
-	<dl></dl>
+	<dl>
+		<dt>Clears</dt>
+		<dd class="clears"></dd>
+		<dt>Pieces</dt>
+		<dd class="pieces"></dd>
+	</dl>
+	<div class="piece_sequence"></div>
+
 </fieldset>
 
 </div><!-- End Playing Fields -->
@@ -127,6 +161,18 @@ const player = new Player(
 	}
 );
 
+player.onLines = cleared => {
+	document.querySelector('dd.clears').textContent = player
+		.clear_events
+		.map(ev => ev.cleared)
+		.join('');
+}
+
+player.onPiece = piece => {
+	player_fields.next.textContent = piece || '';
+	document.querySelector('dd.pieces').textContent = player.pieces.join('');
+}
+
 /*
 player.drought_box = document.querySelector(`.drought`);
 player.runway_tr_box = document.querySelector(`.runway.transition`);
@@ -158,12 +204,9 @@ const API = {
 		// also try
 		// https://www.fileformat.info/info/unicode/block/geometric_shapes/utf8test.htm
 		const plaintext_field = data.field.map(cell => {
-			switch(cell) {
-				case 0: return ' ';
-				case 1: return '#';
-				case 2: return '*';
-				case 3: return '@';
-			}
+			const char = cell > 2 ? '$' : cell > 1 ? '@' : cell > 0 ? '#' : ' ';
+
+			return `<span>${char}</span>`;
 		});
 
 		let rows = Array(20);
@@ -174,8 +217,7 @@ const API = {
 			rows[i] = row;
 		}
 
-		board_content.textContent = rows.join('\n');
-		player_fields.next.textContent = data.preview || '';
+		board_content.innerHTML = rows.join('<br />');
 	},
 
 	message() {} // noop

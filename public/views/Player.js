@@ -249,6 +249,7 @@ class Player {
 	}
 
 	onPiece() {}
+	onLines() {}
 	onLevel() {}
 	onTransition() {}
 	onDroughtStart() {}
@@ -494,6 +495,7 @@ class Player {
 				this.dom.drought.textContent = this.options.format_drought(this.drought);
 				this.prev_preview = data.preview;
 
+				this.pieces.push(cur_piece);
 				this.onPiece(cur_piece);
 			}
 		}
@@ -589,6 +591,8 @@ class Player {
 					this.tr_runway_score = this.score;
 					this.onTransition();
 				}
+
+				this.onLines(cleared);
 			}
 
 			if (this.transition === null) {
