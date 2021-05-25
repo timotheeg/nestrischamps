@@ -14,6 +14,7 @@ html {
 }
 
 .box {
+	left: -607px;
 	width: 95px;
 	height: 60px;
 	text-align: center;
@@ -32,31 +33,34 @@ html {
 
 .score, .runway {
 	top: 76px;
-	left: -107px;
+	left: -636px;
 	width: 168px;
+	transform: rotate(15deg);
 }
 
 .runway {
 	top: 161px;
+	transform: rotate(-8deg);
 }
 
 .next_piece {
 	width: 104px;
 	height: 60px;
-	top: 6px;
+	top: -10px;
 
-	--offset: 177px;
-	right: var(--offset)
+	--offset: 487px;
+	right: var(--offset);
+	transform: rotate(-10deg);
 }
 
 .lines {
-	left: -107px;
 	top: 246px;
+	transform: rotate(7deg);
 }
 
 .level {
-	left: -107px;
 	top: 331px;
+	transform: rotate(-12deg);
 }
 
 .board {
@@ -68,18 +72,17 @@ html {
 	height: 640px;
 	top: 0px;
 
-	--offset: 106px;
-	right: var(--offset)
+	left: -450px;
 }
 
 .tetris_rate {
-	left: -107px;
 	top: 588px;
+	transform: rotate(-12deg);
 }
 
 .efficiency {
-	left: -107px;
 	top: 503px;
+	transform: rotate(8deg);
 }
 
 .tetris_rate .content {
@@ -87,25 +90,27 @@ html {
 }
 
 .running_trt {
+	display: none;
 	padding: 9px;
 	width: 253px;
 	height: 66px;
 	top: 588px;
 
 	--offset: 106px;
-	right: var(--offset)
+	right: var(--offset);
 }
 
 .drought {
 	width: 49px;
-	top: 12px;
+	top: 407px;
 	height: 40px;
 	opacity: 0;
 	color: red;
 	display: none;
 
-	--pos: 304px;
-	right: var(--pos)
+	left: -560px;
+
+	transform: rotate(6deg);
 }
 
 .drought .header {
@@ -128,6 +133,28 @@ html {
 	background: url('/views/boom.png');
 	transform-origin: 50% 50%;
 	display: none;
+}
+
+.dog_approves {
+	position: absolute;
+	top: 420px;
+	left: -160px;
+	width: 272px;
+	height: 272px;
+	background-repeat: no-repeat;
+	background: url('/views/dog_approves.png');
+	transform-origin: 138px 190px;
+	display: none;
+}
+
+.champions {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 500px;
+	height: 311px;
+	background-repeat: no-repeat;
+	background: url('/views/Tetris-Champions-With-Dog.jpg');
 }
 
 @keyframes fadeIn {
@@ -192,8 +219,11 @@ html {
 </div>
 
 <div class="boom"></div>
+<div class="dog_approves"></div>
+<div class="champions"></div>
 
 </div><!-- End Playing Fields -->
+
 </div><!-- End Stream BG -->
 
 
@@ -229,7 +259,6 @@ const tiles = await Promise.all(
 		'/views/tiles/32x32/jonas.png',
 		'/views/tiles/32x32/harry.png',
 		'/views/tiles/32x32/joseph.png',
-		'/views/tiles/32x32/dog.png',
 	]
 	.map(uri => new Promise(resolve => {
 		const img = new Image();
@@ -241,7 +270,8 @@ const tiles = await Promise.all(
 let current_tiles;
 
 function getTiles() {
-	current_tiles = shuffle(tiles.slice(0)).slice(0, 3);
+	current_tiles = tiles;
+	// current_tiles = shuffle(tiles.slice(0)).slice(0, 3);
 }
 
 getTiles();
@@ -289,13 +319,24 @@ player.onGameStart = () => {
 }
 
 player.onTetris = () => {
+	// show dog
+	const dog = document.querySelector('.dog_approves');
+	const dog_angle = Math.round(-5 + Math.random() * 10);
+
+	dog.style.transform = `rotate(${dog_angle}deg)`;
+	dog.style.display = `block`;
+
+	setTimeout(() => {
+		dog.style.display = 'none';
+	}, 650);
+
+	// show boom
 	const boom = document.querySelector('.boom');
 	const scale_start = 0;
 	const scale_end = 1.65;
 	const scale_change = scale_end - scale_start;
 	const angle = Math.round(-45 + Math.random() * 90);
-	const duration = 150;
-
+	const duration = 200;
 
 	boom.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
 	boom.style.display = 'block';
