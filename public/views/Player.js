@@ -126,6 +126,7 @@ const DEFAULT_OPTIONS = {
 	tetris_flash: 1,
 	tetris_sound: 1,
 	reliable_field: 1,
+	draw_field: 1,
 	format_score: (v, size) => {
 		if (!size) {
 			size = 7;
@@ -827,6 +828,8 @@ class Player {
 		if (stage_id === this.current_field) return;
 
 		this.current_field = stage_id;
+
+		if (!this.options.draw_field) return;
 
 		const pixels_per_block = this.field_pixel_size * (7 + 1);
 
