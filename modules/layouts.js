@@ -28,6 +28,14 @@ module.exports = {
 		file: 'stencilplus',
 		type: '1p',
 	},
+	plaintext: {
+		file: 'plaintext',
+		type: '1p',
+	},
+	champions: {
+		file: 'champions',
+		type: '1p',
+	},
 
 	// multi player
 	ctwc: {

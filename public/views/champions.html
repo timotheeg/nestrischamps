@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+<style>
+html {
+	overflow: hidden;
+}
+
+#playing_fields {
+	position: absolute;
+	left: 640px;
+	top: 23px;
+}
+
+.box {
+	left: -607px;
+	width: 95px;
+	height: 60px;
+	text-align: center;
+}
+
+.box .header {
+	font-size: 16px;
+	padding-bottom: 0.5em;
+}
+
+.box .content,
+.box .data {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.score, .runway {
+	top: 76px;
+	left: -636px;
+	width: 168px;
+	transform: rotate(15deg);
+}
+
+.runway {
+	top: 161px;
+	transform: rotate(-8deg);
+}
+
+.next_piece {
+	width: 104px;
+	height: 60px;
+	top: -10px;
+
+	--offset: 487px;
+	right: var(--offset);
+	transform: rotate(-10deg);
+}
+
+.lines {
+	top: 246px;
+	transform: rotate(7deg);
+}
+
+.level {
+	top: 331px;
+	transform: rotate(-12deg);
+}
+
+.board {
+	border-image: url('/views/big_border.png');
+	border-image-slice: 16 16 16 16 fill;
+	border-image-width: 16px 16px;
+	padding: 17px;
+	width: 320px;
+	height: 640px;
+	top: 0px;
+
+	left: -450px;
+}
+
+.tetris_rate {
+	top: 588px;
+	transform: rotate(-12deg);
+}
+
+.efficiency {
+	top: 503px;
+	transform: rotate(8deg);
+}
+
+.tetris_rate .content {
+	padding: 0 5px;
+}
+
+.running_trt {
+	display: none;
+	padding: 9px;
+	width: 253px;
+	height: 66px;
+	top: 588px;
+
+	--offset: 106px;
+	right: var(--offset);
+}
+
+.drought {
+	width: 49px;
+	top: 407px;
+	height: 40px;
+	opacity: 0;
+	color: red;
+	display: none;
+
+	left: -560px;
+
+	transform: rotate(6deg);
+}
+
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+.boom {
+	position: absolute;
+	top: 300px;
+	left: -482px;
+	width: 400px;
+	height: 267px;
+	background-repeat: no-repeat;
+	background: url('/views/boom.png');
+	transform-origin: 50% 50%;
+	display: none;
+}
+
+.dog_approves {
+	position: absolute;
+	top: 420px;
+	left: -160px;
+	width: 272px;
+	height: 272px;
+	background-repeat: no-repeat;
+	background: url('/views/dog_approves.png');
+	transform-origin: 138px 190px;
+	display: none;
+}
+
+.champions {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 500px;
+	height: 311px;
+	background-repeat: no-repeat;
+	background: url('/views/Tetris-Champions-With-Dog.jpg');
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+</style>
+</head>
+<body>
+
+<div id="stream_bg">
+
+<div id="playing_fields">
+<div class="box board"></div>
+<div class="box next_piece"></div>
+
+<!-- Player 1 -->
+
+<div class="box score">
+	<div class="header">SCORE</div>
+	<div class="content">000000</div>
+</div>
+
+<div class="box runway game">
+	<div class="header">GM RUNWAY</div>
+	<div class="content">000000</div>
+</div>
+
+<div class="box runway transition">
+	<div class="header">TR RUNWAY</div>
+	<div class="content">000000</div>
+</div>
+
+<div class="box lines">
+	<div class="header">LINES</div>
+	<div class="content">000</div>
+</div>
+
+<div class="box level">
+	<div class="header">LEVEL</div>
+	<div class="content">00</div>
+</div>
+
+<div class="box tetris_rate">
+	<div class="header">TRT</div>
+	<div class="content">---</div>
+</div>
+
+
+<div class="box efficiency">
+	<div class="header">EFF</div>
+	<div class="content">---</div>
+</div>
+
+
+<div class="box running_trt"></div>
+
+<div class="box drought">
+	<div class="header">DRT</div>
+	<div class="value">99</div>
+</div>
+
+<div class="boom"></div>
+<div class="dog_approves"></div>
+<div class="champions"></div>
+
+</div><!-- End Playing Fields -->
+
+</div><!-- End Stream BG -->
+
+
+<!-- Audio -->
+
+<script src="/js/BinaryFrame.js"></script>
+<script src="/js/QueryString.js"></script>
+<script src="/views/constants.js"></script>
+<script src="/views/utils.js"></script>
+<script src="/js/connection.js"></script>
+<script src="/views/bg.js"></script>
+<script src="/views/renderBlock.js"></script>
+<script src="/views/Player.js"></script>
+
+<script>(async function init() {
+// START ASYNC FUNC WRAPPER
+
+// Penner easing
+// http://robertpenner.com/easing/
+function easeOutElastic (t, b, c, d) {
+	var s=1.70158;var p=0;var a=c;
+	if (t==0) return b;  if ((t/=d)>=1) return b+c;  if (!p) p=d*.3;
+	if (a < Math.abs(c)) { a=c; var s=p/4; }
+	else var s = p/(2*Math.PI) * Math.asin (c/a);
+	return a*Math.pow(2,-10*t) * Math.sin( (t*d-s)*(2*Math.PI)/p ) + c + b;
+}
+
+
+// get 3 random champion tiles out of 4 champions
+const tile_size = 32;
+const tiles = await Promise.all(
+	[
+		'/views/tiles/32x32/jonas.png',
+		'/views/tiles/32x32/harry.png',
+		'/views/tiles/32x32/joseph.png',
+	]
+	.map(uri => new Promise(resolve => {
+		const img = new Image();
+		img.onload = () => resolve(img);
+		img.src = uri;
+	}))
+);
+
+let current_tiles;
+
+function getTiles() {
+	current_tiles = tiles;
+	// current_tiles = shuffle(tiles.slice(0)).slice(0, 3);
+}
+
+getTiles();
+
+const player = new Player(
+	{
+		score:       document.querySelector(`.score .content`),
+		runway_tr:   document.querySelector(`.runway.transition .content`),
+		runway_game: document.querySelector(`.runway.game .content`),
+		level:       document.querySelector(`.level .content`),
+		lines:       document.querySelector(`.lines .content`),
+		trt:         document.querySelector(`.tetris_rate .content`),
+		eff:         document.querySelector(`.efficiency .content`),
+		running_trt: document.querySelector(`.running_trt`),
+		preview:     document.querySelector(`.next_piece`),
+		field:       document.querySelector(`.board`),
+		drought:     document.querySelector(`.drought .value`),
+	},
+	{
+		draw_field: 0
+	}
+);
+
+player.field_ctx.imageSmoothingEnabled = false;
+player.drought_box = document.querySelector(`.drought`);
+player.runway_tr_box = document.querySelector(`.runway.transition`);
+
+player.onDroughtStart = () => {
+	console.log("onDroughtStart")
+	player.drought_box.classList.add('active');
+}
+
+player.onDroughtEnd = (count) => {
+	console.log("onDroughtEnd", count)
+	player.drought_box.classList.remove('active');
+}
+
+player.onTransition = player.onGameOver = () => {
+	player.runway_tr_box.hidden = true;
+}
+
+player.onGameStart = () => {
+	player.drought_box.classList.remove('active');
+	player.runway_tr_box.hidden = false;
+}
+
+player.onTetris = () => {
+	// show dog
+	const dog = document.querySelector('.dog_approves');
+	const dog_angle = Math.round(-5 + Math.random() * 10);
+
+	dog.style.transform = `rotate(${dog_angle}deg)`;
+	dog.style.display = `block`;
+
+	setTimeout(() => {
+		dog.style.display = 'none';
+	}, 650);
+
+	// show boom
+	const boom = document.querySelector('.boom');
+	const scale_start = 0;
+	const scale_end = 1.65;
+	const scale_change = scale_end - scale_start;
+	const angle = Math.round(-45 + Math.random() * 90);
+	const duration = 200;
+
+	boom.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
+	boom.style.display = 'block';
+
+	const start_time = Date.now();
+
+	function step() {
+		const elapsed = Date.now() - start_time;
+		const scale = easeOutElastic(elapsed, scale_start, scale_change, duration);
+
+		if (elapsed < duration) {
+			boom.style.transform = `scale(${scale}) rotate(${angle}deg)`;
+			window.requestAnimationFrame(step);
+		}
+		else {
+			setTimeout(() => {
+				boom.style.display = 'none';
+			}, 100);
+		}
+	}
+
+	window.requestAnimationFrame(step);
+}
+
+const API = {
+	frame(player_idx, data) {
+		player.setFrame(data);
+
+		player.field_ctx.clear();
+
+		data.field.forEach((cell, idx) => {
+			if (!cell) return;
+
+			const row_idx = Math.floor(idx  / 10);
+			const col_idx= idx % 10;
+			const img = current_tiles[cell - 1];
+
+			player.field_ctx.drawImage(
+				img,
+				col_idx * tile_size,
+				row_idx * tile_size
+			);
+		});
+	},
+
+	message() {} // noop
+}
+
+const connection = new Connection();
+
+connection.onMessage = function(frame) {
+	try {
+		const [method, ...args] = frame;
+
+		API[method].apply(API, args);
+	}
+	catch(e) {
+		console.error(e);
+	}
+};
+
+function onFrame(frame, debug) {
+	API.frame(0, frame, debug);
+}
+
+// END ASYNC FUNC WRAPPER
+})();</script>
+
+<!-- script src="sample_frames/sample_frames_11.js"></script>
+<script src="debug.js"></script -->
+
+</body>
+<html>

@@ -29,6 +29,7 @@ function peek(arr, offset) {
 	return arr[arr.length - (offset + 1)];
 }
 
+// see https://stackoverflow.com/a/12646864/361295
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

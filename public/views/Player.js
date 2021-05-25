@@ -111,8 +111,8 @@ const DEFAULT_DOM_REFS = {
 	trt:         DOM_DEV_NULL,
 	eff:         DOM_DEV_NULL,
 	running_trt: DOM_DEV_NULL,
-	preview:     DOM_DEV_NULL,
-	field:       DOM_DEV_NULL,
+	preview:     document.createElement('div'),
+	field:       document.createElement('div'),
 	drought:     DOM_DEV_NULL,
 	burn:        DOM_DEV_NULL,
 };
@@ -126,6 +126,7 @@ const DEFAULT_OPTIONS = {
 	tetris_flash: 1,
 	tetris_sound: 1,
 	reliable_field: 1,
+	draw_field: 1,
 	format_score: (v, size) => {
 		if (!size) {
 			size = 7;
@@ -176,7 +177,7 @@ class Player {
 		this.pieces = [];
 		this.clear_events = [];
 
-		const styles = getComputedStyle(dom.field);
+		const styles = getComputedStyle(this.dom.field);
 
 		// Avatar Block
 		this.avatar = document.createElement('div');
@@ -192,7 +193,7 @@ class Player {
 			backgroundPosition: '50% 50%',
 			filter:              'brightness(0.20)'
 		});
-		dom.field.appendChild(this.avatar);
+		this.dom.field.appendChild(this.avatar);
 
 		// Field Flash
 		this.field_bg = document.createElement('div');
@@ -204,14 +205,14 @@ class Player {
 			width:    `${css_size(styles.width) + this.field_pixel_size * 2}px`,
 			height:   `${css_size(styles.height) + this.field_pixel_size * 2}px`
 		});
-		dom.field.appendChild(this.field_bg);
+		this.dom.field.appendChild(this.field_bg);
 
 		// set up field and preview canvas
 		['field', 'preview', 'running_trt']
 			.forEach(name => {
 				console.log(name);
 
-				const styles = getComputedStyle(dom[name]);
+				const styles = getComputedStyle(this.dom[name]);
 				const canvas = document.createElement('canvas');
 
 				canvas.style.position = 'absolute';
@@ -221,7 +222,7 @@ class Player {
 				canvas.setAttribute('width', styles.width);
 				canvas.setAttribute('height', styles.height);
 
-				dom[name].appendChild(canvas);
+				this.dom[name].appendChild(canvas);
 
 				this[`${name}_ctx`] = canvas.getContext('2d');
 			});
@@ -249,14 +250,16 @@ class Player {
 	}
 
 	onPiece() {}
+	onLines() {}
 	onLevel() {}
 	onTransition() {}
 	onDroughtStart() {}
 	onDroughtEnd() {}
 	onGameStart() {}
 	onGameOver() {}
+	onTetris() {}
 
-	onTetris() {
+	_doTetris() {
 		if (this.options.tetris_flash) {
 			let remaining_frames = 12;
 
@@ -276,6 +279,8 @@ class Player {
 		if (this.options.tetris_sound) {
 			this.sounds.tetris.play();
 		}
+
+		this.onTetris();
 	}
 
 	clearTetrisAnimation() {
@@ -491,6 +496,7 @@ class Player {
 				this.dom.drought.textContent = this.options.format_drought(this.drought);
 				this.prev_preview = data.preview;
 
+				this.pieces.push(cur_piece);
 				this.onPiece(cur_piece);
 			}
 		}
@@ -558,7 +564,7 @@ class Player {
 					this.lines_trt += 4;
 
 					if (!this.options.reliable_field) {
-						this.onTetris();
+						this._doTetris();
 					}
 					this.burn = 0;
 				}
@@ -586,6 +592,8 @@ class Player {
 					this.tr_runway_score = this.score;
 					this.onTransition();
 				}
+
+				this.onLines(cleared);
 			}
 
 			if (this.transition === null) {
@@ -776,8 +784,8 @@ class Player {
 
 		switch(block_diff) {
 			case -8:
-				if (this.reliable_field) {
-					this.onTetris();
+				if (this.options.reliable_field) {
+					this._doTetris();
 				}
 			case -6:
 				// indicate animation for triples and tetris
@@ -820,6 +828,8 @@ class Player {
 		if (stage_id === this.current_field) return;
 
 		this.current_field = stage_id;
+
+		if (!this.options.draw_field) return;
 
 		const pixels_per_block = this.field_pixel_size * (7 + 1);
 
