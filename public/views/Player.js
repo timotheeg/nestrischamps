@@ -783,7 +783,7 @@ class Player {
 
 		switch(block_diff) {
 			case -8:
-				if (this.reliable_field) {
+				if (this.options.reliable_field) {
 					this._doTetris();
 				}
 			case -6:
