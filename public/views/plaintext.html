@@ -161,8 +161,8 @@ player.onLines = cleared => {
 		.join('');
 }
 
-player.onPiece = piece => {
-	player_fields.next.textContent = piece || '';
+player.onPiece = current_piece => {
+	player_fields.next.textContent = player.last_frame.preview || '';
 	document.querySelector('dd.pieces').textContent = player.pieces.join('');
 }
 
