@@ -347,8 +347,9 @@ player.onTetris = () => {
 		const elapsed = Date.now() - start_time;
 		const scale = easeOutElastic(elapsed, scale_start, scale_change, duration);
 
+		boom.style.transform = `scale(${scale}) rotate(${angle}deg)`;
+
 		if (elapsed < duration) {
-			boom.style.transform = `scale(${scale}) rotate(${angle}deg)`;
 			window.requestAnimationFrame(step);
 		}
 		else {
