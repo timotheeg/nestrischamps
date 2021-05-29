@@ -155,18 +155,18 @@ module.exports = function init(server, wss) {
 			console.log('WS: Adding View', user.login, 'single?', request.tetris.view.single_player);
 			const room = request.tetris.view.single_player
 				? user.getPrivateRoom()
-				: user.getMatchRoom()
+				: user.getHostRoom()
 			;
 
 			room.addView(connection);
 		}
 		else if(pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
-			user.getMatchRoom().setAdmin(connection);
+			user.getHostRoom().setAdmin(connection);
 		}
 		else if(pathname.startsWith('/ws/room/producer')) {
 			console.log(`PrivateRoom: ${user.login}: Producer connected`);
-			user.getPrivateRoom().setProducer(connection);
+			user.setProducerConnection(connection);
 		}
 		else if(m = pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
 			const target_user = await UserDAO.getUserByLogin(m[1]);
@@ -188,17 +188,18 @@ module.exports = function init(server, wss) {
 				switch(connection_type) {
 					case 'admin': {
 						console.log(`MatchRoom: ${target_user.login}: Admin connected`);
-						target_user.getMatchRoom().setAdmin(connection);
+						target_user.getHostRoom().setAdmin(connection);
 						break;
 					}
 					case 'producer': {
 						console.log(`MatchRoom: ${target_user.login}: Producer ${user.login} connected`);
-						target_user.getMatchRoom().addProducer(connection);
+						user.setProducerConnection(connection);
+						user.joinMatchRoom(target_user);
 						break;
 					}
 					case 'view': {
 						console.log(`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`);
-						target_user.getMatchRoom().addView(connection);
+						target_user.getHostRoom().addView(connection);
 						break;
 					}
 					default: {

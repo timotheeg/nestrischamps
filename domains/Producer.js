@@ -5,6 +5,8 @@ const Game = require('../modules/Game');
 
 class Producer extends EventEmitter {
 	constructor(user) {
+		super();
+
 		this.user = user;
 
 		this.connection = null;
@@ -46,12 +48,16 @@ class Producer extends EventEmitter {
 		this.connection = connection;
 	}
 
+	hasConnection() {
+		return !!this.connection;
+	}
+
 	setGame() {
 		if (this.game) {
 			delete this.game.onNewGame;
 		}
 
-		this.game = new Game(connection.user);
+		this.game = new Game(this.user);
 
 		this.game.onNewGame = (frame) => {
 			console.log(`${this.user.id} is starting a new game`);
@@ -60,8 +66,6 @@ class Producer extends EventEmitter {
 
 			this.game.setFrame(frame);
 		}
-
-		connection.game = game;
 	}
 
 	endGame() {
@@ -71,3 +75,5 @@ class Producer extends EventEmitter {
 		}
 	}
 }
+
+module.exports = Producer;

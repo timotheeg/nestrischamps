@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const PrivateRoom = require('./PrivateRoom');
 const MatchRoom = require('./MatchRoom');
-const MatchRoom = require('./Producer');
+const Producer = require('./Producer');
 
 // Twitch stuff
 const TwitchAuth = require('twitch-auth');
@@ -35,32 +35,60 @@ class User extends EventEmitter{
 		this.description       = user_object.description;
 		this.profile_image_url = user_object.profile_image_url;
 
-		// TODO: create rooms lazily
-		this.private_room = new PrivateRoom(this);
-		this.match_room = new MatchRoom(this);
-
 		this.producer = new Producer(this);
+
+		// TODO: can room be setup lazily?
+		this.private_room = new PrivateRoom(this);
+		this.host_room = new MatchRoom(this);
+
+		// match room links this user to the host room of another user
+		this.match_room = null;
 
 		// keep track of all socket for the user
 		// dangerous, could lead to memory if not managed well
 		this.destroy_to = null;
 		this.connections = new Set();
 
+		this._handleProducerMessage = this._handleProducerMessage.bind(this);
+		this._handleProducerClose = this._handleProducerClose.bind(this);
+
+		this.producer.on('message', this._handleProducerMessage);
+		this.producer.on('close', this._handleProducerClose);
+
 		this.checkScheduleDestroy();
+	}
+
+	setProducerConnection(conn) {
+		this.addConnection(conn);
+		this.producer.setConnection(conn);
+	}
+
+	getProducer() {
+		return this.producer;
 	}
 
 	getPrivateRoom() {
 		return this.private_room;
 	}
 
-	getMatchRoom() {
-		return this.match_room;
+	getHostRoom() {
+		return this.host_room;
+	}
+
+	joinMatchRoom(host_user) {
+		if (this.match_room) {
+			this.match_room.removeProducer(this);
+			this.match_room = null;
+		}
+
+		this.match_room = host_user.getHostRoom();
+		this.match_room.addProducer(this);
 	}
 
 	closeRooms(reason) {
 		// send message to all connections in all rooms that rooms are going away
 		if (this.private_room) this.private_room.close(reason);
-		if (this.match_room) this.match_room.close(reason);
+		if (this.host_room) this.host_room.close(reason);
 	}
 
 	setTwitchToken(token) {
@@ -99,6 +127,20 @@ class User extends EventEmitter{
 			() => this._onExpired(),
 			USER_SESSION_TIMEOUT
 		);
+	}
+
+	_handleProducerMessage(msg) {
+		this.private_room.handleProducerMessage(this, msg);
+
+		if (this.match_room) {
+			this.match_room.handleProducerMessage(this, msg);
+		}
+	}
+
+	_handleProducerClose() {
+		if (this.match_room) {
+			this.match_room.removeProducer(this);
+		}
 	}
 
 	_send(msg) {
