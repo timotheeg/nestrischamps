@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/views/tetris.css">
+<style>
+#playing_fields {
+	position: absolute;
+	left: 640px;
+	top: 8px;
+}
+
+.score {
+	width: 249px;
+	height: 54px;
+	font-size: 24px;
+	line-height: 24px;
+	padding-right: 10px;
+
+	--offset: 10px;
+	right: var(--offset);
+}
+
+.score > div {
+	display: flex;
+	flex-direction: row;
+}
+
+.score .value, .score .lines {
+	padding-top: 3px;
+	padding-bottom: 4px;
+}
+
+.score .lines {
+	flex-grow: 1;
+	text-align: right;
+	font-size: 16px;
+	line-height: 16px;
+}
+
+.score .tetris_diff {
+	flex-grow: 1;
+	text-align: right;
+	font-size: 16px;
+	line-height: 24px;
+	padding-top: 3px;
+}
+
+.score .value, .score .diff {
+	white-space: pre;
+	text-align: left;
+}
+
+.winning {
+	color: #0eff0e;
+}
+.losing {
+	color: #fd0009;
+}
+
+.board {
+	border-image: url('/views/big_border.png');
+	border-image-slice: 16 16 16 16 fill;
+	border-image-width: 16px 16px;
+	padding: 17px;
+	width: 237px;
+	height: 477px;
+	top: 76px;
+
+	--offset: 10px;
+	right: var(--offset);
+}
+
+.runway, .projection {
+	width: 112px;
+	height: 74px;
+
+	--offset: 279px;
+	right: var(--offset);
+}
+
+.runway .header, .projection .header  {
+	line-height: 12px;
+	font-size: 8px;
+	padding-bottom: 3px;
+}
+
+.runway .content, .projection .content {
+	text-align: right;
+}
+
+.projection {
+	top: 96px;
+}
+
+.name {
+	width: 247px;
+	height: 19px;
+	top: 661px;
+
+	--offset: 10px;
+	right: var(--offset);
+}
+
+.name .content {
+	color: #b0afb0;
+	letter-spacing: 5px;
+	text-indent: 5px;
+}
+
+.hearts .win {
+	color: #fb0204;
+}
+
+.tetris_rate {
+	width: 50px;
+	height: 54px;
+	top: 585px;
+
+	--offset: 279px;
+	right: var(--offset);
+}
+
+.tetris_rate .content {
+	padding-top: 7px;
+}
+
+.running_trt {
+	padding: 9px;
+	width: 253px;
+	height: 60px;
+	top: 585px;
+
+	--offset: 10px;
+	right: var(--offset);
+}
+
+.board .level {
+	position: absolute;
+	z-index: 100;
+}
+
+.board .next_piece {
+	position: absolute;
+	width: 64px;
+	height: 32px;
+	right: 15px;
+	top: 17px;
+	z-index: 1;
+}
+
+.p2 {
+	left: var(--offset);
+}
+
+.eff, .drought {
+	width: 50px;
+	top: 192px;
+
+	--pos: 279px;
+	right: var(--pos)
+}
+
+.eff .header, .drought .header {
+	padding-bottom: 2px;
+}
+
+.eff.p2, .drought.p2 {
+	left: var(--pos)
+}
+
+.drought {
+	opacity: 0;
+	color: red;
+	display: none;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+.eff {
+	top: 523px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+.hearts {
+	position: absolute;
+	top: 638px;
+	width: 280px;
+
+	color: #b0afb0;
+	font-size: 24px;
+	line-height: 24px;
+	letter-spacing: 8px;
+	text-align: center;
+
+	--pos: 358px;
+	right: var(--pos);
+}
+
+.hearts.p2 {
+	left: var(--pos);
+}
+
+
+.dev_null {
+	display: none;
+}
+
+</style>
+</head>
+<body>
+
+<div id="stream_bg">
+<div id="playing_fields">
+
+<!-- Player 1 -->
+
+<div class="box score p1">
+	<div>
+		<div class="value">0000000</div>
+		<div class="lines">000</div>
+	</div>
+	<div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">2.52</div>
+	</div>
+</div>
+
+<div class="box runway p1">
+	<div class="header">RUNWAY</div>
+	<div class="content">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">000</div>
+	</div>
+</div>
+
+<div class="box projection p1">
+	<div class="header">PROJECTION</div>
+	<div class="content">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">000</div>
+	</div>
+</div>
+
+<div class="box tetris_rate p1">
+	<div class="header">TRT</div>
+	<div class="content">---</div>
+</div>
+
+<div class="box running_trt p1"></div>
+
+<div class="box name p1">
+	<div class="header">PLAYER 1</div>
+	<div class="content"></div>
+</div>
+
+<div class="box board p1">
+	<div class="level"></div>
+	<div class="next_piece"></div>
+</div>
+
+<div class="box drought p1">
+	<div class="header">DRT</div>
+	<div class="value">99</div>
+</div>
+
+<div class="box eff p1">
+	<div class="header">EFF</div>
+	<div class="value">---</div>
+</div>
+
+<div class="hearts p1"></div>
+
+
+<!-- Player 2 -->
+
+<div class="box score p2">
+	<div>
+		<div class="value">0000000</div>
+		<div class="lines">000</div>
+	</div>
+	<div>
+		<div class="diff"> 000000</div>
+		<div class="tetris_diff">2.52</div>
+	</div>
+</div>
+
+<div class="box runway p2">
+	<div class="header">RUNWAY</div>
+	<div class="content">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">000</div>
+	</div>
+</div>
+
+<div class="box projection p2">
+	<div class="header">PROJECTION</div>
+	<div class="content">
+		<div class="value">000000</div>
+		<div class="diff">000000</div>
+		<div class="tetris_diff">000</div>
+	</div>
+</div>
+
+<div class="box tetris_rate p2">
+	<div class="header">TRT</div>
+	<div class="content">---</div>
+</div>
+
+<div class="box running_trt p2"></div>
+
+<div class="box name p2">
+	<div class="header">PLAYER 2</div>
+	<div class="content"></div>
+</div>
+
+<div class="box board p2">
+	<div class="level"></div>
+	<div class="next_piece"></div>
+</div>
+
+<div class="box drought p2">
+	<div class="header">DRT</div>
+	<div class="value">99</div>
+</div>
+
+<div class="box eff p2">
+	<div class="header">EFF</div>
+	<div class="value">---</div>
+</div>
+
+<div class="hearts p2"></div>
+
+
+<div class="dev_null"></div>
+
+</div><!-- End Playing Fields -->
+</div><!-- End Stream BG -->
+
+
+<!-- Audio -->
+
+
+<script src="/js/QueryString.js"></script>
+<script src="/views/constants.js"></script>
+<script src="/views/utils.js"></script>
+<script src="/views/renderBlock.js"></script>
+<script src="/views/Player.js"></script>
+<script src="/views/bg.js"></script>
+<script src="/js/connection.js"></script>
+<script src="/views/CompetitionPlayer.js"></script>
+<script src="/js/BinaryFrame.js"></script>
+<script>
+const players = [1, 2].map(num => new CompetitionPlayer(
+	{
+		name:        document.querySelector(`.name.p${num} .header`),
+		score:       document.querySelector(`.score.p${num} .value`),
+		level:       document.querySelector(`.board.p${num} .level`),
+		lines:       document.querySelector(`.score.p${num} .lines`),
+		trt:         document.querySelector(`.tetris_rate.p${num} .content`),
+		running_trt: document.querySelector(`.running_trt.p${num}`),
+		preview:     document.querySelector(`.board.p${num} .next_piece`),
+		field:       document.querySelector(`.board.p${num}`),
+		hearts:      document.querySelector(`.hearts.p${num}`),
+		drought:     document.querySelector(`.drought.p${num} .value`),
+		runway_game: document.querySelector(`.runway.p${num} .value`),
+		eff:         document.querySelector(`.eff.p${num} .value`),
+
+		projection:  document.querySelector(`.projection.p${num} .value`),
+
+		diff:        document.querySelector(`.score.p${num} .diff`),
+		t_diff:      document.querySelector(`.score.p${num} .tetris_diff`),
+
+		runway_diff:   document.querySelector(`.runway.p${num} .diff`),
+		runway_t_diff: document.querySelector(`.runway.p${num} .tetris_diff`),
+
+		projection_diff:   document.querySelector(`.projection.p${num} .diff`),
+		projection_t_diff: document.querySelector(`.projection.p${num} .tetris_diff`),
+	},
+	{
+		field_pixel_size: 3,
+		preview_pixel_size: 2,
+		preview_align: 'tr',
+		running_trt_rtl: 0,
+	}
+));
+
+players.forEach((player, idx) => {
+	player.drought_box = document.querySelector(`.drought.p${idx + 1}`);
+
+	player.onDroughtStart = () => {
+		console.log('onDroughtStart', idx + 1);
+		player.drought_box.classList.add('active');
+	}
+
+	player.onDroughtEnd = (count) => {
+		console.log('onDroughtEnd', idx + 1, count);
+		player.drought_box.classList.remove('active');
+	}
+
+	player.onGameStart = () => {
+		console.log('onGameStart', idx + 1);
+		player.drought_box.classList.remove('active');
+	}
+});
+
+</script>
+<script src="/views/competition.js"></script>
+<script>
+const API = new TetrisCompetitionAPI();
+
+function onFrame(frame, debug) {
+	API.frame(0, frame, debug);
+}
+</script>
+
+<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
+<script src="/views/debug.js"></script -->
+
+</body>
+<html>
