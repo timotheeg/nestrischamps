@@ -306,6 +306,8 @@ class MatchRoom extends Room {
 			this.admin.kick(reason);
 			this.admin = null;
 		}
+
+		this.emit('close');
 	}
 }
 

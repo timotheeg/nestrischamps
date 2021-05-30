@@ -11,28 +11,18 @@ class Producer extends EventEmitter {
 
 		this.connection = null;
 		this.game = null;
+
+		this._handleMessage = this._handleMessage.bind(this);
 	}
 
 	setConnection(connection) {
-		if (this.connection) {
-			this.connection.kick('concurrency_limit');
-			this.endGame();
-		}
+		this.kick('concurrency_limit');
 
-		connection.on('message', message => {
-			if (!this.game) {
-				this.setGame();
-			}
+		connection.on('message', this._handleMessage);
 
-			if (message instanceof Uint8Array) {
-				// this is a game frame, we track it in the game instance
-				this.game.setFrame(message); // this call may reset the game as side effect
-			}
+		connection.once('close', () => {
+			this.connection.removeAllListeners();
 
-			this.emit('message', message);
-		});
-
-		connection.on('close', () => {
 			if (this.connection === connection) {
 				this.connection = null;
 				this.endGame();
@@ -40,7 +30,7 @@ class Producer extends EventEmitter {
 			}
 		});
 
-		connection.on('error', err => {
+		connection.once('error', err => {
 			this.endGame();
 			this.emit('error', err);
 		});
@@ -73,6 +63,26 @@ class Producer extends EventEmitter {
 			this.game.end();
 			this.game = null;
 		}
+	}
+
+	kick(reason) {
+		if (this.connection) {
+			this.connection.kick(reason);
+			this.endGame();
+		}
+	}
+
+	_handleMessage(message) {
+		if (!this.game) {
+			this.setGame();
+		}
+
+		if (message instanceof Uint8Array) {
+			// this is a game frame, we track it in the game instance
+			this.game.setFrame(message); // this call may reset the game as side effect
+		}
+
+		this.emit('message', message);
 	}
 }
 

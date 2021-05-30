@@ -18,9 +18,14 @@ class Connection {
 		this.connect();
 	}
 
+	onBreak() {}
+	onResume() {}
+	onKicked() {}
 	onMessage() {}
 
-	_handleError() {}
+	_handleError(err) {
+		console.error(err);
+	}
 
 	_handleMessage(event) {
 		if (typeof event.data === 'string') {
@@ -30,8 +35,10 @@ class Connection {
 				// Connection-level command parsing
 				switch(data[0]) {
 					case '_kick': {
-						console.log('Socket kicked', data[1]);
+						const reason = data[1];
+						console.log('Socket kicked', reason);
 						this.close();
+						this.onKicked(reason);
 						return;
 					}
 				}
@@ -50,6 +57,7 @@ class Connection {
 
 	_handleClose() {
 		this._clearSocket();
+		this.onBreak();
 		setTimeout(this.connect, 5000); // TODO: exponential backoff
 	}
 
@@ -80,6 +88,11 @@ class Connection {
 
 	close() {
 		this._clearSocket();
+
+		delete this.onBreak;
+		delete this.onResume;
+		delete this.onKicked;
+		delete this.onMessage;
 	}
 
 	send(data) {

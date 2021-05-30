@@ -153,6 +153,15 @@ function checkActivateGoButton() {
 	go_btn.disabled = !all_ready;
 }
 
+const notice = document.querySelector('div.notice');
+
+function resetNotice() {
+	notice.classList.remove('error');
+	notice.classList.remove('warning');
+	notice.textContent = '';
+	notice.style.display = 'none';
+}
+
 function connect() {
 	if (connection) {
 		connection.close();
@@ -160,7 +169,7 @@ function connect() {
 
 	connection = new Connection();
 
-	connection.onMessage= function(frame) {
+	connection.onMessage = function(frame) {
 		try{
 			let [method, ...args] = frame;
 
@@ -174,6 +183,22 @@ function connect() {
 			console.error(e);
 		}
 	}
+
+	connection.onKicked = function(reason) {
+		resetNotice();
+		notice.classList.add('error');
+		notice.textContent = `WARNING! The connection has been kicked because [${reason}]. The page will NOT attempt to reconnect.`;
+		notice.style.display = 'block';
+	}
+
+	connection.onBreak = function() {
+		resetNotice();
+		notice.classList.add('warning');
+		notice.textContent = `WARNING! The page is disconnected. It will try to reconnect automatically.`;
+		notice.style.display = 'block';
+	}
+
+	connection.onResume = resetNotice;
 }
 
 conn_host.addEventListener('change', connect);

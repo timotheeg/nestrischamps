@@ -1,5 +1,9 @@
-class Room {
+const EventEmitter = require('events');
+
+class Room extends EventEmitter {
 	constructor(owner) {
+		super();
+
 		this.owner = owner;
 		this.views = new Set(); // connections
 	}

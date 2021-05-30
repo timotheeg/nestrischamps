@@ -9,7 +9,7 @@ const StaticAuthProvider = TwitchAuth.StaticAuthProvider;
 const RefreshableAuthProvider = TwitchAuth.RefreshableAuthProvider;
 const ChatClient = require('twitch-chat-client').ChatClient;
 
-const USER_SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes before we destroy user! TODO: Make tunable
+const USER_SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes before we destroy user! TODO: Make tunable
 
 
 function is_spam(msg) {
@@ -23,7 +23,7 @@ function is_spam(msg) {
 }
 
 
-class User extends EventEmitter{
+class User extends EventEmitter {
 	constructor(user_object) {
 		super();
 
@@ -76,6 +76,12 @@ class User extends EventEmitter{
 	}
 
 	joinMatchRoom(host_user) {
+		const new_room = host_user.getHostRoom();
+
+		if (new_room === this.match_room) {
+			return;
+		}
+
 		if (this.match_room) {
 			this.match_room.removeProducer(this);
 			this.match_room = null;
@@ -83,6 +89,10 @@ class User extends EventEmitter{
 
 		this.match_room = host_user.getHostRoom();
 		this.match_room.addProducer(this);
+		this.match_room.once('close', () => {
+			this.match_room = null;
+			this.producer.kick('match_room_closed');
+		});
 	}
 
 	closeRooms(reason) {
@@ -108,7 +118,7 @@ class User extends EventEmitter{
 	addConnection(conn) {
 		this.connections.add(conn);
 
-		conn.on('close', () => {
+		conn.once('close', () => {
 			this.connections.delete(conn);
 			this.checkScheduleDestroy();
 		});
