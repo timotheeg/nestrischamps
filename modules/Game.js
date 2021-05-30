@@ -227,7 +227,11 @@ class Game {
 			this.frame_stream.end();
 		}
 
-		if (this.frame_count <= 2) return;
+		if (this.frame_count <= 2 || this.num_frames <= 2) {
+			// TODO: do we really need 2 frame counters?
+			// TODO: How to delete game file?
+			return;
+		}
 
 		const report = this.getReport();
 
