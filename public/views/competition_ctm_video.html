@@ -213,12 +213,31 @@
 	display: none;
 }
 
+video.player_vid {
+	position:  absolute;
+	top: 230px;
+	width: 320px;
+	height: 240px;
+	object-fit: cover;
+
+	--pos: 286px;
+	right: var(--pos);
+}
+
+video.player_vid.p2 {
+	left: var(--pos);
+}
+
 </style>
 </head>
 <body>
 
 <div id="stream_bg">
 <div id="playing_fields">
+
+<video class="box player_vid p1"></video>
+<video class="box player_vid p2"></video>
+
 
 <!-- Player 1 -->
 
