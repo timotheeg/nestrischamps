@@ -8,6 +8,7 @@ class MatchRoom extends Room {
 	constructor(owner, roomid) {
 		super(owner);
 
+		this.producers = new Set(); // users
 		this.admin = null;
 		this.roomid = roomid || '_default';
 		this.state = {
@@ -60,23 +61,45 @@ class MatchRoom extends Room {
 		this.sendStateToAdmin();
 	}
 
-	getProducerFields(connection) {
-		return _.pick(connection.user, PRODUCER_FIELDS);
+	getProducerFields(user) {
+		return _.pick(user, PRODUCER_FIELDS);
 	}
 
-	addProducer(connection) {
-		const is_new_user = super.addProducer(connection);
+	hasProducer(user) {
+		return this.producers.has(user);
+	}
+
+	addProducer(user) {
+		const is_new_user = !this.hasProducer(user);
 
 		if (is_new_user) {
+			this.producers.add(user);
 			this.sendStateToAdmin();
 		}
 	}
 
-	removeProducer(connection, is_replace_flow = false) {
-		const was_present = super.removeProducer(connection);
+	getProducer(user_id) {
+		const iter = this.producers.values();
+		let next;
 
-		if (was_present && !is_replace_flow) {
-			this.sendStateToAdmin();
+		while (next = iter.next()) {
+			const user = next.value;
+
+			if (user.id === user_id) {
+				return user;
+			}
+		}
+	}
+
+	removeProducer(user, is_replace_flow = false) {
+		const was_present = this.hasProducer(user);
+
+		if (was_present) {
+			this.producers.delete(user);
+
+			if (!is_replace_flow) {
+				this.sendStateToAdmin();
+			}
 		}
 	}
 
@@ -255,10 +278,10 @@ class MatchRoom extends Room {
 		}
 	}
 
-	onProducerMessage(producer, message) {
+	handleProducerMessage(user, message) {
 		// system where you can have one user being both players
 		[0, 1].forEach(p_num => {
-			if (this.state.players[p_num].id === producer.user.id) {
+			if (this.state.players[p_num].id === user.id) {
 				if (message instanceof Uint8Array) {
 					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
 					this.sendToViews(message);
@@ -273,10 +296,18 @@ class MatchRoom extends Room {
 	close(reason) {
 		super.close(reason);
 
+		// dodgy iteration that empties the collection as it goes -_-
+		this.producers.forEach(user => {
+			this.removeProducer(user);
+		});
+		this.producers.clear(); // not needed, but added for clarity
+
 		if (this.admin) {
 			this.admin.kick(reason);
 			this.admin = null;
 		}
+
+		this.emit('close');
 	}
 }
 

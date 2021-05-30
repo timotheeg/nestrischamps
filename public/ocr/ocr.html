@@ -114,10 +114,30 @@ fieldset.field pre {
 	border: 1px solid black;
 }
 
+.notice {
+	font-family: monospace;
+	font-weight: bold;
+	display: none;
+	padding-bottom: 1em;
+	text-align: center;
+	font-size: 14px;
+}
+
+.error {
+	color: red;
+}
+
+.warning {
+	color: #ff8c00;
+}
+
 </style>
 </head>
 
 <body>
+
+<div class="notice"></div>
+
 <div id="calibration">
 	<img id="reference_ui" />
 	<canvas id="video_capture" />

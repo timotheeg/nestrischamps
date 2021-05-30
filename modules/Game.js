@@ -72,6 +72,12 @@ class Game {
 		}
 	}
 
+	end() {
+		if (!this.over) {
+			this._doGameOver();
+		}
+	}
+
 	setFrame(frame) {
 		const data = BinaryFrame.parse(frame);
 
@@ -121,10 +127,7 @@ class Game {
 		}
 
 		if (data.gameid != this.gameid) {
-			if (!this.over) {
-				this._doGameOver();
-			}
-
+			this.end();
 			this.onNewGame(frame);
 			return;
 		}
@@ -212,7 +215,7 @@ class Game {
 
 		// Check board for gameover event (curtain has fallen)
 		if (cur_num_blocks >= 200) {
-			this._doGameOver();
+			this.end();
 		}
 	}
 
@@ -224,7 +227,11 @@ class Game {
 			this.frame_stream.end();
 		}
 
-		if (this.frame_count <= 2) return;
+		if (this.frame_count <= 2 || this.num_frames <= 2) {
+			// TODO: do we really need 2 frame counters?
+			// TODO: How to delete game file?
+			return;
+		}
 
 		const report = this.getReport();
 
@@ -277,6 +284,7 @@ class Game {
 
 				if (this.transition === null) {
 					this.transition = data.score;
+					this.onTransition();
 				}
 			}
 		}
@@ -358,8 +366,10 @@ class Game {
 		}
 	}
 
+	// TODO: change callbacks to emit events instead
 	onGameOver() {}
 	onTetris() {}
+	onTransition() {}
 	onNewGame() {}
 }
 
