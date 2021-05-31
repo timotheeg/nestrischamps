@@ -370,6 +370,7 @@ video.player_vid.p2 {
 <!-- Audio -->
 
 
+<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 <script src="/js/QueryString.js"></script>
 <script src="/views/constants.js"></script>
 <script src="/views/utils.js"></script>
@@ -437,6 +438,30 @@ players.forEach((player, idx) => {
 <script src="/views/competition.js"></script>
 <script>
 const API = new TetrisCompetitionAPI();
+
+
+let peer = null;
+
+connection.onInit = () => {
+	if (peer) {
+		peer.removeAllListeners();
+		peer.destroy();
+		peer = null;
+	}
+
+	peer = new Peer(connection.id);
+
+	peer.on('call', (call) => {
+		call.answer()
+		call.on('stream', remoteStream => {
+			const video = document.querySelector('video.p1');
+			video.srcObject = remoteStream;
+			video.addEventListener('loadedmetadata', () => {
+				video.play();
+			})
+		});
+	});
+}
 
 function onFrame(frame, debug) {
 	API.frame(0, frame, debug);

@@ -162,6 +162,8 @@ function resetNotice() {
 	notice.style.display = 'none';
 }
 
+let peer = null;
+
 function connect() {
 	if (connection) {
 		connection.close();
@@ -199,6 +201,16 @@ function connect() {
 	}
 
 	connection.onResume = resetNotice;
+
+	connection.onInit = () => {
+		if (peer) {
+			peer.removeAllListeners();
+			peer.destroy();
+			peer = null;
+		}
+
+		peer = new Peer(connection.id);
+	}
 }
 
 conn_host.addEventListener('change', connect);
