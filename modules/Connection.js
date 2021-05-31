@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const EventEmitter = require('events');
+const ULID = require('ulid');
 
 const KICK_DESTROY_DELAY = 1000; // allows UI to get message and know it should not attempt to reconnect
 const PING_INTERVAL = 15000;
@@ -12,12 +13,12 @@ const WS_CODES = {
 };
 
 class Connection extends EventEmitter {
-	constructor(user, socket, peerid) {
+	constructor(user, socket) {
 		super();
 
+		this.id = ULID.ulid(); // use UUID?
 		this.user = user;
 		this.socket = socket;
-		this.peerid = peerid;
 
 		this._onMessage = this._onMessage.bind(this);
 		this._onError = this._onError.bind(this);
@@ -33,6 +34,8 @@ class Connection extends EventEmitter {
 		this.socket.on('close',   this._onClose);
 
 		this._onHeartBeat();
+
+		this.send(['_id', this.id]);
 	}
 
 	send(message) {

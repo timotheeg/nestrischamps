@@ -34,6 +34,10 @@ class Connection {
 			if (Array.isArray(data)) {
 				// Connection-level command parsing
 				switch(data[0]) {
+					case '_id': {
+						this.remoteid = data[1];
+						return;
+					}
 					case '_kick': {
 						const reason = data[1];
 						console.log('Socket kicked', reason);
