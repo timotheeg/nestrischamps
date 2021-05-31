@@ -11,4 +11,13 @@ const wss = new WebSocket.Server({
 
 require('./routes/websocket.js')(server, wss);
 
+// setting up peerjs
+const { ExpressPeerServer } = require('peerjs-server');
+const peerServer = ExpressPeerServer(server, {
+  path: '/'
+});
+
+app.use('/peerjs', peerServer);
+
+
 server.listen(process.env.PORT || 5000);

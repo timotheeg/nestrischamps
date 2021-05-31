@@ -18,6 +18,7 @@ class Connection {
 		this.connect();
 	}
 
+	onInit() {}
 	onBreak() {}
 	onResume() {}
 	onKicked() {}
@@ -36,6 +37,7 @@ class Connection {
 				switch(data[0]) {
 					case '_id': {
 						this.remoteid = data[1];
+						this.onInit();
 						return;
 					}
 					case '_kick': {
