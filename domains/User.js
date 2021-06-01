@@ -150,6 +150,7 @@ class User extends EventEmitter {
 	_handleProducerClose() {
 		if (this.match_room) {
 			this.match_room.removeProducer(this);
+			this.match_room = null;
 		}
 	}
 
