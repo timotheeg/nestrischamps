@@ -370,6 +370,10 @@ class Player {
 		this.id = id;
 	}
 
+	setPeerId(peerid) {
+		this.peerid = peerid;
+	}
+
 	setLogin(login) {
 		this.login = login;
 	}

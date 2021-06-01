@@ -135,7 +135,7 @@ class MatchRoom extends Room {
 		super.addView(connection);
 
 		if (this.last_view) {
-			this.last_view.send(['setSecondary']);
+			this.last_view.send(['setSecondaryView']);
 		}
 
 		this.last_view = connection;

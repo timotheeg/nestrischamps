@@ -452,14 +452,24 @@ connection.onInit = () => {
 	peer = new Peer(connection.id);
 
 	peer.on('call', (call) => {
-		call.answer()
-		call.on('stream', remoteStream => {
-			const video = document.querySelector('video.p1');
-			video.srcObject = remoteStream;
-			video.addEventListener('loadedmetadata', () => {
-				video.play();
-			})
-		});
+		console.log(`Received media call by ${call.peer}`);
+
+		const player_idx = getPlayerIndexByPeerId(call.peer);
+
+		if (player_idx > -1) {
+			const player_num = player_idx + 1;
+
+			call.answer();
+
+			call.on('stream', remoteStream => {
+				const video = document.querySelector(`video.${player_num}`);
+
+				video.srcObject = remoteStream;
+				video.addEventListener('loadedmetadata', () => {
+					video.play();
+				})
+			});
+		}
 	});
 }
 
