@@ -71,6 +71,7 @@ class MatchRoom extends Room {
 	}
 
 	addProducer(user) {
+		console.log('addProducer', user.id);
 		const is_new_user = !this.hasProducer(user);
 
 		if (is_new_user) {
@@ -82,9 +83,9 @@ class MatchRoom extends Room {
 		// so we need to inform the view
 		if (this.last_view) {
 			this.state.players.some((player, pidx) => {
-				if (player_data.id !== user.id) return false;
+				if (player.id !== user.id) return false;
 
-				this.last_view.send(['setPeer', pidx, user.getProducer().getPeerId()]);
+				this.last_view.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
 
 				return true; // stops iteration
 			});
@@ -103,14 +104,16 @@ class MatchRoom extends Room {
 		while (next = iter.next()) {
 			const user = next.value;
 
-			if (user && user.id === user_id) {
+			if (!user) return;
+
+			if (user.id === user_id) {
 				return user;
 			}
 		}
 	}
 
 	getPlayer(user_id) {
-		const data = this.state.players.find(player_data => player_data.id === user_id);
+		const data = this.state.players.find(player => player.id === user_id);
 
 		if (data) {
 			return this.getProducer(user_id);
@@ -145,11 +148,16 @@ class MatchRoom extends Room {
 
 		this.state.players.forEach((player, pidx) => {
 			connection.send(['setId',              pidx, player.id]);
-			connection.send(['setPeerId',          pidx, this.getProducer(player.id).getProducer().getPeerId()]);
 			connection.send(['setLogin',           pidx, player.login]);
 			connection.send(['setDisplayName',     pidx, player.display_name]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);
 			connection.send(['setVictories',       pidx, player.victories]);
+
+			if (player.id) {
+				const user = this.getProducer(player.id);
+
+				connection.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
+			}
 		});
 	}
 
@@ -202,6 +210,8 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
+					const user = this.getProducer(player_id);
+
 					if (!p_id) {
 						player_data = {
 							id: '',
@@ -217,10 +227,8 @@ class MatchRoom extends Room {
 						player_data = this.state.players[1];
 					}
 					else {
-						const producer = this.getProducer(player_id);
-
-						if (producer) {
-							player_data = this.getProducerFields(producer);
+						if (user) {
+							player_data = this.getProducerFields(user);
 						}
 					}
 
@@ -235,13 +243,14 @@ class MatchRoom extends Room {
 						victories: 0
 					};
 
-					// Send all data back to admin
+					// Send data to all views
 					this.sendToViews(['setId',              p_num, player_data.id]);
+					this.sendToViews(['setPeerId',          p_num, user.getProducer().getPeerId()]);
 					this.sendToViews(['setLogin',           p_num, player_data.login]);
 					this.sendToViews(['setDisplayName',     p_num, player_data.display_name]);
 					this.sendToViews(['setProfileImageURL', p_num, player_data.profile_image_url]);
 
-					forward_to_views= false;
+					forward_to_views = false;
 					break;
 				}
 
