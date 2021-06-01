@@ -103,7 +103,7 @@ class MatchRoom extends Room {
 		while (next = iter.next()) {
 			const user = next.value;
 
-			if (user.id === user_id) {
+			if (user && user.id === user_id) {
 				return user;
 			}
 		}
@@ -145,7 +145,7 @@ class MatchRoom extends Room {
 
 		this.state.players.forEach((player, pidx) => {
 			connection.send(['setId',              pidx, player.id]);
-			connection.send(['setPeerId',          pidx, player.getproducer().getPeerId()]);
+			connection.send(['setPeerId',          pidx, this.getProducer(player.id).getProducer().getPeerId()]);
 			connection.send(['setLogin',           pidx, player.login]);
 			connection.send(['setDisplayName',     pidx, player.display_name]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);

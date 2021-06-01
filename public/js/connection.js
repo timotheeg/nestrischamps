@@ -36,7 +36,7 @@ class Connection {
 				// Connection-level command parsing
 				switch(data[0]) {
 					case '_id': {
-						this.remoteid = data[1];
+						this.id = data[1];
 						this.onInit();
 						return;
 					}
