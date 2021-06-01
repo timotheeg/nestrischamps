@@ -157,6 +157,14 @@ class MatchRoom extends Room {
 				connection.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
 			}
 		});
+
+		console.log('sending view Peer ID to producers')
+		this.producers.forEach(user => {
+			console.log('producer', user.id);
+			user.getProducer().send(
+				['setViewPeerId', this.last_view.id]
+			);
+		});
 	}
 
 	// get state of the room:

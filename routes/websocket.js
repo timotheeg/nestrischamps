@@ -199,6 +199,7 @@ module.exports = function init(server, wss) {
 					}
 					case 'view': {
 						console.log(`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`);
+						// TODO: this view should not take over video feed!
 						target_user.getHostRoom().addView(connection);
 						break;
 					}

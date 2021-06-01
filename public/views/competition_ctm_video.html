@@ -218,6 +218,7 @@ video.player_vid {
 	top: 230px;
 	width: 320px;
 	height: 240px;
+	padding: 10px;
 	object-fit: cover;
 
 	--pos: 286px;
@@ -456,18 +457,24 @@ connection.onInit = () => {
 
 		const player_idx = getPlayerIndexByPeerId(call.peer);
 
-		if (player_idx > -1) {
-			const player_num = player_idx + 1;
+		if (player_idx > -1) { // at least one match
 
 			call.answer();
 
 			call.on('stream', remoteStream => {
-				const video = document.querySelector(`video.${player_num}`);
+				players.forEach((player, player_idx) => {
+					console.log(player_idx, player.peerid, call.peer);
 
-				video.srcObject = remoteStream;
-				video.addEventListener('loadedmetadata', () => {
-					video.play();
-				})
+					if (player.peerid != call.peer) return;
+
+					const player_num = player_idx + 1;
+					const video = document.querySelector(`video.p${player_num}`);
+
+					video.srcObject = remoteStream;
+					video.addEventListener('loadedmetadata', () => {
+						video.play();
+					}, { once: true });
+				});
 			});
 		}
 	});
