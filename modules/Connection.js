@@ -20,6 +20,8 @@ class Connection extends EventEmitter {
 		this.user = user;
 		this.socket = socket;
 
+		this.broken = false;
+
 		this._onMessage = this._onMessage.bind(this);
 		this._onError = this._onError.bind(this);
 		this._onClose = this._onClose.bind(this);

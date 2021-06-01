@@ -81,7 +81,7 @@ class TetrisCompetitionAPI {
 	}
 
 	setPeerId(player_idx, peerid) {
-		getPlayer(player_idx).setPeerId(id);
+		getPlayer(player_idx).setPeerId(peerid);
 	}
 
 	setLogin(player_idx, login) {

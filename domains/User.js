@@ -53,7 +53,7 @@ class User extends EventEmitter {
 		this._handleProducerClose = this._handleProducerClose.bind(this);
 
 		this.producer.on('message', this._handleProducerMessage);
-		this.producer.on('close', this._handleProducerClose);
+		this.producer.once('close', this._handleProducerClose);
 
 		this.checkScheduleDestroy();
 	}
@@ -61,6 +61,11 @@ class User extends EventEmitter {
 	setProducerConnection(conn) {
 		this.addConnection(conn);
 		this.producer.setConnection(conn);
+
+		if (this.match_room) {
+			// this forces a redispatch of the peer ids
+			this.match_room.addProducer(this);
+		}
 	}
 
 	getProducer() {
