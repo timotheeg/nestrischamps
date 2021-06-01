@@ -82,12 +82,10 @@ class MatchRoom extends Room {
 		// whether or not the user was new, its peer id changed
 		// so we need to inform the view
 		if (this.last_view) {
-			this.state.players.some((player, pidx) => {
-				if (player.id !== user.id) return false;
+			this.state.players.forEach((player, pidx) => {
+				if (player.id !== user.id) return;
 
 				this.last_view.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
-
-				return true; // stops iteration
 			});
 
 			// and then inform the producer about the view's peer id
