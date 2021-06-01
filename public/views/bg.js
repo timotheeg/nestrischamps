@@ -4,6 +4,39 @@ if (QueryString.bg === '0') {
 	return;
 }
 
+if (QueryString.bg === '2' || QueryString.bg === '3') {
+	const img_width = 218;
+	const bg_file = QueryString.bg === '2'
+		? 'nestrischamps_bg_green.png'
+		: 'nestrischamps_bg.png'
+	;
+	const bg = document.createElement('div');
+
+	Object.assign(bg.style, {
+	    position:   'absolute',
+	    width:      '140%',
+	    height:     '140%',
+	    top:        '-20%',
+	    left:       '-20%',
+	    background: `url(/views/${bg_file}) 0 0 repeat`,
+	    transform:  'rotate(-11deg)',
+	});
+
+	let pos = 0;
+
+	setInterval(() => {
+		pos = ++pos % img_width;
+		bg.style.backgroundPositionX = `${pos}px`;
+	}, 1000/30);
+
+
+	document.querySelector('#stream_bg').prepend(bg);
+
+	return;
+}
+
+
+// bg=1 (default pieces)
 const width = 1280;
 const height = 720;
 

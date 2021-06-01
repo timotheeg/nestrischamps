@@ -21,6 +21,7 @@ html, body, table, tr, th, td {
 	left: 0;
 	width: 1280px;
 	height: 720px;
+	overflow: hidden;
 	/*
 	border-bottom: 1px solid black;
 	border-right: 1px solid black;
