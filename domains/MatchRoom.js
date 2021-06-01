@@ -11,6 +11,7 @@ class MatchRoom extends Room {
 		this.producers = new Set(); // users
 		this.admin = null;
 		this.roomid = roomid || '_default';
+		this.last_view = null;
 		this.state = {
 			bestof: 3,
 			players: [ // flat user objects
@@ -76,6 +77,23 @@ class MatchRoom extends Room {
 			this.producers.add(user);
 			this.sendStateToAdmin();
 		}
+
+		// whether or not the user was new, its peer id changed
+		// so we need to inform the view
+		if (this.last_view) {
+			this.state.players.some((player, pidx) => {
+				if (player_data.id !== user.id) return false;
+
+				this.last_view.send(['setPeer', pidx, user.getProducer().getPeerId()]);
+
+				return true; // stops iteration
+			});
+
+			// and then inform the producer about the view's peer id
+			user.getProducer().send(
+				['setViewPeerId', this.last_view.id]
+			);
+		}
 	}
 
 	getProducer(user_id) {
@@ -91,6 +109,14 @@ class MatchRoom extends Room {
 		}
 	}
 
+	getPlayer(user_id) {
+		const data = this.state.players.find(player_data => player_data.id === user_id);
+
+		if (data) {
+			return this.getProducer(user_id);
+		}
+	}
+
 	removeProducer(user, is_replace_flow = false) {
 		const was_present = this.hasProducer(user);
 
@@ -101,16 +127,25 @@ class MatchRoom extends Room {
 				this.sendStateToAdmin();
 			}
 		}
+
+		// TODO: anything to send to the views?
 	}
 
 	addView(connection) {
 		super.addView(connection);
+
+		if (this.last_view) {
+			this.last_view.send(['setSecondary']);
+		}
+
+		this.last_view = connection;
 
 		// do a room state dump for this new view
 		connection.send(['setBestOf', this.state.bestof]);
 
 		this.state.players.forEach((player, pidx) => {
 			connection.send(['setId',              pidx, player.id]);
+			connection.send(['setPeerId',          pidx, player.getproducer().getPeerId()]);
 			connection.send(['setLogin',           pidx, player.login]);
 			connection.send(['setDisplayName',     pidx, player.display_name]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);

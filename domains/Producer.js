@@ -72,6 +72,16 @@ class Producer extends EventEmitter {
 		}
 	}
 
+	getPeerId() {
+		return this.connection.id;
+	}
+
+	send(message) {
+		if (this.connection) {
+			this.connection.send(message);
+		}
+	}
+
 	_handleMessage(message) {
 		if (!this.game) {
 			this.setGame();
