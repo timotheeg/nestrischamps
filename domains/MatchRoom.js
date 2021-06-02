@@ -14,6 +14,7 @@ class MatchRoom extends Room {
 		this.last_view = null;
 		this.state = {
 			bestof: 3,
+			video_feed: 0,
 			players: [ // flat user objects
 				{
 					id: '',
@@ -306,6 +307,11 @@ class MatchRoom extends Room {
 				case 'setWinner': {
 					update_admin = false;
 
+					break;
+				}
+
+				case 'setVideoFeed': {
+					this.state.video_feed = args[0] ? 1 : 0;
 					break;
 				}
 
