@@ -133,14 +133,16 @@ class MatchRoom extends Room {
 		// TODO: anything to send to the views?
 	}
 
-	addView(connection) {
+	addView(connection, is_secret_view=true) {
 		super.addView(connection);
 
-		if (this.last_view) {
-			this.last_view.send(['setSecondaryView']);
-		}
+		if (is_secret_view) {
+			if (this.last_view) {
+				this.last_view.send(['setSecondaryView']);
+			}
 
-		this.last_view = connection;
+			this.last_view = connection;
+		}
 
 		// do a room state dump for this new view
 		connection.send(['setBestOf', this.state.bestof]);
@@ -159,13 +161,13 @@ class MatchRoom extends Room {
 			}
 		});
 
-		console.log('sending view Peer ID to producers')
-		this.producers.forEach(user => {
-			console.log('producer', user.id);
-			user.getProducer().send(
-				['setViewPeerId', this.last_view.id]
-			);
-		});
+		if (this.last_view) {
+			this.producers.forEach(user => {
+				user.getProducer().send(
+					['setViewPeerId', this.last_view.id]
+				);
+			});
+		}
 	}
 
 	// get state of the room:
