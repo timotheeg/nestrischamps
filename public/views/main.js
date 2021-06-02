@@ -416,9 +416,6 @@ function clearStage() {
 }
 
 function renderPastGamesAndPBs(data) {
-	dom.pbs.name.textContent = data.current_player;
-	dom.high_scores.name.textContent = data.current_player;
-
 	// pbs
 	data.pbs.forEach(record => {
 		if (!record) return;

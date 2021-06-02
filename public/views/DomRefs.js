@@ -94,7 +94,6 @@ class DomRefs {
 
 		this.pbs = {
 			element: pbs,
-			name: pbs.querySelector('.header .name')
 		};
 
 		['s18', 's19'].forEach(level_class => {
@@ -117,7 +116,6 @@ class DomRefs {
 		this.high_scores = {
 			element: high_scores,
 
-			name:    high_scores.querySelector('.header .name'),
 			today:   high_scores.querySelector('.today tbody'),
 			overall: high_scores.querySelector('.overall tbody'),
 		};
