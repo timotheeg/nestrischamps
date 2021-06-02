@@ -21,6 +21,7 @@ class Connection {
 		this.connect();
 	}
 
+	onOpen() {}
 	onInit() {}
 	onBreak() {}
 	onResume() {}
@@ -31,6 +32,9 @@ class Connection {
 		if (this.broken) {
 			this.broken = false;
 			this.onResume();
+		}
+		else {
+			this.onOpen();
 		}
 	}
 

@@ -84,6 +84,10 @@ class TetrisCompetitionAPI {
 		getPlayer(player_idx).setPeerId(peerid);
 	}
 
+	setSecondaryView() {
+		// overload as needed
+	}
+
 	setLogin(player_idx, login) {
 		getPlayer(player_idx).setLogin(login);
 	}

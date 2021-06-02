@@ -139,9 +139,21 @@ class MatchRoom extends Room {
 		if (is_secret_view) {
 			if (this.last_view) {
 				this.last_view.send(['setSecondaryView']);
+				this.last_view.removeAllListeners();
 			}
 
 			this.last_view = connection;
+			this.last_view.on('message', ([cmd, ...args]) => {
+				if (cmd === 'acceptPlayersVideoFeed') {
+					this.state.video_feed = 1;
+				}
+			});
+
+			this.producers.forEach(user => {
+				user.getProducer().send(
+					['setViewPeerId', this.last_view.id]
+				);
+			});
 		}
 
 		// do a room state dump for this new view
@@ -158,16 +170,9 @@ class MatchRoom extends Room {
 				const user = this.getProducer(player.id);
 
 				connection.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
+				user.getProducer().send(['makePlayer', pidx]); // could be too fast for call to work ??
 			}
 		});
-
-		if (this.last_view) {
-			this.producers.forEach(user => {
-				user.getProducer().send(
-					['setViewPeerId', this.last_view.id]
-				);
-			});
-		}
 	}
 
 	// get state of the room:
@@ -219,6 +224,17 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
+					if (this.state.players[p_num].id && player_id != this.state.players[p_num].id) {
+						// replacing player
+						const other_player_num = (p_num + 1) % 2;
+
+						if (this.state.players[p_num].id != this.state.players[other_player_num].id) {
+							const user = this.getProducer(this.state.players[p_num].id);
+
+							user.getProducer().send(['dropPlayer']);
+						}
+					}
+
 					const user = this.getProducer(player_id);
 
 					if (!p_id) {
@@ -252,12 +268,19 @@ class MatchRoom extends Room {
 						victories: 0
 					};
 
+					const peerid = user ? user.getProducer().getPeerId() : '';
+
 					// Send data to all views
 					this.sendToViews(['setId',              p_num, player_data.id]);
-					this.sendToViews(['setPeerId',          p_num, user.getProducer().getPeerId()]);
+					this.sendToViews(['setPeerId',          p_num, peerid]);
 					this.sendToViews(['setLogin',           p_num, player_data.login]);
 					this.sendToViews(['setDisplayName',     p_num, player_data.display_name]);
 					this.sendToViews(['setProfileImageURL', p_num, player_data.profile_image_url]);
+
+					// inform producer it is a now a player
+					if (user) {
+						user.getProducer().send(['makePlayer', p_num]);
+					}
 
 					forward_to_views = false;
 					break;
@@ -358,11 +381,17 @@ class MatchRoom extends Room {
 		this.producers.forEach(user => {
 			this.removeProducer(user);
 		});
+
 		this.producers.clear(); // not needed, but added for clarity
 
 		if (this.admin) {
 			this.admin.kick(reason);
 			this.admin = null;
+		}
+
+		if (this.last_view) {
+			this.last_view.removeAllListeners();
+			this.last_view = null;
 		}
 
 		this.emit('close');

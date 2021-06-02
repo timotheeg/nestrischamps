@@ -396,6 +396,7 @@ const players = [1, 2].map(num => new CompetitionPlayer(
 		drought:     document.querySelector(`.drought.p${num} .value`),
 		runway_game: document.querySelector(`.runway.p${num} .value`),
 		eff:         document.querySelector(`.eff.p${num} .value`),
+		video:       document.querySelector(`video.p${num}`),
 
 		projection:  document.querySelector(`.projection.p${num} .value`),
 
@@ -440,12 +441,28 @@ players.forEach((player, idx) => {
 <script>
 const API = new TetrisCompetitionAPI();
 
-
+let is_secondary = false;
 let peer = null;
 
-connection.onInit = () => {
+API.setSecondary = function() {
 	if (peer) {
-		peer.removeAllListeners();
+		peer.destroy();
+		peer = null
+	}
+}
+
+function advertiseVideoSupport() {
+	if (is_secondary) return;
+
+	connection.send(['acceptPlayersVideoFeed', {width: 320, height: 240}]);
+}
+
+connection.onOpen = connection.onResume = advertiseVideoSupport;
+
+connection.onInit = () => {
+	if (is_secondary) return;
+
+	if (peer) {
 		peer.destroy();
 		peer = null;
 	}
@@ -453,7 +470,7 @@ connection.onInit = () => {
 	peer = new Peer(connection.id);
 
 	peer.on('call', (call) => {
-		console.log(`Received media call by ${call.peer}`);
+		console.log(`Received media call from ${call.peer}`);
 
 		const player_idx = getPlayerIndexByPeerId(call.peer);
 

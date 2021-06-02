@@ -229,7 +229,11 @@ function connect() {
 	}
 }
 
+let ongoing_call = null;
+
 async function startSharingVideoFeed() {
+	stopSharingVideoFeed();
+
 	if (!peer || !view_peer_id)  return;
 
 	const stream = await navigator.mediaDevices.getUserMedia({
@@ -241,9 +245,16 @@ async function startSharingVideoFeed() {
 		}
 	});
 
-	peer.call(view_peer_id, stream);
+	ongoing_call = peer.call(view_peer_id, stream);
 
 	// DONE!
+}
+
+function stopSharingVideoFeed() {
+	if (ongoing_call) {
+		ongoing_call.close();
+		ongoing_call = null;
+	}
 }
 
 conn_host.addEventListener('change', connect);
