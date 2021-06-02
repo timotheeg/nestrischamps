@@ -50,17 +50,16 @@ function onTetris() {
 	let remaining_frames = 12;
 
 	function steps() {
-		dom.stream_bg.element.style.backgroundColor = (--remaining_frames % 2) ? 'white' : 'black';
+		const flash = --remaining_frames % 2;
 
-		if (remaining_frames <= 0) {
-			window.cancelAnimationFrame(tetris_animation_ID);
-		}
-		else {
+		dom.stream_bg.element.style.backgroundColor = flash ? 'white' : null;
+
+		if (remaining_frames > 0) {
 			window.requestAnimationFrame(steps);
 		}
 	}
 
-	const tetris_animation_ID = window.requestAnimationFrame(steps);
+	window.requestAnimationFrame(steps);
 }
 
 const user_colors = {};
