@@ -186,7 +186,7 @@ class TetrisCompetitionAPI {
 
 		try {
 			const p_diff = player.getGameRunwayScore() - otherPlayer.getGameRunwayScore();
-			const pt_diff = getTetrisDiff(player, otherPlayer, 'game_pace_score');
+			const pt_diff = getTetrisDiff(player, otherPlayer, 'game_runway_score');
 
 			player.setGameRunwayDiff(p_diff, pt_diff);
 			otherPlayer.setGameRunwayDiff(-p_diff, pt_diff);
