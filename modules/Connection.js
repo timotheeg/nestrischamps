@@ -16,7 +16,7 @@ class Connection extends EventEmitter {
 	constructor(user, socket) {
 		super();
 
-		this.id = ULID.ulid(); // use UUID?
+		this.id = `NTC${ULID.ulid()}`; // NTC prefix for NesTrisChamps
 		this.user = user;
 		this.socket = socket;
 
