@@ -247,6 +247,7 @@ class Game {
 				(err) => {
 					console.log('Unable to record game');
 					console.error(err);
+					// TODO delete replay file too
 				}
 			);
 	}
