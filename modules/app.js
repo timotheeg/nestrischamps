@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const { ExpressPeerServer } = require('peerjs-server');
 const middlewares = require('./middlewares');
 const app = express();
 

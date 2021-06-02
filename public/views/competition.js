@@ -4,6 +4,10 @@ function getPlayer(idx) {
 	return players[idx];
 }
 
+function getPlayerIndexByPeerId(peerid) {
+	return players.findIndex(player => player.peerid === peerid);
+}
+
 function getOtherPlayer(idx) {
 	return players[(idx+1) % 2];
 }
@@ -74,6 +78,14 @@ class TetrisCompetitionAPI {
 
 	setId(player_idx, id) {
 		getPlayer(player_idx).setId(id);
+	}
+
+	setPeerId(player_idx, peerid) {
+		getPlayer(player_idx).setPeerId(peerid);
+	}
+
+	setSecondaryView() {
+		// overload as needed
 	}
 
 	setLogin(player_idx, login) {
@@ -189,6 +201,10 @@ class TetrisCompetitionAPI {
 			otherPlayer.setProjectionDiff(-ep_diff, ept_diff);
 		}
 		catch(e) {}
+	}
+
+	setSecondaryView() {
+		// TODO: the player video streams will end, should clear the view
 	}
 }
 

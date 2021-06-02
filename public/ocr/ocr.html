@@ -100,6 +100,7 @@ fieldset.field pre {
 #calibration,
 #color_matching,
 #timer_control,
+#privacy,
 #ocr_results {
 	display: none;
 }
@@ -203,6 +204,15 @@ fieldset.field pre {
 		<div>Host <input type="text" id="conn_host" value="localhost"></input></div>
 		<div>Port <input type="number" id="conn_port" value="3337"></input></div>
 	</fieldset>
+
+	<fieldset id="privacy">
+		<legend>Privacy</legend>
+		<div>
+			<label for="allow_video_feed">Allow Sending Video Feed</label>
+			<input type="checkbox" id="allow_video_feed" checked /><br />
+			<video width="80" height="60" id="video_feed"></video>
+		</div>
+	</fieldset>
 </div>
 
 <div id="ocr_results">
@@ -226,6 +236,7 @@ fieldset.field pre {
 </div>
 <div id="templates"></div>
 
+<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 <script src="/views/utils.js"></script>
 <script src="/js/BinaryFrame.js"></script>
 <script src="/js/QueryString.js"></script>

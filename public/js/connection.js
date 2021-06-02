@@ -10,7 +10,10 @@ class Connection {
 			this.uri = `${wsp}://${location.host}/ws${location.pathname}${location.search}`;
 		}
 
+		this.broken = false;
+
 		this.connect        = this.connect.bind(this);
+		this._handleOpen    = this._handleOpen.bind(this);
 		this._handleError   = this._handleError.bind(this);
 		this._handleClose   = this._handleClose.bind(this);
 		this._handleMessage = this._handleMessage.bind(this);
@@ -18,13 +21,25 @@ class Connection {
 		this.connect();
 	}
 
+	onOpen() {}
+	onInit() {}
 	onBreak() {}
 	onResume() {}
 	onKicked() {}
 	onMessage() {}
 
+	_handleOpen() {
+		if (this.broken) {
+			this.broken = false;
+			this.onResume();
+		}
+		else {
+			this.onOpen();
+		}
+	}
+
 	_handleError(err) {
-		console.error(err);
+		// console.error(err);
 	}
 
 	_handleMessage(event) {
@@ -34,6 +49,11 @@ class Connection {
 			if (Array.isArray(data)) {
 				// Connection-level command parsing
 				switch(data[0]) {
+					case '_id': {
+						this.id = data[1];
+						this.onInit();
+						return;
+					}
 					case '_kick': {
 						const reason = data[1];
 						console.log('Socket kicked', reason);
@@ -57,12 +77,14 @@ class Connection {
 
 	_handleClose() {
 		this._clearSocket();
+		this.broken = true;
 		this.onBreak();
 		setTimeout(this.connect, 5000); // TODO: exponential backoff
 	}
 
 	_clearSocket() {
 		try {
+			this.socket.removeEventListener('open', this._handleOpen);
 			this.socket.removeEventListener('error', this._handleError);
 			this.socket.removeEventListener('close', this._handleClose);
 			this.socket.removeEventListener('message', this._handleMessage);
@@ -81,6 +103,7 @@ class Connection {
 
 		this.socket.binaryType = "arraybuffer";
 
+		this.socket.addEventListener('open', this._handleOpen);
 		this.socket.addEventListener('error', this._handleError);
 		this.socket.addEventListener('close', this._handleClose);
 		this.socket.addEventListener('message', this._handleMessage);

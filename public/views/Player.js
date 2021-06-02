@@ -115,6 +115,7 @@ const DEFAULT_DOM_REFS = {
 	field:       document.createElement('div'),
 	drought:     DOM_DEV_NULL,
 	burn:        DOM_DEV_NULL,
+	video:       DOM_DEV_NULL,
 };
 
 const DEFAULT_OPTIONS = {
@@ -368,6 +369,14 @@ class Player {
 
 	setId(id) {
 		this.id = id;
+	}
+
+	setPeerId(peerid) {
+		this.peerid = peerid;
+
+		if (!peerid) {
+			this.dom.video.srcObject = null
+		}
 	}
 
 	setLogin(login) {

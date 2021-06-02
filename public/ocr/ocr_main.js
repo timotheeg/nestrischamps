@@ -162,6 +162,9 @@ function resetNotice() {
 	notice.style.display = 'none';
 }
 
+let peer = null;
+let view_peer_id = null;
+
 function connect() {
 	if (connection) {
 		connection.close();
@@ -176,6 +179,21 @@ function connect() {
 			switch(method) {
 				case 'message': {
 					speak(args[0]);
+					break;
+				}
+				case 'setViewPeerId': {
+					view_peer_id = args[0];
+					break;
+				}
+				case 'makePlayer': {
+					// producer is player, share video
+					startSharingVideoFeed();
+					break;
+				}
+				case 'dropPlayer': {
+					// producer is no longer player
+					stopSharingVideoFeed();
+					break;
 				}
 			}
 		}
@@ -199,6 +217,44 @@ function connect() {
 	}
 
 	connection.onResume = resetNotice;
+
+	connection.onInit = () => {
+		if (peer) {
+			peer.removeAllListeners();
+			peer.destroy();
+			peer = null;
+		}
+
+		peer = new Peer(connection.id);
+	}
+}
+
+let ongoing_call = null;
+
+async function startSharingVideoFeed() {
+	stopSharingVideoFeed();
+
+	if (!peer || !view_peer_id)  return;
+
+	const stream = await navigator.mediaDevices.getUserMedia({
+		audio: false,
+		video: {
+			width: { ideal: 320 },
+			height: { ideal: 240 },
+			frameRate: { ideal: 15 } // players hardly move... no need high fps?
+		}
+	});
+
+	ongoing_call = peer.call(view_peer_id, stream);
+
+	// DONE!
+}
+
+function stopSharingVideoFeed() {
+	if (ongoing_call) {
+		ongoing_call.close();
+		ongoing_call = null;
+	}
 }
 
 conn_host.addEventListener('change', connect);
