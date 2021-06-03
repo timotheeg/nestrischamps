@@ -545,21 +545,27 @@ class Player {
 			if (lines === null || data.score === null) {
 				return;
 			}
+			
+			const cleared = lines - this.lines;
 
-			// weird readings... wait one more frame
-			if (data.score < this.score || lines < this.lines) {
-				return;
-			}
+			// handles issues where cleared lines are below 0 for any reason
+			const line_score = cleared > 0 && cleared <= 4 ? SCORE_BASES[cleared] * (this.level + 1) : 0;
 
-			const score = data.score;
+			if (data.score == 999999 && this.score + line_score >= 999999) {
+                this.score += line_score;
+            }
+            // weird readings... wait one more frame
+            else if (data.score < this.score || lines < this.lines) {
+                return;
+            } else {
+                const score = data.score;
+                this.score = score;
+            }
 
-			this.score = score;
 			this.dom.score.textContent = this.options.format_score(this.score);
 			this.pending_score = false;
 
 			if (lines > this.lines) {
-				const cleared = lines - this.lines;
-
 				if (cleared === 4) {
 					this.lines_trt += 4;
 
@@ -608,7 +614,8 @@ class Player {
 			this.dom.projection.textContent = this.options.format_score(this.projection, 7);
 		}
 		else if (data.score != null) {
-			if (data.score != this.score) {
+			// added extra checks here due to data.score always being different to this.score after maxout
+			if ((data.score != this.score && data.score != 999999) || (data.score == 999999 && lines != this.lines)) {
 				this.pending_score = true;
 			}
 		}
