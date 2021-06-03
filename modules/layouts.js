@@ -36,6 +36,10 @@ module.exports = {
 		file: 'champions',
 		type: '1p',
 	},
+	tomellosoulman: {
+		file: 'tomellosoulman',
+		type: '1p',
+	},
 
 	// multi player
 	ctwc: {
