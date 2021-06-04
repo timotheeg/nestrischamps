@@ -554,22 +554,25 @@ class Player {
 			if (lines === null || data.score === null) {
 				return;
 			}
-			
+
+			if (lines < this.lines) {
+				// weird reading, wait one more frame
+				return;
+			}
+
 			const cleared = lines - this.lines;
+			const line_score = (SCORE_BASES[cleared] || 0) * (this.level + 1);
 
-			// handles issues where cleared lines are below 0 for any reason
-			const line_score = cleared > 0 && cleared <= 4 ? SCORE_BASES[cleared] * (this.level + 1) : 0;
-
-			if (data.score == 999999 && this.score + line_score >= 999999) {
-                this.score += line_score;
-            }
-            // weird readings... wait one more frame
-            else if (data.score < this.score || lines < this.lines) {
-                return;
-            } else {
-                const score = data.score;
-                this.score = score;
-            }
+			if (data.score === 999999 && this.score + line_score >= 999999) {
+				this.score += line_score;
+			}
+			else if (data.score < this.score) {
+				// weird readings... wait one more frame
+				return;
+			}
+			else {
+				this.score = data.score;
+			}
 
 			this.dom.score.textContent = this.options.format_score(this.score);
 			this.pending_score = false;
