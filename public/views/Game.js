@@ -198,11 +198,16 @@ class Game {
 			actual_score = event.score - this.data.score.current;
 
 		// update total lines and points
-		this.data.lines.count = event.lines;
+		// checks maxed out at 999999 and updates score accordingly
+		if (event.score == 999999 && this.data.score.current + lines_score >= 999999) {
+			event.score = this.data.score.current + lines_score;
+		}
 		this.data.points.count = event.score;
 
 		// update drop score
-		this.data.points.drops.count += actual_score - lines_score;
+		// drop score will be negative if max out due to actual score being 999,999 and current score being > 1,000,000, resulting in a negative.
+		this.data.points.drops.count += Math.max(0, actual_score - lines_score);
+		this.data.lines.count = event.lines;
 
 		if (num_lines) {
 			if (num_lines > 0 && num_lines <= 4) {
