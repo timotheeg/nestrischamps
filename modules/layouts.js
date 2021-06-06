@@ -62,4 +62,8 @@ module.exports = {
 		file: 'competition_ctm_video',
 		type: 'mp',
 	},
+	ctm_video2: {
+		file: 'competition_ctm_video2',
+		type: 'mp',
+	},
 };
