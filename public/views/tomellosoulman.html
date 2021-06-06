@@ -21,20 +21,33 @@
 
 #piece_stats {
 	top: 358px;
-	width: 122px;
+	width: 148px;
 	left: 35px;
 }
 
-#piece_stats .content .headers th{
+#piece_stats .content .headers th {
 	padding: 6px;
 }
 
-#piece_stats .content{
+#piece_stats .content .headers th.drought {
+	padding: 6px 0;
+}
+
+#piece_stats .content {
 	font-size: 12px;
 }
 
-#piece_stats .drought {
-	display: none;
+#piece_stats .content .count {
+	padding-left: 6px;
+}
+
+#piece_stats .content .percent {
+	padding-right: 0;
+	padding-left: 6px;
+}
+
+#piece_stats .content .drought {
+	padding-left: 2px;
 }
 
 #dnshow {
@@ -81,10 +94,10 @@
 
 #droughts {
 	font-size: 12px;
-	width: 132px;
+	width: 191px;
 	height: 76px;
 	top: 425px;
-	left: 223px;
+	left: 208px;
 	padding: 12px 10px;
 }
 
@@ -94,8 +107,8 @@
 
 #runway {
 	top: 358px;
-	left: 179px;
-	width: 216px;
+	left: 208px;
+	width: 187px;
 }
 
 #das {
@@ -198,12 +211,6 @@
 #stream_bg {
     background-color: transparent;
 }
-
-#flash {
-	width:  100%;
-	height:  100%;
-}
-
 
 </style>
 </head>
@@ -321,7 +328,7 @@
 						</tr>
 						<tr>
 							<td>00</td>
-							<td>00000</td>
+							<td>0000000</td>
 							<td>00%</td>
 						</tr>
 					<tbody>
@@ -339,7 +346,7 @@
 					<tbody>
 						<tr>
 							<td>00</td>
-							<td>0000</td>
+							<td>0000000</td>
 							<td>00%</td>
 						</tr>
 						<tr>
@@ -444,17 +451,17 @@
 	<table class="content">
 		<tr class="hgauge current">
 			<th>Cur</th>
-			<td class="gauge"><canvas width="68" height="12" /></td>
+			<td class="gauge"><canvas width="125" height="12" /></td>
 			<td class="value">00</td>
 		</tr>
 		<tr class="hgauge last">
 			<th>Last</th>
-			<td class="gauge"><canvas width="68" height="12" /></td>
+			<td class="gauge"><canvas width="125" height="12" /></td>
 			<td class="value">00</td>
 		</tr>
 		<tr class="hgauge max">
 			<th>Max</th>
-			<td class="gauge"><canvas width="68" height="12" /></td>
+			<td class="gauge"><canvas width="125" height="12" /></td>
 			<td class="value">00</td>
 		</tr>
 	</table>
@@ -633,6 +640,7 @@ flash_div.classList.add('flash');
 Object.assign(flash_div.style, {
 	width:  '100%',
 	height: '100%',
+	transform: 'scale(1)' // so it gets drawn ABOVE other transformed elements
 });
 
 stream_bg.prepend(flash_div);
