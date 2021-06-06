@@ -12,14 +12,16 @@ if (QueryString.bg === '2' || QueryString.bg === '3') {
 	;
 	const bg = document.createElement('div');
 
+	bg.classList.add('bg');
+
 	Object.assign(bg.style, {
-	    position:   'absolute',
-	    width:      '140%',
-	    height:     '140%',
-	    top:        '-20%',
-	    left:       '-20%',
-	    background: `url(/views/${bg_file}) 0 0 repeat`,
-	    transform:  'rotate(-11deg)',
+		position:   'absolute',
+		width:      '140%',
+		height:     '140%',
+		top:        '-20%',
+		left:       '-20%',
+		background: `url(/views/${bg_file}) 0 0 repeat`,
+		transform:  'rotate(-11deg)',
 	});
 
 	let pos = 0;
@@ -60,6 +62,8 @@ while(num_bags--) {
 
 const bg = document.createElement('div');
 
+bg.classList.add('bg');
+
 for (let x = grid_x; x--; ) {
 	for (let y = grid_y; y--; ) {
 		const piece = pieces.pop();
@@ -75,7 +79,6 @@ for (let x = grid_x; x--; ) {
 			top:             `${pos_y}px`,
 			position:        'absolute',
 			transform:       `rotate(${90 * Math.floor(Math.random() * 4)}deg)`,
-			transformOrigin: '50% 50%',
 		});
 
 		bg.appendChild(img);
