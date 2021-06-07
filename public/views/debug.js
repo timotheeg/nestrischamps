@@ -1,46 +1,46 @@
 let timeline_idx = 0;
 
 function splitField(field) {
-	let rows = [], idx=0;
+	let rows = [],
+		idx = 0;
 
 	do {
 		const row = field.substr(idx, 10);
 		rows.push(row);
-		idx += 10
-	}
-	while(idx<200);
+		idx += 10;
+	} while (idx < 200);
 
 	return rows.join('\n');
 }
 
-function oneFrame(debug=false) {
-	const
-		frame1_copy = {...frames[timeline_idx]},
+function oneFrame(debug = false) {
+	const frame1_copy = { ...frames[timeline_idx] },
 		field1 = frame1_copy.field,
-
-		frame2_copy = {...frames[timeline_idx+1]},
+		frame2_copy = { ...frames[timeline_idx + 1] },
 		field2 = frame2_copy.field;
 
 	delete frame1_copy.field;
 	delete frame2_copy.field;
 
-	const frame1_txt = ''
-		+ timeline_idx
-		+ ' '
-		+ field1.replace(/0+/g, '').length
-		+ '\n'
-		+ JSON.stringify(frame1_copy)
-		+ ' '
-		+ splitField(field1);
+	const frame1_txt =
+		'' +
+		timeline_idx +
+		' ' +
+		field1.replace(/0+/g, '').length +
+		'\n' +
+		JSON.stringify(frame1_copy) +
+		' ' +
+		splitField(field1);
 
-	const frame2_txt = ''
-		+ (timeline_idx + 1)
-		+ ' '
-		+ field2.replace(/0+/g, '').length
-		+ '\n'
-		+ JSON.stringify(frame2_copy)
-		+ ' '
-		+ splitField(field2);
+	const frame2_txt =
+		'' +
+		(timeline_idx + 1) +
+		' ' +
+		field2.replace(/0+/g, '').length +
+		'\n' +
+		JSON.stringify(frame2_copy) +
+		' ' +
+		splitField(field2);
 
 	document.querySelector('#cur_frame').value = frame1_txt;
 	document.querySelector('#next_frame').value = frame2_txt;
@@ -48,7 +48,7 @@ function oneFrame(debug=false) {
 	// update frame to be new format compatible
 	const frame = frames[timeline_idx++];
 
-	frame.field = frame.field.split('').map(v => parseInt(v, 10))
+	frame.field = frame.field.split('').map((v) => parseInt(v, 10));
 	frame.lines = parseInt(frame.lines, 10);
 	frame.level = parseInt(frame.level, 10);
 	frame.score = parseInt(frame.score, 10);
@@ -64,11 +64,11 @@ function oneFrame(debug=false) {
 }
 
 function createElementFromHTML(htmlString) {
-  var div = document.createElement('div');
-  div.innerHTML = htmlString.trim();
+	var div = document.createElement('div');
+	div.innerHTML = htmlString.trim();
 
-  // Change this to div.childNodes to support multiple top-level nodes
-  return div.firstChild;
+	// Change this to div.childNodes to support multiple top-level nodes
+	return div.firstChild;
 }
 
 (function setupDebugUI() {
@@ -92,25 +92,26 @@ function createElementFromHTML(htmlString) {
 		'<div id="skip"><input class="to"></body><button class="btn">Skip to</button></div>',
 	]
 		.reverse()
-		.forEach(element_string => {
+		.forEach((element_string) => {
 			body.prepend(createElementFromHTML(element_string));
 		});
-
 })();
 
 document.querySelector('#goto_next_frame').addEventListener('click', () => {
 	oneFrame();
 });
 
-document.querySelector('#goto_next_frame_debug').addEventListener('click', () => {
-	oneFrame(true);
-});
+document
+	.querySelector('#goto_next_frame_debug')
+	.addEventListener('click', () => {
+		oneFrame(true);
+	});
 
-let play_ID
+let play_ID;
 
 function play() {
 	function playFrame() {
-		oneFrame()
+		oneFrame();
 		play_ID = window.requestAnimationFrame(playFrame);
 	}
 
@@ -125,8 +126,7 @@ document.querySelector('#play').addEventListener('click', play);
 document.querySelector('#stop').addEventListener('click', stop);
 
 document.querySelector('#skip .btn').addEventListener('click', () => {
-	const
-		input = document.querySelector('#skip .to').value,
+	const input = document.querySelector('#skip .to').value,
 		to = parseInt(input, 10);
 
 	if (isNaN(to)) {

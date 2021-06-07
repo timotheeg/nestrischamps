@@ -19,14 +19,14 @@ class UserDAO {
 	}
 
 	addUser(user) {
-		this.users_by_id    .set(user.id,     user);
-		this.users_by_login .set(user.login,  user);
+		this.users_by_id.set(user.id, user);
+		this.users_by_login.set(user.login, user);
 		this.users_by_secret.set(user.secret, user);
 	}
 
 	removeUser(user) {
-		this.users_by_id    .delete(user.id);
-		this.users_by_login .delete(user.login);
+		this.users_by_id.delete(user.id);
+		this.users_by_login.delete(user.login);
 		this.users_by_secret.delete(user.secret);
 	}
 
@@ -60,10 +60,7 @@ class UserDAO {
 	async deleteUser(user) {
 		this.removeUser(user);
 
-		await dbPool.query(
-			'DELETE FROM twitch_users WHERE id=$1;',
-			[ user.id ]
-		);
+		await dbPool.query('DELETE FROM twitch_users WHERE id=$1;', [user.id]);
 	}
 
 	async updateSecret(user, new_secret) {
@@ -77,15 +74,14 @@ class UserDAO {
 				set secret=$1
 				WHERE id=$2
 				`,
-				[ new_secret, user.id ]
+				[new_secret, user.id]
 			);
 
 			// TODO: add greater processing safety here
 			this.users_by_secret.delete(user.secret);
 			user.secret = new_secret;
 			this.users_by_secret.set(user.secret, user);
-		}
-		catch(err) {
+		} catch (err) {
 			console.log(`Unable to update secret for user ${user.login}`);
 		}
 
@@ -98,7 +94,7 @@ class UserDAO {
 		if (!user || force_fetch) {
 			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE id=$1',
-				[ id ]
+				[id]
 			);
 
 			if (result.rows.length) {
@@ -115,7 +111,7 @@ class UserDAO {
 		if (!user) {
 			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE login=$1',
-				[ login ]
+				[login]
 			);
 
 			if (result.rows.length) {
@@ -132,7 +128,7 @@ class UserDAO {
 		if (!user) {
 			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE secret=$1',
-				[ secret ]
+				[secret]
 			);
 
 			if (result.rows.length) {
@@ -145,4 +141,3 @@ class UserDAO {
 }
 
 module.exports = new UserDAO();
-

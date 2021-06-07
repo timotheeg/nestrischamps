@@ -56,12 +56,14 @@ module.exports = function init(server, wss) {
 
 			request.tetris.view = {
 				single_player: layout.type == '1p',
-				layout_id:     m[1],
-				user_secret:   m[2],
+				layout_id: m[1],
+				user_secret: m[2],
 			};
 
 			// connection from the non-session-ed views (from OBS)
-			const user = await UserDAO.getUserBySecret(request.tetris.view.user_secret);
+			const user = await UserDAO.getUserBySecret(
+				request.tetris.view.user_secret
+			);
 
 			if (!user) {
 				socket.write('HTTP/1.1 404 User Not Found\r\n\r\n'); // TODO: can this redirect?
@@ -69,23 +71,25 @@ module.exports = function init(server, wss) {
 				return;
 			}
 
-			console.log(`WS: Retrieved user ${user.login} from view secret`, request.tetris.view);
+			console.log(
+				`WS: Retrieved user ${user.login} from view secret`,
+				request.tetris.view
+			);
 
 			if (!request.session) {
 				request.session = {};
 			}
 
 			request.session.user = {
-				id:     user.id,
-				login:  user.login,
+				id: user.id,
+				login: user.login,
 				secret: user.secret,
 			};
 
 			wss.handleUpgrade(request, socket, head, function (ws) {
 				wss.emit('connection', ws, request);
 			});
-		}
-		else {
+		} else {
 			// all other connections must be within a session!
 			// i.e. producers and admin connections
 
@@ -99,7 +103,7 @@ module.exports = function init(server, wss) {
 
 				let m;
 
-				if (m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
+				if ((m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))) {
 					const target_user = await UserDAO.getUserByLogin(m[1]);
 
 					if (!target_user) {
@@ -110,7 +114,9 @@ module.exports = function init(server, wss) {
 					}
 				}
 
-				console.log(`WS: Retrieved user ${request.session.user.login} from session`);
+				console.log(
+					`WS: Retrieved user ${request.session.user.login} from session`
+				);
 
 				wss.handleUpgrade(request, socket, head, function (ws) {
 					console.log('WS: handleUpgrade complete');
@@ -126,17 +132,32 @@ module.exports = function init(server, wss) {
 			const connection = new Connection(user, ws);
 
 			if (request.game1_id) {
-				new Replay(connection, 0, parseInt(request.game1_id, 10), request.speed);
+				new Replay(
+					connection,
+					0,
+					parseInt(request.game1_id, 10),
+					request.speed
+				);
 			}
 
 			if (request.game2_id) {
-				new Replay(connection, 1, parseInt(request.game2_id, 10), request.speed);
+				new Replay(
+					connection,
+					1,
+					parseInt(request.game2_id, 10),
+					request.speed
+				);
 			}
 
 			return;
 		}
 
-		console.log('WS: Connection!', request.url, request.session.user.id, request.session.user.login);
+		console.log(
+			'WS: Connection!',
+			request.url,
+			request.session.user.id,
+			request.session.user.login
+		);
 
 		const user = await UserDAO.getUserById(request.session.user.id);
 
@@ -152,26 +173,28 @@ module.exports = function init(server, wss) {
 		user.addConnection(connection);
 
 		if (request.is_secret_view) {
-			console.log('WS: Adding View', user.login, 'single?', request.tetris.view.single_player);
+			console.log(
+				'WS: Adding View',
+				user.login,
+				'single?',
+				request.tetris.view.single_player
+			);
 			const room = request.tetris.view.single_player
 				? user.getPrivateRoom()
-				: user.getHostRoom()
-			;
-
+				: user.getHostRoom();
 			room.addView(connection);
-		}
-		else if(pathname.startsWith('/ws/room/admin')) {
+		} else if (pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getHostRoom().setAdmin(connection);
-		}
-		else if(pathname.startsWith('/ws/room/producer')) {
+		} else if (pathname.startsWith('/ws/room/producer')) {
 			console.log(`PrivateRoom: ${user.login}: Producer connected`);
 			user.setProducerConnection(connection);
-		}
-		else if(m = pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//)) {
+		} else if ((m = pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))) {
 			const target_user = await UserDAO.getUserByLogin(m[1]);
 
-			console.log(`Retrieved target user (from ${m[1]}) ${target_user.id} ${target_user.login}`);
+			console.log(
+				`Retrieved target user (from ${m[1]}) ${target_user.id} ${target_user.login}`
+			);
 
 			if (!target_user) {
 				// TODO: do at Page or Upgrade level, not at websocket level
@@ -179,26 +202,29 @@ module.exports = function init(server, wss) {
 				// Page level *could* cause race conditions...
 				// Both Page level and Upgrade level could check for target User and throw 404s
 				connection.kick('invalid_target');
-			}
-			else {
+			} else {
 				const connection_type = pathname.split('/')[5];
 
 				console.log(`Switching on ${connection_type}`);
 
-				switch(connection_type) {
+				switch (connection_type) {
 					case 'admin': {
 						console.log(`MatchRoom: ${target_user.login}: Admin connected`);
 						target_user.getHostRoom().setAdmin(connection);
 						break;
 					}
 					case 'producer': {
-						console.log(`MatchRoom: ${target_user.login}: Producer ${user.login} connected`);
+						console.log(
+							`MatchRoom: ${target_user.login}: Producer ${user.login} connected`
+						);
 						user.setProducerConnection(connection);
 						user.joinMatchRoom(target_user);
 						break;
 					}
 					case 'view': {
-						console.log(`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`);
+						console.log(
+							`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`
+						);
 						// TODO: this view should not take over video feed!
 						target_user.getHostRoom().addView(connection, false);
 						break;
@@ -209,8 +235,7 @@ module.exports = function init(server, wss) {
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			console.log('Unrecognized connection');
 			connection.kick('invalid_url');
 		}

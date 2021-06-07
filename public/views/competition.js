@@ -5,11 +5,11 @@ function getPlayer(idx) {
 }
 
 function getPlayerIndexByPeerId(peerid) {
-	return players.findIndex(player => player.peerid === peerid);
+	return players.findIndex((player) => player.peerid === peerid);
 }
 
 function getOtherPlayer(idx) {
-	return players[(idx+1) % 2];
+	return players[(idx + 1) % 2];
 }
 
 function tetris_value(level) {
@@ -26,23 +26,23 @@ function getTetrisDiff(p1, p2, score_field = 'score') {
 		transition = TRANSITIONS[p2.start_level];
 		level = p2.level;
 		lines = p2.lines;
-	}
-	else if (p2_score > p1_score) {
+	} else if (p2_score > p1_score) {
 		transition = TRANSITIONS[p1.start_level];
 		level = p1.level;
 		lines = p1.lines;
-	}
-	else {
+	} else {
 		return 0;
 	}
 
-	let tetrises = 0
-	let diff = Math.abs(p1_score - p2_score)
+	let tetrises = 0;
+	let diff = Math.abs(p1_score - p2_score);
 
 	// TODO: Make this work for any start_level
 	while (diff > 0) {
-		if (lines >= (transition - 4)) { // below transition, level doesn't change every 10 lines
-			if (lines % 10 >= 6) { // the tetris is counted at end level, not start level
+		if (lines >= transition - 4) {
+			// below transition, level doesn't change every 10 lines
+			if (lines % 10 >= 6) {
+				// the tetris is counted at end level, not start level
 				level += 1;
 			}
 		}
@@ -73,7 +73,7 @@ class TetrisCompetitionAPI {
 		this._repaintVictories(0);
 		this._repaintVictories(1);
 
-		players.forEach(player => player.clearField());
+		players.forEach((player) => player.clearField());
 	}
 
 	setId(player_idx, id) {
@@ -140,7 +140,7 @@ class TetrisCompetitionAPI {
 
 	_repaintVictories(player_idx) {
 		const player = getPlayer(player_idx);
-		const victories = this.victories[player_idx]
+		const victories = this.victories[player_idx];
 
 		const hearts = player.dom.hearts;
 
@@ -166,10 +166,9 @@ class TetrisCompetitionAPI {
 	}
 
 	frame(player_idx, data) {
-		const
-			player      = getPlayer(player_idx),
+		const player = getPlayer(player_idx),
 			otherPlayer = getOtherPlayer(player_idx),
-			otherScore  = otherPlayer.getScore();
+			otherScore = otherPlayer.getScore();
 
 		player.setFrame(data);
 
@@ -185,13 +184,13 @@ class TetrisCompetitionAPI {
 		otherPlayer.setDiff(-diff, t_diff);
 
 		try {
-			const p_diff = player.getGameRunwayScore() - otherPlayer.getGameRunwayScore();
+			const p_diff =
+				player.getGameRunwayScore() - otherPlayer.getGameRunwayScore();
 			const pt_diff = getTetrisDiff(player, otherPlayer, 'game_runway_score');
 
 			player.setGameRunwayDiff(p_diff, pt_diff);
 			otherPlayer.setGameRunwayDiff(-p_diff, pt_diff);
-		}
-		catch(e) {}
+		} catch (e) {}
 
 		try {
 			const ep_diff = player.getProjection() - otherPlayer.getProjection();
@@ -199,8 +198,7 @@ class TetrisCompetitionAPI {
 
 			player.setProjectionDiff(ep_diff, ept_diff);
 			otherPlayer.setProjectionDiff(-ep_diff, ept_diff);
-		}
-		catch(e) {}
+		} catch (e) {}
 	}
 
 	setSecondaryView() {
@@ -210,13 +208,12 @@ class TetrisCompetitionAPI {
 
 const connection = new Connection();
 
-connection.onMessage = function(frame) {
-	try{
+connection.onMessage = function (frame) {
+	try {
 		const [method, ...args] = frame;
 
 		API[method](...args);
-	}
-	catch(e) {
+	} catch (e) {
 		// socket.close();
 		console.error(e);
 		console.log(frame);

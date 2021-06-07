@@ -22,11 +22,11 @@ class Room extends EventEmitter {
 	}
 
 	sendToViews(message) {
-		this.views.forEach(connection => connection.send(message));
+		this.views.forEach((connection) => connection.send(message));
 	}
 
 	close(reason) {
-		this.views.forEach(connection => connection.kick(reason));
+		this.views.forEach((connection) => connection.kick(reason));
 		this.views.clear();
 	}
 

@@ -11,22 +11,21 @@ module.exports = {
 		resave: false,
 		saveUninitialized: true,
 		cookie: {
-			secure: !!process.env.IS_PUBLIC_SERVER
+			secure: !!process.env.IS_PUBLIC_SERVER,
 		},
 		genid: uuidv4,
 		store: new pgSession({
-			pool:      dbPool,
+			pool: dbPool,
 			tableName: 'sessions',
 		}),
-		name: 'nsid'
+		name: 'nsid',
 	}),
 
 	assertSession(req, res, next) {
 		if (!req.session || !req.session.user) {
 			req.session.auth_success_redirect = req.originalUrl;
 			res.redirect('/auth');
-		}
-		else {
+		} else {
 			next();
 		}
 	},
@@ -38,8 +37,7 @@ module.exports = {
 			if (!user.hasTwitchToken()) {
 				// assumes session has token!
 				user.setTwitchToken(req.session.token);
-			}
-			else {
+			} else {
 				// verify if the user token has been refreshed and if the session should be updated accordingly
 				const utoken = user.token;
 				const stoken = req.session.token;
@@ -49,11 +47,10 @@ module.exports = {
 					req.session.token = utoken;
 				}
 			}
-		}
-		else if (user.hasTwitchToken()) {
+		} else if (user.hasTwitchToken()) {
 			req.session.token = user.token;
 		}
 
 		if (next) next();
-	}
+	},
 };

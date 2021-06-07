@@ -4,8 +4,8 @@ if (process.env.IS_PUBLIC_SERVER) {
 	const pool = new Pool({
 		connectionString: process.env.DATABASE_URL,
 		ssl: {
-			rejectUnauthorized: false
-		}
+			rejectUnauthorized: false,
+		},
 	});
 
 	// the pool will emit an error on behalf of any idle clients
@@ -15,8 +15,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 	});
 
 	module.exports = pool;
-}
-else {
+} else {
 	/*
 	// Fake Pool for local access
 	// TODO: make a sqlite version
@@ -43,7 +42,7 @@ else {
 	/**/
 
 	const pool = new Pool({
-		connectionString: process.env.DATABASE_URL
+		connectionString: process.env.DATABASE_URL,
 	});
 
 	// the pool will emit an error on behalf of any idle clients
@@ -53,5 +52,4 @@ else {
 	});
 
 	module.exports = pool;
-
 }

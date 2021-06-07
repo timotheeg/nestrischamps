@@ -1,41 +1,41 @@
 {
-  "name": "NESTrisChamps",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node server.js",
-    "env-linux": "export $(cat .env | xargs) && env",
-    "start-linux": "export $(cat .env | xargs) && npm start",
-    "env-windows": "(for /F \"tokens=*\" %i in (.env) do set %i)",
-    "start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "tetris",
-    "statistics"
-  ],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.18.0",
-    "@aws-sdk/lib-storage": "^3.18.0",
-    "connect-pg-simple": "^6.2.1",
-    "ejs": "^3.1.6",
-    "express": "^4.17.1",
-    "express-session": "^1.17.2",
-    "got": "^11.8.2",
-    "lodash": "^4.17.21",
-    "memorystore": "^1.6.4",
-    "pg": "^8.6.0",
-    "twitch": "^4.5.5",
-    "twitch-auth": "^4.5.5",
-    "twitch-chat-client": "^4.5.5",
-    "ulid": "^2.3.0",
-    "uuid": "^8.3.2",
-    "ws": "^7.4.6"
-  },
-  "engines": {
-    "node": "14.x"
-  }
+	"name": "NESTrisChamps",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node server.js",
+		"env-linux": "export $(cat .env | xargs) && env",
+		"start-linux": "export $(cat .env | xargs) && npm start",
+		"env-windows": "(for /F \"tokens=*\" %i in (.env) do set %i)",
+		"start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"tetris",
+		"statistics"
+	],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.18.0",
+		"@aws-sdk/lib-storage": "^3.18.0",
+		"connect-pg-simple": "^6.2.1",
+		"ejs": "^3.1.6",
+		"express": "^4.17.1",
+		"express-session": "^1.17.2",
+		"got": "^11.8.2",
+		"lodash": "^4.17.21",
+		"memorystore": "^1.6.4",
+		"pg": "^8.6.0",
+		"twitch": "^4.5.5",
+		"twitch-auth": "^4.5.5",
+		"twitch-chat-client": "^4.5.5",
+		"ulid": "^2.3.0",
+		"uuid": "^8.3.2",
+		"ws": "^7.4.6"
+	},
+	"engines": {
+		"node": "14.x"
+	}
 }

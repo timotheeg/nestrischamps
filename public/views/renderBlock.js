@@ -1,4 +1,12 @@
-function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_black_border) {
+function renderBlock(
+	level,
+	block_index,
+	pixel_size,
+	ctx,
+	pos_x,
+	pos_y,
+	print_black_border
+) {
 	let color;
 
 	if (block_index < 1) {
@@ -13,12 +21,7 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_bl
 			color = LEVEL_COLORS[level % 10][0];
 
 			ctx.fillStyle = color;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				pixel_size * 7,
-				pixel_size * 7
-			);
+			ctx.fillRect(pos_x, pos_y, pixel_size * 7, pixel_size * 7);
 
 			/*
 			// Drawing just the needed border
@@ -49,12 +52,7 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_bl
 			/**/
 
 			ctx.fillStyle = 'white';
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				pixel_size,
-				pixel_size
-			);
+			ctx.fillRect(pos_x, pos_y, pixel_size, pixel_size);
 
 			ctx.fillRect(
 				pos_x + pixel_size,
@@ -70,20 +68,10 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_bl
 			color = LEVEL_COLORS[level % 10][block_index - 2];
 
 			ctx.fillStyle = color;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				pixel_size * 7,
-				pixel_size * 7
-			);
+			ctx.fillRect(pos_x, pos_y, pixel_size * 7, pixel_size * 7);
 
 			ctx.fillStyle = 'white';
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				pixel_size,
-				pixel_size
-			);
+			ctx.fillRect(pos_x, pos_y, pixel_size, pixel_size);
 			ctx.fillRect(
 				pos_x + pixel_size,
 				pos_y + pixel_size,
@@ -104,24 +92,13 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_bl
 		case 6:
 			if (block_index === 4) {
 				color = '#FFFFFF';
-			}
-			else {
+			} else {
 				color = LEVEL_COLORS[level % 10][block_index - 5];
 			}
 
 			ctx.fillStyle = `${color}90`;
-			ctx.fillRect(
-				pos_x,
-				pos_y,
-				pixel_size * 7,
-				pixel_size
-			);
-			ctx.fillRect(
-				pos_x,
-				pos_y + pixel_size,
-				pixel_size,
-				pixel_size * 6
-			);
+			ctx.fillRect(pos_x, pos_y, pixel_size * 7, pixel_size);
+			ctx.fillRect(pos_x, pos_y + pixel_size, pixel_size, pixel_size * 6);
 			ctx.fillRect(
 				pos_x + pixel_size * 6,
 				pos_y + pixel_size,
@@ -130,7 +107,7 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_bl
 			);
 			ctx.fillRect(
 				pos_x + pixel_size,
-				pos_y + pixel_size * 6	,
+				pos_y + pixel_size * 6,
 				pixel_size * 5,
 				pixel_size
 			);
@@ -140,18 +117,7 @@ function renderBlock(level, block_index, pixel_size, ctx, pos_x, pos_y, print_bl
 
 	if (print_black_border) {
 		ctx.fillStyle = 'black';
-		ctx.fillRect(
-			pos_x,
-			pos_y + pixel_size * 7,
-			pixel_size * 7,
-			pixel_size
-		);
-		ctx.fillRect(
-			pos_x + pixel_size * 7,
-			pos_y,
-			pixel_size,
-			pixel_size * 8
-		);
+		ctx.fillRect(pos_x, pos_y + pixel_size * 7, pixel_size * 7, pixel_size);
+		ctx.fillRect(pos_x + pixel_size * 7, pos_y, pixel_size, pixel_size * 8);
 	}
 }
-

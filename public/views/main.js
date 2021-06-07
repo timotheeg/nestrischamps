@@ -1,8 +1,10 @@
 const dom = new DomRefs(document);
 
 // initial setup for colors based con constants.js
-for (const {name, color} of Object.values(LINES)) {
-	[...document.querySelectorAll(`tr.${name} th`)].forEach(node => node.style.color = color);
+for (const { name, color } of Object.values(LINES)) {
+	[...document.querySelectorAll(`tr.${name} th`)].forEach(
+		(node) => (node.style.color = color)
+	);
 }
 
 if (dom.das) {
@@ -24,27 +26,25 @@ for (const [type, color] of Object.entries(BOARD_COLORS)) {
 }
 
 const API = {
-	message:     onMessage,
+	message: onMessage,
 	player_data: renderPastGamesAndPBs,
-	frame:       (idx, frame) => onFrame(frame),
+	frame: (idx, frame) => onFrame(frame),
 };
 
 const chat_and_pbs_conn = new Connection();
 
-chat_and_pbs_conn.onMessage = function(frame) {
-	try{
+chat_and_pbs_conn.onMessage = function (frame) {
+	try {
 		let [method, ...args] = frame;
 
 		API[method](...args);
-	}
-	catch(e) {
+	} catch (e) {
 		console.error(e);
 	}
-}
+};
 
 // get High Scores
 getStats();
-
 
 function onTetris() {
 	let remaining_frames = 12;
@@ -66,7 +66,10 @@ const user_colors = {};
 
 function getUserColor(username) {
 	if (!(username in user_colors)) {
-		user_colors[username] = `hsl(${~~(360 * Math.random())},${~~(80 + 20 * Math.random())}%,${~~(50 + 20 * Math.random())}%)`;
+		user_colors[username] = `hsl(${~~(360 * Math.random())},${~~(
+			80 +
+			20 * Math.random()
+		)}%,${~~(50 + 20 * Math.random())}%)`;
 	}
 
 	return user_colors[username];
@@ -93,29 +96,24 @@ function onMessage(entry) {
 
 	dom.chat.element.appendChild(p);
 
-	dom.chat.element.scrollTop = dom.chat.element.scrollHeight - dom.chat.element.clientHeight;
+	dom.chat.element.scrollTop =
+		dom.chat.element.scrollHeight - dom.chat.element.clientHeight;
 }
 
 const LINE_CLEAR_IGNORE_FRAMES = 7;
 
-let
-	game = null,
+let game = null,
 	gameid = -1,
 	last_valid_state = null,
-
 	pending_delay_frames = 1,
-
 	last_piece_count = 0,
 	cur_piece = null,
-
 	pending_game = true,
 	pending_piece = -1,
 	pending_line = -1,
-
 	line_animation_remaining_frames = 0,
 	pending_single = false,
 	game_frames = [];
-
 
 function getTotalPieceCount(event) {
 	return PIECES.reduce((acc, p) => acc + (event[p] || 0), 0);
@@ -125,13 +123,13 @@ function getCurPiece(transformed) {
 	if (transformed.cur_piece) return transformed.cur_piece;
 
 	if (transformed.total_piece_count === 1) {
-		return PIECES.find(p => transformed[p] === 1);
+		return PIECES.find((p) => transformed[p] === 1);
 	}
 
 	// compare with last valid_state
 	// return first difference (assumes +1 jump .. could verify that or print warning?)
 	// if there are frame drop, this may be incorrect...
-	const piece = PIECES.find(p => transformed[p] != last_valid_state[p]);
+	const piece = PIECES.find((p) => transformed[p] != last_valid_state[p]);
 
 	// piece may beundefined, at the beginning of capture for classic rom
 	// the capture starts mid-game, there's no cur_piece supplied
@@ -149,18 +147,18 @@ function onFrame(event, debug) {
 		gameid: event.gameid,
 		diff: {
 			cleared_lines: 0,
-			score:         0,
+			score: 0,
 			cur_piece_das: false,
-			cur_piece:     false,
-			next_piece:    false,
-			stage_blocks:  0
+			cur_piece: false,
+			next_piece: false,
+			stage_blocks: 0,
 		},
 
-		score:         event.score,
-		lines:         event.lines,
-		level:         event.level,
+		score: event.score,
+		lines: event.lines,
+		level: event.level,
 
-		next_piece:    event.preview,
+		next_piece: event.preview,
 
 		T: event.T,
 		J: event.J,
@@ -171,14 +169,14 @@ function onFrame(event, debug) {
 		I: event.I,
 
 		cur_piece_das: dom.das != null ? event.cur_piece_das : -1,
-		instant_das:   dom.das != null ? event.instant_das : -1,
-		cur_piece:     event.cur_piece,
+		instant_das: dom.das != null ? event.instant_das : -1,
+		cur_piece: event.cur_piece,
 
 		stage: {
 			num_blocks: event.field.reduce((acc, v) => acc + (v ? 1 : 0), 0),
-			field:      event.field,
+			field: event.field,
 			field_string: event.field.join(''),
-		}
+		},
 	};
 
 	if (debug) {
@@ -225,7 +223,7 @@ function onFrame(event, debug) {
 		if (game.id != transformed.gameid) {
 			reportGame(game);
 			pending_game = true;
-			return
+			return;
 		}
 	}
 
@@ -242,31 +240,32 @@ function onFrame(event, debug) {
 	// populate diff
 	const diff = transformed.diff;
 
-	diff.level         = transformed.level !== last_valid_state.level;
+	diff.level = transformed.level !== last_valid_state.level;
 	diff.cleared_lines = transformed.lines - last_valid_state.lines;
-	diff.score         = transformed.score - last_valid_state.score;
-	diff.cur_piece_das = transformed.cur_piece_das !== last_valid_state.cur_piece_das;
-	diff.cur_piece     = transformed.cur_piece !== last_valid_state.cur_piece;
-	diff.next_piece    = transformed.next_piece !== last_valid_state.next_piece;
-	diff.stage_blocks  = transformed.stage.num_blocks - last_valid_state.stage.num_blocks;
+	diff.score = transformed.score - last_valid_state.score;
+	diff.cur_piece_das =
+		transformed.cur_piece_das !== last_valid_state.cur_piece_das;
+	diff.cur_piece = transformed.cur_piece !== last_valid_state.cur_piece;
+	diff.next_piece = transformed.next_piece !== last_valid_state.next_piece;
+	diff.stage_blocks =
+		transformed.stage.num_blocks - last_valid_state.stage.num_blocks;
 
 	// check if a change to cur_piece_stats
 	if (--pending_piece === 0) {
 		transformed.total_piece_count = getTotalPieceCount(transformed);
 
-		if (transformed.next_piece && (
-			transformed.cur_piece
-			||
-			transformed.total_piece_count
-		)) {
+		if (
+			transformed.next_piece &&
+			(transformed.cur_piece || transformed.total_piece_count)
+		) {
 			transformed.cur_piece = getCurPiece(transformed);
 
 			game.onPiece(transformed);
 			renderPiece(transformed);
 
 			Object.assign(last_valid_state, {
-				cur_piece:     transformed.cur_piece,
-				next_piece:    transformed.next_piece,
+				cur_piece: transformed.cur_piece,
+				next_piece: transformed.next_piece,
 				cur_piece_das: transformed.cur_piece_das,
 
 				T: transformed.T,
@@ -277,8 +276,7 @@ function onFrame(event, debug) {
 				L: transformed.L,
 				I: transformed.I,
 			});
-		}
-		else {
+		} else {
 			pending_piece = 1; // check again next frame
 		}
 	}
@@ -286,11 +284,11 @@ function onFrame(event, debug) {
 	// check for score change or score stayed at 999999 but the line count changed.
 	if (--pending_line === 0) {
 		if (
-			transformed.score
-			&& (transformed.lines != null)
-			&& (transformed.level != null) 
-			&& ((diff.score >= 0 && diff.cleared_lines >= 0)
-			|| (transformed.score == 999999 && diff.cleared_lines > 0))
+			transformed.score &&
+			transformed.lines != null &&
+			transformed.level != null &&
+			((diff.score >= 0 && diff.cleared_lines >= 0) ||
+				(transformed.score == 999999 && diff.cleared_lines > 0))
 		) {
 			game.onLine(transformed);
 			renderLine();
@@ -298,14 +296,12 @@ function onFrame(event, debug) {
 			Object.assign(last_valid_state, {
 				score: transformed.score,
 				lines: transformed.lines,
-				level: transformed.level
+				level: transformed.level,
 			});
-		}
-		else {
+		} else {
 			pending_line = 1; // check again next frame
 		}
-	}
-	else if(pending_line < 0 && diff.score) {
+	} else if (pending_line < 0 && diff.score) {
 		// always wait one frame to read score and line
 		// this is to protect against transition blur causing incorrect OCR
 		pending_line = pending_delay_frames;
@@ -316,7 +312,8 @@ function onFrame(event, debug) {
 		renderNextPiece(transformed.level, transformed.next_piece);
 	}
 
-	if (last_valid_state.stage.field_string == transformed.stage.field_string) return;
+	if (last_valid_state.stage.field_string == transformed.stage.field_string)
+		return;
 
 	last_valid_state.stage.field_string = transformed.stage.field_string;
 
@@ -325,21 +322,20 @@ function onFrame(event, debug) {
 	if (diff.stage_blocks === 4) {
 		last_valid_state.stage = transformed.stage;
 		pending_piece = pending_delay_frames;
-	}
-	else {
+	} else {
 		// assuming we aren't dropping any frame, the number of blocks only reduces when the
 		// line animation starts, the diff is twice the number of lines being cleared.
 		//
 		// Note: diff.stage_blocks can be negative at weird amounts when the piece is rotated
 		// while still being at the top of the field with some block moved out of view
 
-		switch(diff.stage_blocks) {
+		switch (diff.stage_blocks) {
 			case -8:
 				onTetris();
 			case -6:
 				// indicate animation for triples and tetris_rate
 				line_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
-				last_valid_state.stage.num_blocks += (diff.stage_blocks * 5); // equivalent to fast forward on how many blocks will have gone after the animation
+				last_valid_state.stage.num_blocks += diff.stage_blocks * 5; // equivalent to fast forward on how many blocks will have gone after the animation
 
 				break;
 
@@ -348,9 +344,7 @@ function onFrame(event, debug) {
 					// verified single (second frame of clear animation)
 					line_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 2;
 					last_valid_state.stage.num_blocks -= 10;
-				}
-				else
-				{
+				} else {
 					// genuine double
 					line_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
 					last_valid_state.stage.num_blocks -= 20;
@@ -377,20 +371,17 @@ function onFrame(event, debug) {
 function getStats() {
 	let m;
 
-	if (m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/)) {
-		fetch(
-			`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
-			{
-				cache: 'no-cache',
-				headers: {
-					'Cache-Control': 'no-cache'
-				}
-				// mode: 'no-cors'
-			}
-		)
-		.then(response => response.json())
-		.then(renderPastGamesAndPBs)
-		.catch(console.error) // noop
+	if ((m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/))) {
+		fetch(`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`, {
+			cache: 'no-cache',
+			headers: {
+				'Cache-Control': 'no-cache',
+			},
+			// mode: 'no-cors'
+		})
+			.then((response) => response.json())
+			.then(renderPastGamesAndPBs)
+			.catch(console.error); // noop
 	}
 }
 
@@ -408,8 +399,30 @@ function clearStage() {
 	dom.droughts.last.ctx.clear();
 	dom.droughts.max.ctx.clear();
 
-	dom.pieces.element.classList.remove('l0', 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9');
-	dom.next.element.classList.remove('l0', 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9');
+	dom.pieces.element.classList.remove(
+		'l0',
+		'l1',
+		'l2',
+		'l3',
+		'l4',
+		'l5',
+		'l6',
+		'l7',
+		'l8',
+		'l9'
+	);
+	dom.next.element.classList.remove(
+		'l0',
+		'l1',
+		'l2',
+		'l3',
+		'l4',
+		'l5',
+		'l6',
+		'l7',
+		'l8',
+		'l9'
+	);
 
 	stage_currently_rendered = null;
 	next_piece_currently_rendered = null;
@@ -417,53 +430,70 @@ function clearStage() {
 
 function renderPastGamesAndPBs(data) {
 	// pbs
-	data.pbs.forEach(record => {
+	data.pbs.forEach((record) => {
 		if (!record) return;
 
 		const row = dom.pbs[`s${record.start_level}`];
 
 		if (!row) return;
 
-		row.end_level.textContent =   (record.end_level || 0).toString().padStart(2, '0');
-		row.score.textContent =       (record.score || 0).toString().padStart(6, '0').padStart(7, ' ');
-		row.lines.textContent =       (record.lines || 0).toString().padStart(3, '0');
+		row.end_level.textContent = (record.end_level || 0)
+			.toString()
+			.padStart(2, '0');
+		row.score.textContent = (record.score || 0)
+			.toString()
+			.padStart(6, '0')
+			.padStart(7, ' ');
+		row.lines.textContent = (record.lines || 0).toString().padStart(3, '0');
 		row.tetris_rate.textContent = getPercent(record.tetris_rate || 0);
 
-
 		if (row.das_avg) {
-			row.das_avg.textContent = (record.das_avg || 0).toFixed(1).padStart(4, '0');
+			row.das_avg.textContent = (record.das_avg || 0)
+				.toFixed(1)
+				.padStart(4, '0');
 		}
 
 		if (row.max_drought) {
-			row.max_drought.textContent = (record.max_drought || 0).toString().padStart(3, '0');
+			row.max_drought.textContent = (record.max_drought || 0)
+				.toString()
+				.padStart(3, '0');
 		}
 	});
 
 	// Disgusting hardcoded values below T_T
-	const num_scores_to_show = dom.high_scores.element.clientHeight > 200 ? 10 : 5;
+	const num_scores_to_show =
+		dom.high_scores.element.clientHeight > 200 ? 10 : 5;
 
 	// high scores
-	['today', 'overall'].forEach(category => {
+	['today', 'overall'].forEach((category) => {
 		if (data.high_scores[category].length <= 0) {
 			data.high_scores[category].push(null);
 		}
 
-		dom.high_scores[category].innerHTML = data.high_scores[category].slice(0, num_scores_to_show).map(record => {
-			if (!record || record.start_level == null) {
-				record = {
-					score: 0,
-					tetris_rate: 0,
-					start_level: 0
-				};
-			}
+		dom.high_scores[category].innerHTML = data.high_scores[category]
+			.slice(0, num_scores_to_show)
+			.map((record) => {
+				if (!record || record.start_level == null) {
+					record = {
+						score: 0,
+						tetris_rate: 0,
+						start_level: 0,
+					};
+				}
 
-			return '<tr>' + [
-				(record.start_level || 0).toString().padStart(2, '0'),
-				(record.score || 0).toString().padStart(6, '0').padStart(7, ' '),
-				getPercent(record.tetris_rate || 0)
-			].map(content => `<td>${content}</td>`).join('') + '</tr>';
-
-		}).join('');
+				return (
+					'<tr>' +
+					[
+						(record.start_level || 0).toString().padStart(2, '0'),
+						(record.score || 0).toString().padStart(6, '0').padStart(7, ' '),
+						getPercent(record.tetris_rate || 0),
+					]
+						.map((content) => `<td>${content}</td>`)
+						.join('') +
+					'</tr>'
+				);
+			})
+			.join('');
 	});
 }
 
@@ -479,33 +509,41 @@ function renderLine() {
 
 	// do the small boxes first
 	dom.tetris_rate.value.textContent = getPercent(game.data.lines[4].percent);
-	dom.efficiency.value.textContent = (Math.floor(game.data.score.normalized / game.data.lines.count) || 0).toString().padStart(3, '0');
+	dom.efficiency.value.textContent = (
+		Math.floor(game.data.score.normalized / game.data.lines.count) || 0
+	)
+		.toString()
+		.padStart(3, '0');
 	dom.level.value.textContent = game.data.level.toString().padStart(2, '0');
 	dom.burn.count.textContent = game.data.burn.toString().padStart(2, '0');
 
 	const line_count = game.data.lines.count.toString().padStart(3, '0');
 
 	if (dom.lines) {
-		dom.lines.count.textContent = line_count
+		dom.lines.count.textContent = line_count;
 	}
 
-	dom.score.current.textContent = game.data.score.current.toString().padStart(6, '0').padStart(7, ' ');
+	dom.score.current.textContent = game.data.score.current
+		.toString()
+		.padStart(6, '0')
+		.padStart(7, ' ');
 
 	if (dom.runway) {
 		if (game.data.score.transition === null) {
 			dom.runway.header.textContent = 'TRAN RUNWAY';
 			dom.runway.value.textContent = game.data.score.tr_runway.toString();
-		}
-		else {
+		} else {
 			dom.runway.header.textContent = 'GAME RUNWAY';
 			dom.runway.value.textContent = game.data.score.runway.toString();
 		}
 	}
 
 	if (game.data.score.transition) {
-		dom.score.transition.textContent = game.data.score.transition.toString().padStart(6, '0').padStart(7, ' ');
-	}
-	else {
+		dom.score.transition.textContent = game.data.score.transition
+			.toString()
+			.padStart(6, '0')
+			.padStart(7, ' ');
+	} else {
 		dom.score.transition.textContent = '------';
 	}
 
@@ -516,28 +554,43 @@ function renderLine() {
 	for (const [num_lines, values] of Object.entries(LINES)) {
 		const { name } = values;
 
-		dom.lines_stats[name].count.textContent = game.data.lines[num_lines].count.toString().padStart(3, '0');
-		dom.lines_stats[name].lines.textContent = game.data.lines[num_lines].lines.toString().padStart(3, '0');
-		dom.lines_stats[name].percent.textContent = getPercent(game.data.lines[num_lines].percent)
+		dom.lines_stats[name].count.textContent = game.data.lines[num_lines].count
+			.toString()
+			.padStart(3, '0');
+		dom.lines_stats[name].lines.textContent = game.data.lines[num_lines].lines
+			.toString()
+			.padStart(3, '0');
+		dom.lines_stats[name].percent.textContent = getPercent(
+			game.data.lines[num_lines].percent
+		);
 
-		dom.points[name].count.textContent = game.data.points[num_lines].count.toString().padStart(6, '0').padStart(7, ' ');
-		dom.points[name].percent.textContent = getPercent(game.data.points[num_lines].percent);
+		dom.points[name].count.textContent = game.data.points[num_lines].count
+			.toString()
+			.padStart(6, '0')
+			.padStart(7, ' ');
+		dom.points[name].percent.textContent = getPercent(
+			game.data.points[num_lines].percent
+		);
 	}
 
-	dom.points.drops.count.textContent = game.data.points.drops.count.toString().padStart(6, '0').padStart(7, ' ');
-	dom.points.drops.percent.textContent = getPercent(game.data.points.drops.percent);
+	dom.points.drops.count.textContent = game.data.points.drops.count
+		.toString()
+		.padStart(6, '0')
+		.padStart(7, ' ');
+	dom.points.drops.percent.textContent = getPercent(
+		game.data.points.drops.percent
+	);
 
 	dom.lines_stats.trt_ctx.clear();
 
-	const
-		trt_ctx = dom.lines_stats.trt_ctx,
+	const trt_ctx = dom.lines_stats.trt_ctx,
 		pixel_size = 4,
 		max_pixels = Math.floor(trt_ctx.canvas.width / (pixel_size + 1)),
 		y_scale = (trt_ctx.canvas.height - pixel_size) / pixel_size,
 		cur_x = 0,
 		to_draw = game.line_events.slice(-1 * max_pixels);
 
-	for (let idx = to_draw.length; idx--;) {
+	for (let idx = to_draw.length; idx--; ) {
 		const { num_lines, tetris_rate } = to_draw[idx];
 
 		trt_ctx.fillStyle = LINES[num_lines].color;
@@ -550,68 +603,72 @@ function renderLine() {
 	}
 
 	// set piece colors for piece distribution
-	dom.pieces.element.classList.remove(`l${(game.data.level - 1) % 10}`)
-	dom.pieces.element.classList.add(`l${game.data.level % 10}`)
+	dom.pieces.element.classList.remove(`l${(game.data.level - 1) % 10}`);
+	dom.pieces.element.classList.add(`l${game.data.level % 10}`);
 
-	dom.next.element.classList.remove(`l${(game.data.level - 1) % 10}`)
-	dom.next.element.classList.add(`l${game.data.level % 10}`)
+	dom.next.element.classList.remove(`l${(game.data.level - 1) % 10}`);
+	dom.next.element.classList.add(`l${game.data.level % 10}`);
 }
 
 function renderPiece(event) {
-	dom.pieces.count.textContent = game.data.pieces.count.toString().padStart(3, '0');
+	dom.pieces.count.textContent = game.data.pieces.count
+		.toString()
+		.padStart(3, '0');
 
-	dom.pieces.deviation.textContent = (game.data.pieces.deviation * 100).toFixed(1);
-	dom.pieces.deviation_28.textContent = (game.data.pieces.deviation_28 * 100).toFixed(1);
-	dom.pieces.deviation_56.textContent = (game.data.pieces.deviation_56 * 100).toFixed(1);
+	dom.pieces.deviation.textContent = (game.data.pieces.deviation * 100).toFixed(
+		1
+	);
+	dom.pieces.deviation_28.textContent = (
+		game.data.pieces.deviation_28 * 100
+	).toFixed(1);
+	dom.pieces.deviation_56.textContent = (
+		game.data.pieces.deviation_56 * 100
+	).toFixed(1);
 
-	let
-		pixel_size = 4,
+	let pixel_size = 4,
 		max_pixels = Math.floor(dom.pieces.T.ctx.canvas.width / (pixel_size + 1)),
 		draw_start = Math.max(0, game.pieces.length - max_pixels);
 
-	PIECES.forEach(name => {
-		const
-			piece_data    = game.data.pieces[name],
-			ctx           = dom.pieces[name].ctx,
-			indexes       = piece_data.indexes,
+	PIECES.forEach((name) => {
+		const piece_data = game.data.pieces[name],
+			ctx = dom.pieces[name].ctx,
+			indexes = piece_data.indexes,
 			drought_color = name == 'I' ? 'orange' : '#747474';
 
-		dom.pieces[name].count.textContent   = piece_data.count.toString().padStart(3, '0');
-		dom.pieces[name].drought.textContent = piece_data.drought.toString().padStart(2, '0');
+		dom.pieces[name].count.textContent = piece_data.count
+			.toString()
+			.padStart(3, '0');
+		dom.pieces[name].drought.textContent = piece_data.drought
+			.toString()
+			.padStart(2, '0');
 		dom.pieces[name].percent.textContent = getPercent(piece_data.percent);
 
 		ctx.resetTransform();
 		ctx.clear();
-		ctx.transform(1, 0, 0, 1, - draw_start * (pixel_size + 1), 0);
+		ctx.transform(1, 0, 0, 1, -draw_start * (pixel_size + 1), 0);
 
 		for (let idx = 0; idx < indexes.length; idx++) {
-			const
-				piece_idx = indexes[idx].index,
-				das       = indexes[idx].das,
-				color     = DAS_COLORS[ DAS_THRESHOLDS[das] ];
+			const piece_idx = indexes[idx].index,
+				das = indexes[idx].das,
+				color = DAS_COLORS[DAS_THRESHOLDS[das]];
 
-				ctx.fillStyle = color;
-				ctx.fillRect(
-					piece_idx * (pixel_size + 1),
-					0,
-					pixel_size,
-					pixel_size
-				);
+			ctx.fillStyle = color;
+			ctx.fillRect(piece_idx * (pixel_size + 1), 0, pixel_size, pixel_size);
 
-				const last_piece_idx = idx > 0 ? indexes[idx - 1].index : -1;
+			const last_piece_idx = idx > 0 ? indexes[idx - 1].index : -1;
 
-				if (piece_idx - last_piece_idx - 1 < DROUGHT_PANIC_THRESHOLD) {
-					continue;
-				}
+			if (piece_idx - last_piece_idx - 1 < DROUGHT_PANIC_THRESHOLD) {
+				continue;
+			}
 
-				ctx.fillStyle = drought_color;
-				ctx.fillRect(
-					(last_piece_idx + 1) * (pixel_size + 1),
-					0,
-					(piece_idx - last_piece_idx - 1) * (pixel_size + 1) - 1,
-					pixel_size
-				);
-		};
+			ctx.fillStyle = drought_color;
+			ctx.fillRect(
+				(last_piece_idx + 1) * (pixel_size + 1),
+				0,
+				(piece_idx - last_piece_idx - 1) * (pixel_size + 1) - 1,
+				pixel_size
+			);
+		}
 
 		// handle current drought if necessary
 		if (piece_data.drought >= DROUGHT_PANIC_THRESHOLD) {
@@ -634,24 +691,29 @@ function renderPiece(event) {
 
 	// droughts
 	// TODO: Use Canvas rather than span
-	dom.droughts.count.textContent = game.data.i_droughts.count.toString().padStart(3, '0');
-	dom.droughts.cur.value.textContent = game.data.i_droughts.cur.toString().padStart(2, '0');
-	dom.droughts.last.value.textContent = game.data.i_droughts.last.toString().padStart(2, '0');
-	dom.droughts.max.value.textContent = game.data.i_droughts.max.toString().padStart(2, '0');
+	dom.droughts.count.textContent = game.data.i_droughts.count
+		.toString()
+		.padStart(3, '0');
+	dom.droughts.cur.value.textContent = game.data.i_droughts.cur
+		.toString()
+		.padStart(2, '0');
+	dom.droughts.last.value.textContent = game.data.i_droughts.last
+		.toString()
+		.padStart(2, '0');
+	dom.droughts.max.value.textContent = game.data.i_droughts.max
+		.toString()
+		.padStart(2, '0');
 
 	pixel_size = 2;
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
 
-	const
-		color        = 'orange',
-		cur_drought  = game.data.i_droughts.cur,
-		cur_ctx      = dom.droughts.cur.ctx,
-
+	const color = 'orange',
+		cur_drought = game.data.i_droughts.cur,
+		cur_ctx = dom.droughts.cur.ctx,
 		last_drought = game.data.i_droughts.last,
-		last_ctx     = dom.droughts.last.ctx,
-
-		max_drought  = game.data.i_droughts.max,
-		max_ctx      = dom.droughts.max.ctx;
+		last_ctx = dom.droughts.last.ctx,
+		max_drought = game.data.i_droughts.max,
+		max_ctx = dom.droughts.max.ctx;
 
 	if (cur_drought > 0) {
 		if (cur_drought <= max_pixels) {
@@ -674,8 +736,7 @@ function renderPiece(event) {
 				max_ctx.canvas.height
 			);
 		}
-	}
-	else {
+	} else {
 		// clear current but not max (only a new game would clear max)
 		cur_ctx.clear();
 	}
@@ -698,13 +759,11 @@ function renderPiece(event) {
 		if (game.data.i_droughts.max == game.data.i_droughts.cur) {
 			dom.droughts.element.classList.remove('panic');
 			dom.droughts.element.classList.add('max_panic'); // doing this to synchronize animation
-		}
-		else {
+		} else {
 			dom.droughts.element.classList.remove('max_panic');
 			dom.droughts.element.classList.add('panic');
 		}
-	}
-	else {
+	} else {
 		dom.droughts.element.classList.remove('max_panic');
 		dom.droughts.element.classList.remove('panic');
 	}
@@ -717,12 +776,11 @@ function renderPiece(event) {
 
 function renderInstantDas(das) {
 	if (!dom.das) return;
-	if ((das == null) || das < 0) return;
+	if (das == null || das < 0) return;
 
 	dom.das.instant.textContent = das.toString().padStart(2, '0');
 
-	const
-		ctx = dom.das.gauge_ctx,
+	const ctx = dom.das.gauge_ctx,
 		pixel_size = 3,
 		height = dom.das.gauge_ctx.canvas.height;
 
@@ -732,12 +790,7 @@ function renderInstantDas(das) {
 	ctx.fillStyle = 'orange';
 
 	for (let idx = das; idx--; ) {
-		ctx.fillRect(
-			idx * (pixel_size + 1),
-			0,
-			pixel_size,
-			height
-		);
+		ctx.fillRect(idx * (pixel_size + 1), 0, pixel_size, height);
 	}
 }
 
@@ -755,26 +808,22 @@ function renderDasNBoardStats() {
 	dom.board_stats.ctx.clear();
 
 	const pixel_size = 4;
-	const max_pixels = Math.floor(dom.board_stats.ctx.canvas.width / (pixel_size + 1));
+	const max_pixels = Math.floor(
+		dom.board_stats.ctx.canvas.width / (pixel_size + 1)
+	);
 	const to_draw = game.pieces.slice(-1 * max_pixels);
 
 	let cur_x = 0;
 
 	dom.board_stats.ctx.fillStyle = BOARD_COLORS.floor;
-	dom.board_stats.ctx.fillRect(
-		0,
-		60,
-		dom.board_stats.ctx.canvas.width,
-		1
-	);
+	dom.board_stats.ctx.fillRect(0, 60, dom.board_stats.ctx.canvas.width, 1);
 
 	for (let idx = 0; idx < to_draw.length; idx++) {
 		const piece = to_draw[idx];
 
 		if (dom.das) {
-			const
-				das = piece.das,
-				color = DAS_COLORS[ DAS_THRESHOLDS[das] ];
+			const das = piece.das,
+				color = DAS_COLORS[DAS_THRESHOLDS[das]];
 
 			if (piece.das_loss) {
 				dom.das.ctx.fillStyle = '#550000';
@@ -801,7 +850,7 @@ function renderDasNBoardStats() {
 			dom.board_stats.ctx.fillStyle = LINES[piece.lines.num_lines].color;
 
 			dom.board_stats.ctx.fillRect(
-				idx * (pixel_size + 1) + (pixel_size),
+				idx * (pixel_size + 1) + pixel_size,
 				0,
 				1,
 				60
@@ -864,15 +913,13 @@ function renderDasNBoardStats() {
 let stage_currently_rendered = null;
 
 function renderStage(level, stage) {
-	const
-		stage_id = `${level}${stage.field_string}`;
+	const stage_id = `${level}${stage.field_string}`;
 
 	if (stage_id === stage_currently_rendered) return;
 
 	stage_currently_rendered = stage_id;
 
-	const
-		ctx = dom.stage.ctx,
+	const ctx = dom.stage.ctx,
 		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
 		field = stage.field;
 
@@ -895,35 +942,31 @@ function renderStage(level, stage) {
 let next_piece_currently_rendered = null;
 
 function renderNextPiece(level, next_piece) {
-	if (
-		level === null
-		|| !next_piece
-	) {
+	if (level === null || !next_piece) {
 		return;
 	}
 
-	const
-		piece_id = `${level}${next_piece}`;
+	const piece_id = `${level}${next_piece}`;
 
 	if (piece_id === next_piece_currently_rendered) return;
 
 	next_piece_currently_rendered = piece_id;
 
-	const
-		ctx              = dom.next.ctx,
-		col_index        = PIECE_COLORS[next_piece],
+	const ctx = dom.next.ctx,
+		col_index = PIECE_COLORS[next_piece],
 		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1);
-		x_offset_3       = Math.floor((ctx.canvas.width - pixels_per_block * 3 + BLOCK_PIXEL_SIZE) / 2),
-		positions        = [];
+	(x_offset_3 = Math.floor(
+		(ctx.canvas.width - pixels_per_block * 3 + BLOCK_PIXEL_SIZE) / 2
+	)),
+		(positions = []);
 
 	ctx.clear();
 
-	let
-		pos_x = 0,
+	let pos_x = 0,
 		pos_y = 0,
 		x_idx = 0;
 
-	switch(next_piece) {
+	switch (next_piece) {
 		case 'I':
 			pos_y = Math.floor((ctx.canvas.height - BLOCK_PIXEL_SIZE * 7) / 2);
 
@@ -934,7 +977,9 @@ function renderNextPiece(level, next_piece) {
 			break;
 
 		case 'O':
-			pos_x = Math.floor((ctx.canvas.width - pixels_per_block * 2 + BLOCK_PIXEL_SIZE) / 2);
+			pos_x = Math.floor(
+				(ctx.canvas.width - pixels_per_block * 2 + BLOCK_PIXEL_SIZE) / 2
+			);
 
 			positions.push([pos_x, pos_y]);
 			positions.push([pos_x, pos_y + pixels_per_block]);
@@ -952,15 +997,16 @@ function renderNextPiece(level, next_piece) {
 
 			if (next_piece == 'L') {
 				x_idx = 0;
-			}
-			else if (next_piece == 'T') {
+			} else if (next_piece == 'T') {
 				x_idx = 1;
-			}
-			else {
+			} else {
 				x_idx = 2;
 			}
 
-			positions.push([x_offset_3 + x_idx * pixels_per_block, pos_y + pixels_per_block]);
+			positions.push([
+				x_offset_3 + x_idx * pixels_per_block,
+				pos_y + pixels_per_block,
+			]);
 			break;
 
 		case 'Z':
@@ -970,23 +1016,17 @@ function renderNextPiece(level, next_piece) {
 
 			if (next_piece == 'Z') {
 				positions.push([x_offset_3, pos_y]);
-				positions.push([x_offset_3 + pixels_per_block * 2, pos_y + pixels_per_block]);
-			}
-			else {
+				positions.push([
+					x_offset_3 + pixels_per_block * 2,
+					pos_y + pixels_per_block,
+				]);
+			} else {
 				positions.push([x_offset_3, pos_y + pixels_per_block]);
 				positions.push([x_offset_3 + pixels_per_block * 2, pos_y]);
 			}
 	}
 
 	positions.forEach(([pos_x, pos_y]) => {
-		renderBlock(
-			level,
-			col_index,
-			BLOCK_PIXEL_SIZE,
-			ctx,
-			pos_x,
-			pos_y
-		);
+		renderBlock(level, col_index, BLOCK_PIXEL_SIZE, ctx, pos_x, pos_y);
 	});
 }
-

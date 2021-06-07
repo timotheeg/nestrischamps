@@ -21,16 +21,16 @@ const LOSER_FACE_BLOCKS = [
 ];
 
 const BORDER_BLOCKS = [
-	[0,  0],
-	[1,  0],
-	[2,  0],
-	[3,  0],
-	[4,  0],
-	[5,  0],
-	[6,  0],
-	[7,  0],
-	[8,  0],
-	[9,  0],
+	[0, 0],
+	[1, 0],
+	[2, 0],
+	[3, 0],
+	[4, 0],
+	[5, 0],
+	[6, 0],
+	[7, 0],
+	[8, 0],
+	[9, 0],
 	[10, 0],
 	[11, 0],
 	[12, 0],
@@ -61,27 +61,26 @@ const BORDER_BLOCKS = [
 	[12, 9],
 	[11, 9],
 	[10, 9],
-	[9,  9],
-	[8,  9],
-	[7,  9],
-	[6,  9],
-	[5,  9],
-	[4,  9],
-	[3,  9],
-	[2,  9],
-	[1,  9],
-	[0,  9],
+	[9, 9],
+	[8, 9],
+	[7, 9],
+	[6, 9],
+	[5, 9],
+	[4, 9],
+	[3, 9],
+	[2, 9],
+	[1, 9],
+	[0, 9],
 
-	[0,  8],
-	[0,  7],
-	[0,  6],
-	[0,  5],
-	[0,  4],
-	[0,  3],
-	[0,  2],
-	[0,  1],
+	[0, 8],
+	[0, 7],
+	[0, 6],
+	[0, 5],
+	[0, 4],
+	[0, 3],
+	[0, 2],
+	[0, 1],
 ];
-
 
 /*
 	dom: {
@@ -102,20 +101,20 @@ const BORDER_BLOCKS = [
 */
 
 const DEFAULT_DOM_REFS = {
-	score:       DOM_DEV_NULL,
-	runway_tr:   DOM_DEV_NULL,
+	score: DOM_DEV_NULL,
+	runway_tr: DOM_DEV_NULL,
 	runway_game: DOM_DEV_NULL,
-	projection:  DOM_DEV_NULL,
-	level:       DOM_DEV_NULL,
-	lines:       DOM_DEV_NULL,
-	trt:         DOM_DEV_NULL,
-	eff:         DOM_DEV_NULL,
+	projection: DOM_DEV_NULL,
+	level: DOM_DEV_NULL,
+	lines: DOM_DEV_NULL,
+	trt: DOM_DEV_NULL,
+	eff: DOM_DEV_NULL,
 	running_trt: DOM_DEV_NULL,
-	preview:     document.createElement('div'),
-	field:       document.createElement('div'),
-	drought:     DOM_DEV_NULL,
-	burn:        DOM_DEV_NULL,
-	video:       DOM_DEV_NULL,
+	preview: document.createElement('div'),
+	field: document.createElement('div'),
+	drought: DOM_DEV_NULL,
+	burn: DOM_DEV_NULL,
+	video: DOM_DEV_NULL,
 };
 
 const DEFAULT_OPTIONS = {
@@ -137,26 +136,23 @@ const DEFAULT_OPTIONS = {
 			const tail = `${v % 100000}`.padStart(5, '0');
 			const head = Math.floor(v / 100000);
 			v = `${head.toString(16).toUpperCase()}${tail}`;
-		}
-		else {
+		} else {
 			v = `${v}`;
 		}
 
 		return v.padStart(size, ' ');
 	},
-	format_tetris_diff: v => {
+	format_tetris_diff: (v) => {
 		// ensure result is at most 4 char long
 		if (v >= 100) {
 			return Math.round(v);
-		}
-		else if (v >= 10) {
+		} else if (v >= 10) {
 			return v.toFixed(1);
-		}
-		else {
+		} else {
 			return v.toFixed(2);
 		}
 	},
-	format_drought: v => v
+	format_drought: (v) => v,
 };
 
 class Player {
@@ -170,8 +166,10 @@ class Player {
 			...options,
 		};
 
-		this.field_pixel_size = this.options.field_pixel_size || this.options.pixel_size;
-		this.preview_pixel_size = this.options.preview_pixel_size || this.options.pixel_size;
+		this.field_pixel_size =
+			this.options.field_pixel_size || this.options.pixel_size;
+		this.preview_pixel_size =
+			this.options.preview_pixel_size || this.options.pixel_size;
 		this.render_running_trt_rtl = !!this.options.running_trt_rtl;
 		this.render_wins_rtl = !!this.options.wins_rtl;
 
@@ -184,15 +182,15 @@ class Player {
 		this.avatar = document.createElement('div');
 		this.avatar.classList.add('avatar');
 		Object.assign(this.avatar.style, {
-			position:           'absolute',
-			top:                `${this.field_pixel_size * 8 * 1}px`,
-			left:               `${css_size(styles.padding) - this.field_pixel_size}px`,
-			width:              `${css_size(styles.width) + this.field_pixel_size * 2}px`,
-			height:             `${css_size(styles.width) + this.field_pixel_size * 2}px`,
-			backgroundRepeat:   'no-repeat',
-			backgroundSize:     'cover',
+			position: 'absolute',
+			top: `${this.field_pixel_size * 8 * 1}px`,
+			left: `${css_size(styles.padding) - this.field_pixel_size}px`,
+			width: `${css_size(styles.width) + this.field_pixel_size * 2}px`,
+			height: `${css_size(styles.width) + this.field_pixel_size * 2}px`,
+			backgroundRepeat: 'no-repeat',
+			backgroundSize: 'cover',
 			backgroundPosition: '50% 50%',
-			filter:              'brightness(0.20)'
+			filter: 'brightness(0.20)',
 		});
 		this.dom.field.appendChild(this.avatar);
 
@@ -201,33 +199,31 @@ class Player {
 		this.field_bg.classList.add('background');
 		Object.assign(this.field_bg.style, {
 			position: 'absolute',
-			top:      `${css_size(styles.padding) - this.field_pixel_size}px`,
-			left:     `${css_size(styles.padding) - this.field_pixel_size}px`,
-			width:    `${css_size(styles.width) + this.field_pixel_size * 2}px`,
-			height:   `${css_size(styles.height) + this.field_pixel_size * 2}px`
+			top: `${css_size(styles.padding) - this.field_pixel_size}px`,
+			left: `${css_size(styles.padding) - this.field_pixel_size}px`,
+			width: `${css_size(styles.width) + this.field_pixel_size * 2}px`,
+			height: `${css_size(styles.height) + this.field_pixel_size * 2}px`,
 		});
 		this.dom.field.appendChild(this.field_bg);
 
 		// set up field and preview canvas
-		['field', 'preview', 'running_trt']
-			.forEach(name => {
-				console.log(name);
+		['field', 'preview', 'running_trt'].forEach((name) => {
+			console.log(name);
 
-				const styles = getComputedStyle(this.dom[name]);
-				const canvas = document.createElement('canvas');
+			const styles = getComputedStyle(this.dom[name]);
+			const canvas = document.createElement('canvas');
 
-				canvas.style.position = 'absolute';
-				canvas.style.top = styles.padding;
-				canvas.style.left = styles.padding;
+			canvas.style.position = 'absolute';
+			canvas.style.top = styles.padding;
+			canvas.style.left = styles.padding;
 
-				canvas.setAttribute('width', styles.width);
-				canvas.setAttribute('height', styles.height);
+			canvas.setAttribute('width', styles.width);
+			canvas.setAttribute('height', styles.height);
 
-				this.dom[name].appendChild(canvas);
+			this.dom[name].appendChild(canvas);
 
-				this[`${name}_ctx`] = canvas.getContext('2d');
-			});
-
+			this[`${name}_ctx`] = canvas.getContext('2d');
+		});
 
 		this.field_ctx.canvas.style.top = `${this.field_pixel_size}px`;
 		this.field_ctx.canvas.style.left = `${this.field_pixel_size}px`;
@@ -240,7 +236,7 @@ class Player {
 		// buils audio objects
 		// TODO: handle left-right channel
 		this.sounds = {
-			tetris: new Audio('/views/Tetris_Clear.mp3')
+			tetris: new Audio('/views/Tetris_Clear.mp3'),
 		};
 
 		this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
@@ -265,14 +261,14 @@ class Player {
 			let remaining_frames = 12;
 
 			const steps = () => {
-				const bg_color = (--remaining_frames % 2) ? 'white' : 'rgba(0,0,0,0)';
+				const bg_color = --remaining_frames % 2 ? 'white' : 'rgba(0,0,0,0)';
 
 				this.field_bg.style.background = bg_color;
 
 				if (remaining_frames > 0) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				}
-			}
+			};
 
 			this.tetris_animation_ID = window.requestAnimationFrame(steps);
 		}
@@ -312,8 +308,8 @@ class Player {
 		this.burn = 0;
 
 		this.piece_stats = {
-			frame: PIECES.reduce((acc, p) => (acc[p] = 0, acc), { count: 0 }),
-			board: PIECES.reduce((acc, p) => (acc[p] = 0, acc), { count: 0 }),
+			frame: PIECES.reduce((acc, p) => ((acc[p] = 0), acc), { count: 0 }),
+			board: PIECES.reduce((acc, p) => ((acc[p] = 0), acc), { count: 0 }),
 		};
 
 		this.lines_trt = 0;
@@ -333,9 +329,18 @@ class Player {
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
 		this.dom.score.textContent = this.options.format_score(this.score);
-		this.dom.runway_tr.textContent = this.options.format_score(this.tr_runway_score, 6);
-		this.dom.runway_game.textContent = this.options.format_score(this.game_runway_score, 7);
-		this.dom.projection.textContent = this.options.format_score(this.projection, 7);
+		this.dom.runway_tr.textContent = this.options.format_score(
+			this.tr_runway_score,
+			6
+		);
+		this.dom.runway_game.textContent = this.options.format_score(
+			this.game_runway_score,
+			7
+		);
+		this.dom.projection.textContent = this.options.format_score(
+			this.projection,
+			7
+		);
 		this.dom.trt.textContent = '---';
 		this.dom.eff.textContent = '---';
 		this.dom.burn.textContent = 0;
@@ -375,7 +380,7 @@ class Player {
 		this.peerid = peerid;
 
 		if (!peerid) {
-			this.dom.video.srcObject = null
+			this.dom.video.srcObject = null;
 		}
 	}
 
@@ -450,8 +455,7 @@ class Player {
 
 			if (cur_piece === 'I') {
 				drought_change = -this.drought;
-			}
-			else {
+			} else {
 				drought_change = 1;
 			}
 
@@ -459,8 +463,10 @@ class Player {
 			// TODO: Add more resilience here (wait for good data)
 			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
 				const piece_stats = this._getPieceStats(data);
-				const diff = piece_stats.count - this.piece_stats.frame.count
-				const sane_state = PIECES.every(piece => piece_stats[piece] >= this.piece_stats.frame[piece]);
+				const diff = piece_stats.count - this.piece_stats.frame.count;
+				const sane_state = PIECES.every(
+					(piece) => piece_stats[piece] >= this.piece_stats.frame[piece]
+				);
 
 				has_change = sane_state && diff;
 
@@ -470,15 +476,15 @@ class Player {
 					this.pending_piece = true;
 					this.piece_stats.board[cur_piece]--;
 					this.piece_stats.board.count--;
-				}
-				else {
+				} else {
 					const i_diff = piece_stats.I - this.piece_stats.frame.I;
 
 					if (i_diff === 0) {
 						drought_change = diff; // expected to be +1 in most cases
-						cur_piece = PIECES.find(piece => piece_stats[piece] != this.piece_stats.frame[piece]);
-					}
-					else {
+						cur_piece = PIECES.find(
+							(piece) => piece_stats[piece] != this.piece_stats.frame[piece]
+						);
+					} else {
 						drought_change = -this.drought;
 						cur_piece = 'I';
 					}
@@ -494,26 +500,27 @@ class Player {
 					if (this.drought >= 13) {
 						this.onDroughtEnd(this.drought);
 					}
-				}
-				else if (drought === 13) {
+				} else if (drought === 13) {
 					if (this.drought < 13) {
 						this.onDroughtStart();
 					}
 				}
 
 				this.drought = drought;
-				this.dom.drought.textContent = this.options.format_drought(this.drought);
+				this.dom.drought.textContent = this.options.format_drought(
+					this.drought
+				);
 				this.prev_preview = data.preview;
 
 				this.pieces.push(cur_piece);
 				this.onPiece(cur_piece);
 			}
-		}
-		else {
+		} else {
 			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
-				this.pending_piece = PIECES.some(piece => this.piece_stats.frame[piece] != data[piece]);
-			}
-			else {
+				this.pending_piece = PIECES.some(
+					(piece) => this.piece_stats.frame[piece] != data[piece]
+				);
+			} else {
 				allow_field_piece_spawn_detection = true;
 			}
 		}
@@ -536,18 +543,31 @@ class Player {
 			this.game_over = true;
 
 			this.tr_runway_score = this.getTransitionRunwayScore();
-			this.dom.runway_tr.textContent = this.options.format_score(this.tr_runway_score, 7);
+			this.dom.runway_tr.textContent = this.options.format_score(
+				this.tr_runway_score,
+				7
+			);
 
 			this.game_runway_score = this.getGameRunwayScore();
-			this.dom.runway_game.textContent = this.options.format_score(this.game_runway_score, 7);
+			this.dom.runway_game.textContent = this.options.format_score(
+				this.game_runway_score,
+				7
+			);
 
 			this.projection = this.getProjection();
-			this.dom.projection.textContent = this.options.format_score(this.projection, 7);
+			this.dom.projection.textContent = this.options.format_score(
+				this.projection,
+				7
+			);
 
 			this.onGameOver();
-		}
-		else {
-			this.updateField(data.field, num_blocks, field_string, allow_field_piece_spawn_detection);
+		} else {
+			this.updateField(
+				data.field,
+				num_blocks,
+				field_string,
+				allow_field_piece_spawn_detection
+			);
 		}
 
 		if (this.pending_score) {
@@ -565,12 +585,10 @@ class Player {
 
 			if (data.score === 999999 && this.score + line_score >= 999999) {
 				this.score += line_score;
-			}
-			else if (data.score < this.score) {
+			} else if (data.score < this.score) {
 				// weird readings... wait one more frame
 				return;
-			}
-			else {
+			} else {
 				this.score = data.score;
 			}
 
@@ -585,13 +603,12 @@ class Player {
 						this._doTetris();
 					}
 					this.burn = 0;
-				}
-				else {
+				} else {
 					this.burn += cleared;
 				}
 
-				const line_value = cleared <= 4 ? EFF_LINE_VALUES[cleared] : EFF_LINE_VALUES[1];
-
+				const line_value =
+					cleared <= 4 ? EFF_LINE_VALUES[cleared] : EFF_LINE_VALUES[1];
 
 				this.total_eff += line_value * cleared;
 
@@ -601,7 +618,9 @@ class Player {
 				this.clear_events.push({ trt, eff, cleared });
 				this.dom.burn.textContent = this.burn;
 				this.dom.trt.textContent = getPercent(trt);
-				this.dom.eff.textContent = (Math.round(eff) || 0).toString().padStart(3, '0');
+				this.dom.eff.textContent = (Math.round(eff) || 0)
+					.toString()
+					.padStart(3, '0');
 				this.renderRunningTRT();
 				this.lines = lines;
 
@@ -616,18 +635,29 @@ class Player {
 
 			if (this.transition === null) {
 				this.tr_runway_score = this.getTransitionRunwayScore();
-				this.dom.runway_tr.textContent = this.options.format_score(this.tr_runway_score, 6);
+				this.dom.runway_tr.textContent = this.options.format_score(
+					this.tr_runway_score,
+					6
+				);
 			}
 
 			this.game_runway_score = this.getGameRunwayScore();
-			this.dom.runway_game.textContent = this.options.format_score(this.game_runway_score, 7);
+			this.dom.runway_game.textContent = this.options.format_score(
+				this.game_runway_score,
+				7
+			);
 
 			this.projection = this.getProjection();
-			this.dom.projection.textContent = this.options.format_score(this.projection, 7);
-		}
-		else if (data.score != null) {
+			this.dom.projection.textContent = this.options.format_score(
+				this.projection,
+				7
+			);
+		} else if (data.score != null) {
 			// added extra checks here due to data.score always being different to this.score after maxout
-			if ((data.score != this.score && data.score != 999999) || (data.score == 999999 && lines != this.lines)) {
+			if (
+				(data.score != this.score && data.score != 999999) ||
+				(data.score == 999999 && lines != this.lines)
+			) {
 				this.pending_score = true;
 			}
 		}
@@ -644,11 +674,11 @@ class Player {
 	getTransitionRunwayScore() {
 		if (this.game_over) {
 			return this.score;
-		}
-		else if (this.transition === null) {
-			return this.score + getRunway(this.start_level, RUNWAY.TRANSITION, this.lines);
-		}
-		else {
+		} else if (this.transition === null) {
+			return (
+				this.score + getRunway(this.start_level, RUNWAY.TRANSITION, this.lines)
+			);
+		} else {
 			return this.transition;
 		}
 	}
@@ -661,7 +691,9 @@ class Player {
 
 		const eff = (this.lines ? this.total_eff / this.lines : 300) / 300;
 
-		return Math.floor(this.score + eff * getRunway(this.start_level, RUNWAY.GAME, this.lines));
+		return Math.floor(
+			this.score + eff * getRunway(this.start_level, RUNWAY.GAME, this.lines)
+		);
 	}
 
 	renderPreview(level, preview) {
@@ -671,11 +703,10 @@ class Player {
 
 		this.current_preview = piece_id;
 
-		const
-			ctx              = this.preview_ctx,
-			col_index        = PIECE_COLORS[preview],
+		const ctx = this.preview_ctx,
+			col_index = PIECE_COLORS[preview],
 			pixels_per_block = this.preview_pixel_size * (7 + 1),
-			positions        = [];
+			positions = [];
 
 		ctx.clear();
 
@@ -685,21 +716,19 @@ class Player {
 			// top-right alignment
 			pos_y = 0;
 			x_offset_3 = Math.ceil(ctx.canvas.width - pixels_per_block * 3);
-		}
-		else {
+		} else {
 			// default is center
-			pos_y      = Math.ceil((ctx.canvas.height - pixels_per_block * 2) / 2);
+			pos_y = Math.ceil((ctx.canvas.height - pixels_per_block * 2) / 2);
 			x_offset_3 = Math.ceil((ctx.canvas.width - pixels_per_block * 3) / 2);
 		}
 
 		let x_idx = 0;
 
-		switch(preview) {
+		switch (preview) {
 			case 'I':
 				if (this.options.preview_align == 'tr') {
 					pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 4);
-				}
-				else {
+				} else {
 					pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 4) / 2);
 					pos_y = Math.ceil((ctx.canvas.height - pixels_per_block) / 2);
 				}
@@ -713,9 +742,13 @@ class Player {
 			case 'O':
 				if (this.options.preview_align == 'tr') {
 					pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 2);
-				}
-				else {
-					pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 2 + this.preview_pixel_size) / 2);
+				} else {
+					pos_x = Math.ceil(
+						(ctx.canvas.width -
+							pixels_per_block * 2 +
+							this.preview_pixel_size) /
+							2
+					);
 				}
 
 				positions.push([pos_x, pos_y]);
@@ -730,31 +763,37 @@ class Player {
 				// top line is the same for both pieces
 				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
 				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
-				positions.push([x_offset_3 + x_idx   * pixels_per_block, pos_y]);
+				positions.push([x_offset_3 + x_idx * pixels_per_block, pos_y]);
 
 				if (preview == 'L') {
 					x_idx = 0;
-				}
-				else if (preview == 'T') {
+				} else if (preview == 'T') {
 					x_idx = 1;
-				}
-				else {
+				} else {
 					x_idx = 2;
 				}
 
-				positions.push([x_offset_3 + x_idx * pixels_per_block, pos_y + pixels_per_block]);
+				positions.push([
+					x_offset_3 + x_idx * pixels_per_block,
+					pos_y + pixels_per_block,
+				]);
 				break;
 
 			case 'Z':
 			case 'S':
 				positions.push([x_offset_3 + pixels_per_block, pos_y]);
-				positions.push([x_offset_3 + pixels_per_block, pos_y + pixels_per_block]);
+				positions.push([
+					x_offset_3 + pixels_per_block,
+					pos_y + pixels_per_block,
+				]);
 
 				if (preview == 'Z') {
 					positions.push([x_offset_3, pos_y]);
-					positions.push([x_offset_3 + pixels_per_block * 2, pos_y + pixels_per_block]);
-				}
-				else {
+					positions.push([
+						x_offset_3 + pixels_per_block * 2,
+						pos_y + pixels_per_block,
+					]);
+				} else {
 					positions.push([x_offset_3, pos_y + pixels_per_block]);
 					positions.push([x_offset_3 + pixels_per_block * 2, pos_y]);
 				}
@@ -801,7 +840,7 @@ class Player {
 		// Note: diff.stage_blocks can be negative at weird amounts when the piece is rotated
 		// while still being at the top of the field with some block moved out of view
 
-		switch(block_diff) {
+		switch (block_diff) {
 			case -8:
 				if (this.options.reliable_field) {
 					this._doTetris();
@@ -809,20 +848,20 @@ class Player {
 			case -6:
 				// indicate animation for triples and tetris
 				this.clear_animation_remaining_frames = CLEAR_ANIMATION_NUM_FRAMES - 1;
-				this.field_num_blocks += (block_diff * 5); // equivalent to fast forward on how many blocks will have gone after the animation
+				this.field_num_blocks += block_diff * 5; // equivalent to fast forward on how many blocks will have gone after the animation
 
 				break;
 
 			case -4:
 				if (this.pending_single) {
 					// verified single (second frame of clear animation)
-					this.clear_animation_remaining_frames = CLEAR_ANIMATION_NUM_FRAMES - 2;
+					this.clear_animation_remaining_frames =
+						CLEAR_ANIMATION_NUM_FRAMES - 2;
 					this.field_num_blocks -= 10;
-				}
-				else
-				{
+				} else {
 					// genuine double
-					this.clear_animation_remaining_frames = CLEAR_ANIMATION_NUM_FRAMES - 1;
+					this.clear_animation_remaining_frames =
+						CLEAR_ANIMATION_NUM_FRAMES - 1;
 					this.field_num_blocks -= 20;
 				}
 
@@ -870,8 +909,7 @@ class Player {
 	}
 
 	renderRunningTRT() {
-		const
-			ctx = this.running_trt_ctx,
+		const ctx = this.running_trt_ctx,
 			current_trt = peek(this.clear_events).trt,
 			pixel_size_line_clear = 4,
 			pixel_size_baseline = 2;
@@ -887,20 +925,14 @@ class Player {
 		y_scale = (ctx.canvas.height - pixel_size_line_clear) / pixel_size;
 
 		const pos_y = Math.round(
-			((1 - current_trt) * y_scale * pixel_size)
-			+
-			(pixel_size_line_clear - pixel_size_baseline) / 2
+			(1 - current_trt) * y_scale * pixel_size +
+				(pixel_size_line_clear - pixel_size_baseline) / 2
 		);
 
 		ctx.fillStyle = 'grey'; // '#686868';
 
 		for (let idx = max_pixels; idx--; ) {
-			ctx.fillRect(
-				idx * (pixel_size + 1),
-				pos_y,
-				pixel_size,
-				pixel_size
-			);
+			ctx.fillRect(idx * (pixel_size + 1), pos_y, pixel_size, pixel_size);
 		}
 
 		// Show the individual line clear events
@@ -908,11 +940,10 @@ class Player {
 		max_pixels = Math.floor(ctx.canvas.width / (pixel_size + 1));
 		y_scale = (ctx.canvas.height - pixel_size) / pixel_size;
 
-		let
-			to_draw = this.clear_events.slice(-1 * max_pixels),
+		let to_draw = this.clear_events.slice(-1 * max_pixels),
 			len = to_draw.length;
 
-		for (let idx = len; idx--;) {
+		for (let idx = len; idx--; ) {
 			const { cleared, trt } = to_draw[idx];
 			const color = LINES[cleared] ? LINES[cleared].color : 'grey';
 
@@ -941,7 +972,7 @@ class Player {
 	playWinnerAnimation() {
 		this.winner_frame = 0;
 		this.clearField();
-		this.winner_animation_id = setInterval(this.renderWinnerFrame, 1000/18);
+		this.winner_animation_id = setInterval(this.renderWinnerFrame, 1000 / 18);
 	}
 
 	clearWinnerAnimation() {
@@ -999,8 +1030,7 @@ class Player {
 			if (is_winner) {
 				level = Math.floor(offset / 3) % 10;
 				color = (offset % 3) + 1;
-			}
-			else {
+			} else {
 				// ugly grey piece
 				level = 6;
 				color = 3;

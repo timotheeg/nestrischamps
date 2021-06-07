@@ -27,11 +27,12 @@ class LevelFixer {
 		// what's the logic? 🤔
 
 		// Fix the levels with no ambiguity
-		if (digits[0] === 0x1 && digits[1] === 0xE) { // 1E -> 33
+		if (digits[0] === 0x1 && digits[1] === 0xe) {
+			// 1E -> 33
 			digits[0] = 0x3;
 			digits[1] = 0x3;
-		}
-		else if (digits[0] === 0x3 && digits[1] === 0x2) { // 32 -> 35
+		} else if (digits[0] === 0x3 && digits[1] === 0x2) {
+			// 32 -> 35
 			digits[0] = 0x3;
 			digits[1] = 0x5;
 		}
@@ -41,8 +42,8 @@ class LevelFixer {
 			// 00 - could be 00 or 30
 			if (digits[0] === 0x0 && digits[1] === 0x0) {
 				if (
-					(this.last_good_digits[0] === 0x2 && this.last_good_digits[1] === 0x9)
-					||
+					(this.last_good_digits[0] === 0x2 &&
+						this.last_good_digits[1] === 0x9) ||
 					(this.last_good_digits[0] === 0x3 && this.last_good_digits[1] === 0x0)
 				) {
 					digits[0] = 0x3;
@@ -50,46 +51,42 @@ class LevelFixer {
 			}
 
 			// 04 or 0A - could be 04 or 31
-			else if (digits[0] === 0x0 && (digits[1] === 0x4 || digits[1] === 0xA))  {
-				if (this.last_good_digits[0] === 0x3 && (
-					this.last_good_digits[1] === 0x0
-					||
-					this.last_good_digits[1] === 0x1
-				)) {
+			else if (digits[0] === 0x0 && (digits[1] === 0x4 || digits[1] === 0xa)) {
+				if (
+					this.last_good_digits[0] === 0x3 &&
+					(this.last_good_digits[1] === 0x0 || this.last_good_digits[1] === 0x1)
+				) {
 					digits[0] = 0x3;
 					digits[1] = 0x1;
 				}
 			}
 
 			// 14 or 1A - could be 14 or 32
-			else if (digits[0] === 0x1 && (digits[1] === 0x4 || digits[1] === 0xA))  {
-				if (this.last_good_digits[0] === 0x3 && (
-					this.last_good_digits[1] === 0x1
-					||
-					this.last_good_digits[1] === 0x2
-				)) {
+			else if (digits[0] === 0x1 && (digits[1] === 0x4 || digits[1] === 0xa)) {
+				if (
+					this.last_good_digits[0] === 0x3 &&
+					(this.last_good_digits[1] === 0x1 || this.last_good_digits[1] === 0x2)
+				) {
 					digits[0] = 0x3;
 					digits[1] = 0x2;
 				}
 			}
 
 			// 28 or 2B - could be 28 or 34
-			else if (digits[0] === 0x2 && (digits[1] === 0x8 || digits[1] === 0xB))  {
-				if (this.last_good_digits[0] === 0x3 && (
-					this.last_good_digits[1] === 0x3
-					||
-					this.last_good_digits[1] === 0x4
-				)) {
+			else if (digits[0] === 0x2 && (digits[1] === 0x8 || digits[1] === 0xb)) {
+				if (
+					this.last_good_digits[0] === 0x3 &&
+					(this.last_good_digits[1] === 0x3 || this.last_good_digits[1] === 0x4)
+				) {
 					digits[0] = 0x3;
 					digits[1] = 0x4;
 				}
 			}
 
 			// Fix all other A and B in second place, since they're impossible (at least till level 35 anyway...)
-			if (digits[1] === 0xA) {
+			if (digits[1] === 0xa) {
 				digits[1] = 0x4;
-			}
-			else if (digits[1] === 0xB) {
+			} else if (digits[1] === 0xb) {
 				digits[1] = 0x8;
 			}
 		}

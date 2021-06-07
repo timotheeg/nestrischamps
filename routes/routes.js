@@ -18,15 +18,19 @@ router.get('/', (req, res) => {
 	res.render('intro');
 });
 
-router.get('/room/admin',
+router.get(
+	'/room/admin',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
-		res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
+		res.sendFile(
+			path.join(__dirname, '../public/views/competition_admin.html')
+		);
 	}
 );
 
-router.get('/room/u/:login/admin',
+router.get(
+	'/room/u/:login/admin',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
@@ -37,11 +41,14 @@ router.get('/room/u/:login/admin',
 			return;
 		}
 
-		res.sendFile(path.join(__dirname, '../public/views/competition_admin.html'));
+		res.sendFile(
+			path.join(__dirname, '../public/views/competition_admin.html')
+		);
 	}
 );
 
-router.get('/room/producer',
+router.get(
+	'/room/producer',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
@@ -49,7 +56,8 @@ router.get('/room/producer',
 	}
 );
 
-router.get('/room/u/:login/producer',
+router.get(
+	'/room/u/:login/producer',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
@@ -65,7 +73,8 @@ router.get('/room/u/:login/producer',
 );
 
 // This route should only be allowed by admin for non-owner
-router.get('/room/u/:login/view/:layout',
+router.get(
+	'/room/u/:login/view/:layout',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
@@ -87,16 +96,16 @@ router.get('/room/u/:login/view/:layout',
 	}
 );
 
-router.get('/renderers',
+router.get(
+	'/renderers',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
-	res.render('renderers', {
-			secret: req.session.user.secret
+		res.render('renderers', {
+			secret: req.session.user.secret,
 		});
 	}
 );
-
 
 // TODO: uniformalize the alyout and file names
 // TODO: AND uniformalize the way the layout understnd incoming data
@@ -123,6 +132,5 @@ router.get('/replay/:layout/:gamedef', (req, res) => {
 
 	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
 });
-
 
 module.exports = router;

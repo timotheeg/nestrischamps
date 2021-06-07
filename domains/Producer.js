@@ -30,7 +30,7 @@ class Producer extends EventEmitter {
 			}
 		});
 
-		connection.once('error', err => {
+		connection.once('error', (err) => {
 			this.endGame();
 			this.emit('error', err);
 		});
@@ -55,7 +55,7 @@ class Producer extends EventEmitter {
 			this.setGame();
 
 			this.game.setFrame(frame);
-		}
+		};
 	}
 
 	endGame() {

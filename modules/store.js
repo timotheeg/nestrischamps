@@ -16,9 +16,6 @@ module.exports = function getStore(id) {
 	}
 
 	return stores[id];
-}
-
-
-
+};
 
 const store = require('./modules/store')();

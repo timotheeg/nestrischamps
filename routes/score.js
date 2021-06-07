@@ -2,8 +2,7 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 
-const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
 const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
@@ -41,7 +40,8 @@ router.get('/pb/:secret', async (req, res) => {
 	res.json(await ScoreDAO.getPB(user, since));
 });
 
-router.get('/u/:login/get_stats',
+router.get(
+	'/u/:login/get_stats',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
@@ -58,7 +58,8 @@ router.get('/u/:login/get_stats',
 	}
 );
 
-router.get('/get_stats',
+router.get(
+	'/get_stats',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
@@ -74,7 +75,6 @@ router.get('/get_stats',
 		res.json(await ScoreDAO.getStats(user));
 	}
 );
-
 
 router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log('Reporting game by secret');
@@ -137,7 +137,8 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log('Sent new scores back');
 });
 
-router.get('/scores',
+router.get(
+	'/scores',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
@@ -182,11 +183,14 @@ router.get('/scores',
 	}
 );
 
-router.get('/scores/:id',
+router.get(
+	'/scores/:id',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
-		console.log(`User ${req.session.user.id} is getting score ${req.params.id}`);
+		console.log(
+			`User ${req.session.user.id} is getting score ${req.params.id}`
+		);
 		const score = await ScoreDAO.getScore(req.session.user, req.params.id);
 
 		if (score) {
@@ -201,27 +205,42 @@ router.get('/scores/:id',
 	}
 );
 
-router.delete('/scores/:id',
+router.delete(
+	'/scores/:id',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
-		console.log(`User ${req.session.user.id} is deleting score ${req.params.id}`);
+		console.log(
+			`User ${req.session.user.id} is deleting score ${req.params.id}`
+		);
 
 		const score = await ScoreDAO.getScore(req.session.user, req.params.id);
 
 		await ScoreDAO.deleteScore(req.session.user, req.params.id);
 
 		if (score && score.frame_file) {
-			const s3_client = new S3Client({ region: process.env.GAME_FRAMES_REGION });
+			const s3_client = new S3Client({
+				region: process.env.GAME_FRAMES_REGION,
+			});
 
 			// fire and forget, and log
-			s3_client.send(new DeleteObjectCommand({
-				Bucket: process.env.GAME_FRAMES_BUCKET,
-				Key: score.frame_file,
-			})).then(
-				() => console.log(`Deleted game ${req.params.id}'s' file ${score.frame_file}`),
-				(err) => console.log(`Unable to delete game ${req.params.id}'s' file ${score.frame_file}: ${err.message}`)
-			);
+			s3_client
+				.send(
+					new DeleteObjectCommand({
+						Bucket: process.env.GAME_FRAMES_BUCKET,
+						Key: score.frame_file,
+					})
+				)
+				.then(
+					() =>
+						console.log(
+							`Deleted game ${req.params.id}'s' file ${score.frame_file}`
+						),
+					(err) =>
+						console.log(
+							`Unable to delete game ${req.params.id}'s' file ${score.frame_file}: ${err.message}`
+						)
+				);
 		}
 
 		res.json({ status: 'ok' });

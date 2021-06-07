@@ -13,45 +13,43 @@ class ScoreDAO {
 				],
 				high_scores: {
 					overall: await this._getBestOverall(db_client, user),
-					today:   await this._getBest24Hours(db_client, user)
-				}
+					today: await this._getBest24Hours(db_client, user),
+				},
 			};
-		}
-		catch(err) {
+		} catch (err) {
 			console.log('Error getting user stats');
 			console.error(err);
 			return {};
-		}
-		finally {
+		} finally {
 			db_client.release();
 		}
 	}
 
 	async _getPBs(db_client, user, start_level) {
-		const result = await db_client.query(`
+		const result = await db_client.query(
+			`
 			SELECT start_level, end_level, score, lines, das_avg, max_drought, tetris_rate
 			FROM scores
 			WHERE player_id=$1 and start_level=$2
 			ORDER BY score DESC
 			LIMIT 1
 			`,
-			[
-				user.id, start_level
-			]
+			[user.id, start_level]
 		);
 
 		return result.rows[0];
 	}
 
 	async _getBestOverall(db_client, user) {
-		const result = await db_client.query(`
+		const result = await db_client.query(
+			`
 			SELECT start_level, score, tetris_rate
 			FROM scores
 			WHERE player_id=$1
 			ORDER BY score DESC
 			LIMIT 10
 			`,
-			[ user.id ]
+			[user.id]
 		);
 
 		return result.rows;
@@ -59,13 +57,10 @@ class ScoreDAO {
 
 	async _getBestToday(db_client, user) {
 		const now = new Date();
-		const today = new Date(
-			now.getFullYear(),
-			now.getMonth(),
-			now.getDate()
-		);
+		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-		const result = await db_client.query(`
+		const result = await db_client.query(
+			`
 			SELECT start_level, score, tetris_rate
 			FROM scores
 			WHERE player_id=$1
@@ -73,17 +68,15 @@ class ScoreDAO {
 			ORDER BY score DESC
 			LIMIT 10
 			`,
-			[
-				user.id,
-				today.toISOString(),
-			]
+			[user.id, today.toISOString()]
 		);
 
 		return result.rows;
 	}
 
 	async _getBest24Hours(db_client, user) {
-		const result = await db_client.query(`
+		const result = await db_client.query(
+			`
 			SELECT start_level, score, tetris_rate
 			FROM scores
 			WHERE player_id=$1
@@ -92,14 +85,15 @@ class ScoreDAO {
 			ORDER BY score DESC
 			LIMIT 10
 			`,
-			[ user.id ]
+			[user.id]
 		);
 
 		return result.rows;
 	}
 
-	async getPB(user, since=0) {
-		const result = await dbPool.query(`
+	async getPB(user, since = 0) {
+		const result = await dbPool.query(
+			`
 				SELECT score
 				FROM scores
 				WHERE player_id = $1
@@ -107,16 +101,12 @@ class ScoreDAO {
 				ORDER BY score DESC
 				LIMIT 1
 			`,
-			[
-				user.id,
-				since
-			]
+			[user.id, since]
 		);
 
 		try {
 			return parseInt(result.rows[0].score, 10);
-		}
-		catch(err) {
+		} catch (err) {
 			return 0;
 		}
 	}
@@ -124,7 +114,8 @@ class ScoreDAO {
 	async recordGame(user, game_data) {
 		if (!game_data) return;
 
-		const result = await dbPool.query(`
+		const result = await dbPool.query(
+			`
 			INSERT INTO scores
 			(
 				datetime,
@@ -173,12 +164,13 @@ class ScoreDAO {
 	}
 
 	async getNumberOfScores(user) {
-		const result = await dbPool.query(`
+		const result = await dbPool.query(
+			`
 				SELECT count(*)
 				FROM scores
 				WHERE player_id=$1
 			`,
-			[ user.id ]
+			[user.id]
 		);
 
 		return parseInt(result.rows[0].count, 10);
@@ -191,49 +183,53 @@ class ScoreDAO {
 			page_size: 100,
 			page_idx: 0,
 
-			...options
+			...options,
 		};
 
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
-		const result = await dbPool.query(`
+		const result = await dbPool.query(
+			`
 				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration, frame_file
 				FROM scores
 				WHERE player_id=$1
 				ORDER BY ${options.sort_field} ${options.sort_order}
 				LIMIT ${options.page_size} OFFSET ${options.page_size * options.page_idx}
 			`,
-			[ user.id ]
+			[user.id]
 		);
 
 		return result.rows;
 	}
 
 	async deleteScore(user, score_id) {
-		return dbPool.query(`
+		return dbPool.query(
+			`
 			DELETE FROM scores
 			WHERE player_id=$1 AND id=$2
 			`,
-			[ user.id, score_id ]
+			[user.id, score_id]
 		);
 	}
 
 	async getScore(user, score_id) {
-		const result = await dbPool.query(`
+		const result = await dbPool.query(
+			`
 			SELECT * FROM scores
 			WHERE player_id=$1 AND id=$2
 			`,
-			[ user.id, score_id ]
+			[user.id, score_id]
 		);
 
 		return result.rows[0];
 	}
 
 	async getAnonymousScore(score_id) {
-		const result = await dbPool.query(`
+		const result = await dbPool.query(
+			`
 			SELECT * FROM scores
 			WHERE id=$1
 			`,
-			[ score_id ]
+			[score_id]
 		);
 
 		return result.rows[0];
@@ -241,4 +237,3 @@ class ScoreDAO {
 }
 
 module.exports = new ScoreDAO();
-
