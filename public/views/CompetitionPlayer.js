@@ -54,8 +54,9 @@ class CompetitionPlayer extends Player {
 		const absDiff = Math.abs(diff);
 
 		this.dom.runway_diff.textContent = this.options.format_score(absDiff);
-		this.dom.runway_t_diff.textContent =
-			this.options.format_tetris_diff(t_diff);
+		this.dom.runway_t_diff.textContent = this.options.format_tetris_diff(
+			t_diff
+		);
 	}
 
 	setProjectionDiff(diff, t_diff) {
@@ -75,7 +76,8 @@ class CompetitionPlayer extends Player {
 		const absDiff = Math.abs(diff);
 
 		this.dom.projection_diff.textContent = this.options.format_score(absDiff);
-		this.dom.projection_t_diff.textContent =
-			this.options.format_tetris_diff(t_diff);
+		this.dom.projection_t_diff.textContent = this.options.format_tetris_diff(
+			t_diff
+		);
 	}
 }

@@ -102,7 +102,7 @@ class DomRefs {
 			element: pbs,
 		};
 
-		['s18', 's19'].forEach((level_class) => {
+		['s18', 's19'].forEach(level_class => {
 			this.pbs[level_class] = {
 				start_level: pbs.querySelector(`.${level_class} .start_level`),
 				end_level: pbs.querySelector(`.${level_class} .end_level`),
@@ -181,7 +181,7 @@ class DomRefs {
 			count: lines_stats.querySelector('.header .count'),
 		};
 
-		['singles', 'doubles', 'triples', 'tetris'].forEach((category) => {
+		['singles', 'doubles', 'triples', 'tetris'].forEach(category => {
 			const row = lines_stats.querySelector(`tr.${category}`);
 
 			this.lines_stats[category] = {
@@ -201,7 +201,7 @@ class DomRefs {
 			count: points.querySelector('.header .count'),
 		};
 
-		['drops', 'singles', 'doubles', 'triples', 'tetris'].forEach((category) => {
+		['drops', 'singles', 'doubles', 'triples', 'tetris'].forEach(category => {
 			const row = points.querySelector(`tr.${category}`);
 
 			this.points[category] = {
@@ -223,7 +223,7 @@ class DomRefs {
 			deviation: piece_stats.querySelector(`.header .deviation_all`),
 		};
 
-		PIECES.forEach((name) => {
+		PIECES.forEach(name => {
 			const piece_row = piece_stats.querySelector(`.piece.${name}`);
 
 			this.pieces[name] = {

@@ -26,12 +26,12 @@ function getCaptureCoordinates(template_id, capture_id) {
 
 	// console.log('matches', local_matches);
 
-	const src_pts = local_matches.map((m) => {
+	const src_pts = local_matches.map(m => {
 		const pt = kp1.get(m.queryIdx).pt;
 		return [pt.x, pt.y];
 	});
 
-	const dst_pts = local_matches.map((m) => {
+	const dst_pts = local_matches.map(m => {
 		const pt = kp2.get(m.trainIdx).pt;
 		return [pt.x, pt.y];
 	});
@@ -65,7 +65,7 @@ function getCaptureCoordinates(template_id, capture_id) {
 	const target_pts = new ocv.Mat();
 	ocv.perspectiveTransform(boundary_pts, target_pts, transform);
 
-	const [l, t, r, b] = target_pts.data64F.map((v) => v + 0);
+	const [l, t, r, b] = target_pts.data64F.map(v => v + 0);
 
 	// return in [x,y,w,h] format
 	return [l, t, r - l, b - t];

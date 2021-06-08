@@ -109,19 +109,19 @@ let ocr_corrector;
 let config;
 let connection;
 
-device_selector.addEventListener('change', (evt) => {
+device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
 	playVideoFromConfig();
 	checkActivateGoButton();
 });
 
 palette_selector.disabled = true;
-palette_selector.addEventListener('change', (evt) => {
+palette_selector.addEventListener('change', evt => {
 	config.palette = palette_selector.value;
 	checkActivateGoButton();
 });
 
-rom_selector.addEventListener('change', (evt) => {
+rom_selector.addEventListener('change', evt => {
 	if (rom_selector.value === 'classic') {
 		color_matching.style.display = 'block';
 		palette_selector.value = '';
@@ -252,12 +252,12 @@ function stopSharingVideoFeed() {
 conn_host.addEventListener('change', connect);
 conn_port.addEventListener('change', connect);
 
-clear_config.addEventListener('click', (evt) => {
+clear_config.addEventListener('click', evt => {
 	localStorage.clear();
 	location.reload();
 });
 
-start_timer.addEventListener('click', (evt) => {
+start_timer.addEventListener('click', evt => {
 	// minutes are valid per markup restrictions
 	const minutes = parseInt(document.querySelector('#minutes').value, 10);
 
@@ -265,7 +265,7 @@ start_timer.addEventListener('click', (evt) => {
 });
 
 go_btn.disabled = true;
-go_btn.addEventListener('click', async (evt) => {
+go_btn.addEventListener('click', async evt => {
 	if (device_selector.value == 0) return;
 
 	device_selector.disabled = true;
@@ -289,7 +289,7 @@ go_btn.addEventListener('click', async (evt) => {
 
 	video_capture.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0);
 
-	await new Promise((resolve) => {
+	await new Promise(resolve => {
 		setTimeout(resolve, 0); // wait one tick for everything to be drawn nicely... just in case
 	});
 
@@ -317,7 +317,7 @@ go_btn.addEventListener('click', async (evt) => {
 
 	console.log('scale factors', xscale, yscale);
 
-	rom_config.fields.forEach((name) => {
+	rom_config.fields.forEach(name => {
 		config.tasks[name] = JSON.parse(JSON.stringify(reference_locations[name]));
 
 		const crop = config.tasks[name].crop;
@@ -366,7 +366,7 @@ function resetShowPartsTimer() {
 }
 
 function loadImage(img, src) {
-	return new Promise((resolve) => {
+	return new Promise(resolve => {
 		img.onload = resolve;
 		img.src = src;
 	});
@@ -380,11 +380,11 @@ function updatePaletteList() {
 			label: 'Read from frame',
 			value: '',
 		},
-		...Object.keys(palettes).map((value) => ({
+		...Object.keys(palettes).map(value => ({
 			label: `${value} palette`,
 			value,
 		})),
-	].forEach((option) => {
+	].forEach(option => {
 		const palette_option = document.createElement('option');
 		palette_option.text = option.label;
 		palette_option.value = option.value;
@@ -411,7 +411,7 @@ function updateDeviceList(devices) {
 			deviceId: 'window',
 		},
 		...devices,
-	].forEach((camera) => {
+	].forEach(camera => {
 		const camera_option = document.createElement('option');
 		camera_option.text = camera.label;
 		camera_option.value = camera.deviceId;
@@ -440,7 +440,7 @@ async function getConnectedDevices(type) {
 	}
 
 	return (await navigator.mediaDevices.enumerateDevices()).filter(
-		(device) => device.kind === type && device.deviceId
+		device => device.kind === type && device.deviceId
 	);
 }
 
@@ -522,7 +522,7 @@ async function playVideoFromConfig() {
 
 	capture_rate
 		.querySelectorAll('.device_only')
-		.forEach((elmt) => (elmt.hidden = config.device_id === 'window'));
+		.forEach(elmt => (elmt.hidden = config.device_id === 'window'));
 }
 
 let capture_process, blob;
@@ -687,7 +687,7 @@ function showColorControls(palettes, config) {
 	const color_fieldset = document.querySelector(`fieldset.color1`);
 
 	if (color_fieldset) {
-		[1, 2, 3].forEach((num) => {
+		[1, 2, 3].forEach(num => {
 			const col_elmt = document.querySelector(`fieldset.color${num}`);
 
 			if (col_elmt) {
@@ -731,7 +731,7 @@ function addCropControls(parent, config, name, onChangeCallback) {
 		onChangeCallback(
 			config,
 			name,
-			inputs.map((input) => parseInt(input.value, 10))
+			inputs.map(input => parseInt(input.value, 10))
 		);
 	}
 
@@ -935,7 +935,7 @@ async function showParts(data) {
 
 function toCol(col_tuple) {
 	return `#${[...col_tuple]
-		.map((v) => v.toString(16).padStart(2, '0'))
+		.map(v => v.toString(16).padStart(2, '0'))
 		.join('')}`;
 }
 
@@ -1057,7 +1057,7 @@ function trackAndSendFrames() {
 		performance.mark('process_over');
 		performance.measure('total', 'capture_start', 'process_over');
 
-		performance.getEntriesByType('measure').forEach((m) => {
+		performance.getEntriesByType('measure').forEach(m => {
 			perf[m.name] = m.duration.toFixed(3);
 		});
 
@@ -1161,7 +1161,7 @@ function trackAndSendFrames() {
 		// Dynamically load openCV we need to load opencv now
 		const script = document.createElement('script');
 
-		await new Promise((resolve) => {
+		await new Promise(resolve => {
 			script.onload = resolve;
 			script.src = '/ocr/opencv.js';
 			document.head.appendChild(script);

@@ -47,7 +47,7 @@ let room_data;
 let connection;
 
 function getProducer(pid) {
-	return room_data.producers.find((producer) => producer.id == pid);
+	return room_data.producers.find(producer => producer.id == pid);
 }
 
 class Player {
@@ -59,22 +59,16 @@ class Player {
 		this.bestof = -1;
 
 		// link dom events
-		this.dom.name.onchange =
-			this.dom.name.onkeyup =
-			this.dom.name.onblur =
-				() => {
-					remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
-				};
+		this.dom.name.onchange = this.dom.name.onkeyup = this.dom.name.onblur = () => {
+			remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
+		};
 
-		this.dom.avatar_url.onchange =
-			this.dom.avatar_url.onkeyup =
-			this.dom.avatar_url.onblur =
-				() => {
-					const avatar_url = this.dom.avatar_url.value.trim();
+		this.dom.avatar_url.onchange = this.dom.avatar_url.onkeyup = this.dom.avatar_url.onblur = () => {
+			const avatar_url = this.dom.avatar_url.value.trim();
 
-					remoteAPI.setProfileImageURL(this.idx, avatar_url);
-					this.dom.avatar_img.src = avatar_url;
-				};
+			remoteAPI.setProfileImageURL(this.idx, avatar_url);
+			this.dom.avatar_img.src = avatar_url;
+		};
 
 		this.dom.producers.onchange = () =>
 			this._pickProducer(parseInt(this.dom.producers.value, 10));
@@ -92,7 +86,7 @@ class Player {
 		option.textContent = '-';
 		this.dom.producers.appendChild(option);
 
-		producers.forEach((producer) => {
+		producers.forEach(producer => {
 			const option = document.createElement('option');
 			option.value = producer.id;
 			option.textContent = producer.login;
@@ -203,7 +197,7 @@ function setState(_room_data) {
 
 function bootstrap() {
 	players = [1, 2].map(
-		(num) =>
+		num =>
 			new Player(num - 1, {
 				producers: document.querySelector(`#producers .p${num} select`),
 				name: document.querySelector(`#names .p${num} input`),
@@ -222,11 +216,8 @@ function bootstrap() {
 	dom.bestof.onchange = () =>
 		remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
 
-	dom.logo.onchange =
-		logo.onkeyup =
-		logo.onkeydown =
-		logo.onblur =
-			() => remoteAPI.setLogo(dom.logo.value.trim());
+	dom.logo.onchange = logo.onkeyup = logo.onkeydown = logo.onblur = () =>
+		remoteAPI.setLogo(dom.logo.value.trim());
 
 	dom.clear_victories.addEventListener('click', () =>
 		remoteAPI.resetVictories()

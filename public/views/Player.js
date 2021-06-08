@@ -142,7 +142,7 @@ const DEFAULT_OPTIONS = {
 
 		return v.padStart(size, ' ');
 	},
-	format_tetris_diff: (v) => {
+	format_tetris_diff: v => {
 		// ensure result is at most 4 char long
 		if (v >= 100) {
 			return Math.round(v);
@@ -152,7 +152,7 @@ const DEFAULT_OPTIONS = {
 			return v.toFixed(2);
 		}
 	},
-	format_drought: (v) => v,
+	format_drought: v => v,
 };
 
 class Player {
@@ -207,7 +207,7 @@ class Player {
 		this.dom.field.appendChild(this.field_bg);
 
 		// set up field and preview canvas
-		['field', 'preview', 'running_trt'].forEach((name) => {
+		['field', 'preview', 'running_trt'].forEach(name => {
 			console.log(name);
 
 			const styles = getComputedStyle(this.dom[name]);
@@ -465,7 +465,7 @@ class Player {
 				const piece_stats = this._getPieceStats(data);
 				const diff = piece_stats.count - this.piece_stats.frame.count;
 				const sane_state = PIECES.every(
-					(piece) => piece_stats[piece] >= this.piece_stats.frame[piece]
+					piece => piece_stats[piece] >= this.piece_stats.frame[piece]
 				);
 
 				has_change = sane_state && diff;
@@ -482,7 +482,7 @@ class Player {
 					if (i_diff === 0) {
 						drought_change = diff; // expected to be +1 in most cases
 						cur_piece = PIECES.find(
-							(piece) => piece_stats[piece] != this.piece_stats.frame[piece]
+							piece => piece_stats[piece] != this.piece_stats.frame[piece]
 						);
 					} else {
 						drought_change = -this.drought;
@@ -518,7 +518,7 @@ class Player {
 		} else {
 			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
 				this.pending_piece = PIECES.some(
-					(piece) => this.piece_stats.frame[piece] != data[piece]
+					piece => this.piece_stats.frame[piece] != data[piece]
 				);
 			} else {
 				allow_field_piece_spawn_detection = true;

@@ -30,7 +30,7 @@ class Producer extends EventEmitter {
 			}
 		});
 
-		connection.once('error', (err) => {
+		connection.once('error', err => {
 			this.endGame();
 			this.emit('error', err);
 		});
@@ -49,7 +49,7 @@ class Producer extends EventEmitter {
 
 		this.game = new Game(this.user);
 
-		this.game.onNewGame = (frame) => {
+		this.game.onNewGame = frame => {
 			console.log(`${this.user.id} is starting a new game`);
 
 			this.setGame();

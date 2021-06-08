@@ -1,18 +1,23 @@
 @font-face {
-	font-family: "Press Start";
-	src: url("/fonts/prstart.ttf");
+	font-family: 'Press Start';
+	src: url('/fonts/prstart.ttf');
 }
 
 @font-face {
-	font-family: "Press Start K";
-	src: url("/fonts/prstartk_nes_tetris_8.ttf");
+	font-family: 'Press Start K';
+	src: url('/fonts/prstartk_nes_tetris_8.ttf');
 }
 
-html, body, table, tr, th, td {
+html,
+body,
+table,
+tr,
+th,
+td {
 	margin: 0;
 	padding: 0;
 	border: 0;
-	font-family: "Press Start K", monospace;
+	font-family: 'Press Start K', monospace;
 }
 
 #stream_bg {

@@ -236,7 +236,7 @@ router.delete(
 						console.log(
 							`Deleted game ${req.params.id}'s' file ${score.frame_file}`
 						),
-					(err) =>
+					err =>
 						console.log(
 							`Unable to delete game ${req.params.id}'s' file ${score.frame_file}: ${err.message}`
 						)

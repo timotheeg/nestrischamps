@@ -41,7 +41,7 @@ class Board {
 
 		const columns = Array(10)
 			.fill()
-			.map((_) => []);
+			.map(_ => []);
 
 		let top_seen = false;
 		let top_idx = 2;

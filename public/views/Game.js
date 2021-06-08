@@ -63,7 +63,7 @@ class Game {
 			},
 		};
 
-		PIECES.forEach((name) => {
+		PIECES.forEach(name => {
 			this.data.pieces[name] = {
 				count: 0,
 				percent: 0,
@@ -72,7 +72,7 @@ class Game {
 			};
 		});
 
-		[1, 2, 3, 4].forEach((name) => {
+		[1, 2, 3, 4].forEach(name => {
 			this.data.lines[name] = {
 				count: 0,
 				lines: 0,
@@ -107,7 +107,7 @@ class Game {
 		// computation for the variance
 		let distance_square = 0;
 
-		PIECES.forEach((name) => {
+		PIECES.forEach(name => {
 			const stats = this.data.pieces[name];
 
 			stats.percent = stats.count / this.data.pieces.count;
@@ -175,7 +175,7 @@ class Game {
 			// TODO: compute over "true" bags, that would always yield 0 deviation in modern tetrises
 			const counts = {};
 
-			PIECES.forEach((name) => (counts[name] = 0));
+			PIECES.forEach(name => (counts[name] = 0));
 
 			for (let offset = 28; offset > 0; offset--) {
 				counts[game.pieces[len - offset].piece]++;
@@ -316,8 +316,8 @@ class Game {
 			gameid: this.id,
 			duration: (this.end_ts || Date.now()) - this.start_ts,
 			timeline: {
-				clears: this.line_events.map((evt) => evt.num_lines).join(''),
-				pieces: this.pieces.map((evt) => evt.piece).join(''),
+				clears: this.line_events.map(evt => evt.num_lines).join(''),
+				pieces: this.pieces.map(evt => evt.piece).join(''),
 			},
 		};
 	}

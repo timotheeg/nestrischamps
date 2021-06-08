@@ -5,7 +5,7 @@ function getPlayer(idx) {
 }
 
 function getPlayerIndexByPeerId(peerid) {
-	return players.findIndex((player) => player.peerid === peerid);
+	return players.findIndex(player => player.peerid === peerid);
 }
 
 function getOtherPlayer(idx) {
@@ -73,7 +73,7 @@ class TetrisCompetitionAPI {
 		this._repaintVictories(0);
 		this._repaintVictories(1);
 
-		players.forEach((player) => player.clearField());
+		players.forEach(player => player.clearField());
 	}
 
 	setId(player_idx, id) {

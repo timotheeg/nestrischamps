@@ -58,7 +58,7 @@ class Game {
 				// set up some logging for game file upload
 				upload.done().then(
 					() => console.log(`Game file uploaded: ${this.frame_file}`),
-					(err) =>
+					err =>
 						console.log(
 							`Unable to upload game file ${this.frame_file}: ${err.message}`
 						)
@@ -239,11 +239,11 @@ class Game {
 		}
 
 		ScoreDAO.recordGame(this.user, report).then(
-			(score_id) =>
+			score_id =>
 				console.log(
 					`Recorded new game for user ${this.user.id} with id ${score_id}`
 				),
-			(err) => {
+			err => {
 				console.log('Unable to record game');
 				console.error(err);
 				// TODO delete replay file too
@@ -295,14 +295,14 @@ class Game {
 
 		if (this.IS_CLASSIC_ROM) {
 			if (this.num_pieces === 0) {
-				cur_piece = PIECES.find((p) => data[p]); // first truthy value is piece
+				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
 			} else {
 				cur_piece = this.prior_preview; // should be in sync 🤞
 			}
 
 			// record new state
 			this.num_pieces = this._getNumPieces(data);
-			PIECES.forEach((p) => (this.data[p] = data[p]));
+			PIECES.forEach(p => (this.data[p] = data[p]));
 			this.prior_preview = data.preview;
 		} else {
 			cur_piece = data.cur_piece; // 💪

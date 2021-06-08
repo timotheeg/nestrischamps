@@ -85,7 +85,7 @@ router.get('/twitch/callback', async (req, res) => {
 			{
 				headers: {
 					'Client-Id': process.env.TWITCH_CLIENT_ID,
-					Authorization: `Bearer ${token.access_token}`,
+					'Authorization': `Bearer ${token.access_token}`,
 				},
 				searchParams: {
 					id: user_response.body.user_id,

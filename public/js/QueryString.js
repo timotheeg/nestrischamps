@@ -16,7 +16,7 @@ const QueryString = (function () {
 	location.search
 		.slice(1)
 		.split('&')
-		.forEach((token) => {
+		.forEach(token => {
 			const eq_pos = token.indexOf('=');
 
 			let key, value;

@@ -1,212 +1,204 @@
 <!DOCTYPE html>
 <html>
-<head>
-<style>
-html, body {
-	padding: 0;
-	margin: 0;
-}
+	<head>
+		<style>
+			html,
+			body {
+				padding: 0;
+				margin: 0;
+			}
 
-* {
-	font-family: "Courier New", "Andale Mono", AndaleMono, monospace;
-}
+			* {
+				font-family: 'Courier New', 'Andale Mono', AndaleMono, monospace;
+			}
 
-#stream_bg {
-	width: 1280px;
-	height: 720px;
-	overflow: hidden;
-	background: white;
-	display: flex;
-}
+			#stream_bg {
+				width: 1280px;
+				height: 720px;
+				overflow: hidden;
+				background: white;
+				display: flex;
+			}
 
-#board, #stats, #custom {
-	flex-direction: row;
-	flex-grow: 0;
-	flex-shrink: 0;
-}
+			#board,
+			#stats,
+			#custom {
+				flex-direction: row;
+				flex-grow: 0;
+				flex-shrink: 0;
+			}
 
-#stats {
-	flex-basis: 230px;
-}
+			#stats {
+				flex-basis: 230px;
+			}
 
-dl {
-	font-size: 20px;
-	padding: 0 25px;
-}
+			dl {
+				font-size: 20px;
+				padding: 0 25px;
+			}
 
-dt {
-	text-transform: uppercase;
-}
+			dt {
+				text-transform: uppercase;
+			}
 
-dd {
-	font-weight: bold;
-	word-wrap: break-word;
-	word-break: break-all;
-	overflow-wrap: break-word;
-	margin-inline-start: 30px;
-}
+			dd {
+				font-weight: bold;
+				word-wrap: break-word;
+				word-break: break-all;
+				overflow-wrap: break-word;
+				margin-inline-start: 30px;
+			}
 
-#stats dd {
-	font-size: 28px;
-}
+			#stats dd {
+				font-size: 28px;
+			}
 
-#board {
-	flex-basis: 326px;
-	font-weight: bold;
-}
+			#board {
+				flex-basis: 326px;
+				font-weight: bold;
+			}
 
-#board .content {
-	padding: 0;
-	margin: 0;
-	font-size: 30px;
-	letter-spacing: 8px;
-	margin: 0 25px 0 20px;
-}
+			#board .content {
+				padding: 0;
+				margin: 0;
+				font-size: 30px;
+				letter-spacing: 8px;
+				margin: 0 25px 0 20px;
+			}
 
-#board .content span {
-	border: solid 1px grey;
-	border-collapse: collapse;
-}
+			#board .content span {
+				border: solid 1px grey;
+				border-collapse: collapse;
+			}
 
-#custom {
-	flex-basis: 626px;
-}
+			#custom {
+				flex-basis: 626px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<fieldset id="board">
+				<legend>Board</legend>
+				<pre class="content"></pre>
+			</fieldset>
 
-</style>
-</head>
-<body>
+			<fieldset id="stats">
+				<legend>Stats</legend>
+				<dl></dl>
+			</fieldset>
 
-<div id="stream_bg">
+			<fieldset id="custom">
+				<legend>Custom Stuff</legend>
+				<dl>
+					<dt>Clears</dt>
+					<dd class="clears"></dd>
+					<dt>Pieces</dt>
+					<dd class="pieces"></dd>
+				</dl>
+				<div class="piece_sequence"></div>
+			</fieldset>
+		</div>
+		<!-- End Stream BG -->
 
-<fieldset id="board">
-	<legend>Board</legend>
-	<pre class="content"></pre>
-</fieldset>
+		<!-- Audio -->
 
-<fieldset id="stats">
-	<legend>Stats</legend>
-	<dl></dl>
-</fieldset>
+		<script src="/js/BinaryFrame.js"></script>
+		<script src="/js/QueryString.js"></script>
+		<script src="/views/constants.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/js/connection.js"></script>
+		<script src="/views/renderBlock.js"></script>
+		<script src="/views/Player.js"></script>
 
-<fieldset id="custom">
-	<legend>Custom Stuff</legend>
-	<dl>
-		<dt>Clears</dt>
-		<dd class="clears"></dd>
-		<dt>Pieces</dt>
-		<dd class="pieces"></dd>
-	</dl>
-	<div class="piece_sequence"></div>
+		<script>
+			const board_content = document.querySelector(`#board .content`);
+			const stats_dl = document.querySelector(`#stats dl`);
+			const player_fields = {};
 
-</fieldset>
+			[
+				'score',
+				'lines',
+				'level',
+				'next',
+				'trt',
+				'eff',
+				'burn',
+				'drought',
+				'runway_tr',
+				'runway_game',
+				'projection',
+			].forEach(field => {
+				const dt = document.createElement('dt');
+				dt.textContent = field.replace('_', ' ').toUpperCase();
 
-</div><!-- End Stream BG -->
+				const dd = document.createElement('dd');
 
+				player_fields[field] = dd;
 
-<!-- Audio -->
+				stats_dl.appendChild(dt);
+				stats_dl.appendChild(dd);
+			});
 
-<script src="/js/BinaryFrame.js"></script>
-<script src="/js/QueryString.js"></script>
-<script src="/views/constants.js"></script>
-<script src="/views/utils.js"></script>
-<script src="/js/connection.js"></script>
-<script src="/views/renderBlock.js"></script>
-<script src="/views/Player.js"></script>
+			const player = new Player(player_fields, {
+				tetris_sound: 0,
+				draw_field: 0,
+				reliable_field: 0,
+			});
 
-<script>
+			player.onLines = cleared => {
+				document.querySelector(
+					'dd.clears'
+				).textContent = player.clear_events.map(ev => ev.cleared).join('');
+			};
 
-const board_content = document.querySelector(`#board .content`);
-const stats_dl = document.querySelector(`#stats dl`);
-const player_fields = {
-};
+			player.onPiece = current_piece => {
+				player_fields.next.textContent = player.last_frame.preview || '';
+				document.querySelector('dd.pieces').textContent = player.pieces.join(
+					''
+				);
+			};
 
-[
-	'score',
-	'lines',
-	'level',
-	'next',
-	'trt',
-	'eff',
-	'burn',
-	'drought',
-	'runway_tr',
-	'runway_game',
-	'projection',
-]
-.forEach(field => {
-	const dt = document.createElement('dt');
-	dt.textContent = field.replace('_', ' ').toUpperCase();
+			const API = {
+				frame(player_idx, data) {
+					player.setFrame(data);
 
-	const dd = document.createElement('dd');
+					const plaintext_field = data.field.map(cell => {
+						const char = cell > 2 ? '$' : cell > 1 ? '@' : cell > 0 ? '#' : ' ';
 
-	player_fields[field] = dd;
+						return `<span>${char}</span>`;
+					});
 
-	stats_dl.appendChild(dt);
-	stats_dl.appendChild(dd);
-});
+					let rows = Array(20);
 
-const player = new Player(
-	player_fields,
-	{
-		tetris_sound: 0,
-		draw_field: 0,
-		reliable_field: 0
-	}
-);
+					for (let i = 0; i < 20; i++) {
+						row = plaintext_field.slice(i * 10, (i + 1) * 10).join('');
 
-player.onLines = cleared => {
-	document.querySelector('dd.clears').textContent = player
-		.clear_events
-		.map(ev => ev.cleared)
-		.join('');
-}
+						rows[i] = row;
+					}
 
-player.onPiece = current_piece => {
-	player_fields.next.textContent = player.last_frame.preview || '';
-	document.querySelector('dd.pieces').textContent = player.pieces.join('');
-}
+					board_content.innerHTML = rows.join('<br />');
+				},
 
-const API = {
-	frame(player_idx, data) {
-		player.setFrame(data);
+				message() {}, // noop
+			};
 
-		const plaintext_field = data.field.map(cell => {
-			const char = cell > 2 ? '$' : cell > 1 ? '@' : cell > 0 ? '#' : ' ';
+			const connection = new Connection();
 
-			return `<span>${char}</span>`;
-		});
+			connection.onMessage = function (frame) {
+				try {
+					const [method, ...args] = frame;
 
-		let rows = Array(20);
+					API[method].apply(API, args);
+				} catch (e) {
+					console.error(e);
+				}
+			};
 
-		for (let i=0; i<20; i++) {
-			row = plaintext_field.slice(i*10, (i+1)*10).join('');
-
-			rows[i] = row;
-		}
-
-		board_content.innerHTML = rows.join('<br />');
-	},
-
-	message() {} // noop
-}
-
-const connection = new Connection();
-
-connection.onMessage = function(frame) {
-	try {
-		const [method, ...args] = frame;
-
-		API[method].apply(API, args);
-	}
-	catch(e) {
-		console.error(e);
-	}
-};
-
-function onFrame(frame, debug) {
-	API.frame(0, frame, debug);
-}
-</script>
-
-</body>
-<html>
+			function onFrame(frame, debug) {
+				API.frame(0, frame, debug);
+			}
+		</script>
+	</body>
+	<html></html>
+</html>

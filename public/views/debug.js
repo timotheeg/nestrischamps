@@ -48,7 +48,7 @@ function oneFrame(debug = false) {
 	// update frame to be new format compatible
 	const frame = frames[timeline_idx++];
 
-	frame.field = frame.field.split('').map((v) => parseInt(v, 10));
+	frame.field = frame.field.split('').map(v => parseInt(v, 10));
 	frame.lines = parseInt(frame.lines, 10);
 	frame.level = parseInt(frame.level, 10);
 	frame.score = parseInt(frame.score, 10);
@@ -92,7 +92,7 @@ function createElementFromHTML(htmlString) {
 		'<div id="skip"><input class="to"></body><button class="btn">Skip to</button></div>',
 	]
 		.reverse()
-		.forEach((element_string) => {
+		.forEach(element_string => {
 			body.prepend(createElementFromHTML(element_string));
 		});
 })();

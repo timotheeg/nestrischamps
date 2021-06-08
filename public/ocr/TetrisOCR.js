@@ -67,7 +67,7 @@ const TetrisOCR = (function () {
 			this.shine_img = new ImageData(2, 3);
 
 			// decorate relevant methods to capture timings
-			PERF_METHODS.forEach((name) => {
+			PERF_METHODS.forEach(name => {
 				const method = this[name].bind(this);
 				this[name] = timingDecorator(name, method);
 			});
@@ -133,7 +133,7 @@ const TetrisOCR = (function () {
 		fixPalette() {
 			if (!this.palette) return;
 
-			this.palette = this.palette.map((colors) => {
+			this.palette = this.palette.map(colors => {
 				if (colors.length == 2) {
 					return [DEFAULT_COLOR_1, colors[0], colors[1]];
 				}
@@ -270,8 +270,8 @@ const TetrisOCR = (function () {
 
 			// round the colors if needed
 			if (res.color2) {
-				res.color2 = res.color2.map((v) => Math.round(v));
-				res.color3 = res.color3.map((v) => Math.round(v));
+				res.color2 = res.color2.map(v => Math.round(v));
+				res.color3 = res.color3.map(v => Math.round(v));
 			}
 
 			this.onMessage(res);
@@ -627,7 +627,7 @@ const TetrisOCR = (function () {
 					},
 					[0, 0, 0]
 				)
-				.map((v) => Math.sqrt(v / pix_refs.length));
+				.map(v => Math.sqrt(v / pix_refs.length));
 		}
 
 		async scanField(source_img, _colors) {
@@ -722,7 +722,7 @@ const TetrisOCR = (function () {
 							},
 							[0, 0, 0]
 						)
-						.map((v) => v / pix_refs.length); // this is an average of squares!
+						.map(v => v / pix_refs.length); // this is an average of squares!
 
 					let min_diff = 0xffffffff;
 					let min_idx = -1;

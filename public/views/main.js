@@ -3,7 +3,7 @@ const dom = new DomRefs(document);
 // initial setup for colors based con constants.js
 for (const { name, color } of Object.values(LINES)) {
 	[...document.querySelectorAll(`tr.${name} th`)].forEach(
-		(node) => (node.style.color = color)
+		node => (node.style.color = color)
 	);
 }
 
@@ -123,13 +123,13 @@ function getCurPiece(transformed) {
 	if (transformed.cur_piece) return transformed.cur_piece;
 
 	if (transformed.total_piece_count === 1) {
-		return PIECES.find((p) => transformed[p] === 1);
+		return PIECES.find(p => transformed[p] === 1);
 	}
 
 	// compare with last valid_state
 	// return first difference (assumes +1 jump .. could verify that or print warning?)
 	// if there are frame drop, this may be incorrect...
-	const piece = PIECES.find((p) => transformed[p] != last_valid_state[p]);
+	const piece = PIECES.find(p => transformed[p] != last_valid_state[p]);
 
 	// piece may beundefined, at the beginning of capture for classic rom
 	// the capture starts mid-game, there's no cur_piece supplied
@@ -379,7 +379,7 @@ function getStats() {
 			},
 			// mode: 'no-cors'
 		})
-			.then((response) => response.json())
+			.then(response => response.json())
 			.then(renderPastGamesAndPBs)
 			.catch(console.error); // noop
 	}
@@ -430,7 +430,7 @@ function clearStage() {
 
 function renderPastGamesAndPBs(data) {
 	// pbs
-	data.pbs.forEach((record) => {
+	data.pbs.forEach(record => {
 		if (!record) return;
 
 		const row = dom.pbs[`s${record.start_level}`];
@@ -465,14 +465,14 @@ function renderPastGamesAndPBs(data) {
 		dom.high_scores.element.clientHeight > 200 ? 10 : 5;
 
 	// high scores
-	['today', 'overall'].forEach((category) => {
+	['today', 'overall'].forEach(category => {
 		if (data.high_scores[category].length <= 0) {
 			data.high_scores[category].push(null);
 		}
 
 		dom.high_scores[category].innerHTML = data.high_scores[category]
 			.slice(0, num_scores_to_show)
-			.map((record) => {
+			.map(record => {
 				if (!record || record.start_level == null) {
 					record = {
 						score: 0,
@@ -488,7 +488,7 @@ function renderPastGamesAndPBs(data) {
 						(record.score || 0).toString().padStart(6, '0').padStart(7, ' '),
 						getPercent(record.tetris_rate || 0),
 					]
-						.map((content) => `<td>${content}</td>`)
+						.map(content => `<td>${content}</td>`)
 						.join('') +
 					'</tr>'
 				);
@@ -629,7 +629,7 @@ function renderPiece(event) {
 		max_pixels = Math.floor(dom.pieces.T.ctx.canvas.width / (pixel_size + 1)),
 		draw_start = Math.max(0, game.pieces.length - max_pixels);
 
-	PIECES.forEach((name) => {
+	PIECES.forEach(name => {
 		const piece_data = game.data.pieces[name],
 			ctx = dom.pieces[name].ctx,
 			indexes = piece_data.indexes,
@@ -638,9 +638,9 @@ function renderPiece(event) {
 		dom.pieces[name].count.textContent = piece_data.count
 			.toString()
 			.padStart(3, '0');
-		dom.pieces[name].drought.textContent = piece_data.drought
-			.toString()
-			.padStart(2, '0');
+		dom.pieces[
+			name
+		].drought.textContent = piece_data.drought.toString().padStart(2, '0');
 		dom.pieces[name].percent.textContent = getPercent(piece_data.percent);
 
 		ctx.resetTransform();

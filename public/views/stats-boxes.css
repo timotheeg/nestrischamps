@@ -116,7 +116,7 @@ i {
 }
 
 #droughts .content {
-	text-align: left
+	text-align: left;
 }
 
 .hgauge th {
@@ -133,15 +133,18 @@ i {
 }
 
 .max_panic .current .value,
-.max_panic .max .value
-{
+.max_panic .max .value {
 	animation: panic_colorize_wr 0.65s infinite;
 	animation-direction: alternate;
 }
 
 @keyframes panic_colorize_wr {
-  from {color: white;}
-  to {color: red;}
+	from {
+		color: white;
+	}
+	to {
+		color: red;
+	}
 }
 
 #piece_stats {
@@ -214,7 +217,6 @@ i {
 #piece_stats.l9 .content .piece th {
 	background-position-x: -240px;
 }
-
 
 #piece_stats .content .piece.T th {
 	background-position-y: 0px;
@@ -412,7 +414,8 @@ i {
 	padding-bottom: 6px;
 }
 
-#high_scores td.today, #high_scores td.overall {
+#high_scores td.today,
+#high_scores td.overall {
 	vertical-align: top;
 	width: 220px;
 }
@@ -465,5 +468,5 @@ i {
 }
 
 #chat .content .text {
-	font-family: "Press Start", monospace;
+	font-family: 'Press Start', monospace;
 }

@@ -35,7 +35,7 @@ const speak = (function () {
 			return;
 		}
 
-		voices = shuffle(all_voices.filter((v) => v.lang.split('-')[0] === lang));
+		voices = shuffle(all_voices.filter(v => v.lang.split('-')[0] === lang));
 	}
 
 	function hasVoice(username) {

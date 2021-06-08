@@ -1,174 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<title>Match Room Admin</title>
-<link rel="stylesheet" type="text/css" href="/views/tetris.css">
-<style>
-button, input, select, option {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-family: "Press Start K", monospace;
-}
+	<head>
+		<title>Match Room Admin</title>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			button,
+			input,
+			select,
+			option {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				font-family: 'Press Start K', monospace;
+			}
 
-#wrapper {
-	position: absolute;
-	width: auto;
-	height: auto;
-	margin: auto;
-}
+			#wrapper {
+				position: absolute;
+				width: auto;
+				height: auto;
+				margin: auto;
+			}
 
-#room td {
-	padding: 0.5em 0 1em 0;
-}
+			#room td {
+				padding: 0.5em 0 1em 0;
+			}
 
-#num_games td {
-	padding: 1em 0 2em 0;
-}
+			#num_games td {
+				padding: 1em 0 2em 0;
+			}
 
-#buttons td {
-	padding: 2em 0 1em 0;
-	text-align: center;
-}
+			#buttons td {
+				padding: 2em 0 1em 0;
+				text-align: center;
+			}
 
-#victories td, #wins td
- {
-	padding: 1em 0 0 0;
-}
+			#victories td,
+			#wins td {
+				padding: 1em 0 0 0;
+			}
 
-#victories td {
-	font-size: 32px;
-	padding: 1em 0 0 0;
-	letter-spacing: 6px;
-}
+			#victories td {
+				font-size: 32px;
+				padding: 1em 0 0 0;
+				letter-spacing: 6px;
+			}
 
-#wins button {
-	font-size: 24px;
-}
+			#wins button {
+				font-size: 24px;
+			}
 
-#victories span {
-	cursor: pointer;
-}
+			#victories span {
+				cursor: pointer;
+			}
 
-.win {
-	color: red;
-}
+			.win {
+				color: red;
+			}
 
-input[type=text],
-#producers select {
-	text-align: center;
-	box-sizing: border-box;
-	width: 100%;
-	padding: 6px;
-	font-size: 16px;
-}
+			input[type='text'],
+			#producers select {
+				text-align: center;
+				box-sizing: border-box;
+				width: 100%;
+				padding: 6px;
+				font-size: 16px;
+			}
 
-#producers select {
-	height: 32px; /* why though?? */
-	text-align-last: center;
-}
+			#producers select {
+				height: 32px; /* why though?? */
+				text-align-last: center;
+			}
 
-button, select, option {
-	font-size: 16px;
-	line-height: 20px;
-	padding: 4px;
-	background: lightgrey;
-}
+			button,
+			select,
+			option {
+				font-size: 16px;
+				line-height: 20px;
+				padding: 4px;
+				background: lightgrey;
+			}
 
-#avatars img {
-	margin: 0.5em;
-	width: 60px;
-	height: 60px;
-}
+			#avatars img {
+				margin: 0.5em;
+				width: 60px;
+				height: 60px;
+			}
 
-select {
-	height: 1.5em;
-}
-</style>
-</head>
-<body>
+			select {
+				height: 1.5em;
+			}
+		</style>
+	</head>
+	<body>
+		<p>Player link:<br /><a id="player_link">-</a></p>
 
-<p>Player link:<br /><a id="player_link">-</a></p>
+		<div class="box" id="wrapper">
+			<table>
+				<tr id="room">
+					<td colspan="2">
+						Room ID: <span id="roomid"></span>
+						<br />
+						Producers: <span id="producer_count"></span>
+					</td>
+				</tr>
+				<tr id="logo">
+					<td colspan="2">
+						<input type="text" class="logo" placeholder="logo url" />
+					</td>
+				</tr>
+				<tr id="num_games">
+					<td colspan="2">
+						Best of:
+						<select id="bestof"></select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="col">Player 1</th>
+					<th scope="col">Player 2</th>
+				</tr>
+				<tr id="producers">
+					<td class="p1">
+						<select></select>
+					</td>
+					<td class="p2">
+						<select></select>
+					</td>
+				</tr>
+				<tr id="names">
+					<td class="p1">
+						<input type="text" class="name" placeholder="name" />
+					</td>
+					<td class="p2">
+						<input type="text" class="name" placeholder="name" />
+					</td>
+				</tr>
+				<tr id="avatar_urls">
+					<td class="p1">
+						<input type="text" class="avatar" placeholder="avatar url" />
+					</td>
+					<td class="p2">
+						<input type="text" class="avatar" placeholder="avatar url" />
+					</td>
+				</tr>
+				<tr id="avatars">
+					<td class="p1">
+						<img />
+					</td>
+					<td class="p2">
+						<img />
+					</td>
+				</tr>
+				<tr id="victories">
+					<td class="p1"></td>
+					<td class="p2"></td>
+				</tr>
+				<tr id="wins">
+					<td class="p1">
+						<button class="winner">Winner</button>
+					</td>
+					<td class="p2">
+						<button class="winner">Winner</button>
+					</td>
+				</tr>
+				<tr id="buttons">
+					<td colspan="2">
+						<button id="clear_victories">Clear Victories</button>
+					</td>
+				</tr>
+			</table>
+		</div>
 
-<div class="box" id="wrapper">
-	<table>
-		<tr id="room">
-			<td colspan="2">
-				Room ID: <span id="roomid"></span>
-				<br />
-				Producers: <span id="producer_count"></span>
-			</td>
-		</tr>
-		<tr id="logo">
-			<td colspan="2">
-				<input type="text" class="logo" placeholder="logo url"/>
-			</td>
-		</tr>
-		<tr id="num_games">
-			<td colspan="2">
-				Best of:
-				<select id="bestof">
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<th scope="col">Player 1</th>
-			<th scope="col">Player 2</th>
-		</tr>
-		<tr id="producers">
-			<td class="p1">
-				<select></select>
-			</td>
-			<td class="p2">
-				<select></select>
-			</td>
-		</tr>
-		<tr id="names">
-			<td class="p1">
-				<input type="text" class="name" placeholder="name"/>
-			</td>
-			<td class="p2">
-				<input type="text" class="name" placeholder="name"/>
-			</td>
-		</tr>
-		<tr id="avatar_urls">
-			<td class="p1">
-				<input type="text" class="avatar" placeholder="avatar url"/>
-			</td>
-			<td class="p2">
-				<input type="text" class="avatar" placeholder="avatar url" />
-			</td>
-		</tr>
-		<tr id="avatars">
-			<td class="p1">
-				<img />
-			</td>
-			<td class="p2">
-				<img />
-			</td>
-		</tr>
-		<tr id="victories">
-			<td class="p1"></td>
-			<td class="p2"></td>
-		</tr>
-		<tr id="wins">
-			<td class="p1">
-				<button class="winner">Winner</button>
-			</td>
-			<td class="p2">
-				<button class="winner">Winner</button>
-			</td>
-		</tr>
-		<tr id="buttons">
-			<td colspan="2">
-				<button id="clear_victories">Clear Victories</button>
-			</td>
-		</tr>
-	</table>
-</div>
-
-<script src="/js/connection.js"></script>
-<script src="/views/competition_admin.js"></script>
-
-</body>
+		<script src="/js/connection.js"></script>
+		<script src="/views/competition_admin.js"></script>
+	</body>
 </html>

@@ -49,7 +49,7 @@ const BinaryFrame = (function () {
 			// sanitize values to represent null
 			const sanitized = { ...pojo };
 
-			NULLABLE_FIELDS.forEach((field) => {
+			NULLABLE_FIELDS.forEach(field => {
 				// capture null and undefined on purpose
 				if (sanitized[field] == null) {
 					sanitized[field] = 0xffffffff;
@@ -202,7 +202,7 @@ const BinaryFrame = (function () {
 			if (pojo.instant_das === 0b11111) pojo.instant_das = null;
 			if (pojo.cur_piece_das === 0b11111) pojo.cur_piece_das = null;
 
-			PIECES.forEach((piece) => {
+			PIECES.forEach(piece => {
 				if (pojo[piece] === 0xff) {
 					pojo[piece] = null;
 				}
