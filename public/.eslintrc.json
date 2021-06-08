@@ -1,0 +1,6 @@
+{
+	"env": {
+		"browser": true
+	},
+	"ignorePatterns": ["opencv.js", "**/sample_frames/*.js"]
+}
