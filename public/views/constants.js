@@ -183,8 +183,9 @@ function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
 
 function getRunway(start_level, type, lines) {
 	try {
-		return RUNWAYS[start_level][type][lines];
-	} catch (err) {
+		return RUNWAYS[start_level][type][lines] || 0;
+	}
+	catch(err) {
 		return 0;
 	}
 }
