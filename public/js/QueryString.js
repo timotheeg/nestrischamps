@@ -1,9 +1,8 @@
 // minimalistic Query String parsing
 
 const QueryString = (function () {
-
 	const store = {
-		_build: function(pojo) {
+		_build: function (pojo) {
 			const res = [];
 
 			for (const [key, value] of Object.entries(pojo)) {
@@ -11,10 +10,11 @@ const QueryString = (function () {
 			}
 
 			return `?${res.join('&')}`;
-		}
+		},
 	};
 
-	location.search.slice(1)
+	location.search
+		.slice(1)
 		.split('&')
 		.forEach(token => {
 			const eq_pos = token.indexOf('=');
@@ -24,8 +24,7 @@ const QueryString = (function () {
 			if (eq_pos <= -1) {
 				key = decodeURIComponent(token);
 				value = true;
-			}
-			else {
+			} else {
 				key = decodeURIComponent(token.slice(0, eq_pos));
 				value = decodeURIComponent(token.slice(eq_pos + 1));
 			}
@@ -34,5 +33,4 @@ const QueryString = (function () {
 		});
 
 	return store;
-
 })();

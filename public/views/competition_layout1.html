@@ -1,270 +1,269 @@
 <!DOCTYPE html>
 <html>
-<head>
-<link rel="stylesheet" type="text/css" href="/views/tetris.css">
-<style>
-#playing_fields {
-	position: absolute;
-	left: 640px;
-	top: 4px;
-}
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#playing_fields {
+				position: absolute;
+				left: 640px;
+				top: 4px;
+			}
 
-.score {
-	width: 237px;
-	height: 54px;
-	font-size: 24px;
+			.score {
+				width: 237px;
+				height: 54px;
+				font-size: 24px;
 
-	--offset: 15px;
-	right: var(--offset);
-}
+				--offset: 15px;
+				right: var(--offset);
+			}
 
-.score .aligner {
-	display: inline-block;
-}
-.score .aligner div {
-	text-align: right;
-	padding-top: 6px;
-}
-.winning {
-	color: #0eff0e;
-}
-.losing {
-	color: #fd0009;
-}
+			.score .aligner {
+				display: inline-block;
+			}
+			.score .aligner div {
+				text-align: right;
+				padding-top: 6px;
+			}
+			.winning {
+				color: #0eff0e;
+			}
+			.losing {
+				color: #fd0009;
+			}
 
-.next_piece {
-	width: 90px;
-	top: 62px;
+			.next_piece {
+				width: 90px;
+				top: 62px;
 
-	--offset: 274px;
-	right: var(--offset);
-}
+				--offset: 274px;
+				right: var(--offset);
+			}
 
-.lines {
-	width: 90px;
+			.lines {
+				width: 90px;
 
-	--offset: 274px;
-	right: var(--offset);
-}
+				--offset: 274px;
+				right: var(--offset);
+			}
 
-.board {
-	width: 237px;
-	height: 477px;
-	top: 76px;
+			.board {
+				width: 237px;
+				height: 477px;
+				top: 76px;
 
-	--offset: 15px;
-	right: var(--offset);
-}
+				--offset: 15px;
+				right: var(--offset);
+			}
 
-.name {
-	width: 237px;
-	top: 575px;
+			.name {
+				width: 237px;
+				top: 575px;
 
-	--offset: 15px;
-	right: var(--offset);
-}
+				--offset: 15px;
+				right: var(--offset);
+			}
 
-.name .content {
-	color: #b0afb0;
-	letter-spacing: 5px;
-	text-indent: 5px;
-}
+			.name .content {
+				color: #b0afb0;
+				letter-spacing: 5px;
+				text-indent: 5px;
+			}
 
-.name .content .win {
-	color: #fb0204;
-}
+			.name .content .win {
+				color: #fb0204;
+			}
 
-.tetris_rate {
-	width: 50px;
-	height: 50px;
-	top: 637px;
+			.tetris_rate {
+				width: 50px;
+				height: 50px;
+				top: 637px;
 
-	--offset: 274px;
-	right: var(--offset);
-}
+				--offset: 274px;
+				right: var(--offset);
+			}
 
-.tetris_rate .content {
-	padding-top: 5px;
-}
+			.tetris_rate .content {
+				padding-top: 5px;
+			}
 
-.running_trt {
-	padding: 9px;
-	width: 243px;
-	height: 56px;
-	top: 637px;
+			.running_trt {
+				padding: 9px;
+				width: 243px;
+				height: 56px;
+				top: 637px;
 
-	--offset: 15px;
-	right: var(--offset);
-}
+				--offset: 15px;
+				right: var(--offset);
+			}
 
-.level {
-	width: 40px;
+			.level {
+				width: 40px;
 
-	--offset: 386px;
-	right: var(--offset);
-}
+				--offset: 386px;
+				right: var(--offset);
+			}
 
-.p2 {
-	left: var(--offset);
-}
+			.p2 {
+				left: var(--offset);
+			}
 
-.divider {
-	position: absolute;
-	left: -15px;
-	width: 30px;
-	height: 710px;
-	background-color: #000;
-	color: #f8e889;
-	font-size: 16px;
+			.divider {
+				position: absolute;
+				left: -15px;
+				width: 30px;
+				height: 710px;
+				background-color: #000;
+				color: #f8e889;
+				font-size: 16px;
 
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-}
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
 
-.dev_null {
-	display: none;
-}
+			.dev_null {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="playing_fields">
+				<!-- divider -->
 
-</style>
-</head>
-<body>
+				<div class="divider">vs</div>
 
-<div id="stream_bg">
-<div id="playing_fields">
+				<!-- Player 1 -->
 
-<!-- divider -->
+				<div class="box score p1">
+					<div class="aligner">
+						<div class="main">000,000</div>
+						<div class="diff winning">000,000</div>
+					</div>
+				</div>
 
-<div class="divider">vs</div>
+				<div class="box lines p1">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
 
-<!-- Player 1 -->
+				<div class="box next_piece p1"></div>
 
-<div class="box score p1">
-	<div class="aligner">
-		<div class="main">000,000</div>
-		<div class="diff winning">000,000</div>
-	</div>
-</div>
+				<div class="box level p1">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
 
-<div class="box lines p1">
-	<div class="header">LINES</div>
-	<div class="content">000</div>
-</div>
+				<div class="box tetris_rate p1">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
 
-<div class="box next_piece p1"></div>
+				<div class="box running_trt p1"></div>
 
-<div class="box level p1">
-	<div class="header">LV</div>
-	<div class="content">00</div>
-</div>
+				<div class="box name p1">
+					<div class="header">PLAYER 1</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
 
-<div class="box tetris_rate p1">
-	<div class="header">TRT</div>
-	<div class="content">---</div>
-</div>
+				<div class="box board p1"></div>
 
-<div class="box running_trt p1"></div>
+				<!-- Player 2 -->
 
-<div class="box name p1">
-	<div class="header">PLAYER 1</div>
-	<div class="content">&#338;&#338;&#338;</div>
-</div>
+				<div class="box score p2">
+					<div class="aligner">
+						<div class="main">000,000</div>
+						<div class="diff losing">000,000</div>
+					</div>
+				</div>
 
-<div class="box board p1"></div>
+				<div class="box lines p2">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
 
-<!-- Player 2 -->
+				<div class="box next_piece p2"></div>
 
-<div class="box score p2">
-	<div class="aligner">
-		<div class="main">000,000</div>
-		<div class="diff losing">000,000</div>
-	</div>
-</div>
+				<div class="box level p2">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
 
-<div class="box lines p2">
-	<div class="header">LINES</div>
-	<div class="content">000</div>
-</div>
+				<div class="box tetris_rate p2">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
 
-<div class="box next_piece p2"></div>
+				<div class="box running_trt p2"></div>
 
-<div class="box level p2">
-	<div class="header">LV</div>
-	<div class="content">00</div>
-</div>
+				<div class="box name p2">
+					<div class="header">PLAYER 2</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
 
-<div class="box tetris_rate p2">
-	<div class="header">TRT</div>
-	<div class="content">---</div>
-</div>
+				<div class="box board p2"></div>
 
-<div class="box running_trt p2"></div>
+				<div class="dev_null"></div>
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
 
-<div class="box name p2">
-	<div class="header">PLAYER 2</div>
-	<div class="content">&#338;&#338;&#338;</div>
-</div>
+		<!-- Audio -->
 
-<div class="box board p2"></div>
+		<script src="/js/QueryString.js"></script>
+		<script src="/views/constants.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/bg.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/renderBlock.js"></script>
+		<script src="/views/Player.js"></script>
+		<script src="/js/connection.js"></script>
+		<script src="/views/CompetitionPlayer.js"></script>
+		<script src="/js/BinaryFrame.js"></script>
+		<script>
+			const numberFormatter = new Intl.NumberFormat();
+			const players = [1, 2].map(
+				num =>
+					new CompetitionPlayer(
+						{
+							name: document.querySelector(`.name.p${num} .header`),
+							score: document.querySelector(`.score.p${num} .main`),
+							level: document.querySelector(`.level.p${num} .content`),
+							lines: document.querySelector(`.lines.p${num} .content`),
+							trt: document.querySelector(`.tetris_rate.p${num} .content`),
+							running_trt: document.querySelector(`.running_trt.p${num}`),
+							preview: document.querySelector(`.next_piece.p${num}`),
+							field: document.querySelector(`.board.p${num}`),
 
+							diff: document.querySelector(`.score.p${num} .diff`),
+							hearts: document.querySelector(`.name.p${num} .content`),
+							t_diff: DOM_DEV_NULL,
+							p_diff: DOM_DEV_NULL,
+							pt_diff: DOM_DEV_NULL,
+						},
+						{
+							field_pixel_size: 3,
+							preview_pixel_size: 2,
+							running_trt_rtl: 0,
+							format_score: v => numberFormatter.format(v),
+						}
+					)
+			);
+		</script>
+		<script src="/views/competition.js"></script>
+		<script>
+			const API = new TetrisCompetitionAPI();
 
-<div class="dev_null"></div>
+			function onFrame(frame, debug) {
+				API.frame(1, frame, debug);
+			}
+		</script>
 
-</div><!-- End Playing Fields -->
-</div><!-- End Stream BG -->
-
-
-<!-- Audio -->
-
-<script src="/js/QueryString.js"></script>
-<script src="/views/constants.js"></script>
-<script src="/views/utils.js"></script>
-<script src="/views/bg.js"></script>
-<script src="/views/utils.js"></script>
-<script src="/views/renderBlock.js"></script>
-<script src="/views/Player.js"></script>
-<script src="/js/connection.js"></script>
-<script src="/views/CompetitionPlayer.js"></script>
-<script src="/js/BinaryFrame.js"></script>
-<script>
-const numberFormatter = new Intl.NumberFormat();
-const players = [1, 2].map(num => new CompetitionPlayer(
-	{
-		name:        document.querySelector(`.name.p${num} .header`),
-		score:       document.querySelector(`.score.p${num} .main`),
-		level:       document.querySelector(`.level.p${num} .content`),
-		lines:       document.querySelector(`.lines.p${num} .content`),
-		trt:         document.querySelector(`.tetris_rate.p${num} .content`),
-		running_trt: document.querySelector(`.running_trt.p${num}`),
-		preview:     document.querySelector(`.next_piece.p${num}`),
-		field:       document.querySelector(`.board.p${num}`),
-
-		diff:        document.querySelector(`.score.p${num} .diff`),
-		hearts:      document.querySelector(`.name.p${num} .content`),
-		t_diff:      DOM_DEV_NULL,
-		p_diff:      DOM_DEV_NULL,
-		pt_diff:     DOM_DEV_NULL,
-	},
-	{
-		field_pixel_size: 3,
-		preview_pixel_size: 2,
-		running_trt_rtl: 0,
-		format_score: v => numberFormatter.format(v),
-	}
-));
-</script>
-<script src="/views/competition.js"></script>
-<script>
-const API = new TetrisCompetitionAPI();
-
-function onFrame(frame, debug) {
-	API.frame(1, frame, debug);
-}
-</script>
-
-<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
+		<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
 <script src="/views/debug.js"></script -->
-
-</body>
-<html>
+	</body>
+	<html></html>
+</html>

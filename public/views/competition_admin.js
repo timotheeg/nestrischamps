@@ -1,51 +1,50 @@
 const dom = {
-	roomid:          document.querySelector('#roomid'),
-	producer_count:  document.querySelector('#producer_count'),
-	logo:            document.querySelector('#logo input'),
-	bestof:          document.querySelector('#bestof'),
+	roomid: document.querySelector('#roomid'),
+	producer_count: document.querySelector('#producer_count'),
+	logo: document.querySelector('#logo input'),
+	bestof: document.querySelector('#bestof'),
 	clear_victories: document.querySelector('#clear_victories'),
-	player_link:     document.querySelector('#player_link'),
+	player_link: document.querySelector('#player_link'),
 };
 
 const MAX_BEST_OF = 13;
 
 const remoteAPI = {
-	setBestOf: function(n) {
+	setBestOf: function (n) {
 		connection.send(['setBestOf', n]);
 	},
-	setPlayer: function(player_idx, user_id) {
+	setPlayer: function (player_idx, user_id) {
 		connection.send(['setPlayer', player_idx, user_id]);
 	},
-	setVictories: function(player_idx, num_wins) {
+	setVictories: function (player_idx, num_wins) {
 		connection.send(['setVictories', player_idx, num_wins]);
 	},
-	setWinner: function(player_idx) {
+	setWinner: function (player_idx) {
 		connection.send(['setWinner', player_idx]);
 	},
-	setDisplayName: function(player_idx, name) {
+	setDisplayName: function (player_idx, name) {
 		connection.send(['setDisplayName', player_idx, name]);
 	},
-	setProfileImageURL: function(player_idx, url) {
+	setProfileImageURL: function (player_idx, url) {
 		connection.send(['setProfileImageURL', player_idx, url]);
 	},
-	resetVictories: function() {
+	resetVictories: function () {
 		connection.send(['resetVictories']);
 	},
-	playVictoryAnimation: function(player_idx) {
+	playVictoryAnimation: function (player_idx) {
 		connection.send(['playVictoryAnimation', player_idx]);
 	},
-	clearVictoryAnimation: function(player_idx) {
+	clearVictoryAnimation: function (player_idx) {
 		connection.send(['clearVictoryAnimation', player_idx]);
 	},
-	setLogo: function(url) {
+	setLogo: function (url) {
 		connection.send(['setLogo', url]);
-	}
+	},
 };
 
 let players;
 let room_data;
 let connection;
-
 
 function getProducer(pid) {
 	return room_data.producers.find(producer => producer.id == pid);
@@ -60,28 +59,23 @@ class Player {
 		this.bestof = -1;
 
 		// link dom events
-		this.dom.name.onchange
-			= this.dom.name.onkeyup
-			= this.dom.name.onblur
-			= () => {
-				remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
-			};
+		this.dom.name.onchange = this.dom.name.onkeyup = this.dom.name.onblur = () => {
+			remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
+		};
 
-		this.dom.avatar_url.onchange
-			= this.dom.avatar_url.onkeyup
-			= this.dom.avatar_url.onblur
-			= () => {
-				const avatar_url = this.dom.avatar_url.value.trim();
+		this.dom.avatar_url.onchange = this.dom.avatar_url.onkeyup = this.dom.avatar_url.onblur = () => {
+			const avatar_url = this.dom.avatar_url.value.trim();
 
-				remoteAPI.setProfileImageURL(this.idx, avatar_url);
-				this.dom.avatar_img.src = avatar_url;
-			};
+			remoteAPI.setProfileImageURL(this.idx, avatar_url);
+			this.dom.avatar_img.src = avatar_url;
+		};
 
-		this.dom.producers.onchange = () => this._pickProducer(parseInt(this.dom.producers.value, 10));
+		this.dom.producers.onchange = () =>
+			this._pickProducer(parseInt(this.dom.producers.value, 10));
 
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
-		}
+		};
 	}
 
 	setProducers(producers) {
@@ -133,7 +127,7 @@ class Player {
 
 		const producer = getProducer(pid);
 
-		this.dom.producers.value = pid
+		this.dom.producers.value = pid;
 
 		if (!producer) return;
 
@@ -154,8 +148,7 @@ class Player {
 		this.dom.victories.querySelectorAll('span').forEach((span, idx) => {
 			if (idx && idx <= (n || 0)) {
 				span.classList.add('win');
-			}
-			else {
+			} else {
 				span.classList.remove('win');
 			}
 		});
@@ -174,13 +167,13 @@ class Player {
 function setBestOfOptions(n, selected) {
 	const select = dom.bestof;
 
-	for (;  n >= 3; n -= 2) {
+	for (; n >= 3; n -= 2) {
 		const option = document.createElement('option');
 		option.value = n;
 		option.textContent = n;
 
 		if (n === selected) {
-			option.setAttribute('selected', 'selected')
+			option.setAttribute('selected', 'selected');
 		}
 
 		select.prepend(option);
@@ -203,35 +196,38 @@ function setState(_room_data) {
 }
 
 function bootstrap() {
-	players = [1, 2].map(num => new Player(num - 1, {
-		producers:  document.querySelector(`#producers .p${num} select`),
-		name:       document.querySelector(`#names .p${num} input`),
-		avatar_url: document.querySelector(`#avatar_urls .p${num} input`),
-		avatar_img: document.querySelector(`#avatars .p${num} img`),
-		victories:  document.querySelector(`#victories .p${num}`),
-		win_btn:    document.querySelector(`#wins .p${num} button`),
-	}));
+	players = [1, 2].map(
+		num =>
+			new Player(num - 1, {
+				producers: document.querySelector(`#producers .p${num} select`),
+				name: document.querySelector(`#names .p${num} input`),
+				avatar_url: document.querySelector(`#avatar_urls .p${num} input`),
+				avatar_img: document.querySelector(`#avatars .p${num} img`),
+				victories: document.querySelector(`#victories .p${num}`),
+				win_btn: document.querySelector(`#wins .p${num} button`),
+			})
+	);
 
 	setBestOfOptions(MAX_BEST_OF, 3);
 
 	dom.roomid.textContent = location.pathname.split('/')[3] || '_default';
 	dom.producer_count.textContent = 0;
 
-	dom.bestof.onchange = () => remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
+	dom.bestof.onchange = () =>
+		remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
 
-	dom.logo.onchange
-		= logo.onkeyup
-		= logo.onkeydown
-		= logo.onblur
-		= () => remoteAPI.setLogo(dom.logo.value.trim());
+	dom.logo.onchange = logo.onkeyup = logo.onkeydown = logo.onblur = () =>
+		remoteAPI.setLogo(dom.logo.value.trim());
 
-	dom.clear_victories.addEventListener('click', () => remoteAPI.resetVictories());
+	dom.clear_victories.addEventListener('click', () =>
+		remoteAPI.resetVictories()
+	);
 
 	// =====
 
 	connection = new Connection();
 
-	connection.onMessage = function(message) {
+	connection.onMessage = function (message) {
 		const [command, ...args] = message;
 
 		switch (command) {
@@ -258,4 +254,3 @@ function bootstrap() {
 }
 
 bootstrap();
-

@@ -11,28 +11,22 @@ const ChatClient = require('twitch-chat-client').ChatClient;
 
 const USER_SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes before we destroy user! TODO: Make tunable
 
-
 function is_spam(msg) {
-  if (/bigfollows\s*.\s*com/i.test(msg)) return true;
+	if (/bigfollows\s*.\s*com/i.test(msg)) return true;
 
-  return (
-    /become famous/i.test(msg)
-    &&
-    /buy/i.test(msg)
-  );
+	return /become famous/i.test(msg) && /buy/i.test(msg);
 }
-
 
 class User extends EventEmitter {
 	constructor(user_object) {
 		super();
 
-		this.id                = user_object.id;
-		this.login             = user_object.login;
-		this.secret            = user_object.secret;
-		this.email             = user_object.email;
-		this.display_name      = user_object.display_name;
-		this.description       = user_object.description;
+		this.id = user_object.id;
+		this.login = user_object.login;
+		this.secret = user_object.secret;
+		this.email = user_object.email;
+		this.display_name = user_object.display_name;
+		this.description = user_object.description;
 		this.profile_image_url = user_object.profile_image_url;
 
 		this.producer = new Producer(this);
@@ -138,10 +132,7 @@ class User extends EventEmitter {
 		if (this.connections.size > 0) return; // TODO: also check activity on the connections
 
 		// User has no connection, we'll schedule his/her destruction
-		this.destroy_to = setTimeout(
-			() => this._onExpired(),
-			USER_SESSION_TIMEOUT
-		);
+		this.destroy_to = setTimeout(() => this._onExpired(), USER_SESSION_TIMEOUT);
 	}
 
 	_handleProducerMessage(msg) {
@@ -187,7 +178,7 @@ class User extends EventEmitter {
 		const auth = new RefreshableAuthProvider(
 			new StaticAuthProvider(
 				process.env.TWITCH_CLIENT_ID,
-				this.token.access_token,
+				this.token.access_token
 			),
 			{
 				clientSecret: process.env.TWITCH_CLIENT_SECRET,
@@ -198,13 +189,16 @@ class User extends EventEmitter {
 					token.access_token = access_token;
 					token.refresh_token = refresh_token;
 					token.expiry = expiryDate;
-					token.expires_in = Math.max(0, Math.floor((expiryDate.getTime() - Date.now()) / 1000));
-				}
+					token.expires_in = Math.max(
+						0,
+						Math.floor((expiryDate.getTime() - Date.now()) / 1000)
+					);
+				},
 			}
 		);
 
 		this.chat_client = new ChatClient(auth, {
-			channels: [ this.login ],
+			channels: [this.login],
 			readOnly: true,
 		});
 
@@ -214,30 +208,39 @@ class User extends EventEmitter {
 				return;
 			}
 
-			this._send(['message', {
-				user:         user,
-				username:     user,
-				display_name: user,
-				message:      message || ''
-			}]);
+			this._send([
+				'message',
+				{
+					user: user,
+					username: user,
+					display_name: user,
+					message: message || '',
+				},
+			]);
 		});
 
 		this.chat_client.onSub((channel, user) => {
-			this._send(['message', {
-				user:         this.login,
-				username:     this.login,
-				display_name: this.display_name,
-				message:      `Thanks to ${user} for subscribing to the channel!`
-			}]);
+			this._send([
+				'message',
+				{
+					user: this.login,
+					username: this.login,
+					display_name: this.display_name,
+					message: `Thanks to ${user} for subscribing to the channel!`,
+				},
+			]);
 		});
 
 		this.chat_client.onRaid((channel, user, raidInfo) => {
-			this._send(['message', {
-				user:         this.login,
-				username:     this.login,
-				display_name: raidInfo.displayName,
-				message:      `Woohoo! ${raidInfo.displayName} is raiding with a party of ${raidInfo.viewerCount}. Thanks for the raid ${raidInfo.displayName}!`
-			}]);
+			this._send([
+				'message',
+				{
+					user: this.login,
+					username: this.login,
+					display_name: raidInfo.displayName,
+					message: `Woohoo! ${raidInfo.displayName} is raiding with a party of ${raidInfo.viewerCount}. Thanks for the raid ${raidInfo.displayName}!`,
+				},
+			]);
 		});
 
 		await this.chat_client.connect();

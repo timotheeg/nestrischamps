@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 	}
 
 	res.render('settings', {
-		user
+		user,
 	});
 });
 
@@ -33,8 +33,8 @@ router.get('/revoke_secret', async (req, res) => {
 	await UserDAO.updateSecret(user, ULID.ulid());
 
 	req.session.user = {
-		id:     user.id,
-		login:  user.login,
+		id: user.id,
+		login: user.login,
 		secret: user.secret,
 	};
 

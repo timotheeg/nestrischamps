@@ -134,6 +134,9 @@ The variable `DATABASE_URL` should basically contains a [connection URI](https:/
 
 The variable `FF_SAVE_GAME_FRAMES=1` ensures that game files will saved locally (in the folder `games`. For replay if you want, of for further game analysis later if you are so enclined. If you do not want to save grame frames, remove the variable `FF_SAVE_GAME_FRAMES`
 
+#### Install prettier
+
+Prettier is installed when you install nodejs dependencies. To use prettier to format your code, please follow this [guide](https://prettier.io/docs/en/editors.html) to setup prettier with your code editor.
 
 #### Run the server
 

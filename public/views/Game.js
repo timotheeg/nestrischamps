@@ -17,30 +17,30 @@ class Game {
 			start_level: level,
 
 			level: level,
-			burn:  0,
+			burn: 0,
 
 			score: {
-				current:    score,
-				runway:     score + getRunway(level, RUNWAY.GAME, lines),
-				tr_runway:  score + getRunway(level, RUNWAY.TRANSITION, lines),
+				current: score,
+				runway: score + getRunway(level, RUNWAY.GAME, lines),
+				tr_runway: score + getRunway(level, RUNWAY.TRANSITION, lines),
 				normalized: 0,
-				transition: null
+				transition: null,
 			},
 
 			i_droughts: {
 				count: 0,
-				cur:   0,
-				last:  0,
-				max:   0
+				cur: 0,
+				last: 0,
+				max: 0,
 			},
 
 			das: {
-				cur:   0,
+				cur: 0,
 				total: 0, // running total, used for average computation
-				avg:   0,
+				avg: 0,
 				great: 0,
-				ok:    0,
-				bad:   0
+				ok: 0,
+				bad: 0,
 			},
 
 			pieces: {
@@ -57,31 +57,31 @@ class Game {
 			points: {
 				count: event.score,
 				drops: {
-					count:   0,
-					percent: 0
-				}
-			}
-		}
+					count: 0,
+					percent: 0,
+				},
+			},
+		};
 
 		PIECES.forEach(name => {
 			this.data.pieces[name] = {
-				count:   0,
+				count: 0,
 				percent: 0,
 				drought: 0,
-				indexes: []
-			}
+				indexes: [],
+			};
 		});
 
 		[1, 2, 3, 4].forEach(name => {
 			this.data.lines[name] = {
-				count:   0,
-				lines:   0,
-				percent: 0
+				count: 0,
+				lines: 0,
+				percent: 0,
 			};
 
 			this.data.points[name] = {
-				count:   0,
-				percent: 0
+				count: 0,
+				percent: 0,
 			};
 		});
 	}
@@ -112,7 +112,10 @@ class Game {
 
 			stats.percent = stats.count / this.data.pieces.count;
 
-			distance_square += Math.pow(stats.count/this.data.pieces.count - 1/7, 2);
+			distance_square += Math.pow(
+				stats.count / this.data.pieces.count - 1 / 7,
+				2
+			);
 
 			stats.drought++;
 		});
@@ -137,8 +140,7 @@ class Game {
 			if (this.data.i_droughts.cur > this.data.i_droughts.max) {
 				this.data.i_droughts.max = this.data.i_droughts.cur;
 			}
-		}
-		else {
+		} else {
 			if (this.data.i_droughts.cur > 0) {
 				this.data.i_droughts.last = this.data.i_droughts.cur;
 			}
@@ -148,18 +150,18 @@ class Game {
 
 		// update das
 		const das_stats = this.data.das;
-		das_stats.cur   =  event.cur_piece_das;
+		das_stats.cur = event.cur_piece_das;
 		das_stats.total += event.cur_piece_das;
-		das_stats.avg   =  das_stats.total / this.data.pieces.count;
+		das_stats.avg = das_stats.total / this.data.pieces.count;
 		das_stats[DAS_THRESHOLDS[das_stats.cur]]++; // great, ok, bad
 
 		this.board = new Board(event.stage.field_string); // TODO: rewrite board to use the field array
 
 		const piece_data = {
-			piece:      p,
-			das:        event.cur_piece_das,
-			index:      this.pieces.length,
-			board:      this.board.stats,
+			piece: p,
+			das: event.cur_piece_das,
+			index: this.pieces.length,
+			board: this.board.stats,
 			in_drought: this.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD,
 		};
 
@@ -173,33 +175,45 @@ class Game {
 			// TODO: compute over "true" bags, that would always yield 0 deviation in modern tetrises
 			const counts = {};
 
-			PIECES.forEach(name => counts[name] = 0);
+			PIECES.forEach(name => (counts[name] = 0));
 
-			for (let offset=28; offset>0; offset--) {
+			for (let offset = 28; offset > 0; offset--) {
 				counts[game.pieces[len - offset].piece]++;
 			}
 
-			this.data.pieces.deviation_28 = Math.sqrt(Object.values(counts).reduce((sum, count) => sum + Math.pow(count/28 - 1/7, 2), 0) / PIECES.length);
+			this.data.pieces.deviation_28 = Math.sqrt(
+				Object.values(counts).reduce(
+					(sum, count) => sum + Math.pow(count / 28 - 1 / 7, 2),
+					0
+				) / PIECES.length
+			);
 
 			if (this.data.pieces.count >= 56) {
-				for (let offset=28; offset>0; offset--) {
+				for (let offset = 28; offset > 0; offset--) {
 					counts[game.pieces[len - 28 - offset].piece]++;
 				}
 
-				this.data.pieces.deviation_56 = Math.sqrt(Object.values(counts).reduce((sum, count) => sum + Math.pow(count/56 - 1/7, 2), 0) / PIECES.length);
+				this.data.pieces.deviation_56 = Math.sqrt(
+					Object.values(counts).reduce(
+						(sum, count) => sum + Math.pow(count / 56 - 1 / 7, 2),
+						0
+					) / PIECES.length
+				);
 			}
 		}
 	}
 
 	onLine(event) {
-		const
-			num_lines    = event.lines - this.data.lines.count,
-			lines_score  = this.getScore(event.level, num_lines),
+		const num_lines = event.lines - this.data.lines.count,
+			lines_score = this.getScore(event.level, num_lines),
 			actual_score = event.score - this.data.score.current;
 
 		// update total lines and points
 		// checks maxed out at 999999 and updates score accordingly
-		if (event.score == 999999 && this.data.score.current + lines_score >= 999999) {
+		if (
+			event.score == 999999 &&
+			this.data.score.current + lines_score >= 999999
+		) {
 			event.score = this.data.score.current + lines_score;
 		}
 		this.data.points.count = event.score;
@@ -221,12 +235,11 @@ class Game {
 				this.data.points[num_lines].count += lines_score;
 
 				// update percentages for everyone
-				for (let clear_type=4; clear_type; clear_type--) {
+				for (let clear_type = 4; clear_type; clear_type--) {
 					const line_stats = this.data.lines[clear_type];
 					line_stats.percent = line_stats.lines / this.data.lines.count;
 				}
-			}
-			else {
+			} else {
 				// TODO: how to recover
 				console.log('invalid num_lines', num_lines, event);
 			}
@@ -253,18 +266,24 @@ class Game {
 
 		// update score
 		this.data.score.current = event.score;
-		this.data.score.runway = event.score + getRunway(this.data.start_level, RUNWAY.GAME, event.lines);
+		this.data.score.runway =
+			event.score + getRunway(this.data.start_level, RUNWAY.GAME, event.lines);
 
 		// check transition score
 		if (event.level > this.data.level) {
-			if (this.data.score.transition === null && event.level === this.data.start_level + 1) {
+			if (
+				this.data.score.transition === null &&
+				event.level === this.data.start_level + 1
+			) {
 				this.data.score.transition = event.score;
 				this.data.score.tr_runway = event.score;
 			}
 		}
 
 		if (this.data.score.transition === null) {
-			this.data.score.tr_runway = event.score + getRunway(this.data.start_level, RUNWAY.TRANSITION, event.lines);
+			this.data.score.tr_runway =
+				event.score +
+				getRunway(this.data.start_level, RUNWAY.TRANSITION, event.lines);
 		}
 
 		// update level
@@ -274,15 +293,14 @@ class Game {
 		if (num_lines) {
 			if (num_lines < 4) {
 				this.data.burn += num_lines;
-			}
-			else {
+			} else {
 				this.data.burn = 0;
 			}
 		}
 	}
 
 	getScore(level, num_lines) {
-		return SCORE_BASES[num_lines] * (level + 1)
+		return SCORE_BASES[num_lines] * (level + 1);
 	}
 
 	setGameOver() {
@@ -299,12 +317,12 @@ class Game {
 			duration: (this.end_ts || Date.now()) - this.start_ts,
 			timeline: {
 				clears: this.line_events.map(evt => evt.num_lines).join(''),
-				pieces: this.pieces.map(evt => evt.piece).join('')
-			}
+				pieces: this.pieces.map(evt => evt.piece).join(''),
+			},
 		};
 	}
 
-	toString(encoding='json') {
+	toString(encoding = 'json') {
 		return JSON.stringify(this.data);
 	}
 }

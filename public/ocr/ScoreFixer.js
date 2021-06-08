@@ -40,23 +40,36 @@ class ScoreFixer {
 
 		// K, if this point is reached, something is not right, and we need to apply correction
 
-		if (digits[0] == 0xA) { // A, should it have been a 4?
-			if (this.last_good_digits[0] === 0x3 || this.last_good_digits[0] === 0x4) {
+		if (digits[0] == 0xa) {
+			// A, should it have been a 4?
+			if (
+				this.last_good_digits[0] === 0x3 ||
+				this.last_good_digits[0] === 0x4
+			) {
 				digits[0] = 0x4;
 			}
-		}
-		else if (digits[0] === 0x4) { // 4, should it have been a A?
-			if (this.last_good_digits[0] === 0x9 || this.last_good_digits[0] === 0xA) {
-				digits[0] = 0xA;
+		} else if (digits[0] === 0x4) {
+			// 4, should it have been a A?
+			if (
+				this.last_good_digits[0] === 0x9 ||
+				this.last_good_digits[0] === 0xa
+			) {
+				digits[0] = 0xa;
 			}
-		}
-		else if (digits[0] === 0x8) { // 8, should it have been a B?
-			if (this.last_good_digits[0] === 0xA || this.last_good_digits[0] === 0xB) {
-				digits[0] = 0xB;
+		} else if (digits[0] === 0x8) {
+			// 8, should it have been a B?
+			if (
+				this.last_good_digits[0] === 0xa ||
+				this.last_good_digits[0] === 0xb
+			) {
+				digits[0] = 0xb;
 			}
-		}
-		else if (digits[0] === 0xB) { // B, should it have been a 8?
-			if (this.last_good_digits[0] === 0x7 || this.last_good_digits[0] === 0x8) {
+		} else if (digits[0] === 0xb) {
+			// B, should it have been a 8?
+			if (
+				this.last_good_digits[0] === 0x7 ||
+				this.last_good_digits[0] === 0x8
+			) {
 				digits[0] = 0x8;
 			}
 		}

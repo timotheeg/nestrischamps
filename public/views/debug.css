@@ -22,7 +22,8 @@
 	left: 550px;
 }
 
-#cur_frame, #next_frame {
+#cur_frame,
+#next_frame {
 	font-family: monospace;
 	display: block;
 	font-size: 16px;

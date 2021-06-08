@@ -5,7 +5,6 @@
 	}
 */
 
-
 class CompetitionPlayer extends Player {
 	constructor(dom, options) {
 		super(dom, options);
@@ -24,8 +23,7 @@ class CompetitionPlayer extends Player {
 			this.dom.diff.classList.add('losing');
 			this.dom.t_diff.classList.remove('winning');
 			this.dom.t_diff.classList.add('losing');
-		}
-		else {
+		} else {
 			this.dom.diff.classList.remove('losing');
 			this.dom.diff.classList.add('winning');
 			this.dom.t_diff.classList.remove('losing');
@@ -45,8 +43,7 @@ class CompetitionPlayer extends Player {
 			this.dom.runway_diff.classList.add('losing');
 			this.dom.runway_t_diff.classList.remove('winning');
 			this.dom.runway_t_diff.classList.add('losing');
-		}
-		else {
+		} else {
 			this.dom.runway_diff.classList.remove('losing');
 			this.dom.runway_diff.classList.add('winning');
 			this.dom.runway_t_diff.classList.remove('losing');
@@ -57,7 +54,9 @@ class CompetitionPlayer extends Player {
 		const absDiff = Math.abs(diff);
 
 		this.dom.runway_diff.textContent = this.options.format_score(absDiff);
-		this.dom.runway_t_diff.textContent = this.options.format_tetris_diff(t_diff);
+		this.dom.runway_t_diff.textContent = this.options.format_tetris_diff(
+			t_diff
+		);
 	}
 
 	setProjectionDiff(diff, t_diff) {
@@ -66,8 +65,7 @@ class CompetitionPlayer extends Player {
 			this.dom.projection_diff.classList.add('losing');
 			this.dom.projection_t_diff.classList.remove('winning');
 			this.dom.projection_t_diff.classList.add('losing');
-		}
-		else {
+		} else {
 			this.dom.projection_diff.classList.remove('losing');
 			this.dom.projection_diff.classList.add('winning');
 			this.dom.projection_t_diff.classList.remove('losing');
@@ -78,6 +76,8 @@ class CompetitionPlayer extends Player {
 		const absDiff = Math.abs(diff);
 
 		this.dom.projection_diff.textContent = this.options.format_score(absDiff);
-		this.dom.projection_t_diff.textContent = this.options.format_tetris_diff(t_diff);
+		this.dom.projection_t_diff.textContent = this.options.format_tetris_diff(
+			t_diff
+		);
 	}
 }

@@ -1,676 +1,695 @@
 <!DOCTYPE html>
 <html>
-<head>
-<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
-<link rel="stylesheet" type="text/css" href="/views/stats-boxes.css" />
-<style>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/stats-boxes.css" />
+		<style>
+			.box {
+				border-image-source: url('/views/border.png');
+				border-image-slice: 10 10 10 10 fill;
+				border-image-width: 10px 10px;
+				padding: 12px;
+			}
 
-.box {
-	border-image-source: url('/views/border.png');
-	border-image-slice: 10 10 10 10 fill;
-	border-image-width: 10px 10px;
-	padding: 12px;
-}
+			#tetris_rate {
+				left: 440px;
+				top: 602px;
+				width: 255px;
+				height: 71px;
+			}
 
-#tetris_rate {
-	left: 440px;
-	top: 602px;
-	width: 255px;
-	height: 71px;
-}
+			#piece_stats {
+				top: 358px;
+				width: 148px;
+				left: 35px;
+			}
 
-#piece_stats {
-	top: 358px;
-	width: 148px;
-	left: 35px;
-}
+			#piece_stats .content .headers th {
+				padding: 6px;
+			}
 
-#piece_stats .content .headers th {
-	padding: 6px;
-}
+			#piece_stats .content .headers th.drought {
+				padding: 6px 0;
+			}
 
-#piece_stats .content .headers th.drought {
-	padding: 6px 0;
-}
+			#piece_stats .content {
+				font-size: 12px;
+			}
 
-#piece_stats .content {
-	font-size: 12px;
-}
+			#piece_stats .content .count {
+				padding-left: 6px;
+			}
 
-#piece_stats .content .count {
-	padding-left: 6px;
-}
+			#piece_stats .content .percent {
+				padding-right: 0;
+				padding-left: 6px;
+			}
 
-#piece_stats .content .percent {
-	padding-right: 0;
-	padding-left: 6px;
-}
+			#piece_stats .content .drought {
+				padding-left: 2px;
+			}
 
-#piece_stats .content .drought {
-	padding-left: 2px;
-}
+			#dnshow {
+				display: none;
+			}
 
-#dnshow {
-	display: none;
-}
+			#board_stats {
+				display: none;
+			}
 
-#board_stats {
-	display: none;
-}
+			#lines_stats {
+				top: 16px;
+				height: 80px;
+				font-size: 12px;
+				width: 212px;
+				left: 105px;
+			}
 
-#lines_stats {
-	top: 16px;
-	height: 80px;
-	font-size: 12px;
-	width: 212px;
-	left: 105px;
-}
+			#lines_stats .header .count {
+				display: none;
+			}
 
-#lines_stats .header .count {
-	display: none;
-}
+			#lines_stats .content {
+				line-height: 12px;
+			}
 
-#lines_stats .content {
-	line-height: 12px;
-}
+			#points {
+				display: none;
+				top: 138px;
+				height: 131px;
+			}
 
-#points {
-	display: none;
-	top: 138px;
-	height: 131px;
-}
+			#pbs {
+				font-size: 12px;
+				width: 366px;
+				height: 70px;
+				left: 870px;
+				top: 262px;
+			}
 
-#pbs {
-	font-size: 12px;
-	width: 366px;
-	height: 70px;
-	left: 870px;
-	top: 262px;
-}
+			#pbs .content {
+				line-height: 14px;
+			}
 
-#pbs .content {
-	line-height: 14px;
-}
+			#droughts {
+				font-size: 12px;
+				width: 191px;
+				height: 76px;
+				top: 425px;
+				left: 208px;
+				padding: 12px 10px;
+			}
 
-#droughts {
-	font-size: 12px;
-	width: 191px;
-	height: 76px;
-	top: 425px;
-	left: 208px;
-	padding: 12px 10px;
-}
+			#droughts .content {
+				line-height: 14px;
+			}
 
-#droughts .content {
-	line-height: 14px;
-}
+			#runway {
+				top: 358px;
+				left: 208px;
+				width: 187px;
+			}
 
-#runway {
-	top: 358px;
-	left: 208px;
-	width: 187px;
-}
+			#das {
+				display: none;
+			}
 
-#das {
-	display: none;
-}
+			#video {
+				top: 36px;
+				left: 970px;
+				height: 200px;
+				width: 170px;
+			}
 
-#video {
-	top: 36px;
-	left: 970px;
-	height: 200px;
-	width: 170px;
-}
+			#high_scores {
+				height: 210px;
+				width: 360px;
+				left: 35px;
+				top: 122px;
+			}
 
-#high_scores {
-	height: 210px;
-	width: 360px;
-	left: 35px;
-	top: 122px;
-}
+			#high_scores .header {
+				padding-bottom: 4px;
+				font-size: 12px;
+			}
 
-#high_scores .header {
-	padding-bottom: 4px;
-	font-size: 12px;
-}
+			#high_scores .content,
+			#high_scores .data {
+				border-collapse: separate;
+				border-spacing: 0 0px;
+				padding: 0px;
+				font-size: 12px;
+				line-height: 4px;
+			}
 
-#high_scores .content,
-#high_scores .data {
-        border-collapse: separate;
-        border-spacing: 0 0px;
-	padding: 0px;
-        font-size: 12px;
-        line-height: 4px;
-}
+			#high_scores td {
+				line-height: 14px;
+				width: 0px;
+			}
 
-#high_scores td {
-        line-height: 14px;
-        width: 0px;
-}
+			#high_scores td.today,
+			#high_scores td.overall {
+				padding-right: 0px;
+				width: 190px;
+			}
 
-#high_scores td.today,
-#high_scores td.overall {
-	padding-right: 0px;
-	width: 190px;
-}
+			#chat {
+				display: none;
+				top: 353px;
+				height: 341px;
+			}
 
-#chat {
-	display: none;
-	top: 353px;
-	height: 341px;
-}
+			#chat .content {
+				height: 316px;
+			}
 
-#chat .content {
-	height: 316px;
-}
+			#next_piece {
+				left: 523px;
+				top: 14px;
+			}
 
-#next_piece {
-	left: 523px;
-	top: 14px;
-}
+			#next_piece .content {
+				margin-top: 14px;
+			}
 
-#next_piece .content {
-	margin-top: 14px;
-}
+			#tetris_stage {
+				border-image: url('/views/big_border.png');
+				border-image-slice: 16 16 16 16 fill;
+				border-image-width: 16px 16px;
+				padding: 17px;
+				left: 440px;
+				top: 93px;
+			}
 
-#tetris_stage {
-	border-image: url('/views/big_border.png');
-	border-image-slice: 16 16 16 16 fill;
-	border-image-width: 16px 16px;
-	padding: 17px;
-	left: 440px;
-	top:  93px;
-}
+			#score {
+				left: 714px;
+				top: 93px;
+				padding: 12px 10px;
+			}
 
-#score {
-	left: 714px;
-	top: 93px;
-	padding: 12px 10px;
-}
+			#lines {
+				left: 714px;
+				top: 192px;
+			}
 
-#lines {
-	left: 714px;
-	top: 192px;
-}
+			#level {
+				left: 714px;
+				top: 259px;
+			}
 
-#level {
-	left: 714px;
-	top: 259px;
-}
+			#efficiency {
+				left: 714px;
+				top: 326px;
+			}
 
-#efficiency {
-	left: 714px;
-	top: 326px;
-}
+			#burn {
+				left: 714px;
+				top: 393px;
+			}
 
-#burn {
-	left: 714px;
-	top: 393px;
-}
+			#stream_bg {
+				background-color: transparent;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div class="box external" id="video"></div>
 
-#stream_bg {
-    background-color: transparent;
-}
+			<div class="box" id="tetris_stage">
+				<canvas width="237" height="477" />
+			</div>
 
-</style>
-</head>
-<body>
+			<div class="box" id="chat">
+				<div class="header">CHAT</div>
+				<div class="content"></div>
+			</div>
 
-<div id="stream_bg">
-
-<div class="box external" id="video"></div>
-
-<div class="box" id="tetris_stage">
-	<canvas width="237" height="477" />
-</div>
-
-<div class="box" id="chat">
-	<div class="header">CHAT</div>
-	<div class="content"></div>
-</div>
-
-<div class="box" id="pbs">
-	<div class="header">PBs</div>
-	<table class="content" align="center">
-		<thead>
-			<tr>
-				<th>Start</th>
-				<th>End</th>
-				<th>Score</th>
-				<th>Lines</th>
-				<th>Max Drt</th>
-				<th>Trt</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr class="s18">
-				<td class="start_level">18</td>
-				<td class="end_level">--</td>
-				<td class="score">------</td>
-				<td class="lines">---</td>
-				<td class="max_drought">---</td>
-				<td class="tetris_rate">--%</td>
-			</tr>
-			<tr class="s19">
-				<td class="start_level">19</td>
-				<td class="end_level">--</td>
-				<td class="score">------</td>
-				<td class="lines">---</td>
-				<td class="max_drought">---</td>
-				<td class="tetris_rate">--%</td>
-			</tr>
-		</tbody>
-	</table>
-</div>
-
-<div class="box" id="high_scores">
-	<div class="header">HIGH SCORES</div>
-	<table class="content">
-		<tr>
-			<th>24 HOURS</th>
-			<th>OVERALL</th>
-		</tr>
-		<tr>
-			<td class="today">
-				<table>
+			<div class="box" id="pbs">
+				<div class="header">PBs</div>
+				<table class="content" align="center">
 					<thead>
 						<tr>
 							<th>Start</th>
+							<th>End</th>
 							<th>Score</th>
+							<th>Lines</th>
+							<th>Max Drt</th>
 							<th>Trt</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
+						<tr class="s18">
+							<td class="start_level">18</td>
+							<td class="end_level">--</td>
+							<td class="score">------</td>
+							<td class="lines">---</td>
+							<td class="max_drought">---</td>
+							<td class="tetris_rate">--%</td>
 						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
+						<tr class="s19">
+							<td class="start_level">19</td>
+							<td class="end_level">--</td>
+							<td class="score">------</td>
+							<td class="lines">---</td>
+							<td class="max_drought">---</td>
+							<td class="tetris_rate">--%</td>
 						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-					<tbody>
+					</tbody>
 				</table>
-			</td>
-			<td class="overall">
-				<table>
-					<thead>
-						<tr>
-							<th>Start</th>
-							<th>Score</th>
-							<th>Trt</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-						<tr>
-							<td>00</td>
-							<td>0000000</td>
-							<td>00%</td>
-						</tr>
-					<tbody>
+			</div>
+
+			<div class="box" id="high_scores">
+				<div class="header">HIGH SCORES</div>
+				<table class="content">
+					<tr>
+						<th>24 HOURS</th>
+						<th>OVERALL</th>
+					</tr>
+					<tr>
+						<td class="today">
+							<table>
+								<thead>
+									<tr>
+										<th>Start</th>
+										<th>Score</th>
+										<th>Trt</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+								</tbody>
+
+								<tbody></tbody>
+							</table>
+						</td>
+						<td class="overall">
+							<table>
+								<thead>
+									<tr>
+										<th>Start</th>
+										<th>Score</th>
+										<th>Trt</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+								</tbody>
+
+								<tbody></tbody>
+							</table>
+						</td>
+					</tr>
 				</table>
-			</td>
-		</tr>
-	</table>
-</div>
+			</div>
 
-<div class="box" id="next_piece">
-	<div class="content">
-		<canvas width="93" height="45" />
-	</div>
-</div>
+			<div class="box" id="next_piece">
+				<div class="content">
+					<canvas width="93" height="45" />
+				</div>
+			</div>
 
-<div class="box" id="tetris_rate">
-	<div class="header">TRT <span class="value">00%</span></div>
-	<div class="content"><canvas class="bounded" width="255" height="50" /></div>
-</div>
+			<div class="box" id="tetris_rate">
+				<div class="header">TRT <span class="value">00%</span></div>
+				<div class="content">
+					<canvas class="bounded" width="255" height="50" />
+				</div>
+			</div>
 
-<div class="box" id="level">
-	<div class="header">LEVEL</div>
-	<div class="content value">00</div>
-</div>
+			<div class="box" id="level">
+				<div class="header">LEVEL</div>
+				<div class="content value">00</div>
+			</div>
 
-<div class="box" id="lines">
-	<div class="header">LINES</div>
-	<div class="content">000</div>
-</div>
+			<div class="box" id="lines">
+				<div class="header">LINES</div>
+				<div class="content">000</div>
+			</div>
 
-<div class="box" id="burn">
-	<div class="header">BRN</div>
-	<div class="content">00</div>
-</div>
+			<div class="box" id="burn">
+				<div class="header">BRN</div>
+				<div class="content">00</div>
+			</div>
 
-<div class="box" id="efficiency">
-	<div class="header">EFF</div>
-	<div class="content">000</div>
-</div>
+			<div class="box" id="efficiency">
+				<div class="header">EFF</div>
+				<div class="content">000</div>
+			</div>
 
-<div class="box" id="score">
-	<div class="header">SCORE</div>
-	<table class="content">
-		<tr class="running">
-			<th>R</th>
-			<td class="value"> 000000</td>
-		</tr>
-		<tr class="transition">
-			<th>T</th>
-			<td class="value">------</td>
-		</tr>
-	</table>
-</div>
+			<div class="box" id="score">
+				<div class="header">SCORE</div>
+				<table class="content">
+					<tr class="running">
+						<th>R</th>
+						<td class="value">000000</td>
+					</tr>
+					<tr class="transition">
+						<th>T</th>
+						<td class="value">------</td>
+					</tr>
+				</table>
+			</div>
 
-<div class="box" id="droughts">
-	<div class="header">I-DRT <span class="count">000</span></div>
-	<table class="content">
-		<tr class="hgauge current">
-			<th>Cur</th>
-			<td class="gauge"><canvas width="125" height="12" /></td>
-			<td class="value">00</td>
-		</tr>
-		<tr class="hgauge last">
-			<th>Last</th>
-			<td class="gauge"><canvas width="125" height="12" /></td>
-			<td class="value">00</td>
-		</tr>
-		<tr class="hgauge max">
-			<th>Max</th>
-			<td class="gauge"><canvas width="125" height="12" /></td>
-			<td class="value">00</td>
-		</tr>
-	</table>
-</div>
+			<div class="box" id="droughts">
+				<div class="header">I-DRT <span class="count">000</span></div>
+				<table class="content">
+					<tr class="hgauge current">
+						<th>Cur</th>
+						<td class="gauge"><canvas width="125" height="12" /></td>
+						<td class="value">00</td>
+					</tr>
+					<tr class="hgauge last">
+						<th>Last</th>
+						<td class="gauge"><canvas width="125" height="12" /></td>
+						<td class="value">00</td>
+					</tr>
+					<tr class="hgauge max">
+						<th>Max</th>
+						<td class="gauge"><canvas width="125" height="12" /></td>
+						<td class="value">00</td>
+					</tr>
+				</table>
+			</div>
 
-<div class="box" id="piece_stats">
-	<table class="content">
-		<tr class="headers">
-			<th></th>
-			<th class="count">#</th>
-			<th class="percent">%</th>
-			<th class="header distribution" id="dnshow">PIECES <span class="count">000</span>
-				<span class="deviation_28" id="dnshow">00.0</span>
-				<span class="deviation_56" id="dnshow">00.0</span>
-				<span class="deviation_all" id="dnshow">00.0</span>
-			</th>
-			<th class="drought">DRT</th>
-		</tr>
-		<tr class="piece T">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-		<tr class="piece J">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-		<tr class="piece Z">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-		<tr class="piece O">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-		<tr class="piece S">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-		<tr class="piece L">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-		<tr class="piece I">
-			<th></th>
-			<td class="count">000</td>
-			<td class="percent">00%</td>
-			<td class="distribution" id="dnshow"><canvas id="dnshow" width="600" height="4" /></td>
-			<td class="drought">00</td>
-		</tr>
-	</table>
-</div>
+			<div class="box" id="piece_stats">
+				<table class="content">
+					<tr class="headers">
+						<th></th>
+						<th class="count">#</th>
+						<th class="percent">%</th>
+						<th class="header distribution" id="dnshow">
+							PIECES <span class="count">000</span>
+							<span class="deviation_28" id="dnshow">00.0</span>
+							<span class="deviation_56" id="dnshow">00.0</span>
+							<span class="deviation_all" id="dnshow">00.0</span>
+						</th>
+						<th class="drought">DRT</th>
+					</tr>
+					<tr class="piece T">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+					<tr class="piece J">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+					<tr class="piece Z">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+					<tr class="piece O">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+					<tr class="piece S">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+					<tr class="piece L">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+					<tr class="piece I">
+						<th></th>
+						<td class="count">000</td>
+						<td class="percent">00%</td>
+						<td class="distribution" id="dnshow">
+							<canvas id="dnshow" width="600" height="4" />
+						</td>
+						<td class="drought">00</td>
+					</tr>
+				</table>
+			</div>
 
-<div class="box" id="board_stats">
-	<div class="header">
-		<span class="label">HEIGHT &amp; STATE</span>
-		<span class="info_labels">
-			<span class="label tetris_ready">Tetris ready</span>
-			-
-			<span class="label clean_slope">Clean Slope</span>
-			-
-			<span class="label double_well">Double Well</span>
-			-
-			<span class="label drought">Drought</span>
-		</span>
-	</div>
-	<div class="content"><canvas class="bounded" width="730" height="81" /></div>
-</div>
+			<div class="box" id="board_stats">
+				<div class="header">
+					<span class="label">HEIGHT &amp; STATE</span>
+					<span class="info_labels">
+						<span class="label tetris_ready">Tetris ready</span>
+						-
+						<span class="label clean_slope">Clean Slope</span>
+						-
+						<span class="label double_well">Double Well</span>
+						-
+						<span class="label drought">Drought</span>
+					</span>
+				</div>
+				<div class="content">
+					<canvas class="bounded" width="730" height="81" />
+				</div>
+			</div>
 
-<div class="box" id="runway">
-	<div class="header">GAME RUNWAY</div>
-	<div class="content">0000000</div>
-</div>
+			<div class="box" id="runway">
+				<div class="header">GAME RUNWAY</div>
+				<div class="content">0000000</div>
+			</div>
 
-<div class="box" id="lines_stats">
-	<div class="header">LINE STATS<span class="count">000</span></div>
-	<div class="content">
-		<table>
-			<tr class="singles">
-				<th>Singles</th>
-				<td class="count">000</td>
-				<td class="line_count">000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="doubles">
-				<th>Doubles</th>
-				<td class="count">000</td>
-				<td class="line_count">000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="triples">
-				<th>Triples</th>
-				<td class="count">000</td>
-				<td class="line_count">000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="tetris">
-				<th>Tetris</th>
-				<td class="count">000</td>
-				<td class="line_count">000</td>
-				<td class="percent">00%</td>
-			</tr>
-		</table>
-	</div>
-</div>
+			<div class="box" id="lines_stats">
+				<div class="header">LINE STATS<span class="count">000</span></div>
+				<div class="content">
+					<table>
+						<tr class="singles">
+							<th>Singles</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="doubles">
+							<th>Doubles</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="triples">
+							<th>Triples</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="tetris">
+							<th>Tetris</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+					</table>
+				</div>
+			</div>
 
-<div class="box" id="points">
-	<div class="header">POINTS <span class="count">000000</span></div>
-	<div class="content">
-		<table>
-			<tr class="drops">
-				<th>Drops</th>
-				<td class="count"> 000000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="singles">
-				<th>Singles</th>
-				<td class="count"> 000000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="doubles">
-				<th>Doubles</th>
-				<td class="count"> 000000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="triples">
-				<th>Triples</th>
-				<td class="count"> 000000</td>
-				<td class="percent">00%</td>
-			</tr>
-			<tr class="tetris">
-				<th>Tetris</th>
-				<td class="count"> 000000</td>
-				<td class="percent">00%</td>
-			</tr>
-		</table>
-	</div>
-</div>
+			<div class="box" id="points">
+				<div class="header">POINTS <span class="count">000000</span></div>
+				<div class="content">
+					<table>
+						<tr class="drops">
+							<th>Drops</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="singles">
+							<th>Singles</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="doubles">
+							<th>Doubles</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="triples">
+							<th>Triples</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="tetris">
+							<th>Tetris</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- End Stream BG -->
 
-</div><!-- End Stream BG -->
+		<script src="/js/BinaryFrame.js"></script>
+		<script src="/js/connection.js"></script>
+		<script src="/views/constants.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/Board.js"></script>
+		<script src="/views/Game.js"></script>
+		<script src="/views/DomRefs.js"></script>
+		<script src="/views/renderBlock.js"></script>
+		<script src="/views/main.js"></script>
+		<script src="/js/QueryString.js"></script>
+		<script src="/views/bg.js"></script>
+		<script>
+			const stream_bg = document.querySelector('#stream_bg');
+			const flash_div = document.createElement('div');
 
-<script src="/js/BinaryFrame.js"></script>
-<script src="/js/connection.js"></script>
-<script src="/views/constants.js"></script>
-<script src="/views/utils.js"></script>
-<script src="/views/Board.js"></script>
-<script src="/views/Game.js"></script>
-<script src="/views/DomRefs.js"></script>
-<script src="/views/renderBlock.js"></script>
-<script src="/views/main.js"></script>
-<script src="/js/QueryString.js"></script>
-<script src="/views/bg.js"></script>
-<script>
-const stream_bg = document.querySelector('#stream_bg');
-const flash_div = document.createElement('div');
+			flash_div.classList.add('flash');
 
-flash_div.classList.add('flash');
+			Object.assign(flash_div.style, {
+				width: '100%',
+				height: '100%',
+				transform: 'scale(1)', // so it gets drawn ABOVE other transformed elements
+			});
 
-Object.assign(flash_div.style, {
-	width:  '100%',
-	height: '100%',
-	transform: 'scale(1)' // so it gets drawn ABOVE other transformed elements
-});
+			stream_bg.prepend(flash_div);
 
-stream_bg.prepend(flash_div);
+			const bg = document.querySelector('#stream_bg > .bg');
 
-const bg = document.querySelector('#stream_bg > .bg');
+			if (bg) {
+				stream_bg.removeChild(bg);
+				stream_bg.prepend(bg);
+			}
 
-if (bg) {
-	stream_bg.removeChild(bg);
-	stream_bg.prepend(bg);
-}
+			function onTetris() {
+				let remaining_frames = 12;
 
-function onTetris() {
-	let remaining_frames = 12;
+				function steps() {
+					const flash = --remaining_frames % 2;
 
-	function steps() {
-		const flash = --remaining_frames % 2;
+					flash_div.style.backgroundColor = flash ? 'white' : null;
 
-		flash_div.style.backgroundColor = flash ? 'white' : null;
+					if (remaining_frames > 0) {
+						window.requestAnimationFrame(steps);
+					}
+				}
 
-		if (remaining_frames > 0) {
-			window.requestAnimationFrame(steps);
-		}
-	}
+				window.requestAnimationFrame(steps);
+			}
+		</script>
 
-	window.requestAnimationFrame(steps);
-}
-</script>
-
-<!-- script src="/views/sample_frames/last_session.js"></script>
+		<!-- script src="/views/sample_frames/last_session.js"></script>
 <script src="/views/debug.js"></script -->
-
-</body>
-<html>
+	</body>
+	<html></html>
+</html>

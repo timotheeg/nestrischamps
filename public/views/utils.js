@@ -16,11 +16,11 @@ if (!CanvasRenderingContext2D.prototype.clear) {
 function getPercent(ratio) {
 	const percent = Math.round(ratio * 100);
 
-	return percent >= 100 ? '100' : (percent).toString().padStart(2, '0') + '%';
+	return percent >= 100 ? '100' : percent.toString().padStart(2, '0') + '%';
 }
 
 function css_size(css_pixel_width) {
-	return parseInt(css_pixel_width.replace(/px$/, ''), 10)
+	return parseInt(css_pixel_width.replace(/px$/, ''), 10);
 }
 
 function peek(arr, offset) {
@@ -31,10 +31,10 @@ function peek(arr, offset) {
 
 // see https://stackoverflow.com/a/12646864/361295
 function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]];
+	}
 
-    return array;
+	return array;
 }

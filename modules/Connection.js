@@ -30,10 +30,10 @@ class Connection extends EventEmitter {
 		this.ping = this.ping.bind(this);
 
 		this.socket.on('message', this._onMessage);
-		this.socket.on('error',   this._onError); // TODO: log?
-		this.socket.on('ping',    this._onHeartBeat);
-		this.socket.on('pong',    this._onHeartBeat);
-		this.socket.on('close',   this._onClose);
+		this.socket.on('error', this._onError); // TODO: log?
+		this.socket.on('ping', this._onHeartBeat);
+		this.socket.on('pong', this._onHeartBeat);
+		this.socket.on('close', this._onClose);
 
 		this._onHeartBeat();
 
@@ -56,7 +56,10 @@ class Connection extends EventEmitter {
 	kick(reason) {
 		this.socket.send(JSON.stringify(['_kick', reason]));
 		this.doClose(WS_CODES.KICK, reason);
-		this.kick_to = setTimeout(() => this._destroy(WS_CODES.KICK, reason), KICK_DESTROY_DELAY);
+		this.kick_to = setTimeout(
+			() => this._destroy(WS_CODES.KICK, reason),
+			KICK_DESTROY_DELAY
+		);
 	}
 
 	ping() {
@@ -78,8 +81,7 @@ class Connection extends EventEmitter {
 	_onMessage(message) {
 		if (message instanceof Uint8Array) {
 			this.emit('message', message);
-		}
-		else {
+		} else {
 			this.emit('message', JSON.parse(message));
 		}
 	}
@@ -95,12 +97,12 @@ class Connection extends EventEmitter {
 		this.ping_to = setTimeout(this.ping, PING_INTERVAL);
 	}
 
-	_onClose(code=1000, reason='') {
+	_onClose(code = 1000, reason = '') {
 		this.doClose(code, reason);
 		this._destroy(code, reason);
 	}
 
-	_destroy(code=1000, reason='') {
+	_destroy(code = 1000, reason = '') {
 		this.ping_to = clearTimeout(this.ping_to);
 		this.kick_to = clearTimeout(this.kick_to);
 		this.socket.close(code, reason);

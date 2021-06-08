@@ -1,9 +1,8 @@
 class Connection {
-	constructor(uri=null) {
+	constructor(uri = null) {
 		if (uri) {
 			this.uri = uri;
-		}
-		else {
+		} else {
 			// match current page prototol (secure / insecure)
 			const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
 
@@ -12,10 +11,10 @@ class Connection {
 
 		this.broken = false;
 
-		this.connect        = this.connect.bind(this);
-		this._handleOpen    = this._handleOpen.bind(this);
-		this._handleError   = this._handleError.bind(this);
-		this._handleClose   = this._handleClose.bind(this);
+		this.connect = this.connect.bind(this);
+		this._handleOpen = this._handleOpen.bind(this);
+		this._handleError = this._handleError.bind(this);
+		this._handleClose = this._handleClose.bind(this);
 		this._handleMessage = this._handleMessage.bind(this);
 
 		this.connect();
@@ -32,8 +31,7 @@ class Connection {
 		if (this.broken) {
 			this.broken = false;
 			this.onResume();
-		}
-		else {
+		} else {
 			this.onOpen();
 		}
 	}
@@ -48,7 +46,7 @@ class Connection {
 
 			if (Array.isArray(data)) {
 				// Connection-level command parsing
-				switch(data[0]) {
+				switch (data[0]) {
 					case '_id': {
 						this.id = data[1];
 						this.onInit();
@@ -65,12 +63,10 @@ class Connection {
 			}
 
 			this.onMessage(data);
-		}
-		else if(event.data instanceof ArrayBuffer) {
+		} else if (event.data instanceof ArrayBuffer) {
 			const frame = BinaryFrame.parse(new Uint8Array(event.data));
 			this.onMessage(['frame', frame.player_num, frame]);
-		}
-		else {
+		} else {
 			console.log('Unknown message type');
 		}
 	}
@@ -90,8 +86,7 @@ class Connection {
 			this.socket.removeEventListener('message', this._handleMessage);
 			this.socket.close();
 			this.socket = null;
-		}
-		catch(e) {}
+		} catch (e) {}
 	}
 
 	connect() {
@@ -101,7 +96,7 @@ class Connection {
 
 		this.socket = new WebSocket(this.uri);
 
-		this.socket.binaryType = "arraybuffer";
+		this.socket.binaryType = 'arraybuffer';
 
 		this.socket.addEventListener('open', this._handleOpen);
 		this.socket.addEventListener('error', this._handleError);
@@ -119,18 +114,17 @@ class Connection {
 	}
 
 	send(data) {
-		if (!this.socket || this.socket.readyState !== 1) { // 1 === OPEN
+		if (!this.socket || this.socket.readyState !== 1) {
+			// 1 === OPEN
 			return;
 		}
 
 		try {
 			if (data instanceof Uint8Array) {
 				this.socket.send(data); // send binary frame
-			}
-			else {
+			} else {
 				this.socket.send(JSON.stringify(data));
 			}
-		}
-		catch(err) {}
+		} catch (err) {}
 	}
 }

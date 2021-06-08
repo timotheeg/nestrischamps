@@ -1,4 +1,4 @@
-const DIGITS = "0123456789ABCDEF".split('');
+const DIGITS = '0123456789ABCDEF'.split('');
 
 DIGITS.unshift('null');
 
@@ -44,13 +44,13 @@ async function loadDigitTemplates() {
 		const lumas = new Float64Array(14 * 14);
 		const pixel_data = digit.data;
 
-		for (let idx=0; idx<lumas.length; idx++) {
+		for (let idx = 0; idx < lumas.length; idx++) {
 			const offset_idx = idx << 2;
 
 			lumas[idx] = luma(
 				pixel_data[offset_idx],
 				pixel_data[offset_idx + 1],
-				pixel_data[offset_idx + 2],
+				pixel_data[offset_idx + 2]
 			);
 		}
 

@@ -5,8 +5,8 @@ const ULID = require('ulid');
 
 // The below is to upload game frames to S3
 // That should be refactored into another file
-const { Upload } = require("@aws-sdk/lib-storage");
-const { S3Client } = require("@aws-sdk/client-s3");
+const { Upload } = require('@aws-sdk/lib-storage');
+const { S3Client } = require('@aws-sdk/client-s3');
 const stream = require('stream');
 const zlib = require('zlib');
 
@@ -16,7 +16,6 @@ const path = require('path');
 const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
 const LINE_CLEAR_IGNORE_FRAMES = 7;
-
 
 class Game {
 	constructor(user) {
@@ -53,16 +52,18 @@ class Game {
 						ContentEncoding: 'gzip',
 						ContentDisposition: 'attachment',
 						CacheControl: 'max-age=315360000',
-					}
+					},
 				});
 
 				// set up some logging for game file upload
 				upload.done().then(
 					() => console.log(`Game file uploaded: ${this.frame_file}`),
-					(err) => console.log(`Unable to upload game file ${this.frame_file}: ${err.message}`),
+					err =>
+						console.log(
+							`Unable to upload game file ${this.frame_file}: ${err.message}`
+						)
 				);
-			}
-			else if (!process.env.IS_PUBLIC_SERVER) {
+			} else if (!process.env.IS_PUBLIC_SERVER) {
 				// Saving on local filesystem
 				const full_dir = path.join(__dirname, '..', dir);
 
@@ -143,24 +144,21 @@ class Game {
 		if (this.pending_score) {
 			this.pending_score = false;
 			this.onScore(data); // updates state
-		}
-		else if (data.score != this.data.score) {
+		} else if (data.score != this.data.score) {
 			this.pending_score = true;
 		}
 
 		if (this.pending_piece) {
 			this.pending_piece = false;
 			this.onPiece(data); // updates state
-		}
-		else {
+		} else {
 			if (this.IS_CLASSIC_ROM) {
 				const num_pieces = this._getNumPieces(data);
 
 				if (num_pieces != this.num_pieces) {
 					this.pending_piece = true;
 				}
-			}
-			else {
+			} else {
 				do {
 					if (this._isSameField(data)) break;
 
@@ -168,7 +166,7 @@ class Game {
 
 					const block_diff = cur_num_blocks - this.num_blocks;
 
-					switch(block_diff) {
+					switch (block_diff) {
 						case 4:
 							this.data.field = data.field;
 							this.num_blocks = cur_num_blocks;
@@ -178,17 +176,19 @@ class Game {
 						case -8:
 							this.onTetris();
 						case -6:
-							this.clear_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
-							this.num_blocks += (block_diff * 5); // equivalent to fast forward on how many blocks will have gone after the animation
+							this.clear_animation_remaining_frames =
+								LINE_CLEAR_IGNORE_FRAMES - 1;
+							this.num_blocks += block_diff * 5; // equivalent to fast forward on how many blocks will have gone after the animation
 							break;
 
 						case -4:
 							if (this.pending_single) {
-								this.clear_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 2;
+								this.clear_animation_remaining_frames =
+									LINE_CLEAR_IGNORE_FRAMES - 2;
 								this.num_blocks -= 10;
-							}
-							else {
-								this.clear_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
+							} else {
+								this.clear_animation_remaining_frames =
+									LINE_CLEAR_IGNORE_FRAMES - 1;
 								this.num_blocks -= 20;
 							}
 
@@ -207,9 +207,7 @@ class Game {
 							// TODO: block count tracking can fall out of sync, breaking piece count events. CCan anything be done to restore a "clean" count and resume
 							this.pending_single = false;
 					}
-
-				}
-				while(false);
+				} while (false);
 			}
 		}
 
@@ -240,16 +238,17 @@ class Game {
 			return;
 		}
 
-		ScoreDAO
-			.recordGame(this.user, report)
-			.then(
-				(score_id) => console.log(`Recorded new game for user ${this.user.id} with id ${score_id}`),
-				(err) => {
-					console.log('Unable to record game');
-					console.error(err);
-					// TODO delete replay file too
-				}
-			);
+		ScoreDAO.recordGame(this.user, report).then(
+			score_id =>
+				console.log(
+					`Recorded new game for user ${this.user.id} with id ${score_id}`
+				),
+			err => {
+				console.log('Unable to record game');
+				console.error(err);
+				// TODO delete replay file too
+			}
+		);
 	}
 
 	_isSameField(data) {
@@ -297,17 +296,15 @@ class Game {
 		if (this.IS_CLASSIC_ROM) {
 			if (this.num_pieces === 0) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
-			}
-			else {
+			} else {
 				cur_piece = this.prior_preview; // should be in sync 🤞
 			}
 
 			// record new state
 			this.num_pieces = this._getNumPieces(data);
-			PIECES.forEach(p => this.data[p] = data[p]);
+			PIECES.forEach(p => (this.data[p] = data[p]));
 			this.prior_preview = data.preview;
-		}
-		else {
+		} else {
 			cur_piece = data.cur_piece; // 💪
 			this.das_total += data.cur_piece_das;
 		}
@@ -320,8 +317,7 @@ class Game {
 			}
 
 			this.cur_drought = 0;
-		}
-		else {
+		} else {
 			if (++this.cur_drought === 13) {
 				this.num_droughts += 1;
 			}
@@ -341,16 +337,16 @@ class Game {
 		}
 
 		return {
-			start_level:  this.start_level,
-			end_level:    this.data.level,
-			score:        this.data.score,
-			lines:        this.data.lines,
+			start_level: this.start_level,
+			end_level: this.data.level,
+			score: this.data.score,
+			lines: this.data.lines,
 			num_droughts: this.num_droughts,
-			max_drought:  this.max_drought,
-			duration:     (this.end_ts || Date.now()) - this.start_ts,
-			transition:   this.transition,
-			clears:       this.clears.join(''),
-			pieces:       this.pieces.join(''),
+			max_drought: this.max_drought,
+			duration: (this.end_ts || Date.now()) - this.start_ts,
+			transition: this.transition,
+			clears: this.clears.join(''),
+			pieces: this.pieces.join(''),
 
 			tetris_rate,
 			das_avg,

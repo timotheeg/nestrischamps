@@ -15,7 +15,8 @@ class MatchRoom extends Room {
 		this.state = {
 			bestof: 3,
 			video_feed: 0,
-			players: [ // flat user objects
+			players: [
+				// flat user objects
 				{
 					id: '',
 					login: '',
@@ -30,7 +31,7 @@ class MatchRoom extends Room {
 					profile_image_url: '',
 					victories: 0,
 				},
-			]
+			],
 		};
 
 		this.onAdminMessage = this.onAdminMessage.bind(this);
@@ -51,15 +52,19 @@ class MatchRoom extends Room {
 
 		connection.on('message', this.onAdminMessage);
 		connection.on('close', () => {
-			if (this.admin == connection) { // only overwrite self (for potential race conditions)
+			if (this.admin == connection) {
+				// only overwrite self (for potential race conditions)
 				this.admin = null;
 			}
 		});
 
-		this.admin.send(['setOwner', {
-			id:    this.owner.id,
-			login: this.owner.login
-		}]);
+		this.admin.send([
+			'setOwner',
+			{
+				id: this.owner.id,
+				login: this.owner.login,
+			},
+		]);
 		this.sendStateToAdmin();
 	}
 
@@ -86,13 +91,15 @@ class MatchRoom extends Room {
 			this.state.players.forEach((player, pidx) => {
 				if (player.id !== user.id) return;
 
-				this.last_view.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
+				this.last_view.send([
+					'setPeerId',
+					pidx,
+					user.getProducer().getPeerId(),
+				]);
 			});
 
 			// and then inform the producer about the view's peer id
-			user.getProducer().send(
-				['setViewPeerId', this.last_view.id]
-			);
+			user.getProducer().send(['setViewPeerId', this.last_view.id]);
 		}
 	}
 
@@ -100,7 +107,7 @@ class MatchRoom extends Room {
 		const iter = this.producers.values();
 		let next;
 
-		while (next = iter.next()) {
+		while ((next = iter.next())) {
 			const user = next.value;
 
 			if (!user) return;
@@ -133,7 +140,7 @@ class MatchRoom extends Room {
 		// TODO: anything to send to the views?
 	}
 
-	addView(connection, is_secret_view=true) {
+	addView(connection, is_secret_view = true) {
 		super.addView(connection);
 
 		if (is_secret_view) {
@@ -150,9 +157,7 @@ class MatchRoom extends Room {
 			});
 
 			this.producers.forEach(user => {
-				user.getProducer().send(
-					['setViewPeerId', this.last_view.id]
-				);
+				user.getProducer().send(['setViewPeerId', this.last_view.id]);
 			});
 		}
 
@@ -160,11 +165,11 @@ class MatchRoom extends Room {
 		connection.send(['setBestOf', this.state.bestof]);
 
 		this.state.players.forEach((player, pidx) => {
-			connection.send(['setId',              pidx, player.id]);
-			connection.send(['setLogin',           pidx, player.login]);
-			connection.send(['setDisplayName',     pidx, player.display_name]);
+			connection.send(['setId', pidx, player.id]);
+			connection.send(['setLogin', pidx, player.login]);
+			connection.send(['setDisplayName', pidx, player.display_name]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);
-			connection.send(['setVictories',       pidx, player.victories]);
+			connection.send(['setVictories', pidx, player.victories]);
 
 			if (player.id) {
 				const user = this.getProducer(player.id);
@@ -182,8 +187,8 @@ class MatchRoom extends Room {
 	// list customization on avatars and names
 	getState() {
 		return {
-			producers: [ ...this.producers ].map(this.getProducerFields),
-			...this.state
+			producers: [...this.producers].map(this.getProducerFields),
+			...this.state,
 		};
 	}
 
@@ -217,18 +222,24 @@ class MatchRoom extends Room {
 
 				case 'setPlayer': {
 					const [p_num, p_id] = args;
-					console.log('setPlayer()', p_id, typeof p_id)
+					console.log('setPlayer()', p_id, typeof p_id);
 
 					let player_data;
 					let player_id = `${p_id}`;
 
 					this.assertValidPlayer(p_num);
 
-					if (this.state.players[p_num].id && player_id != this.state.players[p_num].id) {
+					if (
+						this.state.players[p_num].id &&
+						player_id != this.state.players[p_num].id
+					) {
 						// replacing player
 						const other_player_num = (p_num + 1) % 2;
 
-						if (this.state.players[p_num].id != this.state.players[other_player_num].id) {
+						if (
+							this.state.players[p_num].id !=
+							this.state.players[other_player_num].id
+						) {
 							const user = this.getProducer(this.state.players[p_num].id);
 
 							user.getProducer().send(['dropPlayer']);
@@ -243,15 +254,12 @@ class MatchRoom extends Room {
 							login: '',
 							display_name: '',
 							profile_image_url: '',
-						}
-					}
-					else if (this.state.players[0].id === player_id) {
+						};
+					} else if (this.state.players[0].id === player_id) {
 						player_data = this.state.players[0];
-					}
-					else if (this.state.players[1].id === player_id) {
+					} else if (this.state.players[1].id === player_id) {
 						player_data = this.state.players[1];
-					}
-					else {
+					} else {
 						if (user) {
 							player_data = this.getProducerFields(user);
 						}
@@ -265,17 +273,21 @@ class MatchRoom extends Room {
 					this.state.players[p_num] = {
 						...this.state.players[p_num],
 						...player_data,
-						victories: 0
+						victories: 0,
 					};
 
 					const peerid = user ? user.getProducer().getPeerId() : '';
 
 					// Send data to all views
-					this.sendToViews(['setId',              p_num, player_data.id]);
-					this.sendToViews(['setPeerId',          p_num, peerid]);
-					this.sendToViews(['setLogin',           p_num, player_data.login]);
-					this.sendToViews(['setDisplayName',     p_num, player_data.display_name]);
-					this.sendToViews(['setProfileImageURL', p_num, player_data.profile_image_url]);
+					this.sendToViews(['setId', p_num, player_data.id]);
+					this.sendToViews(['setPeerId', p_num, peerid]);
+					this.sendToViews(['setLogin', p_num, player_data.login]);
+					this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
+					this.sendToViews([
+						'setProfileImageURL',
+						p_num,
+						player_data.profile_image_url,
+					]);
 
 					// inform producer it is a now a player
 					if (user) {
@@ -353,8 +365,7 @@ class MatchRoom extends Room {
 			if (update_admin) {
 				this.sendStateToAdmin();
 			}
-		}
-		catch(err) {
+		} catch (err) {
 			console.error(err);
 		}
 	}
@@ -366,8 +377,7 @@ class MatchRoom extends Room {
 				if (message instanceof Uint8Array) {
 					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
 					this.sendToViews(message);
-				}
-				else {
+				} else {
 					this.sendToViews(['frame', p_num, message]);
 				}
 			}

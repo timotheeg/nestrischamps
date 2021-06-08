@@ -3,7 +3,7 @@ class Row {
 		this.cells = line.split('');
 		this.idx = row_idx;
 
-		const emptys = this.emptys = [];
+		const emptys = (this.emptys = []);
 
 		this.cells.forEach((val, idx) => {
 			if (val === '0') emptys.push(idx);
@@ -39,7 +39,9 @@ class Board {
 	constructor(board_str) {
 		this.rows = Array();
 
-		const columns = Array(10).fill().map(_ => []);
+		const columns = Array(10)
+			.fill()
+			.map(_ => []);
 
 		let top_seen = false;
 		let top_idx = 2;
@@ -54,8 +56,7 @@ class Board {
 					top_seen = true;
 					top_idx = yidx + 1;
 				}
-			}
-			else {
+			} else {
 				// removes falling piece
 				row = new Row('0000000000', this.rows.length);
 			}
@@ -74,13 +75,13 @@ class Board {
 		this.stats = {
 			top_idx,
 			tetris_ready: !!this.tetris_top_row,
-			clean_slope:  this.hasPerfectSlope(),
-			double_well:  this.hasDoubleWell(),
+			clean_slope: this.hasPerfectSlope(),
+			double_well: this.hasDoubleWell(),
 		};
 	}
 
 	getTetrisTopRow() {
-		for (let idx = this.rows.length; idx-- > 4;) {
+		for (let idx = this.rows.length; idx-- > 4; ) {
 			const row = this.rows[idx];
 
 			if (!row.well) continue;
@@ -89,12 +90,14 @@ class Board {
 			if (this.columns[row.well - 1].top_fill_idx !== idx + 1) continue;
 
 			// well is 4 row deep
-			if (row.well != this.rows[idx-1].well
-				|| row.well != this.rows[idx-2].well
-				|| row.well !=  this.rows[idx-3].well
-			) continue;
+			if (
+				row.well != this.rows[idx - 1].well ||
+				row.well != this.rows[idx - 2].well ||
+				row.well != this.rows[idx - 3].well
+			)
+				continue;
 
-			return this.rows[idx-3];
+			return this.rows[idx - 3];
 		}
 
 		return null;
@@ -115,16 +118,21 @@ class Board {
 
 	hasDoubleWell() {
 		if (
-			!this.tetris_top_row
-			|| this.tetris_top_row.idx === 0 // tetris ready all the way to the top
-			|| this.tetris_top_row.well != 10
-		) return false;
+			!this.tetris_top_row ||
+			this.tetris_top_row.idx === 0 || // tetris ready all the way to the top
+			this.tetris_top_row.well != 10
+		)
+			return false;
 
 		for (let idx = this.tetris_top_row.idx; idx--; ) {
 			let prev_row = this.rows[idx];
 
 			if (prev_row.well === 10) continue; // tetris well still going!
-			if (prev_row.emptys.length == 2 && prev_row.emptys[0] === 8 && prev_row.emptys[1] === 9) {
+			if (
+				prev_row.emptys.length == 2 &&
+				prev_row.emptys[0] === 8 &&
+				prev_row.emptys[1] === 9
+			) {
 				return true;
 			}
 

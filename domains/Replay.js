@@ -5,7 +5,6 @@ const zlib = require('zlib');
 const path = require('path');
 const fs = require('fs');
 
-
 class Replay {
 	constructor(connection, player_num, game_id_or_url, time_scale = 1) {
 		this.connection = connection;
@@ -22,30 +21,30 @@ class Replay {
 			if (this.game_id_or_url.startsWith('http')) {
 				const game_url = this.game_id_or_url;
 				this.game_stream = got.stream(game_url);
-			}
-			else {
+			} else {
 				console.log(`Replay Error: Invalid Game URL: this.game_id_or_url`);
 				return;
 			}
-		}
-		else {
+		} else {
 			const game_id = this.game_id_or_url;
 			const score_data = await ScoreDAO.getAnonymousScore(game_id);
-			const file_path = score_data.frame_file
+			const file_path = score_data.frame_file;
 
 			if (!file_path) {
-				console.log(`Replay Error: No replay file found for gameid ${game_id}:`, score_data);
+				console.log(
+					`Replay Error: No replay file found for gameid ${game_id}:`,
+					score_data
+				);
 				return;
 			}
 
 			if (process.env.GAME_FRAMES_BUCKET) {
 				// data comes from S3
 				//https://nestrischamps.s3-us-west-1.amazonaws.com/
-				const base_url = `https://${process.env.GAME_FRAMES_BUCKET}.s3-${process.env.GAME_FRAMES_REGION}.amazonaws.com/`
+				const base_url = `https://${process.env.GAME_FRAMES_BUCKET}.s3-${process.env.GAME_FRAMES_REGION}.amazonaws.com/`;
 
 				this.game_stream = got.stream(`${base_url}${file_path}`);
-			}
-			else {
+			} else {
 				// data comes from local file
 				this.game_stream = fs
 					.createReadStream(path.join(__dirname, '..', file_path))
@@ -83,8 +82,7 @@ class Replay {
 				this.frame_buffer.push(buf);
 
 				this.sendNextFrame();
-			}
-			while(true);
+			} while (true);
 
 			this.game_stream.read(0);
 		});
@@ -100,7 +98,9 @@ class Replay {
 
 		frame[0] = (frame[0] & 0b11111000) | this.player_num;
 
-		const tdiff = Math.round((BinaryFrame.getCTime(frame) - this.start_ctime) / this.time_scale);
+		const tdiff = Math.round(
+			(BinaryFrame.getCTime(frame) - this.start_ctime) / this.time_scale
+		);
 		const frame_tick = this.start_time + tdiff;
 		const now = Date.now();
 
