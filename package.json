@@ -9,8 +9,7 @@
 		"start-linux": "export $(cat .env | xargs) && npm start",
 		"env-windows": "(for /F \"tokens=*\" %i in (.env) do set %i)",
 		"start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "eslint"
+		"test": ""
 	},
 	"pre-commit": [],
 	"keywords": [
@@ -44,6 +43,18 @@
 		"eslint": "^7.28.0",
 		"eslint-config-prettier": "^8.3.0",
 		"pre-commit": "^1.2.2",
-		"prettier": "2.3.1"
+		"prettier": "2.3.1",
+		"husky": "^6.0.0"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.{js,ts,tsx}": [
+			"prettier --write",
+			"eslint --ext .ts,.tsx,.js --fix"
+			]
 	}
 }
