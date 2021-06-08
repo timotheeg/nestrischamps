@@ -1,6 +1,5 @@
 const session = require('express-session');
 const { v4: uuidv4 } = require('uuid');
-const MemoryStore = require('memorystore')(session);
 const dbPool = require('./db');
 const pgSession = require('connect-pg-simple')(session);
 const UserDAO = require('../daos/UserDAO');

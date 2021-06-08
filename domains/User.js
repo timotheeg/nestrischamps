@@ -186,10 +186,10 @@ class User extends EventEmitter {
 				expiry: this.token.expiry,
 				onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
 					// How to update the session object(s) directly?
-					token.access_token = access_token;
-					token.refresh_token = refresh_token;
-					token.expiry = expiryDate;
-					token.expires_in = Math.max(
+					this.token.access_token = accessToken;
+					this.token.refresh_token = refreshToken;
+					this.token.expiry = expiryDate;
+					this.token.expires_in = Math.max(
 						0,
 						Math.floor((expiryDate.getTime() - Date.now()) / 1000)
 					);

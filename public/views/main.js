@@ -638,9 +638,9 @@ function renderPiece(event) {
 		dom.pieces[name].count.textContent = piece_data.count
 			.toString()
 			.padStart(3, '0');
-		dom.pieces[
-			name
-		].drought.textContent = piece_data.drought.toString().padStart(2, '0');
+		dom.pieces[name].drought.textContent = piece_data.drought
+			.toString()
+			.padStart(2, '0');
 		dom.pieces[name].percent.textContent = getPercent(piece_data.percent);
 
 		ctx.resetTransform();
@@ -954,11 +954,11 @@ function renderNextPiece(level, next_piece) {
 
 	const ctx = dom.next.ctx,
 		col_index = PIECE_COLORS[next_piece],
-		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1);
-	(x_offset_3 = Math.floor(
-		(ctx.canvas.width - pixels_per_block * 3 + BLOCK_PIXEL_SIZE) / 2
-	)),
-		(positions = []);
+		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
+		x_offset_3 = Math.floor(
+			(ctx.canvas.width - pixels_per_block * 3 + BLOCK_PIXEL_SIZE) / 2
+		),
+		positions = [];
 
 	ctx.clear();
 
