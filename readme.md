@@ -98,6 +98,7 @@ Also, verify that Browser Source hardware acceleration is set (under Advanced Se
 
 Warning: Local setup is for developpers and contributors. If you are a casual user, use [nestrischamps online](https://nestrischamps.herokuapp.com/) instead :)
 
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 
 #### Install nodejs
