@@ -150,7 +150,7 @@ class MatchRoom extends Room {
 			}
 
 			this.last_view = connection;
-			this.last_view.on('message', ([cmd, ...args]) => {
+			this.last_view.on('message', ([cmd /* , ...args */]) => {
 				if (cmd === 'acceptPlayersVideoFeed') {
 					this.state.video_feed = 1;
 				}

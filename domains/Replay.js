@@ -53,6 +53,7 @@ class Replay {
 		}
 
 		this.game_stream.on('readable', () => {
+			/* eslint-disable no-constant-condition */
 			do {
 				const buf = this.game_stream.read(71);
 
