@@ -9,7 +9,7 @@
 		"start-linux": "export $(cat .env | xargs) && npm start",
 		"env-windows": "(for /F \"tokens=*\" %i in (.env) do set %i)",
 		"start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
-		"test": "echo NO-TESTS",
+		"test": "echo \"Error: no test specified\" && exit 1",
 		"prepare": "husky install",
 		"lint": "eslint ./"
 	},
