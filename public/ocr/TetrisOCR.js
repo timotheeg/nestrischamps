@@ -54,8 +54,6 @@ const TetrisOCR = (function () {
 	const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this threshold be higher?
 
 	class TetrisOCR extends EventTarget {
-		static TASK_RESIZE = TASK_RESIZE;
-
 		constructor(templates, palettes, config) {
 			super();
 
