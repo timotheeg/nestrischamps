@@ -322,7 +322,7 @@ class Game {
 		};
 	}
 
-	toString(encoding = 'json') {
+	toString() {
 		return JSON.stringify(this.data);
 	}
 }

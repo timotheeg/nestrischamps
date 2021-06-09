@@ -1,6 +1,5 @@
 const EventEmitter = require('events');
 
-const _ = require('lodash');
 const Game = require('../modules/Game');
 
 class Producer extends EventEmitter {

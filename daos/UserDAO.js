@@ -2,9 +2,11 @@ const User = require('../domains/User');
 const dbPool = require('../modules/db');
 
 class UserDAO {
-	users_by_id = new Map();
-	users_by_login = new Map();
-	users_by_secret = new Map();
+	constructor() {
+		this.users_by_id = new Map();
+		this.users_by_login = new Map();
+		this.users_by_secret = new Map();
+	}
 
 	addUserFromData(user_data) {
 		const user = new User(user_data);

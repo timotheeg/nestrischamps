@@ -9,7 +9,11 @@
 		"start-linux": "export $(cat .env | xargs) && npm start",
 		"env-windows": "(for /F \"tokens=*\" %i in (.env) do set %i)",
 		"start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"prepare": "husky install",
+		"lint": "npm run lint-be && npm run lint-fe",
+		"lint-be": "eslint ./",
+		"lint-fe": "eslint ./public"
 	},
 	"keywords": [
 		"tetris",
@@ -26,7 +30,6 @@
 		"express-session": "^1.17.2",
 		"got": "^11.8.2",
 		"lodash": "^4.17.21",
-		"memorystore": "^1.6.4",
 		"pg": "^8.6.0",
 		"twitch": "^4.5.5",
 		"twitch-auth": "^4.5.5",
@@ -39,6 +42,10 @@
 		"node": "14.x"
 	},
 	"devDependencies": {
-		"prettier": "2.3.1"
+		"eslint": "^7.28.0",
+		"eslint-config-prettier": "^8.3.0",
+		"husky": "^6.0.0",
+		"prettier": "2.3.1",
+		"pretty-quick": "^3.1.0"
 	}
 }

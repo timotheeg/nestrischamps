@@ -7,7 +7,6 @@ const ULID = require('ulid');
 // That should be refactored into another file
 const { Upload } = require('@aws-sdk/lib-storage');
 const { S3Client } = require('@aws-sdk/client-s3');
-const stream = require('stream');
 const zlib = require('zlib');
 
 const fs = require('fs');
@@ -159,6 +158,8 @@ class Game {
 					this.pending_piece = true;
 				}
 			} else {
+				/* eslint-disable no-constant-condition */
+
 				do {
 					if (this._isSameField(data)) break;
 
@@ -167,6 +168,8 @@ class Game {
 					const block_diff = cur_num_blocks - this.num_blocks;
 
 					switch (block_diff) {
+						/* eslint-disable no-fallthrough */
+
 						case 4:
 							this.data.field = data.field;
 							this.num_blocks = cur_num_blocks;

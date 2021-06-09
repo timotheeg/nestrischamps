@@ -6,7 +6,6 @@ const ULID = require('ulid');
 
 const KICK_DESTROY_DELAY = 1000; // allows UI to get message and know it should not attempt to reconnect
 const PING_INTERVAL = 15000;
-const PONG_TIMEOUT = 60000;
 
 const WS_CODES = {
 	KICK: 4000,
@@ -64,7 +63,7 @@ class Connection extends EventEmitter {
 
 	ping() {
 		this.is_alive = false;
-		this.socket.ping(_.noop);
+		this.socket.ping(_.noop); // TODO: handle pingt timeout (pong not coming back)
 	}
 
 	doClose(code, reason) {
