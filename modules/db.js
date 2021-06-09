@@ -10,7 +10,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 
 	// the pool will emit an error on behalf of any idle clients
 	// it contains if a backend error or network partition happens
-	pool.on('error', (err, client) => {
+	pool.on('error', err => {
 		console.error('DB: Unexpected error on idle client', err);
 	});
 
@@ -47,7 +47,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 
 	// the pool will emit an error on behalf of any idle clients
 	// it contains if a backend error or network partition happens
-	pool.on('error', (err, client) => {
+	pool.on('error', err => {
 		console.error('DB: Unexpected error on idle client', err);
 	});
 

@@ -59,16 +59,22 @@ class Player {
 		this.bestof = -1;
 
 		// link dom events
-		this.dom.name.onchange = this.dom.name.onkeyup = this.dom.name.onblur = () => {
-			remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
-		};
+		this.dom.name.onchange =
+			this.dom.name.onkeyup =
+			this.dom.name.onblur =
+				() => {
+					remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
+				};
 
-		this.dom.avatar_url.onchange = this.dom.avatar_url.onkeyup = this.dom.avatar_url.onblur = () => {
-			const avatar_url = this.dom.avatar_url.value.trim();
+		this.dom.avatar_url.onchange =
+			this.dom.avatar_url.onkeyup =
+			this.dom.avatar_url.onblur =
+				() => {
+					const avatar_url = this.dom.avatar_url.value.trim();
 
-			remoteAPI.setProfileImageURL(this.idx, avatar_url);
-			this.dom.avatar_img.src = avatar_url;
-		};
+					remoteAPI.setProfileImageURL(this.idx, avatar_url);
+					this.dom.avatar_img.src = avatar_url;
+				};
 
 		this.dom.producers.onchange = () =>
 			this._pickProducer(parseInt(this.dom.producers.value, 10));
@@ -216,8 +222,11 @@ function bootstrap() {
 	dom.bestof.onchange = () =>
 		remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
 
-	dom.logo.onchange = logo.onkeyup = logo.onkeydown = logo.onblur = () =>
-		remoteAPI.setLogo(dom.logo.value.trim());
+	dom.logo.onchange =
+		dom.logo.onkeyup =
+		dom.logo.onkeydown =
+		dom.logo.onblur =
+			() => remoteAPI.setLogo(dom.logo.value.trim());
 
 	dom.clear_victories.addEventListener('click', () =>
 		remoteAPI.resetVictories()

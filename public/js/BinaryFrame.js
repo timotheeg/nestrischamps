@@ -250,4 +250,6 @@ const BinaryFrame = (function () {
 
 try {
 	module.exports = BinaryFrame;
-} catch (err) {}
+} catch (err) {
+	// nothing to do, we're not in node
+}
