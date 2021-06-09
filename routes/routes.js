@@ -6,10 +6,6 @@ const middlewares = require('../modules/middlewares');
 const layout_files = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
 
-function dummy(res) {
-	res.send('dummy ok');
-}
-
 router.get('/debug/session', (req, res) => {
 	res.send(JSON.stringify(req.session));
 });
