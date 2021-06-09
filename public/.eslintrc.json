@@ -1,0 +1,15 @@
+{
+	"env": {
+		"browser": true,
+		"node": false,
+		"commonjs": true,
+		"es2021": true
+	},
+	"root": true,
+	"extends": ["eslint:recommended", "prettier"],
+	"ignorePatterns": ["opencv.js"],
+	"parserOptions": {
+		"ecmaVersion": 12
+	},
+	"rules": {}
+}

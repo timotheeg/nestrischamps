@@ -11,7 +11,9 @@
 		"start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"prepare": "husky install",
-		"lint": "eslint ./"
+		"lint": "npm run lint-be && npm run lint-fe",
+		"lint-be": "eslint ./",
+		"lint-fe": "eslint ./public"
 	},
 	"keywords": [
 		"tetris",
