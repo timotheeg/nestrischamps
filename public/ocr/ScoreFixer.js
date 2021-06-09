@@ -3,7 +3,7 @@ class ScoreFixer {
 		this.last_good_digits = null;
 	}
 
-	charToDigit(chat) {
+	charToDigit(char) {
 		return parseInt(char, 16);
 	}
 
