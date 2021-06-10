@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const middlewares = require('../modules/middlewares');
-const layout_files = require('../modules/layouts');
+const layouts = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
 
 router.get('/debug/session', (req, res) => {
@@ -81,7 +81,7 @@ router.get(
 			return;
 		}
 
-		const layout = layout_files[req.params.layout];
+		const layout = layouts[req.params.layout];
 
 		if (!layout) {
 			res.status(404).send('Layout Not found');
@@ -99,6 +99,7 @@ router.get(
 	(req, res) => {
 		res.render('renderers', {
 			secret: req.session.user.secret,
+			layouts,
 		});
 	}
 );
@@ -108,7 +109,7 @@ router.get(
 
 // TODO: construct the routes based on available layouts - That will allow express to deal with 404s itself
 router.get('/view/:layout/:secret', (req, res) => {
-	const layout = layout_files[req.params.layout];
+	const layout = layouts[req.params.layout];
 
 	if (!layout) {
 		res.status(404).send('Not found');
@@ -119,7 +120,7 @@ router.get('/view/:layout/:secret', (req, res) => {
 });
 
 router.get('/replay/:layout/:gamedef', (req, res) => {
-	const layout = layout_files[req.params.layout];
+	const layout = layouts[req.params.layout];
 
 	if (!layout) {
 		res.status(404).send('Not found');

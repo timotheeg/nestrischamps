@@ -1,5 +1,11 @@
 <html>
 <head>
+<style>
+dt {
+	text-transform: capitalize;
+	font-weight: bold;
+}
+</style>
 </head>
 <body>
 <p>Hi! On this page, you will find URLs for templates you can use in your OBS' browser sources.</p>
@@ -8,49 +14,30 @@
 
 <p>There are many templates you can try. Play around to get a sense of them all.</p>
 
-<p>Single player layouts:</p>
+<h1>Single player layouts</h1>
+
 <dl>
-
-<!--
-<dt>Classic</dt>
-<dd><a href="/layout/classic/<%= secret %>"></a></dd>
--->
-
-<dt>Classic</dt>
-<dd><a href="/view/classic/<%= secret %>">-</a><br /><img src="/docs/layouts/classic.jpg" width="640"/></dd>
-
-<dt>Das Trainer</dt>
-<dd><a href="/view/das_trainer/<%= secret %>">-</a><br /><img src="/docs/layouts/das_trainer.jpg" width="640"/></dd>
-
-<dt>Simple 1p</dt>
-<dd><a href="/view/simple_1p/<%= secret %>">-</a><br /><img src="/docs/layouts/simple_1p.jpg" width="640"/></dd>
-
-<dt>Invisible Tetris</dt>
-<dd><a href="/view/invisible_tetris/<%= secret %>">-</a><br /><img src="/docs/layouts/invisible_tetris.jpg" width="640"/></dd>
-
-<dt>Stencil</dt>
-<dd><a href="/view/stencil/<%= secret %>">-</a><br /><img src="/docs/layouts/stencil.jpg" width="640"/></dd>
-
-<dt>Stencil Plus</dt>
-<dd><a href="/view/stencilplus/<%= secret %>">-</a><br /><img src="/docs/layouts/stencilplus.jpg" width="640"/></dd>
-
+<% layouts['1p'].forEach(layout => { %>
+<dt><%= layout.file.replace(/_/g, ' ') %></dt>
+<dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
+	<% if (layout.has_screenshot) { %>
+	<br /><img src="/views/1p/<%= layout.file %>.jpg" width="640"/>
+	<% } %>
+</dd>
+<% } %>
 </dl>
 
-<p>Competition layouts:</p>
+<h1>Competition layouts</h1>
+
 <dl>
-
-<dt>CTWC</dt>
-<dd><a href="/view/ctwc/<%= secret %>">-</a><br /><img src="/docs/layouts/ctwc.jpg" width="640"/></dd>
-
-<dt>CTJC</dt>
-<dd><a href="/view/ctjc/<%= secret %>">-</a><br /><img src="/docs/layouts/ctjc.jpg" width="640"/></dd>
-
-<dt>CTJC w/ PACE</dt>
-<dd><a href="/view/ctjc_pace/<%= secret %>">-</a><br /><img src="/docs/layouts/ctjc_pace.jpg" width="640"/></dd>
-
-<dt>CTM</dt>
-<dd><a href="/view/ctm/<%= secret %>">-</a><br /><img src="/docs/layouts/ctm.jpg" width="640"/></dd>
-
+<% layouts.mp.forEach(layout => { %>
+<dt><%= layout.file.replace(/_/g, ' ') %></dt>
+<dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
+	<% if (layout.has_screenshot) { %>
+	<br /><img src="/views/mp/<%= layout.file %>.jpg" width="640"/>
+	<% } %>
+</dd>
+<% } %>
 </dl>
 
 <p>If you'd like to change your secret, visit your <a href="/settings">settings</a> page to revoke the token (and generate a new one)</p>
