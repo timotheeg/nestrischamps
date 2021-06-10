@@ -1,69 +1,39 @@
-module.exports = {
-	// single player
-	classic: {
-		file: 'skin_classic_tetris',
-		type: '1p',
-	},
-	das_trainer: {
-		file: 'skin_das_trainer',
-		type: '1p',
-	},
-	simple_1p: {
-		file: 'simple_1p_layout',
-		type: '1p',
-	},
-	invisible_tetris: {
-		file: 'simple_1p_layout_invisible_tetris',
-		type: '1p',
-	},
-	qualifier: {
-		file: 'qualifier',
-		type: '1p',
-	},
-	stencil: {
-		file: 'stencil',
-		type: '1p',
-	},
-	stencilplus: {
-		file: 'stencilplus',
-		type: '1p',
-	},
-	plaintext: {
-		file: 'plaintext',
-		type: '1p',
-	},
-	champions: {
-		file: 'champions',
-		type: '1p',
-	},
-	tomellosoulman: {
-		file: 'tomellosoulman',
-		type: '1p',
-	},
+const fs = require('fs');
+const glob = require('glob');
 
-	// multi player
-	ctwc: {
-		file: 'competition_layout1',
-		type: 'mp',
-	},
-	ctjc: {
-		file: 'competition_layout1_ctjc',
-		type: 'mp',
-	},
-	ctjc_pace: {
-		file: 'competition_layout1_ctjc_pace',
-		type: 'mp',
-	},
-	ctm: {
-		file: 'competition_ctm',
-		type: 'mp',
-	},
-	ctm_video: {
-		file: 'competition_ctm_video',
-		type: 'mp',
-	},
-	ctm_video2: {
-		file: 'competition_ctm_video2',
-		type: 'mp',
+const layouts = {
+	_types: {
+		'1p': [],
+		'mp': [],
 	},
 };
+
+function byFilename(a, b) {
+	return a.file > b.file ? 1 : -1;
+}
+
+const start = Date.now();
+
+['1p', 'mp'].forEach(type => {
+	glob.sync(`public/views/${type}/*.html`).forEach(filename => {
+		const screenshot = filename.replace(/\.html$/, '.jpg');
+		const file = filename.split(/[\\/]/).pop().split('.')[0];
+		const layout_data = {
+			file,
+			type,
+			has_screenshot: fs.existsSync(screenshot),
+		};
+
+		layouts[file] = layout_data;
+		layouts._types[type].push(layout_data);
+	});
+});
+
+layouts._types['1p'].sort(byFilename);
+layouts._types['mp'].sort(byFilename);
+
+const elapsed = Date.now() - start;
+
+console.log(`Populated layouts data from filesystem in ${elapsed} ms.`);
+
+module.exports = layouts;
