@@ -147,16 +147,15 @@
 			});
 
 			player.onLines = cleared => {
-				document.querySelector(
-					'dd.clears'
-				).textContent = player.clear_events.map(ev => ev.cleared).join('');
+				document.querySelector('dd.clears').textContent = player.clear_events
+					.map(ev => ev.cleared)
+					.join('');
 			};
 
 			player.onPiece = current_piece => {
 				player_fields.next.textContent = player.last_frame.preview || '';
-				document.querySelector('dd.pieces').textContent = player.pieces.join(
-					''
-				);
+				document.querySelector('dd.pieces').textContent =
+					player.pieces.join('');
 			};
 
 			const API = {
