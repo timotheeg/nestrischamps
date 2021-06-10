@@ -1,21 +1,39 @@
+const fs = require('fs');
 const glob = require('glob');
 
-const layouts = {};
+const layouts = {
+	_types: {
+		'1p': [],
+		'mp': [],
+	},
+};
+
+function byFilename(a, b) {
+	return a.file > b.file ? 1 : -1;
+}
+
+const start = Date.now();
 
 ['1p', 'mp'].forEach(type => {
-	glob(`public/views/${type}/*.html`, (err, files) => {
-		if (err) {
-			console.error(err);
-			// terminate server
-			return;
-		}
+	glob.sync(`public/views/${type}/*.html`).forEach(filename => {
+		const screenshot = filename.replace(/\.html$/, '.jpg');
+		const file = filename.split(/[\\/]/).pop().split('.')[0];
+		const layout_data = {
+			file,
+			type,
+			has_screenshot: fs.existsSync(screenshot),
+		};
 
-		files.forEach(filename => {
-			const file = filename.split(/[\\/]/).pop().split('.')[0];
-
-			layouts[file] = { file, type };
-		});
+		layouts[file] = layout_data;
+		layouts._types[type].push(layout_data);
 	});
 });
+
+layouts._types['1p'].sort(byFilename);
+layouts._types['mp'].sort(byFilename);
+
+const elapsed = Date.now() - start;
+
+console.log(`Populated layouts data from filesystem in ${elapsed} ms.`);
 
 module.exports = layouts;
