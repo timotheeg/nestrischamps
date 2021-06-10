@@ -17,27 +17,27 @@ dt {
 <h1>Single player layouts</h1>
 
 <dl>
-<% layouts['1p'].forEach(layout => { %>
+<% layouts._types['1p'].forEach(layout => { %>
 <dt><%= layout.file.replace(/_/g, ' ') %></dt>
 <dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
 	<% if (layout.has_screenshot) { %>
 	<br /><img src="/views/1p/<%= layout.file %>.jpg" width="640"/>
 	<% } %>
 </dd>
-<% } %>
+<% }) %>
 </dl>
 
 <h1>Competition layouts</h1>
 
 <dl>
-<% layouts.mp.forEach(layout => { %>
+<% layouts._types.mp.forEach(layout => { %>
 <dt><%= layout.file.replace(/_/g, ' ') %></dt>
 <dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
 	<% if (layout.has_screenshot) { %>
 	<br /><img src="/views/mp/<%= layout.file %>.jpg" width="640"/>
 	<% } %>
 </dd>
-<% } %>
+<% }) %>
 </dl>
 
 <p>If you'd like to change your secret, visit your <a href="/settings">settings</a> page to revoke the token (and generate a new one)</p>
@@ -49,28 +49,6 @@ document.querySelectorAll('dd a').forEach(a => {
 
 	a.href = http_link;
 	a.textContent = http_link; // make the link show the fully qualified url
-
-	/*
-	a.addEventListener('click', async (evt) => {
-		evt.preventDefault();
-
-		const result = await navigator.permissions.query({ name: 'clipboard-write' });
-
-		if (result.state === 'granted') {
-			const type = 'text/plain';
-			const blob = new Blob([a.href], { type });
-			const data = [new ClipboardItem({ [type]: blob })];
-
-			try {
-				await navigator.clipboard.write(data);
-				alert('URL copied to clipboard.\nPaste it in your OBS\'s browser source and enjoy!');
-			}
-			catch(err) {
-				alert('Could not copy URL to clipboard')
-			}
-		}
-	});
-	/**/
 });
 </script>
 </body>

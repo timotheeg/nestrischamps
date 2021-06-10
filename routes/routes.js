@@ -88,7 +88,9 @@ router.get(
 			return;
 		}
 
-		res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
+		res.sendFile(
+			path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+		);
 	}
 );
 
@@ -116,7 +118,9 @@ router.get('/view/:layout/:secret', (req, res) => {
 		return;
 	}
 
-	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
+	res.sendFile(
+		path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+	);
 });
 
 router.get('/replay/:layout/:gamedef', (req, res) => {
@@ -127,7 +131,9 @@ router.get('/replay/:layout/:gamedef', (req, res) => {
 		return;
 	}
 
-	res.sendFile(path.join(__dirname, `../public/views/${layout.file}.html`));
+	res.sendFile(
+		path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+	);
 });
 
 module.exports = router;
