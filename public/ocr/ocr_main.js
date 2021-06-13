@@ -516,7 +516,7 @@ async function playVideoFromConfig() {
 		do_half_height = false;
 		await playVideoFromScreenCap(config.frame_rate);
 	} else {
-		do_half_height = true && !QueryString.disable_half_height;
+		do_half_height = true && !QueryString.get('disable_half_height');
 		await playVideoFromDevice(config.device_id, config.frame_rate);
 	}
 
@@ -1125,7 +1125,7 @@ function trackAndSendFrames() {
 
 (async function init() {
 	// check if timer should be made visible
-	if (QueryString.timer) {
+	if (QueryString.get('timer')) {
 		timer_control.style.display = 'block';
 	}
 

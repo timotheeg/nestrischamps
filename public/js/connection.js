@@ -13,7 +13,7 @@ class Connection {
 		}
 
 		if (extra_search_params) {
-			extra_search_params.forEach((key, value) => {
+			extra_search_params.forEach((value, key) => {
 				url.searchParams.set(key, value); // should this use .append() ?
 			});
 		}

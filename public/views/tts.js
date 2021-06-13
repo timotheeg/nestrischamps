@@ -2,10 +2,8 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis
 
 const speak = (function () {
-	function noop() {}
-
-	if (QueryString.tts != '1') {
-		return noop;
+	if (!QueryString.get('tts')) {
+		return function noop() {};
 	}
 
 	const URL_RE = /\bhttps?:\/\/[^\s]+\b/g;
@@ -13,7 +11,7 @@ const speak = (function () {
 	const VOICES_DELAY = 25;
 
 	const synth = window.speechSynthesis;
-	const lang = QueryString.lang || 'en';
+	const lang = QueryString.get('lang') || 'en';
 	const voice_map = {};
 	const speak_queue = [];
 
