@@ -225,6 +225,8 @@ function connect() {
 let ongoing_call = null;
 
 async function startSharingVideoFeed(view_meta) {
+	console.log('startSharingVideoFeed', view_meta);
+
 	stopSharingVideoFeed();
 
 	if (!peer || !view_peer_id) return;
