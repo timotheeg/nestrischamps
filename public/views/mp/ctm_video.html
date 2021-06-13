@@ -375,6 +375,12 @@
 
 		<!-- Audio -->
 
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '320x240',
+			});
+		</script>
 		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 		<script src="/js/QueryString.js"></script>
 		<script src="/views/constants.js"></script>
