@@ -6,6 +6,10 @@ const QueryString = (function () {
 			const res = [];
 
 			for (const [key, value] of Object.entries(pojo)) {
+				if (typeof value === 'function') {
+					continue;
+				}
+
 				res.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
 			}
 
