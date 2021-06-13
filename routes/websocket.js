@@ -1,4 +1,3 @@
-const URL = require('url');
 const middlewares = require('../modules/middlewares');
 const layouts = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
@@ -9,7 +8,12 @@ module.exports = function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log(`WS: ${request.url}`);
 
-		let m = request.url.match(/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?/);
+		// nestrischamps URL, parsed
+		request.nc_url = new URL(request.url, 'ws://nestrischamps');
+
+		let m = request.nc_url.pathname.match(
+			/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?/
+		);
 
 		if (m) {
 			request.is_replay = true; // indicate no need to have user session
@@ -18,10 +22,14 @@ module.exports = function init(server, wss) {
 
 			request.speed = 1;
 
-			m = request.url.match(/speed=(\d+)/);
+			let speed = request.nc_url.searchParams.get('speed');
 
-			if (m) {
-				request.speed = parseInt(m[1], 10) || 1;
+			if (speed) {
+				m = speed.match(/^\d+$/);
+
+				if (m) {
+					request.speed = parseInt(m[1], 10) || 1;
+				}
 			}
 
 			middlewares.sessionMiddleware(request, {}, async () => {
@@ -33,7 +41,9 @@ module.exports = function init(server, wss) {
 			return;
 		}
 
-		m = request.url.match(/^\/ws\/view\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/);
+		m = request.nc_url.pathname.match(
+			/^\/ws\/view\/([a-z0-9_-]+)\/([a-zA-Z0-9-]+)/
+		);
 
 		request.is_secret_view = !!m;
 
@@ -103,7 +113,9 @@ module.exports = function init(server, wss) {
 
 				let m;
 
-				if ((m = request.url.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))) {
+				if (
+					(m = request.nc_url.pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))
+				) {
 					const target_user = await UserDAO.getUserByLogin(m[1]);
 
 					if (!target_user) {
@@ -159,14 +171,13 @@ module.exports = function init(server, wss) {
 			request.session.user.login
 		);
 
+		const pathname = request.nc_url.pathname;
 		const user = await UserDAO.getUserById(request.session.user.id);
 
 		// synchronize session token if needed
 		await middlewares.checkToken(request, {});
 
-		const connection = new Connection(user, ws);
-
-		const pathname = URL.parse(request.url).pathname;
+		const connection = new Connection(user, ws, request.nc_url.searchParams);
 
 		let m; // for url matching (if needed below)
 

@@ -180,7 +180,8 @@ function connect() {
 				}
 				case 'makePlayer': {
 					// producer is player, share video
-					startSharingVideoFeed();
+					const [player_idx, view_meta] = args;
+					startSharingVideoFeed(view_meta);
 					break;
 				}
 				case 'dropPlayer': {
@@ -223,18 +224,29 @@ function connect() {
 
 let ongoing_call = null;
 
-async function startSharingVideoFeed() {
+async function startSharingVideoFeed(view_meta) {
 	stopSharingVideoFeed();
 
 	if (!peer || !view_peer_id) return;
 
+	const video = {
+		width: { ideal: 320 },
+		height: { ideal: 240 },
+		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
+	};
+
+	if (view_meta && view_meta.video) {
+		const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+
+		if (m) {
+			video.width.ideal = parseInt(m[1], 10);
+			video.height.ideal = parseInt(m[2], 10);
+		}
+	}
+
 	const stream = await navigator.mediaDevices.getUserMedia({
 		audio: false,
-		video: {
-			width: { ideal: 320 },
-			height: { ideal: 240 },
-			frameRate: { ideal: 15 }, // players hardly move... no need high fps?
-		},
+		video,
 	});
 
 	ongoing_call = peer.call(view_peer_id, stream);

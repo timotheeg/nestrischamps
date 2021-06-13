@@ -14,7 +14,6 @@ class MatchRoom extends Room {
 		this.last_view = null;
 		this.state = {
 			bestof: 3,
-			video_feed: 0,
 			players: [
 				// flat user objects
 				{
@@ -150,11 +149,6 @@ class MatchRoom extends Room {
 			}
 
 			this.last_view = connection;
-			this.last_view.on('message', ([cmd /* , ...args */]) => {
-				if (cmd === 'acceptPlayersVideoFeed') {
-					this.state.video_feed = 1;
-				}
-			});
 
 			this.producers.forEach(user => {
 				user.getProducer().send(['setViewPeerId', this.last_view.id]);
@@ -175,9 +169,15 @@ class MatchRoom extends Room {
 				const user = this.getProducer(player.id);
 
 				connection.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
-				user.getProducer().send(['makePlayer', pidx]); // could be too fast for call to work ??
+				user.getProducer().send(['makePlayer', pidx, this.getViewMeta()]); // could be too fast for call to work ??
 			}
 		});
+	}
+
+	getViewMeta() {
+		if (!this.last_view) return {};
+
+		return this.last_view.meta;
 	}
 
 	// get state of the room:
@@ -291,7 +291,7 @@ class MatchRoom extends Room {
 
 					// inform producer it is a now a player
 					if (user) {
-						user.getProducer().send(['makePlayer', p_num]);
+						user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]);
 					}
 
 					forward_to_views = false;
@@ -344,11 +344,6 @@ class MatchRoom extends Room {
 				case 'setWinner': {
 					update_admin = false;
 
-					break;
-				}
-
-				case 'setVideoFeed': {
-					this.state.video_feed = args[0] ? 1 : 0;
 					break;
 				}
 
