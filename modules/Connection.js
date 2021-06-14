@@ -12,12 +12,20 @@ const WS_CODES = {
 };
 
 class Connection extends EventEmitter {
-	constructor(user, socket) {
+	constructor(user, socket, meta = new URLSearchParams()) {
 		super();
 
 		this.id = `NTC${ULID.ulid()}`; // NTC prefix for NesTrisChamps
 		this.user = user;
 		this.socket = socket;
+
+		// convert the incoming meta to a pojo, not sure if wise
+		// but we expect the meta to be serialized often-ish, so might as well pojo-ify it just once
+		this.meta = {};
+
+		meta.forEach((value, key) => {
+			this.meta[key] = value;
+		});
 
 		this.broken = false;
 

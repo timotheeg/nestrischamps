@@ -105,7 +105,6 @@ li {
 <% }; %>
 </ul>
 
-<script src="/js/QueryString.js"></script>
 <script>
 const pagination = <%- JSON.stringify(pagination) %>;
 
@@ -241,7 +240,13 @@ document.querySelectorAll('a.details_score').forEach(a => {
 const orders = ['desc', 'asc'];
 
 function load() {
-	location.href = `${location.pathname}${QueryString._build(pagination)}`;
+	const url = new URL(location);
+
+	for (const [key, value] of Object.entries(pagination)) {
+		url.searchParams.set(key, value);
+	}
+
+	location.href = url.toString();
 }
 
 

@@ -156,6 +156,7 @@ function resetNotice() {
 }
 
 let peer = null;
+let peer_opened = false;
 let view_peer_id = null;
 
 function connect() {
@@ -180,7 +181,8 @@ function connect() {
 				}
 				case 'makePlayer': {
 					// producer is player, share video
-					startSharingVideoFeed();
+					const [player_idx, view_meta] = args;
+					startSharingVideoFeed(view_meta);
 					break;
 				}
 				case 'dropPlayer': {
@@ -215,38 +217,68 @@ function connect() {
 			peer.removeAllListeners();
 			peer.destroy();
 			peer = null;
+			peer_opened = false;
 		}
 
 		peer = new Peer(connection.id);
+
+		peer.on('open', err => {
+			peer_opened = true;
+		});
+
+		peer.on('error', err => {
+			console.log('peer error');
+			console.error(err);
+		});
 	};
 }
 
 let ongoing_call = null;
 
-async function startSharingVideoFeed() {
+async function startSharingVideoFeed(view_meta) {
+	console.log('startSharingVideoFeed', view_meta);
+
 	stopSharingVideoFeed();
 
-	if (!peer || !view_peer_id) return;
+	if (!peer || !view_peer_id || !view_meta || !view_meta.video) return;
+
+	const video = {
+		width: { ideal: 320 },
+		height: { ideal: 240 },
+		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
+	};
+
+	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+
+	if (m) {
+		video.width.ideal = parseInt(m[1], 10);
+		video.height.ideal = parseInt(m[2], 10);
+	}
 
 	const stream = await navigator.mediaDevices.getUserMedia({
 		audio: false,
-		video: {
-			width: { ideal: 320 },
-			height: { ideal: 240 },
-			frameRate: { ideal: 15 }, // players hardly move... no need high fps?
-		},
+		video,
 	});
 
-	ongoing_call = peer.call(view_peer_id, stream);
-
-	// DONE!
+	if (!peer_opened) {
+		peer.on(
+			'open',
+			() => {
+				ongoing_call = peer.call(view_peer_id, stream);
+			},
+			{ once: true }
+		);
+	} else {
+		ongoing_call = peer.call(view_peer_id, stream);
+	}
 }
 
 function stopSharingVideoFeed() {
-	if (ongoing_call) {
+	try {
 		ongoing_call.close();
-		ongoing_call = null;
-	}
+	} catch (err) {}
+
+	ongoing_call = null;
 }
 
 conn_host.addEventListener('change', connect);
@@ -516,7 +548,7 @@ async function playVideoFromConfig() {
 		do_half_height = false;
 		await playVideoFromScreenCap(config.frame_rate);
 	} else {
-		do_half_height = true && !QueryString.disable_half_height;
+		do_half_height = true && QueryString.get('disable_half_height') != '1';
 		await playVideoFromDevice(config.device_id, config.frame_rate);
 	}
 
@@ -1125,7 +1157,7 @@ function trackAndSendFrames() {
 
 (async function init() {
 	// check if timer should be made visible
-	if (QueryString.timer) {
+	if (QueryString.get('timer') === '1') {
 		timer_control.style.display = 'block';
 	}
 

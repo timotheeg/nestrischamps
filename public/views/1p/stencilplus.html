@@ -359,7 +359,7 @@
 		<script>
 			const init_time = Date.now();
 
-			if (QueryString.bg === '0') {
+			if (QueryString.get('bg') === '0') {
 				document.querySelector(`#stream_bg`).style.background = 'transparent';
 			}
 

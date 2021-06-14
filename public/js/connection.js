@@ -1,13 +1,24 @@
 class Connection {
-	constructor(uri = null) {
-		if (uri) {
-			this.uri = uri;
-		} else {
-			// match current page prototol (secure / insecure)
-			const wsp = location.protocol.match(/^https/i) ? 'wss' : 'ws';
+	constructor(uri = null, extra_search_params = null) {
+		let url;
 
-			this.uri = `${wsp}://${location.host}/ws${location.pathname}${location.search}`;
+		if (uri) {
+			url = new URL(uri); // may throw
+		} else {
+			url = new URL(location);
+
+			// match current page prototol (secure / insecure)
+			url.protocol = url.protocol.match(/^https/i) ? 'wss:' : 'ws:';
+			url.pathname = `/ws${url.pathname}`;
 		}
+
+		if (extra_search_params) {
+			extra_search_params.forEach((value, key) => {
+				url.searchParams.set(key, value); // should this use .append() ?
+			});
+		}
+
+		this.uri = url.toString();
 
 		this.broken = false;
 

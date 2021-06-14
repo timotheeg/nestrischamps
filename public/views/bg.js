@@ -1,12 +1,12 @@
 (function () {
-	if (QueryString.bg === '0') {
+	if (QueryString.get('bg') === '0') {
 		return;
 	}
 
-	if (QueryString.bg === '2' || QueryString.bg === '3') {
+	if (QueryString.get('bg') === '2' || QueryString.get('bg') === '3') {
 		const img_width = 218;
 		const bg_file =
-			QueryString.bg === '2'
+			QueryString.get('bg') === '2'
 				? 'nestrischamps_bg_green.png'
 				: 'nestrischamps_bg.png';
 		const bg = document.createElement('div');

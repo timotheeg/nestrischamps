@@ -206,7 +206,13 @@ class TetrisCompetitionAPI {
 	}
 }
 
-const connection = new Connection();
+let connection;
+
+try {
+	connection = new Connection(null, view_meta); // sort of gross T_T
+} catch (_err) {
+	connection = new Connection();
+}
 
 connection.onMessage = function (frame) {
 	try {
