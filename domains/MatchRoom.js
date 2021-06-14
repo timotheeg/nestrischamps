@@ -99,6 +99,7 @@ class MatchRoom extends Room {
 
 			// and then inform the producer about the view's peer id
 			user.getProducer().send(['setViewPeerId', this.last_view.id]);
+			user.getProducer().send(['makePlayer', pidx, this.getViewMeta()]);
 		}
 	}
 
