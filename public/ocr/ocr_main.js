@@ -229,7 +229,7 @@ async function startSharingVideoFeed(view_meta) {
 
 	stopSharingVideoFeed();
 
-	if (!peer || !view_peer_id) return;
+	if (!peer || !view_peer_id || !view_meta || !view_meta.video) return;
 
 	const video = {
 		width: { ideal: 320 },
@@ -237,13 +237,11 @@ async function startSharingVideoFeed(view_meta) {
 		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
 	};
 
-	if (view_meta && view_meta.video) {
-		const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
 
-		if (m) {
-			video.width.ideal = parseInt(m[1], 10);
-			video.height.ideal = parseInt(m[2], 10);
-		}
+	if (m) {
+		video.width.ideal = parseInt(m[1], 10);
+		video.height.ideal = parseInt(m[2], 10);
 	}
 
 	const stream = await navigator.mediaDevices.getUserMedia({
@@ -252,8 +250,6 @@ async function startSharingVideoFeed(view_meta) {
 	});
 
 	ongoing_call = peer.call(view_peer_id, stream);
-
-	// DONE!
 }
 
 function stopSharingVideoFeed() {
