@@ -2,7 +2,7 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis
 
 const speak = (function () {
-	if (!QueryString.get('tts')) {
+	if (QueryString.get('tts') != '1') {
 		return function noop() {};
 	}
 

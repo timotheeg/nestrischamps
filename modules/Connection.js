@@ -20,7 +20,7 @@ class Connection extends EventEmitter {
 		this.socket = socket;
 
 		// convert the incoming meta to a pojo, not sure if wise
-		// but we expect themeta to be serialized often-ish, so might as well pojo-ify it just once
+		// but we expect the meta to be serialized often-ish, so might as well pojo-ify it just once
 		this.meta = {};
 
 		meta.forEach((value, key) => {

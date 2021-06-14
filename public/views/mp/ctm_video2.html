@@ -512,8 +512,7 @@
 								video.srcObject = remoteStream;
 								video.addEventListener(
 									'loadedmetadata',
-									meta => {
-										console.log(meta);
+									() => {
 										video.play();
 									},
 									{ once: true }
