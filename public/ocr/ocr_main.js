@@ -156,6 +156,7 @@ function resetNotice() {
 }
 
 let peer = null;
+let peer_opened = false;
 let view_peer_id = null;
 
 function connect() {
@@ -216,9 +217,19 @@ function connect() {
 			peer.removeAllListeners();
 			peer.destroy();
 			peer = null;
+			peer_opened = false;
 		}
 
 		peer = new Peer(connection.id);
+
+		peer.on('open', err => {
+			peer_opened = true;
+		});
+
+		peer.on('error', err => {
+			console.log('peer error');
+			console.error(err);
+		});
 	};
 }
 
@@ -249,14 +260,25 @@ async function startSharingVideoFeed(view_meta) {
 		video,
 	});
 
-	ongoing_call = peer.call(view_peer_id, stream);
+	if (!peer_opened) {
+		peer.on(
+			'open',
+			() => {
+				ongoing_call = peer.call(view_peer_id, stream);
+			},
+			{ once: true }
+		);
+	} else {
+		ongoing_call = peer.call(view_peer_id, stream);
+	}
 }
 
 function stopSharingVideoFeed() {
-	if (ongoing_call) {
+	try {
 		ongoing_call.close();
-		ongoing_call = null;
-	}
+	} catch (err) {}
+
+	ongoing_call = null;
 }
 
 conn_host.addEventListener('change', connect);
