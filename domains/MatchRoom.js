@@ -50,7 +50,7 @@ class MatchRoom extends Room {
 		this.admin = connection;
 
 		connection.on('message', this.onAdminMessage);
-		connection.on('close', () => {
+		connection.once('close', () => {
 			if (this.admin == connection) {
 				// only overwrite self (for potential race conditions)
 				this.admin = null;
@@ -145,7 +145,6 @@ class MatchRoom extends Room {
 		if (is_secret_view) {
 			if (this.last_view) {
 				this.last_view.send(['setSecondaryView']);
-				this.last_view.removeAllListeners();
 			}
 
 			this.last_view = connection;
@@ -172,6 +171,18 @@ class MatchRoom extends Room {
 				user.getProducer().send(['makePlayer', pidx, this.getViewMeta()]); // could be too fast for call to work ??
 			}
 		});
+	}
+
+	removeView(connection) {
+		super.removeView(connection);
+
+		if (connection === this.last_view) {
+			this.last_view = null;
+
+			this.producers.forEach(user => {
+				user.getProducer().send(['setViewPeerId', null]);
+			});
+		}
 	}
 
 	getViewMeta() {

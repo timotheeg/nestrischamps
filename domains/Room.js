@@ -14,7 +14,7 @@ class Room extends EventEmitter {
 
 	addView(connection) {
 		this.views.add(connection);
-		connection.on('close', () => this.removeView(connection));
+		connection.once('close', () => this.removeView(connection));
 	}
 
 	removeView(connection) {
