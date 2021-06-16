@@ -76,12 +76,15 @@ class LevelFixer {
 						digits[1] = 0x4;
 					}
 				}
-
 				break;
 
 			case 0x1:
-				if (digits[1] === 0x4 || digits[1] === 0xa) {
-					// 14 or 1A - could be 14 or 32
+				if (digits[1] === 0xe) {
+					// 1E -> 33
+					digits[0] = 0x3;
+					digits[1] = 0x3;
+				} else if (digits[1] === 0x4 || digits[1] === 0xa) {
+					// 14 - could be 14 or 32
 					if (this.last_good_digits[0] === 0x3) {
 						digits[0] = 0x3;
 						digits[1] = 0x2;
@@ -92,7 +95,7 @@ class LevelFixer {
 				break;
 			case 0x2:
 				if (digits[1] === 0x8 || digits[1] === 0xb) {
-					// 28 or 2B - could be 28 or 34
+					// 28 - could be 28 or 34
 					if (this.last_good_digits[0] === 0x3) {
 						digits[0] = 0x3;
 						digits[1] = 0x4;
