@@ -81,6 +81,8 @@ const reference_ui = document.querySelector('#reference_ui'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
 	device_selector = document.querySelector('#device'),
+	allow_video_feed = document.querySelector('#allow_video_feed'),
+	video_feed_selector = document.querySelector('#video_feed_device'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
@@ -113,6 +115,11 @@ device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
 	playVideoFromConfig();
 	checkActivateGoButton();
+});
+
+video_feed_selector.addEventListener('change', evt => {
+	config.video_feed_device_id = video_feed_selector.value;
+	saveConfig(config);
 });
 
 palette_selector.disabled = true;
@@ -234,30 +241,49 @@ function connect() {
 }
 
 let ongoing_call = null;
+let video_feed_config = null;
 
 async function startSharingVideoFeed(view_meta) {
 	console.log('startSharingVideoFeed', view_meta);
 
 	stopSharingVideoFeed();
 
+	if (!allow_video_feed.checked) return;
+	if (!video_feed_selector.value) return;
 	if (!peer || !view_peer_id || !view_meta || !view_meta.video) return;
 
-	const video = {
-		width: { ideal: 320 },
-		height: { ideal: 240 },
-		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
-	};
+	let video_constraints;
 
-	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+	if (view_meta) {
+		const video_constraints = {
+			width: { ideal: 320 },
+			height: { ideal: 240 },
+			frameRate: { ideal: 15 }, // players hardly move... no need high fps?
+		};
 
-	if (m) {
-		video.width.ideal = parseInt(m[1], 10);
-		video.height.ideal = parseInt(m[2], 10);
+		const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+
+		if (m) {
+			video_constraints.width.ideal = parseInt(m[1], 10);
+			video_constraints.height.ideal = parseInt(m[2], 10);
+		}
+
+		video_feed_config = video_constraints;
+	} else if (video_feed_config) {
+		video_constraints = video_feed_config;
+	} else {
+		return;
+	}
+
+	if (video_feed_selector.value === 'default') {
+		delete video_constraints.deviceId;
+	} else {
+		video_constraints.deviceId = { exact: video_feed_selector.value };
 	}
 
 	const stream = await navigator.mediaDevices.getUserMedia({
 		audio: false,
-		video,
+		video: video_constraints,
 	});
 
 	if (!peer_opened) {
@@ -384,6 +410,14 @@ function onShowPartsChanged() {
 
 show_parts.addEventListener('change', onShowPartsChanged);
 
+function onPrivacyChanged() {
+	config.allow_video_feed = !!show_parts.checked;
+
+	saveConfig(config);
+}
+
+allow_video_feed.addEventListener('change', onPrivacyChanged);
+
 let hide_show_parts_timer;
 
 function hideParts() {
@@ -431,8 +465,8 @@ function updatePaletteList() {
 
 // Updates the select element with the provided set of cameras
 function updateDeviceList(devices) {
+	// first populate for OCR
 	device_selector.innerHTML = '';
-
 	[
 		{
 			label: '-',
@@ -453,6 +487,27 @@ function updateDeviceList(devices) {
 		}
 
 		device_selector.appendChild(camera_option);
+	});
+
+	// Then populate for video feed
+	// TODO: handle case of no webcam
+	video_feed_selector.innerHTML = '';
+	[
+		{
+			label: 'Default',
+			deviceId: 'default',
+		},
+		...devices,
+	].forEach(camera => {
+		const camera_option = document.createElement('option');
+		camera_option.text = camera.label;
+		camera_option.value = camera.deviceId;
+
+		if (config && config.video_feed_device_id === camera.deviceId) {
+			camera_option.selected = true;
+		}
+
+		video_feed_selector.appendChild(camera_option);
 	});
 }
 
@@ -977,6 +1032,8 @@ function saveConfig(config) {
 		device_id: config.device_id,
 		palette: config.palette,
 		frame_rate: config.frame_rate,
+		allow_video_feed: config.allow_video_feed,
+		video_feed_device_id: config.video_feed_device_id,
 		tasks: {},
 	};
 
