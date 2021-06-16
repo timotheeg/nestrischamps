@@ -75,6 +75,8 @@ const configs = {
 
 const default_frame_rate = 60;
 
+const is_match_room = /^\/room\/u\//.test(new URL(location).pathname);
+
 let do_half_height = true;
 
 const reference_ui = document.querySelector('#reference_ui'),
@@ -407,7 +409,7 @@ go_btn.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
-	privacy.style.display = 'block';
+	privacy.style.display = is_match_room ? 'block' : 'none';
 	controls.style.display = 'block';
 });
 
@@ -1263,9 +1265,11 @@ function trackAndSendFrames() {
 
 		await resetDevices();
 
-		allow_video_feed.checked = config.allow_video_feed;
 		capture_rate.value = config.frame_rate || default_frame_rate;
 		controls.style.display = 'block';
+
+		allow_video_feed.checked = config.allow_video_feed != false;
+		privacy.style.display = is_match_room ? 'block' : 'none';
 
 		await playVideoFromConfig();
 		trackAndSendFrames();
