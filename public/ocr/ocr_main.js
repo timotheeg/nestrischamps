@@ -75,12 +75,17 @@ const configs = {
 
 const default_frame_rate = 60;
 
+const is_match_room = /^\/room\/u\//.test(new URL(location).pathname);
+
 let do_half_height = true;
 
 const reference_ui = document.querySelector('#reference_ui'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
 	device_selector = document.querySelector('#device'),
+	privacy = document.querySelector('#privacy'),
+	allow_video_feed = document.querySelector('#allow_video_feed'),
+	video_feed_selector = document.querySelector('#video_feed_device'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
@@ -113,6 +118,12 @@ device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
 	playVideoFromConfig();
 	checkActivateGoButton();
+});
+
+video_feed_selector.addEventListener('change', evt => {
+	config.video_feed_device_id = video_feed_selector.value;
+	saveConfig(config);
+	restartSharingVideoFeed();
 });
 
 palette_selector.disabled = true;
@@ -158,6 +169,8 @@ function resetNotice() {
 let peer = null;
 let peer_opened = false;
 let view_peer_id = null;
+let is_player = false;
+let view_meta = null;
 
 function connect() {
 	if (connection) {
@@ -181,11 +194,15 @@ function connect() {
 				}
 				case 'makePlayer': {
 					// producer is player, share video
-					const [player_idx, view_meta] = args;
-					startSharingVideoFeed(view_meta);
+					is_player = true;
+					view_meta = args[1];
+
+					startSharingVideoFeed();
 					break;
 				}
 				case 'dropPlayer': {
+					is_player = false;
+					view_meta = null;
 					// producer is no longer player
 					stopSharingVideoFeed();
 					break;
@@ -235,14 +252,16 @@ function connect() {
 
 let ongoing_call = null;
 
-async function startSharingVideoFeed(view_meta) {
+async function startSharingVideoFeed() {
 	console.log('startSharingVideoFeed', view_meta);
 
 	stopSharingVideoFeed();
 
+	if (!allow_video_feed.checked) return;
+	if (!video_feed_selector.value) return;
 	if (!peer || !view_peer_id || !view_meta || !view_meta.video) return;
 
-	const video = {
+	const video_constraints = {
 		width: { ideal: 320 },
 		height: { ideal: 240 },
 		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
@@ -251,13 +270,19 @@ async function startSharingVideoFeed(view_meta) {
 	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
 
 	if (m) {
-		video.width.ideal = parseInt(m[1], 10);
-		video.height.ideal = parseInt(m[2], 10);
+		video_constraints.width.ideal = parseInt(m[1], 10);
+		video_constraints.height.ideal = parseInt(m[2], 10);
+	}
+
+	if (video_feed_selector.value === 'default') {
+		delete video_constraints.deviceId;
+	} else {
+		video_constraints.deviceId = { exact: video_feed_selector.value };
 	}
 
 	const stream = await navigator.mediaDevices.getUserMedia({
 		audio: false,
-		video,
+		video: video_constraints,
 	});
 
 	if (!peer_opened) {
@@ -279,6 +304,11 @@ function stopSharingVideoFeed() {
 	} catch (err) {}
 
 	ongoing_call = null;
+}
+
+function restartSharingVideoFeed() {
+	if (!ongoing_call) return;
+	startSharingVideoFeed();
 }
 
 conn_host.addEventListener('change', connect);
@@ -368,6 +398,7 @@ go_btn.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
+	privacy.style.display = is_match_room ? 'block' : 'none';
 	controls.style.display = 'block';
 });
 
@@ -383,6 +414,22 @@ function onShowPartsChanged() {
 }
 
 show_parts.addEventListener('change', onShowPartsChanged);
+
+function onPrivacyChanged() {
+	config.allow_video_feed = !!allow_video_feed.checked;
+
+	saveConfig(config);
+
+	if (config.allow_video_feed) {
+		if (is_player) {
+			startSharingVideoFeed();
+		}
+	} else {
+		stopSharingVideoFeed();
+	}
+}
+
+allow_video_feed.addEventListener('change', onPrivacyChanged);
 
 let hide_show_parts_timer;
 
@@ -431,8 +478,8 @@ function updatePaletteList() {
 
 // Updates the select element with the provided set of cameras
 function updateDeviceList(devices) {
+	// first populate for OCR
 	device_selector.innerHTML = '';
-
 	[
 		{
 			label: '-',
@@ -453,6 +500,27 @@ function updateDeviceList(devices) {
 		}
 
 		device_selector.appendChild(camera_option);
+	});
+
+	// Then populate for video feed
+	// TODO: handle case of no webcam
+	video_feed_selector.innerHTML = '';
+	[
+		{
+			label: 'Default',
+			deviceId: 'default',
+		},
+		...devices,
+	].forEach(camera => {
+		const camera_option = document.createElement('option');
+		camera_option.text = camera.label;
+		camera_option.value = camera.deviceId;
+
+		if (config && config.video_feed_device_id === camera.deviceId) {
+			camera_option.selected = true;
+		}
+
+		video_feed_selector.appendChild(camera_option);
 	});
 }
 
@@ -977,6 +1045,8 @@ function saveConfig(config) {
 		device_id: config.device_id,
 		palette: config.palette,
 		frame_rate: config.frame_rate,
+		allow_video_feed: config.allow_video_feed,
+		video_feed_device_id: config.video_feed_device_id,
 		tasks: {},
 	};
 
@@ -1186,6 +1256,9 @@ function trackAndSendFrames() {
 
 		capture_rate.value = config.frame_rate || default_frame_rate;
 		controls.style.display = 'block';
+
+		allow_video_feed.checked = config.allow_video_feed != false;
+		privacy.style.display = is_match_room ? 'block' : 'none';
 
 		await playVideoFromConfig();
 		trackAndSendFrames();
