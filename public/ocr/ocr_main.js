@@ -197,7 +197,7 @@ function connect() {
 					is_player = true;
 					view_meta = args[1];
 
-					startSharingVideoFeed(view_meta);
+					startSharingVideoFeed();
 					break;
 				}
 				case 'dropPlayer': {
@@ -251,9 +251,8 @@ function connect() {
 }
 
 let ongoing_call = null;
-let video_feed_config = null;
 
-async function startSharingVideoFeed(view_meta) {
+async function startSharingVideoFeed() {
 	console.log('startSharingVideoFeed', view_meta);
 
 	stopSharingVideoFeed();
@@ -262,27 +261,17 @@ async function startSharingVideoFeed(view_meta) {
 	if (!video_feed_selector.value) return;
 	if (!peer || !view_peer_id || !view_meta || !view_meta.video) return;
 
-	let video_constraints;
+	const video_constraints = {
+		width: { ideal: 320 },
+		height: { ideal: 240 },
+		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
+	};
 
-	if (view_meta) {
-		const video_constraints = {
-			width: { ideal: 320 },
-			height: { ideal: 240 },
-			frameRate: { ideal: 15 }, // players hardly move... no need high fps?
-		};
+	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
 
-		const m = view_meta.video.match(/^(\d+)x(\d+)$/);
-
-		if (m) {
-			video_constraints.width.ideal = parseInt(m[1], 10);
-			video_constraints.height.ideal = parseInt(m[2], 10);
-		}
-
-		video_feed_config = video_constraints;
-	} else if (video_feed_config) {
-		video_constraints = video_feed_config;
-	} else {
-		return;
+	if (m) {
+		video_constraints.width.ideal = parseInt(m[1], 10);
+		video_constraints.height.ideal = parseInt(m[2], 10);
 	}
 
 	if (video_feed_selector.value === 'default') {
@@ -433,7 +422,7 @@ function onPrivacyChanged() {
 
 	if (config.allow_video_feed) {
 		if (is_player) {
-			startSharingVideoFeed(view_meta);
+			startSharingVideoFeed();
 		}
 	} else {
 		stopSharingVideoFeed();
