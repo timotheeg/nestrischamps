@@ -81,6 +81,7 @@ const reference_ui = document.querySelector('#reference_ui'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
 	device_selector = document.querySelector('#device'),
+	privacy = document.querySelector('#privacy'),
 	allow_video_feed = document.querySelector('#allow_video_feed'),
 	video_feed_selector = document.querySelector('#video_feed_device'),
 	color_matching = document.querySelector('#color_matching'),
@@ -120,6 +121,7 @@ device_selector.addEventListener('change', evt => {
 video_feed_selector.addEventListener('change', evt => {
 	config.video_feed_device_id = video_feed_selector.value;
 	saveConfig(config);
+	restartSharingVideoFeed();
 });
 
 palette_selector.disabled = true;
@@ -165,6 +167,8 @@ function resetNotice() {
 let peer = null;
 let peer_opened = false;
 let view_peer_id = null;
+let is_player = false;
+let view_meta = null;
 
 function connect() {
 	if (connection) {
@@ -188,11 +192,15 @@ function connect() {
 				}
 				case 'makePlayer': {
 					// producer is player, share video
-					const [player_idx, view_meta] = args;
+					is_player = true;
+					view_meta = args[1];
+
 					startSharingVideoFeed(view_meta);
 					break;
 				}
 				case 'dropPlayer': {
+					is_player = false;
+					view_meta = null;
 					// producer is no longer player
 					stopSharingVideoFeed();
 					break;
@@ -307,6 +315,11 @@ function stopSharingVideoFeed() {
 	ongoing_call = null;
 }
 
+function restartSharingVideoFeed() {
+	if (!ongoing_call) return;
+	startSharingVideoFeed();
+}
+
 conn_host.addEventListener('change', connect);
 conn_port.addEventListener('change', connect);
 
@@ -394,6 +407,7 @@ go_btn.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
+	privacy.style.display = 'block';
 	controls.style.display = 'block';
 });
 
@@ -411,9 +425,17 @@ function onShowPartsChanged() {
 show_parts.addEventListener('change', onShowPartsChanged);
 
 function onPrivacyChanged() {
-	config.allow_video_feed = !!show_parts.checked;
+	config.allow_video_feed = !!allow_video_feed.checked;
 
 	saveConfig(config);
+
+	if (config.allow_video_feed) {
+		if (is_player) {
+			startSharingVideoFeed(view_meta);
+		}
+	} else {
+		stopSharingVideoFeed();
+	}
 }
 
 allow_video_feed.addEventListener('change', onPrivacyChanged);
@@ -1241,6 +1263,7 @@ function trackAndSendFrames() {
 
 		await resetDevices();
 
+		allow_video_feed.checked = config.allow_video_feed;
 		capture_rate.value = config.frame_rate || default_frame_rate;
 		controls.style.display = 'block';
 
