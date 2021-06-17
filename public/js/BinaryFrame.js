@@ -101,7 +101,7 @@ const BinaryFrame = (function () {
 
 			// lines + level
 			buffer[bidx++] =
-				((sanitized.lines & 0b000000011) << 6) | (sanitized.level & 0b11111);
+				((sanitized.lines & 0b000000011) << 6) | (sanitized.level & 0b111111);
 
 			// instant_das + preview
 			buffer[bidx++] =
