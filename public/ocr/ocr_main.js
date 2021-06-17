@@ -15,7 +15,7 @@ const LEVEL_COLORS = [
 const reference_size = [512, 448];
 const reference_locations = {
 	score: { crop: [384, 112, 94, 14], pattern: 'ADDDDD' },
-	level: { crop: [416, 320, 30, 14], pattern: 'QA' },
+	level: { crop: [416, 320, 30, 14], pattern: 'AA' },
 	lines: { crop: [304, 32, 46, 14], pattern: 'QDD' },
 	field: { crop: [192, 80, 158, 318] },
 	preview: { crop: [384, 224, 62, 30] },

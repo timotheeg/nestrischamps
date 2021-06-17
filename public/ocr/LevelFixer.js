@@ -141,6 +141,7 @@ class LevelFixer {
 					// 5A -> 39
 					digits[1] = 0x9;
 				}
+				break;
 
 			case 0x6:
 				digits[0] = 0x4;
