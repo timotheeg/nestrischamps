@@ -25,10 +25,8 @@ module.exports = function init(server, wss) {
 			let speed = request.nc_url.searchParams.get('speed');
 
 			if (speed) {
-				m = speed.match(/^\d+$/);
-
-				if (m) {
-					request.speed = parseInt(m[1], 10) || 1;
+				if (/^\d+$/.test(speed)) {
+					request.speed = parseInt(speed, 10) || 1;
 				}
 			}
 
