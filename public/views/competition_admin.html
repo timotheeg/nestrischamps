@@ -25,7 +25,11 @@
 			}
 
 			.box > div {
-				margin: 1em;
+				margin: 0.6em;
+			}
+
+			.box .inputs div {
+				border: solid black 1px;
 			}
 
 			.victories {
@@ -68,7 +72,7 @@
 				background: lightgrey;
 			}
 
-			.avatars img {
+			.avatar img {
 				margin: 0.5em;
 				width: 60px;
 				height: 60px;
@@ -115,9 +119,13 @@
 		<template id="player">
 			<div class="box player">
 				<div>Player <span class="num"></span></div>
-				<div class="producers"><select></select></div>
-				<div><input type="text" class="name" placeholder="name" /></div>
-				<div><input type="text" class="avatar" placeholder="avatar url" /></div>
+				<div class="inputs">
+					<div class="producers"><select></select></div>
+					<div><input type="text" class="name" placeholder="name" /></div>
+					<div>
+						<input type="text" class="avatar" placeholder="avatar url" />
+					</div>
+				</div>
 				<div class="avatar"><img /></div>
 				<div class="victories"></div>
 				<div><button class="winner">Winner</button></div>
@@ -125,6 +133,6 @@
 		</template>
 
 		<script src="/js/connection.js"></script>
-		<script src="/views/competition_admin2.js"></script>
+		<script src="/views/competition_admin.js"></script>
 	</body>
 </html>
