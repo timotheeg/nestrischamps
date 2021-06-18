@@ -5,6 +5,16 @@ const Room = require('./Room');
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
 const MAX_PLAYERS = 7;
 
+function getBasePlayerData() {
+	return {
+		id: '',
+		login: '',
+		display_name: '',
+		profile_image_url: '',
+		victories: 0,
+	};
+}
+
 class MatchRoom extends Room {
 	constructor(owner, roomid) {
 		super(owner);
@@ -17,20 +27,8 @@ class MatchRoom extends Room {
 			bestof: 3,
 			players: [
 				// flat user objects - starts with 2 players
-				{
-					id: '',
-					login: '',
-					display_name: '',
-					profile_image_url: '',
-					victories: 0,
-				},
-				{
-					id: '',
-					login: '',
-					display_name: '',
-					profile_image_url: '',
-					victories: 0,
-				},
+				getBasePlayerData(),
+				getBasePlayerData(),
 			],
 		};
 
@@ -270,13 +268,8 @@ class MatchRoom extends Room {
 					const user = this.getProducer(player_id);
 
 					if (!p_id) {
-						// what does this do?
-						player_data = {
-							id: '',
-							login: '',
-							display_name: '',
-							profile_image_url: '',
-						};
+						// player is being erased, get a fresh data set
+						player_data = getBasePlayerData();
 					} else {
 						player_data = this.getPlayerData(player_id);
 
@@ -367,13 +360,7 @@ class MatchRoom extends Room {
 
 				case 'addPlayer': {
 					if (this.state.players.length < MAX_PLAYERS) {
-						this.state.players.push({
-							id: '',
-							login: '',
-							display_name: '',
-							profile_image_url: '',
-							victories: 0,
-						});
+						this.state.players.push(getBasePlayerData());
 					}
 					break;
 				}
