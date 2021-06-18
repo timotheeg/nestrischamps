@@ -16,7 +16,7 @@ class MatchRoom extends Room {
 		this.state = {
 			bestof: 3,
 			players: [
-				// flat user objects
+				// flat user objects - starts with 2 players
 				{
 					id: '',
 					login: '',
@@ -227,6 +227,10 @@ class MatchRoom extends Room {
 		throw new RangeError(`Player number is invalid (${p_num})`);
 	}
 
+	getPlayerData(player_id) {
+		return this.state.players.find(player => player.id === player_id);
+	}
+
 	onAdminMessage(message) {
 		const [command, ...args] = message;
 		let forward_to_views = true;
@@ -253,12 +257,10 @@ class MatchRoom extends Room {
 						player_id != this.state.players[p_num].id
 					) {
 						// replacing player
-						const other_player_num = (p_num + 1) % 2;
+						// if it is no longer used as any player, it needs to be told it is dropped
+						player_data = this.getPlayerData(player_id);
 
-						if (
-							this.state.players[p_num].id !=
-							this.state.players[other_player_num].id
-						) {
+						if (!player_data) {
 							const user = this.getProducer(this.state.players[p_num].id);
 
 							user.getProducer().send(['dropPlayer']);
@@ -268,18 +270,17 @@ class MatchRoom extends Room {
 					const user = this.getProducer(player_id);
 
 					if (!p_id) {
+						// what does this do?
 						player_data = {
 							id: '',
 							login: '',
 							display_name: '',
 							profile_image_url: '',
 						};
-					} else if (this.state.players[0].id === player_id) {
-						player_data = this.state.players[0];
-					} else if (this.state.players[1].id === player_id) {
-						player_data = this.state.players[1];
 					} else {
-						if (user) {
+						player_data = this.getPlayerData(player_id);
+
+						if (!player_data && user) {
 							player_data = this.getProducerFields(user);
 						}
 					}
