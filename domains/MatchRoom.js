@@ -3,6 +3,7 @@ const _ = require('lodash');
 const Room = require('./Room');
 
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
+const MAX_PLAYERS = 7;
 
 class MatchRoom extends Room {
 	constructor(owner, roomid) {
@@ -214,7 +215,14 @@ class MatchRoom extends Room {
 	}
 
 	assertValidPlayer(p_num) {
-		if (p_num === 0 || p_num === 1) return true;
+		if (
+			typeof p_num === 'number' &&
+			p_num >= 0 &&
+			p_num <= MAX_PLAYERS &&
+			!(p_num % 1)
+		) {
+			return true;
+		}
 
 		throw new RangeError(`Player number is invalid (${p_num})`);
 	}
@@ -330,9 +338,7 @@ class MatchRoom extends Room {
 				}
 
 				case 'resetVictories': {
-					this.state.players[0].victories = 0;
-					this.state.players[1].victories = 0;
-
+					this.state.players.forEach(player => (player.victories = 0));
 					break;
 				}
 
@@ -358,6 +364,19 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'addPlayer': {
+					if (this.state.players.length < MAX_PLAYERS) {
+						this.state.players.push({
+							id: '',
+							login: '',
+							display_name: '',
+							profile_image_url: '',
+							victories: 0,
+						});
+					}
+					break;
+				}
+
 				default: {
 					return;
 				}
@@ -378,8 +397,8 @@ class MatchRoom extends Room {
 
 	handleProducerMessage(user, message) {
 		// system where you can have one user being both players
-		[0, 1].forEach(p_num => {
-			if (this.state.players[p_num].id === user.id) {
+		this.state.players.forEach((player, p_num) => {
+			if (player.id === user.id) {
 				if (message instanceof Uint8Array) {
 					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
 					this.sendToViews(message);

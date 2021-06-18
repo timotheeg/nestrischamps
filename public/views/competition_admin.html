@@ -14,43 +14,31 @@
 				font-family: 'Press Start K', monospace;
 			}
 
-			#wrapper {
-				position: absolute;
-				width: auto;
+			body {
+				margin: 2px;
+			}
+
+			.box {
+				position: static;
 				height: auto;
-				margin: auto;
+				margin: 2px;
 			}
 
-			#room td {
-				padding: 0.5em 0 1em 0;
+			.box > div {
+				margin: 1em;
 			}
 
-			#num_games td {
-				padding: 1em 0 2em 0;
-			}
-
-			#buttons td {
-				padding: 2em 0 1em 0;
-				text-align: center;
-			}
-
-			#victories td,
-			#wins td {
-				padding: 1em 0 0 0;
-			}
-
-			#victories td {
+			.victories {
 				font-size: 32px;
-				padding: 1em 0 0 0;
 				letter-spacing: 6px;
 			}
 
-			#wins button {
-				font-size: 24px;
+			.victories span {
+				cursor: pointer;
 			}
 
-			#victories span {
-				cursor: pointer;
+			button {
+				font-size: 24px;
 			}
 
 			.win {
@@ -58,7 +46,7 @@
 			}
 
 			input[type='text'],
-			#producers select {
+			.producers select {
 				text-align: center;
 				box-sizing: border-box;
 				width: 100%;
@@ -66,7 +54,7 @@
 				font-size: 16px;
 			}
 
-			#producers select {
+			.producers select {
 				height: 32px; /* why though?? */
 				text-align-last: center;
 			}
@@ -80,14 +68,24 @@
 				background: lightgrey;
 			}
 
-			#avatars img {
+			.avatars img {
 				margin: 0.5em;
 				width: 60px;
 				height: 60px;
 			}
 
-			select {
-				height: 1.5em;
+			#players {
+				display: flex;
+				flex-wrap: wrap;
+			}
+
+			.player {
+				flex: 1 400px;
+			}
+
+			.buttons {
+				text-align: center;
+				margin-top: 6px;
 			}
 		</style>
 	</head>
@@ -95,82 +93,38 @@
 		<p>Player link:<br /><a id="player_link">-</a></p>
 
 		<div class="box" id="wrapper">
-			<table>
-				<tr id="room">
-					<td colspan="2">
-						Room ID: <span id="roomid"></span>
-						<br />
-						Producers: <span id="producer_count"></span>
-					</td>
-				</tr>
-				<tr id="logo">
-					<td colspan="2">
-						<input type="text" class="logo" placeholder="logo url" />
-					</td>
-				</tr>
-				<tr id="num_games">
-					<td colspan="2">
-						Best of:
-						<select id="bestof"></select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="col">Player 1</th>
-					<th scope="col">Player 2</th>
-				</tr>
-				<tr id="producers">
-					<td class="p1">
-						<select></select>
-					</td>
-					<td class="p2">
-						<select></select>
-					</td>
-				</tr>
-				<tr id="names">
-					<td class="p1">
-						<input type="text" class="name" placeholder="name" />
-					</td>
-					<td class="p2">
-						<input type="text" class="name" placeholder="name" />
-					</td>
-				</tr>
-				<tr id="avatar_urls">
-					<td class="p1">
-						<input type="text" class="avatar" placeholder="avatar url" />
-					</td>
-					<td class="p2">
-						<input type="text" class="avatar" placeholder="avatar url" />
-					</td>
-				</tr>
-				<tr id="avatars">
-					<td class="p1">
-						<img />
-					</td>
-					<td class="p2">
-						<img />
-					</td>
-				</tr>
-				<tr id="victories">
-					<td class="p1"></td>
-					<td class="p2"></td>
-				</tr>
-				<tr id="wins">
-					<td class="p1">
-						<button class="winner">Winner</button>
-					</td>
-					<td class="p2">
-						<button class="winner">Winner</button>
-					</td>
-				</tr>
-				<tr id="buttons">
-					<td colspan="2">
-						<button id="clear_victories">Clear Victories</button>
-					</td>
-				</tr>
-			</table>
+			<div id="room">
+				Room ID: <span id="roomid"></span> - Producers:
+				<span id="producer_count"></span>
+			</div>
+			<div id="num_games">
+				Best of:
+				<select id="bestof"></select>
+			</div>
+			<div id="buttons">
+				<button id="clear_victories">Clear Victories</button>
+			</div>
 		</div>
 
+		<div id="players"></div>
+
+		<div class="buttons">
+			<button id="add_player">+ Add Player</button>
+		</div>
+
+		<template id="player">
+			<div class="box player">
+				<div>Player <span class="num"></span></div>
+				<div class="producers"><select></select></div>
+				<div><input type="text" class="name" placeholder="name" /></div>
+				<div><input type="text" class="avatar" placeholder="avatar url" /></div>
+				<div class="avatar"><img /></div>
+				<div class="victories"></div>
+				<div><button class="winner">Winner</button></div>
+			</div>
+		</template>
+
 		<script src="/js/connection.js"></script>
-		<script src="/views/competition_admin.js"></script>
+		<script src="/views/competition_admin2.js"></script>
 	</body>
 </html>
