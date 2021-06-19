@@ -45,7 +45,6 @@ class MatchRoom extends Room {
 		if (this.admin) {
 			this.admin.kick('concurrency_limit');
 		}
-
 		this.admin = connection;
 
 		connection.on('message', this.onAdminMessage);
@@ -360,7 +359,20 @@ class MatchRoom extends Room {
 
 				case 'addPlayer': {
 					if (this.state.players.length < MAX_PLAYERS) {
-						this.state.players.push(getBasePlayerData());
+						const player = getBasePlayerData();
+						const pidx = this.state.players.length;
+
+						this.state.players.push(player);
+
+						this.sendToViews(['setId', pidx, player.id]);
+						this.sendToViews(['setLogin', pidx, player.login]);
+						this.sendToViews(['setDisplayName', pidx, player.display_name]);
+						this.sendToViews([
+							'setProfileImageURL',
+							pidx,
+							player.profile_image_url,
+						]);
+						this.sendToViews(['setVictories', pidx, player.victories]);
 					}
 					break;
 				}
