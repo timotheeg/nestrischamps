@@ -384,7 +384,7 @@ class MatchRoom extends Room {
 	}
 
 	handleProducerMessage(user, message) {
-		// system where you can have one user being both players
+		// system where you can have one user being multiple players
 		this.state.players.forEach((player, p_num) => {
 			if (player.id === user.id) {
 				if (message instanceof Uint8Array) {
