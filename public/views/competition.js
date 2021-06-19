@@ -170,14 +170,16 @@ class TetrisCompetitionAPI {
 	}
 
 	frame(player_idx, data) {
-		const player = getPlayer(player_idx),
-			old_score = player.getScore();
+		const player = getPlayer(player_idx);
+		const old_score = player.getScore();
+		const old_runway = player.getGameRunwayScore();
 
 		player.setFrame(data);
 
 		const new_score = player.getScore();
+		const new_runway = player.getGameRunwayScore();
 
-		if (new_score === old_score) return;
+		if (new_score === old_score && new_runway === old_runway) return;
 
 		const winner_slice_ratio = 1 / (players.length - 1);
 
