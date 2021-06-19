@@ -401,6 +401,7 @@
 
 					const player = players[player_idx];
 					const old_score = player.getScore();
+					const old_runway_score = player.getGameRunwayScore();
 
 					if (debug) {
 						debugger;
@@ -409,8 +410,10 @@
 					player.setFrame(data);
 
 					const new_score = player.getScore();
+					const new_runway_score = player.getGameRunwayScore();
 
-					if (new_score === old_score) return;
+					if (new_score === old_score && old_runway_score === new_runway_score)
+						return;
 
 					const score_p1 = players[0].getScore(),
 						score_p2 = players[1].getScore();
