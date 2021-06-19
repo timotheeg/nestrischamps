@@ -38,6 +38,8 @@ const CompetitionPlayer = (function () {
 					...options,
 				}
 			);
+
+			this.color_memory = new Map();
 		}
 
 		reset() {
@@ -47,11 +49,23 @@ const CompetitionPlayer = (function () {
 			this.dom.t_diff.textContent = this.options.format_tetris_diff(0);
 		}
 
-		setDiff(diff, t_diff, winner_order_ratio = 0) {
+		getRankColor(rank_ratio) {
+			let col = this.color_memory.get(rank_ratio);
+
+			if (!col) {
+				col = this.options.diff_color_gradient
+					.getColorAt(rank_ratio)
+					.toHexString();
+
+				this.color_memory.set(rank_ratio, col);
+			}
+
+			return col;
+		}
+
+		setDiff(diff, t_diff, rank_ratio = 0) {
 			const absDiff = Math.abs(diff);
-			const color = this.options.diff_color_gradient
-				.getColorAt(winner_order_ratio)
-				.toHexString();
+			const color = this.getRankColor(rank_ratio);
 
 			this.dom.diff.style.color = color;
 			this.dom.t_diff.style.color = color;
@@ -60,11 +74,9 @@ const CompetitionPlayer = (function () {
 			this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
 		}
 
-		setGameRunwayDiff(diff, t_diff, winner_order_ratio = 0) {
+		setGameRunwayDiff(diff, t_diff, rank_ratio = 0) {
 			const absDiff = Math.abs(diff);
-			const color = this.options.diff_color_gradient
-				.getColorAt(winner_order_ratio)
-				.toHexString();
+			const color = this.getRankColor(rank_ratio);
 
 			this.dom.runway_diff.style.color = color;
 			this.dom.runway_t_diff.style.color = color;
@@ -74,11 +86,9 @@ const CompetitionPlayer = (function () {
 				this.options.format_tetris_diff(t_diff);
 		}
 
-		setProjectionDiff(diff, t_diff, winner_order_ratio = 0) {
+		setProjectionDiff(diff, t_diff, rank_ratio = 0) {
 			const absDiff = Math.abs(diff);
-			const color = this.options.diff_color_gradient
-				.getColorAt(winner_order_ratio)
-				.toHexString();
+			const color = this.getRankColor(rank_ratio);
 
 			this.dom.projection_diff.style.color = color;
 			this.dom.projection_t_diff.style.color = color;
