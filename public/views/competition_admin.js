@@ -214,7 +214,7 @@ function setState(_room_data) {
 
 function addPlayer() {
 	const players_node = document.querySelector('#players');
-	const player_template = (linkedTemplate = document.getElementById('player'));
+	const player_template = document.getElementById('player');
 	const player_node = document.importNode(player_template.content, true);
 
 	const player = new Player(players.length, {
