@@ -399,9 +399,12 @@
 
 					startFrame();
 
-					const player = players[player_idx],
-						otherPlayer = players[(player_idx + 1) % 2],
-						otherScore = otherPlayer.getScore();
+					const player = players[player_idx];
+
+					if (!player) return;
+
+					const old_score = player.getScore();
+					const old_runway = player.getGameRunwayScore();
 
 					if (debug) {
 						debugger;
@@ -409,22 +412,17 @@
 
 					player.setFrame(data);
 
+					const new_score = player.getScore();
+					const new_runway = player.getGameRunwayScore();
+
+					if (new_score === old_score && old_runway === new_runway) return;
+
 					const score_p1 = players[0].getScore(),
 						score_p2 = players[1].getScore();
 
 					if (isNaN(score_p1) || isNaN(score_p2)) {
 						return;
 					}
-
-					if (
-						score_p1 === this.last_score_p1 &&
-						score_p2 === this.last_score_p2
-					) {
-						return;
-					}
-
-					this.last_score_p1 = score_p1;
-					this.last_score_p2 = score_p2;
 
 					const diff = score_p1 - score_p2,
 						diff_elem = document.querySelector(`.diff`),
@@ -434,11 +432,20 @@
 						diff_elem.textContent = '<0>';
 						tdiff_elem.textContent = '<0T>';
 					} else {
-						const player1_leading = diff > 0,
-							abs_diff = Math.abs(diff),
-							fmt = numberFormatter.format(abs_diff),
-							tdiff = getTetrisDiff(player, otherPlayer),
-							tfmt = tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1);
+						const player1_leading = diff > 0;
+						const abs_diff = Math.abs(diff);
+						const fmt = numberFormatter.format(abs_diff);
+
+						let tdiff;
+
+						if (player1_leading) {
+							tdiff = getTetrisDiff(players[0], players[1]);
+						} else {
+							tdiff = getTetrisDiff(players[1], players[0]);
+						}
+
+						const tfmt = tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1);
+
 						if (player1_leading) {
 							diff_elem.textContent = `<${fmt}`;
 							tdiff_elem.textContent = `<${tfmt}T`;

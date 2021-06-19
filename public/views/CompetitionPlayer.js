@@ -1,83 +1,103 @@
-/*
-	dom: {
-		... parents
-		diff
-	}
-*/
+const CompetitionPlayer = (function () {
+	const DEFAULT_DOM_REFS = {
+		diff: DOM_DEV_NULL,
+		t_diff: DOM_DEV_NULL,
+		runway_diff: DOM_DEV_NULL,
+		runway_t_diff: DOM_DEV_NULL,
+		projection_diff: DOM_DEV_NULL,
+		projection_t_diff: DOM_DEV_NULL,
+	};
 
-class CompetitionPlayer extends Player {
-	constructor(dom, options) {
-		super(dom, options);
-	}
+	const DEFAULT_OPTIONS = {
+		diff_color_gradient: new Gradient( // green - orange - red
+			'#0eff0e',
+			new Color(255, 165, 0),
+			'#fd0009'
+		),
+		format_tetris_diff: v => {
+			// ensure result is at most 4 char long
+			if (v >= 100) {
+				return Math.round(v);
+			} else if (v >= 10) {
+				return v.toFixed(1);
+			} else {
+				return v.toFixed(2);
+			}
+		},
+	};
 
-	reset() {
-		super.reset();
+	class CompetitionPlayer extends Player {
+		constructor(dom, options) {
+			super(
+				{
+					...DEFAULT_DOM_REFS,
+					...dom,
+				},
+				{
+					...DEFAULT_OPTIONS,
+					...options,
+				}
+			);
 
-		this.dom.diff.textContent = this.options.format_score(0);
-		this.dom.t_diff.textContent = this.options.format_tetris_diff(0);
-	}
-
-	setDiff(diff, t_diff) {
-		if (diff < 0) {
-			this.dom.diff.classList.remove('winning');
-			this.dom.diff.classList.add('losing');
-			this.dom.t_diff.classList.remove('winning');
-			this.dom.t_diff.classList.add('losing');
-		} else {
-			this.dom.diff.classList.remove('losing');
-			this.dom.diff.classList.add('winning');
-			this.dom.t_diff.classList.remove('losing');
-			this.dom.t_diff.classList.add('winning');
+			this.color_memory = new Map();
 		}
 
-		// compute a proper visual of the diff
-		const absDiff = Math.abs(diff);
+		reset() {
+			super.reset();
 
-		this.dom.diff.textContent = this.options.format_score(absDiff);
-		this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
-	}
-
-	setGameRunwayDiff(diff, t_diff) {
-		if (diff < 0) {
-			this.dom.runway_diff.classList.remove('winning');
-			this.dom.runway_diff.classList.add('losing');
-			this.dom.runway_t_diff.classList.remove('winning');
-			this.dom.runway_t_diff.classList.add('losing');
-		} else {
-			this.dom.runway_diff.classList.remove('losing');
-			this.dom.runway_diff.classList.add('winning');
-			this.dom.runway_t_diff.classList.remove('losing');
-			this.dom.runway_t_diff.classList.add('winning');
+			this.dom.diff.textContent = this.options.format_score(0);
+			this.dom.t_diff.textContent = this.options.format_tetris_diff(0);
 		}
 
-		// compute a proper visual of the diff
-		const absDiff = Math.abs(diff);
+		getRankColor(rank_ratio) {
+			let col = this.color_memory.get(rank_ratio);
 
-		this.dom.runway_diff.textContent = this.options.format_score(absDiff);
-		this.dom.runway_t_diff.textContent = this.options.format_tetris_diff(
-			t_diff
-		);
-	}
+			if (!col) {
+				col = this.options.diff_color_gradient
+					.getColorAt(rank_ratio)
+					.toHexString();
 
-	setProjectionDiff(diff, t_diff) {
-		if (diff < 0) {
-			this.dom.projection_diff.classList.remove('winning');
-			this.dom.projection_diff.classList.add('losing');
-			this.dom.projection_t_diff.classList.remove('winning');
-			this.dom.projection_t_diff.classList.add('losing');
-		} else {
-			this.dom.projection_diff.classList.remove('losing');
-			this.dom.projection_diff.classList.add('winning');
-			this.dom.projection_t_diff.classList.remove('losing');
-			this.dom.projection_t_diff.classList.add('winning');
+				this.color_memory.set(rank_ratio, col);
+			}
+
+			return col;
 		}
 
-		// compute a proper visual of the diff
-		const absDiff = Math.abs(diff);
+		setDiff(diff, t_diff, rank_ratio = 0) {
+			const absDiff = Math.abs(diff);
+			const color = this.getRankColor(rank_ratio);
 
-		this.dom.projection_diff.textContent = this.options.format_score(absDiff);
-		this.dom.projection_t_diff.textContent = this.options.format_tetris_diff(
-			t_diff
-		);
+			this.dom.diff.style.color = color;
+			this.dom.t_diff.style.color = color;
+
+			this.dom.diff.textContent = this.options.format_score(absDiff);
+			this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
+		}
+
+		setGameRunwayDiff(diff, t_diff, rank_ratio = 0) {
+			const absDiff = Math.abs(diff);
+			const color = this.getRankColor(rank_ratio);
+
+			this.dom.runway_diff.style.color = color;
+			this.dom.runway_t_diff.style.color = color;
+
+			this.dom.runway_diff.textContent = this.options.format_score(absDiff);
+			this.dom.runway_t_diff.textContent =
+				this.options.format_tetris_diff(t_diff);
+		}
+
+		setProjectionDiff(diff, t_diff, rank_ratio = 0) {
+			const absDiff = Math.abs(diff);
+			const color = this.getRankColor(rank_ratio);
+
+			this.dom.projection_diff.style.color = color;
+			this.dom.projection_t_diff.style.color = color;
+
+			this.dom.projection_diff.textContent = this.options.format_score(absDiff);
+			this.dom.projection_t_diff.textContent =
+				this.options.format_tetris_diff(t_diff);
+		}
 	}
-}
+
+	return CompetitionPlayer;
+})();

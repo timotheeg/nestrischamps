@@ -12,13 +12,12 @@ module.exports = function init(server, wss) {
 		request.nc_url = new URL(request.url, 'ws://nestrischamps');
 
 		let m = request.nc_url.pathname.match(
-			/^\/ws\/replay\/([a-z0-9_-]+)\/(\d+)(-(\d+))?/
+			/^\/ws\/replay\/([a-z0-9_-]+)\/((\d+)(-(\d+)){0,3})/
 		);
 
 		if (m) {
 			request.is_replay = true; // indicate no need to have user session
-			request.game1_id = m[2];
-			request.game2_id = m[4]; // may be null
+			request.game_ids = m[2].split('-');
 
 			request.speed = 1;
 
@@ -141,23 +140,9 @@ module.exports = function init(server, wss) {
 			const user = (request.session && request.session.user) || { id: 1 };
 			const connection = new Connection(user, ws);
 
-			if (request.game1_id) {
-				new Replay(
-					connection,
-					0,
-					parseInt(request.game1_id, 10),
-					request.speed
-				);
-			}
-
-			if (request.game2_id) {
-				new Replay(
-					connection,
-					1,
-					parseInt(request.game2_id, 10),
-					request.speed
-				);
-			}
+			request.game_ids.forEach((game_id, idx) => {
+				new Replay(connection, idx, parseInt(game_id, 10), request.speed);
+			});
 
 			return;
 		}

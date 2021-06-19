@@ -25,12 +25,6 @@
 				text-align: right;
 				padding-top: 6px;
 			}
-			.winning {
-				color: #0eff0e;
-			}
-			.losing {
-				color: #fd0009;
-			}
 
 			.next_piece {
 				width: 90px;
@@ -214,6 +208,8 @@
 		<!-- Audio -->
 
 		<script src="/js/QueryString.js"></script>
+		<script src="/views/color.js"></script>
+		<script src="/views/gradient.js"></script>
 		<script src="/views/constants.js"></script>
 		<script src="/views/utils.js"></script>
 		<script src="/views/bg.js"></script>
@@ -240,9 +236,6 @@
 
 							diff: document.querySelector(`.score.p${num} .diff`),
 							hearts: document.querySelector(`.name.p${num} .content`),
-							t_diff: DOM_DEV_NULL,
-							p_diff: DOM_DEV_NULL,
-							pt_diff: DOM_DEV_NULL,
 						},
 						{
 							field_pixel_size: 3,

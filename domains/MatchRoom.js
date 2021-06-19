@@ -3,6 +3,17 @@ const _ = require('lodash');
 const Room = require('./Room');
 
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
+const MAX_PLAYERS = 7;
+
+function getBasePlayerData() {
+	return {
+		id: '',
+		login: '',
+		display_name: '',
+		profile_image_url: '',
+		victories: 0,
+	};
+}
 
 class MatchRoom extends Room {
 	constructor(owner, roomid) {
@@ -15,21 +26,9 @@ class MatchRoom extends Room {
 		this.state = {
 			bestof: 3,
 			players: [
-				// flat user objects
-				{
-					id: '',
-					login: '',
-					display_name: '',
-					profile_image_url: '',
-					victories: 0,
-				},
-				{
-					id: '',
-					login: '',
-					display_name: '',
-					profile_image_url: '',
-					victories: 0,
-				},
+				// flat user objects - starts with 2 players
+				getBasePlayerData(),
+				getBasePlayerData(),
 			],
 		};
 
@@ -46,7 +45,6 @@ class MatchRoom extends Room {
 		if (this.admin) {
 			this.admin.kick('concurrency_limit');
 		}
-
 		this.admin = connection;
 
 		connection.on('message', this.onAdminMessage);
@@ -214,9 +212,20 @@ class MatchRoom extends Room {
 	}
 
 	assertValidPlayer(p_num) {
-		if (p_num === 0 || p_num === 1) return true;
+		if (
+			typeof p_num === 'number' &&
+			p_num >= 0 &&
+			p_num <= MAX_PLAYERS &&
+			!(p_num % 1)
+		) {
+			return true;
+		}
 
 		throw new RangeError(`Player number is invalid (${p_num})`);
+	}
+
+	getPlayerData(player_id) {
+		return this.state.players.find(player => player.id === player_id);
 	}
 
 	onAdminMessage(message) {
@@ -245,12 +254,10 @@ class MatchRoom extends Room {
 						player_id != this.state.players[p_num].id
 					) {
 						// replacing player
-						const other_player_num = (p_num + 1) % 2;
+						// if it is no longer used as any player, it needs to be told it is dropped
+						player_data = this.getPlayerData(player_id);
 
-						if (
-							this.state.players[p_num].id !=
-							this.state.players[other_player_num].id
-						) {
+						if (!player_data) {
 							const user = this.getProducer(this.state.players[p_num].id);
 
 							user.getProducer().send(['dropPlayer']);
@@ -260,18 +267,12 @@ class MatchRoom extends Room {
 					const user = this.getProducer(player_id);
 
 					if (!p_id) {
-						player_data = {
-							id: '',
-							login: '',
-							display_name: '',
-							profile_image_url: '',
-						};
-					} else if (this.state.players[0].id === player_id) {
-						player_data = this.state.players[0];
-					} else if (this.state.players[1].id === player_id) {
-						player_data = this.state.players[1];
+						// player is being erased, get a fresh data set
+						player_data = getBasePlayerData();
 					} else {
-						if (user) {
+						player_data = this.getPlayerData(player_id);
+
+						if (!player_data && user) {
 							player_data = this.getProducerFields(user);
 						}
 					}
@@ -330,9 +331,7 @@ class MatchRoom extends Room {
 				}
 
 				case 'resetVictories': {
-					this.state.players[0].victories = 0;
-					this.state.players[1].victories = 0;
-
+					this.state.players.forEach(player => (player.victories = 0));
 					break;
 				}
 
@@ -358,6 +357,26 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'addPlayer': {
+					if (this.state.players.length < MAX_PLAYERS) {
+						const player = getBasePlayerData();
+						const pidx = this.state.players.length;
+
+						this.state.players.push(player);
+
+						this.sendToViews(['setId', pidx, player.id]);
+						this.sendToViews(['setLogin', pidx, player.login]);
+						this.sendToViews(['setDisplayName', pidx, player.display_name]);
+						this.sendToViews([
+							'setProfileImageURL',
+							pidx,
+							player.profile_image_url,
+						]);
+						this.sendToViews(['setVictories', pidx, player.victories]);
+					}
+					break;
+				}
+
 				default: {
 					return;
 				}
@@ -377,9 +396,9 @@ class MatchRoom extends Room {
 	}
 
 	handleProducerMessage(user, message) {
-		// system where you can have one user being both players
-		[0, 1].forEach(p_num => {
-			if (this.state.players[p_num].id === user.id) {
+		// system where you can have one user being multiple players
+		this.state.players.forEach((player, p_num) => {
+			if (player.id === user.id) {
 				if (message instanceof Uint8Array) {
 					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
 					this.sendToViews(message);

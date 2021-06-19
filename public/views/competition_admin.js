@@ -1,10 +1,10 @@
 const dom = {
 	roomid: document.querySelector('#roomid'),
 	producer_count: document.querySelector('#producer_count'),
-	logo: document.querySelector('#logo input'),
 	bestof: document.querySelector('#bestof'),
 	clear_victories: document.querySelector('#clear_victories'),
 	player_link: document.querySelector('#player_link'),
+	add_player: document.querySelector('#add_player'),
 };
 
 const MAX_BEST_OF = 13;
@@ -12,6 +12,9 @@ const MAX_BEST_OF = 13;
 const remoteAPI = {
 	setBestOf: function (n) {
 		connection.send(['setBestOf', n]);
+	},
+	addPlayer: function () {
+		connection.send(['addPlayer']);
 	},
 	setPlayer: function (player_idx, user_id) {
 		connection.send(['setPlayer', player_idx, user_id]);
@@ -37,12 +40,9 @@ const remoteAPI = {
 	clearVictoryAnimation: function (player_idx) {
 		connection.send(['clearVictoryAnimation', player_idx]);
 	},
-	setLogo: function (url) {
-		connection.send(['setLogo', url]);
-	},
 };
 
-let players;
+const players = [];
 let room_data;
 let connection;
 
@@ -57,6 +57,8 @@ class Player {
 
 		this.victories = 0;
 		this.bestof = -1;
+
+		this.dom.num.textContent = idx + 1;
 
 		// link dom events
 		this.dom.name.onchange =
@@ -194,6 +196,15 @@ function setState(_room_data) {
 
 	dom.producer_count.textContent = room_data.producers.length;
 
+	// synchronize with remote players
+	while (players.length > room_data.players.length) {
+		players.pop().remove();
+	}
+
+	for (let idx = players.length; idx < room_data.players.length; idx++) {
+		addPlayer();
+	}
+
 	players.forEach((player, idx) => {
 		player.setProducers(room_data.producers);
 		player.setBestOf(room_data.bestof);
@@ -201,19 +212,28 @@ function setState(_room_data) {
 	});
 }
 
-function bootstrap() {
-	players = [1, 2].map(
-		num =>
-			new Player(num - 1, {
-				producers: document.querySelector(`#producers .p${num} select`),
-				name: document.querySelector(`#names .p${num} input`),
-				avatar_url: document.querySelector(`#avatar_urls .p${num} input`),
-				avatar_img: document.querySelector(`#avatars .p${num} img`),
-				victories: document.querySelector(`#victories .p${num}`),
-				win_btn: document.querySelector(`#wins .p${num} button`),
-			})
-	);
+function addPlayer() {
+	const players_node = document.querySelector('#players');
+	const player_template = document.getElementById('player');
+	const player_node = document.importNode(player_template.content, true);
 
+	const player = new Player(players.length, {
+		num: player_node.querySelector('.num'),
+		producers: player_node.querySelector('.producers select'),
+		name: player_node.querySelector('.name'),
+		avatar_url: player_node.querySelector('.avatar'),
+		avatar_img: player_node.querySelector('img'),
+		victories: player_node.querySelector('.victories'),
+		win_btn: player_node.querySelector('.winner'),
+	});
+
+	players_node.appendChild(player_node);
+
+	players.push(player);
+}
+
+function bootstrap() {
+	// start with 2 players
 	setBestOfOptions(MAX_BEST_OF, 3);
 
 	dom.roomid.textContent = location.pathname.split('/')[3] || '_default';
@@ -222,15 +242,13 @@ function bootstrap() {
 	dom.bestof.onchange = () =>
 		remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
 
-	dom.logo.onchange =
-		dom.logo.onkeyup =
-		dom.logo.onkeydown =
-		dom.logo.onblur =
-			() => remoteAPI.setLogo(dom.logo.value.trim());
+	dom.clear_victories.addEventListener('click', () => {
+		remoteAPI.resetVictories();
+	});
 
-	dom.clear_victories.addEventListener('click', () =>
-		remoteAPI.resetVictories()
-	);
+	dom.add_player.addEventListener('click', () => {
+		remoteAPI.addPlayer();
+	});
 
 	// =====
 
