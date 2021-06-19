@@ -598,10 +598,20 @@ const Player = (function () {
 				const line_score = (SCORE_BASES[cleared] || 0) * (this.level + 1);
 
 				if (data.score === 999999 && this.score + line_score >= 999999) {
+					// Compute score beyond maxout
 					this.score += line_score;
 				} else if (data.score < this.score) {
-					// weird readings... wait one more frame
-					return;
+					if (this.score + line_score > 1599999) {
+						// Using Hex score Game Genie code XNEOOGEX
+						// The GG code makes the score wraps around to 0 when reaching 1,600,000
+						// we correct accordingly here
+						// Note: The correction applies for a single wrap around!
+						// Note: Games above 3.2M are not supported
+						this.score = 1600000 + data.score;
+					} else {
+						// weird readings... wait one more frame
+						return;
+					}
 				} else {
 					this.score = data.score;
 				}
