@@ -67,12 +67,12 @@ class TetrisCompetitionAPI {
 	}
 
 	resetVictories() {
-		this.victories = [0, 0];
+		this.victories = players.map(p => 0);
 
-		this._repaintVictories(0);
-		this._repaintVictories(1);
-
-		players.forEach(player => player.clearField());
+		players.forEach((player, idx) => {
+			this._repaintVictories(idx);
+			player.clearField();
+		});
 	}
 
 	setId(player_idx, id) {
@@ -111,15 +111,9 @@ class TetrisCompetitionAPI {
 	setFirstTo(num_games_to_win) {
 		this.first_to = num_games_to_win;
 
-		this.setVictories(0, this.victories[0]);
-		this.setVictories(1, this.victories[1]);
-
-		/*
-		if (this.victories[1] < this.first_to && this.victories[2] < this.first_to) {
-			getPlayer(1).clearField();
-			getPlayer(2).clearField();
-		}
-		/**/
+		this.victories.forEach((num, idx) => {
+			this.setVictories(idx, num);
+		});
 	}
 
 	setBestOf(num_games) {
@@ -171,6 +165,9 @@ class TetrisCompetitionAPI {
 
 	frame(player_idx, data) {
 		const player = getPlayer(player_idx);
+
+		if (!player) return;
+
 		const old_score = player.getScore();
 		const old_runway = player.getGameRunwayScore();
 

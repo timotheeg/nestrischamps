@@ -400,6 +400,9 @@
 					startFrame();
 
 					const player = players[player_idx];
+
+					if (!player) return;
+
 					const old_score = player.getScore();
 					const old_runway = player.getGameRunwayScore();
 
