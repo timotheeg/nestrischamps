@@ -1195,7 +1195,13 @@ function trackAndSendFrames() {
 
 		last_frame = data;
 
-		connection.send(send_binary ? BinaryFrame.encode(data) : data);
+		if (send_binary) {
+			connection.send(BinaryFrame.encode(data));
+		} else {
+			// convert Uint8Array to normal array so it can be json-encoded properly
+			data.field = [...data.field];
+			connection.send(data);
+		}
 	};
 
 	/*
