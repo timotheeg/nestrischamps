@@ -1171,10 +1171,6 @@ function trackAndSendFrames() {
 		delete data.color2;
 		delete data.color3;
 
-		if (data.score === null && data.lines === null) {
-			return; // really? 🤔
-		}
-
 		// only send frame if changed
 		check_equal: do {
 			for (let key in data) {
@@ -1188,7 +1184,7 @@ function trackAndSendFrames() {
 				}
 			}
 
-			// all field equals do a sanity check on time
+			// all fields equal, do a sanity check on time
 			if (data.ctime - last_frame.ctime >= 500) break;
 
 			// no need to send frame
