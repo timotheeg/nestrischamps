@@ -73,6 +73,8 @@ const configs = {
 	},
 };
 
+const send_binary = QueryString.get('binary') !== '0';
+
 const default_frame_rate = 60;
 
 const is_match_room = /^\/room\/u\//.test(new URL(location).pathname);
@@ -1193,7 +1195,7 @@ function trackAndSendFrames() {
 
 		last_frame = data;
 
-		connection.send(BinaryFrame.encode(data));
+		connection.send(send_binary ? BinaryFrame.encode(data) : data);
 	};
 
 	/*
