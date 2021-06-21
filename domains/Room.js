@@ -31,7 +31,11 @@ class Room extends EventEmitter {
 	}
 
 	handleProducerMessage(user, message) {
-		this.sendToViews(message);
+		if (message instanceof Uint8Array) {
+			this.sendToViews(message);
+		} else {
+			this.sendToViews(['frame', 0, message]);
+		}
 	}
 }
 
