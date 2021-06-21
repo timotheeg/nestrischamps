@@ -244,6 +244,7 @@ const BinaryFrame = (function () {
 	}
 
 	BinaryFrame.GAME_TYPE = GAME_TYPE;
+	BinaryFrame.FRAME_SIZE_BY_VERSION = FRAME_SIZE_BY_VERSION;
 
 	return BinaryFrame;
 })();
