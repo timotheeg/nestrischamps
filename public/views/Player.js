@@ -119,6 +119,7 @@ const Player = (function () {
 	};
 
 	const DEFAULT_OPTIONS = {
+		field_real_border: 0, // represents the actual border
 		field_pixel_size: 3,
 		preview_pixel_size: 3,
 		preview_align: 'c',
@@ -169,15 +170,32 @@ const Player = (function () {
 
 			const styles = getComputedStyle(this.dom.field);
 
+			let bg_width, bg_height, bg_offset;
+
+			if (this.options.field_real_border) {
+				bg_width =
+					css_size(styles.width) +
+					2 * (css_size(styles.padding) - this.options.field_real_border);
+				bg_height =
+					css_size(styles.height) +
+					2 * (css_size(styles.padding) - this.options.field_real_border);
+				bg_offset = this.options.field_real_border;
+			} else {
+				// we assume the border include one NES pixel of all sides
+				bg_width = css_size(styles.width) + this.field_pixel_size * 2;
+				bg_height = css_size(styles.height) + this.field_pixel_size * 2;
+				bg_offset = css_size(styles.padding) - this.field_pixel_size;
+			}
+
 			// Avatar Block
 			this.avatar = document.createElement('div');
 			this.avatar.classList.add('avatar');
 			Object.assign(this.avatar.style, {
 				position: 'absolute',
-				top: `${this.field_pixel_size * 8 * 1}px`,
-				left: `${css_size(styles.padding) - this.field_pixel_size}px`,
-				width: `${css_size(styles.width) + this.field_pixel_size * 2}px`,
-				height: `${css_size(styles.width) + this.field_pixel_size * 2}px`,
+				top: `${css_size(styles.padding) + this.field_pixel_size * 8}px`,
+				left: `${bg_offset}px`,
+				width: `${bg_width}px`,
+				height: `${bg_width}px`,
 				backgroundRepeat: 'no-repeat',
 				backgroundSize: 'cover',
 				backgroundPosition: '50% 50%',
@@ -190,10 +208,10 @@ const Player = (function () {
 			this.field_bg.classList.add('background');
 			Object.assign(this.field_bg.style, {
 				position: 'absolute',
-				top: `${css_size(styles.padding) - this.field_pixel_size}px`,
-				left: `${css_size(styles.padding) - this.field_pixel_size}px`,
-				width: `${css_size(styles.width) + this.field_pixel_size * 2}px`,
-				height: `${css_size(styles.height) + this.field_pixel_size * 2}px`,
+				top: `${bg_offset}px`,
+				left: `${bg_offset}px`,
+				width: `${bg_width}px`,
+				height: `${bg_height}px`,
 			});
 			this.dom.field.appendChild(this.field_bg);
 
