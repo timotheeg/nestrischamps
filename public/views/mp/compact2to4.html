@@ -333,6 +333,15 @@
 				player.onGameStart = () => {
 					console.log('onGameStart', idx + 1);
 					player.dom.drought_box.classList.remove('active');
+					player.dom.level.hidden = false;
+					player.dom.preview.hidden = false;
+				};
+
+				player.onGameOver = () => {
+					console.log('onGameStart', idx + 1);
+					player.dom.drought_box.classList.remove('active');
+					player.dom.level.hidden = true;
+					player.dom.preview.hidden = true;
 				};
 
 				players.push(player);
