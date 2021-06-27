@@ -9,6 +9,7 @@ const dom = {
 
 const MAX_BEST_OF = 13;
 
+// TODO: refactor into dynamic getter
 const remoteAPI = {
 	setBestOf: function (n) {
 		connection.send(['setBestOf', n]);
@@ -64,19 +65,19 @@ class Player {
 		this.dom.name.onchange =
 			this.dom.name.onkeyup =
 			this.dom.name.onblur =
-				() => {
+				_.debounce(() => {
 					remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
-				};
+				}, 250);
 
 		this.dom.avatar_url.onchange =
 			this.dom.avatar_url.onkeyup =
 			this.dom.avatar_url.onblur =
-				() => {
+				_.debounce(() => {
 					const avatar_url = this.dom.avatar_url.value.trim();
 
 					remoteAPI.setProfileImageURL(this.idx, avatar_url);
 					this.dom.avatar_img.src = avatar_url;
-				};
+				}, 250);
 
 		this.dom.producers.onchange = () =>
 			this._pickProducer(parseInt(this.dom.producers.value, 10));
