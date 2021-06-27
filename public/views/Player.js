@@ -426,8 +426,6 @@ const Player = (function () {
 			const num_blocks = data.field.reduce((acc, v) => acc + (v ? 1 : 0), 0);
 			const field_string = data.field.join('');
 
-			this.last_frame = data;
-
 			if (data.gameid != this.gameid) {
 				// new game!
 				this.reset();
@@ -601,13 +599,13 @@ const Player = (function () {
 					// Compute score beyond maxout
 					this.score += line_score;
 				} else if (data.score < this.score) {
-					if (this.score + line_score > 1599999) {
+					const num_wraps = Math.floor((this.score + line_score) / 1600000);
+
+					if (num_wraps >= 1) {
 						// Using Hex score Game Genie code XNEOOGEX
-						// The GG code makes the score wraps around to 0 when reaching 1,600,000
-						// we correct accordingly here
-						// Note: The correction applies for a single wrap around!
-						// Note: Games above 3.2M are not supported
-						this.score = 1600000 + data.score;
+						// The GG code makes the score display wrap around to 0
+						// when reaching 1,600,000. We correct accordingly here.
+						this.score = 1600000 * num_wraps + data.score;
 					} else {
 						// weird readings... wait one more frame
 						return;
@@ -678,11 +676,16 @@ const Player = (function () {
 				);
 			} else if (data.score != null) {
 				// added extra checks here due to data.score always being different to this.score after maxout
-				if (
-					(data.score != this.score && data.score != 999999) ||
-					(data.score == 999999 && lines != this.lines)
-				) {
-					this.pending_score = true;
+				if (data.score === 999999) {
+					this.pending_score = lines != this.lines;
+				} else {
+					const high_score = this.score / 1600000;
+
+					if (high_score >= 1) {
+						this.pending_score = data.score != this.score % 1600000;
+					} else {
+						this.pending_score = data.score != this.score;
+					}
 				}
 			}
 		}
