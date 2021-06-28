@@ -259,7 +259,8 @@ const Player = (function () {
 
 			this.reset();
 
-			this.game_over = true; // we start gae over, waiting for the first good frame
+			this.game_over = true; // we start at game over, waiting for the first good frame
+			this.curtain_down = true;
 		}
 
 		onPiece() {}
@@ -270,6 +271,7 @@ const Player = (function () {
 		onDroughtEnd() {}
 		onGameStart() {}
 		onGameOver() {}
+		onCurtainDown() {}
 		onTetris() {}
 
 		_doTetris() {
@@ -334,6 +336,7 @@ const Player = (function () {
 
 			this.gameid = -1;
 			this.game_over = false;
+			this.curtain_down = false;
 			this.winner_frame = 0;
 
 			this.preview_ctx.clear();
@@ -423,8 +426,15 @@ const Player = (function () {
 			);
 		}
 
+		_isTopRowFull(data) {
+			for (let cell_idx = 10; cell_idx--; ) {
+				if (!data.field[cell_idx]) return false;
+			}
+			return true;
+		}
+
 		setFrame(data) {
-			if (this.game_over && data.gameid == this.gameid) {
+			if (this.game_over && this.curtain_down && data.gameid == this.gameid) {
 				return;
 			}
 
@@ -557,8 +567,7 @@ const Player = (function () {
 			this.renderField(this.level, data.field, field_string);
 			this.renderPreview(this.level, data.preview);
 
-			if (num_blocks === 200) {
-				// note, gameover can also be detected when top row of field is full
+			if (!this.game_over && this._isTopRowFull(data)) {
 				this.game_over = true;
 
 				this.tr_runway_score = this.getTransitionRunwayScore();
@@ -580,6 +589,11 @@ const Player = (function () {
 				);
 
 				this.onGameOver();
+			}
+
+			if (num_blocks === 200) {
+				this.curtain_down = true;
+				this.onCurtainDown();
 			} else {
 				this.updateField(
 					data.field,

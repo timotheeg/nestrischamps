@@ -394,6 +394,8 @@
 							projection_t_diff: document.querySelector(
 								`.projection.p${num} .tetris_diff`
 							),
+
+							drought_box: document.querySelector(`.drought.p${num}`),
 						},
 						{
 							field_pixel_size: 3,
@@ -405,21 +407,26 @@
 			);
 
 			players.forEach((player, idx) => {
-				player.drought_box = document.querySelector(`.drought.p${idx + 1}`);
-
 				player.onDroughtStart = () => {
 					console.log('onDroughtStart', idx + 1);
-					player.drought_box.classList.add('active');
+					player.dom.drought_box.classList.add('active');
 				};
 
 				player.onDroughtEnd = count => {
 					console.log('onDroughtEnd', idx + 1, count);
-					player.drought_box.classList.remove('active');
+					player.dom.drought_box.classList.remove('active');
 				};
 
 				player.onGameStart = () => {
 					console.log('onGameStart', idx + 1);
-					player.drought_box.classList.remove('active');
+					player.dom.drought_box.classList.remove('active');
+					player.dom.level.hidden = false;
+					player.dom.preview.hidden = false;
+				};
+
+				player.onGameOver = () => {
+					player.dom.level.hidden = true;
+					player.dom.preview.hidden = true;
 				};
 			});
 		</script>
