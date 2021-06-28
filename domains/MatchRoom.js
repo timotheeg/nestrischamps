@@ -374,10 +374,16 @@ class MatchRoom extends Room {
 						]);
 						this.sendToViews(['setVictories', pidx, player.victories]);
 					}
+					forward_to_views = false;
 					break;
 				}
 
+				case 'setMatch': {
+					break; // simple passthrough
+				}
+
 				default: {
+					// reject any unknown command
 					return;
 				}
 			}
