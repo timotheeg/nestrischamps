@@ -170,21 +170,28 @@ const Player = (function () {
 
 			const styles = getComputedStyle(this.dom.field);
 
-			let bg_width, bg_height, bg_offset;
+			// getComputedStyle returns padding in Chrome,
+			// but Firefox returns 4 individual properties paddingTop, paddingLeft, etc...
+
+			const field_padding = css_size(styles.paddingLeft); // we assume padding is the same on all sides
+
+			let bg_width, bg_height, bg_offset, field_canva_offset;
 
 			if (this.options.field_real_border) {
 				bg_width =
 					css_size(styles.width) +
-					2 * (css_size(styles.padding) - this.options.field_real_border);
+					2 * (field_padding - this.options.field_real_border);
 				bg_height =
 					css_size(styles.height) +
-					2 * (css_size(styles.padding) - this.options.field_real_border);
+					2 * (field_padding - this.options.field_real_border);
 				bg_offset = this.options.field_real_border;
+				field_canva_offset = field_padding - this.options.field_real_border;
 			} else {
 				// we assume the border include one NES pixel of all sides
 				bg_width = css_size(styles.width) + this.field_pixel_size * 2;
 				bg_height = css_size(styles.height) + this.field_pixel_size * 2;
-				bg_offset = css_size(styles.padding) - this.field_pixel_size;
+				bg_offset = field_padding - this.field_pixel_size;
+				field_canva_offset = this.field_pixel_size;
 			}
 
 			// Avatar Block
@@ -192,7 +199,7 @@ const Player = (function () {
 			this.avatar.classList.add('avatar');
 			Object.assign(this.avatar.style, {
 				position: 'absolute',
-				top: `${css_size(styles.padding) + this.field_pixel_size * 8}px`,
+				top: `${field_padding + this.field_pixel_size * 8}px`,
 				left: `${bg_offset}px`,
 				width: `${bg_width}px`,
 				height: `${bg_width}px`,
@@ -223,19 +230,19 @@ const Player = (function () {
 				const canvas = document.createElement('canvas');
 
 				canvas.style.position = 'absolute';
-				canvas.style.top = styles.padding;
-				canvas.style.left = styles.padding;
+				canvas.style.top = styles.paddingTop;
+				canvas.style.left = styles.paddingLeft;
 
-				canvas.setAttribute('width', styles.width);
-				canvas.setAttribute('height', styles.height);
+				canvas.setAttribute('width', css_size(styles.width));
+				canvas.setAttribute('height', css_size(styles.height));
 
 				this.dom[name].appendChild(canvas);
 
 				this[`${name}_ctx`] = canvas.getContext('2d');
 			});
 
-			this.field_ctx.canvas.style.top = `${this.field_pixel_size}px`;
-			this.field_ctx.canvas.style.left = `${this.field_pixel_size}px`;
+			this.field_ctx.canvas.style.top = `${field_canva_offset}px`;
+			this.field_ctx.canvas.style.left = `${field_canva_offset}px`;
 			this.field_bg.appendChild(this.field_ctx.canvas);
 
 			if (this.render_running_trt_rtl) {
