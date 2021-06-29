@@ -471,17 +471,6 @@
 				}
 			};
 
-			function advertiseVideoSupport() {
-				if (is_secondary) return;
-
-				connection.send([
-					'acceptPlayersVideoFeed',
-					{ width: 320, height: 240 },
-				]);
-			}
-
-			connection.onOpen = connection.onResume = advertiseVideoSupport;
-
 			connection.onInit = () => {
 				if (is_secondary) return;
 
