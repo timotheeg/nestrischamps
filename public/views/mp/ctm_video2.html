@@ -204,6 +204,7 @@
 				line-height: 32px;
 				letter-spacing: 8px;
 				text-align: center;
+				text-shadow: 4px 4px rgba(0, 0, 0, 0.5);
 
 				--pos: 358px;
 				right: var(--pos);
@@ -211,10 +212,6 @@
 
 			.hearts.p2 {
 				left: var(--pos);
-			}
-
-			.dev_null {
-				display: none;
 			}
 
 			video.player_vid {
@@ -359,8 +356,6 @@
 				</div>
 
 				<div class="hearts p2"></div>
-
-				<div class="dev_null"></div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>
@@ -425,10 +420,8 @@
 							drought_box: document.querySelector(`.drought.p${num}`),
 						},
 						{
-							field_pixel_size: 3,
 							preview_pixel_size: 2,
 							preview_align: 'tr',
-							running_trt_rtl: 0,
 						}
 					)
 			);
@@ -470,17 +463,6 @@
 					peer = null;
 				}
 			};
-
-			function advertiseVideoSupport() {
-				if (is_secondary) return;
-
-				connection.send([
-					'acceptPlayersVideoFeed',
-					{ width: 320, height: 240 },
-				]);
-			}
-
-			connection.onOpen = connection.onResume = advertiseVideoSupport;
 
 			connection.onInit = () => {
 				if (is_secondary) return;

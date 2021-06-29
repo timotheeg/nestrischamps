@@ -3,7 +3,7 @@ const _ = require('lodash');
 const Room = require('./Room');
 
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
-const MAX_PLAYERS = 7;
+const MAX_PLAYERS = 8;
 
 function getBasePlayerData() {
 	return {
@@ -25,6 +25,8 @@ class MatchRoom extends Room {
 		this.last_view = null;
 		this.state = {
 			bestof: 3,
+			concurrent_2_matches: undefined, // undefined|true|false
+			selected_match: null, // 0|1|null
 			players: [
 				// flat user objects - starts with 2 players
 				getBasePlayerData(),
@@ -150,6 +152,23 @@ class MatchRoom extends Room {
 			this.producers.forEach(user => {
 				user.getProducer().send(['setViewPeerId', this.last_view.id]);
 			});
+
+			const view_meta = this.getViewMeta();
+
+			if (this.state.concurrent_2_matches === view_meta.concurrent_2_matches) {
+				if (this.state.concurrent_2_matches) {
+					connection.send(['setMatch', this.state.selected_match]);
+				}
+			} else {
+				this.state.concurrent_2_matches = view_meta.concurrent_2_matches;
+				this.state.selected_match = undefined;
+
+				if (this.state.concurrent_2_matches) {
+					connection.send(['setMatch', this.state.selected_match]);
+				}
+
+				this.sendStateToAdmin();
+			}
 		}
 
 		// do a room state dump for this new view
@@ -215,7 +234,7 @@ class MatchRoom extends Room {
 		if (
 			typeof p_num === 'number' &&
 			p_num >= 0 &&
-			p_num <= MAX_PLAYERS &&
+			p_num < MAX_PLAYERS &&
 			!(p_num % 1)
 		) {
 			return true;
@@ -374,10 +393,63 @@ class MatchRoom extends Room {
 						]);
 						this.sendToViews(['setVictories', pidx, player.victories]);
 					}
+					forward_to_views = false;
 					break;
 				}
 
+				case 'removePlayer': {
+					const p_num = args[0];
+
+					this.assertValidPlayer(p_num);
+
+					this.state.players.splice(p_num, 1);
+
+					// Tell views to update all players
+					// Inefficient: too many websocket frames
+					// TODO: Find a way to send multiple messages in one frame
+					[
+						...this.state.players,
+						getBasePlayerData(), // dummy entry to clear last player
+					].forEach((player, pidx) => {
+						this.sendToViews(['setId', pidx, player.id]);
+						this.sendToViews(['setLogin', pidx, player.login]);
+						this.sendToViews(['setDisplayName', pidx, player.display_name]);
+						this.sendToViews([
+							'setProfileImageURL',
+							pidx,
+							player.profile_image_url,
+						]);
+						this.sendToViews(['setVictories', pidx, player.victories]);
+
+						if (this.last_view) {
+							const user = player.id ? this.getProducer(player.id) : null;
+
+							this.last_view.send([
+								'setPeerId',
+								pidx,
+								user ? user.getProducer().getPeerId() : '',
+							]);
+						}
+
+						this.state.players.forEach((player, pidx) => {
+							this.getProducer(player.id)
+								.getProducer()
+								.send(['makePlayer', p_num, this.getViewMeta()]);
+						});
+					});
+
+					forward_to_views = false;
+					break;
+				}
+
+				case 'setMatch': {
+					this.state.selected_match = args[0];
+					update_admin = false;
+					break; // simple passthrough
+				}
+
 				default: {
+					// reject any unknown command
 					return;
 				}
 			}

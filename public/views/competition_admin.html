@@ -87,16 +87,31 @@
 				flex: 1 400px;
 			}
 
+			.player .header {
+				position: relative;
+			}
+
+			.player .header .remove_player {
+				position: absolute;
+				right: 0;
+				top: 0;
+				cursor: pointer;
+			}
+
 			.buttons {
 				text-align: center;
 				margin-top: 6px;
+			}
+
+			input[type='radio'] {
+				margin-left: 2em;
 			}
 		</style>
 	</head>
 	<body>
 		<p>Player link:<br /><a id="player_link">-</a></p>
 
-		<div class="box" id="wrapper">
+		<div class="box">
 			<div id="room">
 				Room ID: <span id="roomid"></span> - Producers:
 				<span id="producer_count"></span>
@@ -110,6 +125,22 @@
 			</div>
 		</div>
 
+		<div class="box" id="show_match_controls">
+			Show Match:
+			<input
+				type="radio"
+				id="match_both"
+				name="selected_match"
+				value=""
+				checked
+			/>
+			<label for="match_both">Both</label>
+			<input type="radio" id="match_1" name="selected_match" value="0" />
+			<label for="match_1">Match 1</label>
+			<input type="radio" id="match_2" name="selected_match" value="1" />
+			<label for="match_2">Match 2</label>
+		</div>
+
 		<div id="players"></div>
 
 		<div class="buttons">
@@ -118,7 +149,10 @@
 
 		<template id="player">
 			<div class="box player">
-				<div>Player <span class="num"></span></div>
+				<div class="header">
+					Player <span class="num"></span>
+					<span class="remove_player" title="Remove player">X</span>
+				</div>
 				<div class="inputs">
 					<div class="producers"><select></select></div>
 					<div><input type="text" class="name" placeholder="name" /></div>

@@ -4,6 +4,7 @@ const dom = {
 	bestof: document.querySelector('#bestof'),
 	clear_victories: document.querySelector('#clear_victories'),
 	player_link: document.querySelector('#player_link'),
+	show_match_controls: document.querySelector('#show_match_controls'),
 	add_player: document.querySelector('#add_player'),
 };
 
@@ -26,6 +27,9 @@ const remoteAPI = {
 	setWinner: function (player_idx) {
 		connection.send(['setWinner', player_idx]);
 	},
+	removePlayer: function (player_idx) {
+		connection.send(['removePlayer', player_idx]);
+	},
 	setDisplayName: function (player_idx, name) {
 		connection.send(['setDisplayName', player_idx, name]);
 	},
@@ -41,6 +45,9 @@ const remoteAPI = {
 	clearVictoryAnimation: function (player_idx) {
 		connection.send(['clearVictoryAnimation', player_idx]);
 	},
+	setMatch: function (match_idx) {
+		connection.send(['setMatch', match_idx]);
+	},
 };
 
 const players = [];
@@ -53,13 +60,12 @@ function getProducer(pid) {
 
 class Player {
 	constructor(idx, dom) {
-		this.idx = idx;
 		this.dom = dom;
+
+		this.setIndex(idx);
 
 		this.victories = 0;
 		this.bestof = -1;
-
-		this.dom.num.textContent = idx + 1;
 
 		// link dom events
 		this.dom.name.onchange =
@@ -85,6 +91,15 @@ class Player {
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
 		};
+
+		this.dom.remove_btn.onclick = () => {
+			remoteAPI.removePlayer(this.idx);
+		};
+	}
+
+	setIndex(idx) {
+		this.idx = idx;
+		this.dom.num.textContent = idx + 1;
 	}
 
 	setProducers(producers) {
@@ -199,7 +214,7 @@ function setState(_room_data) {
 
 	// synchronize with remote players
 	while (players.length > room_data.players.length) {
-		players.pop().remove();
+		players.pop().dom.root.remove();
 	}
 
 	for (let idx = players.length; idx < room_data.players.length; idx++) {
@@ -207,18 +222,40 @@ function setState(_room_data) {
 	}
 
 	players.forEach((player, idx) => {
+		player.setIndex(idx);
 		player.setProducers(room_data.producers);
 		player.setBestOf(room_data.bestof);
 		player.setState(room_data.players[idx]);
 	});
+
+	dom.show_match_controls.style.display = room_data.concurrent_2_matches
+		? null
+		: 'none';
+
+	if (room_data.concurrent_2_matches) {
+		switch (room_data.selected_match) {
+			case 0:
+				dom.show_match_controls.querySelector('#match_1').checked = true;
+				break;
+			case 1:
+				dom.show_match_controls.querySelector('#match_2').checked = true;
+				break;
+			default:
+				dom.show_match_controls.querySelector('#match_both').checked = true;
+				break;
+		}
+	}
 }
 
 function addPlayer() {
 	const players_node = document.querySelector('#players');
 	const player_template = document.getElementById('player');
-	const player_node = document.importNode(player_template.content, true);
+	const player_node = document
+		.importNode(player_template.content, true)
+		.querySelector('.player');
 
 	const player = new Player(players.length, {
+		root: player_node,
 		num: player_node.querySelector('.num'),
 		producers: player_node.querySelector('.producers select'),
 		name: player_node.querySelector('.name'),
@@ -226,6 +263,7 @@ function addPlayer() {
 		avatar_img: player_node.querySelector('img'),
 		victories: player_node.querySelector('.victories'),
 		win_btn: player_node.querySelector('.winner'),
+		remove_btn: player_node.querySelector('.remove_player'),
 	});
 
 	players_node.appendChild(player_node);
@@ -236,6 +274,8 @@ function addPlayer() {
 function bootstrap() {
 	// start with 2 players
 	setBestOfOptions(MAX_BEST_OF, 3);
+
+	dom.show_match_controls.style.display = 'none';
 
 	dom.roomid.textContent = location.pathname.split('/')[3] || '_default';
 	dom.producer_count.textContent = 0;
@@ -251,6 +291,14 @@ function bootstrap() {
 		remoteAPI.addPlayer();
 	});
 
+	dom.show_match_controls.querySelectorAll('input').forEach(radio =>
+		radio.addEventListener('click', () => {
+			const value =
+				dom.show_match_controls.querySelector('input:checked').value;
+			remoteAPI.setMatch(value ? parseInt(value, 10) : null);
+		})
+	);
+
 	// =====
 
 	connection = new Connection();
@@ -265,6 +313,16 @@ function bootstrap() {
 			}
 
 			case 'setOwner': {
+				const owner = args[0];
+				const player_url = `${location.protocol}//${location.host}/room/u/${owner.login}/producer`;
+
+				dom.player_link.href = player_url;
+				dom.player_link.textContent = player_url;
+
+				break;
+			}
+
+			case 'setViewMeta': {
 				const owner = args[0];
 				const player_url = `${location.protocol}//${location.host}/room/u/${owner.login}/producer`;
 

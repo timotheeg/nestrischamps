@@ -12,7 +12,7 @@ function tetris_value(level) {
 	return 1200 * (level + 1);
 }
 
-function getSortedPlayers(getter = 'getScore') {
+function getSortedPlayers(players, getter = 'getScore') {
 	return players.concat().sort((p1, p2) => {
 		const p1_score = p1[getter]();
 		const p2_score = p2[getter]();
@@ -186,7 +186,7 @@ class TetrisCompetitionAPI {
 			{ getter: 'getGameRunwayScore', setter: 'setGameRunwayDiff' },
 			{ getter: 'getProjection', setter: 'setProjectionDiff' },
 		].forEach(({ getter, setter }) => {
-			const sorted_players = getSortedPlayers(getter);
+			const sorted_players = getSortedPlayers(players, getter);
 
 			// handle score diff between player 0 and 1
 			const diff = sorted_players[0][getter]() - sorted_players[1][getter]();
