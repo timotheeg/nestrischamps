@@ -554,6 +554,16 @@
 				});
 			};
 
+			API.setWinner = function (player_idx) {
+				const match_index = player_idx < 2 ? 0 : 1;
+
+				players
+					.slice(2 * match_index, 2 * match_index + 2)
+					.forEach(player => player.showLoserFrame());
+
+				players[player_idx].playWinnerAnimation();
+			};
+
 			connection.onInit = () => {
 				if (is_secondary) return;
 
