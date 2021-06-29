@@ -422,12 +422,12 @@ class MatchRoom extends Room {
 						this.sendToViews(['setVictories', pidx, player.victories]);
 
 						if (this.last_view) {
-							const producer = player.id ? this.getProducer(player.id) : null;
+							const user = player.id ? this.getProducer(player.id) : null;
 
 							this.last_view.send([
 								'setPeerId',
 								pidx,
-								producer ? producer.getPeerId() : '',
+								user ? user.getProducer().getPeerId() : '',
 							]);
 						}
 
