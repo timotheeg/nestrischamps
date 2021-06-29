@@ -45,6 +45,9 @@ const remoteAPI = {
 	clearVictoryAnimation: function (player_idx) {
 		connection.send(['clearVictoryAnimation', player_idx]);
 	},
+	setMatch: function (match_idx) {
+		connection.send(['setMatch', match_idx]);
+	},
 };
 
 const players = [];
@@ -224,6 +227,24 @@ function setState(_room_data) {
 		player.setBestOf(room_data.bestof);
 		player.setState(room_data.players[idx]);
 	});
+
+	dom.show_match_controls.style.display = room_data.concurrent_2_matches
+		? null
+		: 'none';
+
+	if (room_data.concurrent_2_matches) {
+		switch (room_data.selected_match) {
+			case 0:
+				dom.show_match_controls.querySelector('#match_1').checked = true;
+				break;
+			case 1:
+				dom.show_match_controls.querySelector('#match_2').checked = true;
+				break;
+			default:
+				dom.show_match_controls.querySelector('#match_both').checked = true;
+				break;
+		}
+	}
 }
 
 function addPlayer() {
@@ -269,6 +290,14 @@ function bootstrap() {
 	dom.add_player.addEventListener('click', () => {
 		remoteAPI.addPlayer();
 	});
+
+	dom.show_match_controls.querySelectorAll('input').forEach(radio =>
+		radio.addEventListener('click', () => {
+			const value =
+				dom.show_match_controls.querySelector('input:checked').value;
+			remoteAPI.setMatch(value ? parseInt(value, 10) : null);
+		})
+	);
 
 	// =====
 

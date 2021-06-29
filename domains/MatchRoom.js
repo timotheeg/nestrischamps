@@ -443,6 +443,8 @@ class MatchRoom extends Room {
 				}
 
 				case 'setMatch': {
+					this.state.selected_match = args[0];
+					update_admin = false;
 					break; // simple passthrough
 				}
 
