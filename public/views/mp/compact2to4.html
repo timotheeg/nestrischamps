@@ -54,9 +54,7 @@
 			.projection {
 				width: 112px;
 				height: 74px;
-
-				--offset: 279px;
-				right: var(--offset);
+				left: 255px;
 			}
 
 			.runway .header,
@@ -72,6 +70,7 @@
 			}
 
 			.projection {
+				display: none;
 				top: 96px;
 			}
 
@@ -164,11 +163,6 @@
 				to {
 					opacity: 1;
 				}
-			}
-
-			.runway,
-			.projection {
-				display: none;
 			}
 		</style>
 	</head>
@@ -343,6 +337,10 @@
 				};
 
 				players.push(player);
+
+				if (num_players >= 4) {
+					player_node.querySelector('.runway').remove();
+				}
 			}
 
 			for (idx = 0; idx < num_players; idx++) {
