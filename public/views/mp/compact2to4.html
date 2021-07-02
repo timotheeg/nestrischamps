@@ -156,13 +156,9 @@
 				animation-fill-mode: forwards;
 			}
 
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-				}
-				to {
-					opacity: 1;
-				}
+			.past_killscreen {
+				animation: darkens_n_hides 1s;
+				animation-fill-mode: forwards;
 			}
 		</style>
 	</head>
@@ -305,6 +301,7 @@
 						),
 
 						drought_box: player_node.querySelector('.drought'),
+						runway_box: player_node.querySelector('.runway'),
 					},
 					{
 						field_real_border: 8,
@@ -324,9 +321,14 @@
 					player.dom.drought_box.classList.remove('active');
 				};
 
+				player.onKillScreen = () => {
+					player.dom.runway_box.style.classList.add('past_killscreen');
+				};
+
 				player.onGameStart = () => {
 					console.log('onGameStart', idx + 1);
 					player.dom.drought_box.classList.remove('active');
+					player.dom.runway_box.style.classList.remove('past_killscreen');
 					player.dom.level.hidden = false;
 					player.dom.preview.hidden = false;
 				};

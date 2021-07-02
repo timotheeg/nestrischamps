@@ -1,0 +1,193 @@
+#playing_fields {
+	position: absolute;
+	left: 640px;
+	top: 8px;
+}
+
+.score,
+.name,
+.board,
+.running_trt {
+	--offset: 10px;
+	right: var(--offset);
+}
+
+.tetris_rate,
+.runway,
+.projection,
+.eff,
+.drought {
+	--offset: 279px;
+	right: var(--offset);
+}
+
+.score {
+	width: 249px;
+	height: 54px;
+	font-size: 24px;
+	line-height: 24px;
+	padding-right: 10px;
+}
+
+.score > div {
+	display: flex;
+	flex-direction: row;
+}
+
+.score .value,
+.score .lines {
+	padding-top: 3px;
+	padding-bottom: 4px;
+}
+
+.score .lines {
+	flex-grow: 1;
+	text-align: right;
+	font-size: 16px;
+	line-height: 16px;
+}
+
+.score .tetris_diff {
+	flex-grow: 1;
+	text-align: right;
+	font-size: 16px;
+	line-height: 24px;
+	padding-top: 3px;
+}
+
+.score .value,
+.score .diff {
+	white-space: pre;
+	text-align: left;
+}
+
+.board {
+	border-image: url('/views/big_border.png');
+	border-image-slice: 16 16 16 16 fill;
+	border-image-width: 16px 16px;
+	padding: 17px;
+	width: 237px;
+	height: 477px;
+	top: 76px;
+}
+
+.runway,
+.projection {
+	width: 112px;
+	height: 74px;
+}
+
+.runway .header,
+.projection .header {
+	line-height: 12px;
+	font-size: 8px;
+	padding-bottom: 3px;
+}
+
+.runway .content,
+.projection .content {
+	text-align: right;
+}
+
+.projection {
+	top: 96px;
+}
+
+.name {
+	width: 247px;
+	height: 19px;
+	top: 661px;
+}
+
+.name .content {
+	color: #b0afb0;
+	letter-spacing: 5px;
+	text-indent: 5px;
+}
+
+.hearts .win {
+	color: #fb0204;
+}
+
+.tetris_rate {
+	width: 50px;
+	height: 54px;
+	top: 585px;
+}
+
+.tetris_rate .content {
+	padding-top: 7px;
+}
+
+.running_trt {
+	padding: 9px;
+	width: 253px;
+	height: 60px;
+	top: 585px;
+}
+
+.board .level {
+	position: absolute;
+	z-index: 100;
+}
+
+.board .next_piece {
+	position: absolute;
+	width: 64px;
+	height: 32px;
+	right: 15px;
+	top: 17px;
+	z-index: 1;
+}
+
+.eff,
+.drought {
+	width: 50px;
+	top: 461px;
+}
+
+.eff .header,
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought {
+	opacity: 0;
+	color: red;
+	display: none;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+.past_killscreen {
+	animation: darkens_n_hides 1s;
+	animation-fill-mode: forwards;
+}
+
+.eff {
+	top: 523px;
+}
+
+.hearts {
+	position: absolute;
+	top: 638px;
+	width: 280px;
+
+	color: #b0afb0;
+	font-size: 32px;
+	line-height: 32px;
+	letter-spacing: 8px;
+	text-align: center;
+	text-shadow: 4px 4px rgba(0, 0, 0, 0.65);
+
+	--offset: 358px;
+	right: var(--offset);
+}
+
+.p2 {
+	left: var(--offset);
+}

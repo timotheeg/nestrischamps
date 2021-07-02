@@ -47,3 +47,25 @@ td {
 	border-image-slice: 10 10 10 10 fill;
 	border-image-width: 10px 10px;
 }
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes darkens_n_hides {
+	from {
+		visibility: visible;
+		opacity: 1;
+		filter: brightness(1) blur(0px);
+	}
+	to {
+		visibility: hidden;
+		opacity: 0;
+		filter: brightness(0.5) blur(10px);
+	}
+}

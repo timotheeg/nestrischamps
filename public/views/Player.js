@@ -267,6 +267,7 @@ const Player = (function () {
 		onLines() {}
 		onLevel() {}
 		onTransition() {}
+		onKillScreen() {}
 		onDroughtStart() {}
 		onDroughtEnd() {}
 		onGameStart() {}
@@ -561,6 +562,10 @@ const Player = (function () {
 
 				if (is_level_change) {
 					this.onLevel();
+
+					if (this.level === 29) {
+						this.onKillScreen();
+					}
 				}
 			}
 

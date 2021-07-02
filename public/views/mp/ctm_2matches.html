@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
 		<style>
 			.match {
 				position: absolute;
@@ -9,113 +10,38 @@
 				top: 8px;
 			}
 
-			.score {
-				width: 249px;
-				height: 54px;
-				font-size: 24px;
-				line-height: 24px;
-				padding-right: 10px;
-
+			.score,
+			.name,
+			.board,
+			.running_trt {
 				--offset: -1px;
-				right: var(--offset);
 			}
 
-			.score > div {
-				display: flex;
-				flex-direction: row;
-			}
-
-			.score .value,
-			.score .lines {
-				padding-top: 3px;
-				padding-bottom: 4px;
-			}
-
-			.score .lines {
-				flex-grow: 1;
-				text-align: right;
-				font-size: 16px;
-				line-height: 16px;
-			}
-
-			.score .tetris_diff {
-				flex-grow: 1;
-				text-align: right;
-				font-size: 16px;
-				line-height: 24px;
-				padding-top: 3px;
-			}
-
-			.score .value,
-			.score .diff {
-				white-space: pre;
-				text-align: left;
-			}
-
-			.board {
-				border-image: url('/views/big_border.png');
-				border-image-slice: 16 16 16 16 fill;
-				border-image-width: 16px 16px;
-				padding: 17px;
-				width: 237px;
-				height: 477px;
-				top: 76px;
-
-				--offset: -1px;
-				right: var(--offset);
+			.tetris_rate,
+			.eff,
+			.drought {
+				--offset: 268px;
 			}
 
 			.runway,
 			.projection {
 				width: 120px;
-				height: 74px;
-
 				--offset: 296px;
-				right: var(--offset);
-			}
-
-			.runway .header,
-			.projection .header {
-				line-height: 12px;
-				font-size: 8px;
-				padding-bottom: 3px;
-			}
-
-			.runway .content,
-			.projection .content {
-				text-align: right;
 			}
 
 			.projection {
+				top: 0;
 				--offset: 468px;
 			}
 
 			.name {
 				width: 272px;
-				height: 19px;
 				top: 628px;
-
 				--offset: 340px;
-				right: var(--offset);
-			}
-
-			.name .content {
-				color: #b0afb0;
-				letter-spacing: 5px;
-				text-indent: 5px;
-			}
-
-			.hearts .win {
-				color: #fb0204;
 			}
 
 			.tetris_rate {
-				width: 50px;
 				height: 62px;
-				top: 585px;
-
-				--offset: 268px;
-				right: var(--offset);
 			}
 
 			.tetris_rate .content {
@@ -123,84 +49,14 @@
 			}
 
 			.running_trt {
-				padding: 9px;
-				width: 253px;
 				height: 68px;
 				top: 585px;
-
-				--offset: -1px;
-				right: var(--offset);
-			}
-
-			.board .level {
-				position: absolute;
-				z-index: 100;
-			}
-
-			.board .next_piece {
-				position: absolute;
-				width: 64px;
-				height: 32px;
-				right: 15px;
-				top: 17px;
-				z-index: 1;
-			}
-
-			.eff,
-			.drought {
-				width: 50px;
-				top: 461px;
-
-				--offset: 268px;
-				right: var(--offset);
-			}
-
-			.eff .header,
-			.drought .header {
-				padding-bottom: 2px;
-			}
-
-			.drought {
-				color: red;
-				/**/
-				opacity: 0;
-				display: none;
-				/**/
-			}
-
-			.drought.active {
-				display: block;
-				animation: fadeIn ease 1s;
-				animation-fill-mode: forwards;
-			}
-
-			.eff {
-				top: 523px;
-			}
-
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-				}
-				to {
-					opacity: 1;
-				}
 			}
 
 			.hearts {
-				position: absolute;
 				top: 585px;
 				width: 295px;
-
-				color: #b0afb0;
-				font-size: 32px;
-				line-height: 32px;
-				letter-spacing: 8px;
-				text-align: center;
-				text-shadow: 4px 4px rgba(0, 0, 0, 0.65);
-
 				--offset: 342px;
-				right: var(--offset);
 			}
 
 			video {
@@ -240,7 +96,7 @@
 				--offset: 268px;
 			}
 			.match.small .projection {
-				visibility: hidden;
+				display: none;
 			}
 			.match.small .name {
 				top: 445px;
@@ -388,6 +244,7 @@
 		<script src="/views/bg.js"></script>
 		<script src="/js/connection.js"></script>
 		<script src="/views/CompetitionPlayer.js"></script>
+		<script src="/views/CTMCompetitionPlayer.js"></script>
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
 			const players = [];
@@ -406,7 +263,7 @@
 					player_node.classList.add(`p${player_num}`);
 					match_node.appendChild(player_node);
 
-					const player = new CompetitionPlayer(
+					const player = new CTMCompetitionPlayer(
 						{
 							name: player_node.querySelector(`.name .header`),
 							score: player_node.querySelector(`.score .value`),
@@ -436,34 +293,14 @@
 							),
 
 							drought_box: player_node.querySelector(`.drought`),
+							runway_box: player_node.querySelector(`.runway`),
+							projection_box: player_node.querySelector(`.projection`),
 						},
 						{
 							preview_pixel_size: 2,
 							preview_align: 'tr',
 						}
 					);
-
-					player.onDroughtStart = () => {
-						console.log('onDroughtStart', player_num);
-						player.dom.drought_box.classList.add('active');
-					};
-
-					player.onDroughtEnd = count => {
-						console.log('onDroughtEnd', player_num, count);
-						player.dom.drought_box.classList.remove('active');
-					};
-
-					player.onGameStart = () => {
-						console.log('onGameStart', player_num);
-						player.dom.drought_box.classList.remove('active');
-						player.dom.level.hidden = false;
-						player.dom.preview.hidden = false;
-					};
-
-					player.onGameOver = () => {
-						player.dom.level.hidden = true;
-						player.dom.preview.hidden = true;
-					};
 
 					players.push(player);
 				});
