@@ -22,11 +22,19 @@ img {
 
 <p>Your OBS browser sources must have a canva size of 1280x720 to show the layouts fully.</p>
 
-<h2>Single player layouts</h2>
+<p>The background in the layouts is tunable. Use the query string <strong>?bg=X</strong> to change it, where X is a number as follow:</p>
+<ol start="0">
+	<li>Transparent background</li>
+	<li>Black background with randomly position tetris tiles: <img src="/docs/backgrounds/tiles.jpg" /></li>
+	<li>Green Nestrischamps animated background (branding FTW!): <img src="/docs/backgrounds/nestrischamps_green.jpg" /></li>
+	<li>Rainbow Nestrischamps animated background: <img src="/docs/backgrounds/nestrischamps_rainbow.jpg" /></li>
+</ol>
+
+<h2 id="single">Single player layouts</h2>
 
 <dl>
 <% layouts._types['1p'].forEach(layout => { %>
-<dt><%= layout.file.replace(/_/g, ' ') %></dt>
+<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
 <dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
 	<% layout.screenshot_uris.forEach(uri => { %>
 	<img src="<%= uri %>" width="640"/>
@@ -35,11 +43,11 @@ img {
 <% }) %>
 </dl>
 
-<h2>Competition layouts</h2>
+<h2 id="competition">Competition layouts</h2>
 
 <dl>
 <% layouts._types.mp.forEach(layout => { %>
-<dt><%= layout.file.replace(/_/g, ' ') %></dt>
+<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
 <dd>
 	<% if (layout.info && layout.info.description) { %>
 		<p><%= layout.info.description %></p>
