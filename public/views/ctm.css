@@ -13,8 +13,6 @@
 }
 
 .tetris_rate,
-.runway,
-.projection,
 .eff,
 .drought {
 	--offset: 279px;
@@ -73,8 +71,11 @@
 
 .runway,
 .projection {
-	width: 112px;
+	width: 120px;
 	height: 74px;
+
+	--offset: 302px;
+	right: var(--offset);
 }
 
 .runway .header,
@@ -90,7 +91,7 @@
 }
 
 .projection {
-	top: 96px;
+	--offset: 468px;
 }
 
 .name {

@@ -4,6 +4,11 @@
 dt {
 	text-transform: capitalize;
 	font-weight: bold;
+	margin-top: 1em;
+}
+img {
+	display: block;
+	margin-top: 0.5em;
 }
 </style>
 </head>
@@ -20,9 +25,9 @@ dt {
 <% layouts._types['1p'].forEach(layout => { %>
 <dt><%= layout.file.replace(/_/g, ' ') %></dt>
 <dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
-	<% if (layout.has_screenshot) { %>
-	<br /><img src="/views/1p/<%= layout.file %>.jpg" width="640"/>
-	<% } %>
+	<% layout.screenshot_uris.forEach(uri => { %>
+	<img src="<%= uri %>" width="640"/>
+	<% }) %>
 </dd>
 <% }) %>
 </dl>
@@ -32,10 +37,15 @@ dt {
 <dl>
 <% layouts._types.mp.forEach(layout => { %>
 <dt><%= layout.file.replace(/_/g, ' ') %></dt>
-<dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
-	<% if (layout.has_screenshot) { %>
-	<br /><img src="/views/mp/<%= layout.file %>.jpg" width="640"/>
+<dd>
+	<% if (layout.info) { %>
 	<% } %>
+
+	<a href="/view/<%= layout.file %>/<%= secret %>">-</a>
+	<% layout.screenshot_uris.forEach(uri => { %>
+	<img src="<%= uri %>" width="640"/>
+	<% }) %>
+
 </dd>
 <% }) %>
 </dl>
