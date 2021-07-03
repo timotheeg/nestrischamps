@@ -45,10 +45,10 @@ const start = Date.now();
 		} else if (/\.json$/.test(filename)) {
 			try {
 				layout_data.info = JSON.parse(fs.readFileSync(filename));
+				console.log(type, layout_data.info);
 			} catch (err) {
 				// ignore
 			}
-			layout_data.screenshot_uris.push(filename.replace(/^public\//, ''));
 		}
 	});
 
