@@ -111,6 +111,31 @@ class ScoreDAO {
 		}
 	}
 
+	async getTop3(user, since = 0) {
+		const result = await dbPool.query(
+			`
+				SELECT score, end_level
+				FROM scores
+				WHERE player_id = $1
+				AND datetime >= to_timestamp($2)
+				ORDER BY score DESC
+				LIMIT 3
+			`,
+			[user.id, since]
+		);
+
+		try {
+			return result.rows.map(row => {
+				return {
+					score: parseInt(row.score, 10),
+					end_level: parseInt(row.end_level, 10),
+				};
+			});
+		} catch (err) {
+			return 0;
+		}
+	}
+
 	async recordGame(user, game_data) {
 		if (!game_data) return;
 

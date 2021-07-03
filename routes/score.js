@@ -39,6 +39,27 @@ router.get('/pb/:secret', async (req, res) => {
 	res.json(await ScoreDAO.getPB(user, since));
 });
 
+router.get('/top3/:secret', async (req, res) => {
+	const user = await UserDAO.getUserBySecret(req.params.secret);
+
+	if (!user) {
+		res.status(404).send('User Not found');
+		return;
+	}
+
+	let since = 0;
+
+	console.log('Top 3 request', req.query.since, Date.now());
+
+	if (/^\d+$/.test(req.query.since)) {
+		// since is supplied in ms since epoch
+		// but we need it in second since epoch
+		since = Math.floor(parseInt(req.query.since, 10) / 1000);
+	}
+
+	res.json(await ScoreDAO.getTop3(user, since));
+});
+
 router.get(
 	'/u/:login/get_stats',
 	middlewares.assertSession,
