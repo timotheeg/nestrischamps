@@ -400,7 +400,7 @@ go_btn.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
-	privacy.style.display = is_match_room ? 'block' : 'none';
+	privacy.style.display = 'block';
 	controls.style.display = 'block';
 });
 
@@ -1262,7 +1262,7 @@ function trackAndSendFrames() {
 		controls.style.display = 'block';
 
 		allow_video_feed.checked = config.allow_video_feed != false;
-		privacy.style.display = is_match_room ? 'block' : 'none';
+		privacy.style.display = 'block';
 
 		await playVideoFromConfig();
 		trackAndSendFrames();

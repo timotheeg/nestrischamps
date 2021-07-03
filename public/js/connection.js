@@ -58,6 +58,12 @@ class Connection {
 			if (Array.isArray(data)) {
 				// Connection-level command parsing
 				switch (data[0]) {
+					case '_init': {
+						this.id = data[1].id;
+						this.start_ts = data[1].server_ts;
+						this.onInit();
+						return;
+					}
 					case '_id': {
 						this.id = data[1];
 						this.onInit();

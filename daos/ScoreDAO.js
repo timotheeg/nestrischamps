@@ -132,7 +132,7 @@ class ScoreDAO {
 				};
 			});
 		} catch (err) {
-			return 0;
+			return [];
 		}
 	}
 

@@ -59,6 +59,8 @@ class User extends EventEmitter {
 		if (this.match_room) {
 			// this forces a redispatch of the peer ids
 			this.match_room.addProducer(this);
+		} else {
+			// no match room, private room may need the webcam feed
 		}
 	}
 
