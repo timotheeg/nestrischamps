@@ -429,7 +429,7 @@
 							.catch(err => [])
 							.then(top3 => {
 								while (top3.length < 3) {
-									top3.push({ score: '0', end_level: 0 });
+									top3.push({ score: 0, end_level: 0 });
 								}
 
 								custom_doms.pb.textContent = format_score(top3[0].score || 0);
