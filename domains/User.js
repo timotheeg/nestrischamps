@@ -45,6 +45,7 @@ class User extends EventEmitter {
 
 		this._handleProducerMessage = this._handleProducerMessage.bind(this);
 		this._handleProducerClose = this._handleProducerClose.bind(this);
+		this._handleMatchRoomClose = this._handleMatchRoomClose.bind(this);
 
 		this.producer.on('message', this._handleProducerMessage);
 		this.producer.once('close', this._handleProducerClose);
@@ -52,15 +53,15 @@ class User extends EventEmitter {
 		this.checkScheduleDestroy();
 	}
 
-	setProducerConnection(conn) {
+	setProducerConnection(conn, { match = false, target_user = null }) {
 		this.addConnection(conn);
-		this.producer.setConnection(conn);
+		this.producer.setConnection(conn, { match });
 
-		if (this.match_room) {
-			// this forces a redispatch of the peer ids
-			this.match_room.addProducer(this);
+		if (match) {
+			this.joinMatchRoom(target_user);
 		} else {
-			// no match room, private room may need the webcam feed
+			this.leaveMatchRoom();
+			this.makePlayer();
 		}
 	}
 
@@ -80,26 +81,40 @@ class User extends EventEmitter {
 		const new_room = host_user.getHostRoom();
 
 		if (new_room === this.match_room) {
+			// this forces a redispatch of the peer ids
+			this.match_room.addProducer(this);
 			return;
 		}
 
 		if (this.match_room) {
-			this.match_room.removeProducer(this);
-			this.match_room = null;
+			this.leaveMatchRoom();
 		}
 
 		this.match_room = host_user.getHostRoom();
 		this.match_room.addProducer(this);
-		this.match_room.once('close', () => {
+		this.match_room.once('close', this._handleMatchRoomClose);
+	}
+
+	leaveMatchRoom() {
+		if (this.match_room) {
+			this.match_room.off('close', this._handleMatchRoomClose);
+			this.match_room.removeProducer(this);
 			this.match_room = null;
+		}
+	}
+
+	_handleMatchRoomClose() {
+		this.match_room = null;
+
+		if (this.producer.isMatchConnection()) {
 			this.producer.kick('match_room_closed');
-		});
+		}
 	}
 
 	closeRooms(reason) {
 		// send message to all connections in all rooms that rooms are going away
-		if (this.private_room) this.private_room.close(reason);
-		if (this.host_room) this.host_room.close(reason);
+		this.private_room.close(reason);
+		this.host_room.close(reason);
 	}
 
 	setTwitchToken(token) {
@@ -126,6 +141,29 @@ class User extends EventEmitter {
 
 		this.checkScheduleDestroy();
 		this._connectToTwitchChat();
+	}
+
+	makePlayer() {
+		if (this.match_room) {
+			// TODO refactor
+			console.log("there's a match room!");
+			// match room manages webcam feed itself
+			return;
+		}
+
+		console.log('isMatchConnection', this.getProducer().isMatchConnection());
+
+		if (!this.getProducer().isMatchConnection()) {
+			this.getProducer().send([
+				'setViewPeerId',
+				this.private_room.last_view_peer_id,
+			]);
+			this.getProducer().send([
+				'makePlayer',
+				0,
+				this.private_room.last_view_meta,
+			]);
+		}
 	}
 
 	checkScheduleDestroy() {

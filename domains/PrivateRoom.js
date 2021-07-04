@@ -15,8 +15,7 @@ class PrivateRoom extends Room {
 		if (connection.meta.video) {
 			this.last_view_peer_id = connection.id;
 			this.last_view_meta = connection.meta;
-
-			this.makePlayer();
+			this.owner.makePlayer();
 		}
 	}
 
@@ -26,13 +25,8 @@ class PrivateRoom extends Room {
 		if (connection.id === this.last_view_peer_id) {
 			this.last_view_peer_id = null;
 			this.last_view_meta = null;
-			this.makePlayer();
+			this.owner.makePlayer();
 		}
-	}
-
-	makePlayer() {
-		this.owner.getProducer().send(['setViewPeerId', this.last_view_peer_id]);
-		this.owner.getProducer().send(['makePlayer', 0, this.last_view_meta]);
 	}
 }
 

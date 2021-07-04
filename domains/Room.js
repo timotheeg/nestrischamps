@@ -21,6 +21,10 @@ class Room extends EventEmitter {
 		return this.views.delete(connection);
 	}
 
+	hasViews() {
+		return this.views.size > 0;
+	}
+
 	sendToViews(message) {
 		this.views.forEach(connection => connection.send(message));
 	}

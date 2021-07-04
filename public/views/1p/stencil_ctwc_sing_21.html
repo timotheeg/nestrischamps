@@ -473,6 +473,7 @@
 
 						eff: document.querySelector(`label.eff`),
 						projection: document.querySelector(`label.projection`),
+						video: document.querySelector(`video`),
 					},
 					{
 						field_pixel_size: 2,
@@ -620,10 +621,10 @@
 					peer = new Peer(connection.id);
 
 					peer.on('call', call => {
+						const video = document.querySelector('video');
+
 						call.answer(); // assume correct!
 						call.on('stream', remoteStream => {
-							const video = document.querySelector('video');
-
 							video.srcObject = remoteStream;
 							video.addEventListener(
 								'loadedmetadata',
@@ -632,6 +633,14 @@
 								},
 								{ once: true }
 							);
+						});
+						call.on('error', () => {
+							video.stop();
+							video.srcObject = null;
+						});
+						call.on('close', () => {
+							video.stop();
+							video.srcObject = null;
 						});
 					});
 
