@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			html {
+				overflow: hidden;
+			}
+			#stream_bg {
+				background: black;
+			}
+
+			#nestris_ui {
+				position: absolute;
+				overflow: hidden;
+				top: 0;
+				left: 0;
+				width: 512px;
+				height: 448px;
+				background: url('/views/stencil_champs_bg.png');
+				background-repeat: no-repeat;
+				background-size: 512px 448px;
+				transform-origin: top left;
+				transform: scale(1.6071428571428572);
+			}
+
+			#nestris_ui label {
+				position: absolute;
+				font-size: 16px;
+				font-family: 'Press Start K';
+				color: white;
+			}
+
+			#nestris_ui .lines {
+				top: 32px;
+				left: 304px;
+			}
+
+			#nestris_ui .top {
+				top: 64px;
+				left: 384px;
+			}
+
+			#nestris_ui .score {
+				top: 112px;
+				left: 384px;
+			}
+
+			#nestris_ui .level {
+				top: 320px;
+				left: 416px;
+			}
+
+			#nestris_ui .stat {
+				left: 96px;
+				color: #d82901;
+			}
+
+			#nestris_ui .stat.T {
+				top: 176px;
+			}
+
+			#nestris_ui .stat.J {
+				top: 208px;
+			}
+
+			#nestris_ui .stat.Z {
+				top: 240px;
+			}
+
+			#nestris_ui .stat.O {
+				top: 272px;
+			}
+
+			#nestris_ui .stat.S {
+				top: 304px;
+			}
+
+			#nestris_ui .stat.L {
+				top: 336px;
+			}
+
+			#nestris_ui .stat.I {
+				top: 368px;
+			}
+
+			#piece_stats .piece {
+				position: absolute;
+				left: 48px;
+				display: inline-block;
+				background: url(/views/pieces_sprites.png);
+				background-repeat: no-repeat;
+				background-position-x: 0px;
+				width: 46px;
+				height: 22px;
+				margin: 0;
+				padding: 0;
+			}
+
+			#piece_stats.l0 .piece {
+				background-position-x: -48px;
+			}
+
+			#piece_stats.l1 .piece {
+				background-position-x: -96px;
+			}
+
+			#piece_stats.l2 .piece {
+				background-position-x: -144px;
+			}
+
+			#piece_stats.l3 .piece {
+				background-position-x: -192px;
+			}
+
+			#piece_stats.l4 .piece {
+				background-position-x: -240px;
+			}
+
+			#piece_stats.l5 .piece {
+				background-position-x: -288px;
+			}
+
+			#piece_stats.l6 .piece {
+				background-position-x: -336px;
+			}
+
+			#piece_stats.l7 .piece {
+				background-position-x: -384px;
+			}
+
+			#piece_stats.l8 .piece {
+				background-position-x: -432px;
+			}
+
+			#piece_stats.l9 .piece {
+				background-position-x: -480px;
+			}
+
+			#piece_stats .piece.T {
+				background-position-y: -2px;
+				top: 170px;
+			}
+
+			#piece_stats .piece.J {
+				background-position-y: -32px;
+				top: 200px;
+			}
+
+			#piece_stats .piece.Z {
+				background-position-y: -66px;
+				top: 234px;
+			}
+
+			#piece_stats .piece.O {
+				background-position-y: -98px;
+				top: 266px;
+			}
+
+			#piece_stats .piece.S {
+				background-position-y: -130px;
+				top: 298px;
+			}
+
+			#piece_stats .piece.L {
+				background-position-y: -160px;
+				top: 328px;
+			}
+
+			#piece_stats .piece.I {
+				background-position-y: -192px;
+				top: 360px;
+			}
+
+			#playing_fields {
+				position: absolute;
+				left: 825px;
+				top: 260px;
+			}
+
+			.box {
+				width: 95px;
+				height: 56px;
+				text-align: center;
+			}
+
+			.box .header {
+				padding-bottom: 0.5em;
+			}
+
+			.box .content,
+			.box .data {
+				font-size: 24px;
+				line-height: 30px;
+			}
+
+			.box.ui {
+				border-image-source: none;
+				padding: 16px;
+				line-height: 16px;
+			}
+
+			.box.ui .header {
+				padding: 0;
+			}
+
+			.eff {
+				top: 392px;
+				left: 448px;
+			}
+
+			.trt {
+				top: 368px;
+				left: 448px;
+			}
+
+			.runway {
+				top: 46px;
+				left: 32px;
+			}
+
+			.projection {
+				top: 82px;
+				left: 32px;
+			}
+
+			.next_piece {
+				position: absolute;
+				width: 64px;
+				height: 32px;
+				top: 224px;
+				left: 384px;
+			}
+
+			.board {
+				position: absolute;
+				width: 160px;
+				height: 320px;
+				top: 80px;
+				left: 192px;
+			}
+
+			.timer {
+				top: 5px;
+				left: 5px;
+				width: 418px;
+				text-align: center;
+				height: 27px;
+			}
+
+			.bounded {
+				border-style: dashed;
+				border-color: #505050;
+				border-width: 1px 0;
+			}
+
+			.running_trt {
+				padding: 12px 9px 9px;
+
+				width: 424px;
+				height: 133px;
+				top: 298px;
+				left: 5px;
+			}
+
+			.running_trt .value {
+				border-bottom: 0;
+				width: 424px;
+				height: 103px;
+				position: relative;
+			}
+
+			.drought {
+				position: absolute;
+				background: black;
+				font-family: 'Press Start K', monospace;
+				font-size: 16px;
+				color: #d82901;
+
+				padding: 6px 2px;
+				top: 126px;
+				left: 36px;
+				width: 120px;
+				height: 20px;
+			}
+
+			.drought .header {
+				padding-bottom: 2px;
+			}
+
+			.drought .value {
+				padding-bottom: 2px;
+			}
+
+			.qualifier_result {
+				top: 92px;
+				left: 5px;
+				width: 418px;
+				height: 146px;
+			}
+
+			.qualifier_result .average {
+				font-size: 24px;
+				line-height: 32px;
+				padding: 5px 0 15px;
+			}
+
+			video {
+				position: absolute;
+				top: 0;
+				left: 825px;
+				width: 455px;
+				height: 253px;
+				object-fit: cover;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<video></video>
+
+			<div id="nestris_ui">
+				<label class="value lines">000</label>
+				<label class="value top">000000</label>
+				<label class="value score">000000</label>
+				<label class="value level">00</label>
+				<label class="value eff">000</label>
+				<label class="value trt">000</label>
+				<label class="value runway">00000</label>
+				<label class="value projection">00000</label>
+
+				<label class="value stat T">000</label>
+				<label class="value stat J">000</label>
+				<label class="value stat Z">000</label>
+				<label class="value stat O">000</label>
+				<label class="value stat S">000</label>
+				<label class="value stat L">000</label>
+				<label class="value stat I">000</label>
+
+				<div id="piece_stats" class="l0">
+					<p class="piece T"></p>
+					<p class="piece J"></p>
+					<p class="piece Z"></p>
+					<p class="piece O"></p>
+					<p class="piece S"></p>
+					<p class="piece L"></p>
+					<p class="piece I"></p>
+				</div>
+
+				<div class="board"></div>
+				<div class="next_piece"></div>
+
+				<div class="drought">DRT <span class="value">000</span></div>
+			</div>
+
+			<div id="playing_fields">
+				<div class="box timer">
+					<div class="content">02:00:00</div>
+				</div>
+
+				<div class="box qualifier_result">
+					<div class="header">QUALIFIER RESULT</div>
+					<div class="average">0000000</div>
+					<div class="top_scores">
+						<div>0000000 - 00</div>
+						<div>0000000 - 00</div>
+						<div>0000000 - 00</div>
+					</div>
+				</div>
+
+				<div class="box running_trt">
+					<div class="header">RUNNING TETRIS RATE</div>
+					<div class="value bounded"></div>
+				</div>
+			</div>
+
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			const view_meta = new URLSearchParams({
+				video: '640x480',
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+		<script src="/js/QueryString.js"></script>
+		<script src="/views/constants.js"></script>
+		<script src="/js/connection.js"></script>
+		<script src="/js/BinaryFrame.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/renderBlock.js"></script>
+		<script src="/views/Player.js"></script>
+		<script>
+			(async function () {
+				// client side time is not reliable, supply a date from the future
+				let received_time_from_server = false;
+				let init_time = new Date(2030, 1, 1).getTime();
+
+				function format_score(v) {
+					const tail = `${v % 100000}`.padStart(5, '0');
+					const head = Math.floor(v / 100000);
+					const v_str = `${head.toString(16).toUpperCase()}${tail}`;
+
+					return v_str.padStart(6, '0');
+				}
+
+				function getTop3() {
+					let m;
+
+					if (
+						(m = location.pathname.match(
+							/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/
+						))
+					) {
+						fetch(
+							`${location.protocol}//${location.host}/stats/top3/${m[1]}?since=${init_time}`,
+							{
+								cache: 'no-cache',
+								headers: {
+									'Cache-Control': 'no-cache',
+								},
+								// mode: 'no-cors'
+							}
+						)
+							.then(response => response.json())
+							.catch(err => [])
+							.then(top3 => {
+								while (top3.length < 3) {
+									top3.push({ score: '0', end_level: 0 });
+								}
+
+								custom_doms.pb.textContent = format_score(top3[0].score || 0);
+								custom_doms.top3.innerHTML = '';
+
+								top3.forEach((res, idx) => {
+									const div = document.createElement('div');
+									div.textContent = `${idx + 1}: ${res.score
+										.toString()
+										.padStart(7, '0')} - ${res.end_level
+										.toString()
+										.padStart(2, '0')}`;
+									custom_doms.top3.appendChild(div);
+								});
+
+								custom_doms.qual_average.textContent = Math.round(
+									top3.reduce((acc, v) => acc + v.score, 0) / top3.length
+								)
+									.toString()
+									.padStart(7, '0');
+							});
+					}
+				}
+
+				function updateLevel() {
+					piece_stats.className = '';
+					piece_stats.classList.add(`l${(player.level || 0) % 10}`);
+				}
+
+				const player = new Player(
+					{
+						lines: document.querySelector(`label.lines`),
+						score: document.querySelector(`label.score`),
+						level: document.querySelector(`label.level`),
+						runway_game: document.querySelector(`label.runway`),
+						trt: document.querySelector(`label.trt`),
+						running_trt: document.querySelector(`.running_trt .value`),
+						preview: document.querySelector(`.next_piece`),
+						field: document.querySelector(`.board`),
+						drought: document.querySelector(`.drought .value`),
+
+						eff: document.querySelector(`label.eff`),
+						projection: document.querySelector(`label.projection`),
+						video: document.querySelector(`video`),
+					},
+					{
+						field_pixel_size: 2,
+						preview_pixel_size: 2,
+						tetris_flash: 0,
+						tetris_sound: 0,
+						format_score,
+						format_drought: v => v.toString().padStart(3, '0'),
+					}
+				);
+
+				const custom_doms = {
+					pb: document.querySelector(`label.top`),
+					qual_average: document.querySelector(`.qualifier_result .average`),
+					top3: document.querySelector(`.qualifier_result .top_scores`),
+					drought_box: document.querySelector(`.drought`),
+					piece_stats: {},
+				};
+
+				PIECES.forEach(p => {
+					custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
+				});
+
+				custom_doms.drought_box.hidden = true;
+
+				player.onDroughtStart = () => {
+					custom_doms.drought_box.hidden = false;
+				};
+
+				player.onDroughtEnd = count => {
+					custom_doms.drought_box.hidden = true;
+				};
+
+				player.onGameStart = () => {
+					custom_doms.drought_box.hidden = true;
+					updateLevel();
+				};
+
+				player.onPiece = () => {
+					const is_classic =
+						player.last_frame.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
+
+					const piece_stats =
+						player.piece_stats[is_classic ? 'frame' : 'board'];
+
+					PIECES.forEach(p => {
+						custom_doms.piece_stats[p].textContent = piece_stats[p]
+							.toString()
+							.padStart(3, '0');
+					});
+				};
+
+				// timer management
+				const ALLOWED_TIME = 2 * 60 * 60;
+				const timer_el = document.querySelector(`.timer .content`);
+				let start_time = 0;
+				let timer = null;
+
+				function startTimer(allowed) {
+					document.querySelector('.timer').style.display = 'block';
+
+					timer = clearInterval(timer);
+					start_time = Date.now();
+
+					const allowed_time = allowed || ALLOWED_TIME;
+
+					timer = setInterval(() => {
+						const elapsed = Math.floor((Date.now() - start_time) / 1000);
+						let remainder = allowed_time - elapsed;
+
+						if (remainder < 0) {
+							remainder = 0;
+							timer = clearInterval(timer);
+						}
+
+						const hours = Math.floor(remainder / (60 * 60));
+
+						remainder = remainder % (60 * 60);
+
+						const minutes = Math.floor(remainder / 60);
+						const seconds = remainder % 60;
+
+						timer_el.textContent =
+							`${hours}`.padStart(2, '0') +
+							':' +
+							`${minutes}`.padStart(2, '0') +
+							':' +
+							`${seconds}`.padStart(2, '0');
+					}, 500);
+				}
+
+				const piece_stats = document.querySelector('#piece_stats');
+
+				const API = {
+					frame(player_num, data) {
+						if (!data) {
+							data = player_num;
+						}
+
+						player.setFrame(data);
+					},
+
+					startTimer(allowed_time) {
+						// not allowed to restart the timer
+						// startTimer(allowed_time);
+					},
+
+					message() {}, // noop
+				};
+
+				const connection = new Connection(null, view_meta);
+
+				connection.onMessage = function (frame) {
+					try {
+						const [method, ...args] = frame;
+
+						API[method].apply(API, args);
+					} catch (e) {
+						console.error(e);
+					}
+				};
+
+				function onFrame(frame, debug) {
+					API.frame(1, frame, debug);
+				}
+
+				let peer = null;
+
+				connection.onInit = () => {
+					if (!received_time_from_server) {
+						init_time = connection.start_ts; // use server time
+						received_time_from_server = true;
+					}
+
+					player.onCurtainDown = getTop3;
+					player.onLevel = updateLevel;
+
+					getTop3();
+
+					if (peer) {
+						peer.destroy();
+						peer = null;
+					}
+
+					peer = new Peer(connection.id);
+
+					peer.on('call', call => {
+						const video = document.querySelector('video');
+
+						call.answer(); // assume correct!
+						call.on('stream', remoteStream => {
+							video.srcObject = remoteStream;
+							video.addEventListener(
+								'loadedmetadata',
+								() => {
+									video.play();
+								},
+								{ once: true }
+							);
+						});
+						call.on('error', () => {
+							video.stop();
+							video.srcObject = null;
+						});
+						call.on('close', () => {
+							video.stop();
+							video.srcObject = null;
+						});
+					});
+
+					startTimer();
+				};
+			})(); // call async function wrapper
+		</script>
+
+		<!-- script src="/views/sample_frames/sample_frames_11.js"></script>
+<script src="debug.js"></script -->
+	</body>
+	<html></html>
+</html>

@@ -44,6 +44,16 @@ class Connection extends EventEmitter {
 
 		this._onHeartBeat();
 
+		this.send([
+			'_init',
+			{
+				server_ts: Date.now(),
+				id: this.id,
+			},
+		]);
+
+		// for backward compatibility
+		// TODO: remove after a while
 		this.send(['_id', this.id]);
 	}
 

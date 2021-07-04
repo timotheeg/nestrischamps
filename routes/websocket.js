@@ -182,7 +182,7 @@ module.exports = function init(server, wss) {
 			user.getHostRoom().setAdmin(connection);
 		} else if (pathname.startsWith('/ws/room/producer')) {
 			console.log(`PrivateRoom: ${user.login}: Producer connected`);
-			user.setProducerConnection(connection);
+			user.setProducerConnection(connection, { match: false });
 		} else if ((m = pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))) {
 			const target_user = await UserDAO.getUserByLogin(m[1]);
 
@@ -211,8 +211,10 @@ module.exports = function init(server, wss) {
 						console.log(
 							`MatchRoom: ${target_user.login}: Producer ${user.login} connected`
 						);
-						user.setProducerConnection(connection);
-						user.joinMatchRoom(target_user);
+						user.setProducerConnection(connection, {
+							match: true,
+							target_user,
+						});
 						break;
 					}
 					case 'view': {

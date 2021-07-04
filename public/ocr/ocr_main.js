@@ -243,6 +243,7 @@ function connect() {
 
 		peer.on('open', err => {
 			peer_opened = true;
+			startSharingVideoFeed();
 		});
 
 		peer.on('error', err => {
@@ -261,7 +262,8 @@ async function startSharingVideoFeed() {
 
 	if (!allow_video_feed.checked) return;
 	if (!video_feed_selector.value) return;
-	if (!peer || !view_peer_id || !view_meta || !view_meta.video) return;
+	if (!is_player || !peer || !view_peer_id || !view_meta || !view_meta.video)
+		return;
 
 	const video_constraints = {
 		width: { ideal: 320 },
@@ -400,7 +402,7 @@ go_btn.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
-	privacy.style.display = is_match_room ? 'block' : 'none';
+	privacy.style.display = 'block';
 	controls.style.display = 'block';
 });
 
@@ -423,9 +425,7 @@ function onPrivacyChanged() {
 	saveConfig(config);
 
 	if (config.allow_video_feed) {
-		if (is_player) {
-			startSharingVideoFeed();
-		}
+		startSharingVideoFeed();
 	} else {
 		stopSharingVideoFeed();
 	}
@@ -1262,7 +1262,7 @@ function trackAndSendFrames() {
 		controls.style.display = 'block';
 
 		allow_video_feed.checked = config.allow_video_feed != false;
-		privacy.style.display = is_match_room ? 'block' : 'none';
+		privacy.style.display = 'block';
 
 		await playVideoFromConfig();
 		trackAndSendFrames();

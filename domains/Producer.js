@@ -9,18 +9,22 @@ class Producer extends EventEmitter {
 		this.user = user;
 
 		this.connection = null;
+		this.is_match_connection = false;
 		this.game = null;
 
 		this._handleMessage = this._handleMessage.bind(this);
 	}
 
-	setConnection(connection) {
+	setConnection(connection, { match = false }) {
 		this.kick('concurrency_limit');
+
+		this.is_match_connection = !!match;
 
 		connection.on('message', this._handleMessage);
 
 		connection.once('close', () => {
 			this.connection.removeAllListeners();
+			this.is_match_connection = false;
 
 			if (this.connection === connection) {
 				this.connection = null;
@@ -39,6 +43,10 @@ class Producer extends EventEmitter {
 
 	hasConnection() {
 		return !!this.connection;
+	}
+
+	isMatchConnection() {
+		return this.is_match_connection;
 	}
 
 	setGame() {

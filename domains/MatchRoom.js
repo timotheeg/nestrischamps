@@ -268,18 +268,23 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
-					if (
-						this.state.players[p_num].id &&
-						player_id != this.state.players[p_num].id
-					) {
-						// replacing player
-						// if it is no longer used as any player, it needs to be told it is dropped
-						player_data = this.getPlayerData(player_id);
+					const old_player_id = this.state.players[p_num].id;
 
-						if (!player_data) {
+					if (old_player_id && player_id != old_player_id) {
+						// player at p_num is being replaced
+						// check if old player was used in more than one slot
+						// if not, then user needs to be informed it is dropped as a player
+						const still_around =
+							this.state.players.filter(player => player.id === old_player_id)
+								.length > 1;
+
+						if (!still_around) {
 							const user = this.getProducer(this.state.players[p_num].id);
 
-							user.getProducer().send(['dropPlayer']);
+							if (user) {
+								// hmm, is this necessary?
+								user.getProducer().send(['dropPlayer']);
+							}
 						}
 					}
 
