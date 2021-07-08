@@ -285,7 +285,7 @@ async function startSharingVideoFeed() {
 	}
 
 	const stream = await navigator.mediaDevices.getUserMedia({
-		audio: false,
+		audio: QueryString.get('webcam_audio') === '1',
 		video: video_constraints,
 	});
 
