@@ -99,7 +99,12 @@ class Connection extends EventEmitter {
 		if (message instanceof Uint8Array) {
 			this.emit('message', message);
 		} else {
-			this.emit('message', JSON.parse(message));
+			try {
+				this.emit('message', JSON.parse(message));
+			}
+			catch(err) {
+				console.warn(`Received non JSON message on connection ${this.id}: ${message.toString().substr(1, 60)}`);
+			}
 		}
 	}
 
