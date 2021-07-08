@@ -29,7 +29,7 @@ https://nestrischamps.herokuapp.com/docs
 
 ### Das Trainer Stats Layout
 
-![Full UI](./public/docs/layouts/das_trainer.jpg)
+![Full UI](./public/views/1p/das_trainer.jpg)
 
 Documentation for sections of that UI is [here](https://github.com/timotheeg/NESTrisStatsUI/blob/master/docs/stats.md)
 
@@ -38,7 +38,7 @@ Documentation for sections of that UI is [here](https://github.com/timotheeg/NES
 
 ### CTJC Competition Layout
 
-![Full UI](./public/docs/layouts/ctjc_pace.jpg)
+![Full UI](../public/views/mp/ctjc_pace.jpg)
 
 Includes score differentials, difference in number of tetrises, tetris rate computation, running tetris rate, and pace.
 
@@ -49,7 +49,7 @@ UI "inspired" from, and improving on, [CTJC's layout](https://www.youtube.com/wa
 
 ### Invisible Tetris Renderer
 
-![Full UI](./public/docs/layouts/invisible_tetris.jpg)
+![Full UI](./public/views/1p/invisible_tetris.jpg)
 
 Here's a demo of my playing from the renderer itself (it's harder than it looks because rendering runs 2 frame behind)
 * [Game 1](https://www.youtube.com/watch?v=eh2bqVe4wOo)
