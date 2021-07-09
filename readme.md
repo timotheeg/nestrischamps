@@ -38,7 +38,7 @@ Documentation for sections of that UI is [here](https://github.com/timotheeg/NES
 
 ### CTJC Competition Layout
 
-![Full UI](../public/views/mp/ctjc_pace.jpg)
+![Full UI](./public/views/mp/ctjc_pace.jpg)
 
 Includes score differentials, difference in number of tetrises, tetris rate computation, running tetris rate, and pace.
 
