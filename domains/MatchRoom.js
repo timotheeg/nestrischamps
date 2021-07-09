@@ -252,6 +252,7 @@ class MatchRoom extends Room {
 		let forward_to_views = true;
 		let update_admin = true;
 
+		// TODO: Extract this encompassing try..catch to own method
 		try {
 			switch (command) {
 				case 'getState': {
@@ -407,15 +408,18 @@ class MatchRoom extends Room {
 
 					this.assertValidPlayer(p_num);
 
-					this.state.players.splice(p_num, 1);
+					const dropped_player = this.state.players.splice(p_num, 1)[0];
 
-					// Tell views to update all players
-					// Inefficient: too many websocket frames
-					// TODO: Find a way to send multiple messages in one frame
-					[
-						...this.state.players,
-						getBasePlayerData(), // dummy entry to clear last player
-					].forEach((player, pidx) => {
+					// tell player who is being removed he/she's being dropped
+					try {
+						this.getProducer(dropped_player.id)
+							.getProducer()
+							.send(['dropPlayer']);
+					} catch (err) {
+						// ignore errors
+					}
+
+					const updatePlayer = (player, pidx) => {
 						this.sendToViews(['setId', pidx, player.id]);
 						this.sendToViews(['setLogin', pidx, player.login]);
 						this.sendToViews(['setDisplayName', pidx, player.display_name]);
@@ -429,19 +433,31 @@ class MatchRoom extends Room {
 						if (this.last_view) {
 							const user = player.id ? this.getProducer(player.id) : null;
 
-							this.last_view.send([
-								'setPeerId',
-								pidx,
-								user ? user.getProducer().getPeerId() : '',
-							]);
-						}
+							if (user) {
+								this.last_view.send([
+									'setPeerId',
+									pidx,
+									user.getProducer().getPeerId(),
+								]);
 
-						this.state.players.forEach((player, pidx) => {
-							this.getProducer(player.id)
-								.getProducer()
-								.send(['makePlayer', p_num, this.getViewMeta()]);
-						});
-					});
+								user
+									.getProducer()
+									.send(['makePlayer', pidx, this.getViewMeta()]);
+							} else {
+								this.last_view.send(['setPeerId', pidx, '']);
+							}
+						}
+					};
+
+					// update all shifted players
+					for (let pidx = p_num; pidx < this.state.players.length; pidx++) {
+						const player = this.state.players[pidx];
+
+						updatePlayer(player, pidx);
+					}
+
+					// finally send dummy data to clear last player
+					updatePlayer(getBasePlayerData(), this.state.players.length);
 
 					forward_to_views = false;
 					break;
