@@ -355,7 +355,7 @@
 
 			<div id="playing_fields">
 				<div class="box timer">
-					<div class="content">02:00:00</div>
+					<div class="content">-</div>
 				</div>
 
 				<div class="box qualifier_result">
@@ -394,259 +394,274 @@
 		<script src="/views/renderBlock.js"></script>
 		<script src="/views/Player.js"></script>
 		<script>
-			(async function () {
-				// client side time is not reliable, supply a date from the future
-				let received_time_from_server = false;
-				let init_time = new Date(2030, 1, 1).getTime();
+			// client side time is not reliable, supply a date from the future
+			let received_time_from_server = false;
+			let init_time = new Date(2030, 1, 1).getTime();
+			let average_of = 3;
+			let allowed_time_in_minutes = 2 * 60;
 
-				function format_score(v) {
-					const tail = `${v % 100000}`.padStart(5, '0');
-					const head = Math.floor(v / 100000);
-					const v_str = `${head.toString(16).toUpperCase()}${tail}`;
+			function processQueryStringArgs() {
+				const avgof = QueryString.get('average_of');
+				const minutes = QueryString.get('minutes');
 
-					return v_str.padStart(6, '0');
+				if (['1', '2'].includes(avgof)) {
+					average_of = parseInt(avgof, 10);
 				}
 
-				function getTop3() {
-					let m;
+				if (/^\d+$/.test(minutes)) {
+					const val = parseInt(minutes, 10);
 
-					if (
-						(m = location.pathname.match(
-							/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/
-						))
-					) {
-						fetch(
-							`${location.protocol}//${location.host}/stats/top3/${m[1]}?since=${init_time}`,
-							{
-								cache: 'no-cache',
-								headers: {
-									'Cache-Control': 'no-cache',
-								},
-								// mode: 'no-cors'
+					if (val >= 1 && val <= 100 * 60) {
+						allowed_time_in_minutes = val;
+					}
+				}
+			}
+
+			function format_score(v) {
+				const tail = `${v % 100000}`.padStart(5, '0');
+				const head = Math.floor(v / 100000);
+				const v_str = `${head.toString(16).toUpperCase()}${tail}`;
+
+				return v_str.padStart(6, '0');
+			}
+
+			function getTop3() {
+				let m;
+
+				if (
+					(m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/))
+				) {
+					fetch(
+						`${location.protocol}//${location.host}/stats/top3/${m[1]}?since=${init_time}`,
+						{
+							cache: 'no-cache',
+							headers: {
+								'Cache-Control': 'no-cache',
+							},
+							// mode: 'no-cors'
+						}
+					)
+						.then(response => response.json())
+						.catch(err => [])
+						.then(top3 => {
+							while (top3.length < 3) {
+								top3.push({ score: 0, end_level: 0 });
 							}
-						)
-							.then(response => response.json())
-							.catch(err => [])
-							.then(top3 => {
-								while (top3.length < 3) {
-									top3.push({ score: 0, end_level: 0 });
-								}
 
-								custom_doms.pb.textContent = format_score(top3[0].score || 0);
-								custom_doms.top3.innerHTML = '';
+							custom_doms.pb.textContent = format_score(top3[0].score || 0);
+							custom_doms.top3.innerHTML = '';
 
-								top3.forEach((res, idx) => {
-									const div = document.createElement('div');
-									div.textContent = `${idx + 1}: ${res.score
-										.toString()
-										.padStart(7, '0')} - ${res.end_level
-										.toString()
-										.padStart(2, '0')}`;
-									custom_doms.top3.appendChild(div);
-								});
-
-								custom_doms.qual_average.textContent = Math.round(
-									top3.reduce((acc, v) => acc + v.score, 0) / top3.length
-								)
+							top3.forEach((res, idx) => {
+								const div = document.createElement('div');
+								div.textContent = `${idx + 1}: ${res.score
 									.toString()
-									.padStart(7, '0');
+									.padStart(7, '0')} - ${res.end_level
+									.toString()
+									.padStart(2, '0')}`;
+								custom_doms.top3.appendChild(div);
 							});
-					}
+
+							custom_doms.qual_average.textContent = Math.round(
+								top3.slice(0, average_of).reduce((acc, v) => acc + v.score, 0) /
+									average_of
+							)
+								.toString()
+								.padStart(7, '0');
+						});
 				}
+			}
 
-				function updateLevel() {
-					piece_stats.className = '';
-					piece_stats.classList.add(`l${(player.level || 0) % 10}`);
+			function updateLevel() {
+				piece_stats.className = '';
+				piece_stats.classList.add(`l${(player.level || 0) % 10}`);
+			}
+
+			const player = new Player(
+				{
+					lines: document.querySelector(`label.lines`),
+					score: document.querySelector(`label.score`),
+					level: document.querySelector(`label.level`),
+					runway_game: document.querySelector(`label.runway`),
+					trt: document.querySelector(`label.trt`),
+					running_trt: document.querySelector(`.running_trt .value`),
+					preview: document.querySelector(`.next_piece`),
+					field: document.querySelector(`.board`),
+					drought: document.querySelector(`.drought .value`),
+
+					eff: document.querySelector(`label.eff`),
+					projection: document.querySelector(`label.projection`),
+					video: document.querySelector(`video`),
+				},
+				{
+					field_pixel_size: 2,
+					preview_pixel_size: 2,
+					tetris_flash: 0,
+					tetris_sound: 0,
+					format_score,
+					format_drought: v => v.toString().padStart(3, '0'),
 				}
+			);
 
-				const player = new Player(
-					{
-						lines: document.querySelector(`label.lines`),
-						score: document.querySelector(`label.score`),
-						level: document.querySelector(`label.level`),
-						runway_game: document.querySelector(`label.runway`),
-						trt: document.querySelector(`label.trt`),
-						running_trt: document.querySelector(`.running_trt .value`),
-						preview: document.querySelector(`.next_piece`),
-						field: document.querySelector(`.board`),
-						drought: document.querySelector(`.drought .value`),
+			const custom_doms = {
+				pb: document.querySelector(`label.top`),
+				qual_average: document.querySelector(`.qualifier_result .average`),
+				top3: document.querySelector(`.qualifier_result .top_scores`),
+				drought_box: document.querySelector(`.drought`),
+				piece_stats: {},
+			};
 
-						eff: document.querySelector(`label.eff`),
-						projection: document.querySelector(`label.projection`),
-						video: document.querySelector(`video`),
-					},
-					{
-						field_pixel_size: 2,
-						preview_pixel_size: 2,
-						tetris_flash: 0,
-						tetris_sound: 0,
-						format_score,
-						format_drought: v => v.toString().padStart(3, '0'),
-					}
-				);
+			PIECES.forEach(p => {
+				custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
+			});
 
-				const custom_doms = {
-					pb: document.querySelector(`label.top`),
-					qual_average: document.querySelector(`.qualifier_result .average`),
-					top3: document.querySelector(`.qualifier_result .top_scores`),
-					drought_box: document.querySelector(`.drought`),
-					piece_stats: {},
-				};
+			custom_doms.drought_box.hidden = true;
+
+			player.onDroughtStart = () => {
+				custom_doms.drought_box.hidden = false;
+			};
+
+			player.onDroughtEnd = count => {
+				custom_doms.drought_box.hidden = true;
+			};
+
+			player.onGameStart = () => {
+				custom_doms.drought_box.hidden = true;
+				updateLevel();
+			};
+
+			player.onPiece = () => {
+				const is_classic =
+					player.last_frame.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
+
+				const piece_stats = player.piece_stats[is_classic ? 'frame' : 'board'];
 
 				PIECES.forEach(p => {
-					custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
+					custom_doms.piece_stats[p].textContent = piece_stats[p]
+						.toString()
+						.padStart(3, '0');
 				});
+			};
 
-				custom_doms.drought_box.hidden = true;
+			// timer management
+			const timer_el = document.querySelector(`.timer .content`);
+			let start_time = 0;
+			let timer = null;
 
-				player.onDroughtStart = () => {
-					custom_doms.drought_box.hidden = false;
-				};
+			function startTimer(allowed) {
+				document.querySelector('.timer').style.display = 'block';
 
-				player.onDroughtEnd = count => {
-					custom_doms.drought_box.hidden = true;
-				};
+				timer = clearInterval(timer);
+				start_time = Date.now();
 
-				player.onGameStart = () => {
-					custom_doms.drought_box.hidden = true;
-					updateLevel();
-				};
+				const allowed_time = allowed || allowed_time_in_minutes * 60;
 
-				player.onPiece = () => {
-					const is_classic =
-						player.last_frame.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
+				timer = setInterval(() => {
+					const elapsed = Math.floor((Date.now() - start_time) / 1000);
+					let remainder = allowed_time - elapsed;
 
-					const piece_stats =
-						player.piece_stats[is_classic ? 'frame' : 'board'];
+					if (remainder < 0) {
+						remainder = 0;
+						timer = clearInterval(timer);
+					}
 
-					PIECES.forEach(p => {
-						custom_doms.piece_stats[p].textContent = piece_stats[p]
-							.toString()
-							.padStart(3, '0');
-					});
-				};
+					const hours = Math.floor(remainder / (60 * 60));
 
-				// timer management
-				const ALLOWED_TIME = 2 * 60 * 60;
-				const timer_el = document.querySelector(`.timer .content`);
-				let start_time = 0;
-				let timer = null;
+					remainder = remainder % (60 * 60);
 
-				function startTimer(allowed) {
-					document.querySelector('.timer').style.display = 'block';
+					const minutes = Math.floor(remainder / 60);
+					const seconds = remainder % 60;
 
-					timer = clearInterval(timer);
-					start_time = Date.now();
+					timer_el.textContent =
+						`${hours}`.padStart(2, '0') +
+						':' +
+						`${minutes}`.padStart(2, '0') +
+						':' +
+						`${seconds}`.padStart(2, '0');
+				}, 500);
+			}
 
-					const allowed_time = allowed || ALLOWED_TIME;
+			const piece_stats = document.querySelector('#piece_stats');
 
-					timer = setInterval(() => {
-						const elapsed = Math.floor((Date.now() - start_time) / 1000);
-						let remainder = allowed_time - elapsed;
+			const API = {
+				frame(player_num, data) {
+					if (!data) {
+						data = player_num;
+					}
 
-						if (remainder < 0) {
-							remainder = 0;
-							timer = clearInterval(timer);
-						}
+					player.setFrame(data);
+				},
 
-						const hours = Math.floor(remainder / (60 * 60));
+				startTimer(allowed_time) {
+					// not allowed to restart the timer
+					// startTimer(allowed_time);
+				},
 
-						remainder = remainder % (60 * 60);
+				message() {}, // noop
+			};
 
-						const minutes = Math.floor(remainder / 60);
-						const seconds = remainder % 60;
+			const connection = new Connection(null, view_meta);
 
-						timer_el.textContent =
-							`${hours}`.padStart(2, '0') +
-							':' +
-							`${minutes}`.padStart(2, '0') +
-							':' +
-							`${seconds}`.padStart(2, '0');
-					}, 500);
+			connection.onMessage = function (frame) {
+				try {
+					const [method, ...args] = frame;
+
+					API[method].apply(API, args);
+				} catch (e) {
+					console.error(e);
 				}
+			};
 
-				const piece_stats = document.querySelector('#piece_stats');
+			function onFrame(frame, debug) {
+				API.frame(1, frame, debug);
+			}
 
-				const API = {
-					frame(player_num, data) {
-						if (!data) {
-							data = player_num;
-						}
+			let peer = null;
 
-						player.setFrame(data);
-					},
+			connection.onInit = () => {
+				if (!received_time_from_server) {
+					received_time_from_server = true;
 
-					startTimer(allowed_time) {
-						// not allowed to restart the timer
-						// startTimer(allowed_time);
-					},
-
-					message() {}, // noop
-				};
-
-				const connection = new Connection(null, view_meta);
-
-				connection.onMessage = function (frame) {
-					try {
-						const [method, ...args] = frame;
-
-						API[method].apply(API, args);
-					} catch (e) {
-						console.error(e);
-					}
-				};
-
-				function onFrame(frame, debug) {
-					API.frame(1, frame, debug);
-				}
-
-				let peer = null;
-
-				connection.onInit = () => {
-					if (!received_time_from_server) {
-						init_time = connection.start_ts; // use server time
-						received_time_from_server = true;
-					}
-
-					player.onCurtainDown = getTop3;
-					player.onLevel = updateLevel;
-
-					getTop3();
-
-					if (peer) {
-						peer.destroy();
-						peer = null;
-					}
-
-					peer = new Peer(connection.id);
-
-					peer.on('call', call => {
-						const video = document.querySelector('video');
-
-						call.answer(); // assume correct!
-						call.on('stream', remoteStream => {
-							video.srcObject = remoteStream;
-							video.addEventListener(
-								'loadedmetadata',
-								() => {
-									video.play();
-								},
-								{ once: true }
-							);
-						});
-						call.on('error', () => {
-							video.stop();
-							video.srcObject = null;
-						});
-						call.on('close', () => {
-							video.stop();
-							video.srcObject = null;
-						});
-					});
-
+					init_time = connection.start_ts; // use server time
+					processQueryStringArgs();
 					startTimer();
-				};
-			})(); // call async function wrapper
+				}
+
+				player.onCurtainDown = getTop3;
+				player.onLevel = updateLevel;
+
+				getTop3();
+
+				if (peer) {
+					peer.destroy();
+					peer = null;
+				}
+
+				peer = new Peer(connection.id);
+
+				peer.on('call', call => {
+					const video = document.querySelector('video');
+
+					call.answer(); // assume correct!
+					call.on('stream', remoteStream => {
+						video.srcObject = remoteStream;
+						video.addEventListener(
+							'loadedmetadata',
+							() => {
+								video.play();
+							},
+							{ once: true }
+						);
+					});
+					call.on('error', () => {
+						video.stop();
+						video.srcObject = null;
+					});
+					call.on('close', () => {
+						video.stop();
+						video.srcObject = null;
+					});
+				});
+			};
 		</script>
 
 		<!-- script src="/views/sample_frames/sample_frames_11.js"></script>
