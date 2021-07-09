@@ -98,6 +98,18 @@
 				right: var(--offset);
 			}
 
+			.drought {
+				opacity: 0;
+				color: red;
+				display: none;
+			}
+
+			.drought.active {
+				display: block;
+				animation: fadeIn ease 1s;
+				animation-fill-mode: forwards;
+			}
+
 			.p2 {
 				left: var(--offset);
 			}
@@ -115,10 +127,6 @@
 				align-items: center;
 				justify-content: center;
 				text-align: center;
-			}
-
-			.dev_null {
-				display: none;
 			}
 		</style>
 	</head>
@@ -164,6 +172,11 @@
 
 				<div class="box board p1"></div>
 
+				<div class="box drought p1">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
 				<!-- Player 2 -->
 
 				<div class="box score p2">
@@ -199,7 +212,10 @@
 
 				<div class="box board p2"></div>
 
-				<div class="dev_null"></div>
+				<div class="box drought p2">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>
@@ -218,12 +234,13 @@
 		<script src="/views/Player.js"></script>
 		<script src="/js/connection.js"></script>
 		<script src="/views/CompetitionPlayer.js"></script>
+		<script src="/views/CTMCompetitionPlayer.js"></script>
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
 			const numberFormatter = new Intl.NumberFormat();
 			const players = [1, 2].map(
 				num =>
-					new CompetitionPlayer(
+					new CTMCompetitionPlayer(
 						{
 							name: document.querySelector(`.name.p${num} .header`),
 							score: document.querySelector(`.score.p${num} .main`),
@@ -233,14 +250,15 @@
 							running_trt: document.querySelector(`.running_trt.p${num}`),
 							preview: document.querySelector(`.next_piece.p${num}`),
 							field: document.querySelector(`.board.p${num}`),
+							drought: document.querySelector(`.drought.p${num} .value`),
 
 							diff: document.querySelector(`.score.p${num} .diff`),
 							hearts: document.querySelector(`.name.p${num} .content`),
+
+							drought_box: document.querySelector(`.drought.p${num}`),
 						},
 						{
-							field_pixel_size: 3,
 							preview_pixel_size: 2,
-							running_trt_rtl: 0,
 							format_score: v => numberFormatter.format(v),
 						}
 					)
