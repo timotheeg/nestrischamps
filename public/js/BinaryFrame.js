@@ -41,6 +41,8 @@ const BinaryFrame = (function () {
 		...PIECES,
 	];
 
+	const POSSIBLE_RIGHT_PADDING = 50 /* field */ + 1; /* null terminator */
+
 	class BinaryFrame {
 		static encode(pojo) {
 			// TODO: validate pojo fields
@@ -137,14 +139,10 @@ const BinaryFrame = (function () {
 			return buffer;
 		}
 
-		static parse(buffer) {
+		static parse(buffer_or_uintarray) {
+			const f = BinaryFrame.getFrameFromBuffer(buffer_or_uintarray); // may throw
+
 			const pojo = {};
-
-			const f = new Uint8Array(buffer);
-
-			if (f[0] >> 5 != FORMAT_VERSION) {
-				throw new Error('Version not supported');
-			}
 
 			let bidx = 0;
 
@@ -177,21 +175,21 @@ const BinaryFrame = (function () {
 			pojo.cur_piece = f[bidx++] & 0b111;
 
 			// piece stats
-			pojo.T = buffer[bidx++];
-			pojo.J = buffer[bidx++];
-			pojo.Z = buffer[bidx++];
-			pojo.O = buffer[bidx++];
-			pojo.S = buffer[bidx++];
-			pojo.L = buffer[bidx++];
-			pojo.I = buffer[bidx++];
+			pojo.T = f[bidx++];
+			pojo.J = f[bidx++];
+			pojo.Z = f[bidx++];
+			pojo.O = f[bidx++];
+			pojo.S = f[bidx++];
+			pojo.L = f[bidx++];
+			pojo.I = f[bidx++];
 
 			pojo.field = Array(200);
 
-			for (let idx = 0; idx < 50; idx++) {
+			for (let idx = 0; idx < 50; idx++, bidx++) {
 				pojo.field[idx * 4 + 0] = (f[bidx] & 0b11000000) >> 6;
 				pojo.field[idx * 4 + 1] = (f[bidx] & 0b00110000) >> 4;
 				pojo.field[idx * 4 + 2] = (f[bidx] & 0b00001100) >> 2;
-				pojo.field[idx * 4 + 3] = (f[bidx++] & 0b00000011) >> 0;
+				pojo.field[idx * 4 + 3] = (f[bidx] & 0b00000011) >> 0;
 			}
 
 			// we've extracted all the value, now checks for nulls
@@ -223,23 +221,57 @@ const BinaryFrame = (function () {
 			return pojo;
 		}
 
-		static getCTime(buffer) {
+		static getCTime(frame_arr) {
+			return (
+				(frame_arr[3] << 20) |
+				(frame_arr[4] << 12) |
+				(frame_arr[5] << 4) |
+				((frame_arr[6] & 0xf0) >> 4)
+			);
+		}
+
+		static getFrameFromBuffer(buffer_or_uintarray) {
 			let f;
 
-			if (buffer instanceof Uint8Array) {
-				f = buffer;
+			if (buffer_or_uintarray instanceof Uint8Array) {
+				f = buffer_or_uintarray;
 			} else {
-				f = new Uint8Array(buffer);
+				f = new Uint8Array(buffer_or_uintarray);
 			}
 
-			let bidx = 3;
+			const version = f[0] >> 5; // 3 bits with mask 0b11100000
 
-			return (
-				(f[bidx++] << 20) |
-				(f[bidx++] << 12) |
-				(f[bidx++] << 4) |
-				((f[bidx] & 0xf0) >> 4)
-			);
+			if (version != FORMAT_VERSION) {
+				throw new Error('Invalid Frame: Version not supported');
+			}
+
+			const normal_size = FRAME_SIZE_BY_VERSION[version];
+
+			if (f.length === normal_size) {
+				return f;
+			}
+
+			if (f.length > normal_size) {
+				throw new Error('Invalid frame: too long');
+			}
+
+			// Minor transport optimization below
+			// The tail of the frame (field) may
+			// be omitted and will pad with zeros to compensate
+
+			if (f.length < normal_size - POSSIBLE_RIGHT_PADDING) {
+				throw new Error('Invalid frame: too short');
+			}
+
+			// frame is too short, but paddable
+			// 1. init as all zeros
+			const padded = new Uint8Array(normal_size);
+
+			// 2. (inefficient) copy the values from f
+			// Can't we do a fast low-level buffer copy? :'(
+			f.forEach((v, i) => (padded[i] = v));
+
+			return padded;
 		}
 	}
 

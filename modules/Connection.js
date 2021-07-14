@@ -4,6 +4,8 @@ const _ = require('lodash');
 const EventEmitter = require('events');
 const ULID = require('ulid');
 
+const BinaryFrame = require('../public/js/BinaryFrame');
+
 const KICK_DESTROY_DELAY = 1000; // allows UI to get message and know it should not attempt to reconnect
 const PING_INTERVAL = 15000;
 
@@ -97,14 +99,31 @@ class Connection extends EventEmitter {
 
 	_onMessage(message) {
 		if (message instanceof Uint8Array) {
-			this.emit('message', message);
+			// binary frames are always game frames
+			try {
+				message = BinaryFrame.getFrameFromBuffer(message); // throw if buffer is invalid
+			} catch (err) {
+				console.warn(`Unable to process binary frame: ${err.message}`);
+				return;
+			}
 		} else {
 			try {
-				this.emit('message', JSON.parse(message));
+				message = JSON.parse(message);
+				this.emit('message', message);
+			} catch (err) {
+				console.warn(
+					`Received non JSON message on connection ${this.id}: ${message
+						.toString()
+						.substr(1, 60)}`
+				);
+				return;
 			}
-			catch(err) {
-				console.warn(`Received non JSON message on connection ${this.id}: ${message.toString().substr(1, 60)}`);
-			}
+		}
+
+		try {
+			this.emit('message', message);
+		} catch (err) {
+			console.warn(`Error while processing msg: ${err.message}`);
 		}
 	}
 
