@@ -101,7 +101,7 @@ class Connection extends EventEmitter {
 		if (message instanceof Uint8Array) {
 			// binary frames are always game frames
 			try {
-				message = BinaryFrame.getFrameFromBuffer(message); // throw if buffer is invalid
+				message = BinaryFrame.getFrameFromBuffer(message); // throws if message is invalid
 			} catch (err) {
 				console.warn(`Unable to process binary frame: ${err.message}`);
 				return;
@@ -109,7 +109,6 @@ class Connection extends EventEmitter {
 		} else {
 			try {
 				message = JSON.parse(message);
-				this.emit('message', message);
 			} catch (err) {
 				console.warn(
 					`Received non JSON message on connection ${this.id}: ${message
