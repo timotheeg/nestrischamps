@@ -5,6 +5,19 @@ const CTMCompetitionPlayer = (function () {
 		projection_box: DOM_DEV_NULL,
 	};
 
+	// one time check of Query String args
+	let buffer_time = QueryString.get('buffer_time') || '';
+
+	if (/^\d+$/.test(buffer_time)) {
+		buffer_time = parseInt(buffer_time, 10);
+	} else {
+		buffer_time = 0;
+	}
+
+	const DEFAULT_OPTIONS = {
+		buffer_time,
+	};
+
 	class CTMCompetitionPlayer extends CompetitionPlayer {
 		constructor(dom, options) {
 			super(
@@ -12,7 +25,10 @@ const CTMCompetitionPlayer = (function () {
 					...DEFAULT_DOM_REFS,
 					...dom,
 				},
-				options
+				{
+					...DEFAULT_OPTIONS,
+					...options,
+				}
 			);
 
 			// hack to force elements to be invisible no matter what
