@@ -129,6 +129,7 @@ const Player = (function () {
 		tetris_sound: 1,
 		reliable_field: 1,
 		draw_field: 1,
+		buffer_time: 0,
 		format_score: (v, size) => {
 			if (!size) {
 				size = 7;
@@ -256,6 +257,7 @@ const Player = (function () {
 			};
 
 			this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
+			this._setFrame = this._setFrame.bind(this);
 
 			this.reset();
 
@@ -435,6 +437,20 @@ const Player = (function () {
 		}
 
 		setFrame(data) {
+			if (this.options.buffer_time) {
+				if (!this.frame_buffer) {
+					this.frame_buffer = new FrameBuffer(
+						this.options.buffer_time,
+						this._setFrame
+					);
+				}
+				this.frame_buffer.setFrame(data);
+			} else {
+				this._setFrame(data);
+			}
+		}
+
+		_setFrame(data) {
 			if (this.game_over && this.curtain_down && data.gameid == this.gameid) {
 				return;
 			}
