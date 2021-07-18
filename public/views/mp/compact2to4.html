@@ -3,6 +3,7 @@
 	<head>
 		<title>NestrisChamps Competition</title>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
 		<style>
 			#players {
 				position: absolute;
@@ -16,6 +17,9 @@
 			.box {
 				width: 47px;
 				padding: 10px;
+				left: 0;
+				font-size: 16px;
+				line-height: 20px;
 			}
 
 			.score {
@@ -23,14 +27,12 @@
 				height: 38px;
 			}
 
-			.score > div {
-				display: flex;
-				flex-direction: row;
-			}
-
-			.score .lines {
-				flex-grow: 1;
-				text-align: right;
+			.score .value,
+			.score .lines,
+			.score .tetris_diff {
+				padding-top: 0;
+				padding-bottom: 0;
+				line-height: 20px;
 			}
 
 			.score .tetris_diff {
@@ -38,35 +40,18 @@
 				text-align: right;
 			}
 
-			.score .value,
-			.score .diff {
-				white-space: pre;
-				text-align: left;
-			}
-
 			.board {
+				border-image-source: url('/views/border.png');
+				border-image-slice: 10 10 10 10 fill;
+				border-image-width: 10px 10px;
 				width: 237px;
-				height: 477px;
 				top: 56px;
 			}
 
 			.runway,
 			.projection {
 				width: 112px;
-				height: 74px;
 				left: 255px;
-			}
-
-			.runway .header,
-			.projection .header {
-				line-height: 12px;
-				font-size: 8px;
-				padding-bottom: 3px;
-			}
-
-			.runway .content,
-			.projection .content {
-				text-align: right;
 			}
 
 			.projection {
@@ -81,20 +66,9 @@
 				padding: 12px;
 			}
 
-			.name .content {
-				color: #b0afb0;
-				letter-spacing: 5px;
-				text-indent: 5px;
-			}
-
-			.hearts .win {
-				color: #fb0204;
-			}
-
 			.tetris_rate {
 				height: 66px;
 				top: 551px;
-
 				left: 255px;
 			}
 
@@ -113,18 +87,9 @@
 				top: 551px;
 			}
 
-			.board .level {
-				position: absolute;
-				z-index: 1;
-			}
-
 			.board .next_piece {
-				position: absolute;
-				width: 64px;
-				height: 32px;
 				right: 8px;
 				top: 10px;
-				z-index: 1;
 			}
 
 			.eff,
@@ -135,30 +100,8 @@
 				left: 255px;
 			}
 
-			.eff .header,
-			.drought .header {
-				padding-bottom: 2px;
-			}
-
 			.eff {
 				top: 489px;
-			}
-
-			.drought {
-				opacity: 0;
-				color: red;
-				display: none;
-			}
-
-			.drought.active {
-				display: block;
-				animation: fadeIn ease 1s;
-				animation-fill-mode: forwards;
-			}
-
-			.past_killscreen {
-				animation: darkens_n_hides 1s;
-				animation-fill-mode: forwards;
 			}
 		</style>
 	</head>
@@ -240,6 +183,7 @@
 		<script src="/views/bg.js"></script>
 		<script src="/js/connection.js"></script>
 		<script src="/views/CompetitionPlayer.js"></script>
+		<script src="/views/CTMCompetitionPlayer.js"></script>
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
 			const TEMPLATE_WIDTH = 1280;
@@ -272,7 +216,7 @@
 
 				players_node.appendChild(player_node);
 
-				const player = new CompetitionPlayer(
+				const player = new CTMCompetitionPlayer(
 					{
 						name: player_node.querySelector('.name .header'),
 						score: player_node.querySelector('.score .value'),
@@ -309,34 +253,6 @@
 						preview_align: 'tr',
 					}
 				);
-
-				// Add extra APIs
-				player.onDroughtStart = () => {
-					console.log('onDroughtStart', idx + 1);
-					player.dom.drought_box.classList.add('active');
-				};
-
-				player.onDroughtEnd = count => {
-					console.log('onDroughtEnd', idx + 1, count);
-					player.dom.drought_box.classList.remove('active');
-				};
-
-				player.onKillScreen = () => {
-					player.dom.runway_box.style.classList.add('past_killscreen');
-				};
-
-				player.onGameStart = () => {
-					console.log('onGameStart', idx + 1);
-					player.dom.drought_box.classList.remove('active');
-					player.dom.runway_box.style.classList.remove('past_killscreen');
-					player.dom.level.hidden = false;
-					player.dom.preview.hidden = false;
-				};
-
-				player.onGameOver = () => {
-					player.dom.level.hidden = true;
-					player.dom.preview.hidden = true;
-				};
 
 				players.push(player);
 
