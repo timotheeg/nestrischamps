@@ -420,6 +420,7 @@ class MatchRoom extends Room {
 					}
 
 					const updatePlayer = (player, pidx) => {
+						// TODO: this should also also set the player idx
 						this.sendToViews(['setId', pidx, player.id]);
 						this.sendToViews(['setLogin', pidx, player.login]);
 						this.sendToViews(['setDisplayName', pidx, player.display_name]);
@@ -457,6 +458,8 @@ class MatchRoom extends Room {
 					}
 
 					// finally send dummy data to clear last player
+					// warning: this clears the player data, but it doens't cler the player object itself :(
+					// TODO: implement an actual removePlayer() API in views
 					updatePlayer(getBasePlayerData(), this.state.players.length);
 
 					forward_to_views = false;
