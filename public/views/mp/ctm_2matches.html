@@ -298,8 +298,6 @@
 		</script>
 		<script src="/views/competition.js"></script>
 		<script>
-			const API = new TetrisCompetitionAPI();
-
 			let is_secondary = false;
 			let peer = null;
 
@@ -335,52 +333,6 @@
 				show_match.hidden = false;
 			};
 
-			API.frame = function (player_idx, data) {
-				const player = getPlayer(player_idx);
-
-				if (!player) return;
-
-				const old_score = player.getScore();
-				const old_runway = player.getGameRunwayScore();
-
-				player.setFrame(data);
-
-				const new_score = player.getScore();
-				const new_runway = player.getGameRunwayScore();
-
-				if (new_score === old_score && new_runway === old_runway) return;
-
-				const match_index = player_idx < 2 ? 0 : 1;
-				const match_players = players.slice(
-					2 * match_index,
-					2 * match_index + 2
-				);
-
-				// score change, we need to update all the diffs
-				[
-					{ getter: 'getScore', setter: 'setDiff' },
-					{ getter: 'getGameRunwayScore', setter: 'setGameRunwayDiff' },
-					{ getter: 'getProjection', setter: 'setProjectionDiff' },
-				].forEach(({ getter, setter }) => {
-					const sorted_players = getSortedPlayers(match_players, getter);
-
-					// handle score diff between player 0 and 1
-					const diff =
-						sorted_players[0][getter]() - sorted_players[1][getter]();
-
-					if (!isNaN(diff)) {
-						const t_diff = getTetrisDiff(
-							sorted_players[0],
-							sorted_players[1],
-							getter
-						);
-
-						sorted_players[0][setter](diff, t_diff, 0);
-						sorted_players[1][setter](diff, t_diff, 1);
-					}
-				});
-			};
-
 			API.setWinner = function (player_idx) {
 				const match_index = player_idx < 2 ? 0 : 1;
 
@@ -390,6 +342,18 @@
 
 				players[player_idx].playWinnerAnimation();
 			};
+
+			players.forEach((player, player_idx) => {
+				player.onScore = () => {
+					const match_index = player_idx < 2 ? 0 : 1;
+					const match_players = players.slice(
+						2 * match_index,
+						2 * match_index + 2
+					);
+
+					computeScoreDifferentials(match_players);
+				};
+			});
 
 			connection.onInit = () => {
 				if (is_secondary) return;
@@ -432,13 +396,14 @@
 					}
 				});
 			};
-
+		</script>
+		<!-- script>
 			function onFrame(frame, debug) {
 				API.frame(0, frame, debug);
 			}
 		</script>
 
-		<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
+		<script src="/views/sample_frames/sample_frames_16.js"></script>
 <script src="/views/debug.js"></script -->
 	</body>
 	<html></html>

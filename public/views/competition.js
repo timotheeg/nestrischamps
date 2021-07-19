@@ -168,59 +168,63 @@ class TetrisCompetitionAPI {
 
 		if (!player) return;
 
-		const old_score = player.getScore();
-		const old_runway = player.getGameRunwayScore();
-
 		player.setFrame(data);
-
-		const new_score = player.getScore();
-		const new_runway = player.getGameRunwayScore();
-
-		if (new_score === old_score && new_runway === old_runway) return;
-
-		const winner_slice_ratio = 1 / (players.length - 1);
-
-		// score change, we need to update all the diffs
-		[
-			{ getter: 'getScore', setter: 'setDiff' },
-			{ getter: 'getGameRunwayScore', setter: 'setGameRunwayDiff' },
-			{ getter: 'getProjection', setter: 'setProjectionDiff' },
-		].forEach(({ getter, setter }) => {
-			const sorted_players = getSortedPlayers(players, getter);
-
-			// handle score diff between player 0 and 1
-			const diff = sorted_players[0][getter]() - sorted_players[1][getter]();
-
-			if (!isNaN(diff)) {
-				const t_diff = getTetrisDiff(
-					sorted_players[0],
-					sorted_players[1],
-					getter
-				);
-
-				sorted_players[0][setter](diff, t_diff, 0);
-				sorted_players[1][setter](diff, t_diff, winner_slice_ratio);
-			}
-
-			for (let pidx = 2; pidx < sorted_players.length; pidx++) {
-				const leader = sorted_players[pidx - 1];
-				const laggard = sorted_players[pidx];
-
-				const diff = leader[getter]() - laggard[getter]();
-
-				if (isNaN(diff)) continue;
-
-				const t_diff = getTetrisDiff(leader, laggard, getter);
-
-				laggard[setter](diff, t_diff, pidx * winner_slice_ratio);
-			}
-		});
 	}
 
 	setSecondaryView() {
 		// TODO: the player video streams will end, should clear the view
 	}
 }
+
+function computeScoreDifferentials(_players) {
+	const winner_slice_ratio = 1 / (_players.length - 1);
+
+	// score change, we need to update all the diffs
+	[
+		{ getter: 'getScore', setter: 'setDiff' },
+		{ getter: 'getGameRunwayScore', setter: 'setGameRunwayDiff' },
+		{ getter: 'getProjection', setter: 'setProjectionDiff' },
+	].forEach(({ getter, setter }) => {
+		const sorted_players = getSortedPlayers(_players, getter);
+
+		// handle score diff between player 0 and 1
+		const diff = sorted_players[0][getter]() - sorted_players[1][getter]();
+
+		if (!isNaN(diff)) {
+			const t_diff = getTetrisDiff(
+				sorted_players[0],
+				sorted_players[1],
+				getter
+			);
+
+			sorted_players[0][setter](diff, t_diff, 0);
+			sorted_players[1][setter](diff, t_diff, winner_slice_ratio);
+		}
+
+		for (let pidx = 2; pidx < sorted_players.length; pidx++) {
+			const leader = sorted_players[pidx - 1];
+			const laggard = sorted_players[pidx];
+
+			const diff = leader[getter]() - laggard[getter]();
+
+			if (isNaN(diff)) continue;
+
+			const t_diff = getTetrisDiff(leader, laggard, getter);
+
+			laggard[setter](diff, t_diff, pidx * winner_slice_ratio);
+		}
+	});
+}
+
+function onPlayerScoreChanged() {
+	computeScoreDifferentials(players);
+}
+
+players.forEach(player => {
+	player.onScore = onPlayerScoreChanged;
+});
+
+const API = new TetrisCompetitionAPI();
 
 let connection;
 
@@ -234,6 +238,8 @@ connection.onMessage = function (frame) {
 	try {
 		const [method, ...args] = frame;
 
+		// urgh, API is instantiated outside of this file -_-
+		// encapsulation totally broken T_T
 		API[method](...args);
 	} catch (e) {
 		// socket.close();

@@ -9,7 +9,7 @@ const FrameBuffer = (function () {
 
 			this.frame_to = null;
 
-			this.sendFrame = this.sendFrame.bind(this);
+			this._sendFrame = this._sendFrame.bind(this);
 		}
 
 		setFrame(frame) {
@@ -21,19 +21,19 @@ const FrameBuffer = (function () {
 			this.buffer.push(frame);
 
 			if (this.buffer.length == 1) {
-				this.reset();
+				this._reset();
 			}
 		}
 
-		reset() {
+		_reset() {
 			if (this.buffer.length <= 0) return;
 
 			this.client_time_base = 0;
 			this.local_time_base = 0;
-			this.frame_to = setTimeout(this.sendFrame, this.duration_ms);
+			this.frame_to = setTimeout(this._sendFrame, this.duration_ms);
 		}
 
-		sendFrame() {
+		_sendFrame() {
 			if (this.buffer.length <= 0) return;
 
 			const data = this.buffer.shift();
@@ -54,7 +54,7 @@ const FrameBuffer = (function () {
 				const elapsed = next_frame_ctime - this.client_time_base;
 
 				this.frame_to = setTimeout(
-					this.sendFrame,
+					this._sendFrame,
 					this.local_time_base + elapsed - now
 				);
 			}

@@ -179,6 +179,7 @@
 		<script src="/views/gradient.js"></script>
 		<script src="/views/utils.js"></script>
 		<script src="/views/renderBlock.js"></script>
+		<script src="/views/FrameBuffer.js"></script>
 		<script src="/views/Player.js"></script>
 		<script src="/views/bg.js"></script>
 		<script src="/js/connection.js"></script>
@@ -266,12 +267,5 @@
 			}
 		</script>
 		<script src="/views/competition.js"></script>
-		<script>
-			const API = new TetrisCompetitionAPI();
-
-			function onFrame(frame, debug) {
-				API.frame(0, frame, debug);
-			}
-		</script>
 	</body>
 </html>

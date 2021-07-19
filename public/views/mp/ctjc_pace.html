@@ -371,164 +371,91 @@
 		</script>
 		<script src="/views/competition.js"></script>
 		<script>
-			const captured_frames = [];
+			API.setLogo = function (url) {
+				document.querySelector(`#logo`).style.backgroundImage = `url(${url})`;
+			};
 
-			const DEBUG_FRAME_STATS = false;
+			function computeScoreDifferentials() {
+				const score_p1 = players[0].getScore(),
+					score_p2 = players[1].getScore();
 
-			const frame_stats_dom = document.querySelector('#frame_stats');
-			const FRAME_STATS_SAMPLES = 60;
-			const frame_stats = [];
-			let frame_start;
-			let total_elapsed = 0;
-
-			function startFrame() {
-				frame_start = Date.now();
-			}
-
-			function endFrame() {
-				if (!DEBUG_FRAME_STATS) return;
-
-				const now = Date.now();
-				const elapsed = now - frame_start;
-
-				frame_stats.push([frame_start, elapsed]);
-				total_elapsed += elapsed;
-
-				if (frame_stats.length > FRAME_STATS_SAMPLES) {
-					total_elapsed -= frame_stats.shift()[1];
+				if (isNaN(score_p1) || isNaN(score_p2)) {
+					return;
 				}
 
-				// compute frame rate and average processing time
-				const avg_elapsed = total_elapsed / frame_stats.length;
-				const incoming_rate = (now - frame_stats[0][0]) / frame_stats.length;
+				// do score diff first
+				let diff = score_p1 - score_p2,
+					diff_elem = document.querySelector(`.score .diff`),
+					tdiff_elem = document.querySelector(`.score .tetris_diff`);
 
-				frame_stats_dom.innerText =
-					`instant: ${elapsed}\n` +
-					`last ${frame_stats.length} avg: ${avg_elapsed.toFixed(1)}\n` +
-					`ingestion rate: ${incoming_rate.toFixed(1)}`;
-			}
+				if (diff === 0) {
+					diff_elem.textContent = '<0>';
+					tdiff_elem.textContent = '<0T>';
+				} else {
+					const player1_leading = diff > 0;
+					const abs_diff = Math.abs(diff);
+					const fmt = numberFormatter.format(abs_diff);
 
-			class TetrisCompetitionAPI_CTJS extends TetrisCompetitionAPI {
-				setLogo(url) {
-					document.querySelector(`#logo`).style.backgroundImage = `url(${url})`;
-				}
+					let tdiff;
 
-				frame(player_idx, data, debug) {
-					// captured_frames.push(data);
-
-					startFrame();
-
-					const player = players[player_idx];
-
-					if (!player) return;
-
-					const old_score = player.getScore();
-					const old_runway = player.getGameRunwayScore();
-
-					if (debug) {
-						debugger;
-					}
-
-					player.setFrame(data);
-
-					const new_score = player.getScore();
-					const new_runway = player.getGameRunwayScore();
-
-					if (new_score === old_score && old_runway === new_runway) return;
-
-					const score_p1 = players[0].getScore(),
-						score_p2 = players[1].getScore();
-
-					if (isNaN(score_p1) || isNaN(score_p2)) {
-						return;
-					}
-
-					// do score diff first
-
-					let diff = score_p1 - score_p2,
-						diff_elem = document.querySelector(`.score .diff`),
-						tdiff_elem = document.querySelector(`.score .tetris_diff`);
-
-					if (diff === 0) {
-						diff_elem.textContent = '<0>';
-						tdiff_elem.textContent = '<0T>';
+					if (player1_leading) {
+						tdiff = getTetrisDiff(players[0], players[1]);
 					} else {
-						const player1_leading = diff > 0;
-						const abs_diff = Math.abs(diff);
-						const fmt = numberFormatter.format(abs_diff);
-
-						let tdiff;
-
-						if (player1_leading) {
-							tdiff = getTetrisDiff(players[0], players[1]);
-						} else {
-							tdiff = getTetrisDiff(players[1], players[0]);
-						}
-
-						const tfmt = tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1);
-
-						if (player1_leading) {
-							diff_elem.textContent = `<${fmt}`;
-							tdiff_elem.textContent = `<${tfmt}T`;
-						} else {
-							diff_elem.textContent = `${fmt}>`;
-							tdiff_elem.textContent = `${tfmt}T>`;
-						}
+						tdiff = getTetrisDiff(players[1], players[0]);
 					}
 
-					// then do runway diff
-					diff =
-						players[0].getGameRunwayScore() - players[1].getGameRunwayScore();
-					diff_elem = document.querySelector(`.runway .diff`);
-					tdiff_elem = document.querySelector(`.runway .tetris_diff`);
+					const tfmt = tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1);
 
-					if (diff === 0) {
-						diff_elem.textContent = '<0>';
-						tdiff_elem.textContent = '<0T>';
+					if (player1_leading) {
+						diff_elem.textContent = `<${fmt}`;
+						tdiff_elem.textContent = `<${tfmt}T`;
 					} else {
-						const player1_leading = diff > 0;
-						const abs_diff = Math.abs(diff);
-						const fmt = player.options.format_score(abs_diff);
+						diff_elem.textContent = `${fmt}>`;
+						tdiff_elem.textContent = `${tfmt}T>`;
+					}
+				}
 
-						let tdiff;
+				// then do runway diff
+				diff =
+					players[0].getGameRunwayScore() - players[1].getGameRunwayScore();
+				diff_elem = document.querySelector(`.runway .diff`);
+				tdiff_elem = document.querySelector(`.runway .tetris_diff`);
 
-						if (player1_leading) {
-							tdiff = getTetrisDiff(
-								players[0],
-								players[1],
-								'getGameRunwayScore'
-							);
-						} else {
-							tdiff = getTetrisDiff(
-								players[1],
-								players[0],
-								'getGameRunwayScore'
-							);
-						}
+				if (diff === 0) {
+					diff_elem.textContent = '<0>';
+					tdiff_elem.textContent = '<0T>';
+				} else {
+					const player1_leading = diff > 0;
+					const abs_diff = Math.abs(diff);
+					const fmt = player.options.format_score(abs_diff);
 
-						const tfmt = player.options.format_tetris_diff(tdiff);
+					let tdiff;
 
-						if (player1_leading) {
-							diff_elem.textContent = `<${fmt}`;
-							tdiff_elem.textContent = `<${tfmt}T`;
-						} else {
-							diff_elem.textContent = `${fmt}>`;
-							tdiff_elem.textContent = `${tfmt}T>`;
-						}
+					if (player1_leading) {
+						tdiff = getTetrisDiff(players[0], players[1], 'getGameRunwayScore');
+					} else {
+						tdiff = getTetrisDiff(players[1], players[0], 'getGameRunwayScore');
 					}
 
-					endFrame();
+					const tfmt = player.options.format_tetris_diff(tdiff);
+
+					if (player1_leading) {
+						diff_elem.textContent = `<${fmt}`;
+						tdiff_elem.textContent = `<${tfmt}T`;
+					} else {
+						diff_elem.textContent = `${fmt}>`;
+						tdiff_elem.textContent = `${tfmt}T>`;
+					}
 				}
 			}
-
-			const API = new TetrisCompetitionAPI_CTJS();
-
+		</script>
+		<!-- script>
 			function onFrame(frame, debug) {
-				API.frame(1, frame, debug);
+				API.frame(0, frame, debug);
 			}
 		</script>
 
-		<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
+		<script src="/views/sample_frames/sample_frames_16.js"></script>
 <script src="/views/debug.js"></script -->
 	</body>
 	<html></html>

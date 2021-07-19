@@ -257,7 +257,7 @@ const Player = (function () {
 			};
 
 			this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
-			this._setFrame = this._setFrame.bind(this);
+			this._setFrameOuter = this._setFrameOuter.bind(this);
 
 			this.reset();
 
@@ -265,6 +265,7 @@ const Player = (function () {
 			this.curtain_down = true;
 		}
 
+		onScore() {}
 		onPiece() {}
 		onLines() {}
 		onLevel() {}
@@ -441,16 +442,30 @@ const Player = (function () {
 				if (!this.frame_buffer) {
 					this.frame_buffer = new FrameBuffer(
 						this.options.buffer_time,
-						this._setFrame
+						this._setFrameOuter
 					);
 				}
 				this.frame_buffer.setFrame(data);
 			} else {
-				this._setFrame(data);
+				this._setFrameOuter(data);
 			}
 		}
 
-		_setFrame(data) {
+		_setFrameOuter(data) {
+			const old_score = this.getScore();
+			const old_runway = this.getGameRunwayScore();
+
+			this._setFrameInner(data);
+
+			const new_score = this.getScore();
+			const new_runway = this.getGameRunwayScore();
+
+			if (new_score === old_score && new_runway === old_runway) return;
+
+			this.onScore();
+		}
+
+		_setFrameInner(data) {
 			if (this.game_over && this.curtain_down && data.gameid == this.gameid) {
 				return;
 			}

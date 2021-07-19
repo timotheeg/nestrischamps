@@ -233,8 +233,6 @@
 		</script>
 		<script src="/views/competition.js"></script>
 		<script>
-			const API = new TetrisCompetitionAPI();
-
 			let is_secondary = false;
 			let peer = null;
 
@@ -287,13 +285,14 @@
 					}
 				});
 			};
-
+		</script>
+		<!-- script>
 			function onFrame(frame, debug) {
 				API.frame(0, frame, debug);
 			}
 		</script>
 
-		<!-- script src="/views/sample_frames/sample_frames_16.js"></script>
+		<script src="/views/sample_frames/sample_frames_16.js"></script>
 <script src="/views/debug.js"></script -->
 	</body>
 	<html></html>
