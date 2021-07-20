@@ -5,18 +5,7 @@ const CTMCompetitionPlayer = (function () {
 		projection_box: DOM_DEV_NULL,
 	};
 
-	// one time check of Query String args
-	let buffer_time = QueryString.get('buffer_time') || '';
-
-	if (/^\d+$/.test(buffer_time)) {
-		buffer_time = parseInt(buffer_time, 10);
-	} else {
-		buffer_time = 0;
-	}
-
-	const DEFAULT_OPTIONS = {
-		buffer_time,
-	};
+	const DEFAULT_OPTIONS = {};
 
 	class CTMCompetitionPlayer extends CompetitionPlayer {
 		constructor(dom, options) {

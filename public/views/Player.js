@@ -101,6 +101,17 @@ const Player = (function () {
 	}
 */
 
+	// One time check of Query String args
+	// Bit dirty to have Player.js access query String
+	// But that's the most covenient way to share the functionality
+	let buffer_time = QueryString.get('buffer_time') || '';
+
+	if (/^\d+$/.test(buffer_time)) {
+		buffer_time = parseInt(buffer_time, 10);
+	} else {
+		buffer_time = 0;
+	}
+
 	const DEFAULT_DOM_REFS = {
 		score: DOM_DEV_NULL,
 		runway_tr: DOM_DEV_NULL,
@@ -129,7 +140,7 @@ const Player = (function () {
 		tetris_sound: 1,
 		reliable_field: 1,
 		draw_field: 1,
-		buffer_time: 0,
+		buffer_time,
 		format_score: (v, size) => {
 			if (!size) {
 				size = 7;
