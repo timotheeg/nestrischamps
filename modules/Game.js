@@ -246,7 +246,7 @@ class Game {
 
 		const report = this.getReport();
 
-		if (report.score == null) {
+		if (!report || report.score == null) {
 			console.log('Block reporting of null score');
 			return;
 		}
@@ -357,6 +357,8 @@ class Game {
 	}
 
 	getReport() {
+		if (!this.data) return null;
+
 		let tetris_rate = null;
 		let das_avg = -1;
 
