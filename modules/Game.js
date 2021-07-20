@@ -81,7 +81,7 @@ class Game {
 	setFrame(frame) {
 		const data = BinaryFrame.parse(frame);
 
-		if (this.score === null || this.lines === null || this.level === null) {
+		if (data.score === null || data.lines === null || data.level === null) {
 			// not in game
 			return;
 		}
