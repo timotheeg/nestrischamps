@@ -96,43 +96,100 @@ module.exports = function init(server, wss) {
 			wss.handleUpgrade(request, socket, head, function (ws) {
 				wss.emit('connection', ws, request);
 			});
-		} else {
-			// all other connections must be within a session!
-			// i.e. producers and admin connections
 
-			middlewares.sessionMiddleware(request, {}, async () => {
-				if (!request.session || !request.session.user) {
-					console.log(`WS: User session not found`);
-					socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+			return;
+		}
+
+		m = request.nc_url.pathname.match(
+			/^\/ws\/room\/(u\/([a-z0-9_-]+)\/)?producer\/([a-zA-Z0-9-]+)/
+		);
+
+		request.is_secret_producer = !!m;
+
+		if (request.is_secret_producer) {
+			if (!request.tetris) {
+				request.tetris = {};
+			}
+
+			request.tetris.producer = {
+				target_user_login: m[2],
+				connecting_user_secret: m[3],
+			};
+
+			const connecting_user = await UserDAO.getUserBySecret(
+				request.tetris.producer.connecting_user_secret
+			);
+
+			if (!connecting_user) {
+				socket.write('HTTP/1.1 404 Connecting User Not Found\r\n\r\n');
+				socket.destroy();
+				return;
+			}
+
+			if (request.tetris.producer.target_user_login) {
+				const target_user = await UserDAO.getUserByLogin(
+					request.tetris.producer.target_user_login
+				);
+
+				if (!target_user) {
+					socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
 					socket.destroy();
 					return;
 				}
+			}
 
-				let m;
+			if (!request.session) {
+				request.session = {};
+			}
 
-				if (
-					(m = request.nc_url.pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))
-				) {
-					const target_user = await UserDAO.getUserByLogin(m[1]);
+			request.session.user = {
+				id: connecting_user.id,
+				login: connecting_user.login,
+				secret: connecting_user.secret,
+			};
 
-					if (!target_user) {
-						console.log(`WS: Target User Not Found`);
-						socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
-						socket.destroy();
-						return;
-					}
-				}
-
-				console.log(
-					`WS: Retrieved user ${request.session.user.login} from session`
-				);
-
-				wss.handleUpgrade(request, socket, head, function (ws) {
-					console.log('WS: handleUpgrade complete');
-					wss.emit('connection', ws, request);
-				});
+			wss.handleUpgrade(request, socket, head, function (ws) {
+				wss.emit('connection', ws, request);
 			});
+
+			return;
 		}
+
+		// all other connections must be within a session!
+		// i.e. producers and admin connections
+
+		middlewares.sessionMiddleware(request, {}, async () => {
+			if (!request.session || !request.session.user) {
+				console.log(`WS: User session not found`);
+				socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+				socket.destroy();
+				return;
+			}
+
+			let m;
+
+			if (
+				(m = request.nc_url.pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))
+			) {
+				const target_user = await UserDAO.getUserByLogin(m[1]);
+
+				if (!target_user) {
+					console.log(`WS: Target User Not Found`);
+					socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
+					socket.destroy();
+					return;
+				}
+			}
+
+			console.log(
+				`WS: Retrieved user ${request.session.user.login} from session`
+			);
+
+			wss.handleUpgrade(request, socket, head, function (ws) {
+				console.log('WS: handleUpgrade complete');
+				wss.emit('connection', ws, request);
+			});
+		});
 	});
 
 	wss.on('connection', async (ws, request) => {
@@ -177,6 +234,19 @@ module.exports = function init(server, wss) {
 				? user.getPrivateRoom()
 				: user.getHostRoom();
 			room.addView(connection);
+		} else if (request.is_secret_producer) {
+			console.log(`Secret Producer for ${user.login}`);
+			if (request.tetris.producer.target_user_login) {
+				const target_user = await UserDAO.getUserByLogin(
+					request.tetris.producer.target_user_login
+				);
+				user.setProducerConnection(connection, {
+					match: true,
+					target_user,
+				});
+			} else {
+				user.setProducerConnection(connection, { match: false });
+			}
 		} else if (pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getHostRoom().setAdmin(connection);
