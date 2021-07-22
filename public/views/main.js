@@ -31,9 +31,17 @@ const API = {
 	frame: (idx, frame) => onFrame(frame),
 };
 
-const chat_and_pbs_conn = new Connection();
+/* check query string to see if video is active */
 
-chat_and_pbs_conn.onMessage = function (frame) {
+let connection;
+
+try {
+	connection = new Connection(null, view_meta); // sort of gross T_T
+} catch (_err) {
+	connection = new Connection();
+}
+
+connection.onMessage = function (frame) {
 	try {
 		let [method, ...args] = frame;
 
@@ -42,6 +50,47 @@ chat_and_pbs_conn.onMessage = function (frame) {
 		console.error(e);
 	}
 };
+
+if (QueryString.get('video') === '1') {
+	const holder = document.querySelector('#video');
+	const video = document.createElement('video');
+
+	holder.innerHTML = '';
+	holder.appendChild(video);
+
+	let peer;
+
+	connection.onInit = () => {
+		if (peer) {
+			peer.destroy();
+			peer = null;
+		}
+
+		peer = new Peer(connection.id);
+
+		peer.on('call', call => {
+			call.answer(); // assume correct!
+			call.on('stream', remoteStream => {
+				video.srcObject = remoteStream;
+				video.addEventListener(
+					'loadedmetadata',
+					() => {
+						video.play();
+					},
+					{ once: true }
+				);
+			});
+			call.on('error', () => {
+				video.stop();
+				video.srcObject = null;
+			});
+			call.on('close', () => {
+				video.stop();
+				video.srcObject = null;
+			});
+		});
+	};
+}
 
 // get High Scores
 getStats();
