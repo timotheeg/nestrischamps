@@ -147,6 +147,12 @@
 				reliable_field: 0,
 			});
 
+			player.onGameStart = () => {
+				document.querySelector('dd.clears').textContent = '';
+				document.querySelector('dd.pieces').textContent = '';
+				player_fields.next.textContent = '';
+			};
+
 			player.onLines = cleared => {
 				document.querySelector('dd.clears').textContent = player.clear_events
 					.map(ev => ev.cleared)
