@@ -3,6 +3,8 @@
 		return;
 	}
 
+	const parent = document.querySelector('#stream_bg');
+
 	if (QueryString.get('bg') === '2' || QueryString.get('bg') === '3') {
 		const img_width = 218;
 		const bg_file =
@@ -30,14 +32,16 @@
 			bg.style.backgroundPositionX = `${pos}px`;
 		}, 1000 / 30);
 
-		document.querySelector('#stream_bg').prepend(bg);
+		parent.prepend(bg);
 
 		return;
 	}
 
 	// bg=1 (default pieces)
-	const width = 1280;
-	const height = 720;
+	const bounds = parent.getBoundingClientRect();
+
+	const width = bounds.width;
+	const height = bounds.height;
 
 	const border = 100;
 
@@ -85,8 +89,6 @@
 			bg.appendChild(img);
 		}
 	}
-
-	const parent = document.querySelector('#stream_bg');
 
 	parent.style.backgroundColor = 'black';
 

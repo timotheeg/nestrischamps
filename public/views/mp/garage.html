@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#stream_bg {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 1334px;
+				height: 750px;
+				overflow: hidden;
+				/*
+				border-bottom: 1px solid black;
+				border-right: 1px solid black;
+				/**/
+			}
+
+			#playing_fields {
+				position: absolute;
+				left: 667px;
+				top: 4px;
+			}
+
+			.score {
+				width: 237px;
+				height: 97px;
+
+				--offset: 15px;
+				right: var(--offset);
+			}
+
+			.aligner {
+				display: inline-block;
+				font-size: 24px;
+				padding-bottom: 6px;
+			}
+			.aligner div {
+				text-align: right;
+				padding-top: 6px;
+			}
+
+			.next_piece {
+				width: 108px;
+				top: 119px;
+
+				--offset: 15px;
+				right: var(--offset);
+			}
+
+			.lines {
+				top: 119px;
+				width: 107px;
+
+				--offset: 145px;
+				right: var(--offset);
+			}
+
+			.board {
+				width: 237px;
+				height: 477px;
+				top: 181px;
+
+				--offset: 15px;
+				right: var(--offset);
+			}
+
+			.name {
+				width: 237px;
+				height: 39px;
+				top: 680px;
+
+				--offset: 15px;
+				right: var(--offset);
+			}
+
+			.name .content {
+				color: #b0afb0;
+				letter-spacing: 5px;
+				text-indent: 5px;
+			}
+
+			.name .content .win {
+				color: #fb0204;
+			}
+
+			.tetris_rate,
+			.drought {
+				width: 50px;
+				top: 551px;
+
+				--offset: 274px;
+				right: var(--offset);
+			}
+
+			.level {
+				top: 489px;
+				width: 40px;
+
+				--offset: 274px;
+				right: var(--offset);
+			}
+
+			.drought {
+				color: red;
+				display: none;
+			}
+
+			.drought.active {
+				display: block;
+			}
+
+			.runway {
+				width: 237px;
+				height: 97px;
+
+				top: 613px;
+				--offset: 274px;
+				right: var(--offset);
+			}
+
+			.runway .header {
+				line-height: 20px;
+			}
+
+			.p2 {
+				left: var(--offset);
+			}
+
+			.lines.p2 {
+				left: 15px;
+			}
+			.next_piece.p2 {
+				left: 144px;
+			}
+
+			.player_vid {
+				position: absolute;
+				top: 2px;
+				width: 399px;
+				height: 739px;
+				padding: 0;
+				object-fit: cover;
+
+				--offset: 268px;
+				right: var(--offset);
+			}
+
+			.divider {
+				position: absolute;
+				left: -15px;
+				width: 30px;
+				height: 743px;
+				background-color: #000;
+				color: #f8e889;
+				font-size: 16px;
+
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="playing_fields">
+				<!-- divider -->
+
+				<div class="divider">vs</div>
+
+				<!-- Player 1 -->
+				<video class="player_vid p1"></video>
+
+				<div class="box score p1">
+					<div class="header">SCORE</div>
+					<div class="aligner">
+						<div class="main">0,000,000</div>
+						<div class="diff winning">0,000,000</div>
+					</div>
+					<div><span class="tetris_diff">0.00</span> TETRISES</div>
+				</div>
+
+				<div class="box lines p1">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box next_piece p1"></div>
+
+				<div class="box level p1">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box tetris_rate p1">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box name p1">
+					<div class="header">PLAYER 1</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box board p1"></div>
+
+				<div class="box drought p1">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box runway p1">
+					<div class="header">RUNWAY</div>
+					<div class="aligner">
+						<div class="value">0,000,000</div>
+						<div class="diff">0,000,000</div>
+					</div>
+					<div><span class="tetris_diff">0.00</span> TETRISES</div>
+				</div>
+
+				<!-- Player 2 -->
+				<video class="player_vid p2"></video>
+
+				<div class="box score p2">
+					<div class="header">SCORE</div>
+					<div class="aligner">
+						<div class="main">0,000,000</div>
+						<div class="diff winning">0,000,000</div>
+					</div>
+					<div><span class="tetris_diff">0.00</span> TETRISES</div>
+				</div>
+
+				<div class="box lines p2">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box next_piece p2"></div>
+
+				<div class="box level p2">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box tetris_rate p2">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box name p2">
+					<div class="header">PLAYER 2</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box board p2"></div>
+
+				<div class="box drought p2">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box runway p2">
+					<div class="header">RUNWAY</div>
+					<div class="aligner">
+						<div class="value">0,000.000</div>
+						<div class="diff">0,000,000</div>
+					</div>
+					<div><span class="tetris_diff">0.00</span> TETRISES</div>
+				</div>
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '1280x720', // urgh, so big for so much space wasted :(
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+		<script src="/js/QueryString.js"></script>
+		<script src="/views/color.js"></script>
+		<script src="/views/gradient.js"></script>
+		<script src="/views/constants.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/bg.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/renderBlock.js"></script>
+		<script src="/views/FrameBuffer.js"></script>
+		<script src="/views/Player.js"></script>
+		<script src="/js/connection.js"></script>
+		<script src="/views/CompetitionPlayer.js"></script>
+		<script src="/views/CTMCompetitionPlayer.js"></script>
+		<script src="/js/BinaryFrame.js"></script>
+		<script>
+			const numberFormatter = new Intl.NumberFormat();
+			const players = [1, 2].map(num => {
+				const player = new CTMCompetitionPlayer(
+					{
+						name: document.querySelector(`.name.p${num} .header`),
+						score: document.querySelector(`.score.p${num} .main`),
+						level: document.querySelector(`.level.p${num} .content`),
+						lines: document.querySelector(`.lines.p${num} .content`),
+						trt: document.querySelector(`.tetris_rate.p${num} .content`),
+						preview: document.querySelector(`.next_piece.p${num}`),
+						field: document.querySelector(`.board.p${num}`),
+						drought: document.querySelector(`.drought.p${num} .value`),
+
+						diff: document.querySelector(`.score.p${num} .diff`),
+						t_diff: document.querySelector(`.score.p${num} .tetris_diff`),
+
+						runway_game: document.querySelector(`.runway.p${num} .value`),
+						runway_diff: document.querySelector(`.runway.p${num} .diff`),
+						runway_t_diff: document.querySelector(
+							`.runway.p${num} .tetris_diff`
+						),
+
+						hearts: document.querySelector(`.name.p${num} .content`),
+						drought_box: document.querySelector(`.drought.p${num}`),
+						runway_box: document.querySelector(`.runway.p${num}`),
+					},
+					{
+						preview_pixel_size: 2,
+						format_score: v => numberFormatter.format(v),
+					}
+				);
+
+				// Undo the CTM logic of hiding the level and preview
+				delete player.onGameOver;
+
+				return player;
+			});
+		</script>
+		<script src="/views/competition.js"></script>
+		<script>
+			if (QueryString.get('video') === '1') {
+				let is_secondary = false;
+				let peer = null;
+
+				API.setSecondary = function () {
+					if (peer) {
+						peer.destroy();
+						peer = null;
+					}
+
+					is_secondary = true;
+				};
+
+				connection.onInit = () => {
+					if (is_secondary) return;
+
+					if (peer) {
+						peer.destroy();
+						peer = null;
+					}
+
+					peer = new Peer(connection.id);
+
+					peer.on('call', call => {
+						if (is_secondary) return;
+
+						console.log(`Received media call from ${call.peer}`);
+
+						const player_idx = getPlayerIndexByPeerId(call.peer);
+
+						if (player_idx > -1) {
+							// at least one match
+
+							call.answer();
+
+							call.on('stream', remoteStream => {
+								players.forEach((player, player_idx) => {
+									console.log(player_idx, player.peerid, call.peer);
+
+									if (player.peerid != call.peer) return;
+
+									const player_num = player_idx + 1;
+									const video = document.querySelector(`video.p${player_num}`);
+
+									video.srcObject = remoteStream;
+									video.addEventListener(
+										'loadedmetadata',
+										() => {
+											video.play();
+										},
+										{ once: true }
+									);
+								});
+							});
+						}
+					});
+				};
+			}
+		</script>
+		<!-- script>
+			function onFrame(frame, debug) {
+				API.frame(0, frame, debug);
+			}
+		</script>
+		<script src="/views/sample_frames/sample_frames_16.js"></script>
+		<script src="/views/debug.js"></script -->
+	</body>
+	<html></html>
+</html>

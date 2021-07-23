@@ -241,6 +241,8 @@
 					peer.destroy();
 					peer = null;
 				}
+
+				is_secondary = true;
 			};
 
 			connection.onInit = () => {
@@ -254,6 +256,8 @@
 				peer = new Peer(connection.id);
 
 				peer.on('call', call => {
+					if (is_secondary) return;
+
 					console.log(`Received media call from ${call.peer}`);
 
 					const player_idx = getPlayerIndexByPeerId(call.peer);
@@ -291,9 +295,8 @@
 				API.frame(0, frame, debug);
 			}
 		</script>
-
 		<script src="/views/sample_frames/sample_frames_16.js"></script>
-<script src="/views/debug.js"></script -->
+		<script src="/views/debug.js"></script -->
 	</body>
 	<html></html>
 </html>
