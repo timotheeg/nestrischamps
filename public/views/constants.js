@@ -94,6 +94,7 @@ const DOM_DEV_NULL = document.createElement('div'),
 		TRANSITION: 1,
 	},
 	RUNWAYS = _getRunways();
+
 DAS_THRESHOLDS[-1] = 'absent';
 
 function _getRunways() {
