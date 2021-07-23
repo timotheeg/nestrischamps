@@ -202,6 +202,14 @@ So far "native" webcam support (e.g. built-in [webRTC](https://webrtc.org/)) is 
 
 Native webcam sharing can also be activated in the layouts `classic` and `das_trainer` with the query string argument `?video=1`.
 
+### Enable Twitch Chat Text To Speech
+
+In the producer window, if you add the query string `?tts=1` you can enable Twitch Chat TTS.
+
+Chatter get assigned a random voice out of the available ones, with no repeats until all voices are exhausted, and then repeat may happen.
+
+Note that you can specify which language you want the voices to be in by adding an additional query string parameter `lang=X`, where `X` is a ISO 2-letter language code, e.g. `lang=en`. Defaults to `en` if not supplied.
+
 
 ## Contribute
 
