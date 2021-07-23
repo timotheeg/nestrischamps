@@ -184,6 +184,24 @@ Capture devices are presumed to produce interlaced output, which can create inco
 
 It is possible to disable the half-height behaviour by adding the following query string argument in the producer page `?disable_half_height=1`.
 
+### Enable Frame Buffering
+
+By default, nestrischamps broadcasts frames immediately and renders them as soon as they are received. If network is good and latency is more or less consistent, rendering will look good while being the most real time possible. If latency is not consistent however, this can create a stuttering rendering effect, which may look very good.
+
+It is possible to enable frame buffering in many of the renderers by adding a query string argument `?buffer_time=X` , where X is the number in milliseconds of buffering one wishes to have. For a simple try out, use `?buffer_time=1000`.
+
+When Frame buffering is active, frames are not rendered as soon as they are received. Instead, there is an initial delay to accumulate frames (in the example above, a 1s delay), and frames are then replayed with the timing interval they were captured at.
+
+Note that, when you share your webcam feed at the same, it means your reaction on webcam will preceed the frames themselves. That may look slightly odd, but it is not a usualy a deal breaker.
+
+The [Emulator Connector](https://github.com/Stabyourself/nestrischamps-emulator-connector) sometimes causes frames to be clumped together making for very bad looking rendering, a 1s buffer smoothes out the display.
+
+### Enable Native webcam capture
+
+So far "native" webcam support (e.g. built-in [webRTC](https://webrtc.org/)) is only built into some of the layouts, so by choosing the layouts, you chose whether there'll be webcam support or not. At the moment, the layouts which support webcam natively are `ctm_video`, `ctm_video2`, `ctm_2matches`, `stencil_ctwc_sing_21`.
+
+Native webcam sharing can also be activated in the layouts `classic` and `das_trainer` with the query string argument `?video=1`.
+
 
 ## Contribute
 
