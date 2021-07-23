@@ -95,6 +95,7 @@ const reference_ui = document.querySelector('#reference_ui'),
 	controls = document.querySelector('#controls'),
 	capture_rate = document.querySelector('#capture_rate'),
 	show_parts = document.querySelector('#show_parts'),
+	focus_alarm = document.querySelector('#focus_alarm'),
 	timer_control = document.querySelector('#timer_control'),
 	start_timer = document.querySelector('#start_timer'),
 	conn_host = document.querySelector('#conn_host'),
@@ -107,6 +108,10 @@ const reference_ui = document.querySelector('#reference_ui'),
 	adjustments = document.querySelector('#adjustments');
 const IN_GAME = {};
 const IN_MENU = {};
+
+const UNFOCUSED_ALARM_SND = new Audio('/ocr/alarm.mp3');
+const UNFOCUSED_SILENCE_SND = new Audio('/ocr/silence.mp3');
+const UNFOCUSED_ALARM_LOOPS = 4;
 
 let ocv;
 let templates;
@@ -433,6 +438,18 @@ function onPrivacyChanged() {
 
 allow_video_feed.addEventListener('change', onPrivacyChanged);
 
+function onFocusAlarmChanged() {
+	config.focus_alarm = !!focus_alarm.checked;
+
+	saveConfig(config);
+
+	if (!config.focus_alarm) {
+		stopUnfocusedAlarm(); // shoud not be needed, since window is focused when value changes, but just in case
+	}
+}
+
+focus_alarm.addEventListener('change', onFocusAlarmChanged);
+
 let hide_show_parts_timer;
 
 function hideParts() {
@@ -689,8 +706,93 @@ async function startCapture(stream) {
 	capture_process = setInterval(captureFrame, frame_ms);
 }
 
+let last_frame_time = 0;
+
+let unfocused_alarm_loop_counter = 0;
+let unfocused_alert_delay = 25 * 1000; // 25s before alerting
+let unfocused_abnormal_elapsed = 650; // If capture interval runs at 650ms, capture is messed
+let unfocused_alarm_playing = false;
+let unfocused_alert_to = null; // tracking timeout
+
+if (QueryString.get('unfocused_alert_seconds')) {
+	// TODO: replace this by UI element
+	const value = QueryString.get('unfocused_alert_seconds');
+	if (/^\d+$/.test(value)) {
+		unfocused_alert_delay = parseInt(value, 10) * 1000;
+	}
+}
+
+function playUnfocusedAlarm() {
+	if (!unfocused_alarm_playing) return;
+
+	unfocused_alarm_loop_counter =
+		++unfocused_alarm_loop_counter % UNFOCUSED_ALARM_LOOPS;
+
+	if (unfocused_alarm_loop_counter === 0) {
+		// Say Message
+		delete UNFOCUSED_ALARM_SND.onended;
+		speak(
+			{
+				username: '_system',
+				display_name: 'System',
+				message: 'Warning! Nestris champs OCR page is not active!',
+			},
+			{ force: true, callback: playUnfocusedAlarm }
+		);
+	} else {
+		// Play alarm
+		UNFOCUSED_ALARM_SND.onended = playUnfocusedAlarm;
+		UNFOCUSED_ALARM_SND.play();
+	}
+}
+
+function startUnfocusedAlarm() {
+	unfocused_alarm_playing = true;
+	unfocused_alarm_loop_counter = 0;
+	playUnfocusedAlarm();
+
+	// play silence sound continuously to disable timer throttling
+	UNFOCUSED_SILENCE_SND.loop = true;
+	UNFOCUSED_SILENCE_SND.play();
+
+	window.addEventListener('focus', stopUnfocusedAlarm);
+}
+
+function stopUnfocusedAlarm() {
+	if (unfocused_alert_to) {
+		unfocused_alert_to = clearTimeout(unfocused_alert_to);
+	}
+
+	if (unfocused_alarm_playing) {
+		delete UNFOCUSED_ALARM_SND.onended;
+		UNFOCUSED_ALARM_SND.pause();
+		unfocused_alarm_playing = false;
+	}
+
+	UNFOCUSED_SILENCE_SND.pause();
+
+	window.removeEventListener('focus', stopUnfocusedAlarm);
+}
+
 async function captureFrame() {
 	++frame_count;
+
+	const now = Date.now();
+
+	if (focus_alarm.checked && last_frame_time) {
+		const elapsed = Date.now() - last_frame_time;
+
+		if (elapsed > unfocused_abnormal_elapsed) {
+			if (!unfocused_alert_to && !unfocused_alarm_playing) {
+				unfocused_alert_to = setTimeout(
+					startUnfocusedAlarm,
+					unfocused_alert_delay
+				);
+			}
+		}
+	}
+
+	last_frame_time = now;
 
 	try {
 		let bitmap;
@@ -1047,6 +1149,7 @@ function saveConfig(config) {
 		device_id: config.device_id,
 		palette: config.palette,
 		frame_rate: config.frame_rate,
+		focus_alarm: config.focus_alarm,
 		allow_video_feed: config.allow_video_feed,
 		video_feed_device_id: config.video_feed_device_id,
 		tasks: {},
@@ -1262,6 +1365,7 @@ function trackAndSendFrames() {
 		controls.style.display = 'block';
 
 		allow_video_feed.checked = config.allow_video_feed != false;
+		focus_alarm.checked = config.focus_alarm != false;
 		privacy.style.display = 'block';
 
 		await playVideoFromConfig();
