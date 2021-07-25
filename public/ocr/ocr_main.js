@@ -709,21 +709,11 @@ async function startCapture(stream) {
 let last_frame_time = 0;
 
 let unfocused_alarm_loop_counter = 0;
-let unfocused_alert_delay = 25 * 1000; // 25s before alerting
 let unfocused_abnormal_elapsed = 750; // If capture interval runs at 750ms, capture is messed
 let unfocused_alarm_playing = false;
-let unfocused_alert_to = null; // tracking timeout
 
-let unfocused_smoothing_factor = 1 / 3;
+let unfocused_smoothing_factor = 1 / 15; // causes roughly 20s delay from when interval jumps from 33ms to 1000ms
 let unfocused_smoothed_elapsed = 0;
-
-if (QueryString.get('unfocused_alert_seconds')) {
-	// TODO: replace this by UI element
-	const value = QueryString.get('unfocused_alert_seconds');
-	if (/^\d+$/.test(value)) {
-		unfocused_alert_delay = parseInt(value, 10) * 1000;
-	}
-}
 
 function playUnfocusedAlarm() {
 	if (!unfocused_alarm_playing) return;
@@ -750,6 +740,8 @@ function playUnfocusedAlarm() {
 }
 
 function startUnfocusedAlarm() {
+	if (unfocused_alarm_playing) return;
+
 	unfocused_alarm_playing = true;
 	unfocused_alarm_loop_counter = 0;
 	playUnfocusedAlarm();
@@ -762,18 +754,11 @@ function startUnfocusedAlarm() {
 }
 
 function stopUnfocusedAlarm() {
-	if (unfocused_alert_to) {
-		unfocused_alert_to = clearTimeout(unfocused_alert_to);
-	}
-
-	if (unfocused_alarm_playing) {
-		delete UNFOCUSED_ALARM_SND.onended;
-		UNFOCUSED_ALARM_SND.pause();
-		unfocused_alarm_playing = false;
-	}
-
+	delete UNFOCUSED_ALARM_SND.onended;
+	unfocused_alarm_playing = false;
 	unfocused_smoothed_elapsed = 0;
 
+	UNFOCUSED_ALARM_SND.pause();
 	UNFOCUSED_SILENCE_SND.pause();
 
 	window.removeEventListener('focus', stopUnfocusedAlarm);
@@ -792,14 +777,7 @@ async function captureFrame() {
 			(1 - unfocused_smoothing_factor) * unfocused_smoothed_elapsed;
 
 		if (unfocused_smoothed_elapsed > unfocused_abnormal_elapsed) {
-			if (!unfocused_alert_to && !unfocused_alarm_playing) {
-				unfocused_alert_to = setTimeout(
-					startUnfocusedAlarm,
-					unfocused_alert_delay
-				);
-			}
-		} else {
-			// stopUnfocusedAlarm();
+			startUnfocusedAlarm();
 		}
 	}
 
