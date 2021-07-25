@@ -776,15 +776,15 @@ const Player = (function () {
 		}
 
 		getTransitionRunwayScore() {
-			if (this.game_over) {
+			if (this.transition) {
+				return this.transition;
+			} else if (this.game_over) {
 				return this.score;
-			} else if (this.transition === null) {
+			} else {
 				return (
 					this.score +
 					getRunway(this.start_level, RUNWAY.TRANSITION, this.lines)
 				);
-			} else {
-				return this.transition;
 			}
 		}
 
