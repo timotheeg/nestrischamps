@@ -476,6 +476,13 @@ const Player = (function () {
 			this.onScore();
 		}
 
+		_doGameOver() {
+			if (this.game_over) return;
+
+			this.game_over = true;
+			this.onGameOver();
+		}
+
 		_setFrameInner(data) {
 			if (this.game_over && this.curtain_down && data.gameid == this.gameid) {
 				return;
@@ -490,6 +497,7 @@ const Player = (function () {
 			this.last_frame = data;
 
 			if (data.gameid != this.gameid) {
+				this._doGameOver();
 				// new game!
 				this.reset();
 
@@ -618,8 +626,6 @@ const Player = (function () {
 			this.renderPreview(this.level, data.preview);
 
 			if (!this.game_over && this._isTopRowFull(data)) {
-				this.game_over = true;
-
 				this.tr_runway_score = this.getTransitionRunwayScore();
 				this.dom.runway_tr.textContent = this.options.format_score(
 					this.tr_runway_score,
@@ -638,7 +644,7 @@ const Player = (function () {
 					7
 				);
 
-				this.onGameOver();
+				this._doGameOver();
 			}
 
 			if (num_blocks === 200) {
