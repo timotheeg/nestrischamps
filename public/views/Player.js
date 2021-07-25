@@ -626,6 +626,8 @@ const Player = (function () {
 			this.renderPreview(this.level, data.preview);
 
 			if (!this.game_over && this._isTopRowFull(data)) {
+				this.game_over = true;
+
 				this.tr_runway_score = this.getTransitionRunwayScore();
 				this.dom.runway_tr.textContent = this.options.format_score(
 					this.tr_runway_score,
@@ -644,7 +646,7 @@ const Player = (function () {
 					7
 				);
 
-				this._doGameOver();
+				this.onGameOver();
 			}
 
 			if (num_blocks === 200) {
