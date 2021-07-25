@@ -710,9 +710,12 @@ let last_frame_time = 0;
 
 let unfocused_alarm_loop_counter = 0;
 let unfocused_alert_delay = 25 * 1000; // 25s before alerting
-let unfocused_abnormal_elapsed = 650; // If capture interval runs at 650ms, capture is messed
+let unfocused_abnormal_elapsed = 750; // If capture interval runs at 750ms, capture is messed
 let unfocused_alarm_playing = false;
 let unfocused_alert_to = null; // tracking timeout
+
+let unfocused_smoothing_factor = 1 / 3;
+let unfocused_smoothed_elapsed = 0;
 
 if (QueryString.get('unfocused_alert_seconds')) {
 	// TODO: replace this by UI element
@@ -769,6 +772,8 @@ function stopUnfocusedAlarm() {
 		unfocused_alarm_playing = false;
 	}
 
+	unfocused_smoothed_elapsed = 0;
+
 	UNFOCUSED_SILENCE_SND.pause();
 
 	window.removeEventListener('focus', stopUnfocusedAlarm);
@@ -782,13 +787,19 @@ async function captureFrame() {
 	if (focus_alarm.checked && last_frame_time) {
 		const elapsed = Date.now() - last_frame_time;
 
-		if (elapsed > unfocused_abnormal_elapsed) {
+		unfocused_smoothed_elapsed =
+			unfocused_smoothing_factor * elapsed +
+			(1 - unfocused_smoothing_factor) * unfocused_smoothed_elapsed;
+
+		if (unfocused_smoothed_elapsed > unfocused_abnormal_elapsed) {
 			if (!unfocused_alert_to && !unfocused_alarm_playing) {
 				unfocused_alert_to = setTimeout(
 					startUnfocusedAlarm,
 					unfocused_alert_delay
 				);
 			}
+		} else {
+			// stopUnfocusedAlarm();
 		}
 	}
 
