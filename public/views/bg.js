@@ -5,12 +5,19 @@
 
 	const parent = document.querySelector('#stream_bg');
 
-	if (QueryString.get('bg') === '2' || QueryString.get('bg') === '3') {
+	if (
+		QueryString.get('bg') === '2' ||
+		QueryString.get('bg') === '3' ||
+		QueryString.get('bg') === '4'
+	) {
+		const bgs = {
+			2: 'nestrischamps_bg_green.png',
+			3: 'nestrischamps_bg.png',
+			4: 'nestrischamps_bg_green.gif',
+		};
+
 		const img_width = 218;
-		const bg_file =
-			QueryString.get('bg') === '2'
-				? 'nestrischamps_bg_green.png'
-				: 'nestrischamps_bg.png';
+		const bg_file = bgs[QueryString.get('bg')];
 		const bg = document.createElement('div');
 
 		bg.classList.add('bg');
