@@ -36,6 +36,9 @@ const remoteAPI = {
 	setProfileImageURL: function (player_idx, url) {
 		connection.send(['setProfileImageURL', player_idx, url]);
 	},
+	setVdoNinjaURL: function (player_idx, url) {
+		connection.send(['setVdoNinjaURL', player_idx, url]);
+	},
 	resetVictories: function () {
 		connection.send(['resetVictories']);
 	},
@@ -83,6 +86,31 @@ class Player {
 
 					remoteAPI.setProfileImageURL(this.idx, avatar_url);
 					this.dom.avatar_img.src = avatar_url;
+				}, 250);
+
+		this.dom.vdoninja_url.onchange =
+			this.dom.vdoninja_url.onkeyup =
+			this.dom.vdoninja_url.onblur =
+				_.debounce(() => {
+					const vdoninja_url = this.dom.vdoninja_url.value.trim();
+
+					this.dom.vdoninja_url.classList.remove('valid');
+					this.dom.vdoninja_url.classList.remove('invalid');
+
+					if (!vdoninja_url) return;
+
+					if (
+						!/^https?:\/\/(vdo|obs).ninja\/\?view=[a-zA-Z0-9]+$/.test(
+							vdoninja_url
+						)
+					) {
+						this.dom.vdoninja_url.classList.add('invalid');
+						return;
+					}
+
+					this.dom.vdoninja_url.classList.add('valid');
+
+					remoteAPI.setVdoNinjaURL(this.idx, vdoninja_url);
 				}, 250);
 
 		this.dom.producers.onchange = () =>
@@ -261,6 +289,7 @@ function addPlayer() {
 		name: player_node.querySelector('.name'),
 		avatar_url: player_node.querySelector('.avatar'),
 		avatar_img: player_node.querySelector('img'),
+		vdoninja_url: player_node.querySelector('.vdoninja'),
 		victories: player_node.querySelector('.victories'),
 		win_btn: player_node.querySelector('.winner'),
 		remove_btn: player_node.querySelector('.remove_player'),
