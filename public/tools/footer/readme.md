@@ -28,6 +28,6 @@ Sample query string:
 ?system=PAL&event=Marq's%20garage%20party&cycle_seconds=5
 ```
 
-The parameters can be used in any combination. All are optional can be ommitted.
+The parameters can be used in any combination. All parameters are optional can be ommitted.
 
 The value need to be [url-encoded](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to display properly. If your title is complex, use [this tool](https://www.onlinewebtoolkit.com/url-encode-decode) to encode.
