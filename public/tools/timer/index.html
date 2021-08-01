@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: 'Press Start K';
+				src: url('/fonts/prstartk_nes_tetris_8.ttf');
+			}
+
+			body {
+				margin: 0;
+				font-family: 'Press Start K', monospace;
+				font-size: 32px;
+			}
+
+			#timer {
+				padding: 6px;
+				width: 256px;
+				height: 32px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="timer">00:00:00</div>
+
+		<script type="text/javascript">
+			// defaults
+			const TEXT_COLOR = '#000';
+			const BG_COLOR = '#fff';
+			const MINUTES = 120; // 2 hours
+			const MAX_MINUTES = 100 * 60 - 1; // 99 hours 59 minutes (basically only 2 digits for hours)
+			const TYPE = 'down';
+
+			// validator regexes
+			const HEX_COLOR_RE = /^([0-9a-f]{3}){1,2}$/i;
+			const MINUTES_RE = /^[1-9]\d*$/;
+			const TYPE_RE = /^up|down$/i;
+
+			// get, validate and finalize args
+			const QueryString = new URL(location).searchParams;
+			let text_color = QueryString.get('text_color');
+			let bg_color = QueryString.get('bg_color');
+			let minutes = QueryString.get('minutes');
+			let type = QueryString.get('type');
+
+			text_color = HEX_COLOR_RE.test(text_color)
+				? `#${text_color.toLowerCase()}`
+				: TEXT_COLOR;
+
+			bg_color = HEX_COLOR_RE.test(bg_color)
+				? `#${bg_color.toLowerCase()}`
+				: BG_COLOR;
+
+			minutes = MINUTES_RE.test(minutes) ? parseInt(minutes, 10) : MINUTES;
+
+			if (minutes > MAX_MINUTES) {
+				minutes = MAX_MINUTES;
+			}
+
+			type = TYPE_RE.test(type) ? type.toLowerCase() : TYPE;
+
+			// update styles
+			const timer_node = document.querySelector('#timer');
+
+			timer_node.style.background = bg_color;
+			timer_node.style.color = text_color;
+
+			function format_duration(duration) {
+				const hours = Math.floor(duration / (60 * 60));
+
+				duration %= 60 * 60;
+
+				const minutes = Math.floor(duration / 60);
+				const seconds = duration % 60;
+
+				return (
+					`${hours}`.padStart(2, '0') +
+					':' +
+					`${minutes}`.padStart(2, '0') +
+					':' +
+					`${seconds}`.padStart(2, '0')
+				);
+			}
+
+			const start_time = Date.now();
+			const allowed_time_s = minutes * 60;
+
+			let timer = setInterval(() => {
+				let elapsed_s = Math.floor((Date.now() - start_time) / 1000);
+
+				if (elapsed_s > allowed_time_s) {
+					elapsed_s = allowed_time_s;
+					clearInterval(timer);
+				}
+
+				if (type === 'up') {
+					timer_node.innerHTML = format_duration(elapsed_s);
+				} else {
+					timer_node.innerHTML = format_duration(allowed_time_s - elapsed_s);
+				}
+			}, 250);
+		</script>
+	</body>
+</html>
