@@ -108,6 +108,10 @@ class TetrisCompetitionAPI {
 		this.setName(player_idx, name);
 	}
 
+	setVdoNinjaURL(player_idx, vdoninja_url) {
+		getPlayer(player_idx).setVdoNinjaURL(vdoninja_url);
+	}
+
 	setFirstTo(num_games_to_win) {
 		this.first_to = num_games_to_win;
 

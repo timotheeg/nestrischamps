@@ -2,7 +2,13 @@ const _ = require('lodash');
 
 const Room = require('./Room');
 
-const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
+const PRODUCER_FIELDS = [
+	'id',
+	'login',
+	'display_name',
+	'profile_image_url',
+	'vdoninja_url',
+];
 const MAX_PLAYERS = 8;
 
 function getBasePlayerData() {
@@ -11,6 +17,7 @@ function getBasePlayerData() {
 		login: '',
 		display_name: '',
 		profile_image_url: '',
+		vdoninja_url: '',
 		victories: 0,
 	};
 }
@@ -351,6 +358,16 @@ class MatchRoom extends Room {
 					this.assertValidPlayer(p_num);
 
 					this.state.players[p_num].profile_image_url = url;
+
+					break;
+				}
+
+				case 'setVdoNinjaURL': {
+					const [p_num, url] = args;
+
+					this.assertValidPlayer(p_num);
+
+					this.state.players[p_num].vdoninja_url = url;
 
 					break;
 				}

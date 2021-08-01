@@ -288,6 +288,7 @@ const Player = (function () {
 		onGameOver() {}
 		onCurtainDown() {}
 		onTetris() {}
+		onVdoNinjaURL() {}
 
 		_doTetris() {
 			if (this.options.tetris_flash) {
@@ -409,6 +410,11 @@ const Player = (function () {
 			} else {
 				this.dom.name.innerHTML = '&nbsp;';
 			}
+		}
+
+		setVdoNinjaURL(url) {
+			this.vdoninja_url = url;
+			this.onVdoNinjaURL(url);
 		}
 
 		setId(id) {

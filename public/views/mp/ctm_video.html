@@ -15,11 +15,16 @@
 				--offset: 286px;
 				right: var(--offset);
 			}
+
+			.iframes {
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="stream_bg">
 			<div id="playing_fields">
+				<div class="iframes"></div>
 				<video class="box player_vid p1"></video>
 				<video class="box player_vid p2"></video>
 
@@ -172,51 +177,81 @@
 		<script src="/views/CTMCompetitionPlayer.js"></script>
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
-			const players = [1, 2].map(
-				num =>
-					new CTMCompetitionPlayer(
-						{
-							name: document.querySelector(`.name.p${num} .header`),
-							score: document.querySelector(`.score.p${num} .value`),
-							level: document.querySelector(`.board.p${num} .level`),
-							lines: document.querySelector(`.score.p${num} .lines`),
-							trt: document.querySelector(`.tetris_rate.p${num} .content`),
-							running_trt: document.querySelector(`.running_trt.p${num}`),
-							preview: document.querySelector(`.board.p${num} .next_piece`),
-							field: document.querySelector(`.board.p${num}`),
-							hearts: document.querySelector(`.hearts.p${num}`),
-							drought: document.querySelector(`.drought.p${num} .value`),
-							runway_game: document.querySelector(`.runway.p${num} .value`),
-							eff: document.querySelector(`.eff.p${num} .value`),
-							video: document.querySelector(`video.p${num}`),
+			const players = [1, 2].map(num => {
+				const player = new CTMCompetitionPlayer(
+					{
+						name: document.querySelector(`.name.p${num} .header`),
+						score: document.querySelector(`.score.p${num} .value`),
+						level: document.querySelector(`.board.p${num} .level`),
+						lines: document.querySelector(`.score.p${num} .lines`),
+						trt: document.querySelector(`.tetris_rate.p${num} .content`),
+						running_trt: document.querySelector(`.running_trt.p${num}`),
+						preview: document.querySelector(`.board.p${num} .next_piece`),
+						field: document.querySelector(`.board.p${num}`),
+						hearts: document.querySelector(`.hearts.p${num}`),
+						drought: document.querySelector(`.drought.p${num} .value`),
+						runway_game: document.querySelector(`.runway.p${num} .value`),
+						eff: document.querySelector(`.eff.p${num} .value`),
+						video: document.querySelector(`video.p${num}`),
 
-							projection: document.querySelector(`.projection.p${num} .value`),
+						projection: document.querySelector(`.projection.p${num} .value`),
 
-							diff: document.querySelector(`.score.p${num} .diff`),
-							t_diff: document.querySelector(`.score.p${num} .tetris_diff`),
+						diff: document.querySelector(`.score.p${num} .diff`),
+						t_diff: document.querySelector(`.score.p${num} .tetris_diff`),
 
-							runway_diff: document.querySelector(`.runway.p${num} .diff`),
-							runway_t_diff: document.querySelector(
-								`.runway.p${num} .tetris_diff`
-							),
+						runway_diff: document.querySelector(`.runway.p${num} .diff`),
+						runway_t_diff: document.querySelector(
+							`.runway.p${num} .tetris_diff`
+						),
 
-							projection_diff: document.querySelector(
-								`.projection.p${num} .diff`
-							),
-							projection_t_diff: document.querySelector(
-								`.projection.p${num} .tetris_diff`
-							),
+						projection_diff: document.querySelector(
+							`.projection.p${num} .diff`
+						),
+						projection_t_diff: document.querySelector(
+							`.projection.p${num} .tetris_diff`
+						),
 
-							drought_box: document.querySelector(`.drought.p${num}`),
-							runway_box: document.querySelector(`.runway.p${num}`),
-							projection_box: document.querySelector(`.projection.p${num}`),
-						},
-						{
-							preview_pixel_size: 2,
-							preview_align: 'tr',
-						}
-					)
-			);
+						drought_box: document.querySelector(`.drought.p${num}`),
+						runway_box: document.querySelector(`.runway.p${num}`),
+						projection_box: document.querySelector(`.projection.p${num}`),
+					},
+					{
+						preview_pixel_size: 2,
+						preview_align: 'tr',
+					}
+				);
+
+				player.onVdoNinjaURL = function (url) {
+					if (!player.iframe) {
+						const iframe = document.createElement('iframe');
+
+						document.querySelector('.iframes').appendChild(iframe);
+
+						player.iframe = iframe;
+
+						// set interval to wait for content and video object
+						player.vdoninja_wait = setInterval(() => {
+							const video =
+								iframe.contentWindow.document.querySelector('video'); // grab first video
+
+							if (!video) return;
+							if (!video.srcObject) return;
+
+							clearInterval(player.vdoninja_wait);
+							delete player.vdoninja_wait;
+
+							document.querySelector(`video.p${player_num}`).srcObject =
+								video.srcObject;
+							video.srcObject = null;
+							document.querySelector(`video.p${player_num}`).play();
+						}, 100);
+					}
+
+					player.iframe.src = url;
+				};
+
+				return player;
+			});
 		</script>
 		<script src="/views/competition.js"></script>
 		<script>
