@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: 'Press Start K';
+				src: url('/fonts/prstartk_nes_tetris_8.ttf');
+			}
+
+			body {
+				margin: 0;
+				font-family: 'Press Start K', monospace;
+				font-size: 32px;
+			}
+
+			#timer {
+				text-align: right;
+				padding: 6px;
+				width: 320px;
+				height: 32px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="timer"></div>
+
+		<script type="text/javascript">
+			function geRandomValue(len) {
+				return Array(len)
+					.fill()
+					.map(_ => Math.floor(Math.random() * 10))
+					.join('');
+			}
+
+			const timer = document.getElementById('timer');
+
+			let cycle = 0;
+
+			setInterval(() => {
+				if (++cycle % 2) {
+					timer.textContent = geRandomValue(10);
+				} else {
+					timer.textContent = '0';
+				}
+			}, 1000);
+		</script>
+	</body>
+</html>
