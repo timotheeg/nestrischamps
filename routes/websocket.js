@@ -91,6 +91,7 @@ module.exports = function init(server, wss) {
 				id: user.id,
 				login: user.login,
 				secret: user.secret,
+				profile_image_url: user.profile_image_url,
 			};
 
 			wss.handleUpgrade(request, socket, head, function (ws) {
@@ -146,6 +147,7 @@ module.exports = function init(server, wss) {
 				id: connecting_user.id,
 				login: connecting_user.login,
 				secret: connecting_user.secret,
+				profile_image_url: connecting_user.profile_image_url,
 			};
 
 			wss.handleUpgrade(request, socket, head, function (ws) {
