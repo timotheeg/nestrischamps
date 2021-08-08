@@ -8,6 +8,10 @@ app.set('trust proxy', 1); // trust first proxy (i.e. heroku) -- needed to get r
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(middlewares.sessionMiddleware);
+app.use((req, res, next) => {
+	res.locals.user = req.session.user;
+	next();
+});
 
 app.use('/auth', require('../routes/auth'));
 app.use('/stats', require('../routes/score'));

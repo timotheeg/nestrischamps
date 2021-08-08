@@ -30,6 +30,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 			id: user.id,
 			login: user.login,
 			secret: user.secret,
+			profile_image_url: user.profile_image_url,
 		};
 
 		console.log('Stored session user as', req.session.user);
@@ -116,6 +117,7 @@ router.get('/twitch/callback', async (req, res) => {
 			id: user.id,
 			login: user.login,
 			secret: user.secret,
+			profile_image_url: user.profile_image_url,
 		};
 
 		console.log('Stored session user as', req.session.user);
@@ -123,7 +125,7 @@ router.get('/twitch/callback', async (req, res) => {
 		if (req.session.auth_success_redirect) {
 			res.redirect(req.session.auth_success_redirect);
 		} else {
-			res.render('intro');
+			res.redirect('/');
 		}
 	} catch (err) {
 		console.error(err);

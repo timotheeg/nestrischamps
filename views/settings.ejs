@@ -1,24 +1,44 @@
+<!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NestrisChamps: user settings</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style>
+      .navbar-item img {
+        max-height: 2.5rem;
+      }
+    </style>
 </head>
 <body>
 
-<h1>Hi <%= user.display_name %>!</h1>
+<%- include('header'); %>
 
-<p>Thanks for using NestrisChamps.</p>
+<section class="section">
+  <div class="container content">
+    <h1 class="title is-1">
+      <%= db_user.display_name %> settings
+    </h1>
 
-<p>Your view secret is <b><%= user.secret%></b>. <a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</p>
+    <p>Thanks for using NestrisChamps <%= db_user.display_name %>!</p>
+    <p>Your view secret is <b><%= db_user.secret%></b>.</p>
+    <p>Actions</p>
+    <ul>
+    	<li><a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</li>
+    	<li><a href="/settings/clear_session">Clear Session</a> (= logout)</li>
+    </ul>
 
-<p><a href="/settings/clear_session">Clear Session</a> (= logout)</p>
-
-<p>Quick Links</p>
-<ul>
-	<li><a href="/renderers">See my personal view links</a></li>
-	<li><a href="/room/producer">Produce into my private room</a></li>
-	<li><a href="/room/admin">Administer my match room</a></li>
-	<li><a href="/room/u/<%= user.login %>/producer">Produce into my match room</a></li>
-	<li><a href="/stats/scores">View and manage my past scores</a></li>
-</ul>
+	<p>Quick Links</p>
+	<ul>
+		<li><a href="/renderers">See my personal view links</a></li>
+		<li><a href="/room/producer">Capture my gameplay into my private room</a></li>
+		<li><a href="/room/u/<%= db_user.login %>/producer">Capture my gameplay into my private room</a></li>
+		<li><a href="/room/admin">Administer my match room</a></li>
+		<li><a href="/stats/scores">My scores and replays</a></li>
+	</ul>
+  </div>
+</section>
 
 </body>
 </html>
