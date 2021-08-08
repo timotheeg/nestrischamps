@@ -1,19 +1,33 @@
+<!DOCTYPE html>
 <html>
 <head>
-<style>
-dt {
-	text-transform: capitalize;
-	font-weight: bold;
-	margin-top: 1em;
-}
-img {
-	display: block;
-	margin-top: 0.5em;
-}
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NestrisChamps: renderers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style>
+      .navbar-item img {
+        max-height: 2.5rem;
+      }
+
+	dt {
+		text-transform: capitalize;
+		font-weight: bold;
+		margin-top: 1em;
+	}
+	img {
+		display: block;
+		margin-top: 0.5em;
+	}
+    </style>
 </head>
 <body>
-<h1>Nestrischamps Layouts</h1>
+
+<%- include('header'); %>
+
+<section class="section" class="bd-index-section">
+  <div class="container content">
+<h1 class="title is-1">Nestrischamps Layouts</h1>
 <p>On this page, you will find URLs for layouts you can use in your OBS' browser sources.</p>
 
 <p>This URLs identify <b>YOU</b> as a user, do NOT share them. They contain your secret identifier <b><%= secret %></b> (see <a href="/docs/">documentation</a> for details).</p>
@@ -43,7 +57,7 @@ img {
 <% }) %>
 </dl>
 
-<h2 id="competition">Competition layouts</h2>
+<h2 class="title is-2" id="competition">Competition layouts</h2>
 
 <dl>
 <% layouts._types.mp.forEach(layout => { %>
@@ -63,6 +77,9 @@ img {
 </dl>
 
 <p>If you'd like to change your secret, visit your <a href="/settings">settings</a> page to revoke the token (and generate a new one)</p>
+
+</div>
+</section>
 
 <script>
 document.querySelectorAll('dd a').forEach(a => {

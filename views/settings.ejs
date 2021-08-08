@@ -22,8 +22,12 @@
     </h1>
 
     <p>Thanks for using NestrisChamps <%= db_user.display_name %>!</p>
-    <p>Your view secret is <b><%= db_user.secret%></b>. <a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</p>
-	<p><a href="/settings/clear_session">Clear Session</a> (= logout)</p>
+    <p>Your view secret is <b><%= db_user.secret%></b>.</p>
+    <p>Actions</p>
+    <ul>
+    	<li><a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</li>
+    	<li><a href="/settings/clear_session">Clear Session</a> (= logout)</li>
+    </ul>
 
 	<p>Quick Links</p>
 	<ul>
