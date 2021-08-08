@@ -37,6 +37,7 @@ router.get('/revoke_secret', async (req, res) => {
 		id: user.id,
 		login: user.login,
 		secret: user.secret,
+		profile_image_url: user.profile_image_url,
 	};
 
 	res.redirect('/settings');
@@ -44,7 +45,7 @@ router.get('/revoke_secret', async (req, res) => {
 
 router.get('/clear_session', async (req, res) => {
 	req.session.destroy();
-	res.redirect('/settings');
+	res.redirect('/');
 });
 
 module.exports = router;
