@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NestrisChamps: renderers</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <style>
-      .navbar-item img {
-        max-height: 2.5rem;
-      }
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>NestrisChamps: renderers</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+		<style>
+			.navbar-item img {
+				max-height: 2.5rem;
+			}
 
 	dt {
 		text-transform: capitalize;
@@ -19,66 +19,66 @@
 		display: block;
 		margin-top: 0.5em;
 	}
-    </style>
+		</style>
 </head>
 <body>
 
 <%- include('header'); %>
 
 <section class="section" class="bd-index-section">
-  <div class="container content">
-<h1 class="title is-1">Nestrischamps Layouts</h1>
-<p>On this page, you will find URLs for layouts you can use in your OBS' browser sources.</p>
+	<div class="container content">
+		<h1 class="title is-1">Nestrischamps Layouts</h1>
+		<p>On this page, you will find URLs for layouts you can use in your OBS' browser sources.</p>
 
-<p>This URLs identify <b>YOU</b> as a user, do NOT share them. They contain your secret identifier <b><%= secret %></b> (see <a href="/docs/">documentation</a> for details).</p>
+		<p>This URLs identify <b>YOU</b> as a user, do NOT share them. They contain your secret identifier <b><%= secret %></b> (see <a href="/docs/">documentation</a> for details).</p>
 
-<p>There are many templates you can try. Play around to get a sense of them all.</p>
+		<p>There are many templates you can try. Play around to get a sense of them all.</p>
 
-<p>Your OBS browser sources must have a canva size of 1280x720 to show the layouts fully.</p>
+		<p>Your OBS browser sources must have a canva size of 1280x720 to show the layouts fully.</p>
 
-<p>The background in the layouts is tunable. Use the query string <strong>?bg=X</strong> to change it, where X is a number as follow:</p>
-<ol start="0">
-	<li>Transparent background</li>
-	<li>Black background with randomly positioned tetris tiles: <img src="/docs/backgrounds/tiles.jpg" /></li>
-	<li>Green Nestrischamps animated background (branding FTW!): <img src="/docs/backgrounds/nestrischamps_green.jpg" /></li>
-	<li>Rainbow Nestrischamps animated background: <img src="/docs/backgrounds/nestrischamps_rainbow.jpg" /></li>
-</ol>
+		<p>The background in the layouts is tunable. Use the query string <strong>?bg=X</strong> to change it, where X is a number as follow:</p>
+		<ol start="0">
+			<li>Transparent background</li>
+			<li>Black background with randomly positioned tetris tiles: <img src="/docs/backgrounds/tiles.jpg" /></li>
+			<li>Green Nestrischamps animated background (branding FTW!): <img src="/docs/backgrounds/nestrischamps_green.jpg" /></li>
+			<li>Rainbow Nestrischamps animated background: <img src="/docs/backgrounds/nestrischamps_rainbow.jpg" /></li>
+		</ol>
 
-<h2 id="single">Single player layouts</h2>
+		<h2 id="single">Single player layouts</h2>
 
-<dl>
-<% layouts._types['1p'].forEach(layout => { %>
-<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
-<dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
-	<% layout.screenshot_uris.forEach(uri => { %>
-	<img src="<%= uri %>" width="640"/>
-	<% }) %>
-</dd>
-<% }) %>
-</dl>
+		<dl>
+		<% layouts._types['1p'].forEach(layout => { %>
+		<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
+		<dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
+			<% layout.screenshot_uris.forEach(uri => { %>
+			<img src="<%= uri %>" width="640"/>
+			<% }) %>
+		</dd>
+		<% }) %>
+		</dl>
 
-<h2 class="title is-2" id="competition">Competition layouts</h2>
+		<h2 class="title is-2" id="competition">Competition layouts</h2>
 
-<dl>
-<% layouts._types.mp.forEach(layout => { %>
-<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
-<dd>
-	<% if (layout.info && layout.info.description) { %>
-		<p><%= layout.info.description %></p>
-	<% } %>
+		<dl>
+		<% layouts._types.mp.forEach(layout => { %>
+		<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
+		<dd>
+			<% if (layout.info && layout.info.description) { %>
+				<p><%= layout.info.description %></p>
+			<% } %>
 
-	<a href="/view/<%= layout.file %>/<%= secret %>">-</a>
-	<% layout.screenshot_uris.forEach(uri => { %>
-	<img src="<%= uri %>" width="640"/>
-	<% }) %>
+			<a href="/view/<%= layout.file %>/<%= secret %>">-</a>
+			<% layout.screenshot_uris.forEach(uri => { %>
+			<img src="<%= uri %>" width="640"/>
+			<% }) %>
 
-</dd>
-<% }) %>
-</dl>
+		</dd>
+		<% }) %>
+		</dl>
 
-<p>If you'd like to change your secret, visit your <a href="/settings">settings</a> page to revoke the token (and generate a new one)</p>
+		<p>If you'd like to change your secret, visit your <a href="/settings">settings</a> page to revoke the token (and generate a new one)</p>
 
-</div>
+	</div>
 </section>
 
 <script>
