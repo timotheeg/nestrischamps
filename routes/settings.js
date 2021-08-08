@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const ULID = require('ulid');
+const nocache = require('nocache');
 
 const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
 
 router.use(middlewares.assertSession);
 router.use(middlewares.checkToken);
+router.use(nocache());
 
 router.get('/', async (req, res) => {
 	const user = await UserDAO.getUserById(req.session.user.id);
@@ -17,7 +19,7 @@ router.get('/', async (req, res) => {
 	}
 
 	res.render('settings', {
-		user,
+		db_user: user,
 	});
 });
 

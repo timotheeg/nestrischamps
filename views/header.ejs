@@ -1,0 +1,101 @@
+<script src="https://kit.fontawesome.com/c97ff70141.js" crossorigin="anonymous"></script>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="/">
+      <img src="/brand/logo_header.2.png" width="180" height="34">
+    </a>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="/#getting_started">
+        Getting Started
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More
+        </a>
+
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="/#stats">
+            Statistics
+          </a>
+          <a class="navbar-item" href="/#recordings_n_replays">
+            Recording and Replays
+          </a>
+          <a class="navbar-item" href="/#layouts">
+            Layouts
+          </a>
+          <a class="navbar-item" href="/#game_hosting_n_tournaments">
+            Game Hosting and Tournaments
+          </a>
+          <a class="navbar-item" href="/#features_n_tools">
+            Features and Tools
+          </a>
+          <hr class="navbar-divider">
+          <a class="navbar-item" href="https://discord.gg/ZsMFdhzyk3">
+            Join discord
+          </a>
+          <hr class="navbar-divider">
+          <a class="navbar-item" href="https://github.com/timotheeg/nestrischamps/issues/new">
+            Report an issue
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-end">
+       <% if (user) {
+        console.log(user);
+       %>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            <img src="<%= user.profile_image_url %>" />
+          </a>
+
+          <div class="navbar-dropdown is-right">
+            <a class="navbar-item" href="/renderers">
+              My renderers
+            </a>
+            <a class="navbar-item" href="/room/producer">
+              Capture my gameplay into my private room
+            </a>
+            <a class="navbar-item" href="/room/u/<%=user.login%>producer">
+              Capture my gameplay into my match room
+            </a>
+            <a class="navbar-item" href="/room/admin">
+              Administer my match room
+            </a>
+            <a class="navbar-item" href="/stats/scores">
+              My scores and replays
+            </a>
+            <hr class="navbar-divider">
+            <a class="navbar-item" href="/settings">
+              My settings
+            </a>
+          </div>
+        </div>
+
+       <% } else { %>
+
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-primary" href="/settings">
+            <strong>Log in with Twitch</strong>
+          </a>
+        </div>
+      </div>
+
+        <% } %>
+    </div>
+
+  </div>
+</nav>

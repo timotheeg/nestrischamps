@@ -123,7 +123,7 @@ router.get('/twitch/callback', async (req, res) => {
 		if (req.session.auth_success_redirect) {
 			res.redirect(req.session.auth_success_redirect);
 		} else {
-			res.render('intro');
+			res.redirect('/');
 		}
 	} catch (err) {
 		console.error(err);
