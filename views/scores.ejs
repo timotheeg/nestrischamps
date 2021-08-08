@@ -1,301 +1,308 @@
+<!DOCTYPE html>
 <html>
 <head>
-<style>
-html, body {
-	font-family: Verdana, sans-serif;
-}
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>NestrisChamps: user settings</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+		<style>
+			.navbar-item img {
+				max-height: 2.5rem;
+			}
+			td.data-number {
+				font-family: monospace;
+				text-align:  right;
+			}
 
-table {
-  table-layout: fixed;
-  border-collapse: collapse;
-  border: 1px solid black;
-}
+			#scores td, #scores dd {
+				overflow-wrap: anywhere;
+			}
 
-th, td {
-	text-align: center;
-	border: 1px solid black;
-	padding: 2px 1em;
-}
-
-td, dd {
-	overflow-wrap: anywhere;
-}
-
-tbody tr.even {
-  background-color: #ddd;
-}
-
-tr.details td {
-	font-family: monospace;
-	text-align: left;
-}
-
-ul {
-	padding: 0;
-}
-
-li {
-	display: inline-block;
-	padding: 0 0.5em;
-}
-
-</style>
+			#scores tr.even {
+				background-color: #eee;
+			}
+		</style>
 </head>
 <body>
 
-<h1>Your last 100 scores</h1>
+<%- include('header'); %>
 
-<!-- TODO: implement sort by field score and date -->
-<table>
-<thead>
-	<tr>
-		<th class="sorter" data-field="datetime">Date</th>
-		<th>Start Level</th>
-		<th>End Level</th>
-		<th class="sorter" data-field="score">Score</th>
-		<th>Lines</th>
-		<th class="sorter" data-field="tetris_rate">Tetris Rate</th>
-		<th>Num Droughts</th>
-		<th>Max Drought</th>
-		<th>DAS Avg</th>
-		<th>Duration</th>
-		<th>Actions</th>
-	</tr>
-</thead>
-<tbody>
-	<% scores.forEach((score, idx) => { %>
-	<tr class="<%= idx % 2 ? 'odd': 'even' %>">
-		<td><%= score.datetime.toISOString() %></td>
-		<td><%= score.start_level %></td>
-		<td><%= score.end_level %></td>
-		<td class="score"><%= (score.score || 0).toString().padStart(6, '0') %></td>
-		<td class="lines"><%= score.lines %></td>
-		<td><%= ((score.tetris_rate || 0) * 100).toFixed(1) %>%</td>
-		<td><%= score.num_droughts %></td>
-		<td><%= score.max_drought %></td>
-		<td><%= (score.das_avg || 0).toFixed(1) %></td>
-		<td>
-			<%= Math.floor(score.duration / 1000 / 60) %>&prime;
-			<%= Math.floor((score.duration / 1000) % 60).toString().padStart(2, '0') %>&Prime;
-		</td>
-		<td>
-			<a class="details_score" href="/stats/scores/<%= score.id %>">details</a>
-			<% if (score.frame_file) { %>
-			-
-			<a class="replay_score" href="/replay/simple_1p/<%= score.id %>">replay</a>
-			<% } %>
-			-
-			<a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a>
-		</td>
-	</tr>
-	<% }); %>
-</tbody>
-</table>
+<section class="section">
+	<div class="container content">
+		<h1 class="title is-1">Score Summary</h1>
 
-<!-- TODO: implement pagination controls -->
-<ul id="pages">
-<% for (let page_idx=0; page_idx < num_pages; page_idx++) { %>
-	<li>
-		<% if (page_idx == pagination.page_idx) { %>
-			<%= page_idx + 1 %>
-		<% } else { %>
-			<a href='#'><%= page_idx + 1 %></a>
-		<% } %>
-	</li>
-<% }; %>
-</ul>
+		<nav class="pagination is-centered is-small" role="navigation">
+			<ul class="pagination-list">
+			<% for (let page_idx=0; page_idx < num_pages; page_idx++) { %>
+				<li>
+					<% if (page_idx == pagination.page_idx) { %>
+						<a class="pagination-link is-current" href='#'><%= page_idx + 1 %></a>
+					<% } else { %>
+						<a class="pagination-link" href='#'><%= page_idx + 1 %></a>
+					<% } %>
+				</li>
+			<% }; %>
+			</ul>
+		</nav>
 
-<script>
-const pagination = <%- JSON.stringify(pagination) %>;
+		<!-- TODO: implement sort by field score and date -->
+		<table class="table is-bordered" id="scores">
+		<thead>
+			<tr>
+				<th class="sorter" data-field="datetime">Date/Time</th>
+				<th>Start Level</th>
+				<th>End Level</th>
+				<th class="sorter" data-field="score">Score</th>
+				<th>Lines</th>
+				<th class="sorter" data-field="tetris_rate">Tetris Rate</th>
+				<th>Num Droughts</th>
+				<th>Max Drought</th>
+				<th>DAS Avg</th>
+				<th>Duration</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% scores.forEach((score, idx) => { %>
+			<% const datetime = score.datetime.toISOString(); %>
+			<tr class="<%= idx % 2 ? 'odd': 'even' %>">
 
-document.querySelectorAll('a.delete_score').forEach(a => {
-	a.addEventListener('click', async (evt) => {
-		evt.preventDefault();
+				<td title="<%=datetime%>"><%= score.datetime.toISOString().substr(0, 16).replace('T', ' ') %></td>
+				<td class="data-number" align="right"><%= score.start_level %></td>
+				<td class="data-number" align="right"><%= score.end_level %></td>
+				<td class="score data-number" align="right"><%= (score.score || 0).toString().padStart(6, '0') %></td>
+				<td class="lines data-number" align="right"><%= score.lines %></td>
+				<td class="data-number" align="right"><%= ((score.tetris_rate || 0) * 100).toFixed(1) %>%</td>
+				<td class="data-number" align="right"><%= score.num_droughts %></td>
+				<td class="data-number" align="right"><%= score.max_drought %></td>
+				<td class="data-number" align="right"><%= (score.das_avg || 0).toFixed(1) %></td>
+				<td class="data-number" align="right">
+					<%= Math.floor(score.duration / 1000 / 60) %>&prime;
+					<%= Math.floor((score.duration / 1000) % 60).toString().padStart(2, '0') %>&Prime;
+				</td>
+				<td>
+					<a class="details_score" href="/stats/scores/<%= score.id %>">details</a>
+					<% if (score.frame_file) { %>
+					-
+					<a class="replay_score" href="/replay/simple_1p/<%= score.id %>">replay</a>
+					<% } %>
+					-
+					<a class="delete_score" href="/stats/scores/<%= score.id %>">delete</a>
+				</td>
+			</tr>
+			<% }); %>
+		</tbody>
+		</table>
 
-		const parent_tr = a.closest('tr');
-		const id = a.href.split('/').pop();
-		const score = parent_tr.querySelector('td.score').textContent;
-		const lines = parent_tr.querySelector('td.lines').textContent;
+		<nav class="pagination is-centered is-small" role="navigation">
+			<ul class="pagination-list">
+			<% for (let page_idx=0; page_idx < num_pages; page_idx++) { %>
+				<li>
+					<% if (page_idx == pagination.page_idx) { %>
+						<a class="pagination-link is-current" href='#'><%= page_idx + 1 %></a>
+					<% } else { %>
+						<a class="pagination-link" href='#'><%= page_idx + 1 %></a>
+					<% } %>
+				</li>
+			<% }; %>
+			</ul>
+		</nav>
+	</div>
+</section>
 
-		if (!window.confirm(
-			`Are you sure you want to delete score entry with score:${score} - lines:${lines}?`
-		)) {
-			return;
-		}
+	<script>
+		/**/
+	const pagination = <%- JSON.stringify(pagination) %>;
 
-		try {
-			await fetch(a.href, {
-				method: 'DELETE',
-				mode: 'cors',
-				credentials: 'same-origin'
-			});
-		}
-		catch(err) {
-			console.log('Unable to delete score');
-		}
+	document.querySelectorAll('a.delete_score').forEach(a => {
+		a.addEventListener('click', async (evt) => {
+			evt.preventDefault();
 
-		// remove record in place, dont reload whole list...
-		parent_tr.remove();
-		// also remove the details row if it existed
-		try {
-			document.querySelector(`tr#details_${id}`).remove();
-		}
-		catch(err) { }
+			const parent_tr = a.closest('tr');
+			const id = a.href.split('/').pop();
+			const score = parent_tr.querySelector('td.score').textContent;
+			const lines = parent_tr.querySelector('td.lines').textContent;
 
-		// Could also do:
-		// location.reload(); // but that's inefficient
-	});
-});
-
-document.querySelectorAll('a.details_score').forEach(a => {
-	a.addEventListener('click', async (evt) => {
-		evt.preventDefault();
-
-		// clear all prior details
-		document.querySelectorAll('tr.details').forEach(tr => tr.hidden = true);
-
-		const parent_tr = a.closest('tr');
-		const id = a.href.split('/').pop();
-		const details = document.querySelector(`tr#details_${id}`);
-
-		if (details) {
-			details.hidden = false;
-			return;
-		}
-
-		// details are not already loaded, fetch now and populate in page
-		const details_tr = document.createElement('tr');
-		details_tr.classList.add('details');
-		details_tr.setAttribute('id', `details_${id}`);
-
-		if (parent_tr.classList.contains('even')) {
-			details_tr.classList.add('even');
-		}
-
-		const td = document.createElement('td');
-		td.setAttribute('colspan', '11');
-		td.textContent = 'Loading...';
-
-		details_tr.appendChild(td);
-
-		parent_tr.insertAdjacentElement('afterend', details_tr);
-
-		try {
-			const response = await fetch(a.href, {
-				method: 'GET',
-				mode: 'cors',
-				credentials: 'same-origin'
-			});
-
-			const data = await response.json();
-
-			// TODO: derive stats again and show them
-			// TODO show pretty graphs
-
-			const details = {
-				Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
-				Clears: data.clears || '-',
-				Pieces: data.pieces || '-',
-			};
-
-			const dl = document.createElement('dl');
-
-			for (const [key, value] of Object.entries(details)) {
-				const dt = document.createElement('dt');
-				const dd = document.createElement('dd');
-
-				dt.textContent = key;
-				dd.textContent = value;
-
-				dl.appendChild(dt);
-				dl.appendChild(dd);
+			if (!window.confirm(
+				`Are you sure you want to delete score entry with score:${score} - lines:${lines}?`
+			)) {
+				return;
 			}
 
-			// write game file as link
-			if (data.frame_file_url) {
-				const dt = document.createElement('dt');
-				const dd = document.createElement('dd');
-				const a = document.createElement('a');
-
-				dt.textContent = 'Game Frame Files';
-
-				a.href = data.frame_file_url;
-				a.textContent = data.frame_file_url;
-
-				dd.appendChild(a);
-				dl.appendChild(dt);
-				dl.appendChild(dd);
+			try {
+				await fetch(a.href, {
+					method: 'DELETE',
+					mode: 'cors',
+					credentials: 'same-origin'
+				});
+			}
+			catch(err) {
+				console.log('Unable to delete score');
 			}
 
+			// remove record in place, dont reload whole list...
+			parent_tr.remove();
+			// also remove the details row if it existed
+			try {
+				document.querySelector(`tr#details_${id}`).remove();
+			}
+			catch(err) { }
 
-			td.innerHTML = ''; // clear the loading message
-			td.appendChild(dl);
-		}
-		catch(err) {
-			console.log('Unable to show details');
-		}
+			// Could also do:
+			// location.reload(); // but that's inefficient
+		});
 	});
-});
 
-const orders = ['desc', 'asc'];
+	document.querySelectorAll('a.details_score').forEach(a => {
+		a.addEventListener('click', async (evt) => {
+			evt.preventDefault();
 
-function load() {
-	const url = new URL(location);
+			// clear all prior details
+			document.querySelectorAll('tr.details').forEach(tr => tr.hidden = true);
 
-	for (const [key, value] of Object.entries(pagination)) {
-		url.searchParams.set(key, value);
+			const parent_tr = a.closest('tr');
+			const id = a.href.split('/').pop();
+			const details = document.querySelector(`tr#details_${id}`);
+
+			if (details) {
+				details.hidden = false;
+				return;
+			}
+
+			// details are not already loaded, fetch now and populate in page
+			const details_tr = document.createElement('tr');
+			details_tr.classList.add('details');
+			details_tr.setAttribute('id', `details_${id}`);
+
+			if (parent_tr.classList.contains('even')) {
+				details_tr.classList.add('even');
+			}
+
+			const td = document.createElement('td');
+			td.setAttribute('colspan', '11');
+			td.textContent = 'Loading...';
+
+			details_tr.appendChild(td);
+
+			parent_tr.insertAdjacentElement('afterend', details_tr);
+
+			try {
+				const response = await fetch(a.href, {
+					method: 'GET',
+					mode: 'cors',
+					credentials: 'same-origin'
+				});
+
+				const data = await response.json();
+
+				// TODO: derive stats again and show them
+				// TODO show pretty graphs
+
+				const details = {
+					Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
+					Clears: data.clears || '-',
+					Pieces: data.pieces || '-',
+				};
+
+				const dl = document.createElement('dl');
+
+				for (const [key, value] of Object.entries(details)) {
+					const dt = document.createElement('dt');
+					const dd = document.createElement('dd');
+
+					dt.textContent = key;
+					dd.textContent = value;
+
+					dl.appendChild(dt);
+					dl.appendChild(dd);
+				}
+
+				// write game file as link
+				if (data.frame_file_url) {
+					const dt = document.createElement('dt');
+					const dd = document.createElement('dd');
+					const a = document.createElement('a');
+
+					dt.textContent = 'Game Frame Files';
+
+					a.href = data.frame_file_url;
+					a.textContent = data.frame_file_url;
+
+					dd.appendChild(a);
+					dl.appendChild(dt);
+					dl.appendChild(dd);
+				}
+
+
+				td.innerHTML = ''; // clear the loading message
+				td.appendChild(dl);
+			}
+			catch(err) {
+				console.log('Unable to show details');
+			}
+		});
+	});
+
+	const orders = ['desc', 'asc'];
+
+	function load() {
+		const url = new URL(location);
+
+		for (const [key, value] of Object.entries(pagination)) {
+			url.searchParams.set(key, value);
+		}
+
+		location.href = url.toString();
 	}
 
-	location.href = url.toString();
-}
 
+	// show up and/or down arrow on active sorter
+	try {
+		const sorter = document.querySelector(`th.sorter[data-field='${pagination.sort_field}']`);
+		sorter.textContent = `${sorter.textContent} ${pagination.sort_order === 'desc' ? '↓' : '↑'}`;
+	}
+	catch(err) {
+		console.log(err);
+	}
 
-// show up and/or down arrow on active sorter
-try {
-	const sorter = document.querySelector(`th.sorter[data-field='${pagination.sort_field}']`);
-	sorter.textContent = `${sorter.textContent} ${pagination.sort_order === 'desc' ? '↓' : '↑'}`;
-}
-catch(err) {
-	console.log(err);
-}
+	document.querySelectorAll('th.sorter').forEach(th => {
+		const a = document.createElement('a');
+		a.href = '#';
+		a.textContent = th.textContent;
+		th.innerHTML = '';
 
-document.querySelectorAll('th.sorter').forEach(th => {
-	const a = document.createElement('a');
-	a.href = '#';
-	a.textContent = th.textContent;
-	th.innerHTML = '';
+		a.addEventListener('click', evt => {
+			evt.preventDefault();
 
-	a.addEventListener('click', evt => {
-		evt.preventDefault();
+			const field = th.dataset.field;
 
-		const field = th.dataset.field;
+			if (pagination.sort_field === field) {
+				const idx = orders.indexOf(pagination.sort_order);
+				pagination.sort_order = orders[(idx + 1) % orders.length];
+			}
+			else {
+				pagination.sort_field = field;
+				pagination.sort_order = orders[0];
+			}
 
-		if (pagination.sort_field === field) {
-			const idx = orders.indexOf(pagination.sort_order);
-			pagination.sort_order = orders[(idx + 1) % orders.length];
-		}
-		else {
-			pagination.sort_field = field;
-			pagination.sort_order = orders[0];
-		}
+			pagination.page_idx = 0;
+			load();
+		});
 
-		pagination.page_idx = 0;
-		load();
+		th.appendChild(a);
 	});
 
-	th.appendChild(a);
-});
+	document.querySelectorAll('nav li a').forEach(a => {
+		a.addEventListener('click', evt => {
+			evt.preventDefault();
 
-document.querySelectorAll('li a').forEach(a => {
-	a.addEventListener('click', evt => {
-		evt.preventDefault();
-
-		pagination.page_idx = parseInt(a.textContent, 10) - 1;
-		load();
+			pagination.page_idx = parseInt(a.textContent, 10) - 1;
+			load();
+		});
 	});
-});
+	/**/
 
-</script>
+	</script>
 
 </body>
 </html>
