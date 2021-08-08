@@ -22,7 +22,7 @@
 		</style>
 	</head>
 	<body>
-		<div id="timer">00:00:00</div>
+		<div id="timer"></div>
 
 		<script type="text/javascript">
 			// defaults
@@ -83,10 +83,7 @@
 				);
 			}
 
-			const start_time = Date.now();
-			const allowed_time_s = minutes * 60;
-
-			let timer = setInterval(() => {
+			function run() {
 				let elapsed_s = Math.floor((Date.now() - start_time) / 1000);
 
 				if (elapsed_s > allowed_time_s) {
@@ -99,7 +96,14 @@
 				} else {
 					timer_node.innerHTML = format_duration(allowed_time_s - elapsed_s);
 				}
-			}, 250);
+			}
+
+			const start_time = Date.now();
+			const allowed_time_s = minutes * 60;
+
+			let timer = setInterval(run, 250);
+
+			run();
 		</script>
 	</body>
 </html>
