@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<title>NestrisChamps: Capture your NES Classic Tetris gameplay</title>
-		<meta name="description" content="Nestrischamps: capture NES Classic Tetris data and see awesome stats. Record all your games. See your progressions. Play with friends and organise tournaments!" />
+	<title>NestrisChamps: Capture your NES Classic Tetris gameplay</title>
+	<meta name="description" content="Nestrischamps: capture NES Classic Tetris data and see awesome stats. Record all your games. See your progressions. Play with friends and organise tournaments!" />
 
-	<meta property="og:url" content="https://nestrischamps.herokuapp.com/" />
-	<meta property="og:type" content="website" />
-	<meta property="og:image" content="https://nestrischamps.herokuapp.com/views/1p/das_trainer.jpg" />
-	<meta property="og:title" content="NestrisChamps: Capture your NES Classic Tetris gameplay" />
-	<meta property="og:description" content="Nestrischamps: capture NES Classic Tetris data and see awesome stats. Record all your games. See your progressions. Play with friends and organise tournaments!" />
+<meta property="og:url" content="https://nestrischamps.herokuapp.com/" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://nestrischamps.herokuapp.com/views/1p/das_trainer.jpg" />
+<meta property="og:title" content="NestrisChamps: Capture your NES Classic Tetris gameplay" />
+<meta property="og:description" content="Nestrischamps: capture NES Classic Tetris data and see awesome stats. Record all your games. See your progressions. Play with friends and organise tournaments!" />
 
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-		<style>
-			.navbar-item img {
-				max-height: 2.5rem;
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+	<style>
+		.navbar-item img {
+			max-height: 2.5rem;
+		}
+	</style>
+	<script>
+		function load_iframe(selector, url, [width, height] = [1280, 720]) {
+			const holder = document.querySelector(selector);
+			holder.innerHTML = '';
+
+			const styles = getComputedStyle(holder);
+
+			const iframe = document.createElement('iframe');
+			iframe.src = `https://nestrischamps.herokuapp.com${url}`;
+			iframe.width = width;
+			iframe.height = height;
+
+			const scale = parseInt(styles.width) / width;
+
+			if (scale < 1) {
+				iframe.style.transformOrigin = `0 0`;
+				iframe.style.transform = `scale(${scale})`;
+				holder.style.height = `${height * scale}px`; // should not be needed, but bug in chrome :'(
 			}
-		</style>
-		<script>
-			function load_iframe(selector, url, [width, height] = [1280, 720]) {
-				const holder = document.querySelector(selector);
-				holder.innerHTML = '';
 
-				const styles = getComputedStyle(holder);
-
-				const iframe = document.createElement('iframe');
-				iframe.src = `https://nestrischamps.herokuapp.com${url}`;
-				iframe.width = width;
-				iframe.height = height;
-
-				const scale = parseInt(styles.width) / width;
-
-				if (scale < 1) {
-					iframe.style.transformOrigin = `0 0`;
-					iframe.style.transform = `scale(${scale})`;
-					holder.style.height = `${height * scale}px`; // should not be needed, but bug in chrome :'(
-				}
-
-				holder.appendChild(iframe);
-			}
-		</script>
-	</head>
-	<body>
+			holder.appendChild(iframe);
+		}
+	</script>
+</head>
+<body>
 
 <%- include('header'); %>
 
@@ -84,13 +84,13 @@
 		<p>Once calibration is done, streaming with nestrischamps is easy as pie! You just need to add <strong>ONE</strong> <a href="https://plsoid.medium.com/how-to-add-browser-source-in-obs-streamlabs-obs-twitch-studio-xsplit-50a698080497">Browser Source component</a> to <a hre="https://obsproject.com/">OBS</a> / <a href="https://streamlabs.com/">SLOBS</a>, to have the captured gameplay re-rendered, and you are ready to stream right away!</p>
 		<p>There's no manual cutting of the source video stream to do, everything is ready in just a few clicks.</p>
 		<p>So, to get started, the first you need to do is to calibrate.</p>
-		<p><strong>Before</strong> You do that however, it is strongly recommended that, you spend timeon these 2 resources.</p>
+		<p><strong>Before</strong> You do that however, it is strongly recommended that, you spend time on these 2 resources.</p>
 		<ul>
 			<li><a href="https://nestrischamps.gitbook.io/docs/streaming/ocr-and-calibration">Calibration documentation</a></li>
-			<li><a href="https://www.youtube.com/watch?v=HJIqU38LqoE">Calibration tutorial video on youtube</a></li>
+			<li><a href="https://www.youtube.com/watch?v=HJIqU38LqoE">Calibration tutorial on youtube</a></li>
 		</ul>
-		<p>Once you are done reading the doc, go and <a href="/room/producer">calibrate here</a>.</p>
-		<p>And once you've calibrated, pick a renderer for your browser sour in the <a href="/renderers"> renderers page</a></p>
+		<p>Once you've read the doc, go and <a href="/room/producer">calibrate your capture here</a>.</p>
+		<p>And once you've calibrated, pick a renderer for your Browser Source in the <a href="/renderers">renderers page</a>.</p>
 	</div>
 </section>
 
@@ -99,7 +99,7 @@
 		<h1 class="title is-1" id="stats">
 			Stats! So many stats!
 		</h1>
-		<p>The NES had very little real-estate, which severely limited the space available for stats beside gameplay itself. Oce game data is acquired in NestrisChamps however, it can be renderered in gorgeous HD resolution, and thus offers much more space for stats. In NestrisChamps, all layouts are provided to run in 720p resolution (1280x720), allowing much more data to be displayed. But custom renderers could even be made in 1080p resolution or even (gasp!) 4K!</p>
+		<p>The NES has very little real-estate, which severely limits the space available for stats beside gameplay itself. Once game data is acquired in NestrisChamps however, it can be renderered in a large HD canvas, offering much more space for stats. In NestrisChamps, all layouts are provided to run in 720p resolution (1280x720), but custom renderers could even be made in 1080p resolution or even (gasp!) 4K!</p>
 		<div class="columns">
 			<div class="column is-half">
 				<img title="Classic Layout" src="/views/1p/classic.jpg" />
@@ -127,9 +127,9 @@
 			</div>
 			<div class="column is-half">
 				<p>
-					<button onclick="load_iframe('#replay', '/replay/das_trainer/11020?speed=4')">Start a game replay</button>
-					<button onclick="load_iframe('#replay', '/replay/ctwc/24619-24623?bg=2&speed=4')">Start a match replay</button>
-					<button onclick="load_iframe('#replay', '/replay/compact2to4/24619-24623-11020?bg=2&players=3&speed=4')">Start a 3-way replay</button>
+					<button class="button is-info is-light is-outlined" onclick="load_iframe('#replay', '/replay/das_trainer/11020?speed=4')">Start a game replay</button>
+					<button class="button is-info is-light is-outlined" onclick="load_iframe('#replay', '/replay/ctwc/24619-24623?bg=2&speed=4')">Start a match replay</button>
+					<button class="button is-info is-light is-outlined" onclick="load_iframe('#replay', '/replay/compact2to4/24619-24623-11020?bg=2&players=3&speed=4')">Start a 3-way replay</button>
 				</p>
 				<div id="replay"></div>
 			</div>
@@ -181,14 +181,14 @@
 		<h1 class="title is-1" id="game_hosting_n_tournaments">
 			Game Hosting and Tournaments
 		</h1>
-		<p>While you can use NestriChamps purely to capture and stream your own gameplay. One great thing about Nestrischamps is that you can connect your game stream to someone's else renderer, who acts as a game host! And of course, you can be a game host yourself!</p>
+		<p>While you can use NestriChamps purely to capture and stream your own gameplay. One great thing about Nestrischamps is that you can connect your game stream to someone's else renderer, who acts as a game host. And of course, you can be a game host yourself!</p>
 		<p>Game hosting with nestrischamps is incredibly easy!</p>
 		<ol>
 			<li>Set a browser source in OBS to one of Nestrischamps competition layouts, that you can find in the <a href="/renderers"> renderers page</a></li>
 			<li>Control which player should be shown in the layout from the <a href="/room/admin">admin page</a></li>
 			<li>Commentate on games and let your commentating flavour earn you fame and glory!</li>
 		</ol>
-		<p>There are a variety of competitions layouts to chose from. Below are just 2 examples.</p>
+		<p>There are a variety of competition layouts to chose from, with some example below.</p>
 		<div class="columns">
 			<div class="column is-half">
 				<h4 class="subtitle is-4">CTM video</h4>
@@ -230,7 +230,7 @@
 			<div class="column is-half">
 				<h2 class="title is-2">Twitch Chat Integration</h2>
 				<p>For layouts that support it, Twitch chats is automatically renderered into the layout.</p>
-				<p>Additionally, the capture page can be loaded with a query string <pre>?tts=1</pre> and the chat message will be read to the player, with one random voice assigned to each participants to the chat.</p>
+				<p>Additionally, the capture page can be loaded with a query string <pre>?tts=1</pre> to activate Text-To-Speech, and chat messages will be read to the player, with one random voice assigned to each participant of the chat.</p>
 			</div>
 		</div>
 		<div class="columns">
@@ -242,6 +242,34 @@ VNIPZN
 VNTPYN</pre>
 				<p>It is hard enough for expert players themselves to track the invisible field, and it is practically impossible for stream viewers to track. Nestrischamps comes to the rescue here with a Invisible Tetris renderer! While the player plays invisible Tetris and must keep track of the board in his/her head. The audience to the stream get to see the "phantom" pieces in the board.</p>
 				<img title="Invisible Tetris layout" src="/views/1p/invisible_tetris.jpg" />
+			</div>
+			<div class="column is-half">
+				<h2 class="title is-2">Counting scores past maxout</h2>
+				<div>
+					<p>NES tetris stops counting score at 999,999. With a custom Game Genie code, it is possible to count past this (up to 1,600,000) with using a hexadecimal character as first letter (e.g. A is 1 million, B is 1.1 million, C, is 1.2 million, etc)</p>
+					<p>Folks do not necessarily have a Game Genie though. Well, Nestrischamps to the rescue for this case too! By inspecting the line clears in the game, Nestrischamps is able to add up score beyond maxout and display it in the layouts.</p>
+					<p>As a bonus, levels in NES classic Tetris are not displayed correctly beyond level 30. Nestrischamps corrects the level up to level 49, which is enough formost players.</p>
+				</div>
+			</div>
+		</div>
+		<div class="columns">
+			<div class="column is-half">
+				<h2 class="title is-2">Qualifier renderer</h2>
+				<div>
+					<p>Many online events have a qualifier format, where players must qualify to determine in which bracket they will play.</p>
+					<p>Most qualifiers have the same sort of requirements: stream for a specific amounf of time, track your qual score, as either the highest score you can achieve during your qual session, or average of top 2 or 3.</p>
+					<p>NestrisChamps offers a qualifier layout. The layout is CTM-stencil-based, includes a built-in timer, and computes the qual score as the average of top X (3 by default). Native webcam is active in this layout, so players can show their webcam capture works, if that is a requirement of the tournament they are joining.</p>
+					<p>The layout tracks scores from the moment it is loaded, and the timer starts as soon as the layout loads.</p>
+					<p>The qualifier layout can be tuned with the following parameters, which can be added to the query string.</p>
+					<dl>
+						<dt><strong>minutes=X</strong></dt>
+						<dd>where X is the qualifier time (default to 120 minutes, i.e. 2 hours)</d>
+						<dt><strong>average_of=Y</strong></dt>
+						<dd>where Y can be one of 1, 2, or 3 (defaults to 3)</d>
+					</dl>
+					<pre>?minutes=60&average_of=2</pre>
+					<img title="Qualifier layout layout" src="/views/1p/stencil_ctwc_sing_21.jpg" />
+				</div>
 			</div>
 			<div class="column is-half">
 				<h2 class="title is-2">Backgrounds</h2>
@@ -262,61 +290,33 @@ VNTPYN</pre>
 		</div>
 		<div class="columns">
 			<div class="column is-half">
-				<h2 class="title is-2">Qualifier renderer</h2>
-				<div>
-					<p>Many online events have qualifier format. Where players must qualify to play in various brackets.</p>
-					<p>Most qualifier have the same requirements: stream for a specific amounf of time, track your qual score, as either the highest score you can achieve during your qual session, or average of top 2, or average of top 3</p>
-					<p>NestrisChamps offers a qualifier layout. The layout is CTM-stencil-based, includes a built-in timers, and compute the qual score as the average of top X (3 by default). Native webcam is also active in this layout, so players can show their webcam capture works, if that is a requirement of the tournament they are joining.</p>
-					<p>The layout tracks scores from the moment it is loaded, and the timer starts as soon as the layout loads.</p>
-					<p>The qualifier layout can be tuned with the following parameters, which can be added to the query string.</p>
-					<dl>
-						<dt><strong>minutes=X</strong></dt>
-						<dd>where X is the qualifier time (default to 120 minutes, i.e. 2 hours)</d>
-						<dt><strong>average_of=Y</strong></dt>
-						<dd>where Y can be one of 1, 2, or 3 (defaults to 3)</d>
-					</dl>
-					<pre>?minutes=60&average_of=2</pre>
-					<img title="Qualifier layout layout" src="/views/1p/stencil_ctwc_sing_21.jpg" />
-				</div>
-			</div>
-			<div class="column is-half">
 				<h2 class="title is-2">Timer Tool</h2>
 				<div>
-					<div id="timer"><button onclick="load_iframe('#timer', '/tools/timer/', [268, 44])">Start a timer</button></div>
-					<p>Some competitions might not allow nestrischamps for qualifiers. For those, it is typically expected that players will stream their qualification run while being stencil-ready, and include some custom timer in their OBS stream.</p>
-					<p>It is surprinsingly annpyingto find a very light timer to use. Most players resort to finding a timer on the internet, and capture it with window capture in OBS. That is <em>waaayyy</em> heavier than it needs to be.</p>
-					<p>NestrisChamps includes a very simple timer that can be used in your OBS layout. Simply create a new browser source with canvas size 268x44 (you can scale its size in OBS later), and load the URL: <a href="https://nestrischamps.herokuapp.com/tools/timer/">https://nestrischamps.herokuapp.com/tools/timer/</a>.</p>
+					<p>Some competitions might not allow NestrisChamps for qualifiers. For those, it is typically expected that players will stream their qualification run while being stencil-ready, and include some custom timer in their OBS stream.</p>
+					<p>It is surprinsingly annoying to find a very light timer to use. Most players resort to finding a timer on the internet, and capture it with window capture in OBS. That is <em>waaayyy</em> heavier than it needs to be.</p>
+					<p>NestrisChamps provides a very simple timer that can be used in your OBS layout. Simply create a new Browser Source with canvas size 268x44 (you can scale its size in OBS later), and load the URL: <a href="https://nestrischamps.herokuapp.com/tools/timer/">https://nestrischamps.herokuapp.com/tools/timer/</a>.</p>
+					<p id="timer"><button class="button is-info is-light is-outlined" onclick="load_iframe('#timer', '/tools/timer/', [268, 44])">Start a timer</button></p>
 					<p>The timer can be customized with the following parameters</p>
 					<dl>
 						<dt><strong>minutes=X</strong></dt>
-						<dd>where X represents the duration of the timer (defaults to 2 hours)</dd>
+						<dd>where X is a integer representing the duration in minutes of the timer (defaults to 120, i.e. 2 hours)</dd>
 						<dt><strong>type=Y</strong></dt>
 						<dd>where Y can be one of 'up' or 'down' to indicate whether this is a count-up or count-down timer.</dd>
-						<dt><strong>text_color=HHHHHH</strong></dt>
-						<dd>where HHHHHH is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the text</dd>
-						<dt><strong>bg_color=HHHHHH</strong></dt>
-						<dd>where HHHHHH is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the background</dd>
+						<dt><strong>text_color=H</strong></dt>
+						<dd>where H is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the text (default to black)</dd>
+						<dt><strong>bg_color=H</strong></dt>
+						<dd>where H is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the background (default to white)</dd>
 					</dl>
 					<pre>?minutes=60&type=down&text_color=ffffff&bg_color=000000</pre>
 					<p>Source code and documentation for the timer is available <a href="https://github.com/timotheeg/nestrischamps/tree/main/public/tools/timer">here</a></p>
 				</div>
 			</div>
-		</div>
-		<div class="columns">
-			<div class="column is-half">
-				<h2 class="title is-2">Counting scores past maxout</h2>
-				<div>
-					<p>NES tetris stops counting score at 999,999. With a custom Game Genie code, it is possible to count past this (up to 1,600,000) with using a hexadecimal character as first letter (e.g. A is 1 million, B is 1.1 million, C, is 1.2 million, etc)</p>
-					<p>Folks do not necessarily have a Game Genie though. Well, Nestrischamps to the rescue for this case too! By inspecting the line clears in the game, Nestrischamps is able to add up score beyond maxout and display it in the layouts.</p>
-					<p>As a bonus, NES classic Tetris is not working correctly when players go to level 30 and beyond. Nestrischamps corrects the level up to level 49.</p>
-				</div>
-			</div>
 			<div class="column is-half">
 				<h2 class="title is-2">CTWC Footer Tool</h2>
 				<div>
-					<p>When running an official CTWC event, most tournament use a common footer that cycles between multiple "slides" of information (e.g. event name, facebook page, etc.)</p>
-					<p>Nestrischamps makes available a simple footer that can be easily loaded in OBS. The footer has size 1280x32, and can thus be easily added as a standalone browser source above many of the competition layouts, which specificaly leave a 32px strip at the bottom of the layouts.</p>
-					<p id="ncfooter"><button onclick="load_iframe('#ncfooter', '/tools/footer/', [1280, 32])">Run the footer</button></p>
+					<p>When running an official CTWC event, most tournaments use a common footer that cycles between multiple "slides" of information (e.g. event name, facebook page, etc.)</p>
+					<p>Nestrischamps makes available a simple footer that can be easily loaded in OBS. The footer has size 1280x32, and can thus be easily added as a standalone browser source, above many of the competition layouts, which specificaly leave a 32px strip at the bottom of the layouts.</p>
+					<p id="ncfooter"><button class="button is-info is-light is-outlined" onclick="load_iframe('#ncfooter', '/tools/footer/', [1280, 32])">Run the footer</button></p>
 					<p>The footer can be customized with the following parameters</p>
 					<dl>
 						<dt><strong>event=X</strong></dt>
@@ -331,19 +331,27 @@ VNTPYN</pre>
 				</div>
 			</div>
 		</div>
+		<div class="columns">
+			<div class="column is-half">
+				<h2 class="title is-2">
+					Native emulator support
+				</h2>
+				<p>Capture is the most critical part of Nestrischamps. Without good data in, Nestrischamps can't compute stats from gameplay accurately.</p>
+				<p>While we can't do without frame capture for a video feed from a NES, frame capture is unecessary in an emulator! Indeed game data can be read from the game itself and sent to NestrisChamps' server! This exactly what <a href="https://github.com/Stabyourself">Maurice</a> did when he created the <a href="https://github.com/Stabyourself/nestrischamps-emulator-connector">NestrisChamps emulator connector</a>!</p>
+				<p>If you play NES Tetris in one of <a href="http://fceux.com/">FCEUX</a>, <a href="https://www.mesen.ca/">Mesen</a>, or <a href="http://tasvideos.org/BizHawk.html">BizHawk</a> (basically emulators with support for lua scripting), then you can easily use the NestrisChamps Emulator Connector.</p>
+				<p>Because the connector runs straight in the emulator, features from the "normal" NestrisChamps capture page are obviously not available (e.g. native webcam sharing, and Twitch chat Text-To-Speech).</p>
+			</div>
+			<div class="column is-half">
+				<h2 class="title is-2">
+					Free and Open Source!
+				</h2>
+				<p>NestrisChamps is Open Source Software, licenced under the MIT licence and <a href="https://github.com/timotheeg/nestrischamps">available on github</a>.</p>
+				<p>That means you can run your own version of NestrisChamps locally if you wish, and have your own database.</p>
+				<p>The online version of NestrisChamps is owned and operated by yobi9 (Find him on <a href="https://discord.gg/Wzr4YdQWa4">discord</a>, <a href="https://www.twitch.tv/yobi9">twitch</a>, <a href="https://github.com/timotheeg">github</a>).</p>
+			</div>
+		</div>
 	</div>
 </section>
 
-<section class="section">
-	<div class="container content">
-		<h1 class="title is-1">
-			Free and Open Source!
-		</h1>
-		<p>NestrisChamps is Open Source Software, licenced under the MIT licence and <a href="https://github.com/timotheeg/nestrischamps">available on github</a>.</p>
-		<p>That means you can run your own version of NestrisChamps locally if you wish, and have your own database.</p>
-		<p>The online version of NestrisChamps is owned and operated by yobi9 (Find him on <a href="https://discord.gg/Wzr4YdQWa4">discord</a>, <a href="https://www.twitch.tv/yobi9">twitch</a>, <a href="https://github.com/timotheeg">github</a>).</p>
-	</div>
-</section>
-
-	</body>
+</body>
 </html>
