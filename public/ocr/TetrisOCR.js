@@ -634,7 +634,7 @@ const TetrisOCR = (function () {
 			// see: https://www.youtube.com/watch?v=LKnqECcg6Gw
 			const task = this.config.tasks.field;
 			const xywh_coordinates = this.getCropCoordinates(task);
-			const colors = _colors.map(([r, g, b]) => [r * r, g * g, b * b]); // we square the reference colors
+			const colors = _colors.map(rgb2lab); // we operate in Lab color space
 			const index_offset = _colors.length == 4 ? 0 : 1; // length of colors is either 3 or 4
 
 			// crop is not needed, but done anyway to share task captured area with caller app
@@ -707,21 +707,23 @@ const TetrisOCR = (function () {
 						continue;
 					}
 
-					const channels = pix_refs
-						.map(([x, y]) => {
-							const col_idx = block_offset + y * row_width * 4 + x * 4;
-							return field_img.data.subarray(col_idx, col_idx + 3);
-						})
-						.reduce(
-							(acc, col) => {
-								acc[0] += col[0] * col[0];
-								acc[1] += col[1] * col[1];
-								acc[2] += col[2] * col[2];
-								return acc;
-							},
-							[0, 0, 0]
-						)
-						.map(v => v / pix_refs.length); // this is an average of squares!
+					const channels = rgb2lab(
+						pix_refs
+							.map(([x, y]) => {
+								const col_idx = block_offset + y * row_width * 4 + x * 4;
+								return field_img.data.subarray(col_idx, col_idx + 3);
+							})
+							.reduce(
+								(acc, col) => {
+									acc[0] += col[0] * col[0];
+									acc[1] += col[1] * col[1];
+									acc[2] += col[2] * col[2];
+									return acc;
+								},
+								[0, 0, 0]
+							)
+							.map(v => Math.sqrt(v / pix_refs.length))
+					);
 
 					let min_diff = 0xffffffff;
 					let min_idx = -1;
