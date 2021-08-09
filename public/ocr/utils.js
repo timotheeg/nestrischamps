@@ -11,3 +11,41 @@ function timingDecorator(name, func) {
 		return res;
 	};
 }
+
+function rgb2lab_normalizeRgbChannel(channel) {
+	channel /= 255;
+
+	return (
+		100 *
+		(channel > 0.04045
+			? Math.pow((channel + 0.055) / 1.055, 2.4)
+			: channel / 12.92)
+	);
+}
+
+function rgb2lab_normalizeXyzChannel(channel) {
+	return channel > 0.008856
+		? Math.pow(channel, 1 / 3)
+		: 7.787 * channel + 16 / 116;
+}
+
+function rgb2lab([r, g, b]) {
+	r = rgb2lab_normalizeRgbChannel(r);
+	g = rgb2lab_normalizeRgbChannel(g);
+	b = rgb2lab_normalizeRgbChannel(b);
+
+	let X = r * 0.4124 + g * 0.3576 + b * 0.1805;
+	let Y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+	let Z = r * 0.0193 + g * 0.1192 + b * 0.9505;
+
+	// Observer= 2°, Illuminant= D65
+	X = rgb2lab_normalizeXyzChannel(X / 95.047);
+	Y = rgb2lab_normalizeXyzChannel(Y / 100.0);
+	Z = rgb2lab_normalizeXyzChannel(Z / 108.883);
+
+	return [
+		116 * Y - 16, // L
+		500 * (X - Y), // a
+		200 * (Y - Z), // b
+	];
+}
