@@ -5,6 +5,81 @@
 
 	const parent = document.querySelector('#stream_bg');
 
+	if (QueryString.get('bg') === '5') {
+		const bg = document.createElement('div');
+		parent.style.backgroundColor = 'black';
+		bg.classList.add('bg');
+
+		const bounds = parent.getBoundingClientRect();
+
+		const spacer_w = 160;
+		const spacer_h = 40;
+		const canvas_w = bounds.width + spacer_w * 2;
+		const canvas_h = bounds.height + spacer_h * 2;
+
+		const trophy_base_uri = '/brand/trophies/';
+		const trophy_nums = Array(20)
+			.fill()
+			.map((_, idx) => idx + 1);
+
+		const columns = Math.ceil(canvas_w / spacer_w);
+		const rows = Math.ceil(canvas_h / spacer_h);
+
+		let num_trophy_set = Math.ceil((columns * rows) / trophy_nums.length);
+
+		const trophies = [];
+
+		while (num_trophy_set--) {
+			trophies.push(...shuffle(trophy_nums.concat()));
+		}
+
+		shuffle(trophies);
+
+		trophies.length = columns * rows;
+
+		for (let y = rows; y--; ) {
+			const offset_x = -(y % 2 === 0 ? 0 : spacer_w / 2);
+			const offset_y = -(y % 2 === 0 ? 0 : spacer_h / 2) - spacer_h;
+
+			for (let x = columns; x--; ) {
+				const trophy_num = trophies.shift();
+				const img = new Image();
+				img.src = `${trophy_base_uri}${trophy_num}.2x.png`;
+
+				img.loc = {
+					x: offset_x + x * spacer_w,
+					y: offset_y + y * spacer_h,
+				};
+
+				Object.assign(img.style, {
+					left: `${img.loc.x}px`,
+					top: `${img.loc.y}px`,
+					position: 'absolute',
+				});
+
+				bg.appendChild(img);
+				trophies.push(img);
+			}
+		}
+
+		setInterval(() => {
+			trophies.forEach(img => {
+				if (++img.loc.x > canvas_w - spacer_w * 2) {
+					img.loc.x -= canvas_w;
+				}
+				if (++img.loc.y > canvas_h - spacer_h * 2) {
+					img.loc.y -= canvas_h;
+				}
+
+				img.style.left = `${img.loc.x}px`;
+				img.style.top = `${img.loc.y}px`;
+			});
+		}, 1000 / 30);
+
+		parent.prepend(bg);
+		return;
+	}
+
 	if (
 		QueryString.get('bg') === '2' ||
 		QueryString.get('bg') === '3' ||
