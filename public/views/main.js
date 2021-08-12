@@ -389,23 +389,25 @@ function onFrame(event, debug) {
 			})
 			.filter(v => v);
 
-		return;
+		last_negative_diff = null;
 	} else if (diff.stage_blocks === 4) {
 		last_valid_state.stage = transformed.stage;
 		pending_piece = pending_delay_frames;
-	} else if (diff.stage_blocks > 0) {
-		return;
-	} else if (!all_possible_negative_diffs.includes(diff.stage_blocks)) {
+		last_negative_diff = null;
+		full_rows.length = 0;
+	} else if (
+		diff.stage_blocks > 0 ||
+		!all_possible_negative_diffs.includes(diff.stage_blocks)
+	) {
 		// unexpected negative value, ignore
-		return;
+		last_negative_diff = null;
+		full_rows.length = 0;
 	} else {
-		// assuming we aren't dropping any frame, the number of blocks only reduces when the
-		// line animation starts, the diff is twice the number of lines being cleared.
-		//
-		// Note: diff.stage_blocks can be negative at weird amounts when the piece is rotated
-		// while still being at the top of the field with some block moved out of view
+		// when we reach here diff.stage_blocks is a *valid* negative diff
 
-		if (full_rows.length) {
+		// We only use the full rows data for triple and tetris
+		// That is in the hope that we can fire the Tetris Flash
+		if (full_rows.length > 2) {
 			const clears = clear_diffs[full_rows.length - 1];
 			const clear_frame_idx = clears.indexOf(diff.stage_blocks);
 
@@ -420,11 +422,13 @@ function onFrame(event, debug) {
 				}
 
 				full_rows.length = 0;
+				last_negative_diff = null;
 				return;
 			}
-
-			full_rows.length = 0;
-		} else if (last_negative_diff != null) {
+		} else if (
+			last_negative_diff != null &&
+			last_negative_diff != diff.stage_blocks
+		) {
 			// inspect all clear diffs to see if we have 2 consecutive values
 			for (let clear = clear_diffs.length; clear > 0; clear--) {
 				if (!clear_diffs[clear - 1].includes(last_negative_diff)) continue;
@@ -444,14 +448,15 @@ function onFrame(event, debug) {
 					onTetris();
 				}
 
+				full_rows.length = 0;
 				last_negative_diff = null;
 				return;
 			}
 		}
-	}
 
-	full_rows.length = 0;
-	last_negative_diff = diff.stage_blocks;
+		last_negative_diff = diff.stage_blocks;
+		full_rows.length = 0;
+	}
 }
 
 const all_possible_negative_diffs = [
