@@ -161,7 +161,8 @@ let game = null,
 	pending_piece = -1,
 	pending_line = -1,
 	line_animation_remaining_frames = 0,
-	pending_single = false,
+	full_rows = [],
+	last_negative_diff = null,
 	game_frames = [];
 
 function getTotalPieceCount(event) {
@@ -252,6 +253,8 @@ function onFrame(event, debug) {
 		last_valid_state = { ...transformed };
 
 		line_animation_remaining_frames = 0;
+		last_negative_diff = null;
+		full_rows = [];
 
 		pending_piece = 1;
 	}
@@ -361,6 +364,11 @@ function onFrame(event, debug) {
 		renderNextPiece(transformed.level, transformed.next_piece);
 	}
 
+	if (game.over) {
+		// no need to count block, we just need to wait for the next game now
+		return;
+	}
+
 	if (last_valid_state.stage.field_string == transformed.stage.field_string)
 		return;
 
@@ -368,54 +376,98 @@ function onFrame(event, debug) {
 
 	if (line_animation_remaining_frames-- > 0) return;
 
-	if (diff.stage_blocks === 4) {
+	if (diff.stage_blocks === 0) {
+		// piece is still falling, compute full rows
+		full_rows = Array(20)
+			.fill()
+			.map((_, ridx) => {
+				return Array(10)
+					.fill()
+					.every((_, cidx) => transformed.stage.field[ridx * 10 + cidx])
+					? ridx
+					: 0;
+			})
+			.filter(v => v);
+
+		last_negative_diff = null;
+	} else if (diff.stage_blocks === 4) {
 		last_valid_state.stage = transformed.stage;
 		pending_piece = pending_delay_frames;
+		last_negative_diff = null;
+		full_rows.length = 0;
+	} else if (
+		diff.stage_blocks > 0 ||
+		!all_possible_negative_diffs.includes(diff.stage_blocks)
+	) {
+		// unexpected negative value, ignore
+		last_negative_diff = null;
+		full_rows.length = 0;
 	} else {
-		// assuming we aren't dropping any frame, the number of blocks only reduces when the
-		// line animation starts, the diff is twice the number of lines being cleared.
-		//
-		// Note: diff.stage_blocks can be negative at weird amounts when the piece is rotated
-		// while still being at the top of the field with some block moved out of view
+		// when we reach here diff.stage_blocks is a *valid* negative diff
 
-		switch (diff.stage_blocks) {
-			case -8:
-				onTetris();
-			case -6:
-				// indicate animation for triples and tetris_rate
-				line_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
-				last_valid_state.stage.num_blocks += diff.stage_blocks * 5; // equivalent to fast forward on how many blocks will have gone after the animation
+		// We only use the full rows data for triple and tetris
+		// That is in the hope that we can fire the Tetris Flash
+		if (full_rows.length > 2) {
+			const clears = clear_diffs[full_rows.length - 1];
+			const clear_frame_idx = clears.indexOf(diff.stage_blocks);
 
-				break;
+			if (clear_frame_idx >= 0) {
+				// we found the clear!
+				line_animation_remaining_frames =
+					LINE_CLEAR_IGNORE_FRAMES - 1 - clear_frame_idx;
+				last_valid_state.stage.num_blocks -= full_rows.length * 10;
 
-			case -4:
-				if (pending_single) {
-					// verified single (second frame of clear animation)
-					line_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 2;
-					last_valid_state.stage.num_blocks -= 10;
-				} else {
-					// genuine double
-					line_animation_remaining_frames = LINE_CLEAR_IGNORE_FRAMES - 1;
-					last_valid_state.stage.num_blocks -= 20;
+				if (full_rows.length === 4) {
+					onTetris();
 				}
 
-				pending_single = false;
-				break;
+				full_rows.length = 0;
+				last_negative_diff = null;
+				return;
+			}
+		} else if (
+			last_negative_diff != null &&
+			last_negative_diff != diff.stage_blocks
+		) {
+			// inspect all clear diffs to see if we have 2 consecutive values
+			for (let clear = clear_diffs.length; clear > 0; clear--) {
+				if (!clear_diffs[clear - 1].includes(last_negative_diff)) continue;
 
-			case -2:
-				// -2 can happen on the first clear animation frame of a single
-				// -2 can also happen when the piece is at the top of the field and gets rotated and is then partially off field
-				// to differentiate the 2, we must wait for the next frame, if it goes to -4, then it is the clear animation continuing
-				pending_single = true;
-				break;
+				const clear_frame_idx = clear_diffs[clear - 1].indexOf(
+					diff.stage_blocks
+				);
 
-			default:
-				// We ignore invalid block count diffs. In many cases these dut to interlace artefacts when the pieces rotate of move
-				// TODO: block count tracking can fall out of sync, breaking piece count events. CCan anything be done to restore a "clean" count and resume
-				pending_single = false;
+				if (clear_frame_idx < 0) continue;
+
+				// we found the clear!
+				line_animation_remaining_frames =
+					LINE_CLEAR_IGNORE_FRAMES - 1 - clear_frame_idx;
+				last_valid_state.stage.num_blocks -= clear * 10;
+
+				if (clear === 4) {
+					onTetris();
+				}
+
+				full_rows.length = 0;
+				last_negative_diff = null;
+				return;
+			}
 		}
+
+		last_negative_diff = diff.stage_blocks;
+		full_rows.length = 0;
 	}
 }
+
+const all_possible_negative_diffs = [
+	-2, -4, -6, -8, -10, -12, -16, -18, -20, -24, -30, -32, -40,
+];
+const clear_diffs = [
+	[-2, -4, -6, -8, -10],
+	[-4, -8, -12, -16, -20],
+	[-6, -12, -18, -24, -30],
+	[-8, -16, -24, -32, -40],
+];
 
 function getStats() {
 	let m;
