@@ -100,7 +100,7 @@ const speak = (function () {
 
 	function noop() {}
 
-	function speak(chatter, { force = 0, callback = noop }) {
+	function speak(chatter, { force = 0, callback = noop } = {}) {
 		if (QueryString.get('tts') != '1' && !force) return;
 		if (voices.length <= 0) return;
 		if (chatter.username == 'classictetrisbot') return;
