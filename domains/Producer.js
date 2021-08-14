@@ -80,7 +80,10 @@ class Producer extends EventEmitter {
 	}
 
 	getPeerId() {
-		return this.connection.id;
+		if (this.connection) {
+			return this.connection.id;
+		}
+		return '';
 	}
 
 	send(message) {
