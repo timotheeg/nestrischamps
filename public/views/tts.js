@@ -60,6 +60,11 @@ const speak = (function () {
 
 		if (voice) {
 			utterance.voice = voice;
+			console.log(
+				`SpeechSynthesis: ${chatter.username} (as ${voice.name}): ${chatter.message}`
+			);
+		} else {
+			console.log(`SpeechSynthesis: ${chatter.username}: ${chatter.message}`);
 		}
 
 		utterance.onend = utterance.onerror = () => {
@@ -80,8 +85,6 @@ const speak = (function () {
 
 		const chatter = speak_queue.shift();
 
-		console.log('Speaking', chatter.username, voice.name, chatter.message);
-
 		// wrap callback to add flow controls
 		const callback = chatter.callback;
 
@@ -100,7 +103,7 @@ const speak = (function () {
 
 	function noop() {}
 
-	function speak(chatter, { force = 0, callback = noop }) {
+	function speak(chatter, { force = 0, callback = noop } = {}) {
 		if (QueryString.get('tts') != '1' && !force) return;
 		if (voices.length <= 0) return;
 		if (chatter.username == 'classictetrisbot') return;
