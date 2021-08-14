@@ -192,7 +192,9 @@ function connect() {
 
 			switch (method) {
 				case 'message': {
-					speak(args[0]);
+					if (QueryString.get('tts') === '1') {
+						speak(args[0]);
+					}
 					break;
 				}
 				case 'setViewPeerId': {
@@ -730,7 +732,7 @@ function playUnfocusedAlarm() {
 				display_name: 'System',
 				message: 'Warning! Nestris champs OCR page is not active!',
 			},
-			{ force: true, callback: playUnfocusedAlarm }
+			{ now: true, callback: playUnfocusedAlarm }
 		);
 	} else {
 		// Play alarm

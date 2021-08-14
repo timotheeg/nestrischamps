@@ -103,8 +103,7 @@ const speak = (function () {
 
 	function noop() {}
 
-	function speak(chatter, { force = 0, callback = noop } = {}) {
-		if (QueryString.get('tts') != '1' && !force) return;
+	function speak(chatter, { now = false, callback = noop } = {}) {
 		if (voices.length <= 0) return;
 		if (chatter.username == 'classictetrisbot') return;
 
@@ -121,7 +120,7 @@ const speak = (function () {
 			callback,
 		};
 
-		if (force) {
+		if (now) {
 			speakNow(augmented_chatter);
 		} else {
 			speak_queue.push(augmented_chatter);
