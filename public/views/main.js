@@ -246,6 +246,12 @@ function onFrame(event, debug) {
 		game = new Game(transformed);
 		gameid = game.id;
 
+		game.onTransitionWarning = warning_lines => {
+			commentate(
+				`${game.transition_lines - game.data.lines.count} line till transition`
+			);
+		};
+
 		clearStage();
 		renderPiece(transformed);
 		renderLine();
@@ -1130,4 +1136,41 @@ function renderNextPiece(level, next_piece) {
 	positions.forEach(([pos_x, pos_y]) => {
 		renderBlock(level, col_index, BLOCK_PIXEL_SIZE, ctx, pos_x, pos_y);
 	});
+}
+
+const VOICES_DELAY = 100;
+let acquire_voices_tries = 10;
+let voice = null;
+
+function getVoices() {
+	if (!window.speechSynthesis) return;
+
+	const all_voices = window.speechSynthesis.getVoices();
+
+	if (all_voices.length <= 0) {
+		if (acquire_voices_tries--) {
+			setTimeout(getVoices, VOICES_DELAY);
+		} else {
+			console.log('Unable to get voices');
+		}
+
+		return;
+	}
+
+	// Samantha commentates!
+	voice = all_voices.find(v => v.name.toLowerCase() === 'samantha');
+}
+
+function commentate(message) {
+	if (!voice) return;
+
+	const utterance = new SpeechSynthesisUtterance(message);
+	utterance.voice = voice;
+	utterance.rate = 1.05;
+
+	window.speechSynthesis.speak(utterance);
+}
+
+if (QueryString.get('commentate') === '1') {
+	getVoices();
 }

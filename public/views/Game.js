@@ -13,6 +13,11 @@ class Game {
 		const score = event.score || 0;
 		const level = event.level || 0;
 
+		this.transition_lines = TRANSITIONS[level] || 0;
+		this.transition_warnings = [30, 20, 10]
+			.map(diff => this.transition_lines - diff)
+			.filter(lines => lines > event.lines);
+
 		this.data = {
 			start_level: level,
 
@@ -253,6 +258,13 @@ class Game {
 			// record line event
 			this.line_events.push(line_event);
 			this.pieces[this.pieces.length - 1].lines = line_event;
+
+			if (
+				this.transition_warnings.length &&
+				event.lines > this.transition_warnings[0]
+			) {
+				this.onTransitionWarning(this.transition_warnings.shift());
+			}
 		}
 
 		// update percentages for all clear types
@@ -325,4 +337,6 @@ class Game {
 	toString() {
 		return JSON.stringify(this.data);
 	}
+
+	onTransitionWarning() {}
 }
