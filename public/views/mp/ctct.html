@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
+		<style>
+			#layout_skeletton {
+				position: absolute;
+				width: 1280px;
+				height: 720px;
+				overflow: hidden;
+				background: url(/views/ctct_bg.png);
+			}
+
+			.box {
+				border-image-source: none;
+				border-image-width: 0 0;
+				padding: 3px 0 0 0;
+				height: 51px;
+				font-size: 22px;
+				line-height: 26px;
+			}
+
+			.box .header {
+				font-size: 17px;
+				line-height: 24px;
+			}
+
+			.board {
+				padding: 3px;
+				width: 217px;
+				height: 437px;
+				top: 142px;
+				--offset: 23px;
+			}
+
+			.eff,
+			.tetris_rate,
+			.runway,
+			.projection,
+			.running_trt {
+				display: none;
+			}
+
+			.level {
+				top: 600px;
+				width: 62px;
+				--offset: 261px;
+				right: var(--offset);
+			}
+
+			.lines {
+				top: 74px;
+				padding-left: 3px;
+				width: 108px;
+				--offset: 135px;
+				right: var(--offset);
+			}
+
+			.lines .header {
+				line-height: 22px;
+			}
+
+			.lines.p2 {
+				left: 23px;
+			}
+
+			.next_piece {
+				width: 103px;
+				height: 53px;
+				top: 74px;
+				right: 23px;
+				padding-top: 0;
+			}
+
+			.next_piece.p2 {
+				left: 143px;
+			}
+
+			.score {
+				width: 223px;
+				height: 51px;
+				top: 12px;
+				--offset: 23px;
+				text-align: center;
+			}
+
+			.score .header {
+				line-height: 22px;
+			}
+
+			.score > div {
+				display: block;
+			}
+
+			.score .value {
+				padding: 0;
+				text-align: center;
+				white-space: normal;
+			}
+
+			.name {
+				--offset: 23px;
+				top: 600px;
+				width: 223px;
+				height: 56px;
+			}
+
+			.name .hearts {
+				position: static;
+				font-size: 24px;
+				width: auto;
+				font-size: 22px;
+				line-height: 26px;
+				padding-top: 1px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="layout_skeletton"></div>
+			<div id="playing_fields">
+				<!-- Player 1 -->
+
+				<div class="box score p1">
+					<div class="header">SCORE</div>
+					<div class="value">0000000</div>
+				</div>
+
+				<div class="box runway p1">
+					<div class="header">RUNWAY</div>
+					<div class="content">
+						<div class="value">000000</div>
+						<div class="diff">000000</div>
+						<div class="tetris_diff">000</div>
+					</div>
+				</div>
+
+				<div class="box projection p1">
+					<div class="header">PROJECTION</div>
+					<div class="content">
+						<div class="value">000000</div>
+						<div class="diff">000000</div>
+						<div class="tetris_diff">000</div>
+					</div>
+				</div>
+
+				<div class="box tetris_rate p1">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box running_trt p1"></div>
+
+				<div class="box name p1">
+					<div class="header">PLAYER 1</div>
+					<div class="content hearts">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box board p1"></div>
+
+				<div class="box next_piece p1"></div>
+
+				<div class="box level p1">
+					<div class="header">LV</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box lines p1">
+					<div class="header">LINES</div>
+					<div class="value">000</div>
+				</div>
+
+				<div class="box drought p1">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box eff p1">
+					<div class="header">EFF</div>
+					<div class="value">---</div>
+				</div>
+
+				<!-- Player 2 -->
+
+				<div class="box score p2">
+					<div class="header">SCORE</div>
+					<div class="value">0000000</div>
+				</div>
+
+				<div class="box runway p2">
+					<div class="header">RUNWAY</div>
+					<div class="content">
+						<div class="value">000000</div>
+						<div class="diff">000000</div>
+						<div class="tetris_diff">000</div>
+					</div>
+				</div>
+
+				<div class="box projection p2">
+					<div class="header">PROJECTION</div>
+					<div class="content">
+						<div class="value">000000</div>
+						<div class="diff">000000</div>
+						<div class="tetris_diff">000</div>
+					</div>
+				</div>
+
+				<div class="box tetris_rate p2">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box running_trt p2"></div>
+
+				<div class="box name p2">
+					<div class="header">PLAYER 2</div>
+					<div class="content hearts">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box board p2"></div>
+
+				<div class="box next_piece p2"></div>
+
+				<div class="box level p2">
+					<div class="header">LV</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box lines p2">
+					<div class="header">LINES</div>
+					<div class="value">000</div>
+				</div>
+
+				<div class="box drought p2">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box eff p2">
+					<div class="header">EFF</div>
+					<div class="value">---</div>
+				</div>
+
+				<div class="dev_null"></div>
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script src="/js/QueryString.js"></script>
+		<script src="/views/color.js"></script>
+		<script src="/views/gradient.js"></script>
+		<script src="/views/constants.js"></script>
+		<script src="/views/utils.js"></script>
+		<script src="/views/renderBlock.js"></script>
+		<script src="/views/FrameBuffer.js"></script>
+		<script src="/views/Player.js"></script>
+		<script src="/views/bg.js"></script>
+		<script src="/js/connection.js"></script>
+		<script src="/views/CompetitionPlayer.js"></script>
+		<script src="/views/CTMCompetitionPlayer.js"></script>
+		<script src="/js/BinaryFrame.js"></script>
+		<script>
+			const numberFormatter = new Intl.NumberFormat();
+
+			const players = [1, 2].map(num => {
+				const player = new CTMCompetitionPlayer(
+					{
+						name: document.querySelector(`.name.p${num} .header`),
+						score: document.querySelector(`.score.p${num} .value`),
+						level: document.querySelector(`.level.p${num} .value`),
+						lines: document.querySelector(`.lines.p${num} .value`),
+						trt: document.querySelector(`.tetris_rate.p${num} .content`),
+						running_trt: document.querySelector(`.running_trt.p${num}`),
+						preview: document.querySelector(`.next_piece.p${num}`),
+						field: document.querySelector(`.board.p${num}`),
+						hearts: document.querySelector(`.name.p${num} .hearts`),
+						drought: document.querySelector(`.drought.p${num} .value`),
+						runway_game: document.querySelector(`.runway.p${num} .value`),
+						eff: document.querySelector(`.eff.p${num} .value`),
+
+						projection: document.querySelector(`.projection.p${num} .value`),
+
+						// diff: document.querySelector(`.score.p${num} .diff`),
+						// t_diff: document.querySelector(`.score.p${num} .tetris_diff`),
+
+						runway_diff: document.querySelector(`.runway.p${num} .diff`),
+						runway_t_diff: document.querySelector(
+							`.runway.p${num} .tetris_diff`
+						),
+
+						projection_diff: document.querySelector(
+							`.projection.p${num} .diff`
+						),
+						projection_t_diff: document.querySelector(
+							`.projection.p${num} .tetris_diff`
+						),
+
+						drought_box: document.querySelector(`.drought.p${num}`),
+						runway_box: document.querySelector(`.runway.p${num}`),
+						projection_box: document.querySelector(`.projection.p${num}`),
+					},
+					{
+						field_pixel_size: 220 / 80,
+						preview_pixel_size: 2.3,
+						preview_align: 'cc',
+						format_score: v => numberFormatter.format(v),
+					}
+				);
+
+				delete player.onGameOver;
+
+				return player;
+			});
+		</script>
+		<script src="/views/competition.js"></script>
+	</body>
+	<html></html>
+</html>
