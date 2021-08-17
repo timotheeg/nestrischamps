@@ -18,6 +18,9 @@
 		.navbar-item img {
 			max-height: 2.5rem;
 		}
+		.logo img {
+			display: block;
+		}
 	</style>
 	<script>
 		function load_iframe(selector, url, [width, height] = [1280, 720]) {
@@ -50,9 +53,7 @@
 <section class="section">
 	<div class="container">
 		<div class="columns">
-			<div class="column is-one-quarter">
-				<img title="nestrischamps logo trophy" src="/brand/trophies/<%=1 + Math.floor(Math.random() * 20) %>.e.6x.png" />
-				<br />
+			<div class="column is-one-quarter logo">
 				<img title="nestrischamps logo podium" src="/brand/logo.podium.6x.png" />
 			</div>
 			<div class="column is-three-quarters content">
@@ -355,5 +356,17 @@ VNTPYN</pre>
 	</div>
 </section>
 
+<script>
+(function init() {
+	const logo = document.querySelector('.logo');
+	const img = document.createElement('img');
+	const trophy_num = 1 + Math.floor(Math.random() * 20);
+
+	img.title = 'nestrischamps logo trophy';
+	img.src = `/brand/trophies/${trophy_num}.e.6x.png`;
+
+	logo.prepend(img);
+})();
+</script>
 </body>
 </html>
