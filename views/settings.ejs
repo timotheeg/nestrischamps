@@ -88,9 +88,7 @@
 								<%
 									const code = db_user.country_code || 'US';
 									countries.forEach(country => { %>
-									<option value="<%= country.code %>" <%= code === country.code ? 'selected="selected"' : '' %> >
-										<%= country.name %>
-									</option>
+									<option value="<%= country.code %>"<%= code === country.code ? ' selected' : '' %>><%= country.name %></option>
 								<% }) %>
 								</select>
 							</div>
@@ -106,7 +104,7 @@
 							<div class="select">
 								<select id="style">
 								<% ['das', 'tap', 'roll', 'hybrid'].forEach(style => { %>
-									<option value="<%=style%>" <%= style === db_user.style ? 'selected="selected"' : '' %>><%=style.toUpperCase()%></option>
+									<option value="<%=style%>" <%= style === db_user.style ? 'selected' : '' %>><%=style.toUpperCase()%></option>
 								<% }) %>
 								</select>
 							</div>
