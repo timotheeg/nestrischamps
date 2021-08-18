@@ -158,11 +158,12 @@ class ScoreDAO {
 				pieces,
 				transition,
 				num_frames,
-				frame_file
+				frame_file,
+				manual
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
 			)
 			RETURNING id
 			`,
@@ -182,6 +183,7 @@ class ScoreDAO {
 				game_data.transition,
 				game_data.num_frames,
 				game_data.frame_file,
+				!!game_data.manual,
 			]
 		);
 
@@ -258,6 +260,36 @@ class ScoreDAO {
 		);
 
 		return result.rows[0];
+	}
+
+	async setPB(user, update) {
+		const result = await dbPool.query(
+			`
+			UPDATE scores
+			SET datetime=NOW(), score=$1, end_level=$2
+			WHERE player_id=$3 AND start_level=$4 AND manual=true;
+			`,
+			[update.score, update.end_level, user.id, update.start_level]
+		);
+
+		// BAD - this is not atomic!
+		// TODO: Figure out a way to upsert atomically
+		if (result.rowCount === 0) {
+			await this.recordGame(user, {
+				...update,
+				lines: 0,
+				tetris_rate: 0,
+				num_droughts: 0,
+				max_drought: 0,
+				das_avg: -1,
+				duration: 0,
+				clears: '',
+				pieces: '',
+				num_frames: 0,
+				frame_file: '',
+				manual: true,
+			});
+		}
 	}
 }
 

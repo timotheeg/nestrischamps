@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const ULID = require('ulid');
 const nocache = require('nocache');
+const _ = require('lodash');
 
 const middlewares = require('../modules/middlewares');
 const countries = require('../modules/countries');
 const UserDAO = require('../daos/UserDAO');
+const ScoreDAO = require('../daos/ScoreDAO');
 
 router.use(middlewares.assertSession);
 router.use(middlewares.checkToken);
@@ -87,6 +89,45 @@ router.post('/update_profile', express.json(), async (req, res) => {
 	}
 });
 
-router.post('/update_pb', async (req, res) => {});
+router.post('/set_pb', express.json(), async (req, res) => {
+	if (!req.body) {
+		res.status(400).json({ errors: ['Bad Request'] });
+		return;
+	}
+
+	const update = _.pick(req.body, ['score', 'start_level', 'end_level']);
+
+	do {
+		if (
+			typeof update.score != 'number' ||
+			update.score < 0 ||
+			update.score > 1500000
+		)
+			break;
+
+		if (
+			typeof update.start_level != 'number' ||
+			update.start_level < 0 ||
+			update.start_level > 30
+		)
+			break;
+
+		if (
+			typeof update.end_level != 'number' ||
+			update.end_level < 0 ||
+			update.end_level > 30
+		)
+			break;
+
+		const user = await UserDAO.getUserById(req.session.user.id);
+
+		// fire and forget
+		await ScoreDAO.setPB(user, update);
+		res.status(200).json({});
+		return;
+	} while (false);
+
+	res.status(400).json({ errors: ['Bad Request'] });
+});
 
 module.exports = router;

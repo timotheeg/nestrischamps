@@ -40,7 +40,7 @@ CREATE TABLE scores (
 	transition INTEGER DEFAULT NULL,
 	num_frames INTEGER DEFAULT 0,
 	frame_file VARCHAR(256) DEFAULT '',
-	manual BOOLEAN default 0,
+	manual BOOLEAN default false,
 
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)
