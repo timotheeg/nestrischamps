@@ -1,3 +1,5 @@
+CREATE TYPE play_style AS ENUM ('das', 'tap', 'roll', 'hybrid');
+
 CREATE TABLE twitch_users (
 	id BIGINT PRIMARY KEY,
 	login VARCHAR ( 25 ) UNIQUE NOT NULL,
@@ -9,6 +11,10 @@ CREATE TABLE twitch_users (
 	description TEXT,
 	display_name VARCHAR ( 255 ),
 	profile_image_url VARCHAR ( 255 ),
+
+	country_code VARCHAR( 2 ) default 'US',
+	interests VARCHAR ( 300 ) default '',
+	style play_style default 'das',
 
 	created_on TIMESTAMP NOT NULL,
 	last_login TIMESTAMP NOT NULL
@@ -34,6 +40,7 @@ CREATE TABLE scores (
 	transition INTEGER DEFAULT NULL,
 	num_frames INTEGER DEFAULT 0,
 	frame_file VARCHAR(256) DEFAULT '',
+	manual BOOLEAN default 0,
 
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)

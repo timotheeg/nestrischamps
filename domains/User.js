@@ -29,6 +29,10 @@ class User extends EventEmitter {
 		this.description = user_object.description;
 		this.profile_image_url = user_object.profile_image_url;
 
+		this.country_code = user_object.country_code || 'US';
+		this.style = user_object.style || 'das';
+		this.interests = user_object.interests || '';
+
 		this.producer = new Producer(this);
 
 		// TODO: can room be setup lazily?
