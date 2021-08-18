@@ -5,6 +5,7 @@ const router = express.Router();
 const middlewares = require('../modules/middlewares');
 const layouts = require('../modules/layouts');
 const UserDAO = require('../daos/UserDAO');
+const ScoreDAO = require('../daos/ScoreDAO');
 
 router.get('/debug/session', (req, res) => {
 	res.send(JSON.stringify(req.session));
@@ -105,6 +106,22 @@ router.get(
 		});
 	}
 );
+
+router.get('/view/profile_card/:login', async (req, res) => {
+	const user = await UserDAO.getUserByLogin(req.params.login);
+
+	console.log(user);
+
+	if (!user) {
+		res.status(404).send('Not found');
+		return;
+	}
+
+	res.render('profile_card', {
+		user,
+		pb: await ScoreDAO.getPB(user),
+	});
+});
 
 // TODO: uniformalize the alyout and file names
 // TODO: AND uniformalize the way the layout understnd incoming data
