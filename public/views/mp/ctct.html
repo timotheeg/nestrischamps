@@ -13,10 +13,11 @@
 			}
 
 			.box {
+				background: black;
 				border-image-source: none;
 				border-image-width: 0 0;
 				padding: 3px 0 0 0;
-				height: 51px;
+				height: 50px;
 				font-size: 22px;
 				line-height: 26px;
 			}
@@ -35,15 +36,26 @@
 			}
 
 			.eff,
-			.tetris_rate,
 			.runway,
 			.projection,
 			.running_trt {
 				display: none;
 			}
 
-			.level {
+			.tetris_rate,
+			.drought {
 				top: 600px;
+				width: 80px;
+				--offset: 261px;
+				right: var(--offset);
+			}
+
+			.tetris_rate .content {
+				padding: 0;
+			}
+
+			.level {
+				top: 529px;
 				width: 62px;
 				--offset: 261px;
 				right: var(--offset);
@@ -79,7 +91,6 @@
 
 			.score {
 				width: 223px;
-				height: 51px;
 				top: 12px;
 				--offset: 23px;
 				text-align: center;
@@ -103,7 +114,7 @@
 				--offset: 23px;
 				top: 600px;
 				width: 223px;
-				height: 56px;
+				height: 53px;
 			}
 
 			.name .hearts {
