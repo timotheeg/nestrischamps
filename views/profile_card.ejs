@@ -1,17 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
+<style>
+@font-face {
+	font-family: 'Gotham';
+	src: url('/tools/footer/Gotham Black Regular/Gotham Black Regular.ttf');
+}
+
+html, body {
+	padding: 0;
+	margin: 0;
+	font-family: Gotham;
+
+	--fsize: 22px;
+	--beige: #fee28a;
+	line-height: 24px;
+	font-size: var(--fsize);
+	color: var(--beige);
+}
+
+.frame {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 237px;
+	height: 477px;
+	background: black;
+	overflow: hidden;
+	text-align: center;
+}
+
+.container {
+	padding: 6px 3px;
+}
+
+#name {
+	border-bottom: 3px solid var(--beige);
+}
+
+h1 {
+	padding: 0;
+	margin: 0;
+	font-size: var(--fsize);
+	font-weight: normal;
+	color: white;
+	text-align: center;
+	line-height: 32px;
+}
+
+section {
+	margin-bottom: 1em;
+}
+
+p {
+	margin-block-start: 0.35em;
+}
+
+#twitch {
+	position: absolute;
+	bottom: 0;
+	margin-bottom: 1em;
+	color: white;
+	width: 100%;
+}
+
+#twitch .envelop {
+	margin: 0 0.25em;
+	border-radius: 25px;
+	background: #4c297e;
+	line-height: 28px;
+}
+
+</style>
+
 </head>
 <body>
 
-<div>
-<%= user.login %><br />
-<img src="https://www.countryflags.io/<%= user.country_code %>/shiny/64.png"><br />
-<%= user.interests %><br />
-<%= user.style %><br />
-<%= user.description %><br />
-<%= pb %><br />
+<div class="frame">
+	<div class="container">
+		<div id="name">
+			<h1><%= user.display_name %></h1>
+		</div>
 
+		<section id="flag"><img src="https://www.countryflags.io/<%= user.country_code %>/flat/64.png"></section>
+
+		<section id="interests">
+			<h1>Interests</h1>
+			<p><%= user.interests %></p>
+		</section>
+
+		<section id="play_style">
+			<h1>Play info</h1>
+			<p>Style: <%= user.style %></p>
+			<p>PB: <%= (new Intl.NumberFormat()).format(pb) %></p>
+		</section>
+	</div>
+
+	<div id="twitch">
+		<div class="envelop">
+			<%= user.login %>
+		</div>
+	</div>
 </div>
 
 </body>
