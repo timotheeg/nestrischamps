@@ -90,18 +90,25 @@
 			}
 
 			.score {
+				padding-top: 5px;
+				height: 48px;
 				width: 223px;
 				top: 12px;
 				--offset: 23px;
 				text-align: center;
 			}
 
-			.score .header {
-				line-height: 22px;
+			.score .aligner {
+				display: inline-block;
 			}
 
-			.score > div {
-				display: block;
+			.score .aligner div {
+				text-align: right;
+			}
+
+			.score .header {
+				font-size: 22px;
+				line-height: 22px;
 			}
 
 			.score .value {
@@ -134,8 +141,10 @@
 				<!-- Player 1 -->
 
 				<div class="box score p1">
-					<div class="header">SCORE</div>
-					<div class="value">0000000</div>
+					<div class="aligner">
+						<div class="header">0000000</div>
+						<div class="value">0000000</div>
+					</div>
 				</div>
 
 				<div class="box runway p1">
@@ -195,8 +204,10 @@
 				<!-- Player 2 -->
 
 				<div class="box score p2">
-					<div class="header">SCORE</div>
-					<div class="value">0000000</div>
+					<div class="aligner">
+						<div class="header">0000000</div>
+						<div class="value">0000000</div>
+					</div>
 				</div>
 
 				<div class="box runway p2">
@@ -281,7 +292,7 @@
 				const player = new CTMCompetitionPlayer(
 					{
 						name: document.querySelector(`.name.p${num} .header`),
-						score: document.querySelector(`.score.p${num} .value`),
+						score: document.querySelector(`.score.p${num} .header`),
 						level: document.querySelector(`.level.p${num} .value`),
 						lines: document.querySelector(`.lines.p${num} .value`),
 						trt: document.querySelector(`.tetris_rate.p${num} .content`),
@@ -295,7 +306,7 @@
 
 						projection: document.querySelector(`.projection.p${num} .value`),
 
-						// diff: document.querySelector(`.score.p${num} .diff`),
+						diff: document.querySelector(`.score.p${num} .value`),
 						// t_diff: document.querySelector(`.score.p${num} .tetris_diff`),
 
 						runway_diff: document.querySelector(`.runway.p${num} .diff`),
@@ -318,7 +329,17 @@
 						field_pixel_size: 220 / 80,
 						preview_pixel_size: 2.3,
 						preview_align: 'cc',
-						format_score: v => numberFormatter.format(v),
+						/*
+						format_score: v => {
+							const parts = [];
+							while (v) {
+								parts.unshift(v % 1000);
+								v = Math.floor(v / 1000);
+							}
+
+							return parts.length ? parts.join(' ') : '0';
+						},
+						/**/
 					}
 				);
 
