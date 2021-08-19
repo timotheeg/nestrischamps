@@ -44,7 +44,7 @@
 
 			.tetris_rate,
 			.drought {
-				top: 600px;
+				top: 529px;
 				width: 80px;
 				--offset: 261px;
 				right: var(--offset);
@@ -55,7 +55,7 @@
 			}
 
 			.level {
-				top: 529px;
+				top: 458px;
 				width: 62px;
 				--offset: 261px;
 				right: var(--offset);
@@ -118,6 +118,7 @@
 			}
 
 			.name {
+				display: none;
 				--offset: 23px;
 				top: 600px;
 				width: 223px;
@@ -131,6 +132,22 @@
 				font-size: 22px;
 				line-height: 26px;
 				padding-top: 1px;
+			}
+
+			.runway.transition {
+				display: block;
+				width: 172px;
+				top: 600px;
+				--offset: 261px;
+				right: var(--offset);
+			}
+
+			.runway.transition .header {
+				padding: 0;
+			}
+
+			.runway.transition .content {
+				text-align: center;
 			}
 		</style>
 	</head>
@@ -201,6 +218,11 @@
 					<div class="value">---</div>
 				</div>
 
+				<div class="box runway transition p1">
+					<div class="header">TR RUNWAY</div>
+					<div class="content">0000000</div>
+				</div>
+
 				<!-- Player 2 -->
 
 				<div class="box score p2">
@@ -264,6 +286,11 @@
 					<div class="value">---</div>
 				</div>
 
+				<div class="box runway transition p2">
+					<div class="header">TR RUNWAY</div>
+					<div class="content">0000000</div>
+				</div>
+
 				<div class="dev_null"></div>
 			</div>
 			<!-- End Playing Fields -->
@@ -309,6 +336,10 @@
 						diff: document.querySelector(`.score.p${num} .value`),
 						// t_diff: document.querySelector(`.score.p${num} .tetris_diff`),
 
+						runway_tr: document.querySelector(
+							`.runway.transition.p${num} .content`
+						),
+
 						runway_diff: document.querySelector(`.runway.p${num} .diff`),
 						runway_t_diff: document.querySelector(
 							`.runway.p${num} .tetris_diff`
@@ -323,6 +354,7 @@
 
 						drought_box: document.querySelector(`.drought.p${num}`),
 						runway_box: document.querySelector(`.runway.p${num}`),
+						runway_tr_box: document.querySelector(`.runway.transition.p${num}`),
 						projection_box: document.querySelector(`.projection.p${num}`),
 					},
 					{
@@ -343,8 +375,25 @@
 					}
 				);
 
+				// Undo the CTM logic of hiding the level and preview
 				delete player.onGameOver;
 
+				// Ugly custom logic for game start because we only have callbacks, no events
+				const super_onGameStart = player.onGameStart;
+
+				player.onTransition = () => {
+					player.dom.runway_tr_box.querySelector('.header').textContent =
+						'TRANSITION';
+				};
+
+				player.onGameStart = () => {
+					super_onGameStart.call(player);
+
+					player.dom.runway_tr_box.querySelector('.header').textContent =
+						'TR RUNWAY';
+				};
+
+				return player;
 				return player;
 			});
 		</script>
