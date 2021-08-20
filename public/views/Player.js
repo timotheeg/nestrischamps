@@ -145,6 +145,7 @@ const Player = (function () {
 		tetris_sound: 1,
 		reliable_field: 1,
 		draw_field: 1,
+		curtain: 1,
 		buffer_time,
 		format_score: (v, size) => {
 			if (!size) {
@@ -260,39 +261,50 @@ const Player = (function () {
 				this[`${name}_ctx`] = canvas.getContext('2d');
 			});
 
-			// start - Field curtain
-			this.curtain_viewport = document.createElement('div');
-			this.curtain_viewport.classList.add('curtain_viewport');
-			Object.assign(this.curtain_viewport.style, {
-				position: 'absolute',
-				top: `${bg_offset}px`,
-				left: `${bg_offset}px`,
-				width: `${bg_width}px`,
-				height: `${bg_height}px`,
-				overflow: 'hidden',
-			});
-			this.dom.field.appendChild(this.curtain_viewport);
+			this.has_curtain = this.options.curtain || this.dom.curtain;
 
-			this.curtain_container = document.createElement('div');
-			this.curtain_container.classList.add('curtain_container');
-			Object.assign(this.curtain_container.style, {
-				position: 'absolute',
-				top: `-${bg_height}px`,
-				left: 0,
-				width: `${bg_width}px`,
-				height: `${bg_height}px`,
-				background: 'rgba(0, 0, 0, 0.9)',
-				overflow: 'hidden',
-				display: 'flex',
-				justifyContent: 'center',
-				alignItems: 'center',
-			});
-			this.curtain_viewport.appendChild(this.curtain_container);
+			if (this.has_curtain) {
+				// start - Field curtain
+				this.curtain_viewport = document.createElement('div');
+				this.curtain_viewport.classList.add('curtain_viewport');
+				Object.assign(this.curtain_viewport.style, {
+					position: 'absolute',
+					top: `${bg_offset}px`,
+					left: `${bg_offset}px`,
+					width: `${bg_width}px`,
+					height: `${bg_height}px`,
+					overflow: 'hidden',
+				});
+				this.dom.field.appendChild(this.curtain_viewport);
 
-			if (this.dom.curtain) {
-				this.curtain_container.appendChild(this.dom.curtain);
+				this.curtain_container = document.createElement('div');
+				this.curtain_container.classList.add('curtain_container');
+				Object.assign(this.curtain_container.style, {
+					position: 'absolute',
+					top: `-${bg_height}px`,
+					left: 0,
+					width: `${bg_width}px`,
+					height: `${bg_height}px`,
+					background: 'rgba(0, 0, 0, 0.9)',
+					overflow: 'hidden',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+				});
+				this.curtain_viewport.appendChild(this.curtain_container);
+
+				if (this.dom.curtain) {
+					this.curtain_container.appendChild(this.dom.curtain);
+				} else {
+					const img = document.createElement('img');
+
+					img.src = '/brand/logo.v3.white.2x.png';
+
+					this.curtain_container.appendChild(img);
+				}
+
+				this._hideCurtain();
 			}
-			// end - Field curtain
 
 			this.field_ctx.canvas.style.top = `${field_canva_offset}px`;
 			this.field_ctx.canvas.style.left = `${field_canva_offset}px`;
@@ -331,9 +343,10 @@ const Player = (function () {
 		onTetris() {}
 
 		_showCurtain() {
-			if (!this.dom.curtain) return;
+			if (!this.has_curtain) return;
 
 			this._hideCurtain();
+			this.curtain_viewport.hidden = false;
 
 			const start_ts = Date.now();
 			const duration = 1000;
@@ -359,10 +372,11 @@ const Player = (function () {
 		}
 
 		_hideCurtain() {
-			if (!this.dom.curtain) return;
+			if (!this.has_curtain) return;
 
 			window.cancelAnimationFrame(this.curtain_animation_ID);
 
+			this.curtain_viewport.hidden = true;
 			this.curtain_container.style.top = `-${this.bg_height}px`;
 		}
 
@@ -726,9 +740,10 @@ const Player = (function () {
 				this.onGameOver();
 			}
 
-			if (!(this.game_over && this.dom.curtain)) {
+			if (!(this.game_over && this.has_curtain)) {
 				this.renderField(this.level, data.field, field_string);
 			}
+
 			this.renderPreview(this.level, data.preview);
 
 			if (num_blocks === 200) {
