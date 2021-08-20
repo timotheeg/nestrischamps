@@ -302,7 +302,7 @@
 				<br />
 				<br />
 				<br />
-				<img src="/images/ctg.png" width="150" />
+				<img class="ctg" src="/images/ctg.png" width="150" />
 				<br />
 				<br />
 				<br />
@@ -328,6 +328,13 @@
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
 			const numberFormatter = new Intl.NumberFormat();
+
+			function easeInOutBack(t, b, c, d, s) {
+				if (s == undefined) s = 1.70158;
+				if ((t /= d / 2) < 1)
+					return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+				return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+			}
 
 			const players = [1, 2].map(num => {
 				const curtain_template = document.getElementById('curtain');
@@ -416,7 +423,39 @@
 						'TR RUNWAY';
 				};
 
-				return player;
+				let rotate_animation_id;
+				const logo = curtain_node.querySelector('.ctg');
+
+				function rotateLogo() {
+					resetLogo();
+
+					const start_ts = Date.now();
+					const duration = 850;
+
+					const steps = () => {
+						const elapsed = Math.min(Date.now() - start_ts, duration);
+
+						const turn_ratio = easeInOutBack(elapsed, 0, 1, duration, 1.1);
+
+						logo.style.transform = `rotate(${turn_ratio}turn)`;
+
+						if (elapsed < duration) {
+							rotate_animation_id = window.requestAnimationFrame(steps);
+						} else {
+							resetLogo();
+						}
+					};
+
+					rotate_animation_id = window.requestAnimationFrame(steps);
+				}
+
+				function resetLogo() {
+					window.cancelAnimationFrame(rotate_animation_id);
+					logo.style.transform = null;
+				}
+
+				player.onCurtainDown = rotateLogo;
+
 				return player;
 			});
 		</script>

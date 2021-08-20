@@ -365,6 +365,8 @@ const Player = (function () {
 
 				if (elapsed < duration) {
 					this.curtain_animation_ID = window.requestAnimationFrame(steps);
+				} else {
+					this.onCurtainDown();
 				}
 			};
 
@@ -748,7 +750,7 @@ const Player = (function () {
 
 			if (num_blocks === 200) {
 				this.curtain_down = true;
-				this.onCurtainDown();
+				if (!this.has_curtain) this.onCurtainDown();
 			} else {
 				this.updateField(
 					data.field,
