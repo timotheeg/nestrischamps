@@ -296,6 +296,21 @@
 		</div>
 		<!-- End Stream BG -->
 
+		<template id="curtain">
+			<div class="curtain">
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/images/ctg.png" width="150" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.png" />
+			</div>
+		</template>
+
 		<!-- Audio -->
 
 		<script src="/js/QueryString.js"></script>
@@ -315,6 +330,13 @@
 			const numberFormatter = new Intl.NumberFormat();
 
 			const players = [1, 2].map(num => {
+				const curtain_template = document.getElementById('curtain');
+				const curtain_fragment = document.importNode(
+					curtain_template.content,
+					true
+				);
+				const curtain_node = curtain_fragment.querySelector('.curtain');
+
 				const player = new CTMCompetitionPlayer(
 					{
 						name: document.querySelector(`.name.p${num} .header`),
@@ -329,6 +351,7 @@
 						drought: document.querySelector(`.drought.p${num} .value`),
 						runway_game: document.querySelector(`.runway.p${num} .value`),
 						eff: document.querySelector(`.eff.p${num} .value`),
+						curtain: curtain_node,
 
 						projection: document.querySelector(`.projection.p${num} .value`),
 
@@ -357,6 +380,7 @@
 						projection_box: document.querySelector(`.projection.p${num}`),
 					},
 					{
+						field_real_border: 3,
 						field_pixel_size: 220 / 80,
 						preview_pixel_size: 2.3,
 						preview_align: 'cc',

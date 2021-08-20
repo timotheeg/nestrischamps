@@ -101,6 +101,10 @@ const Player = (function () {
 	}
 */
 
+	function easeOutQuart(t, b, c, d) {
+		return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+	}
+
 	// One time check of Query String args
 	// Bit dirty to have Player.js access query String
 	// But that's the most covenient way to share the functionality
@@ -127,6 +131,7 @@ const Player = (function () {
 		drought: DOM_DEV_NULL,
 		burn: DOM_DEV_NULL,
 		video: DOM_DEV_NULL,
+		curtain: null,
 	};
 
 	const DEFAULT_OPTIONS = {
@@ -206,6 +211,8 @@ const Player = (function () {
 				field_canva_offset = this.field_pixel_size;
 			}
 
+			this.bg_height = bg_height; // store value for curtain animation
+
 			// Avatar Block
 			this.avatar = document.createElement('div');
 			this.avatar.classList.add('avatar');
@@ -253,6 +260,40 @@ const Player = (function () {
 				this[`${name}_ctx`] = canvas.getContext('2d');
 			});
 
+			// start - Field curtain
+			this.curtain_viewport = document.createElement('div');
+			this.curtain_viewport.classList.add('curtain_viewport');
+			Object.assign(this.curtain_viewport.style, {
+				position: 'absolute',
+				top: `${bg_offset}px`,
+				left: `${bg_offset}px`,
+				width: `${bg_width}px`,
+				height: `${bg_height}px`,
+				overflow: 'hidden',
+			});
+			this.dom.field.appendChild(this.curtain_viewport);
+
+			this.curtain_container = document.createElement('div');
+			this.curtain_container.classList.add('curtain_container');
+			Object.assign(this.curtain_container.style, {
+				position: 'absolute',
+				top: `-${bg_height}px`,
+				left: 0,
+				width: `${bg_width}px`,
+				height: `${bg_height}px`,
+				background: 'rgba(0, 0, 0, 0.9)',
+				overflow: 'hidden',
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+			});
+			this.curtain_viewport.appendChild(this.curtain_container);
+
+			if (this.dom.curtain) {
+				this.curtain_container.appendChild(this.dom.curtain);
+			}
+			// end - Field curtain
+
 			this.field_ctx.canvas.style.top = `${field_canva_offset}px`;
 			this.field_ctx.canvas.style.left = `${field_canva_offset}px`;
 			this.field_bg.appendChild(this.field_ctx.canvas);
@@ -288,6 +329,42 @@ const Player = (function () {
 		onGameOver() {}
 		onCurtainDown() {}
 		onTetris() {}
+
+		_showCurtain() {
+			if (!this.dom.curtain) return;
+
+			this._hideCurtain();
+
+			const start_ts = Date.now();
+			const duration = 1000;
+
+			const steps = () => {
+				const elapsed = Math.min(Date.now() - start_ts, duration);
+
+				const top = easeOutQuart(
+					elapsed,
+					-this.bg_height,
+					this.bg_height,
+					duration
+				);
+
+				this.curtain_container.style.top = `${top}px`;
+
+				if (elapsed < duration) {
+					this.curtain_animation_ID = window.requestAnimationFrame(steps);
+				}
+			};
+
+			this.curtain_animation_ID = window.requestAnimationFrame(steps);
+		}
+
+		_hideCurtain() {
+			if (!this.dom.curtain) return;
+
+			window.cancelAnimationFrame(this.curtain_animation_ID);
+
+			this.curtain_container.style.top = `-${this.bg_height}px`;
+		}
 
 		_doTetris() {
 			if (this.options.tetris_flash) {
@@ -480,6 +557,7 @@ const Player = (function () {
 			if (this.game_over) return;
 
 			this.game_over = true;
+			this._showCurtain();
 			this.onGameOver();
 		}
 
@@ -513,6 +591,7 @@ const Player = (function () {
 				this.pending_score = true;
 				this.prev_preview = data.cur_piece || data.preview || 'I';
 
+				this._hideCurtain();
 				this.onGameStart();
 			}
 
@@ -622,9 +701,6 @@ const Player = (function () {
 				}
 			}
 
-			this.renderField(this.level, data.field, field_string);
-			this.renderPreview(this.level, data.preview);
-
 			if (!this.game_over && this._isTopRowFull(data)) {
 				this.game_over = true;
 
@@ -646,8 +722,14 @@ const Player = (function () {
 					7
 				);
 
+				this._showCurtain();
 				this.onGameOver();
 			}
+
+			if (!(this.game_over && this.dom.curtain)) {
+				this.renderField(this.level, data.field, field_string);
+			}
+			this.renderPreview(this.level, data.preview);
 
 			if (num_blocks === 200) {
 				this.curtain_down = true;
