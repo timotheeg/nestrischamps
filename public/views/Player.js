@@ -1165,6 +1165,7 @@ const Player = (function () {
 		clearField() {
 			this.field_ctx.clear();
 			this.clearWinnerAnimation();
+			this._hideCurtain();
 		}
 
 		showLoserFrame() {
