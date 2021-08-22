@@ -387,6 +387,24 @@
 						}
 					);
 
+					// Undo the CTM logic of hiding the level and preview
+					delete player.onGameOver;
+
+					// Ugly custom logic for game start because we only have callbacks, no events
+					const super_onGameStart = player.onGameStart;
+
+					player.onTransition = () => {
+						player.dom.runway_tr_box.querySelector('.header').textContent =
+							'TRANSITION';
+					};
+
+					player.onGameStart = () => {
+						super_onGameStart.call(player);
+
+						player.dom.runway_tr_box.querySelector('.header').textContent =
+							'TR RUNWAY';
+					};
+
 					players.push(player);
 				});
 			});
