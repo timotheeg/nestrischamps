@@ -48,6 +48,13 @@ td {
 	border-image-width: 10px 10px;
 }
 
+.box.px3 {
+	padding: 15px;
+	border-image-source: url('/views/border_3px.png');
+	border-image-slice: 12 12 12 12 fill;
+	border-image-width: 12px 12px;
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;
