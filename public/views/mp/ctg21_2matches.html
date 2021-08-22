@@ -88,6 +88,14 @@
 				--offset: 248px;
 			}
 
+			.name .content {
+				padding-top: 1px;
+			}
+
+			.name .content .win {
+				color: #fb0204;
+			}
+
 			.box.px3.level {
 				padding-left: 18px;
 				padding-right: 18px;
@@ -102,7 +110,7 @@
 			.runway.transition {
 				display: block;
 				--offset: 248px;
-				width: 149px;
+				width: 160px;
 				height: 34px;
 				padding-top: 18px;
 				padding-bottom: 18px;
@@ -276,7 +284,7 @@
 
 					<div class="box px3 name">
 						<div class="header">PLAYER 1</div>
-						<div class="content hearts">&#338;&#338;&#338;</div>
+						<div class="content">&#338;&#338;&#338;</div>
 					</div>
 
 					<div class="box px3 next_piece"></div>
@@ -356,7 +364,7 @@
 							running_trt: player_node.querySelector(`.running_trt`),
 							preview: player_node.querySelector(`.next_piece`),
 							field: player_node.querySelector(`.board`),
-							hearts: player_node.querySelector(`.name .hearts`),
+							hearts: player_node.querySelector(`.name .content`),
 							drought: player_node.querySelector(`.drought .value`),
 							runway_game: player_node.querySelector(`.runway .value`),
 							video: player_node.querySelector(`video`),
