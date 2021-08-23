@@ -310,6 +310,20 @@
 					</div>
 				</div>
 			</template>
+			<template id="curtain">
+				<div class="curtain">
+					<br />
+					<br />
+					<br />
+					<br />
+					<img class="ctg" src="/images/ctg.png" width="150" />
+					<br />
+					<br />
+					<br />
+					<br />
+					<img src="/brand/logo.v3.white.png" />
+				</div>
+			</template>
 		</div>
 		<!-- End Stream BG -->
 
@@ -338,6 +352,13 @@
 		<script src="/views/CTMCompetitionPlayer.js"></script>
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
+			function easeInOutBack(t, b, c, d, s) {
+				if (s == undefined) s = 1.70158;
+				if ((t /= d / 2) < 1)
+					return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+				return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+			}
+
 			const players = [];
 
 			[1, 2].forEach(match_num => {
@@ -354,6 +375,13 @@
 					player_node.classList.add(`p${player_num}`);
 					match_node.appendChild(player_node);
 
+					const curtain_template = document.getElementById('curtain');
+					const curtain_fragment = document.importNode(
+						curtain_template.content,
+						true
+					);
+					const curtain_node = curtain_fragment.querySelector('.curtain');
+
 					const player = new CTMCompetitionPlayer(
 						{
 							name: player_node.querySelector(`.name .header`),
@@ -368,6 +396,7 @@
 							drought: player_node.querySelector(`.drought .value`),
 							runway_game: player_node.querySelector(`.runway .value`),
 							video: player_node.querySelector(`video`),
+							curtain: curtain_node,
 
 							projection: player_node.querySelector(`.projection .value`),
 
@@ -387,11 +416,13 @@
 
 							drought_box: player_node.querySelector(`.drought`),
 							runway_box: player_node.querySelector(`.runway`),
+							runway_tr_box: document.querySelector(`.runway.transition`),
 							projection_box: player_node.querySelector(`.projection`),
 						},
 						{
 							field_pixel_size: 220 / 80,
 							preview_pixel_size: 2,
+							preview_align: 'cc',
 						}
 					);
 
@@ -412,6 +443,39 @@
 						player.dom.runway_tr_box.querySelector('.header').textContent =
 							'TR RUNWAY';
 					};
+
+					let rotate_animation_id;
+					const logo = curtain_node.querySelector('.ctg');
+
+					function rotateLogo() {
+						resetLogo();
+
+						const start_ts = Date.now();
+						const duration = 850;
+
+						const steps = () => {
+							const elapsed = Math.min(Date.now() - start_ts, duration);
+
+							const turn_ratio = easeInOutBack(elapsed, 0, 1, duration, 1.1);
+
+							logo.style.transform = `rotate(${turn_ratio}turn)`;
+
+							if (elapsed < duration) {
+								rotate_animation_id = window.requestAnimationFrame(steps);
+							} else {
+								resetLogo();
+							}
+						};
+
+						rotate_animation_id = window.requestAnimationFrame(steps);
+					}
+
+					function resetLogo() {
+						window.cancelAnimationFrame(rotate_animation_id);
+						logo.style.transform = null;
+					}
+
+					player.onCurtainDown = rotateLogo;
 
 					players.push(player);
 				});

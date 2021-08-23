@@ -35,7 +35,6 @@
 				--offset: 23px;
 			}
 
-			.eff,
 			.runway,
 			.projection,
 			.running_trt {
@@ -212,11 +211,6 @@
 					<div class="value">99</div>
 				</div>
 
-				<div class="box eff p1">
-					<div class="header">EFF</div>
-					<div class="value">---</div>
-				</div>
-
 				<div class="box runway transition p1">
 					<div class="header">TR RUNWAY</div>
 					<div class="content">0000000</div>
@@ -280,11 +274,6 @@
 					<div class="value">99</div>
 				</div>
 
-				<div class="box eff p2">
-					<div class="header">EFF</div>
-					<div class="value">---</div>
-				</div>
-
 				<div class="box runway transition p2">
 					<div class="header">TR RUNWAY</div>
 					<div class="content">0000000</div>
@@ -327,8 +316,6 @@
 		<script src="/views/CTMCompetitionPlayer.js"></script>
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
-			const numberFormatter = new Intl.NumberFormat();
-
 			function easeInOutBack(t, b, c, d, s) {
 				if (s == undefined) s = 1.70158;
 				if ((t /= d / 2) < 1)
@@ -357,7 +344,6 @@
 						hearts: document.querySelector(`.name.p${num} .hearts`),
 						drought: document.querySelector(`.drought.p${num} .value`),
 						runway_game: document.querySelector(`.runway.p${num} .value`),
-						eff: document.querySelector(`.eff.p${num} .value`),
 						curtain: curtain_node,
 
 						projection: document.querySelector(`.projection.p${num} .value`),
