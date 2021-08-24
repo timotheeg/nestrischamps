@@ -115,11 +115,16 @@
 			}
 
 			.name {
-				display: none;
 				--offset: 23px;
 				top: 600px;
 				width: 223px;
 				height: 53px;
+			}
+
+			.name .header {
+				padding: 0 0 0 3px;
+				white-space: nowrap;
+				overflow: hidden;
 			}
 
 			.name .hearts {
@@ -390,6 +395,13 @@
 						/**/
 					}
 				);
+
+				// custom logic for see-through
+				if (QueryString.get('name') === '0') {
+					// Hide the name and hearts
+					// It is expected another program like CTCT will show the data underneath
+					document.querySelector(`.name.p${num}`).remove();
+				}
 
 				// Undo the CTM logic of hiding the level and preview
 				delete player.onGameOver;
