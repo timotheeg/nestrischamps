@@ -29,7 +29,9 @@ class User extends EventEmitter {
 		this.description = user_object.description;
 		this.profile_image_url = user_object.profile_image_url;
 
+		this.dob = user_object.dob;
 		this.country_code = user_object.country_code || 'US';
+		this.city = user_object.city || '';
 		this.style = user_object.style || 'das';
 		this.interests = user_object.interests || '';
 

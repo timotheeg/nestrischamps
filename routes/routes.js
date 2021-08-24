@@ -107,10 +107,23 @@ router.get(
 	}
 );
 
+function getAge(dob) {
+	const now = new Date();
+	const today_str = now.toISOString().slice(0, 10);
+	const today = new Date(today_str);
+	const m = today.getMonth() - dob.getMonth();
+
+	let age = today.getFullYear() - dob.getFullYear();
+
+	if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+		age--;
+	}
+
+	return age;
+}
+
 router.get('/view/profile_card/:login', async (req, res) => {
 	const user = await UserDAO.getUserByLogin(req.params.login);
-
-	console.log(user);
 
 	if (!user) {
 		res.status(404).send('Not found');
@@ -119,6 +132,7 @@ router.get('/view/profile_card/:login', async (req, res) => {
 
 	res.render('profile_card', {
 		user,
+		age: user.dob ? getAge(user.dob) : 9,
 		pb: await ScoreDAO.getPB(user),
 	});
 });

@@ -108,7 +108,7 @@ p {
 		</section>
 
 		<section id="flag">
-			<h1>43 - Singapore</h1>
+			<h1><%= [age, user.city].filter(v => v).join(' - ') %></h1>
 			<img src="https://www.countryflags.io/<%= user.country_code %>/flat/64.png">
 		</section>
 

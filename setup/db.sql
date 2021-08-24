@@ -12,7 +12,9 @@ CREATE TABLE twitch_users (
 	display_name VARCHAR ( 255 ),
 	profile_image_url VARCHAR ( 255 ),
 
-	country_code VARCHAR( 2 ) default 'US',
+	dob date,
+	country_code VARCHAR( 2 ),
+	city VARCHAR( 100 ),
 	interests VARCHAR ( 300 ) default '',
 	style play_style default 'das',
 

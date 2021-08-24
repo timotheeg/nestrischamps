@@ -52,6 +52,21 @@ router.get('/clear_session', async (req, res) => {
 	res.redirect('/');
 });
 
+function getAge(dateString /*YYYY-MM-DD*/) {
+	const now = new Date();
+	const today_str = now.toISOString().slice(0, 10);
+	const today = new Date(today_str);
+	const birthDate = new Date(dateString);
+	const m = today.getMonth() - birthDate.getMonth();
+
+	let age = today.getFullYear() - birthDate.getFullYear();
+
+	if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+		age--;
+	}
+	return age;
+}
+
 router.post('/update_profile', express.json(), async (req, res) => {
 	if (!req.body) {
 		res.status(400).json({ errors: ['Bad Request'] });
@@ -69,10 +84,32 @@ router.post('/update_profile', express.json(), async (req, res) => {
 
 	const code = (req.body.country_code || '').toUpperCase();
 
+	// crude string test first, and then date test
+	if (
+		/^(19|20)\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/.test(req.body.dob)
+	) {
+		const age = getAge(req.body.dob);
+
+		// arbitrary age boundaries
+		if (age < 10 || age > 100) {
+			errors.push('Dob is not valid');
+		} else {
+			update.dob = req.body.dob;
+		}
+	} else {
+		errors.push('Dob is not valid');
+	}
+
 	if (code && countries.some(country => country.code === code)) {
 		update.country_code = code;
 	} else {
 		errors.push('Country code is not valid');
+	}
+
+	if (typeof req.body.city === 'string') {
+		update.city = req.body.city;
+	} else {
+		errors.push('City is not valid');
 	}
 
 	if (typeof req.body.interests === 'string') {

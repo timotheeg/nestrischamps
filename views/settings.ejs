@@ -99,6 +99,27 @@
 					</div>
 
 					<div class="field">
+						<label class="label">City</label>
+						<div class="control">
+							<input id="city" class="input" type="text" value="<%= db_user.city %>" placeholder="Enter your city" />
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Date of Birth (to show your age)</label>
+						<div class="control">
+							<input id="dob" class="input" type="date" value="<%= db_user.dob ? db_user.dob.toISOString().slice(0, 10) : '' %>" min="1950-01-01" pattern="(19|20)\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])" />
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Interests</label>
+						<div class="control">
+							<textarea id="interests" class="textarea" placeholder="Interests - Keep it short" maxlength="300"><%= db_user.interests %></textarea>
+						</div>
+					</div>
+
+					<div class="field">
 						<label class="label">Style</label>
 						<div class="control">
 							<div class="select">
@@ -108,13 +129,6 @@
 								<% }) %>
 								</select>
 							</div>
-						</div>
-					</div>
-
-					<div class="field">
-						<label class="label">Interests</label>
-						<div class="control">
-							<textarea id="interests" class="textarea" placeholder="Interests - Keep it short" maxlength="300"><%= db_user.interests %></textarea>
 						</div>
 					</div>
 
@@ -183,12 +197,19 @@
 	</div>
 </section>
 <script type="text/javascript">
-
 const profile_nodes = {
+	dob: document.getElementById('dob'),
 	country_code: document.getElementById('country_code'),
+	city: document.getElementById('city'),
 	style: document.getElementById('style'),
 	interests: document.getElementById('interests'),
 };
+
+// add dob max constraint dynamically
+const min_10yo_dob = new Date();
+min_10yo_dob.setFullYear(min_10yo_dob.getFullYear() - 10);
+
+profile_nodes.dob.setAttribute('max', min_10yo_dob.toISOString().slice(0, 10));
 
 const pb_nodes = {
 	score: document.getElementById('pb_score'),

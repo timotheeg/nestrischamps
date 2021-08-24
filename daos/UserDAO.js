@@ -144,13 +144,23 @@ class UserDAO {
 	async updateProfile(user_id, update) {
 		await dbPool.query(
 			`UPDATE twitch_users
-			SET style=$1, country_code=$2, interests=$3
-			WHERE id=$4;
+			SET dob=$1, country_code=$2, city=$3, style=$4, interests=$5
+			WHERE id=$6;
 			`,
-			[update.style, update.country_code, update.interests, user_id]
+			[
+				update.dob,
+				update.country_code,
+				update.city,
+				update.style,
+				update.interests,
+				user_id,
+			]
 		);
 
-		const user = this.getUserById(user_id);
+		const user = await this.getUserById(user_id);
+
+		// Always assign a date to user's dob
+		update.dob = update.dob ? new Date(update.dob) : null;
 
 		// In case user was already in memory, we update its data
 		// Note: small risk that DB changed something (e.g. truncate)
