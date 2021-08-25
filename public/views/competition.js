@@ -136,6 +136,10 @@ class TetrisCompetitionAPI {
 		});
 	}
 
+	showProfileCard(visible) {
+		players.forEach(player => player.showProfileCard(visible));
+	}
+
 	_repaintVictories(player_idx) {
 		const player = getPlayer(player_idx);
 		const victories = this.victories[player_idx];

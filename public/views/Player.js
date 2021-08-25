@@ -306,6 +306,21 @@ const Player = (function () {
 				this._hideCurtain();
 			}
 
+			this.profile_card = document.createElement('iframe');
+			Object.assign(this.profile_card.style, {
+				position: 'absolute',
+				top: `${bg_offset}px`,
+				left: `${bg_offset}px`,
+				width: `${bg_width}px`,
+				height: `${bg_height}px`,
+				border: 0,
+				margin: 0,
+				padding: 0,
+				overflow: 'hidden',
+			});
+			this.profile_card.hidden = true;
+			this.dom.field.appendChild(this.profile_card);
+
 			this.field_ctx.canvas.style.top = `${field_canva_offset}px`;
 			this.field_ctx.canvas.style.left = `${field_canva_offset}px`;
 			this.field_bg.appendChild(this.field_ctx.canvas);
@@ -341,6 +356,10 @@ const Player = (function () {
 		onGameOver() {}
 		onCurtainDown() {}
 		onTetris() {}
+
+		showProfileCard(visible) {
+			this.profile_card.hidden = !visible;
+		}
 
 		_showCurtain() {
 			if (!this.has_curtain) return;
@@ -517,7 +536,10 @@ const Player = (function () {
 		}
 
 		setLogin(login) {
+			if (login === this.login) return;
+
 			this.login = login;
+			this.profile_card.src = `/view/profile_card/${login}`;
 		}
 
 		_getPieceStats(data) {

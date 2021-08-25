@@ -11,6 +11,8 @@ html, body {
 	padding: 0;
 	margin: 0;
 	font-family: Gotham;
+	background: black;
+
 
 	--fsize: 22px;
 	--beige: #fee28a;
@@ -20,11 +22,6 @@ html, body {
 }
 
 .frame {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 237px;
-	height: 477px;
 	background: black;
 	overflow: hidden;
 	text-align: center;
@@ -36,6 +33,7 @@ html, body {
 
 #name {
 	border-bottom: 3px solid var(--beige);
+	margin-bottom: 0.5em;
 }
 
 h1 {
@@ -46,6 +44,10 @@ h1 {
 	color: white;
 	text-align: center;
 	line-height: 32px;
+}
+
+#name h1 {
+	line-height: 48px;
 }
 
 section {
@@ -65,7 +67,7 @@ p {
 #twitch {
 	position: absolute;
 	bottom: 0;
-	margin-bottom: 1em;
+	margin-bottom: 20px;
 	color: white;
 	width: 100%;
 }
@@ -87,7 +89,7 @@ p {
 	position: absolute;
 	top: 1px;
 	left: 22px;
-	width: 151px;
+	width: calc(100% - 32px - 60px);
 	font-size: 18px;
 	line-height: 32px;
 
@@ -97,6 +99,15 @@ p {
 	text-align: center;
 	vertical-align: middle;
 }
+
+#play_style span {
+	margin-right: 0.2em;
+}
+
+#play_style span:last-of-type {
+	margin-right: 0;
+}
+
 </style>
 </head>
 <body>
@@ -112,15 +123,31 @@ p {
 			<img src="https://www.countryflags.io/<%= user.country_code %>/flat/64.png">
 		</section>
 
-		<section id="interests">
-			<h1>Interests</h1>
-			<p><%= user.interests %></p>
-		</section>
-
 		<section id="play_style">
 			<h1>Play info</h1>
 			<p>Style: <%= user.style %></p>
-			<p>PB: <%= (new Intl.NumberFormat()).format(pb) %></p>
+			<p>PB: <%
+
+				let remainder = pb || 0;
+				let parts = [];
+
+				while (remainder) {
+					parts.unshift(remainder % 1000);
+					remainder = Math.floor(remainder / 1000);
+				}
+
+				if (!parts.length) parts.push(0);
+
+				parts = parts
+					.map((part, idx) => idx > 0 ? `${part}`.padStart(3, '0') : part)
+					.map(part => `<span>${part}</span>`);
+
+			%><%- parts.join('') %></p>
+		</section>
+
+		<section id="interests">
+			<h1>Interests</h1>
+			<p><%= user.interests %></p>
 		</section>
 	</div>
 

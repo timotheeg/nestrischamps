@@ -472,6 +472,11 @@ class MatchRoom extends Room {
 					break; // simple passthrough
 				}
 
+				case 'showProfileCard': {
+					update_admin = false;
+					break; // simple passthrough
+				}
+
 				default: {
 					// reject any unknown command
 					return;
