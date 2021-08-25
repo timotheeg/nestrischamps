@@ -162,7 +162,7 @@ router.post('/set_pb', express.json(), async (req, res) => {
 		await ScoreDAO.setPB(user, update);
 		res.status(200).json({});
 		return;
-	} while (false);
+	} while (false); // eslint-disable-line no-constant-condition
 
 	res.status(400).json({ errors: ['Bad Request'] });
 });
