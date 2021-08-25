@@ -518,6 +518,12 @@
 				show_match.hidden = false;
 			};
 
+			API.showProfileCard = function (visible, match_idx) {
+				players
+					.slice(2 * match_idx, 2 * match_idx + 2)
+					.forEach(player => player.showProfileCard(visible));
+			};
+
 			API.setWinner = function (player_idx) {
 				const match_index = player_idx < 2 ? 0 : 1;
 
