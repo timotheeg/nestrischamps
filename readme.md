@@ -2,7 +2,7 @@
 
 NESTrisChamps is a browser-based OCR and rendering system for NES classic Tetris.
 
-It is available online under the domain `nestrischamps.herokuapp.com`
+It is available online under the domain [`nestrischamps.herokuapp.com`](https://nestrischamps.herokuapp.com)
 
 NESTrisChamps is composed of 3 main parts:
 * A browser Based OCR
