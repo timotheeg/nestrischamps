@@ -20,8 +20,36 @@
 	<body>
 		<p>
 			Select an image:
+			<select id="sample_image"></select>
+			OR
 			<input type="file" id="file" name="files" style="display: inline" />
 			<span id="file_sel_err" />
+		</p>
+
+		<p>
+			Select Color matching strategy
+			<select id="strategy">
+				<option value="rgb" selected>RGB</option>
+				<option value="luma">LUMA</option>
+				<option value="lab">LAB</option>
+			</select>
+		</p>
+
+		<p id="pixel_size">
+			Tetris block represents a
+			<select id="pixels"></select>
+			pixel square area in the source image.
+		</p>
+
+		<p id="levels_table">Level Colors:</p>
+		<table>
+			<tr class="levels"></tr>
+			<tr class="colors"></tr>
+		</table>
+
+		<p>
+			Selected Colors Union
+			<span id="union"></span>
 		</p>
 
 		<div id="source"></div>
@@ -33,38 +61,63 @@
 		<script src="/ocr/image_tools.js"></script>
 		<script src="/ocr/utils.js"></script>
 		<script type="text/javascript">
-			let levels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+			const dom = {
+				sample_image: document.getElementById('sample_image'),
+				file: document.getElementById('file'),
+				file_sel_err: document.getElementById('file_sel_err'),
+				pixels: document.getElementById('pixels'),
+				source: document.getElementById('source'),
+				work: document.getElementById('work'),
+				union: document.getElementById('union'),
+				strategy: document.getElementById('strategy'),
+			};
+
+			const sample_images = ['jonas', 'joseph', 'harry', 'dog'];
+
+			const strategies = {
+				rgb: _ => _,
+				luma: _ => [luma(..._)],
+				lab: rgb2lab,
+			};
+
+			const ALLOWED_LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+			const PIXEL_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 24, 32, 48, 64];
+
+			let levels = ALLOWED_LEVELS;
 			let source_pixel_size = 8;
 			let scale = 1;
+			let strategy = strategies.rgb;
+			let face = 'jonas';
 
-			if (/^\d(,\d)*$/.test(QueryString.get('levels'))) {
+			if (/^(\d|10)(,(\d|10))*$/.test(QueryString.get('levels'))) {
 				levels = _.union(QueryString.get('levels').split(',')).map(v => +v);
 			}
 
-			if (/^[1-9]|[12][0-9]$/.test(QueryString.get('pixel'))) {
+			if (/^[1-9][0-9]?$/.test(QueryString.get('pixel'))) {
 				source_pixel_size = +QueryString.get('pixel');
+
+				// allow the supplied value to be used
+				if (!PIXEL_SIZES.includes(source_pixel_size)) {
+					PIXEL_SIZES.unshift(source_pixel_size);
+				}
 			}
 
 			if (/^[123456]$/.test(QueryString.get('scale'))) {
 				scale = +QueryString.get('scale');
 			}
 
-			const dom = {
-				file: document.getElementById('file'),
-				file_sel_err: document.getElementById('file_sel_err'),
-				source: document.getElementById('source'),
-				work: document.getElementById('work'),
-			};
+			if (/^luma|rgb|lab$/i.test(QueryString.get('strategy'))) {
+				strategy = QueryString.get('strategy').toLowerCase();
+			}
 
-			let lab_colors;
+			if (/^jonas|joseph|harry|dog$/i.test(QueryString.get('face'))) {
+				face = QueryString.get('face').toLowerCase();
+			}
+
+			let current_image;
+			let base_colors;
+			let color_channels;
 			let colors;
-
-			/**/
-			rgb2lab = function ([r, g, b]) {
-				return [r, g, b];
-				// return luma(r, g, b);
-			};
-			/**/
 
 			function renderBlock(color, block_index, pixel_size, ctx, pos_x, pos_y) {
 				if (block_index < 1) {
@@ -121,30 +174,47 @@
 			}
 
 			function getColors() {
-				const cols = ['#000000', '#FFFFFF'];
+				const cols = [];
 
-				levels.forEach(level => {
-					cols.push(...LEVEL_COLORS[level]);
+				[...document.querySelectorAll('table th input:checked')]
+					.map(cb => +cb.value)
+					.forEach(index => {
+						cols.push(...base_colors[index]);
+					});
+
+				colors = _.union(cols);
+				color_channels = colors
+					.map(col => parseInt(col.slice(1), 16))
+					.map(col => [
+						(col >> 16) & 0xff,
+						(col >> 8) & 0xff,
+						(col >> 0) & 0xff,
+					])
+					.map(strategies[dom.strategy.value]);
+
+				// show the union
+				dom.union.innerHTML = ''; // clear
+
+				colors.forEach(col => {
+					const span = document.createElement('span');
+					span.style.background = col;
+					span.style.border = 'solid 1px black';
+					span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+					dom.union.appendChild(span);
 				});
-
-				return _.union(cols);
 			}
 
 			function getColorIndex(col_in) {
-				col_in = rgb2lab(col_in);
+				col_in = strategies[dom.strategy.value](col_in);
 
 				let min_diff = 0xffffffff;
 				let min_idx = -1;
 
-				lab_colors.forEach((col, col_idx) => {
-					/**/
+				color_channels.forEach((col, col_idx) => {
 					const sum = col.reduce(
 						(acc, c, idx) => acc + (c - col_in[idx]) * (c - col_in[idx]),
 						0
 					);
-					/**/
-
-					// const sum = (col - col_in) * (col - col_in);
 
 					if (sum < min_diff) {
 						min_diff = sum;
@@ -161,6 +231,14 @@
 				return colors[index];
 			}
 
+			function reDo() {
+				getColors();
+
+				if (current_image) {
+					nestrify(current_image);
+				}
+			}
+
 			function showError(msg) {
 				dom.file_sel_err.textContent = '';
 			}
@@ -169,24 +247,26 @@
 				const width = img.width;
 				const height = img.height;
 
-				if (width < source_pixel_size || height < source_pixel_size) {
+				const pixel_size = +dom.pixels.value;
+
+				if (width < pixel_size || height < pixel_size) {
 					showError('Image dimensions are not suitable!');
 					return;
 				}
 
 				dom.work.innerHTML = '';
 
-				const x_block = Math.floor(width / source_pixel_size);
-				const y_block = Math.floor(height / source_pixel_size);
-				const x_offset = Math.floor((width - x_block * source_pixel_size) / 2);
-				const y_offset = Math.floor((height - y_block * source_pixel_size) / 2);
+				const x_block = Math.floor(width / pixel_size);
+				const y_block = Math.floor(height / pixel_size);
+				const x_offset = Math.floor((width - x_block * pixel_size) / 2);
+				const y_offset = Math.floor((height - y_block * pixel_size) / 2);
 
 				const source = document.createElement('canvas');
 
 				source.width = x_block;
 				source.height = y_block;
 
-				const source_context = source.getContext('2d', { alpha: false });
+				const source_context = source.getContext('2d', { alpha: true });
 
 				source_context.imageSmoothingEnabled = true;
 				source_context.imageSmoothingQuality = 'high';
@@ -197,8 +277,8 @@
 					img,
 					x_offset,
 					y_offset,
-					x_block * source_pixel_size,
-					y_block * source_pixel_size,
+					x_block * pixel_size,
+					y_block * pixel_size,
 					0,
 					0,
 					x_block,
@@ -206,6 +286,7 @@
 				);
 
 				// ==========
+				// show pixaleted image
 
 				const target = document.createElement('canvas');
 
@@ -218,7 +299,7 @@
 
 				context.imageSmoothingEnabled = false;
 
-				dom.work.appendChild(target);
+				// dom.work.appendChild(target);
 
 				context.drawImage(
 					source,
@@ -233,6 +314,7 @@
 				);
 
 				// ==========
+				// show nestrified image
 
 				const pixels = source_context.getImageData(0, 0, x_block, y_block);
 
@@ -287,28 +369,97 @@
 					reader.onload = function (e) {
 						dom.source.style.backgroundImage = `url(${e.target.result})`;
 
-						const img = new Image();
-						img.onload = function () {
+						current_image = new Image();
+						current_image.onload = function () {
 							nestrify(this);
 						};
-						img.src = e.target.result;
+						current_image.src = e.target.result;
 					};
 
 					reader.readAsDataURL(selectedFile);
 				}
 
-				function bootstrap() {
-					colors = getColors();
-					lab_colors = colors
-						.map(col => parseInt(col.slice(1), 16))
-						.map(col => [
-							(col >> 16) & 0xff,
-							(col >> 8) & 0xff,
-							(col >> 0) & 0xff,
-						])
-						.map(rgb2lab);
+				function pickSampleImage(evt) {
+					showError('');
+					const uri = `/views/tiles/heads/${dom.sample_image.value}.png`;
 
-					file.addEventListener('change', selectImage);
+					dom.source.style.backgroundImage = `url(${uri})`;
+
+					current_image = new Image();
+					current_image.onload = function () {
+						nestrify(this);
+					};
+					current_image.src = uri;
+				}
+
+				function bootstrap() {
+					base_colors = [...LEVEL_COLORS, ['#000000', '#FFFFFF']];
+
+					dom.file.addEventListener('change', selectImage);
+					dom.strategy.addEventListener('change', reDo);
+
+					// build color checkbox selection
+					const row_levels = document.querySelector('table .levels');
+					const row_colors = document.querySelector('table .colors');
+
+					base_colors.forEach((cols, idx) => {
+						const cell_level = document.createElement('th');
+						const cell_col = document.createElement('td');
+
+						const span = document.createElement('span');
+						span.textContent = `${idx} - `;
+
+						const check = document.createElement('input');
+						check.type = 'checkbox';
+						check.value = idx;
+						check.checked = levels.includes(idx);
+						check.addEventListener('change', reDo);
+
+						cell_level.appendChild(span);
+						cell_level.appendChild(check);
+
+						cols.forEach(col => {
+							const span = document.createElement('span');
+							span.style.background = col;
+							span.style.border = 'solid 1px black';
+							span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+
+							cell_col.appendChild(span);
+						});
+
+						row_levels.appendChild(cell_level);
+						row_colors.appendChild(cell_col);
+					});
+
+					// set current strategy in drop down
+					dom.strategy.value = strategy;
+
+					sample_images.forEach(name => {
+						const option = document.createElement('option');
+
+						option.textContent = name;
+						option.value = name;
+
+						dom.sample_image.appendChild(option);
+					});
+
+					dom.sample_image.value = face;
+					dom.sample_image.addEventListener('change', pickSampleImage);
+
+					PIXEL_SIZES.forEach(size => {
+						const option = document.createElement('option');
+
+						option.textContent = size;
+						option.value = size;
+
+						dom.pixels.appendChild(option);
+					});
+
+					dom.pixels.value = source_pixel_size;
+					dom.pixels.addEventListener('change', reDo);
+
+					getColors();
+					pickSampleImage();
 				}
 
 				bootstrap();
