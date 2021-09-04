@@ -86,7 +86,7 @@
 			let levels = ALLOWED_LEVELS;
 			let source_pixel_size = 8;
 			let scale = 1;
-			let strategy = strategies.rgb;
+			let strategy = 'luma';
 			let face = 'jonas';
 
 			if (/^(\d|10)(,(\d|10))*$/.test(QueryString.get('levels'))) {
@@ -273,6 +273,8 @@
 
 				dom.work.appendChild(source);
 
+				// source_context.fillStyle = '#FFFFFF';
+				// source_context.fillRect(0, 0, x_block, y_block);
 				source_context.drawImage(
 					img,
 					x_offset,
