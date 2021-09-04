@@ -136,6 +136,10 @@ class TetrisCompetitionAPI {
 		});
 	}
 
+	setGameOver(player_idx) {
+		getPlayer(player_idx).setGameOver();
+	}
+
 	_repaintVictories(player_idx) {
 		const player = getPlayer(player_idx);
 		const victories = this.victories[player_idx];

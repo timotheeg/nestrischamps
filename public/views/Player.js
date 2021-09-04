@@ -366,6 +366,7 @@ const Player = (function () {
 				if (elapsed < duration) {
 					this.curtain_animation_ID = window.requestAnimationFrame(steps);
 				} else {
+					this.curtain_down = true;
 					this.onCurtainDown();
 				}
 			};
@@ -719,25 +720,7 @@ const Player = (function () {
 
 			if (!this.game_over && this._isTopRowFull(data)) {
 				this.game_over = true;
-
-				this.tr_runway_score = this.getTransitionRunwayScore();
-				this.dom.runway_tr.textContent = this.options.format_score(
-					this.tr_runway_score,
-					7
-				);
-
-				this.game_runway_score = this.getGameRunwayScore();
-				this.dom.runway_game.textContent = this.options.format_score(
-					this.game_runway_score,
-					7
-				);
-
-				this.projection = this.getProjection();
-				this.dom.projection.textContent = this.options.format_score(
-					this.projection,
-					7
-				);
-
+				this._lockRunWayToScore();
 				this._showCurtain();
 				this.onGameOver();
 			}
@@ -866,6 +849,26 @@ const Player = (function () {
 					}
 				}
 			}
+		}
+
+		_lockRunWayToScore() {
+			this.tr_runway_score = this.getTransitionRunwayScore();
+			this.dom.runway_tr.textContent = this.options.format_score(
+				this.tr_runway_score,
+				7
+			);
+
+			this.game_runway_score = this.getGameRunwayScore();
+			this.dom.runway_game.textContent = this.options.format_score(
+				this.game_runway_score,
+				7
+			);
+
+			this.projection = this.getProjection();
+			this.dom.projection.textContent = this.options.format_score(
+				this.projection,
+				7
+			);
 		}
 
 		getGameRunwayScore() {
@@ -1168,6 +1171,12 @@ const Player = (function () {
 			this.field_ctx.clear();
 			this.clearWinnerAnimation();
 			this._hideCurtain();
+		}
+
+		setGameOver() {
+			this._doGameOver();
+			this._lockRunWayToScore();
+			this.curtain_down = true; // set early to force all frames to be ignored from that point on
 		}
 
 		showLoserFrame() {

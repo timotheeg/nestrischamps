@@ -27,6 +27,9 @@ const remoteAPI = {
 	setWinner: function (player_idx) {
 		connection.send(['setWinner', player_idx]);
 	},
+	setGameOver: function (player_idx) {
+		connection.send(['setGameOver', player_idx]);
+	},
 	removePlayer: function (player_idx) {
 		connection.send(['removePlayer', player_idx]);
 	},
@@ -90,6 +93,16 @@ class Player {
 
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
+		};
+
+		this.dom.game_over_btn.onclick = () => {
+			if (
+				confirm(
+					`Are you sure you want to set game over for player ${this.idx + 1}?`
+				)
+			) {
+				remoteAPI.setGameOver(this.idx);
+			}
 		};
 
 		this.dom.remove_btn.onclick = () => {
@@ -263,6 +276,7 @@ function addPlayer() {
 		avatar_img: player_node.querySelector('img'),
 		victories: player_node.querySelector('.victories'),
 		win_btn: player_node.querySelector('.winner'),
+		game_over_btn: player_node.querySelector('.game_over'),
 		remove_btn: player_node.querySelector('.remove_player'),
 	});
 
