@@ -297,7 +297,7 @@ class ScoreDAO {
 			[user.id, update.start_level, update.end_level, update.score]
 		);
 
-		// what to return?
+		return result.rowCount === 1;
 	}
 }
 
