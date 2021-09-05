@@ -263,33 +263,41 @@ class ScoreDAO {
 	}
 
 	async setPB(user, update) {
+		// atomic upsert
 		const result = await dbPool.query(
 			`
-			UPDATE scores
-			SET datetime=NOW(), score=$1, end_level=$2
-			WHERE player_id=$3 AND start_level=$4 AND manual=true;
+			INSERT INTO scores
+			(
+				datetime,
+				player_id,
+				start_level,
+				end_level,
+				score,
+				manual,
+
+				lines,
+				tetris_rate,
+				num_droughts,
+				max_drought,
+				das_avg,
+				duration,
+				clears,
+				pieces,
+				transition,
+				num_frames,
+				frame_file
+			)
+			VALUES
+			(
+				NOW(), $1, $2, $3, $4, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
+			)
+			ON CONFLICT (player_id, start_level) where manual
+			DO UPDATE SET datetime=NOW(), end_level=$3, score=$4
 			`,
-			[update.score, update.end_level, user.id, update.start_level]
+			[user.id, update.start_level, update.end_level, update.score]
 		);
 
-		// BAD - this is not atomic!
-		// TODO: Figure out a way to upsert atomically
-		if (result.rowCount === 0) {
-			await this.recordGame(user, {
-				...update,
-				lines: 0,
-				tetris_rate: 0,
-				num_droughts: 0,
-				max_drought: 0,
-				das_avg: -1,
-				duration: 0,
-				clears: '',
-				pieces: '',
-				num_frames: 0,
-				frame_file: '',
-				manual: true,
-			});
-		}
+		// what to return?
 	}
 }
 

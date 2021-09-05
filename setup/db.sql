@@ -49,6 +49,7 @@ CREATE TABLE scores (
 			REFERENCES twitch_users(id)
 );
 
+CREATE UNIQUE INDEX IDX_scores_manual_scores on scores (player_id, start_level) where manual;
 CREATE INDEX IDX_scores_player_datetime ON scores (player_id, datetime);
 CREATE INDEX IDX_scores_player_score ON scores (player_id, score);
 CREATE INDEX IDX_scores_datetime ON scores (datetime);
