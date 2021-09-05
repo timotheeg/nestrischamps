@@ -382,6 +382,12 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'setGameOver': {
+					update_admin = false;
+
+					break;
+				}
+
 				case 'addPlayer': {
 					if (this.state.players.length < MAX_PLAYERS) {
 						const player = getBasePlayerData();

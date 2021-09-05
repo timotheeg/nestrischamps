@@ -1,25 +1,25 @@
 # NESTrisChamps
 
-NESTrisChamps is a browser-based OCR and rendering system for NES classic Tetris.
+NESTrisChamps is a browser-based gamne capture and rendering system for NES classic Tetris.
 
-It is available online under the domain `nestrischamps.herokuapp.com`
+It is available online under the domain [`nestrischamps.herokuapp.com`](https://nestrischamps.herokuapp.com)
 
 NESTrisChamps is composed of 3 main parts:
-* A browser Based OCR
+* A browser based capture system
 	* Supports both capture devices and screen capture
 	* Supports 2 roms: Classic Tetris, and [Das Trainer](https://www.romhacking.net/hacks/3761/)
-* A Server to which OCR-ed game data is sent, and which rebroadcasts data
-* A System of renderers to redraw game play from scratch
+* A server to which captured game data is sent, and which rebroadcasts data
+* A system of renderers to redraw game play from scratch
 	* Crisp, pixel-perfect rendering
 	* Many stats computed in real time
 		* For reviewing one's own game footage after the fact
-		* For audience to understand more about the gamein real time
+		* For audience to understand more about the game in real time
 		* For match commentators to make better commentary in real time
 
 
 Basically, when we have Tetris game data (as opposed to images), the tetris game can be re-rendered with custom layouts, and various statistics can be computed. When multiple player data are used, a competition UI can be built with score differential and other comparative stats.
 
-NEsTrisChamps provides many renmdering layouts implemented in HTML+CSS+JavaScript at 720p resolution. This allows the templates to be dropped easily in [OBS](https://obsproject.com/) or [StreamLabs](https://streamlabs.com/) as [Browser Sources](https://obsproject.com/wiki/Sources-Guide#browsersource), and then adding player video stream or other sources like Twitch Chat on top of it.
+NEsTrisChamps provides many rendering layouts implemented in HTML+CSS+JavaScript at 720p resolution. This allows the templates to be dropped easily in [OBS](https://obsproject.com/) or [StreamLabs OBS](https://streamlabs.com/) as a [Browser Sources](https://obsproject.com/wiki/Sources-Guide#browsersource), and then adding player video stream or other sources like Twitch Chat on top of it.
 
 To get started, visit the online docs here:
 https://nestrischamps.herokuapp.com/docs
@@ -64,17 +64,17 @@ The 2 semi finals and the final match of CTWC 2019's Invisible Tetris Competitio
 
 ## Getting started
 
-NESTrisChamps only works in Chrome and Chromium atm (sorry!). Firefox might come at some point. It is unlikely I will support MS Edge unless someone contribute PRs.
+NESTrisChamps is only tested in Chrome, Chromium, and Firefox. It is unlikely I will support MS Edge unless someone contribute PRs.
 
 Read [the documentation](https://nestrischamps.herokuapp.com/docs).
 
 
 ### NEStrisChamps online
 
-1. In a window laod your producer page [https://nestrischamps.herokuapp.com/room/producer](https://nestrischamps.herokuapp.com/room/producer)
+1. In a window load your producer page [https://nestrischamps.herokuapp.com/room/producer](https://nestrischamps.herokuapp.com/room/producer)
 2. Calibrate your input. If you're lucky the autocalibration would have done a good job, and only needs minor fine tuning. You still **must** fine tune to have the capture areas pixel-perfect (refer to [the OCR section](https://nestrischamps.herokuapp.com/docs/#ocr) for details) of the documentation.
 3. Visit your personal renderers page to copy the renderer URL [https://nestrischamps.herokuapp.com/renderers](https://nestrischamps.herokuapp.com/renderers). I recommend using the layout `simple_1p` for a start
-4. Start playing the renderer should render your game.
+4. Start playing. The renderer should render your game.
 
 Note: Both pages **must** be in their own windows. The producer cannot be a in background tab, or chrome would throttle its processing, and your capture would be all choppy.
 
@@ -84,9 +84,9 @@ Read this additional [calibration guide](https://docs.google.com/document/d/1W7g
 
 ### OBS
 
-One you have connected your producer and renderer, you are ready to set up OBS or Streamlabs to stream it.
+Once you have connected your producer and renderer, you are ready to set up OBS or Streamlabs to stream it.
 
-To do that, drop a Browser Source in OBS and use the renderer URL as-is. Make sure the Browser Source is set at 1280x720.
+To do that, drop a Browser Source in OBS and use the renderer URL as-is. Make sure the Browser Source dimensions are set to 1280x720.
 
 Also, verify that Browser Source hardware acceleration is set (under Advanced Settings).
 
@@ -186,15 +186,13 @@ It is possible to disable the half-height behaviour by adding the following quer
 
 ### Enable Frame Buffering
 
-By default, nestrischamps broadcasts frames immediately and renders them as soon as they are received. If network is good and latency is more or less consistent, rendering will look good while being the most real time possible. If latency is not consistent however, this can create a stuttering rendering effect, which may look very good.
+By default, nestrischamps broadcasts frames immediately and renders them as soon as they are received. If network is good and latency is more or less consistent, rendering will look good while being the most real time possible. If latency is not consistent however, this can create a stuttering rendering effect, which may not look very good.
 
 It is possible to enable frame buffering in many of the renderers by adding a query string argument `?buffer_time=X` , where X is the number in milliseconds of buffering one wishes to have. For a simple try out, use `?buffer_time=1000`.
 
 When Frame buffering is active, frames are not rendered as soon as they are received. Instead, there is an initial delay to accumulate frames (in the example above, a 1s delay), and frames are then replayed with the timing interval they were captured at.
 
 Note that, when you share your webcam feed at the same, it means your reaction on webcam will preceed the frames themselves. That may look slightly odd, but it is not a usualy a deal breaker.
-
-The [Emulator Connector](https://github.com/Stabyourself/nestrischamps-emulator-connector) sometimes causes frames to be clumped together making for very bad looking rendering, a 1s buffer smoothes out the display.
 
 ### Enable Native webcam capture
 
@@ -206,7 +204,7 @@ Native webcam sharing can also be activated in the layouts `classic` and `das_tr
 
 In the producer window, if you add the query string `?tts=1` you can enable Twitch Chat TTS.
 
-Chatter get assigned a random voice out of the available ones, with no repeats until all voices are exhausted, and then repeat may happen.
+Chatters get assigned a random voice out of the available ones, with no repeats until all voices are exhausted, and then repeat may happen randomly.
 
 Note that you can specify which language you want the voices to be in by adding an additional query string parameter `lang=X`, where `X` is a ISO 2-letter language code, e.g. `lang=en`. Defaults to `en` if not supplied.
 
