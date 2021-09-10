@@ -96,13 +96,7 @@ class Player {
 		};
 
 		this.dom.game_over_btn.onclick = () => {
-			if (
-				confirm(
-					`Are you sure you want to set game over for player ${this.idx + 1}?`
-				)
-			) {
-				remoteAPI.setGameOver(this.idx);
-			}
+			remoteAPI.setGameOver(this.idx);
 		};
 
 		this.dom.remove_btn.onclick = () => {
