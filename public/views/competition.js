@@ -144,6 +144,10 @@ class TetrisCompetitionAPI {
 		getPlayer(player_idx).setGameOver();
 	}
 
+	cancelGameOver(player_idx) {
+		getPlayer(player_idx).cancelGameOver();
+	}
+
 	_repaintVictories(player_idx) {
 		const player = getPlayer(player_idx);
 		const victories = this.victories[player_idx];

@@ -1206,6 +1206,12 @@ const Player = (function () {
 			this.curtain_down = true; // set early to force all frames to be ignored from that point on
 		}
 
+		cancelGameOver() {
+			this.clearField();
+			this.curtain_down = false;
+			this.game_over = false;
+		}
+
 		showLoserFrame() {
 			this.winner_frame = 0;
 			this.clearField();
@@ -1214,6 +1220,9 @@ const Player = (function () {
 		}
 
 		playWinnerAnimation() {
+			// cancel rendering for current game
+			this.game_over = this.curtain_down = true;
+
 			this.winner_frame = 0;
 			this.clearField();
 			this.winner_animation_id = setInterval(this.renderWinnerFrame, 1000 / 18);

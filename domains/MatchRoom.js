@@ -376,15 +376,10 @@ class MatchRoom extends Room {
 					break;
 				}
 
-				case 'setWinner': {
+				case 'setWinner':
+				case 'setGameOver':
+				case 'cancelGameOver': {
 					update_admin = false;
-
-					break;
-				}
-
-				case 'setGameOver': {
-					update_admin = false;
-
 					break;
 				}
 

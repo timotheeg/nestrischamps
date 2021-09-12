@@ -33,6 +33,9 @@ const remoteAPI = {
 	setGameOver: function (player_idx) {
 		connection.send(['setGameOver', player_idx]);
 	},
+	cancelGameOver: function (player_idx) {
+		connection.send(['cancelGameOver', player_idx]);
+	},
 	removePlayer: function (player_idx) {
 		connection.send(['removePlayer', player_idx]);
 	},
@@ -103,6 +106,10 @@ class Player {
 
 		this.dom.game_over_btn.onclick = () => {
 			remoteAPI.setGameOver(this.idx);
+		};
+
+		this.dom.cancel_game_over_btn.onclick = () => {
+			remoteAPI.cancelGameOver(this.idx);
 		};
 
 		this.dom.remove_btn.onclick = () => {
@@ -280,6 +287,7 @@ function addPlayer() {
 		victories: player_node.querySelector('.victories'),
 		win_btn: player_node.querySelector('.winner'),
 		game_over_btn: player_node.querySelector('.game_over'),
+		cancel_game_over_btn: player_node.querySelector('.cancel_game_over'),
 		remove_btn: player_node.querySelector('.remove_player'),
 	});
 
