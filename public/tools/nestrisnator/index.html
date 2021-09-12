@@ -35,6 +35,17 @@
 			</select>
 		</p>
 
+		<p>
+			<label for="dithering"
+				>Apply
+				<a
+					href="https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering"
+					>Floyd-Steinberg dithering</a
+				></label
+			>
+			<input type="checkbox" id="dithering" />
+		</p>
+
 		<p id="pixel_size">
 			Tetris block represents a
 			<select id="pixels"></select>
@@ -70,6 +81,7 @@
 				work: document.getElementById('work'),
 				union: document.getElementById('union'),
 				strategy: document.getElementById('strategy'),
+				dithering: document.getElementById('dithering'),
 			};
 
 			const sample_images = ['jonas', 'joseph', 'harry', 'dog'];
@@ -88,6 +100,7 @@
 			let scale = 1;
 			let strategy = 'luma';
 			let face = 'jonas';
+			let dithering = QueryString.get('dithering') !== '0';
 
 			if (/^(\d|10)(,(\d|10))*$/.test(QueryString.get('levels'))) {
 				levels = _.union(QueryString.get('levels').split(',')).map(v => +v);
@@ -204,7 +217,14 @@
 				});
 			}
 
-			function getColorIndex(col_in) {
+			function getColorIndex(col_in, correction) {
+				// update col_in with corrections
+				if (dom.dithering.checked) {
+					col_in = col_in.map((v, idx) =>
+						Math.max(0, Math.min(v + correction[idx], 255))
+					);
+				}
+
 				col_in = strategies[dom.strategy.value](col_in);
 
 				let min_diff = 0xffffffff;
@@ -225,8 +245,8 @@
 				return min_idx;
 			}
 
-			function getColor(col_in) {
-				const index = getColorIndex(col_in);
+			function getColor(col_in, correction = [0, 0, 0]) {
+				const index = getColorIndex(col_in, correction);
 
 				return colors[index];
 			}
@@ -331,11 +351,16 @@
 
 				dom.work.appendChild(drawn);
 
+				const corrections = Array(y_block + 1)
+					.fill()
+					.map(() => Array(x_block + 1).fill());
+
 				for (let ridx = 0; ridx < y_block; ridx++) {
 					for (let cidx = 0; cidx < x_block; cidx++) {
 						const offset = (ridx * x_block + cidx) * 4; // 4 color channels per pixel
 						const col = pixels.data.subarray(offset, offset + 3);
-						const block_color = getColor(col);
+						const dithering = corrections[ridx][cidx];
+						const block_color = getColor(col, dithering);
 						const block_type =
 							block_color === '#000000' ? 0 : block_color === '#FFFFFF' ? 1 : 2;
 
@@ -347,8 +372,33 @@
 							cidx * scale * 8,
 							ridx * scale * 8
 						);
+
+						// spread dithering correction
+						const error = [
+							col[0] - block_color[0],
+							col[1] - block_color[2],
+							col[2] - block_color[3],
+						];
+
+						spread_error(corrections, ridx + 0, cidx + 1, error, 7 / 16);
+						spread_error(corrections, ridx + 1, cidx - 1, error, 3 / 16);
+						spread_error(corrections, ridx + 1, cidx + 0, error, 5 / 16);
+						spread_error(corrections, ridx + 1, cidx + 1, error, 1 / 16);
 					}
 				}
+			}
+
+			function spread_error(correction, ridx, cidx, error, ratio) {
+				let offsets = correction[ridx][cidx];
+
+				if (!offsets) {
+					offsets = [0, 0, 0];
+					correction[ridx][cidx] = offsets;
+				}
+
+				offsets.forEach((v, idx) => {
+					offsets[idx] += error[idx] * ratio;
+				});
 			}
 
 			(async function () {
@@ -459,6 +509,9 @@
 
 					dom.pixels.value = source_pixel_size;
 					dom.pixels.addEventListener('change', reDo);
+
+					dom.dithering.checked = dithering;
+					dom.dithering.addEventListener('change', reDo);
 
 					getColors();
 					pickSampleImage();
