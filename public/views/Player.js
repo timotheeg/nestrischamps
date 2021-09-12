@@ -404,16 +404,21 @@ const Player = (function () {
 
 		_doTetris() {
 			if (this.options.tetris_flash) {
-				let remaining_frames = 12;
+				const start = Date.now();
 
 				const steps = () => {
-					const bg_color = --remaining_frames % 2 ? 'white' : 'rgba(0,0,0,0)';
+					const elapsed = (Date.now() - start) / 1000;
+					const flashing = elapsed % (5 / 60) < 2 / 60; // flash for 2 "frame" every 5 "frames"
+					let bg_color = flashing ? 'white' : 'rgba(0,0,0,0)';
+
+					if (elapsed < 25 / 60) {
+						this.tetris_animation_ID = window.requestAnimationFrame(steps);
+					} else {
+						// make sure we don't end on white
+						bg_color = 'rgba(0,0,0,0)';
+					}
 
 					this.field_bg.style.background = bg_color;
-
-					if (remaining_frames > 0) {
-						this.tetris_animation_ID = window.requestAnimationFrame(steps);
-					}
 				};
 
 				this.tetris_animation_ID = window.requestAnimationFrame(steps);
