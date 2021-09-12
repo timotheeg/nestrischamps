@@ -1,4 +1,6 @@
 const OCRSanitizer = (function () {
+	const FIX_LEVEL = Query.get('fixlevel') !== '0';
+
 	/*
 	 * OCRSanitizer sanitizes a stream of Tetris OCRed data.
 	 *
@@ -174,8 +176,10 @@ const OCRSanitizer = (function () {
 					this.score_fixer.reset();
 					this.score_fixer.fix(this.last_frame.score);
 
-					this.level_fixer.reset();
-					this.level_fixer.fix(this.last_frame.level);
+					if (FIX_LEVEL) {
+						this.level_fixer.reset();
+						this.level_fixer.fix(this.last_frame.level);
+					}
 				}
 			}
 
@@ -189,7 +193,9 @@ const OCRSanitizer = (function () {
 					this.score_fixer.fix(this.last_frame.score)
 				), // note: nulls are passthrough
 				level: OCRSanitizer.digitsToValue(
-					this.level_fixer.fix(this.last_frame.level)
+					FIX_LEVEL
+						? this.level_fixer.fix(this.last_frame.level)
+						: this.last_frame.level
 				), // note: nulls are passthrough
 			};
 
