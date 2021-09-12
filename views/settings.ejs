@@ -1,44 +1,316 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NestrisChamps: user settings</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <style>
-      .navbar-item img {
-        max-height: 2.5rem;
-      }
-    </style>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>NestrisChamps: user settings</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+		<style>
+			.navbar-item img {
+				max-height: 2.5rem;
+			}
+
+			.fieldset{
+				background-color: #fff;
+				border-radius: 6px;
+				box-shadow: 0 0.5em 1em -0.125em rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.02);
+				color: #4a4a4a;
+				display: block;
+				padding: 1.25rem;
+				border: 1px solid #ccc
+			}
+
+			.fieldset  > legend {
+				color: #363636;
+				display: block;
+				font-size: 1rem;
+				font-weight: 700;
+				background-color: #fff;
+				padding: 0 5px;
+				width: max-content;
+				border: 0 none
+			}
+
+			.fieldset.content ul {
+				margin-top: 0;
+			}
+
+			p.help {
+				display: none;
+			}
+		</style>
 </head>
 <body>
 
 <%- include('header'); %>
 
 <section class="section">
-  <div class="container content">
-    <h1 class="title is-1">
-      <%= db_user.display_name %> settings
-    </h1>
+	<div class="container">
+		<h1 class="title is-1">
+			<%= db_user.display_name %> settings
+		</h1>
+		<p>Thanks for using NestrisChamps <%= db_user.display_name %>!</p>
+		<p>&nbsp;</p>
+	</div>
+	<div class="container">
+		<div class="columns">
+			<div class="column is-half">
+				<fieldset class="fieldset content">
+					<legend>Profile</legend>
+					<p>In competition layouts, profile information can be displayed on the board by a game host.</p>
 
-    <p>Thanks for using NestrisChamps <%= db_user.display_name %>!</p>
-    <p>Your view secret is <b><%= db_user.secret%></b>.</p>
-    <p>Actions</p>
-    <ul>
-    	<li><a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</li>
-    	<li><a href="/settings/clear_session">Clear Session</a> (= logout)</li>
-    </ul>
+					<div class="field">
+						<label class="label">ID <em>(from <a href="https://www.twitch.tv/settings/profile" target="twitch">Twitch</a>)</em></label>
+						<div class="control">
+							<input class="input" type="text" value="<%= db_user.login %>" readonly="readonly" />
+						</div>
+					</div>
 
-	<p>Quick Links</p>
-	<ul>
-		<li><a href="/renderers">See my personal view links</a></li>
-		<li><a href="/room/producer">Capture my gameplay into my private room</a></li>
-		<li><a href="/room/u/<%= db_user.login %>/producer">Capture my gameplay into my private room</a></li>
-		<li><a href="/room/admin">Administer my match room</a></li>
-		<li><a href="/stats/scores">My scores and replays</a></li>
-	</ul>
-  </div>
+					<div class="field">
+						<label class="label">Display Name <em>(from <a href="https://www.twitch.tv/settings/profile" target="twitch">Twitch</a>)</em></label>
+						<div class="control">
+							<input class="input" type="text" value="<%= db_user.display_name %>" readonly="readonly" />
+						</div>
+					</div>
+
+					<!-- div class="field">
+						<label class="label">Bio <em>(from Twitch)</em></label>
+						<div class="control">
+							<textarea class="textarea" readonly="readonly"><%= db_user.description || '-' %></textarea>
+						</div>
+					</div -->
+
+					<div class="field">
+						<label class="label">Country</label>
+						<div class="control has-icons-left">
+							<div class="select">
+								<select id="country_code">
+								<%
+									const code = db_user.country_code || 'US';
+									countries.forEach(country => { %>
+									<option value="<%= country.code %>"<%= code === country.code ? ' selected' : '' %>><%= country.name %></option>
+								<% }) %>
+								</select>
+							</div>
+								<span class="icon is-medium is-left">
+									<img id="country_flag" src="https://www.countryflags.io/<%=code%>/flat/32.png">
+								</span>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">City</label>
+						<div class="control">
+							<input id="city" class="input" type="text" value="<%= db_user.city %>" placeholder="Enter your city" />
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Date of Birth (to show your age)</label>
+						<div class="control">
+							<input id="dob" class="input" type="date" value="<%= db_user.dob ? db_user.dob.toISOString().slice(0, 10) : '' %>" min="1950-01-01" pattern="(19|20)\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])" />
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Interests</label>
+						<div class="control">
+							<textarea id="interests" class="textarea" placeholder="Interests - Keep it short" maxlength="300"><%= db_user.interests %></textarea>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Style</label>
+						<div class="control">
+							<div class="select">
+								<select id="style">
+								<% ['das', 'tap', 'roll', 'hybrid'].forEach(style => { %>
+									<option value="<%=style%>" <%= style === db_user.style ? 'selected' : '' %>><%=style.toUpperCase()%></option>
+								<% }) %>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="control">
+						<button class="button is-primary" id="update_profile_btn">Update</button>
+						<p class="help profile"></p>
+					</div>
+
+				</fieldset>
+			</div>
+			<div class="column is-half">
+
+				<fieldset class="fieldset content">
+					<legend>Actions</legend>
+					<p>Your view secret is <b><%= db_user.secret%></b>.</p>
+					<ul>
+						<li><a href="/settings/revoke_secret">Revoke Secret</a> (a new one will be generated for you)</li>
+						<li><a href="/settings/clear_session">Clear Session</a> (= logout)</li>
+					</ul>
+				</fieldset>
+
+				<fieldset class="fieldset content">
+					<legend>Quick Links</legend>
+					<ul>
+						<li><a href="/renderers">See my personal view links</a></li>
+						<li><a href="/room/producer">Capture my gameplay into my private room</a></li>
+						<li><a href="/room/u/<%= db_user.login %>/producer">Capture my gameplay into my private room</a></li>
+						<li><a href="/room/admin">Administer my match room</a></li>
+						<li><a href="/stats/scores">My scores and replays</a></li>
+					</ul>
+				</fieldset>
+
+				<fieldset class="fieldset content">
+					<legend>Personal Best</legend>
+					<p>Depending on when you started to use NestrisChamps, and how often you use it, your PB may not be in NestrisChamps' database. Here you have the ability to manually set <strong>one PB per start level</strong> in NestrisChamps database.</p>
+
+					<div class="field">
+						<label class="label">PB</label>
+						<div class="control">
+							<input id="pb_score" class="input" type="number" placeholder="Score" min="0" max="1600000">
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Start Level</label>
+						<div class="control">
+							<input id="pb_start_level" class="input" type="number" placeholder="Start Level" min="0" max="99">
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">End Level</label>
+						<div class="control">
+							<input id="pb_end_level" class="input" type="number" placeholder="End Level" min="0" max="99">
+						</div>
+					</div>
+
+					<div class="control">
+						<button class="button is-primary" id="set_pb_btn">Set PB</button>
+						<p class="help pb"></p>
+					</div>
+
+				</fieldset>
+			</div>
+		</div>
+	</div>
 </section>
+<script type="text/javascript">
+const profile_nodes = {
+	dob: document.getElementById('dob'),
+	country_code: document.getElementById('country_code'),
+	city: document.getElementById('city'),
+	style: document.getElementById('style'),
+	interests: document.getElementById('interests'),
+};
 
+// add dob max constraint dynamically
+const min_10yo_dob = new Date();
+min_10yo_dob.setFullYear(min_10yo_dob.getFullYear() - 10);
+
+profile_nodes.dob.setAttribute('max', min_10yo_dob.toISOString().slice(0, 10));
+
+const pb_nodes = {
+	score: document.getElementById('pb_score'),
+	start_level: document.getElementById('pb_start_level'),
+	end_level: document.getElementById('pb_end_level'),
+};
+
+profile_nodes.country_code.addEventListener('change', setCounntryFlag);
+
+function setCounntryFlag() {
+	document.getElementById('country_flag').src = `https://www.countryflags.io/${profile_nodes.country_code.value}/flat/32.png`
+}
+
+document.getElementById('update_profile_btn').addEventListener('click', async () => {
+	const feedback = document.querySelector('p.help.profile');
+
+	feedback.classList.remove('is-success');
+	feedback.classList.remove('is-danger');
+	feedback.style.display = 'none';
+
+	const data = {};
+
+	for (const [key, node] of Object.entries(profile_nodes)) {
+		data[key] = node.value;
+	}
+
+	try {
+		const response = await fetch('/settings/update_profile', {
+			method: 'POST',
+			cache: 'no-cache',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+			},
+			body: JSON.stringify(data) // body data type must match "Content-Type" header
+		});
+
+		const result = await response.json()
+
+		console.log(result);
+
+		if (response.ok) {
+			feedback.classList.add('is_success');
+			feedback.textContent = 'Profile updated successfully';
+		}
+		else {
+			feedback.classList.add('is_danger');
+			feedback.textContent = `Profile could not be updated: ${result.errors.join(', ')}`;
+		}
+	}
+	catch(err) {
+		console.error(err);
+		feedback.classList.add('is_danger');
+		feedback.textContent = `Profile could not be updated`;
+	}
+
+	feedback.style.display = 'block';
+});
+
+document.getElementById('set_pb_btn').addEventListener('click', async () => {
+	const feedback = document.querySelector('p.help.pb');
+
+	feedback.classList.remove('is-success');
+	feedback.classList.remove('is-danger');
+	feedback.style.display = 'none';
+
+	const data = {};
+
+	for (const [key, node] of Object.entries(pb_nodes)) {
+		data[key] = parseInt(node.value, 10);
+	}
+
+	// fire and forget ... urgh -_-
+	try {
+		const response = await fetch('/settings/set_pb', {
+			method: 'POST',
+			cache: 'no-cache',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+			},
+			body: JSON.stringify(data) // body data type must match "Content-Type" header
+		});
+
+		if (response.ok) {
+			feedback.classList.add('is_success');
+			feedback.textContent = 'PB added or updated successfully';
+		}
+		else {
+			throw new Error(response);
+		}
+	}
+	catch(err) {
+		console.error(err);
+		feedback.classList.add('is_danger');
+		feedback.textContent = 'Could not add or update PB';
+	}
+
+	feedback.style.display = 'block';
+});
+
+</script>
 </body>
 </html>

@@ -158,11 +158,12 @@ class ScoreDAO {
 				pieces,
 				transition,
 				num_frames,
-				frame_file
+				frame_file,
+				manual
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
 			)
 			RETURNING id
 			`,
@@ -182,6 +183,7 @@ class ScoreDAO {
 				game_data.transition,
 				game_data.num_frames,
 				game_data.frame_file,
+				!!game_data.manual,
 			]
 		);
 
@@ -258,6 +260,44 @@ class ScoreDAO {
 		);
 
 		return result.rows[0];
+	}
+
+	async setPB(user, update) {
+		// atomic upsert
+		const result = await dbPool.query(
+			`
+			INSERT INTO scores
+			(
+				datetime,
+				player_id,
+				start_level,
+				end_level,
+				score,
+				manual,
+
+				lines,
+				tetris_rate,
+				num_droughts,
+				max_drought,
+				das_avg,
+				duration,
+				clears,
+				pieces,
+				transition,
+				num_frames,
+				frame_file
+			)
+			VALUES
+			(
+				NOW(), $1, $2, $3, $4, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
+			)
+			ON CONFLICT (player_id, start_level) where manual
+			DO UPDATE SET datetime=NOW(), end_level=$3, score=$4
+			`,
+			[user.id, update.start_level, update.end_level, update.score]
+		);
+
+		return result.rowCount === 1;
 	}
 }
 

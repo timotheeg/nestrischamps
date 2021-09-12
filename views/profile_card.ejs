@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@font-face {
+	font-family: 'Gotham';
+	src: url('/tools/footer/Gotham Black Regular/Gotham Black Regular.ttf');
+}
+
+html, body {
+	padding: 0;
+	margin: 0;
+	font-family: Gotham;
+	background: black;
+
+
+	--fsize: 22px;
+	--beige: #fee28a;
+	line-height: 24px;
+	font-size: var(--fsize);
+	color: var(--beige);
+}
+
+.frame {
+	background: black;
+	overflow: hidden;
+	text-align: center;
+}
+
+.container {
+	padding: 6px 3px;
+}
+
+#name {
+	border-bottom: 3px solid var(--beige);
+	margin-bottom: 0.5em;
+}
+
+h1 {
+	padding: 0;
+	margin: 0;
+	font-size: var(--fsize);
+	font-weight: normal;
+	color: white;
+	text-align: center;
+	line-height: 32px;
+}
+
+#name h1 {
+	line-height: 48px;
+}
+
+section {
+	margin-top: 0.65em;
+}
+
+section:first-of-type,
+section#flag {
+	margin: 0;
+}
+
+p {
+	margin-block-start: 0.15em;
+	margin-block-end: 0;
+}
+
+#twitch {
+	position: absolute;
+	bottom: 0;
+	margin-bottom: 20px;
+	color: white;
+	width: 100%;
+}
+
+#twitch .envelop {
+	margin: 0 0.25em;
+	border-radius: 25px;
+	background: #4c297e;
+	line-height: 32px;
+}
+
+#twitch img.twitch {
+	position: absolute;
+	top: -5px;
+	right: 15px;
+}
+
+#twitch .login {
+	position: absolute;
+	top: 1px;
+	left: 22px;
+	width: calc(100% - 32px - 60px);
+	font-size: 18px;
+	line-height: 32px;
+
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: center;
+	vertical-align: middle;
+}
+
+#play_style span {
+	margin-right: 0.2em;
+}
+
+#play_style span:last-of-type {
+	margin-right: 0;
+}
+
+</style>
+</head>
+<body>
+
+<div class="frame">
+	<div class="container">
+		<section id="name">
+			<h1><%= user.display_name %></h1>
+		</section>
+
+		<section id="flag">
+			<h1><%= [age, user.city].filter(v => v).join(' - ') %></h1>
+			<img src="https://www.countryflags.io/<%= user.country_code %>/flat/64.png">
+		</section>
+
+		<section id="play_style">
+			<h1>Play info</h1>
+			<p>Style: <%= user.style %></p>
+			<p>PB: <%
+
+				let remainder = pb || 0;
+				let parts = [];
+
+				while (remainder) {
+					parts.unshift(remainder % 1000);
+					remainder = Math.floor(remainder / 1000);
+				}
+
+				if (!parts.length) parts.push(0);
+
+				parts = parts
+					.map((part, idx) => idx > 0 ? `${part}`.padStart(3, '0') : part)
+					.map(part => `<span>${part}</span>`);
+
+			%><%- parts.join('') %></p>
+		</section>
+
+		<section id="interests">
+			<h1>Interests</h1>
+			<p><%= user.interests %></p>
+		</section>
+	</div>
+
+	<div id="twitch">
+		<div class="envelop">&nbsp;</div>
+		<img class="twitch" src="/images/twitch_small.png" />
+		<div class="login">
+			<%= user.login %>
+		</div>
+	</div>
+</div>
+
+<script>
+let login = document.querySelector('#twitch .login');
+
+function shrinkText() {
+	const styles = getComputedStyle(login);
+
+	login.style.fontSize = `${parseInt(styles.fontSize, 10) - 1}px`;
+}
+
+function checkShrink() {
+	if (login.scrollWidth > login.clientWidth) {
+		const styles = getComputedStyle(login);
+
+		if (parseInt(styles.fontSize, 10) > 14) {
+			shrinkText();
+			window.requestAnimationFrame(checkShrink);
+		}
+	}
+}
+
+setTimeout(checkShrink, 100);
+
+</script>
+</body>
+</html>

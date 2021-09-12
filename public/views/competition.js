@@ -136,6 +136,10 @@ class TetrisCompetitionAPI {
 		});
 	}
 
+	showProfileCard(visible) {
+		players.forEach(player => player.showProfileCard(visible));
+	}
+
 	setGameOver(player_idx) {
 		getPlayer(player_idx).setGameOver();
 	}

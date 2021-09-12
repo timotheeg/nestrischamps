@@ -5,6 +5,9 @@ const dom = {
 	clear_victories: document.querySelector('#clear_victories'),
 	player_link: document.querySelector('#player_link'),
 	show_match_controls: document.querySelector('#show_match_controls'),
+	show_profile_cards_controls: document.querySelector(
+		'#show_profile_cards_controls'
+	),
 	add_player: document.querySelector('#add_player'),
 };
 
@@ -50,6 +53,9 @@ const remoteAPI = {
 	},
 	setMatch: function (match_idx) {
 		connection.send(['setMatch', match_idx]);
+	},
+	showProfileCard: function (visible, match_idx) {
+		connection.send(['showProfileCard', visible, match_idx]);
 	},
 };
 
@@ -252,6 +258,9 @@ function setState(_room_data) {
 				break;
 		}
 	}
+
+	dom.show_profile_cards_controls.querySelector('.matches').style.display =
+		room_data.concurrent_2_matches ? null : 'none';
 }
 
 function addPlayer() {
@@ -306,6 +315,14 @@ function bootstrap() {
 			remoteAPI.setMatch(value ? parseInt(value, 10) : null);
 		})
 	);
+
+	dom.show_profile_cards_controls
+		.querySelectorAll('input')
+		.forEach(checkbox => {
+			checkbox.addEventListener('click', function () {
+				remoteAPI.showProfileCard(this.checked, this.value);
+			});
+		});
 
 	// =====
 

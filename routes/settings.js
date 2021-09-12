@@ -2,9 +2,28 @@ const express = require('express');
 const router = express.Router();
 const ULID = require('ulid');
 const nocache = require('nocache');
+const _ = require('lodash');
 
 const middlewares = require('../modules/middlewares');
 const UserDAO = require('../daos/UserDAO');
+const ScoreDAO = require('../daos/ScoreDAO');
+
+// Country Management
+
+const { overwrite, getData } = require('country-list');
+
+overwrite([
+	{
+		code: 'TW',
+		name: 'Taiwan',
+	},
+	{
+		code: 'GB',
+		name: 'United Kingdom',
+	},
+]);
+
+const countries = getData().sort((a, b) => (a.name < b.name ? -1 : 1)); // Sort by country name
 
 router.use(middlewares.assertSession);
 router.use(middlewares.checkToken);
@@ -20,6 +39,7 @@ router.get('/', async (req, res) => {
 
 	res.render('settings', {
 		db_user: user,
+		countries,
 	});
 });
 
@@ -37,7 +57,7 @@ router.get('/revoke_secret', async (req, res) => {
 		id: user.id,
 		login: user.login,
 		secret: user.secret,
-		profile_image_url: user.profile_image_url,
+		profile_image_url: user.profile_i1mage_url,
 	};
 
 	res.redirect('/settings');
@@ -46,6 +66,124 @@ router.get('/revoke_secret', async (req, res) => {
 router.get('/clear_session', async (req, res) => {
 	req.session.destroy();
 	res.redirect('/');
+});
+
+function getAge(dateString /*YYYY-MM-DD*/) {
+	const now = new Date();
+	const today_str = now.toISOString().slice(0, 10);
+	const today = new Date(today_str);
+	const birthDate = new Date(dateString);
+	const m = today.getMonth() - birthDate.getMonth();
+
+	let age = today.getFullYear() - birthDate.getFullYear();
+
+	if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+		age--;
+	}
+	return age;
+}
+
+router.post('/update_profile', express.json(), async (req, res) => {
+	if (!req.body) {
+		res.status(400).json({ errors: ['Bad Request'] });
+		return;
+	}
+
+	const errors = [];
+	const update = {};
+
+	if (/^(das|tap|roll|hybrid)$/i.test(req.body.style)) {
+		update.style = req.body.style.toLowerCase();
+	} else {
+		errors.push('Style is not valid');
+	}
+
+	const code = (req.body.country_code || '').toUpperCase();
+
+	// crude string test first, and then date test
+	if (
+		/^(19|20)\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/.test(req.body.dob)
+	) {
+		const age = getAge(req.body.dob);
+
+		// arbitrary age boundaries
+		if (age < 10 || age > 100) {
+			update.dob = null;
+			// errors.push('Dob is not valid');
+		} else {
+			update.dob = req.body.dob;
+		}
+	} else {
+		update.dob = null;
+		// errors.push('Dob is not valid');
+	}
+
+	if (code && countries.some(country => country.code === code)) {
+		update.country_code = code;
+	} else {
+		errors.push('Country code is not valid');
+	}
+
+	if (typeof req.body.city === 'string') {
+		update.city = req.body.city;
+	} else {
+		errors.push('City is not valid');
+	}
+
+	if (typeof req.body.interests === 'string') {
+		update.interests = req.body.interests;
+	} else {
+		errors.push('Interests are not valid');
+	}
+
+	if (errors.length) {
+		console.log({ errors });
+		res.status(400).json({ errors });
+	} else {
+		await UserDAO.updateProfile(req.session.user.id, update);
+		res.status(200).json({});
+	}
+});
+
+router.post('/set_pb', express.json(), async (req, res) => {
+	if (!req.body) {
+		res.status(400).json({ errors: ['Bad Request'] });
+		return;
+	}
+
+	const update = _.pick(req.body, ['score', 'start_level', 'end_level']);
+
+	do {
+		if (
+			typeof update.score != 'number' ||
+			update.score < 0 ||
+			update.score > 1500000
+		)
+			break;
+
+		if (
+			typeof update.start_level != 'number' ||
+			update.start_level < 0 ||
+			update.start_level > 30
+		)
+			break;
+
+		if (
+			typeof update.end_level != 'number' ||
+			update.end_level < 0 ||
+			update.end_level > 30
+		)
+			break;
+
+		const user = await UserDAO.getUserById(req.session.user.id);
+
+		// fire and forget
+		await ScoreDAO.setPB(user, update);
+		res.status(200).json({});
+		return;
+	} while (false); // eslint-disable-line no-constant-condition
+
+	res.status(400).json({ errors: ['Bad Request'] });
 });
 
 module.exports = router;

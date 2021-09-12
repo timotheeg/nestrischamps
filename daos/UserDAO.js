@@ -140,6 +140,35 @@ class UserDAO {
 
 		return user;
 	}
+
+	async updateProfile(user_id, update) {
+		await dbPool.query(
+			`UPDATE twitch_users
+			SET dob=$1, country_code=$2, city=$3, style=$4, interests=$5
+			WHERE id=$6;
+			`,
+			[
+				update.dob,
+				update.country_code,
+				update.city,
+				update.style,
+				update.interests,
+				user_id,
+			]
+		);
+
+		const user = await this.getUserById(user_id);
+
+		// Always assign a date to user's dob
+		update.dob = update.dob ? new Date(update.dob) : null;
+
+		// In case user was already in memory, we update its data
+		// Note: small risk that DB changed something (e.g. truncate)
+		// and the assignment here is not consistent, but we'll live with it for now
+		Object.assign(user, update);
+
+		return user;
+	}
 }
 
 module.exports = new UserDAO();
