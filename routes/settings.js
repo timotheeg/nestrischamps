@@ -5,9 +5,25 @@ const nocache = require('nocache');
 const _ = require('lodash');
 
 const middlewares = require('../modules/middlewares');
-const countries = require('../modules/countries');
 const UserDAO = require('../daos/UserDAO');
 const ScoreDAO = require('../daos/ScoreDAO');
+
+// Country Management
+
+const { overwrite, getData } = require('country-list');
+
+overwrite([
+	{
+		code: 'TW',
+		name: 'Taiwan',
+	},
+	{
+		code: 'GB',
+		name: 'United Kingdom',
+	},
+]);
+
+const countries = getData().sort((a, b) => (a.name < b.name ? -1 : 1)); // Sort by country name
 
 router.use(middlewares.assertSession);
 router.use(middlewares.checkToken);
