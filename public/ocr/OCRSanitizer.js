@@ -1,5 +1,5 @@
 const OCRSanitizer = (function () {
-	const FIX_LEVEL = Query.get('fixlevel') !== '0';
+	const FIX_LEVEL = QueryString.get('fixlevel') !== '0';
 
 	/*
 	 * OCRSanitizer sanitizes a stream of Tetris OCRed data.
