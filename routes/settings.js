@@ -108,12 +108,14 @@ router.post('/update_profile', express.json(), async (req, res) => {
 
 		// arbitrary age boundaries
 		if (age < 10 || age > 100) {
-			errors.push('Dob is not valid');
+			update.dob = null;
+			// errors.push('Dob is not valid');
 		} else {
 			update.dob = req.body.dob;
 		}
 	} else {
-		errors.push('Dob is not valid');
+		update.dob = null;
+		// errors.push('Dob is not valid');
 	}
 
 	if (code && countries.some(country => country.code === code)) {
@@ -135,6 +137,7 @@ router.post('/update_profile', express.json(), async (req, res) => {
 	}
 
 	if (errors.length) {
+		console.log({ errors });
 		res.status(400).json({ errors });
 	} else {
 		await UserDAO.updateProfile(req.session.user.id, update);

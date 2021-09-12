@@ -223,13 +223,6 @@ function setCounntryFlag() {
 	document.getElementById('country_flag').src = `https://www.countryflags.io/${profile_nodes.country_code.value}/flat/32.png`
 }
 
-function handleFetchError(response) {
-	if (!response.ok) {
-		throw new Error(response);
-	}
-	return response;
-}
-
 document.getElementById('update_profile_btn').addEventListener('click', async () => {
 	const feedback = document.querySelector('p.help.profile');
 
@@ -243,31 +236,40 @@ document.getElementById('update_profile_btn').addEventListener('click', async ()
 		data[key] = node.value;
 	}
 
-	// fire and forget ... urgh -_-
-	fetch('/settings/update_profile', {
-		method: 'POST',
-		cache: 'no-cache',
-		headers: {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-		},
-		body: JSON.stringify(data) // body data type must match "Content-Type" header
-	})
-	.then(handleFetchError)
-	.then(() => {
-		feedback.classList.add('is_success');
-		feedback.textContent = 'Profile updated successfully';
-	})
-	.catch(() => {
+	try {
+		const response = await fetch('/settings/update_profile', {
+			method: 'POST',
+			cache: 'no-cache',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+			},
+			body: JSON.stringify(data) // body data type must match "Content-Type" header
+		});
+
+		const result = await response.json()
+
+		console.log(result);
+
+		if (response.ok) {
+			feedback.classList.add('is_success');
+			feedback.textContent = 'Profile updated successfully';
+		}
+		else {
+			feedback.classList.add('is_danger');
+			feedback.textContent = `Profile could not be updated: ${result.errors.join(', ')}`;
+		}
+	}
+	catch(err) {
+		console.error(err);
 		feedback.classList.add('is_danger');
-		feedback.textContent = 'Profile could not be updated';
-	})
-	.then(() => {
-		feedback.style.display = 'block';
-	});
+		feedback.textContent = `Profile could not be updated`;
+	}
+
+	feedback.style.display = 'block';
 });
 
-document.getElementById('set_pb_btn').addEventListener('click', () => {
+document.getElementById('set_pb_btn').addEventListener('click', async () => {
 	const feedback = document.querySelector('p.help.pb');
 
 	feedback.classList.remove('is-success');
@@ -281,27 +283,32 @@ document.getElementById('set_pb_btn').addEventListener('click', () => {
 	}
 
 	// fire and forget ... urgh -_-
-	fetch('/settings/set_pb', {
-		method: 'POST',
-		cache: 'no-cache',
-		headers: {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-		},
-		body: JSON.stringify(data) // body data type must match "Content-Type" header
-	})
-	.then(handleFetchError)
-	.then(() => {
-		feedback.classList.add('is_success');
-		feedback.textContent = 'PB added or updated successfully';
-	})
-	.catch(() => {
+	try {
+		const response = await fetch('/settings/set_pb', {
+			method: 'POST',
+			cache: 'no-cache',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+			},
+			body: JSON.stringify(data) // body data type must match "Content-Type" header
+		});
+
+		if (response.ok) {
+			feedback.classList.add('is_success');
+			feedback.textContent = 'PB added or updated successfully';
+		}
+		else {
+			throw new Error(response);
+		}
+	}
+	catch(err) {
+		console.error(err);
 		feedback.classList.add('is_danger');
 		feedback.textContent = 'Could not add or update PB';
-	})
-	.then(() => {
-		feedback.style.display = 'block';
-	});
+	}
+
+	feedback.style.display = 'block';
 });
 
 </script>
