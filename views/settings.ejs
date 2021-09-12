@@ -60,25 +60,25 @@
 					<p>In competition layouts, profile information can be displayed on the board by a game host.</p>
 
 					<div class="field">
-						<label class="label">ID <em>(from Twitch)</em></label>
+						<label class="label">ID <em>(from <a href="https://www.twitch.tv/settings/profile" target="twitch">Twitch</a>)</em></label>
 						<div class="control">
 							<input class="input" type="text" value="<%= db_user.login %>" readonly="readonly" />
 						</div>
 					</div>
 
 					<div class="field">
-						<label class="label">Display Name <em>(from Twitch)</em></label>
+						<label class="label">Display Name <em>(from <a href="https://www.twitch.tv/settings/profile" target="twitch">Twitch</a>)</em></label>
 						<div class="control">
 							<input class="input" type="text" value="<%= db_user.display_name %>" readonly="readonly" />
 						</div>
 					</div>
 
-					<div class="field">
+					<!-- div class="field">
 						<label class="label">Bio <em>(from Twitch)</em></label>
 						<div class="control">
 							<textarea class="textarea" readonly="readonly"><%= db_user.description || '-' %></textarea>
 						</div>
-					</div>
+					</div -->
 
 					<div class="field">
 						<label class="label">Country</label>
