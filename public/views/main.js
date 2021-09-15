@@ -342,12 +342,13 @@ function onFrame(event, debug) {
 	// check for score change or score stayed at 999999 but the line count changed.
 	if (--pending_line === 0) {
 		if (
-			transformed.score &&
+			transformed.score != null &&
 			transformed.lines != null &&
 			transformed.level != null &&
-			((diff.score >= 0 && diff.cleared_lines >= 0) ||
+			(diff.score > 0 || // standard game progression
 				(diff.cleared_lines > 0 &&
-					(transformed.score == 999999 || game.data.score.current >= 1600000)))
+					(transformed.score == 999999 || // score frozen on maxout
+						diff.score < 0))) // 1.6M wraparound
 		) {
 			game.onLine(transformed);
 			renderLine();
