@@ -346,7 +346,8 @@ function onFrame(event, debug) {
 			transformed.lines != null &&
 			transformed.level != null &&
 			((diff.score >= 0 && diff.cleared_lines >= 0) ||
-				(transformed.score == 999999 && diff.cleared_lines > 0))
+				(diff.cleared_lines > 0 &&
+					(transformed.score == 999999 || game.data.score.current >= 1600000)))
 		) {
 			game.onLine(transformed);
 			renderLine();

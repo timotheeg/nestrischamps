@@ -210,8 +210,7 @@ class Game {
 
 	onLine(event) {
 		const num_lines = event.lines - this.data.lines.count,
-			lines_score = this.getScore(event.level, num_lines),
-			actual_score = event.score - this.data.score.current;
+			lines_score = this.getScore(event.level, num_lines);
 
 		// update total lines and points
 		// checks maxed out at 999999 and updates score accordingly
@@ -220,7 +219,21 @@ class Game {
 			this.data.score.current + lines_score >= 999999
 		) {
 			event.score = this.data.score.current + lines_score;
+		} else if (event.score < this.data.score.current) {
+			const num_wraps = Math.floor(
+				(this.data.score.current + line_score) / 1600000
+			);
+
+			if (num_wraps >= 1) {
+				// Using Hex score Game Genie code XNEOOGEX
+				// The GG code makes the score display wrap around to 0
+				// when reaching 1,600,000. We correct accordingly here.
+				event.score = 1600000 * num_wraps + event.score;
+			}
 		}
+
+		const actual_score = event.score - this.data.score.current;
+
 		this.data.points.count = event.score;
 
 		// update drop score
