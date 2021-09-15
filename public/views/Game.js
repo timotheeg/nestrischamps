@@ -221,7 +221,7 @@ class Game {
 			event.score = this.data.score.current + lines_score;
 		} else if (event.score < this.data.score.current) {
 			const num_wraps = Math.floor(
-				(this.data.score.current + line_score) / 1600000
+				(this.data.score.current + lines_score) / 1600000
 			);
 
 			if (num_wraps >= 1) {
