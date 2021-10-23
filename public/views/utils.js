@@ -38,3 +38,15 @@ function shuffle(array) {
 
 	return array;
 }
+
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+function translate(iRange, oRange, value) {
+	// not adding validation of ranges and value... Assume callers have done it
+	ratio = (value - iRange[0]) / (iRange[1] - iRange[0]);
+	return oRange[0] + ratio * (oRange[1] - oRange[0]);
+}

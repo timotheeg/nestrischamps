@@ -347,6 +347,7 @@
 							format_score: v => v,
 							format_tetris_diff: tdiff =>
 								tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1),
+							stereo: translate([1, 2], [-1, 1], num),
 						}
 					)
 			);

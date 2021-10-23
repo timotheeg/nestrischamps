@@ -143,6 +143,7 @@ const Player = (function () {
 		wins_rtl: 0,
 		tetris_flash: 1,
 		tetris_sound: 1,
+		stereo: 0, // [-1, 1] representing left:-1 to right:1
 		reliable_field: 1,
 		draw_field: 1,
 		curtain: 1,
@@ -330,10 +331,29 @@ const Player = (function () {
 			}
 
 			// buils audio objects
-			// TODO: handle left-right channel
+			this.audioContext = new AudioContext();
 			this.sounds = {
 				tetris: new Audio('/views/Tetris_Clear.mp3'),
 			};
+
+			this.options.stereo = clamp(this.options.stereo, -1, 1);
+
+			Object.entries(this.sounds).forEach(([sound, audio]) => {
+				const track = this.audioContext.createMediaElementSource(audio);
+				const stereoNode = new StereoPannerNode(this.audioContext, {
+					pan: this.options.stereo,
+				});
+
+				track.connect(stereoNode).connect(this.audioContext.destination);
+
+				this.sounds[sound] = () => {
+					if (this.audioContext.state === 'suspended') {
+						this.audioContext.resume();
+					}
+
+					audio.play();
+				};
+			});
 
 			this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
 			this._setFrameOuter = this._setFrameOuter.bind(this);
@@ -425,7 +445,7 @@ const Player = (function () {
 			}
 
 			if (this.options.tetris_sound) {
-				this.sounds.tetris.play();
+				this.sounds.tetris();
 			}
 
 			this.onTetris();
