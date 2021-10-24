@@ -213,13 +213,20 @@ class ScoreDAO {
 			...options,
 		};
 
+		let null_handling = '';
+
+		if (options.sort_field === 'tetris_rate') {
+			null_handling =
+				options.sort_order === 'desc' ? 'NULLS last' : 'NULLS first';
+		}
+
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
 		const result = await dbPool.query(
 			`
 				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration, frame_file
 				FROM scores
 				WHERE player_id=$1
-				ORDER BY ${options.sort_field} ${options.sort_order}
+				ORDER BY ${options.sort_field} ${options.sort_order} ${null_handling}
 				LIMIT ${options.page_size} OFFSET ${options.page_size * options.page_idx}
 			`,
 			[user.id]
