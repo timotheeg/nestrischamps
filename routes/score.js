@@ -157,6 +157,42 @@ router.post('/report_game/:secret', express.json(), async (req, res) => {
 	console.log('Sent new scores back');
 });
 
+function range(min, max) {
+	return Array(max - min + 1)
+		.fill()
+		.map((_, idx) => min + idx);
+}
+
+function getPages(page_idx, num_pages) {
+	const side = 2;
+	const ellipsis_spread = 2;
+	const max_tokens = 5 + side * 2; // sides x 2 + first + last + page + start ellipsis + end ellipsis
+
+	let cur_page_num = page_idx + 1;
+	let pages;
+
+	if (num_pages <= max_tokens) {
+		pages = range(1, num_pages);
+	} else {
+		const needs_lead = page_idx - 0 > side + ellipsis_spread;
+		const needs_tail = num_pages - page_idx - 1 > side + ellipsis_spread;
+
+		if (needs_lead && needs_tail) {
+			pages = range(cur_page_num - side, cur_page_num + side);
+			pages.unshift(1, '...');
+			pages.push('...', num_pages);
+		} else if (needs_lead) {
+			pages = range(num_pages - max_tokens + 3, num_pages);
+			pages.unshift(1, '...');
+		} else if (needs_tail) {
+			pages = range(1, max_tokens - 2);
+			pages.push('...', num_pages);
+		}
+	}
+
+	return pages;
+}
+
 router.get(
 	'/scores',
 	middlewares.assertSession,
@@ -205,6 +241,7 @@ router.get(
 			scores,
 			num_pages,
 			pagination: options,
+			pages: getPages(options.page_idx, num_pages),
 		});
 	}
 );

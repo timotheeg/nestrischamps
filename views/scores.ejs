@@ -31,19 +31,7 @@
 	<div class="container content">
 		<h1 class="title is-1">Score Summary</h1>
 
-		<nav class="pagination is-centered is-small" role="navigation">
-			<ul class="pagination-list">
-			<% for (let page_idx=0; page_idx < num_pages; page_idx++) { %>
-				<li>
-					<% if (page_idx == pagination.page_idx) { %>
-						<a class="pagination-link is-current" href='#'><%= page_idx + 1 %></a>
-					<% } else { %>
-						<a class="pagination-link" href='#'><%= page_idx + 1 %></a>
-					<% } %>
-				</li>
-			<% }; %>
-			</ul>
-		</nav>
+		<%- include('partials/pagination') %>
 
 		<!-- TODO: implement sort by field score and date -->
 		<table class="table is-bordered" id="scores">
@@ -97,19 +85,7 @@
 		</tbody>
 		</table>
 
-		<nav class="pagination is-centered is-small" role="navigation">
-			<ul class="pagination-list">
-			<% for (let page_idx=0; page_idx < num_pages; page_idx++) { %>
-				<li>
-					<% if (page_idx == pagination.page_idx) { %>
-						<a class="pagination-link is-current" href='#'><%= page_idx + 1 %></a>
-					<% } else { %>
-						<a class="pagination-link" href='#'><%= page_idx + 1 %></a>
-					<% } %>
-				</li>
-			<% }; %>
-			</ul>
-		</nav>
+		<%- include('partials/pagination') %>
 	</div>
 </section>
 

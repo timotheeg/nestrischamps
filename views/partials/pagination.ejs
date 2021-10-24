@@ -1,0 +1,15 @@
+<nav class="pagination is-centered is-small" role="navigation">
+	<ul class="pagination-list">
+	<% pages.forEach((page_num, page_idx) => { %>
+		<li>
+			<% if (page_num == '...') { %>
+				<span class="pagination-ellipsis">&hellip;</span>
+			<% } else if (page_num == pagination.page_idx + 1) { %>
+				<a class="pagination-link is-current" href='#'><%= page_num %></a>
+			<% } else { %>
+				<a class="pagination-link" href='#'><%= page_num %></a>
+			<% } %>
+		</li>
+	<% }); %>
+	</ul>
+</nav>
