@@ -165,7 +165,13 @@ router.get(
 		console.log(`Fetching user scores for ${req.session.user.id}`);
 
 		const PAGE_SIZE = 100;
-		const ALLOWED_ORDER_FIELDS = ['datetime', 'score', 'tetris_rate'];
+		const ALLOWED_ORDER_FIELDS = [
+			'datetime',
+			'score',
+			'tetris_rate',
+			'num_droughts',
+			'max_drought',
+		];
 		const ALLOWED_ORDER_DIRS = ['desc', 'asc'];
 
 		const options = {
