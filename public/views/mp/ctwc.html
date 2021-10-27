@@ -6,7 +6,7 @@
 			#playing_fields {
 				position: absolute;
 				left: 640px;
-				top: 4px;
+				top: 2px;
 			}
 
 			.score {
@@ -28,23 +28,23 @@
 
 			.next_piece {
 				width: 90px;
-				top: 62px;
+				top: 61px;
 
-				--offset: 274px;
+				--offset: 273px;
 				right: var(--offset);
 			}
 
 			.lines {
 				width: 90px;
 
-				--offset: 274px;
+				--offset: 273px;
 				right: var(--offset);
 			}
 
 			.board {
 				width: 237px;
 				height: 477px;
-				top: 76px;
+				top: 75px;
 
 				--offset: 15px;
 				right: var(--offset);
@@ -52,7 +52,7 @@
 
 			.name {
 				width: 237px;
-				top: 575px;
+				top: 573px;
 
 				--offset: 15px;
 				right: var(--offset);
@@ -71,14 +71,14 @@
 			.tetris_rate,
 			.drought {
 				width: 50px;
-				top: 637px;
+				top: 634px;
 
-				--offset: 274px;
+				--offset: 273px;
 				right: var(--offset);
 			}
 
 			.tetris_rate {
-				height: 50px;
+				height: 52px;
 			}
 
 			.tetris_rate .content {
@@ -86,14 +86,14 @@
 			}
 
 			.drought {
-				top: 124px;
+				top: 122px;
 			}
 
 			.running_trt {
-				padding: 9px;
+				padding: 12px;
 				width: 243px;
-				height: 56px;
-				top: 637px;
+				height: 58px;
+				top: 634px;
 
 				--offset: 15px;
 				right: var(--offset);
@@ -102,7 +102,7 @@
 			.level {
 				width: 40px;
 
-				--offset: 386px;
+				--offset: 384px;
 				right: var(--offset);
 			}
 
@@ -247,32 +247,34 @@
 		<script src="/js/BinaryFrame.js"></script>
 		<script>
 			const numberFormatter = new Intl.NumberFormat();
-			const players = [1, 2].map(
-				num =>
-					new CTMCompetitionPlayer(
-						{
-							name: document.querySelector(`.name.p${num} .header`),
-							score: document.querySelector(`.score.p${num} .main`),
-							level: document.querySelector(`.level.p${num} .content`),
-							lines: document.querySelector(`.lines.p${num} .content`),
-							trt: document.querySelector(`.tetris_rate.p${num} .content`),
-							running_trt: document.querySelector(`.running_trt.p${num}`),
-							preview: document.querySelector(`.next_piece.p${num}`),
-							field: document.querySelector(`.board.p${num}`),
-							drought: document.querySelector(`.drought.p${num} .value`),
+			const players = [1, 2].map(num => {
+				const player = new CTMCompetitionPlayer(
+					{
+						name: document.querySelector(`.name.p${num} .header`),
+						score: document.querySelector(`.score.p${num} .main`),
+						level: document.querySelector(`.level.p${num} .content`),
+						lines: document.querySelector(`.lines.p${num} .content`),
+						trt: document.querySelector(`.tetris_rate.p${num} .content`),
+						running_trt: document.querySelector(`.running_trt.p${num}`),
+						preview: document.querySelector(`.next_piece.p${num}`),
+						field: document.querySelector(`.board.p${num}`),
+						drought: document.querySelector(`.drought.p${num} .value`),
 
-							diff: document.querySelector(`.score.p${num} .diff`),
-							hearts: document.querySelector(`.name.p${num} .content`),
+						diff: document.querySelector(`.score.p${num} .diff`),
+						hearts: document.querySelector(`.name.p${num} .content`),
 
-							drought_box: document.querySelector(`.drought.p${num}`),
-						},
-						{
-							preview_pixel_size: 2,
-							format_score: v => numberFormatter.format(v),
-							stereo: translate([1, 2], [-1, 1], num),
-						}
-					)
-			);
+						drought_box: document.querySelector(`.drought.p${num}`),
+					},
+					{
+						preview_pixel_size: 2,
+						format_score: v => numberFormatter.format(v),
+						stereo: translate([1, 2], [-1, 1], num),
+					}
+				);
+				player.onGameOver = () => {};
+
+				return player;
+			});
 		</script>
 		<script src="/views/competition.js"></script>
 	</body>
