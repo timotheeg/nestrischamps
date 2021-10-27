@@ -35,7 +35,7 @@ td {
 
 .box {
 	position: absolute;
-	padding: 12px;
+	padding: 15px;
 	height: 40px;
 
 	color: white;
@@ -43,13 +43,6 @@ td {
 	line-height: 20px;
 	text-align: center;
 
-	border-image-source: url('/views/border.png');
-	border-image-slice: 10 10 10 10 fill;
-	border-image-width: 10px 10px;
-}
-
-.box.px3 {
-	padding: 15px;
 	border-image-source: url('/views/border_3px.png');
 	border-image-slice: 12 12 12 12 fill;
 	border-image-width: 12px 12px;
