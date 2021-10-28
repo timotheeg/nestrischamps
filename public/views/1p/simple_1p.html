@@ -31,56 +31,57 @@
 			}
 
 			.score,
+			.runway,
+			.lines,
+			.level,
+			.efficiency,
+			.tetris_rate {
+				left: -119px;
+			}
+
+			.score,
 			.runway {
 				top: 76px;
-				left: -107px;
 				width: 168px;
 			}
 
 			.runway {
-				top: 161px;
+				top: 157px;
 			}
 
 			.next_piece {
 				width: 104px;
 				height: 60px;
-				top: 6px;
+				top: 1px;
 
-				--offset: 177px;
+				--offset: 176px;
 				right: var(--offset);
 			}
 
 			.lines {
-				left: -107px;
-				top: 246px;
+				top: 238px;
 			}
 
 			.level {
-				left: -107px;
-				top: 331px;
+				top: 319px;
 			}
 
 			.board {
-				border-image: url('/views/big_border.png');
-				border-image-slice: 16 16 16 16 fill;
-				border-image-width: 16px 16px;
-				padding: 17px;
 				width: 237px;
 				height: 477px;
 				top: 76px;
 
-				--offset: 106px;
+				--offset: 110px;
 				right: var(--offset);
 			}
 
 			.tetris_rate {
-				left: -107px;
-				top: 588px;
+				top: 574px;
+				height: 66px;
 			}
 
 			.efficiency {
-				left: -107px;
-				top: 503px;
+				top: 493px;
 			}
 
 			.tetris_rate .content {
@@ -88,24 +89,24 @@
 			}
 
 			.running_trt {
-				padding: 9px;
-				width: 253px;
-				height: 66px;
-				top: 588px;
+				padding: 12px;
+				width: 244px;
+				height: 72px;
+				top: 574px;
 
-				--offset: 106px;
+				--offset: 110px;
 				right: var(--offset);
 			}
 
 			.drought {
-				width: 49px;
-				top: 12px;
+				width: 46px;
+				top: 15px;
 				height: 40px;
 				opacity: 0;
 				color: red;
 				display: none;
 
-				--pos: 304px;
+				--pos: 301px;
 				right: var(--pos);
 			}
 
@@ -132,14 +133,19 @@
 	<body>
 		<div id="stream_bg">
 			<div id="playing_fields">
-				<div class="box board"></div>
-				<div class="box next_piece"></div>
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
 
-				<!-- Player 1 -->
+				<div class="box level">
+					<div class="header">LEVEL</div>
+					<div class="content">00</div>
+				</div>
 
-				<div class="box score">
-					<div class="header">SCORE</div>
-					<div class="content">000000</div>
+				<div class="box lines">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
 				</div>
 
 				<div class="box runway game">
@@ -152,14 +158,9 @@
 					<div class="content">000000</div>
 				</div>
 
-				<div class="box lines">
-					<div class="header">LINES</div>
-					<div class="content">000</div>
-				</div>
-
-				<div class="box level">
-					<div class="header">LEVEL</div>
-					<div class="content">00</div>
+				<div class="box score">
+					<div class="header">SCORE</div>
+					<div class="content">000000</div>
 				</div>
 
 				<div class="box tetris_rate">
@@ -173,11 +174,8 @@
 				</div>
 
 				<div class="box running_trt"></div>
-
-				<div class="box drought">
-					<div class="header">DRT</div>
-					<div class="value">99</div>
-				</div>
+				<div class="box board"></div>
+				<div class="box next_piece"></div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>
