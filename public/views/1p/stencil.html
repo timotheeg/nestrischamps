@@ -201,25 +201,25 @@
 			}
 
 			.eff {
-				top: 236px;
+				top: 235px;
 				left: 5px;
 			}
 
 			.burn {
-				top: 174px;
+				top: 175px;
 				left: 5px;
 			}
 
 			.runway {
-				top: 174px;
-				left: 123px;
-				width: 300px;
+				top: 175px;
+				left: 121px;
+				width: 298px;
 			}
 
 			.projection {
-				top: 236px;
-				left: 123px;
-				width: 300px;
+				top: 235px;
+				left: 121px;
+				width: 298px;
 			}
 
 			.next_piece {
@@ -239,15 +239,12 @@
 			}
 
 			.timer {
+				display: none; /**/
 				top: 5px;
 				left: 5px;
-				width: 418px;
+				width: 415px;
 				text-align: center;
 				height: 27px;
-			}
-
-			.timer {
-				display: none;
 			}
 
 			.bounded {
@@ -257,11 +254,11 @@
 			}
 
 			.running_trt {
-				padding: 12px 9px 9px;
+				padding: 15px 12px 12px 12px;
 
-				width: 424px;
+				width: 420px;
 				height: 133px;
-				top: 298px;
+				top: 295px;
 				left: 5px;
 			}
 
@@ -271,7 +268,7 @@
 
 			.running_trt .value {
 				border-bottom: 0;
-				width: 424px;
+				width: 420px;
 				height: 103px;
 				position: relative;
 			}
@@ -336,6 +333,11 @@
 					<div class="content">02:00:00</div>
 				</div>
 
+				<div class="box running_trt">
+					<div class="header">TETRIS RATE <span class="trt">000</span></div>
+					<div class="value bounded"></div>
+				</div>
+
 				<div class="box eff">
 					<div class="header">EFF</div>
 					<div class="value">000</div>
@@ -354,11 +356,6 @@
 				<div class="box projection">
 					<div class="header">PROJECTION</div>
 					<div class="value">000000</div>
-				</div>
-
-				<div class="box running_trt">
-					<div class="header">TETRIS RATE <span class="trt">000</span></div>
-					<div class="value bounded"></div>
 				</div>
 			</div>
 			<!-- End Playing Fields -->
