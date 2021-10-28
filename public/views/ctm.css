@@ -155,8 +155,8 @@
 
 .drought {
 	opacity: 0;
+	display: none; /**/
 	color: red;
-	display: none;
 }
 
 .drought.active {
