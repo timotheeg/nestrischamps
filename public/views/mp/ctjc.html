@@ -10,7 +10,7 @@
 			#playing_fields {
 				position: absolute;
 				left: 640px;
-				top: -3px;
+				top: -5px;
 			}
 
 			#logo {
@@ -28,13 +28,13 @@
 			}
 
 			.box {
-				width: 190px;
+				width: 197px;
 				height: 56px;
 			}
 
 			.box .header {
 				font-size: 16px;
-				padding-bottom: 0.5em;
+				padding: 2px 0 6px 0;
 			}
 
 			.box .content,
@@ -65,10 +65,18 @@
 				text-align: center;
 			}
 
+			.score,
+			.lines,
+			.level,
+			.tetris_rate,
+			.efficiency {
+				padding-left: 18px;
+				left: -115px;
+			}
+
 			.score {
-				top: 76px;
-				height: 144px;
-				left: -107px;
+				top: 85px;
+				height: 146px;
 			}
 
 			.score .diff,
@@ -92,37 +100,31 @@
 				height: 60px;
 				top: 7px;
 
-				--offset: 177px;
+				--offset: 171px;
 				right: var(--offset);
 			}
 
 			.lines {
-				left: -107px;
-				top: 250px;
+				top: 252px;
 			}
 
 			.level {
-				left: -107px;
-				top: 336px;
+				top: 329px;
 			}
 
 			.board {
-				border-image: url('/views/big_border.png');
-				border-image-slice: 16 16 16 16 fill;
-				border-image-width: 16px 16px;
-				padding: 17px;
 				width: 237px;
 				height: 477px;
-				top: 76px;
+				top: 85px;
 
 				--offset: 106px;
 				right: var(--offset);
 			}
 
 			.name {
-				width: 730px;
+				width: 722px;
 				height: 20px;
-				left: -377px;
+				left: -373px;
 				top: 669px;
 				padding: 16px 12px;
 			}
@@ -136,24 +138,19 @@
 			}
 
 			.tetris_rate {
-				left: -107px;
-				top: 588px;
+				top: 583px;
+				height: 65px;
 			}
 
 			.efficiency {
-				left: -107px;
-				top: 507px;
-			}
-
-			.tetris_rate .content {
-				padding: 0 5px;
+				top: 506px;
 			}
 
 			.running_trt {
-				padding: 9px;
-				width: 253px;
-				height: 62px;
-				top: 588px;
+				padding: 12px;
+				width: 243px;
+				height: 71px;
+				top: 583px;
 
 				--offset: 106px;
 				right: var(--offset);
@@ -164,14 +161,14 @@
 			}
 
 			.drought {
-				width: 49px;
-				top: 12px;
+				width: 47px;
+				top: 24px;
 				height: 40px;
 				opacity: 0;
 				color: red;
 				display: none;
 
-				--pos: 304px;
+				--pos: 296px;
 				right: var(--pos);
 			}
 
@@ -218,12 +215,6 @@
 
 			<div id="playing_fields">
 				<div id="logo"></div>
-
-				<div class="box board p1"></div>
-				<div class="box board p2"></div>
-
-				<div class="box next_piece p1"></div>
-				<div class="box next_piece p2"></div>
 
 				<!-- Player 1 -->
 
@@ -289,7 +280,14 @@
 					</div>
 					<div class="p2">Player 2</div>
 				</div>
+
+				<div class="box board p1"></div>
+				<div class="box board p2"></div>
+
+				<div class="box next_piece p1"></div>
+				<div class="box next_piece p2"></div>
 			</div>
+
 			<!-- End Playing Fields -->
 		</div>
 		<!-- End Stream BG -->
