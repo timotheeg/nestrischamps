@@ -1,0 +1,211 @@
+html {
+	overflow: hidden;
+}
+
+#playing_fields {
+	position: absolute;
+	left: 640px;
+	top: -5px;
+}
+
+#logo {
+	position: absolute;
+	left: -75px;
+	top: 411px;
+	width: 150px;
+	height: 150px;
+	padding: 0;
+	margin: 0;
+
+	background-position: '50% 50%';
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.box {
+	width: 197px;
+	height: 56px;
+}
+
+.box .header {
+	font-size: 16px;
+	padding: 2px 0 6px 0;
+}
+
+.box .content,
+.box .data {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.box .content,
+.box.name {
+	display: flex;
+}
+
+.box .content div,
+.box.name div {
+	flex: 1;
+}
+
+.box .p1 {
+	text-align: left;
+}
+
+.box .p2 {
+	text-align: right;
+}
+
+.box.name div {
+	text-align: center;
+}
+
+.score,
+.runway,
+.lines,
+.level,
+.tetris_rate,
+.efficiency {
+	padding-left: 18px;
+	left: -115px;
+}
+
+.score,
+.runway {
+	top: 18px;
+	height: 146px;
+}
+
+.runway {
+	top: 185px;
+}
+
+.score .diff,
+.score .tetris_diff,
+.runway .diff,
+.runway .tetris_diff {
+	text-align: center;
+}
+
+.winning,
+.diff,
+.tetris_diff {
+	color: #0eff0e;
+}
+
+.losing,
+.heart {
+	color: #fd0009;
+}
+
+.next_piece {
+	width: 103px;
+	height: 57px;
+	top: 10px;
+
+	--offset: 173px;
+	right: var(--offset);
+}
+
+.lines {
+	top: 352px;
+}
+
+.level {
+	top: 429px;
+}
+
+.board {
+	width: 237px;
+	height: 477px;
+	top: 85px;
+
+	--offset: 106px;
+	right: var(--offset);
+}
+
+.name {
+	width: 722px;
+	height: 20px;
+	left: -373px;
+	top: 669px;
+	padding: 16px 12px;
+}
+
+.name .wins {
+	color: grey;
+}
+
+.name .wins .win {
+	color: #fb0204;
+}
+
+.tetris_rate {
+	top: 583px;
+	height: 65px;
+}
+
+.efficiency {
+	top: 506px;
+}
+
+.running_trt {
+	padding: 12px;
+	width: 243px;
+	height: 71px;
+	top: 583px;
+
+	--offset: 106px;
+	right: var(--offset);
+}
+
+.p2 {
+	left: var(--offset);
+}
+
+.drought {
+	width: 46px;
+	top: 25px;
+	height: 39px;
+	color: red;
+	opacity: 0;
+	display: none; /**/
+
+	--pos: 297px;
+	right: var(--pos);
+}
+
+.drought .header {
+	padding: 0;
+}
+
+.drought.p2 {
+	left: var(--pos);
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+#frame_stats {
+	position: absolute;
+	width: 225px;
+	height: 400px;
+	top: 15px;
+	left: 1050px;
+	color: white;
+	font-family: monospace;
+	font-size: 12px;
+	overflow: hidden;
+}
