@@ -1,0 +1,125 @@
+html {
+	overflow: hidden;
+}
+
+#playing_fields {
+	position: absolute;
+	left: 640px;
+	top: 23px;
+}
+
+.box {
+	width: 95px;
+	height: 60px;
+	text-align: center;
+}
+
+.box .header {
+	font-size: 16px;
+	padding-bottom: 0.5em;
+}
+
+.box .content,
+.box .data {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.score,
+.runway,
+.lines,
+.level,
+.efficiency,
+.tetris_rate {
+	left: -119px;
+}
+
+.score,
+.runway {
+	top: 76px;
+	width: 168px;
+}
+
+.runway {
+	top: 157px;
+}
+
+.next_piece {
+	width: 104px;
+	height: 60px;
+	top: 1px;
+
+	--offset: 176px;
+	right: var(--offset);
+}
+
+.lines {
+	top: 238px;
+}
+
+.level {
+	top: 319px;
+}
+
+.board {
+	width: 237px;
+	height: 477px;
+	top: 76px;
+
+	--offset: 110px;
+	right: var(--offset);
+}
+
+.tetris_rate {
+	top: 574px;
+	height: 66px;
+}
+
+.efficiency {
+	top: 493px;
+}
+
+.tetris_rate .content {
+	padding: 0 5px;
+}
+
+.running_trt {
+	padding: 12px;
+	width: 244px;
+	height: 72px;
+	top: 574px;
+
+	--offset: 110px;
+	right: var(--offset);
+}
+
+.drought {
+	width: 46px;
+	top: 15px;
+	height: 40px;
+	opacity: 0;
+	color: red;
+	display: none;
+
+	--pos: 301px;
+	right: var(--pos);
+}
+
+.drought .header {
+	padding-bottom: 2px;
+}
+
+.drought.active {
+	display: block;
+	animation: fadeIn ease 1s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
