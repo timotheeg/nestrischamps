@@ -10,7 +10,7 @@
 				top: 8px;
 			}
 
-			.box.px3 {
+			.box {
 				line-height: 18px;
 			}
 
@@ -20,9 +20,8 @@
 				display: none;
 			}
 
-			.box.px3.score {
-				padding-top: 18px;
-				padding-bottom: 18px;
+			.score {
+				padding: 18px 15px;
 				height: 49px;
 				line-height: 24px;
 				text-align: center;
@@ -49,7 +48,7 @@
 				right: var(--offset);
 			}
 
-			.box.px3.lines {
+			.lines {
 				padding-top: 18px;
 				padding-bottom: 18px;
 			}
@@ -60,20 +59,20 @@
 			}
 
 			.score,
-			.name,
-			.board {
+			.name {
 				width: 217px;
 			}
 
 			.board {
+				width: 217px;
 				height: 437px;
 				top: 137px;
 			}
 
-			.box.px3.name,
-			.box.px3.tetris_rate,
-			.box.px3.drought,
-			.box.px3.level {
+			.name,
+			.tetris_rate,
+			.drought,
+			.level {
 				padding-top: 18px;
 				padding-bottom: 18px;
 				top: 595px;
@@ -82,10 +81,14 @@
 				right: var(--offset);
 			}
 
-			.box.px3.level,
-			.box.px3.tetris_rate,
-			.box.px3.drought {
+			.level,
+			.tetris_rate,
+			.drought {
 				--offset: 248px;
+			}
+
+			.name .header {
+				padding: 0;
 			}
 
 			.name .content {
@@ -96,7 +99,7 @@
 				color: #fb0204;
 			}
 
-			.box.px3.level {
+			.level {
 				padding-left: 18px;
 				padding-right: 18px;
 				width: 32px;
@@ -160,27 +163,33 @@
 			.match.small .board {
 				top: 0;
 				--offset: 0;
+				z-index: 7;
 			}
 			.match.small .score {
 				top: 0;
 				--offset: 238px;
+				z-index: 6;
 			}
 			.match.small .next_piece {
 				top: 137px;
 				--offset: 238px;
+				z-index: 4;
 			}
 			.match.small .lines {
 				top: 198px;
 				--offset: 238px;
+				z-index: 3;
 			}
 			.match.small .level {
 				top: 259px;
 				width: 44px;
 				--offset: 238px;
+				z-index: 2;
 			}
 			.match.small .runway.transition {
 				top: 76px;
 				--offset: 238px;
+				z-index: 5;
 			}
 			.match.small .projection {
 				display: none;
@@ -194,6 +203,7 @@
 			.match.small .drought {
 				top: 320px;
 				--offset: 238px;
+				z-index: 1;
 			}
 			.match.small video {
 				top: 0;
@@ -223,8 +233,8 @@
 			}
 
 			#branding {
-				position: absolute;
-				/* background: orange; */
+				/* position: absolute;
+				background: orange; /**/
 				opacity: 0.5;
 				width: 1280px;
 				height: 32px;
@@ -248,16 +258,7 @@
 				<div class="player">
 					<video></video>
 
-					<div class="box px3 board"></div>
-
-					<div class="box px3 score">
-						<div class="aligner">
-							<div class="header">0000000</div>
-							<div class="value diff">0000000</div>
-						</div>
-					</div>
-
-					<div class="box px3 runway">
+					<div class="box runway">
 						<div class="header">RUNWAY</div>
 						<div class="content">
 							<div class="value">000000</div>
@@ -266,7 +267,7 @@
 						</div>
 					</div>
 
-					<div class="box px3 projection">
+					<div class="box projection">
 						<div class="header">PROJECTION</div>
 						<div class="content">
 							<div class="value">000000</div>
@@ -275,39 +276,48 @@
 						</div>
 					</div>
 
-					<div class="box px3 tetris_rate">
-						<div class="header">TRT</div>
-						<div class="content">100</div>
+					<div class="box runway transition">
+						<div class="header">TR RUNWAY</div>
+						<div class="content">0000000</div>
 					</div>
 
-					<div class="box px3 running_trt"></div>
-
-					<div class="box px3 name">
-						<div class="header">PLAYER 1</div>
-						<div class="content">&#338;&#338;&#338;</div>
+					<div class="box score">
+						<div class="aligner">
+							<div class="header">0000000</div>
+							<div class="value diff">0000000</div>
+						</div>
 					</div>
 
-					<div class="box px3 next_piece"></div>
-
-					<div class="box px3 lines">
-						<div class="header">LINES</div>
-						<div class="value">000</div>
-					</div>
-
-					<div class="box px3 level">
+					<div class="box level">
 						<div class="header">LV</div>
 						<div class="value">99</div>
 					</div>
 
-					<div class="box px3 drought">
+					<div class="box tetris_rate">
+						<div class="header">TRT</div>
+						<div class="content">100</div>
+					</div>
+
+					<div class="box running_trt"></div>
+
+					<div class="box name">
+						<div class="header">PLAYER 1</div>
+						<div class="content">&#338;&#338;&#338;</div>
+					</div>
+
+					<div class="box next_piece"></div>
+
+					<div class="box lines">
+						<div class="header">LINES</div>
+						<div class="value">000</div>
+					</div>
+
+					<div class="box drought">
 						<div class="header">DRT</div>
 						<div class="value">99</div>
 					</div>
 
-					<div class="box px3 runway transition">
-						<div class="header">TR RUNWAY</div>
-						<div class="content">0000000</div>
-					</div>
+					<div class="box board"></div>
 				</div>
 			</template>
 			<template id="curtain">

@@ -6,7 +6,7 @@
 			#playing_fields {
 				position: absolute;
 				left: 640px;
-				top: 3px;
+				top: 2px;
 			}
 
 			.score {
@@ -29,35 +29,32 @@
 
 			.next_piece {
 				width: 108px;
-				top: 119px;
+				top: 118px;
 
 				--offset: 15px;
 				right: var(--offset);
 			}
 
 			.lines {
-				top: 119px;
-				width: 107px;
+				top: 118px;
+				width: 108px;
 
-				--offset: 145px;
+				--offset: 144px;
 				right: var(--offset);
 			}
 
 			.board {
 				width: 237px;
 				height: 477px;
-				top: 181px;
+				top: 178px;
 
 				--offset: 15px;
 				right: var(--offset);
 			}
 
 			.name {
-				width: 340px;
+				width: 337px;
 				height: 39px;
-
-				--offset: 274px;
-				right: var(--offset);
 			}
 
 			.name .content {
@@ -70,21 +67,25 @@
 				color: #fb0204;
 			}
 
+			.name,
+			.tetris_rate,
+			.drought,
+			.level,
+			.runway.transition,
+			.runway.game {
+				--offset: 273px;
+				right: var(--offset);
+			}
+
 			.tetris_rate,
 			.drought {
 				width: 50px;
-				top: 437px;
-
-				--offset: 274px;
-				right: var(--offset);
+				top: 436px;
 			}
 
 			.level {
 				top: 375px;
 				width: 40px;
-
-				--offset: 274px;
-				right: var(--offset);
 			}
 
 			.drought {
@@ -98,19 +99,13 @@
 
 			.runway.transition {
 				width: 162px;
-
-				top: 499px;
-				--offset: 274px;
-				right: var(--offset);
+				top: 497px;
 			}
 
 			.runway.game {
 				width: 237px;
 				height: 97px;
-
-				top: 561px;
-				--offset: 274px;
-				right: var(--offset);
+				top: 558px;
 			}
 
 			.runway.game .header {
@@ -130,13 +125,14 @@
 
 			.player_vid {
 				position: absolute;
-				top: 63px;
-				width: 366px;
-				height: 617px;
+				top: 66px;
+				width: 358px;
+				height: 616px;
 				padding: 0;
 				object-fit: cover;
+				/* background: yellow; /**/
 
-				--offset: 274px;
+				--offset: 282px;
 				right: var(--offset);
 			}
 
@@ -160,6 +156,8 @@
 				width: 1280px;
 				height: 32px;
 				top: 688px;
+				/* background: orange;
+				opacity: 0.5; /**/
 			}
 		</style>
 	</head>
@@ -173,6 +171,11 @@
 
 				<!-- Player 1 -->
 				<video class="player_vid p1"></video>
+
+				<div class="box name p1">
+					<div class="header">PLAYER 1</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
 
 				<div class="box score p1">
 					<div class="header">SCORE</div>
@@ -200,13 +203,6 @@
 					<div class="content">---</div>
 				</div>
 
-				<div class="box name p1">
-					<div class="header">PLAYER 1</div>
-					<div class="content">&#338;&#338;&#338;</div>
-				</div>
-
-				<div class="box board p1"></div>
-
 				<div class="box drought p1">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
@@ -226,8 +222,15 @@
 					<div><span class="tetris_diff">0.00</span> TETRISES</div>
 				</div>
 
+				<div class="box board p1"></div>
+
 				<!-- Player 2 -->
 				<video class="player_vid p2"></video>
+
+				<div class="box name p2">
+					<div class="header">PLAYER 2</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
 
 				<div class="box score p2">
 					<div class="header">SCORE</div>
@@ -255,13 +258,6 @@
 					<div class="content">---</div>
 				</div>
 
-				<div class="box name p2">
-					<div class="header">PLAYER 2</div>
-					<div class="content">&#338;&#338;&#338;</div>
-				</div>
-
-				<div class="box board p2"></div>
-
 				<div class="box drought p2">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
@@ -280,6 +276,8 @@
 					</div>
 					<div><span class="tetris_diff">0.00</span> TETRISES</div>
 				</div>
+
+				<div class="box board p2"></div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>

@@ -11,7 +11,7 @@
 			#playing_fields {
 				position: absolute;
 				left: 667px;
-				top: 4px;
+				top: 2px;
 			}
 
 			.score {
@@ -34,24 +34,24 @@
 
 			.next_piece {
 				width: 108px;
-				top: 119px;
+				top: 118px;
 
 				--offset: 15px;
 				right: var(--offset);
 			}
 
 			.lines {
-				top: 119px;
-				width: 107px;
+				top: 118px;
+				width: 108px;
 
-				--offset: 145px;
+				--offset: 144px;
 				right: var(--offset);
 			}
 
 			.board {
 				width: 237px;
 				height: 477px;
-				top: 181px;
+				top: 179px;
 
 				--offset: 15px;
 				right: var(--offset);
@@ -60,7 +60,7 @@
 			.name {
 				width: 237px;
 				height: 39px;
-				top: 680px;
+				top: 677px;
 
 				--offset: 15px;
 				right: var(--offset);
@@ -77,20 +77,23 @@
 			}
 
 			.tetris_rate,
+			.drought,
+			.level,
+			.runway.transition,
+			.runway.game {
+				--offset: 273px;
+				right: var(--offset);
+			}
+
+			.tetris_rate,
 			.drought {
 				width: 50px;
-				top: 489px;
-
-				--offset: 274px;
-				right: var(--offset);
+				top: 488px;
 			}
 
 			.level {
 				top: 427px;
 				width: 40px;
-
-				--offset: 274px;
-				right: var(--offset);
 			}
 
 			.drought {
@@ -104,19 +107,13 @@
 
 			.runway.transition {
 				width: 162px;
-
-				top: 551px;
-				--offset: 274px;
-				right: var(--offset);
+				top: 549px;
 			}
 
 			.runway.game {
 				width: 237px;
 				height: 97px;
-
-				top: 613px;
-				--offset: 274px;
-				right: var(--offset);
+				top: 610px;
 			}
 
 			.runway.game .header {
@@ -136,13 +133,13 @@
 
 			.player_vid {
 				position: absolute;
-				top: 2px;
-				width: 393px;
-				height: 739px;
+				top: 3px;
+				width: 388px;
+				height: 740px;
 				padding: 0;
 				object-fit: cover;
 
-				--offset: 274px;
+				--offset: 279px;
 				right: var(--offset);
 			}
 
@@ -198,13 +195,6 @@
 					<div class="content">---</div>
 				</div>
 
-				<div class="box name p1">
-					<div class="header">PLAYER 1</div>
-					<div class="content">&#338;&#338;&#338;</div>
-				</div>
-
-				<div class="box board p1"></div>
-
 				<div class="box drought p1">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
@@ -223,6 +213,13 @@
 					</div>
 					<div><span class="tetris_diff">0.00</span> TETRISES</div>
 				</div>
+
+				<div class="box name p1">
+					<div class="header">PLAYER 1</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box board p1"></div>
 
 				<!-- Player 2 -->
 				<video class="player_vid p2"></video>
@@ -253,13 +250,6 @@
 					<div class="content">---</div>
 				</div>
 
-				<div class="box name p2">
-					<div class="header">PLAYER 2</div>
-					<div class="content">&#338;&#338;&#338;</div>
-				</div>
-
-				<div class="box board p2"></div>
-
 				<div class="box drought p2">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
@@ -278,6 +268,13 @@
 					</div>
 					<div><span class="tetris_diff">0.00</span> TETRISES</div>
 				</div>
+
+				<div class="box name p2">
+					<div class="header">PLAYER 2</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box board p2"></div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>

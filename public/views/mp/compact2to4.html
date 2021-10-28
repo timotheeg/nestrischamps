@@ -7,7 +7,7 @@
 		<style>
 			#players {
 				position: absolute;
-				top: 10px;
+				top: 0px;
 			}
 
 			.player {
@@ -15,15 +15,13 @@
 			}
 
 			.box {
-				width: 47px;
-				padding: 10px;
-				left: 0;
+				left: -3px;
 				font-size: 16px;
 				line-height: 20px;
 			}
 
 			.score {
-				width: 237px;
+				width: 235px;
 				height: 38px;
 			}
 
@@ -41,17 +39,14 @@
 			}
 
 			.board {
-				border-image-source: url('/views/border.png');
-				border-image-slice: 10 10 10 10 fill;
-				border-image-width: 10px 10px;
-				width: 237px;
-				top: 56px;
+				padding: 13px;
+				top: 59px;
 			}
 
 			.runway,
 			.projection {
 				width: 112px;
-				left: 255px;
+				left: 251px;
 			}
 
 			.projection {
@@ -60,48 +55,67 @@
 			}
 
 			.name {
-				width: 233px;
+				width: 239px;
 				height: 37px;
-				top: 635px;
+				top: 628px;
 				padding: 12px;
 			}
 
-			.tetris_rate {
-				height: 66px;
-				top: 551px;
-				left: 255px;
+			.hearts {
+				position: static;
+				font-size: 16px;
+				line-height: inherit;
+				text-shadow: 1px 1px rgba(0, 0, 0, 0.65);
+				width: auto;
+				margin-top: -3px;
 			}
 
-			.tetris_rate .header {
-				padding-top: 5px;
+			.tetris_rate,
+			.eff,
+			.drought {
+				width: 47px;
+				left: 251px;
+				padding: 15px 14px;
+			}
+
+			.tetris_rate {
+				height: 54px;
+				top: 553px;
 			}
 
 			.tetris_rate .content {
 				padding-top: 10px;
 			}
 
-			.running_trt {
-				padding: 9px;
-				width: 239px;
-				height: 68px;
-				top: 551px;
-			}
-
-			.board .next_piece {
-				right: 8px;
-				top: 10px;
-			}
-
 			.eff,
 			.drought {
-				padding-top: 12px;
-				padding-bottom: 12px;
-				top: 427px;
-				left: 255px;
+				top: 421px;
+				height: 45px;
 			}
 
 			.eff {
-				top: 489px;
+				top: 487px;
+			}
+
+			.running_trt {
+				width: 239px;
+				height: 60px;
+				top: 553px;
+			}
+
+			.board .next_piece {
+				right: 12px;
+				top: 14px;
+			}
+
+			#branding {
+				position: absolute;
+				/* background: orange;
+				opacity: 0.5; /**/
+				width: 1280px;
+				height: 32px;
+				left: 0;
+				top: 688px;
 			}
 		</style>
 	</head>
@@ -149,11 +163,6 @@
 					<div class="content hearts"></div>
 				</div>
 
-				<div class="box board">
-					<div class="level"></div>
-					<div class="next_piece"></div>
-				</div>
-
 				<div class="box drought">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
@@ -163,12 +172,18 @@
 					<div class="header">EFF</div>
 					<div class="value">---</div>
 				</div>
+				<div class="box board">
+					<div class="level"></div>
+					<div class="next_piece"></div>
+				</div>
 			</div>
 		</template>
 
 		<div id="stream_bg">
 			<div id="players"></div>
 		</div>
+
+		<div id="branding"></div>
 		<!-- End Stream BG -->
 
 		<!-- Audio -->
@@ -249,7 +264,7 @@
 						runway_box: player_node.querySelector('.runway'),
 					},
 					{
-						field_real_border: 8,
+						field_real_border: 13,
 						preview_pixel_size: 2,
 						preview_align: 'tr',
 						stereo: translate([0, num_players - 1], [-1, 1], players.length),

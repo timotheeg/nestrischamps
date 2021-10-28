@@ -7,7 +7,7 @@
 			.match {
 				position: absolute;
 				left: 640px;
-				top: 8px;
+				top: 12px;
 			}
 
 			.score,
@@ -18,32 +18,21 @@
 			}
 
 			.tetris_rate,
+			.runway,
+			.projection,
 			.eff,
 			.drought {
-				--offset: 268px;
+				--offset: 257px;
 			}
 
 			.name {
-				width: 272px;
-				top: 628px;
-				--offset: 340px;
-			}
-
-			.tetris_rate {
-				height: 62px;
-			}
-
-			.tetris_rate .content {
-				padding-top: 11px;
-			}
-
-			.running_trt {
-				height: 68px;
-				top: 585px;
+				width: 281px;
+				top: 612px;
+				--offset: 328px;
 			}
 
 			.hearts {
-				top: 585px;
+				top: 575px;
 				width: 295px;
 				--offset: 342px;
 			}
@@ -58,13 +47,13 @@
 
 			video {
 				position: absolute;
-				top: 2px;
-				width: 372px;
-				height: 669px;
+				top: 3px;
+				width: 374px;
+				height: 659px;
 				padding: 0;
 				object-fit: cover;
 
-				--offset: 268px;
+				--offset: 266px;
 				right: var(--offset);
 			}
 
@@ -73,24 +62,36 @@
 			.match.small {
 				left: 640px;
 				top: 0;
-				transform: scale(0.6731898238747553); /* (720-32)/511/2 */
+				transform: scale(0.6785009861932939); /* (720-32)/507/2 */
 			}
 			#match2.small {
 				top: 344px;
 			}
+
+			.match.small .score,
+			.match.small .runway,
+			.match.small .tetris_rate,
+			.match.small .eff,
+			.match.small .drought {
+				--offset: 258px;
+			}
+
 			.match.small .board {
 				top: 0;
+				--offset: 0px;
+				z-index: 5;
 			}
 			.match.small .score {
+				width: 245px;
 				top: 0;
-				--offset: 268px;
+				z-index: 4;
 			}
 			.match.small .running_trt {
 				visibility: hidden;
 			}
 			.match.small .runway {
-				top: 76px;
-				--offset: 268px;
+				top: 75px;
+				z-index: 3;
 			}
 			.match.small .projection {
 				display: none;
@@ -101,22 +102,23 @@
 				--offset: 398px;
 			}
 			.match.small .tetris_rate {
-				top: 172px;
+				top: 170px;
 				height: 40px;
 				width: 68px;
+				z-index: 2;
 			}
 			.match.small .tetris_rate .content {
 				padding-top: 0;
 			}
 			.match.small .eff {
-				top: 234px;
+				top: 231px;
 				width: 68px;
-				--offset: 268px;
+				z-index: 1;
 			}
 			.match.small .drought {
-				top: 296px;
+				top: 292px;
 				width: 68px;
-				--offset: 268px;
+				z-index: 1;
 			}
 			.match.small .hearts {
 				top: 405px;
@@ -126,8 +128,8 @@
 			.match.small video {
 				top: 0;
 				width: 683px;
-				height: 511px;
-				--offset: 268px;
+				height: 507px;
+				--offset: 267px;
 			}
 
 			/* Magic to have a mirror display 💪 */
@@ -138,8 +140,8 @@
 
 			#branding {
 				position: absolute;
-				/* background: orange; */
-				opacity: 0.5;
+				/* background: orange;
+				opacity: 0.5; /**/
 				width: 1280px;
 				height: 32px;
 				left: 0;

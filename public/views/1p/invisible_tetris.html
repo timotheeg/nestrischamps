@@ -2,144 +2,28 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/simple_1p.css" />
 		<style>
-			html {
-				overflow: hidden;
-			}
-
-			#playing_fields {
-				position: absolute;
-				left: 485px;
-				top: 23px;
-			}
-
-			.box {
-				width: 95px;
-				height: 56px;
-				text-align: center;
-			}
-
-			.box .header {
-				font-size: 16px;
-				padding-bottom: 0.5em;
-			}
-
-			.box .content,
-			.box .data {
-				font-size: 24px;
-				line-height: 30px;
-			}
-
-			.score {
-				top: 76px;
-				height: 60px;
-				left: -107px;
-				width: 168px;
-			}
-
-			.score .diff {
-				text-align: center;
-			}
-
-			.next_piece {
-				width: 104px;
-				height: 60px;
-				top: 6px;
-
-				--offset: 177px;
-				right: var(--offset);
-			}
-
 			.lines {
-				left: -107px;
-				top: 160px;
+				top: 157px;
 			}
 
 			.level {
-				left: -107px;
-				top: 241px;
-			}
-
-			.board {
-				border-image: url('/views/big_border.png');
-				border-image-slice: 16 16 16 16 fill;
-				border-image-width: 16px 16px;
-				padding: 17px;
-				width: 237px;
-				height: 477px;
-				top: 76px;
-
-				--offset: 106px;
-				right: var(--offset);
-			}
-
-			.tetris_rate {
-				left: -107px;
-				top: 588px;
-			}
-
-			.efficiency {
-				left: -107px;
-				top: 507px;
-			}
-
-			.tetris_rate .content {
-				padding: 0 5px;
-			}
-
-			.running_trt {
-				padding: 9px;
-				width: 253px;
-				height: 62px;
-				top: 588px;
-
-				--offset: 106px;
-				right: var(--offset);
-			}
-
-			.drought {
-				width: 49px;
-				top: 12px;
-				height: 40px;
-				opacity: 0;
-				color: red;
-				display: none;
-
-				--pos: 304px;
-				right: var(--pos);
-			}
-
-			.drought .header {
-				padding-bottom: 2px;
-			}
-
-			.drought.active {
-				display: block;
-				animation: fadeIn ease 1s;
-				animation-fill-mode: forwards;
-			}
-
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-				}
-				to {
-					opacity: 1;
-				}
+				top: 238px;
 			}
 		</style>
 	</head>
 	<body>
 		<div id="stream_bg">
 			<div id="playing_fields">
-				<div class="box board"></div>
-				<div class="box next_piece"></div>
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
 
-				<!-- Player 1 -->
-
-				<div class="box score">
-					<div class="header">SCORE</div>
-					<div class="content">000000</div>
+				<div class="box level">
+					<div class="header">LEVEL</div>
+					<div class="content">000</div>
 				</div>
 
 				<div class="box lines">
@@ -147,9 +31,9 @@
 					<div class="content">000</div>
 				</div>
 
-				<div class="box level">
-					<div class="header">LEVEL</div>
-					<div class="content">000</div>
+				<div class="box score">
+					<div class="header">SCORE</div>
+					<div class="content">000000</div>
 				</div>
 
 				<div class="box tetris_rate">
@@ -163,11 +47,8 @@
 				</div>
 
 				<div class="box running_trt"></div>
-
-				<div class="box drought">
-					<div class="header">DRT</div>
-					<div class="value">99</div>
-				</div>
+				<div class="box board"></div>
+				<div class="box next_piece"></div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>
