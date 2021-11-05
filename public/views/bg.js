@@ -99,10 +99,10 @@
 
 		Object.assign(bg.style, {
 			position: 'absolute',
-			width: '140%',
-			height: '140%',
-			top: '-20%',
-			left: '-20%',
+			width: '121%',
+			height: '133%',
+			top: '-16%',
+			left: '-15%',
 			background: `url(/views/${bg_file}) 0 0 repeat`,
 			transform: 'rotate(-11deg)',
 		});
