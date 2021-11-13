@@ -250,8 +250,8 @@ VNTPYN</pre>
 				<h2 class="title is-2">Counting scores past maxout</h2>
 				<div>
 					<p>NES Tetris stops counting score at 999,999. With a custom Game Genie code, it is possible to count past this (up to 1,600,000) with using a hexadecimal character as first letter (e.g. A is 1 million, B is 1.1 million, C, is 1.2 million, etc)</p>
-					<p>Folks do not necessarily have a Game Genie though. Well, Nestrischamps to the rescue for this case too! By inspecting the line clears in the game, NestrisChamps is able to add up score beyond maxout and display it in the layouts.</p>
-					<p>As a bonus, levels in NES classic Tetris are not displayed correctly beyond level 30. NestrisChamps corrects the level up to level 49, which is enough formost players.</p>
+					<p>Folks do not necessarily have a Game Genie though. Well, Nestrischamps to the rescue for this case too! By inspecting the line clears in the game, NestrisChamps is able to add up score beyond maxout, and display it in the layouts.</p>
+					<p>As a bonus, levels in NES classic Tetris are not displayed correctly beyond level 30. NestrisChamps corrects the levels up to level 62, which is enough for most players.</p>
 				</div>
 			</div>
 		</div>
@@ -260,7 +260,7 @@ VNTPYN</pre>
 				<h2 class="title is-2">Qualifier renderer</h2>
 				<div>
 					<p>Many online events have a qualifier format, where players must qualify to determine in which bracket they will play.</p>
-					<p>Most qualifiers have the same sort of requirements: stream for a specific amounf of time, track your qual score, as either the highest score you can achieve during your qual session, or average of top 2 or 3.</p>
+					<p>Most qualifiers have the same sort of requirements: stream for a specific amount of time, track your qual score, as either the highest score you can achieve during your qual session, or average of top 2, or top 3.</p>
 					<p>NestrisChamps offers a qualifier layout. The layout is CTM-stencil-based, includes a built-in timer, and computes the qual score as the average of top X (3 by default). Native webcam is active in this layout, so players can show their webcam capture works, if that is a requirement of the tournament they are joining.</p>
 					<p>The layout tracks scores from the moment it is loaded, and the timer starts as soon as the layout loads.</p>
 					<p>The qualifier layout can be tuned with the following parameters, which can be added to the query string.</p>
@@ -276,8 +276,8 @@ VNTPYN</pre>
 			</div>
 			<div class="column is-half">
 				<h2 class="title is-2">Backgrounds</h2>
-				<p>Many of the layouts in NestrisChamps come with changeable backgrounds. It's of course possible to demand <string>NO</string> background, so a user may set whichever custom background they want in OBS. Still, there are some built-in background you can consider using.</p>
-				<p>Select a background by adding the following query string o the layout URL</p>
+				<p>Many of the layouts in NestrisChamps come with changeable backgrounds. It's of course possible to request <string>NO</string> background too, so a user may set whichever custom background they want in OBS. Still, there are some built-in backgrounds you can consider using.</p>
+				<p>Select a background by adding the following query string to the layout URL</p>
 				<pre>?bg=NUM</pre>
 				<p>where <strong>NUM</strong> is a number, as follows:</p>
 				<ol start="0" type="1">
@@ -296,19 +296,19 @@ VNTPYN</pre>
 				<h2 class="title is-2">Timer Tool</h2>
 				<div>
 					<p>Some competitions might not allow NestrisChamps for qualifiers. For those, it is typically expected that players will stream their qualification run while being stencil-ready, and include some custom timer in their OBS stream.</p>
-					<p>It is surprinsingly annoying to find a very light timer to use. Most players resort to finding a timer on the internet, and capture it with window capture in OBS. That is <em>waaayyy</em> heavier than it needs to be.</p>
+					<p>It is surprisingly annoying to find a very light timer to use. Most players resort to finding a timer on the internet, and capture it with window capture in OBS. That is <em>waaayyy</em> heavier than it needs to be.</p>
 					<p>NestrisChamps provides a very simple timer that can be used in your OBS layout. Simply create a new Browser Source with canvas size 268x44 (you can scale its size in OBS later), and load the URL: <a href="https://nestrischamps.herokuapp.com/tools/timer/">https://nestrischamps.herokuapp.com/tools/timer/</a>.</p>
 					<p id="timer"><button class="button is-info is-light is-outlined" onclick="load_iframe('#timer', '/tools/timer/', [268, 44])">Start the timer</button></p>
-					<p>The timer can be customized with the following parameters</p>
+					<p>The timer can be customized with the following parameters:</p>
 					<dl>
 						<dt><strong>minutes=X</strong></dt>
 						<dd>where X is a integer representing the duration in minutes of the timer (defaults to 120, i.e. 2 hours)</dd>
 						<dt><strong>type=Y</strong></dt>
 						<dd>where Y can be one of 'up' or 'down' to indicate whether this is a count-up or count-down timer.</dd>
 						<dt><strong>text_color=H</strong></dt>
-						<dd>where H is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the text (default to black)</dd>
+						<dd>where H is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the text (defaults to black)</dd>
 						<dt><strong>bg_color=H</strong></dt>
-						<dd>where H is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the background (default to white)</dd>
+						<dd>where H is the <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">hex representation of a color</a> for the background (defaults to white)</dd>
 					</dl>
 					<pre>?minutes=60&type=down&text_color=ffffff&bg_color=000000</pre>
 					<p>Source code and documentation for the timer is available <a href="https://github.com/timotheeg/nestrischamps/tree/main/public/tools/timer">here</a></p>
@@ -318,9 +318,9 @@ VNTPYN</pre>
 				<h2 class="title is-2">CTWC Footer Tool</h2>
 				<div>
 					<p>When running an official CTWC event, most tournaments use a common footer that cycles between multiple "slides" of information (e.g. event name, facebook page, etc.)</p>
-					<p>NestrisChamps makes available a simple footer that can be easily loaded in OBS. The footer has size 1280x32, and can thus be easily added as a standalone browser source, above many of the competition layouts, which specificaly leave a 32px strip at the bottom of the layouts.</p>
+					<p>NestrisChamps makes available a simple footer that can be easily loaded in OBS. The footer has size 1280x32, and can thus be easily added as a standalone browser source, above many of the competition layouts, which specificaly leave a 32px strip at the bottom.</p>
 					<p id="ncfooter"><button class="button is-info is-light is-outlined" onclick="load_iframe('#ncfooter', '/tools/footer/', [1280, 32])">Run the footer</button></p>
-					<p>The footer can be customized with the following parameters</p>
+					<p>The footer can be customized with the following parameters:</p>
 					<dl>
 						<dt><strong>event=X</strong></dt>
 						<dd>where X is the name of the event (defaults to "SINGAPORE CHAMPIONSHIP 2021")</dd>
