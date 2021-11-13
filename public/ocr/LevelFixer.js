@@ -164,13 +164,13 @@ class LevelFixer {
 			case 0xb:
 				digits[0] = 0x4;
 
-				if ((digits[1] = 0x2)) {
+				if (digits[1] === 0x2) {
 					// 82 -> 43
 					digits[1] = 0x3;
-				} else if ((digits[1] = 0xc)) {
+				} else if (digits[1] === 0xc) {
 					// 8c -> 44
 					digits[1] = 0x4;
-				} else if ((digits[1] = 0xe)) {
+				} else if (digits[1] === 0xe) {
 					// be -> 48
 					digits[1] = 0x8;
 				} else {
