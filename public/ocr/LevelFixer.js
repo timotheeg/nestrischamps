@@ -22,9 +22,19 @@ Levels beyond 30
 47 -> AA
 48 -> B4
 49 -> BE
-
-Basically with formula:
-30 + (hex(value) / 0x0A)
+50 -> C6
+51 -> 20
+52 -> E6
+53 -> 20
+54 -> 06
+55 -> 21
+56 -> 26
+57 -> 21
+58 -> 46
+59 -> 21
+60 -> 66
+61 -> 21
+62 -> 86
 
 Reference:
 https://meatfighter.com/nintendotetrisai/#Level_30_and_Beyond
@@ -75,6 +85,12 @@ class LevelFixer {
 					} else {
 						digits[1] = 0x4;
 					}
+				} else if (digits[1] === 0x6) {
+					// 06 - could be 06 or 54
+					if (this.last_good_digits[0] === 0x5) {
+						digits[0] = 0x5;
+						digits[1] = 0x4;
+					}
 				}
 				break;
 
@@ -93,6 +109,7 @@ class LevelFixer {
 					}
 				}
 				break;
+
 			case 0x2:
 				if (digits[1] === 0x8 || digits[1] === 0xb) {
 					// 28 - could be 28 or 34
@@ -101,6 +118,45 @@ class LevelFixer {
 						digits[1] = 0x4;
 					} else {
 						digits[1] = 0x8;
+					}
+				} else if (digits[1] === 0x0) {
+					// 20 - could be 20, 51, 53
+					if (this.last_good_digits[0] === 0x5) {
+						digits[0] = 0x5;
+						if (
+							this.last_good_digits[1] === 0x0 ||
+							this.last_good_digits[1] === 0x1
+						) {
+							digits[1] = 0x1;
+						} else {
+							digits[1] = 0x3;
+						}
+					}
+				} else if (digits[1] === 0x1) {
+					// 21 - could be 21, 55, 57, 59, 61
+					if (this.last_good_digits[0] === 0x6) {
+						digits[0] = 0x6;
+					} else if (this.last_good_digits[0] === 0x5) {
+						digits[0] = 0x5;
+						if (
+							this.last_good_digits[1] === 0x4 ||
+							this.last_good_digits[1] === 0x5
+						) {
+							digits[1] = 0x5;
+						} else if (
+							this.last_good_digits[1] === 0x6 ||
+							this.last_good_digits[1] === 0x7
+						) {
+							digits[1] = 0x7;
+						} else {
+							digits[1] = 0x9;
+						}
+					}
+				} else if (digits[1] === 0x6) {
+					// 26 - could be 26, 56
+					if (this.last_good_digits[0] === 0x5) {
+						digits[0] = 0x5;
+						digits[1] = 0x6;
 					}
 				}
 				break;
@@ -118,9 +174,14 @@ class LevelFixer {
 			case 0x4:
 			case 0xa:
 				if (digits[1] === 0x6) {
-					// 46 -> 37
-					digits[0] = 0x3;
-					digits[1] = 0x7;
+					// 46 - could be 37, 58
+					if (this.last_good_digits[0] === 0x3) {
+						digits[0] = 0x3;
+						digits[1] = 0x7;
+					} else {
+						digits[0] = 0x5;
+						digits[1] = 0x8;
+					}
 				} else if (digits[1] === 0x0) {
 					// A0 -> 46
 					digits[0] = 0x4;
@@ -144,12 +205,16 @@ class LevelFixer {
 				break;
 
 			case 0x6:
-				digits[0] = 0x4;
 				if (digits[1] === 0xe) {
 					// 6e -> 41
+					digits[0] = 0x4;
 					digits[1] = 0x1;
+				} else if (digits[1] === 0x6) {
+					// 66 -> 60
+					digits[1] = 0x0;
 				} else {
 					// 64 -> 40
+					digits[0] = 0x4;
 					digits[1] = 0x0;
 				}
 				break;
@@ -162,19 +227,25 @@ class LevelFixer {
 
 			case 0x8:
 			case 0xb:
-				digits[0] = 0x4;
-
-				if ((digits[1] = 0x2)) {
+				if (digits[1] === 0x2) {
 					// 82 -> 43
+					digits[0] = 0x4;
 					digits[1] = 0x3;
-				} else if ((digits[1] = 0xc)) {
+				} else if (digits[1] === 0x6) {
+					// 86 -> 62
+					digits[0] = 0x6;
+					digits[1] = 0x2;
+				} else if (digits[1] === 0xc) {
 					// 8c -> 44
+					digits[0] = 0x4;
 					digits[1] = 0x4;
-				} else if ((digits[1] = 0xe)) {
+				} else if (digits[1] === 0xe) {
 					// be -> 48
+					digits[0] = 0x4;
 					digits[1] = 0x8;
 				} else {
 					// b4 -> 49
+					digits[0] = 0x4;
 					digits[1] = 0x9;
 				}
 				break;
@@ -183,6 +254,18 @@ class LevelFixer {
 				// 96 -> 45
 				digits[0] = 0x4;
 				digits[1] = 0x5;
+				break;
+
+			case 0xc:
+				// c6 -> 50
+				digits[0] = 0x5;
+				digits[1] = 0x0;
+				break;
+
+			case 0xe:
+				// e6 -> 52
+				digits[0] = 0x5;
+				digits[1] = 0x2;
 				break;
 		}
 
