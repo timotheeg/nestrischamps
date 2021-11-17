@@ -3,35 +3,46 @@ const { transformTwitchApiResponse } = require("twitch-api-call/lib")
 
 frames[
     frame {
-        // shared
-        score,
-        lines,
-        level,
-        board
-        preview,
+        raw {
+            // shared
+            ctime
+            score,
+            lines,
+            level,
+            board
+            preview,
 
-        // classic
-        piece_stats: {
-            T,
-            J,
-            Z,
-            O,
-            S,
-            L,
-            I,
-        },
+            // classic
+            piece_stats: {
+                T,
+                J,
+                Z,
+                O,
+                S,
+                L,
+                I,
+            },
 
-        // das trainer
-        instant_das,
-        cur_piece_das,
-        cur_piece
+            // das trainer
+            instant_das,
+            cur_piece_das,
+            cur_piece
 
-        // augmentation data
-        // piece_events, // supplied on get
-        pieces_length,
+            // augmentation data
+            // piece_events, // supplied on get
+            pieces_length,
+        }
 
-        // point_events, // supplied on get
-        points_length,
+        // views into main arrays
+        pieces[]
+        points[]
+
+        T,J,Z,O,S,L,I {
+            count,
+            percent,
+            drought,
+            indexes[]
+        }
     }
 ]
 
@@ -40,7 +51,7 @@ pieces[
         index,
         piece: TJZOSLI,
         preview: TJZOSLI,
-        in_drought: true|false
+        in_drought: true|false,
 
         das_stats {
             spawn,
@@ -60,8 +71,11 @@ pieces[
             deviation_56
         }
 
-        drought_stats {
-
+        i_drought_stats {
+            count,
+            current,
+            last,
+            max,
         }
 
         board_stats {
@@ -73,15 +87,23 @@ pieces[
     }
 ]
 
+T,J,Z,O,S,L,I {
+    count,
+    percent,
+    drought,
+    indexes[]
+}
+
 points[
     point {
         index,
         game_stats {
             lines,
             level
+            tetris_lines,
         }
 
-        line: 0,1,2,3,4 // can be larger meaning undefined clear
+        line: 0,1,2,3,4 // can be larger, but means undefined clear
         points:
 
         score {
@@ -108,11 +130,7 @@ points[
                 lines,
                 percent
             },
-            triple { {
-                count,
-                lines,
-                percent
-            },
+            triple {
                 count,
                 lines,
                 percent
