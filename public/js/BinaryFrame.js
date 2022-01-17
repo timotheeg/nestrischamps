@@ -105,7 +105,7 @@ const BinaryFrame = (function () {
 			// score - 24 bits
 			buffer[bidx++] = (sanitized.score & 0xff0000) >> 16;
 			buffer[bidx++] = (sanitized.score & 0x00ff00) >> 8;
-			buffer[bidx++] = sanitized.score & 0x0000ff;
+			buffer[bidx++] = (sanitized.score & 0x0000ff);
 
 			// instant_das (5) + preview (3)
 			buffer[bidx++] =
@@ -117,20 +117,14 @@ const BinaryFrame = (function () {
 				(sanitized.cur_piece & 0b111);
 
 			// piece stats (9 bits each - does not lign nicely to byte boundaries 😓)
-			buffer[bidx++] = (sanitized.T & 0b111111110) >> 1;
-			buffer[bidx++] =
-				((sanitized.T & 0b000000001) << 7) | ((sanitized.J & 0b111111100) >> 2);
-			buffer[bidx++] =
-				((sanitized.J & 0b000000011) << 6) | ((sanitized.Z & 0b111111000) >> 3);
-			buffer[bidx++] =
-				((sanitized.Z & 0b000000111) << 5) | ((sanitized.O & 0b111110000) >> 4);
-			buffer[bidx++] =
-				((sanitized.O & 0b000001111) << 4) | ((sanitized.S & 0b111100000) >> 5);
-			buffer[bidx++] =
-				((sanitized.S & 0b000011111) << 3) | ((sanitized.L & 0b111000000) >> 6);
-			buffer[bidx++] =
-				((sanitized.L & 0b000111111) << 2) | ((sanitized.I & 0b110000000) >> 7);
-			buffer[bidx++] = (sanitized.I & 0b001111111) << 1;
+			buffer[bidx++] = ((sanitized.T & 0b111111110) >> 1);
+			buffer[bidx++] = ((sanitized.T & 0b000000001) << 7) | ((sanitized.J & 0b111111100) >> 2);
+			buffer[bidx++] = ((sanitized.J & 0b000000011) << 6) | ((sanitized.Z & 0b111111000) >> 3);
+			buffer[bidx++] = ((sanitized.Z & 0b000000111) << 5) | ((sanitized.O & 0b111110000) >> 4);
+			buffer[bidx++] = ((sanitized.O & 0b000001111) << 4) | ((sanitized.S & 0b111100000) >> 5);
+			buffer[bidx++] = ((sanitized.S & 0b000011111) << 3) | ((sanitized.L & 0b111000000) >> 6);
+			buffer[bidx++] = ((sanitized.L & 0b000111111) << 2) | ((sanitized.I & 0b110000000) >> 7);
+			buffer[bidx++] = ((sanitized.I & 0b001111111) << 1);
 
 			// field
 			for (
@@ -181,20 +175,13 @@ const BinaryFrame = (function () {
 				pojo.cur_piece = f[bidx++] & 0b111;
 
 				// piece stats
-				pojo.T =
-					(f[bidx++] & (0b11111111 << 1)) | (f[bidx] & (0b10000000 >> 7));
-				pojo.J =
-					(f[bidx++] & (0b01111111 << 2)) | (f[bidx] & (0b11000000 >> 6));
-				pojo.Z =
-					(f[bidx++] & (0b00111111 << 3)) | (f[bidx] & (0b11100000 >> 5));
-				pojo.O =
-					(f[bidx++] & (0b00011111 << 4)) | (f[bidx] & (0b11110000 >> 4));
-				pojo.S =
-					(f[bidx++] & (0b00001111 << 5)) | (f[bidx] & (0b11111000 >> 3));
-				pojo.L =
-					(f[bidx++] & (0b00000111 << 6)) | (f[bidx] & (0b11111100 >> 2));
-				pojo.I =
-					(f[bidx++] & (0b00000011 << 7)) | (f[bidx] & (0b11111110 >> 1));
+				pojo.T = (f[bidx++] & (0b11111111 << 1)) | (f[bidx] & (0b10000000 >> 7));
+				pojo.J = (f[bidx++] & (0b01111111 << 2)) | (f[bidx] & (0b11000000 >> 6));
+				pojo.Z = (f[bidx++] & (0b00111111 << 3)) | (f[bidx] & (0b11100000 >> 5));
+				pojo.O = (f[bidx++] & (0b00011111 << 4)) | (f[bidx] & (0b11110000 >> 4));
+				pojo.S = (f[bidx++] & (0b00001111 << 5)) | (f[bidx] & (0b11111000 >> 3));
+				pojo.L = (f[bidx++] & (0b00000111 << 6)) | (f[bidx] & (0b11111100 >> 2));
+				pojo.I = (f[bidx++] & (0b00000011 << 7)) | (f[bidx] & (0b11111110 >> 1));
 
 				bidx++;
 			} else {
