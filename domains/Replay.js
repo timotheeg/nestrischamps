@@ -60,9 +60,14 @@ class Replay {
 					const buf = this.game_stream.read(1);
 
 					if (buf === null) {
+						console.warn(`warning: getting null buffer when reading one byte`);
 						// shouldn't happen but 🤷
 						// is this a memory leak? 🤔
 						return;
+					}
+
+					if (!buf.length) {
+						break;
 					}
 
 					const b = new Uint8Array(buf);
@@ -71,15 +76,25 @@ class Replay {
 					if (BinaryFrame.FRAME_SIZE_BY_VERSION[version]) {
 						this.frame_size = BinaryFrame.FRAME_SIZE_BY_VERSION[version];
 						this.game_stream.unshift(buf);
-						break;
+						console.info(
+							`Found version ${version} with size ${this.frame_size}`
+						);
+						continue;
 					} else {
 						// unknown version, do nothing
 						// is this a memory leak? 🤔
+						console.warn(
+							`warning: unknown version in replay file ${this.game_id_or_url}: ${version}`
+						);
 						return;
 					}
 				}
 
 				const buf = this.game_stream.read(this.frame_size);
+
+				if (buf === null) {
+					return; // done!!
+				}
 
 				if (buf.length < this.frame_size) {
 					this.game_stream.unshift(buf);
