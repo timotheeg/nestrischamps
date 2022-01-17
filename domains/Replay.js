@@ -119,7 +119,7 @@ class Replay {
 			this.game_stream.read(0);
 		});
 
-		// TODO: Error handling close hand,ing on source and target, etc...
+		// TODO: Error handling close handling on source and target, etc...
 	}
 
 	sendNextFrame() {
