@@ -12,6 +12,7 @@ class Replay {
 		this.game_id_or_url = game_id_or_url;
 		this.time_scale = time_scale;
 		this.frame_buffer = [];
+		this.frame_size = 0;
 
 		this.startStreaming();
 	}
@@ -55,17 +56,32 @@ class Replay {
 		this.game_stream.on('readable', () => {
 			/* eslint-disable no-constant-condition */
 			do {
-				const buf = this.game_stream.read(71);
+				if (!this.frame_size) {
+					const buf = this.game_stream.read(1);
 
-				if (buf === null) {
-					return; // done!!
+					if (buf === null) {
+						// shouldn't happen but 🤷
+						// is this a memory leak? 🤔
+						return;
+					}
+
+					const b = new Uint8Array(buf);
+					const version = b[0] >> 5 || 1;
+
+					if (BinaryFrame.FRAME_SIZE_BY_VERSION[version]) {
+						this.frame_size = BinaryFrame.FRAME_SIZE_BY_VERSION[version];
+						this.game_stream.unshift(buf);
+						break;
+					} else {
+						// unknown version, do nothing
+						// is this a memory leak? 🤔
+						return;
+					}
 				}
 
-				// Hardcoding 71 as frame size of the binary format
-				// Note that the format version might imply different frame length
-				// Ideally, on first data read, we'd check the header, check the version, and extract the frame size
-				// and then use that frame size for all subsequent reads
-				if (buf.length < 71) {
+				const buf = this.game_stream.read(this.frame_size);
+
+				if (buf.length < this.frame_size) {
 					this.game_stream.unshift(buf);
 					break;
 				}
