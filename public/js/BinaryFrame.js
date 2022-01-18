@@ -174,14 +174,14 @@ const BinaryFrame = (function () {
 				pojo.cur_piece_das = (f[bidx] & 0b11111000) >> 3;
 				pojo.cur_piece = f[bidx++] & 0b111;
 
-				// piece stats
-				pojo.T = (f[bidx++] & (0b11111111 << 1)) | (f[bidx] & (0b10000000 >> 7));
-				pojo.J = (f[bidx++] & (0b01111111 << 2)) | (f[bidx] & (0b11000000 >> 6));
-				pojo.Z = (f[bidx++] & (0b00111111 << 3)) | (f[bidx] & (0b11100000 >> 5));
-				pojo.O = (f[bidx++] & (0b00011111 << 4)) | (f[bidx] & (0b11110000 >> 4));
-				pojo.S = (f[bidx++] & (0b00001111 << 5)) | (f[bidx] & (0b11111000 >> 3));
-				pojo.L = (f[bidx++] & (0b00000111 << 6)) | (f[bidx] & (0b11111100 >> 2));
-				pojo.I = (f[bidx++] & (0b00000011 << 7)) | (f[bidx] & (0b11111110 >> 1));
+				// piece stats)
+				pojo.T = ((f[bidx++] & 0b11111111) << 1) | ((f[bidx] & 0b10000000) >> 7);
+				pojo.J = ((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+				pojo.Z = ((f[bidx++] & 0b00111111) << 3) | ((f[bidx] & 0b11100000) >> 5);
+				pojo.O = ((f[bidx++] & 0b00011111) << 4) | ((f[bidx] & 0b11110000) >> 4);
+				pojo.S = ((f[bidx++] & 0b00001111) << 5) | ((f[bidx] & 0b11111000) >> 3);
+				pojo.L = ((f[bidx++] & 0b00000111) << 6) | ((f[bidx] & 0b11111100) >> 2);
+				pojo.I = ((f[bidx++] & 0b00000011) << 7) | ((f[bidx] & 0b11111110) >> 1);
 
 				bidx++;
 			} else {
