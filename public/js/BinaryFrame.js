@@ -1,8 +1,9 @@
 const BinaryFrame = (function () {
-	const FORMAT_VERSION = 1;
+	const FORMAT_VERSION = 2;
 
 	const FRAME_SIZE_BY_VERSION = {
 		1: 71,
+		2: 72,
 	};
 
 	const GAME_TYPE = {
@@ -93,35 +94,37 @@ const BinaryFrame = (function () {
 			buffer[bidx++] = (sanitized.ctime & 0x00ff000) >> 12;
 			buffer[bidx++] = (sanitized.ctime & 0x0000ff0) >> 4;
 			buffer[bidx++] =
-				((sanitized.ctime & 0x0f) << 4) | ((sanitized.score & 0x1e0000) >> 17);
+				((sanitized.ctime & 0x0f) << 4) | ((sanitized.lines & 0xf00) >> 8);
 
-			// score - 21 bits
-			buffer[bidx++] = (sanitized.score & 0x1fe00) >> 9;
-			buffer[bidx++] = (sanitized.score & 0x001fe) >> 1;
-			buffer[bidx++] =
-				((sanitized.score & 0b1) << 7) | ((sanitized.lines & 0b111111100) >> 2);
+			// lines - 12 bits
+			buffer[bidx++] = sanitized.lines & 0xff;
 
-			// lines + level
-			buffer[bidx++] =
-				((sanitized.lines & 0b000000011) << 6) | (sanitized.level & 0b111111);
+			// level - 8 bits
+			buffer[bidx++] = sanitized.level & 0xff;
 
-			// instant_das + preview
+			// score - 24 bits
+			buffer[bidx++] = (sanitized.score & 0xff0000) >> 16;
+			buffer[bidx++] = (sanitized.score & 0x00ff00) >> 8;
+			buffer[bidx++] = (sanitized.score & 0x0000ff);
+
+			// instant_das (5) + preview (3)
 			buffer[bidx++] =
 				((sanitized.instant_das & 0b11111) << 3) | (sanitized.preview & 0b111);
 
-			// cur piece das + cur piece
+			// cur piece das (5) + cur piece (3)
 			buffer[bidx++] =
 				((sanitized.cur_piece_das & 0b11111) << 3) |
 				(sanitized.cur_piece & 0b111);
 
-			// piece stats
-			buffer[bidx++] = sanitized.T;
-			buffer[bidx++] = sanitized.J;
-			buffer[bidx++] = sanitized.Z;
-			buffer[bidx++] = sanitized.O;
-			buffer[bidx++] = sanitized.S;
-			buffer[bidx++] = sanitized.L;
-			buffer[bidx++] = sanitized.I;
+			// piece stats (9 bits each - does not lign nicely to byte boundaries 😓)
+			buffer[bidx++] = ((sanitized.T & 0b111111110) >> 1);
+			buffer[bidx++] = ((sanitized.T & 0b000000001) << 7) | ((sanitized.J & 0b111111100) >> 2);
+			buffer[bidx++] = ((sanitized.J & 0b000000011) << 6) | ((sanitized.Z & 0b111111000) >> 3);
+			buffer[bidx++] = ((sanitized.Z & 0b000000111) << 5) | ((sanitized.O & 0b111110000) >> 4);
+			buffer[bidx++] = ((sanitized.O & 0b000001111) << 4) | ((sanitized.S & 0b111100000) >> 5);
+			buffer[bidx++] = ((sanitized.S & 0b000011111) << 3) | ((sanitized.L & 0b111000000) >> 6);
+			buffer[bidx++] = ((sanitized.L & 0b000111111) << 2) | ((sanitized.I & 0b110000000) >> 7);
+			buffer[bidx++] = ((sanitized.I & 0b001111111) << 1);
 
 			// field
 			for (
@@ -146,6 +149,7 @@ const BinaryFrame = (function () {
 
 			let bidx = 0;
 
+			pojo.version = (f[bidx] & 0b11100000) >> 5;
 			pojo.game_type = (f[bidx] & 0b11000) >> 3;
 			pojo.player_num = f[bidx++] & 0b111;
 
@@ -157,31 +161,57 @@ const BinaryFrame = (function () {
 				(f[bidx++] << 4) |
 				((f[bidx] & 0xf0) >> 4);
 
-			pojo.score =
-				((f[bidx++] & 0x0f) << 17) |
-				(f[bidx++] << 9) |
-				(f[bidx++] << 1) |
-				((f[bidx] & 0b10000000) >> 7);
+			if (pojo.version === FORMAT_VERSION) {
+				pojo.lines = ((f[bidx++] & 0x0f) << 8) | f[bidx++];
 
-			pojo.lines =
-				((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+				pojo.level = f[bidx++];
 
-			pojo.level = f[bidx++] & 0b0111111;
+				pojo.score = (f[bidx++] << 16) | (f[bidx++] << 8) | f[bidx++];
 
-			pojo.instant_das = (f[bidx] & 0b11111000) >> 3;
-			pojo.preview = f[bidx++] & 0b111;
+				pojo.instant_das = (f[bidx] & 0b11111000) >> 3;
+				pojo.preview = f[bidx++] & 0b111;
 
-			pojo.cur_piece_das = (f[bidx] & 0b11111000) >> 3;
-			pojo.cur_piece = f[bidx++] & 0b111;
+				pojo.cur_piece_das = (f[bidx] & 0b11111000) >> 3;
+				pojo.cur_piece = f[bidx++] & 0b111;
 
-			// piece stats
-			pojo.T = f[bidx++];
-			pojo.J = f[bidx++];
-			pojo.Z = f[bidx++];
-			pojo.O = f[bidx++];
-			pojo.S = f[bidx++];
-			pojo.L = f[bidx++];
-			pojo.I = f[bidx++];
+				// piece stats)
+				pojo.T = ((f[bidx++] & 0b11111111) << 1) | ((f[bidx] & 0b10000000) >> 7);
+				pojo.J = ((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+				pojo.Z = ((f[bidx++] & 0b00111111) << 3) | ((f[bidx] & 0b11100000) >> 5);
+				pojo.O = ((f[bidx++] & 0b00011111) << 4) | ((f[bidx] & 0b11110000) >> 4);
+				pojo.S = ((f[bidx++] & 0b00001111) << 5) | ((f[bidx] & 0b11111000) >> 3);
+				pojo.L = ((f[bidx++] & 0b00000111) << 6) | ((f[bidx] & 0b11111100) >> 2);
+				pojo.I = ((f[bidx++] & 0b00000011) << 7) | ((f[bidx] & 0b11111110) >> 1);
+
+				bidx++;
+			} else {
+				// can only be version 1 for now, no need to check more
+				pojo.score =
+					((f[bidx++] & 0x0f) << 17) |
+					(f[bidx++] << 9) |
+					(f[bidx++] << 1) |
+					((f[bidx] & 0b10000000) >> 7);
+
+				pojo.lines =
+					((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+
+				pojo.level = f[bidx++] & 0b0111111;
+
+				pojo.instant_das = (f[bidx] & 0b11111000) >> 3;
+				pojo.preview = f[bidx++] & 0b111;
+
+				pojo.cur_piece_das = (f[bidx] & 0b11111000) >> 3;
+				pojo.cur_piece = f[bidx++] & 0b111;
+
+				// piece stats
+				pojo.T = f[bidx++];
+				pojo.J = f[bidx++];
+				pojo.Z = f[bidx++];
+				pojo.O = f[bidx++];
+				pojo.S = f[bidx++];
+				pojo.L = f[bidx++];
+				pojo.I = f[bidx++];
+			}
 
 			pojo.field = Array(200);
 
@@ -194,17 +224,32 @@ const BinaryFrame = (function () {
 
 			// we've extracted all the value, now checks for nulls
 
-			if (pojo.score === 0x1fffff) pojo.score = null;
-			if (pojo.lines === 0b111111111) pojo.lines = null;
-			if (pojo.level === 0b111111) pojo.level = null;
+			if (pojo.version === FORMAT_VERSION) {
+				if (pojo.score === 0xffffff) pojo.score = null;
+				if (pojo.lines === 0xfff) pojo.lines = null;
+				if (pojo.level === 0xff) pojo.level = null;
+
+				PIECES.forEach(piece => {
+					if (pojo[piece] === 0x1ff) {
+						pojo[piece] = null;
+					}
+				});
+			}
+			else {
+				if (pojo.score === 0x1fffff) pojo.score = null;
+				if (pojo.lines === 0b111111111) pojo.lines = null;
+				if (pojo.level === 0b111111) pojo.level = null;
+
+				PIECES.forEach(piece => {
+					if (pojo[piece] === 0xff) {
+						pojo[piece] = null;
+					}
+				});
+			}
+
 			if (pojo.instant_das === 0b11111) pojo.instant_das = null;
 			if (pojo.cur_piece_das === 0b11111) pojo.cur_piece_das = null;
 
-			PIECES.forEach(piece => {
-				if (pojo[piece] === 0xff) {
-					pojo[piece] = null;
-				}
-			});
 
 			if (pojo.preview === 0b111) {
 				pojo.preview = null;
@@ -241,7 +286,7 @@ const BinaryFrame = (function () {
 
 			const version = f[0] >> 5; // 3 bits with mask 0b11100000
 
-			if (version != FORMAT_VERSION) {
+			if (!FRAME_SIZE_BY_VERSION[version]) {
 				throw new Error('Invalid Frame: Version not supported');
 			}
 

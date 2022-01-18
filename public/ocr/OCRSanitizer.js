@@ -195,6 +195,8 @@ const OCRSanitizer = (function () {
 				level: OCRSanitizer.digitsToValue(
 					FIX_LEVEL
 						? this.level_fixer.fix(this.last_frame.level)
+						: OCRSanitizer.arrEqual(this.last_frame.level, [10, 9])
+						? [6, 1] // special correction for Cheez 2.3M game with broken Tetris Gym 🤷
 						: this.last_frame.level
 				), // note: nulls are passthrough
 			};
