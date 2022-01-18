@@ -16,7 +16,7 @@ const reference_size = [512, 448];
 const reference_locations = {
 	score: { crop: [384, 112, 94, 14], pattern: 'ADDDDD' },
 	level: { crop: [416, 320, 30, 14], pattern: 'LA' },
-	lines: { crop: [304, 32, 46, 14], pattern: 'QDD' },
+	lines: { crop: [304, 32, 46, 14], pattern: 'DDD' },
 	field: { crop: [192, 80, 158, 318] },
 	preview: { crop: [384, 224, 62, 30] },
 	color1: { crop: [76, 170, 10, 10] },
@@ -25,13 +25,13 @@ const reference_locations = {
 	instant_das: { crop: [80, 64, 30, 14], pattern: 'BD' },
 	cur_piece_das: { crop: [112, 96, 30, 14], pattern: 'BD' },
 	cur_piece: { crop: [30, 89, 45, 23] },
-	T: { crop: [96, 176, 46, 14], pattern: 'TDD', red: true },
-	J: { crop: [96, 208, 46, 14], pattern: 'TDD', red: true },
-	Z: { crop: [96, 240, 46, 14], pattern: 'TDD', red: true },
-	O: { crop: [96, 272, 46, 14], pattern: 'TDD', red: true },
-	S: { crop: [96, 304, 46, 14], pattern: 'TDD', red: true },
-	L: { crop: [96, 336, 46, 14], pattern: 'TDD', red: true },
-	I: { crop: [96, 368, 46, 14], pattern: 'TDD', red: true },
+	T: { crop: [96, 176, 46, 14], pattern: 'QDD', red: true },
+	J: { crop: [96, 208, 46, 14], pattern: 'QDD', red: true },
+	Z: { crop: [96, 240, 46, 14], pattern: 'QDD', red: true },
+	O: { crop: [96, 272, 46, 14], pattern: 'QDD', red: true },
+	S: { crop: [96, 304, 46, 14], pattern: 'QDD', red: true },
+	L: { crop: [96, 336, 46, 14], pattern: 'QDD', red: true },
+	I: { crop: [96, 368, 46, 14], pattern: 'QDD', red: true },
 };
 
 const configs = {
