@@ -224,17 +224,32 @@ const BinaryFrame = (function () {
 
 			// we've extracted all the value, now checks for nulls
 
-			if (pojo.score === 0x1fffff) pojo.score = null;
-			if (pojo.lines === 0b111111111) pojo.lines = null;
-			if (pojo.level === 0b111111) pojo.level = null;
+			if (pojo.version === FORMAT_VERSION) {
+				if (pojo.score === 0xffffff) pojo.score = null;
+				if (pojo.lines === 0xfff) pojo.lines = null;
+				if (pojo.level === 0xff) pojo.level = null;
+
+				PIECES.forEach(piece => {
+					if (pojo[piece] === 0x1ff) {
+						pojo[piece] = null;
+					}
+				});
+			}
+			else {
+				if (pojo.score === 0x1fffff) pojo.score = null;
+				if (pojo.lines === 0b111111111) pojo.lines = null;
+				if (pojo.level === 0b111111) pojo.level = null;
+
+				PIECES.forEach(piece => {
+					if (pojo[piece] === 0xff) {
+						pojo[piece] = null;
+					}
+				});
+			}
+
 			if (pojo.instant_das === 0b11111) pojo.instant_das = null;
 			if (pojo.cur_piece_das === 0b11111) pojo.cur_piece_das = null;
 
-			PIECES.forEach(piece => {
-				if (pojo[piece] === 0xff) {
-					pojo[piece] = null;
-				}
-			});
 
 			if (pojo.preview === 0b111) {
 				pojo.preview = null;
