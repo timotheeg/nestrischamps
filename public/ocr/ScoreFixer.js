@@ -72,6 +72,22 @@ class ScoreFixer {
 			) {
 				digits[0] = 0x8;
 			}
+		} else if (digits[0] === 0x0) {
+			// 0, should it have been a D?
+			if (
+				this.last_good_digits[0] === 0xc ||
+				this.last_good_digits[0] === 0xd
+			) {
+				digits[0] = 0xd;
+			}
+		} else if (digits[0] === 0xd) {
+			// D, should it have been a 0?
+			if (
+				this.last_good_digits[0] === 0x0 ||
+				this.last_good_digits[0] === 0xf
+			) {
+				digits[0] = 0x0;
+			}
 		}
 
 		this.last_good_digits = digits;
