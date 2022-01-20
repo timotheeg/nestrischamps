@@ -83,33 +83,31 @@ const ArrayView = (function () {
 
 		forEach(cb) {
 			for (let idx = 0; idx < this.length; idx++) {
-				cb(this._source[this._start_index + idx], idx, this._proxy);
+				cb(this.at(idx), idx, this._proxy);
 			}
 		}
 
 		map(cb) {
 			const res = Array(this.length);
 
-			for (let idx = this.length; idx--; ) {
-				res[idx] = cb(this._source[this._start_index + idx], idx, this._proxy);
+			for (let idx = 0; idx < this.length; idx++) {
+				res[idx] = cb(this.at(idx), idx, this._proxy);
 			}
 
 			return res;
 		}
 
 		every(cb) {
-			for (let idx = this.length; idx--; ) {
-				if (!cb(this._source[this._start_index + idx], idx, this._proxy))
-					return false;
+			for (let idx = 0; idx < this.length; idx++) {
+				if (!cb(this.at(idx), idx, this._proxy)) return false;
 			}
 
 			return true;
 		}
 
 		some(cb) {
-			for (let idx = this.length; idx--; ) {
-				if (cb(this._source[this._start_index + idx], idx, this._proxy))
-					return true;
+			for (let idx = 0; idx < this.length; idx++) {
+				if (cb(this.at(idx), idx, this._proxy)) return true;
 			}
 
 			return false;
@@ -117,7 +115,7 @@ const ArrayView = (function () {
 
 		includes(item, from_index = 0) {
 			for (let idx = from_index; idx < this.length; idx++) {
-				if (this._source[this._start_index + idx] === item) return true;
+				if (this.at(idx) === item) return true;
 			}
 			return false;
 		}
