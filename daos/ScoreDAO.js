@@ -257,6 +257,25 @@ class ScoreDAO {
 		return result.rows[0];
 	}
 
+	async getProgress(user) {
+		const result = await dbPool.query(
+			`
+			SELECT
+				Date(datetime) as date,
+				count(id) as num_games,
+				max(score) as max_score,
+				percentile_cont(0.5) WITHIN GROUP (order by score) as median_score
+			FROM scores
+			WHERE player_id=$1
+			GROUP BY date
+			ORDER BY date asc
+			`,
+			[user.id]
+		);
+
+		return result.rows;
+	}
+
 	async getAnonymousScore(score_id) {
 		const result = await dbPool.query(
 			`

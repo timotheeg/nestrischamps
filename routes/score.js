@@ -310,4 +310,29 @@ router.delete(
 	}
 );
 
+router.get(
+	'/progress/data',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		const progress = await ScoreDAO.getProgress(req.session.user);
+
+		progress.forEach(datapoint => {
+			datapoint.timestamp = datapoint.date.getTime();
+			delete datapoint.date;
+		});
+
+		res.json(progress);
+	}
+);
+
+router.get(
+	'/progress',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		res.render('progress');
+	}
+);
+
 module.exports = router;
