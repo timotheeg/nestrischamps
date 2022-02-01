@@ -257,20 +257,27 @@ class ScoreDAO {
 		return result.rows[0];
 	}
 
-	async getProgress(user) {
+	async getProgress(user, start_level = null) {
+		const args = [user.id];
+		let level_condition = '';
+
+		if (start_level !== null && start_level >= 0 && start_level <= 29) {
+			args.push(start_level);
+			level_condition = `AND s.start_level=$2 `;
+		}
+
 		const result = await dbPool.query(
 			`
 			SELECT
-				Date(datetime) as date,
-				count(id) as num_games,
-				max(score) as max_score,
-				percentile_cont(0.5) WITHIN GROUP (order by score) as median_score
-			FROM scores
-			WHERE player_id=$1
+				Date(s.datetime AT TIME ZONE u.timezone) AS date,
+				count(s.id) AS num_games,
+				max(s.score) AS max_score
+			FROM scores s, twitch_users u
+			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
 			GROUP BY date
 			ORDER BY date asc
 			`,
-			[user.id]
+			args
 		);
 
 		return result.rows;
