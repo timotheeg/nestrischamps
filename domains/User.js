@@ -32,6 +32,7 @@ class User extends EventEmitter {
 		this.dob = user_object.dob;
 		this.country_code = user_object.country_code || 'US';
 		this.city = user_object.city || '';
+		this.timezone = user_object.timezone || 'UTC';
 		this.style = user_object.style || 'das';
 		this.interests = user_object.interests || '';
 

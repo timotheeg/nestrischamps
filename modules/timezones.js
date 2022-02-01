@@ -2,7 +2,8 @@ const timezones = require('timezones.json')
 	.reduce((acc, o) => {
 		return acc.push(...o.utc), acc;
 	}, [])
-	.filter(tz => !tz.startsWith('Etc/'));
+	.filter(tz => !tz.startsWith('Etc/'))
+	.filter(tz => tz.includes('/'));
 
 const timezones_extras = [
 	'UTC',
