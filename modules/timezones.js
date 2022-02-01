@@ -1,3 +1,9 @@
+const timezones = require('timezones.json')
+	.reduce((acc, o) => {
+		return acc.push(...o.utc), acc;
+	}, [])
+	.filter(tz => !tz.startsWith('Etc/'));
+
 const timezones_extras = [
 	'UTC',
 	'US/Alaska',
@@ -14,12 +20,7 @@ const timezones_extras = [
 	'US/Samoa',
 ];
 
-const timezones = require('timezones.json')
-	.reduce((acc, o) => {
-		return acc.push(...o.utc), acc;
-	}, [])
-	.filter(tz => !tz.startsWith('Etc/'))
-	.push(...timezones_extras);
+timezones.push(...timezones_extras);
 
 const tz_set = new Set(timezones); // to remove duplicates
 
