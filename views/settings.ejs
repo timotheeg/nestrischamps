@@ -108,13 +108,16 @@
 					<div class="field">
 						<label class="label">Timezone</label>
 						<div class="control">
-							<select id="timezone">
-								<%
-									const zone = db_user.timezone || 'UTC';
-									timezones.forEach(timezone => { %>
-									<option value="<%= timezone %>"<%= zone === timezone ? ' selected' : '' %>><%= timezone %></option>
-								<% }) %>
+							<div class="select"></div>
+								<select id="timezone">
+									<%
+										const zone = db_user.timezone || 'UTC';
+										timezones.forEach(timezone => { %>
+										<option <%= zone === timezone ? ' selected' : '' %>><%= timezone %></option>
+									<% }) %>
 								</select>
+							</div>
+							<!-- <%- db_user.timezone %> -->
 						</div>
 					</div>
 
