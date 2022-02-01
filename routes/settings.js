@@ -24,6 +24,7 @@ overwrite([
 ]);
 
 const countries = getData().sort((a, b) => (a.name < b.name ? -1 : 1)); // Sort by country name
+const timezones = require('../modules/timezones');
 
 router.use(middlewares.assertSession);
 router.use(middlewares.checkToken);
@@ -40,6 +41,7 @@ router.get('/', async (req, res) => {
 	res.render('settings', {
 		db_user: user,
 		countries,
+		timezones,
 	});
 });
 
@@ -128,6 +130,15 @@ router.post('/update_profile', express.json(), async (req, res) => {
 		update.city = req.body.city;
 	} else {
 		errors.push('City is not valid');
+	}
+
+	if (
+		typeof req.body.timezone === 'string' &&
+		timezones.includes(req.body.timezone)
+	) {
+		update.timezone = req.body.timezone;
+	} else {
+		errors.push('Timezone is not valid');
 	}
 
 	if (typeof req.body.interests === 'string') {

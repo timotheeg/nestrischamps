@@ -106,6 +106,19 @@
 					</div>
 
 					<div class="field">
+						<label class="label">Timezone</label>
+						<div class="control">
+							<select id="timezone">
+								<%
+									const zone = db_user.timezone || 'UTC';
+									timezones.forEach(timezone => { %>
+									<option value="<%= timezone %>"<%= zone === timezone ? ' selected' : '' %>><%= timezone %></option>
+								<% }) %>
+								</select>
+						</div>
+					</div>
+
+					<div class="field">
 						<label class="label">Date of Birth (to show your age)</label>
 						<div class="control">
 							<input id="dob" class="input" type="date" value="<%= db_user.dob ? db_user.dob.toISOString().slice(0, 10) : '' %>" min="1950-01-01" pattern="(19|20)\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])" />
@@ -201,6 +214,7 @@ const profile_nodes = {
 	dob: document.getElementById('dob'),
 	country_code: document.getElementById('country_code'),
 	city: document.getElementById('city'),
+	timezone: document.getElementById('timezone'),
 	style: document.getElementById('style'),
 	interests: document.getElementById('interests'),
 };
@@ -217,9 +231,9 @@ const pb_nodes = {
 	end_level: document.getElementById('pb_end_level'),
 };
 
-profile_nodes.country_code.addEventListener('change', setCounntryFlag);
+profile_nodes.country_code.addEventListener('change', setCountryFlag);
 
-function setCounntryFlag() {
+function setCountryFlag() {
 	document.getElementById('country_flag').src = `https://www.countryflags.io/${profile_nodes.country_code.value}/flat/32.png`
 }
 

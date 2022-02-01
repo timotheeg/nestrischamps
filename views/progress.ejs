@@ -63,7 +63,9 @@
 	<div class="container content">
 		<h1 class="title is-1">Progress</h1>
 		<figure class="highcharts-figure">
-			<div id="container"></div>
+			<div id="container_overall"></div>
+			<div id="container_18"></div>
+			<div id="container_19"></div>
 		</figure>
 	</div>
 </section>
@@ -71,9 +73,11 @@
 <script>
 (async function showChart() {
 	const response = await fetch('/stats/progress/data')
-    const progress = await response.json()
+	const progress = await response.json()
+	const response1819 = await fetch('/stats/progress/data-1819')
+	const progress1819 = await response1819.json()
 
-    Highcharts.chart('container', {
+	Highcharts.chart('container_overall', {
 		chart: {
 			zoomType: 'x',
 		},
@@ -110,7 +114,7 @@
 			}
 		},
 
-		colors: ['#6CF', '#333'],
+		colors: ['#6CF', '#333', '#4A32FF', '#F69B00'],
 
 		series: [{
 			name: "Num games",
@@ -118,9 +122,17 @@
 			yAxis: 1,
 			data: progress.map(({timestamp, num_games}) => [timestamp, parseInt(num_games, 10)])
 		},{
-			name: "Max score",
+			name: "Max score (overall)",
 			type: 'spline',
 			data: progress.map(({timestamp, max_score}) => [timestamp, max_score])
+		},{
+			name: "18 start",
+			type: 'spline',
+			data: progress1819[18].map(({timestamp, max_score}) => [timestamp, max_score])
+		},{
+			name: "19 start",
+			type: 'spline',
+			data: progress1819[19].map(({timestamp, max_score}) => [timestamp, max_score])
 		}],
 
 		responsive: {
@@ -140,6 +152,82 @@
 			}]
 		}
 	});
+
+	[
+		[18, '#4A32FF'],
+		[19, '#F69B00'],
+	]
+	.forEach(([level, color]) => {
+
+		Highcharts.chart(`container_${level}`, {
+			chart: {
+				zoomType: 'x',
+			},
+			title: {
+				text: `${level}-start progress`
+			},
+			xAxis: {
+				type: 'datetime',
+				title: {
+					text: 'Date'
+				}
+			},
+			yAxis: [{
+				title: {
+					text: 'Score'
+				},
+				min: 0
+			},{
+				title: {
+					text: 'Number of games'
+				},
+				min: 0,
+				opposite: true
+			}],
+			tooltip: {
+				shared: true
+			},
+
+			plotOptions: {
+				series: {
+					marker: {
+						enabled: true
+					}
+				}
+			},
+
+			colors: ['#6CF', color],
+
+			series: [{
+				name: `Num games`,
+				type: 'column',
+				yAxis: 1,
+				data: progress1819[level].map(({timestamp, num_games}) => [timestamp, parseInt(num_games, 10)])
+			},{
+				name: `Max score`,
+				type: 'spline',
+				data: progress1819[level].map(({timestamp, max_score}) => [timestamp, max_score])
+			}],
+
+			responsive: {
+				rules: [{
+					condition: {
+						maxWidth: 500
+					},
+					chartOptions: {
+						plotOptions: {
+							series: {
+								marker: {
+									radius: 2.5
+								}
+							}
+						}
+					}
+				}]
+			}
+		});
+	});
+
 })();
 </script>
 
