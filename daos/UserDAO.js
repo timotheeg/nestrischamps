@@ -144,8 +144,8 @@ class UserDAO {
 	async updateProfile(user_id, update) {
 		await dbPool.query(
 			`UPDATE twitch_users
-			SET dob=$1, country_code=$2, city=$3, style=$4, interests=$5
-			WHERE id=$6;
+			SET dob=$1, country_code=$2, city=$3, style=$4, interests=$5, timezone=$6
+			WHERE id=$7;
 			`,
 			[
 				update.dob,
@@ -153,6 +153,7 @@ class UserDAO {
 				update.city,
 				update.style,
 				update.interests,
+				update.timezone || 'UTC',
 				user_id,
 			]
 		);
