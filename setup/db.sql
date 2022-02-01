@@ -18,15 +18,15 @@ CREATE TABLE twitch_users (
 	interests VARCHAR ( 300 ) default '',
 	style play_style default 'das',
 
-	created_on TIMESTAMP NOT NULL,
-	last_login TIMESTAMP NOT NULL
+	created_on timestamptz NOT NULL,
+	last_login timestamptz NOT NULL
 );
 
 CREATE INDEX IDX_users_email ON twitch_users (email);
 
 CREATE TABLE scores (
 	id SERIAL PRIMARY KEY,
-	datetime TIMESTAMP NOT NULL,
+	datetime timestamptz NOT NULL,
 	player_id BIGINT NOT NULL,
 	start_level SMALLINT,
 	end_level SMALLINT,
@@ -43,6 +43,7 @@ CREATE TABLE scores (
 	num_frames INTEGER DEFAULT 0,
 	frame_file VARCHAR(256) DEFAULT '',
 	manual BOOLEAN default false,
+	timezone TEXT NOT NULL CHECK (now() AT TIME ZONE timezone IS NOT NULL) DEFAULT 'UTC',
 
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)
