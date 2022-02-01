@@ -327,6 +327,32 @@ router.get(
 );
 
 router.get(
+	'/progress/data-1819',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		const progress18 = await ScoreDAO.getProgress(req.session.user, 18);
+
+		progress18.forEach(datapoint => {
+			datapoint.timestamp = datapoint.date.getTime();
+			delete datapoint.date;
+		});
+
+		const progress19 = await ScoreDAO.getProgress(req.session.user, 19);
+
+		progress19.forEach(datapoint => {
+			datapoint.timestamp = datapoint.date.getTime();
+			delete datapoint.date;
+		});
+
+		res.json({
+			18: progress18,
+			19: progress19,
+		});
+	}
+);
+
+router.get(
 	'/progress',
 	middlewares.assertSession,
 	middlewares.checkToken,
