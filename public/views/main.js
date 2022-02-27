@@ -248,7 +248,7 @@ function onFrame(event, debug) {
 
 		game.onTransitionWarning = warning_lines => {
 			commentate(
-				`${game.transition_lines - game.data.lines.count} line till transition`
+				`${game.transition_lines - game.data.lines.count} lines till transition`
 			);
 		};
 
