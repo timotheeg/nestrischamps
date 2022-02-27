@@ -22,32 +22,32 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.49.0",
-		"@aws-sdk/lib-storage": "^3.49.0",
-		"connect-pg-simple": "^6.2.1",
+		"@aws-sdk/client-s3": "^3.53.1",
+		"@aws-sdk/lib-storage": "^3.53.1",
+		"connect-pg-simple": "^7.0.0",
 		"country-list": "^2.2.0",
 		"ejs": "^3.1.6",
-		"express": "^4.17.2",
+		"express": "^4.17.3",
 		"express-session": "^1.17.2",
 		"glob": "^7.2.0",
-		"got": "^11.8.3",
+		"got": "^12.0.1",
 		"lodash": "^4.17.21",
 		"nocache": "^3.0.1",
-		"pg": "^8.7.1",
-		"timezones.json": "^1.6.0",
+		"pg": "^8.7.3",
+		"timezones.json": "^1.6.1",
 		"twitch": "4.6.5",
 		"twitch-auth": "4.6.5",
 		"twitch-chat-client": "4.6.5",
 		"ulid": "^2.3.0",
 		"uuid": "^8.3.2",
-		"ws": "^7.5.6"
+		"ws": "^8.5.0"
 	},
 	"engines": {
 		"node": "14.x"
 	},
 	"devDependencies": {
-		"eslint": "^7.32.0",
-		"eslint-config-prettier": "^8.3.0",
+		"eslint": "^8.10.0",
+		"eslint-config-prettier": "^8.4.0",
 		"husky": "^7.0.4",
 		"prettier": "^2.5.1",
 		"pretty-quick": "^3.1.3"
