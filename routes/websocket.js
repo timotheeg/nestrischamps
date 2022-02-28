@@ -1,10 +1,10 @@
-const middlewares = require('../modules/middlewares');
-const layouts = require('../modules/layouts');
-const UserDAO = require('../daos/UserDAO');
-const Replay = require('../domains/Replay');
-const Connection = require('../modules/Connection');
+import middlewares from '../modules/middlewares.js';
+import layouts from '../modules/layouts.js';
+import UserDAO from '../daos/UserDAO.js';
+import Replay from '../domains/Replay.js';
+import Connection from '../modules/Connection.js';
 
-module.exports = function init(server, wss) {
+export default function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log(`WS: ${request.url}`);
 
@@ -308,4 +308,4 @@ module.exports = function init(server, wss) {
 			connection.kick('invalid_url');
 		}
 	});
-};
+}
