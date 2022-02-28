@@ -1,11 +1,12 @@
-const path = require('path');
-const express = require('express');
-const router = express.Router();
+import path from 'path';
+import express from 'express';
 
-const middlewares = require('../modules/middlewares');
-const layouts = require('../modules/layouts');
-const UserDAO = require('../daos/UserDAO');
-const ScoreDAO = require('../daos/ScoreDAO');
+import middlewares from '../modules/middlewares.js';
+import layouts from '../modules/layouts.js';
+import UserDAO from '../daos/UserDAO.js';
+import ScoreDAO from '../daos/ScoreDAO.js';
+
+const router = express.Router();
 
 router.get('/debug/session', (req, res) => {
 	res.send(JSON.stringify(req.session));
@@ -167,4 +168,4 @@ router.get('/replay/:layout/:gamedef', (req, res) => {
 	);
 });
 
-module.exports = router;
+export default router;

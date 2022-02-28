@@ -7,7 +7,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('trust proxy', 1); // trust first proxy (i.e. heroku) -- needed to get req.protocol correctly
 
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static('../public'));
 app.use(middlewares.sessionMiddleware);
 
 const TWITCH_LOGIN_BASE_URI = 'https://id.twitch.tv/oauth2/authorize?';
@@ -46,9 +46,14 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.use('/auth', require('../routes/auth'));
-app.use('/stats', require('../routes/score'));
-app.use('/settings', require('../routes/settings'));
-app.use('', require('../routes/routes'));
+import authRoutes from '../routes/auth.js';
+import scoreRoutes from '../routes/score.js';
+import settingsRoute from '../routes/settings.js';
+import defaultRoutes from '../routes/routes.js';
+
+app.use('/auth', authRoutes);
+app.use('/stats', scoreRoutes);
+app.use('/settings', settingsRoute);
+app.use('', defaultRoutes);
 
 export default app;

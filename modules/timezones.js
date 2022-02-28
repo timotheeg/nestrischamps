@@ -1,4 +1,6 @@
-const timezones = require('timezones.json')
+import tzs from 'timezones.json';
+
+const timezones = tzs
 	.reduce((acc, o) => {
 		return acc.push(...o.utc), acc;
 	}, [])
@@ -28,4 +30,4 @@ const tz_set = new Set(timezones); // to remove duplicates
 // Here's hoping the resultant set is a strict subset of Postgres:
 // "SELECT name FROM pg_timezone_names;"
 
-module.exports = [...tz_set].sort();
+export default [...tz_set].sort();

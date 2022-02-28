@@ -1,11 +1,10 @@
-const express = require('express');
+import express from 'express';
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import middlewares from '../modules/middlewares.js';
+import UserDAO from '../daos/UserDAO.js';
+import ScoreDAO from '../daos/ScoreDAO.js';
+
 const router = express.Router();
-
-const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-
-const middlewares = require('../modules/middlewares');
-const UserDAO = require('../daos/UserDAO');
-const ScoreDAO = require('../daos/ScoreDAO');
 
 router.get('/get_stats/:secret', async (req, res) => {
 	const user = await UserDAO.getUserBySecret(req.params.secret);
@@ -361,4 +360,4 @@ router.get(
 	}
 );
 
-module.exports = router;
+export default router;
