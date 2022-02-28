@@ -4,8 +4,8 @@ import MatchRoom from './MatchRoom.js';
 import Producer from './Producer.js';
 
 // Twitch stuff
-import { StaticAuthProvider, RefreshableAuthProvider } from 'twitch-auth';
-import { ChatClient } from 'twitch-chat-client';
+import { RefreshingAuthProvider } from '@twurple/auth';
+import { ChatClient } from '@twurple/chat';
 
 const USER_SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes before we destroy user! TODO: Make tunable
 
@@ -216,19 +216,18 @@ class User extends EventEmitter {
 	}
 
 	async _connectToTwitchChat() {
+		console.log('_connectToTwitchChat 1');
+
 		if (this.chat_client || !this.token) {
 			return;
 		}
 
-		const auth = new RefreshableAuthProvider(
-			new StaticAuthProvider(
-				process.env.TWITCH_CLIENT_ID,
-				this.token.access_token
-			),
+		console.log('_connectToTwitchChat 2');
+
+		const authProvider = new RefreshingAuthProvider(
 			{
+				clientId: process.env.TWITCH_CLIENT_ID,
 				clientSecret: process.env.TWITCH_CLIENT_SECRET,
-				refreshToken: this.token.refresh_token,
-				expiry: this.token.expiry,
 				onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
 					// How to update the session object(s) directly?
 					this.token.access_token = accessToken;
@@ -239,15 +238,23 @@ class User extends EventEmitter {
 						Math.floor((expiryDate.getTime() - Date.now()) / 1000)
 					);
 				},
-			}
+			},
+			this.token
 		);
 
-		this.chat_client = new ChatClient(auth, {
+		console.log('create chat client');
+
+		this.chat_client = new ChatClient({
+			authProvider,
 			channels: [this.login],
 			readOnly: true,
+			logger: {
+				minLevel: 'debug',
+			},
 		});
 
 		this.chat_client.onMessage((channel, user, message) => {
+			console.error.log('onMessage', user, message);
 			if (is_spam(message)) {
 				// TODO: find API to do ban user automatically
 				return;

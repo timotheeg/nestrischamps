@@ -25,6 +25,9 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.53.1",
 		"@aws-sdk/lib-storage": "^3.53.1",
+		"@twurple/api": "^5.0.18",
+		"@twurple/auth": "^5.0.18",
+		"@twurple/chat": "^5.0.18",
 		"connect-pg-simple": "^7.0.0",
 		"country-list": "^2.2.0",
 		"ejs": "^3.1.6",
@@ -36,9 +39,6 @@
 		"nocache": "^3.0.1",
 		"pg": "^8.7.3",
 		"timezones.json": "^1.6.1",
-		"twitch": "^4.6.7",
-		"twitch-auth": "^4.6.7",
-		"twitch-chat-client": "^4.6.7",
 		"ulid": "^2.3.0",
 		"uuid": "^8.3.2",
 		"ws": "^8.5.0"
