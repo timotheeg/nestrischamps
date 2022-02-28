@@ -7,7 +7,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('trust proxy', 1); // trust first proxy (i.e. heroku) -- needed to get req.protocol correctly
 
-app.use(express.static('../public'));
+app.use(express.static('public'));
 app.use(middlewares.sessionMiddleware);
 
 const TWITCH_LOGIN_BASE_URI = 'https://id.twitch.tv/oauth2/authorize?';

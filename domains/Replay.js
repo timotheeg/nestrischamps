@@ -49,7 +49,7 @@ class Replay {
 			} else {
 				// data comes from local file
 				this.game_stream = fs
-					.createReadStream(path.join(__dirname, '..', file_path))
+					.createReadStream(file_path)
 					.pipe(zlib.createGunzip());
 			}
 		}

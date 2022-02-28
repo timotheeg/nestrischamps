@@ -64,10 +64,9 @@ class Game {
 				);
 			} else if (!process.env.IS_PUBLIC_SERVER) {
 				// Saving on local filesystem
-				const full_dir = path.join(__dirname, '..', dir);
 
-				fs.mkdirSync(full_dir, { recursive: true }); // sync action is no good! Can we do without the sync? 😰
-				this.frame_stream.pipe(fs.createWriteStream(path.join(full_dir, file)));
+				fs.mkdirSync(dir, { recursive: true }); // sync action is no good! Can we do without the sync? 😰
+				this.frame_stream.pipe(fs.createWriteStream(path.join(dir, file)));
 			}
 		}
 	}

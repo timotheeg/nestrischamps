@@ -22,7 +22,7 @@ router.get(
 	middlewares.checkToken,
 	(req, res) => {
 		res.sendFile(
-			path.join(__dirname, '../public/views/competition_admin.html')
+			path.join(path.resolve(), 'public/views/competition_admin.html')
 		);
 	}
 );
@@ -40,7 +40,7 @@ router.get(
 		}
 
 		res.sendFile(
-			path.join(__dirname, '../public/views/competition_admin.html')
+			path.join(path.resolve(), 'public/views/competition_admin.html')
 		);
 	}
 );
@@ -50,7 +50,7 @@ router.get(
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
-		res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+		res.sendFile(path.join(path.resolve(), 'public/ocr/ocr.html'));
 	}
 );
 
@@ -66,7 +66,7 @@ router.get(
 			return;
 		}
 
-		res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+		res.sendFile(path.join(path.resolve(), 'public/ocr/ocr.html'));
 	}
 );
 
@@ -91,7 +91,10 @@ router.get(
 		}
 
 		res.sendFile(
-			path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+			path.join(
+				path.resolve(),
+				`public/views/${layout.type}/${layout.file}.html`
+			)
 		);
 	}
 );
@@ -151,7 +154,7 @@ router.get('/view/:layout/:secret', (req, res) => {
 	}
 
 	res.sendFile(
-		path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+		path.join(path.resolve(), `public/views/${layout.type}/${layout.file}.html`)
 	);
 });
 
@@ -164,7 +167,7 @@ router.get('/replay/:layout/:gamedef', (req, res) => {
 	}
 
 	res.sendFile(
-		path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+		path.join(path.resolve(), `public/views/${layout.type}/${layout.file}.html`)
 	);
 });
 
