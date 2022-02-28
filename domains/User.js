@@ -1,13 +1,11 @@
-const EventEmitter = require('events');
-const PrivateRoom = require('./PrivateRoom');
-const MatchRoom = require('./MatchRoom');
-const Producer = require('./Producer');
+import EventEmitter from 'events';
+import PrivateRoom from './PrivateRoom.js';
+import MatchRoom from './MatchRoom.js';
+import Producer from './Producer.js';
 
 // Twitch stuff
-const TwitchAuth = require('twitch-auth');
-const StaticAuthProvider = TwitchAuth.StaticAuthProvider;
-const RefreshableAuthProvider = TwitchAuth.RefreshableAuthProvider;
-const ChatClient = require('twitch-chat-client').ChatClient;
+import { StaticAuthProvider, RefreshableAuthProvider } from 'twitch-auth';
+import { ChatClient } from 'twitch-chat-client';
 
 const USER_SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes before we destroy user! TODO: Make tunable
 
@@ -296,4 +294,4 @@ class User extends EventEmitter {
 	}
 }
 
-module.exports = User;
+export default User;

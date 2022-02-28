@@ -1,5 +1,5 @@
-const User = require('../domains/User');
-const dbPool = require('../modules/db');
+import User from '../domains/User.js';
+import dbPool from '../modules/db.js';
 
 class UserDAO {
 	constructor() {
@@ -172,4 +172,4 @@ class UserDAO {
 	}
 }
 
-module.exports = new UserDAO();
+export default new UserDAO();

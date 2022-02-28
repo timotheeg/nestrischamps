@@ -1,4 +1,4 @@
-const EventEmitter = require('events');
+import EventEmitter from 'events';
 
 class Room extends EventEmitter {
 	constructor(owner) {
@@ -45,4 +45,4 @@ class Room extends EventEmitter {
 	}
 }
 
-module.exports = Room;
+export default Room;

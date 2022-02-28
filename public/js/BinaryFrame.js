@@ -326,8 +326,4 @@ const BinaryFrame = (function () {
 	return BinaryFrame;
 })();
 
-try {
-	module.exports = BinaryFrame;
-} catch (err) {
-	// nothing to do, we're not in node
-}
+export default BinaryFrame;

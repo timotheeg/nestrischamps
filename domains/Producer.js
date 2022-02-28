@@ -1,6 +1,5 @@
-const EventEmitter = require('events');
-
-const Game = require('../modules/Game');
+import EventEmitter from 'events';
+import Game from '../modules/Game.js';
 
 class Producer extends EventEmitter {
 	constructor(user) {
@@ -106,4 +105,4 @@ class Producer extends EventEmitter {
 	}
 }
 
-module.exports = Producer;
+export default Producer;

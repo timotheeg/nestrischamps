@@ -1,10 +1,12 @@
-const session = require('express-session');
-const { v4: uuidv4 } = require('uuid');
-const dbPool = require('./db');
-const pgSession = require('connect-pg-simple')(session);
-const UserDAO = require('../daos/UserDAO');
+import session from 'express-session';
+import { v4 as uuidv4 } from 'uuid';
+import dbPool from './db.js';
+import pgConnect from 'connect-pg-simple';
+import UserDAO from '../daos/UserDAO.js';
 
-module.exports = {
+const pgSession = pgConnect(session);
+
+export default {
 	sessionMiddleware: session({
 		secret: process.env.SESSION_SECRET || uuidv4(),
 		resave: false,

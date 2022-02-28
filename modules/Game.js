@@ -1,16 +1,16 @@
 // Minimum amount of game tracking to do server side to be able to report games
-const BinaryFrame = require('../public/js/BinaryFrame');
-const ScoreDAO = require('../daos/ScoreDAO');
-const ULID = require('ulid');
+import BinaryFrame from '../public/js/BinaryFrame.js';
+import ScoreDAO from '../daos/ScoreDAO.js';
+import ULID from 'ulid';
 
 // The below is to upload game frames to S3
 // That should be refactored into another file
-const { Upload } = require('@aws-sdk/lib-storage');
-const { S3Client } = require('@aws-sdk/client-s3');
-const zlib = require('zlib');
+import { Upload } from '@aws-sdk/lib-storage';
+import { S3Client } from '@aws-sdk/client-s3';
+import zlib from 'zlib';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 const SCORE_BASES = [0, 40, 100, 300, 1200];
@@ -404,4 +404,4 @@ class Game {
 	onNewGame() {}
 }
 
-module.exports = Game;
+export default Game;

@@ -1,6 +1,7 @@
-const path = require('path');
-const express = require('express');
-const middlewares = require('./middlewares');
+import path from 'path';
+import express from 'express';
+import middlewares from './middlewares.js';
+
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -50,4 +51,4 @@ app.use('/stats', require('../routes/score'));
 app.use('/settings', require('../routes/settings'));
 app.use('', require('../routes/routes'));
 
-module.exports = app;
+export default app;

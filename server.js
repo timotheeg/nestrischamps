@@ -1,8 +1,8 @@
-const WebSocket = require('ws');
+import WebSocket from 'ws';
+import app from './modules/app.js';
+import { Server } from 'http';
 
-const app = require('./modules/app');
-
-const server = require('http').Server(app);
+const server = Server(app);
 const wss = new WebSocket.Server({
 	clientTracking: false,
 	noServer: true,

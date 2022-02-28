@@ -1,7 +1,9 @@
-const { Pool } = require('pg');
+import pg from 'pg';
+
+let pool;
 
 if (process.env.IS_PUBLIC_SERVER) {
-	const pool = new Pool({
+	pool = new pg.Pool({
 		connectionString: process.env.DATABASE_URL,
 		ssl: {
 			rejectUnauthorized: false,
@@ -13,8 +15,6 @@ if (process.env.IS_PUBLIC_SERVER) {
 	pool.on('error', err => {
 		console.error('DB: Unexpected error on idle client', err);
 	});
-
-	module.exports = pool;
 } else {
 	/*
 	// Fake Pool for local access
@@ -41,7 +41,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 	};
 	/**/
 
-	const pool = new Pool({
+	pool = new pg.Pool({
 		connectionString: process.env.DATABASE_URL,
 	});
 
@@ -50,6 +50,6 @@ if (process.env.IS_PUBLIC_SERVER) {
 	pool.on('error', err => {
 		console.error('DB: Unexpected error on idle client', err);
 	});
-
-	module.exports = pool;
 }
+
+export default pool;
