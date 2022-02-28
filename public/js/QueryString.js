@@ -1,3 +1,3 @@
 // Return the searchParams Objet for the current page URL
 
-const QueryString = new URL(location).searchParams;
+export default new URL(location).searchParams;

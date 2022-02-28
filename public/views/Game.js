@@ -1,4 +1,14 @@
-class Game {
+import Board from '/views/Board.js';
+import {
+	PIECES,
+	DROUGHT_PANIC_THRESHOLD,
+	DAS_THRESHOLDS,
+	RUNWAY,
+	TRANSITIONS,
+	getRunway,
+} from '/views/constants.js';
+
+export default class Game {
 	constructor(event) {
 		this.id = event.gameid;
 		this.over = false;

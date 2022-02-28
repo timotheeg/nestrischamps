@@ -1,4 +1,4 @@
-function renderBlock(
+export default function renderBlock(
 	level,
 	block_index,
 	pixel_size,

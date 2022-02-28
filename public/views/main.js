@@ -1,3 +1,19 @@
+import QueryString from '/js/QueryString.js';
+import Connection from '/js/connection.js';
+import DomRefs from '/views/DomRefs.js';
+import renderBlock from '/views/renderBlock.js';
+import Game from '/views/Game.js';
+
+import {
+	PIECES,
+	LINES,
+	DAS_COLORS,
+	BOARD_COLORS,
+	DROUGHT_PANIC_THRESHOLD,
+	DAS_THRESHOLDS,
+	BLOCK_PIXEL_SIZE,
+} from '/views/constants.js';
+
 const dom = new DomRefs(document);
 
 // initial setup for colors based con constants.js
