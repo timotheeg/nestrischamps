@@ -125,7 +125,6 @@ class User extends EventEmitter {
 	setTwitchToken(token) {
 		// in memory only, not in DB
 		this.token = token;
-		this.token.expiry = new Date(Date.now() + token.expires_in * 1000);
 
 		if (this.connections.length) {
 			this._connectToTwitchChat();
@@ -216,45 +215,44 @@ class User extends EventEmitter {
 	}
 
 	async _connectToTwitchChat() {
-		console.log('_connectToTwitchChat 1');
-
 		if (this.chat_client || !this.token) {
 			return;
 		}
 
-		console.log('_connectToTwitchChat 2');
+		const twurpleToken = {
+			accessToken: this.token.access_token,
+			refreshToken: this.token.refresh_token,
+			expiresIn: 0,
+			obtainmentTimestamp: 0,
+		};
 
 		const authProvider = new RefreshingAuthProvider(
 			{
 				clientId: process.env.TWITCH_CLIENT_ID,
 				clientSecret: process.env.TWITCH_CLIENT_SECRET,
-				onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
+				onRefresh: args => {
+					const { accessToken, refreshToken, expiresIn } = args;
+
 					// How to update the session object(s) directly?
 					this.token.access_token = accessToken;
 					this.token.refresh_token = refreshToken;
-					this.token.expiry = expiryDate;
-					this.token.expires_in = Math.max(
-						0,
-						Math.floor((expiryDate.getTime() - Date.now()) / 1000)
-					);
+					this.token.expires_in = expiresIn;
 				},
 			},
-			this.token
+			twurpleToken
 		);
-
-		console.log('create chat client');
 
 		this.chat_client = new ChatClient({
 			authProvider,
 			channels: [this.login],
 			readOnly: true,
 			logger: {
-				minLevel: 'debug',
+				minLevel: 'info',
 			},
 		});
 
 		this.chat_client.onMessage((channel, user, message) => {
-			console.error.log('onMessage', user, message);
+			console.log('onMessage', user, message);
 			if (is_spam(message)) {
 				// TODO: find API to do ban user automatically
 				return;
