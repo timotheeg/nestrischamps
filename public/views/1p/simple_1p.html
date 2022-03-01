@@ -58,17 +58,11 @@
 
 		<!-- Audio -->
 
-		<script src="/js/BinaryFrame.js"></script>
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
+		<script type="module">
+			import bg from '/views/bg.js';
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
 
-		<script>
 			const player = new Player(
 				{
 					score: document.querySelector(`.score .content`),

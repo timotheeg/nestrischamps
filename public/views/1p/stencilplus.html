@@ -81,15 +81,12 @@
 
 		<!-- Audio -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
-		<script>
+		<script type="module">
+			import QueryString from '/js/QueryString.js';
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
+			import { PIECES } from '/views/constants.js';
+
 			const init_time = Date.now();
 
 			if (QueryString.get('bg') === '0') {
