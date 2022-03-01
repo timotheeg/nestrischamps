@@ -1,35 +1,87 @@
-/*jshint boss:true, smarttabs:true, laxcomma:true, laxbreak:true, bitwise:false */
+const _min = Math.min;
+const _max = Math.max;
+const isNumber = v => typeof v === 'number';
+const isInt = v => isNumber(v) && v % 1 === 0;
+const isInRange = (v, min, max) => v >= min && v <= max;
+const clamp = (v, min, max) => _max(min, _min(v, max));
 
-var module_setup = function (undefined) {
-	'use strict';
+const named_cache = {};
+const named = {
+	aqua: '#0ff',
+	black: '#0',
+	blue: '#00f',
+	fuchsia: '#f0f',
+	grey: '#80',
+	gray: '#80',
+	green: '#008000',
+	lime: '#0f0',
+	maroon: '#800000',
+	navy: '#000080',
+	olive: '#808000',
+	purple: '#800080',
+	red: '#f00',
+	silver: '#c0',
+	teal: '#008080',
+	white: '#f',
+	yellow: '#ff0',
+};
 
-	// ===================================================
-	// Private Statics
-	// ===================================================
-
-	var _min = Math.min,
-		_max = Math.max,
-		isNumber = function (v) {
-			return typeof v === 'number';
+const color_format = [
+	[
+		new RegExp('^#([0-9a-f])$'),
+		function (m) {
+			const v = parseInt(m[1] + m[1], 16);
+			return new Color(v, v, v);
 		},
-		isInt = function (v) {
-			return isNumber(v) && v % 1 === 0;
+	],
+
+	[
+		new RegExp('^#([0-9a-f]{2})$'),
+		function (m) {
+			const v = parseInt(m[1], 16);
+			return new Color(v, v, v);
 		},
-		isInRange = function (v, min, max) {
-			return v >= min && v <= max;
+	],
+
+	[
+		new RegExp('^#([0-9a-f]{3})$'),
+		function (m) {
+			const s = m[1];
+			return new Color(
+				parseInt(s.charAt(0) + s.charAt(0), 16),
+				parseInt(s.charAt(1) + s.charAt(1), 16),
+				parseInt(s.charAt(2) + s.charAt(2), 16)
+			);
 		},
-		clamp = function (v, min, max) {
-			return _max(min, _min(v, max));
-		};
+	],
 
-	// ===================================================
-	// Constructor
-	// ===================================================
+	[
+		new RegExp('^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$'),
+		function (m) {
+			return new Color(
+				parseInt(m[1], 16),
+				parseInt(m[2], 16),
+				parseInt(m[3], 16)
+			);
+		},
+	],
+];
 
-	var Color = function (r, g, b, a) {
-		// a is optional, if it not defined, we set up default NOW
-		if (a === undefined) a = 1;
+// hex string regexps will be lazy-initialized
+function localCreateFromHexString(str) {
+	let m;
 
+	for (let idx = res.length; idx-- > 0; ) {
+		if ((m = res[idx][0].exec(str))) {
+			return res[idx][1](m);
+		}
+	}
+
+	throw new SyntaxError('Not a valid hex color: ' + s);
+}
+
+export default class Color {
+	constructor(r, g, b, a = 1) {
 		// all color components MUST be valid to be accepted
 		if (
 			!(
@@ -43,20 +95,16 @@ var module_setup = function (undefined) {
 				isInRange(a, 0, 1)
 			)
 		) {
-			throw new Error('invalid arguments: ' + [r, g, b, a]);
+			throw new RangeError('invalid arguments: ' + [r, g, b, a]);
 		}
 
 		this.r = r;
 		this.g = g;
 		this.b = b;
 		this.a = a;
-	};
+	}
 
-	// ===================================================
-	// Static Color methods below
-	// ===================================================
-
-	Color.create = function (entry) {
+	static create(entry) {
 		if (entry instanceof Color) {
 			return entry.clone();
 		}
@@ -73,86 +121,9 @@ var module_setup = function (undefined) {
 		}
 
 		throw new Error('Not a color: ' + entry);
-	};
+	}
 
-	// hex string regexps will be lazy-initialized
-	var res = null;
-	var localCreateFromHexString = function (str) {
-		if (!res) {
-			res = [
-				[
-					new RegExp('^#([0-9a-f])$'),
-					function (m) {
-						var v = parseInt(m[1] + m[1], 16);
-						return new Color(v, v, v);
-					},
-				],
-
-				[
-					new RegExp('^#([0-9a-f]{2})$'),
-					function (m) {
-						var v = parseInt(m[1], 16);
-						return new Color(v, v, v);
-					},
-				],
-
-				[
-					new RegExp('^#([0-9a-f]{3})$'),
-					function (m) {
-						var s = m[1];
-						return new Color(
-							parseInt(s.charAt(0) + s.charAt(0), 16),
-							parseInt(s.charAt(1) + s.charAt(1), 16),
-							parseInt(s.charAt(2) + s.charAt(2), 16)
-						);
-					},
-				],
-
-				[
-					new RegExp('^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$'),
-					function (m) {
-						return new Color(
-							parseInt(m[1], 16),
-							parseInt(m[2], 16),
-							parseInt(m[3], 16)
-						);
-					},
-				],
-			];
-		}
-
-		var m;
-		for (var idx = res.length; idx-- > 0; ) {
-			if ((m = res[idx][0].exec(str))) {
-				return res[idx][1](m);
-			}
-		}
-
-		throw new Error('Not a valid hex color: ' + s);
-	};
-
-	var named_cache = {},
-		named = {
-			aqua: '#0ff',
-			black: '#0',
-			blue: '#00f',
-			fuchsia: '#f0f',
-			grey: '#80',
-			gray: '#80',
-			green: '#008000',
-			lime: '#0f0',
-			maroon: '#800000',
-			navy: '#000080',
-			olive: '#808000',
-			purple: '#800080',
-			red: '#f00',
-			silver: '#c0',
-			teal: '#008080',
-			white: '#f',
-			yellow: '#ff0',
-		};
-
-	Color.createFromHexString = function (entry) {
+	static createFromHexString(entry) {
 		entry = entry.toLowerCase();
 
 		// check local cache to reduce repeat parsing
@@ -164,19 +135,19 @@ var module_setup = function (undefined) {
 		}
 
 		return localCreateFromHexString(entry);
-	};
+	}
 
-	Color.createFromInt = function (entry) {
+	static createFromInt(entry) {
 		entry = Math.round(entry);
 		return new Color(
 			(entry & 0xff0000) >> 16,
 			(entry & 0xff00) >> 8,
 			entry & 0xff
 		);
-	};
+	}
 
-	Color.createFromObject = function (entry) {
-		var r, g, b, a;
+	static createFromObject(entry) {
+		let r, g, b, a;
 
 		if (isInt(entry.r) && isInt(entry.g) && isInt(entry.b)) {
 			// basic check for ints at named fields passed
@@ -217,35 +188,30 @@ var module_setup = function (undefined) {
 		}
 
 		return new Color(clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255), a);
-	};
+	}
 
-	Color.getMidChannel = function (start, end, ratio) {
+	static getMidChannel(start, end, ratio) {
 		// Channel blending needs to be done in square space
 		// See: https://www.youtube.com/watch?v=LKnqECcg6Gw
-		var value = start * start + (end * end - start * start) * ratio;
+		const value = start * start + (end * end - start * start) * ratio;
 
 		return Math.round(Math.sqrt(value));
-	};
+	}
 
-	// ===================================================
-	// Instance methods below
-	// ===================================================
-
-	var p = Color.prototype;
-
-	p.toRGBAString = function () {
-		var channels = [this.r, this.g, this.b];
+	toRGBAString() {
+		const channels = [this.r, this.g, this.b];
 		return (
 			(this.a >= 1 ? 'rgb(' : (channels.push(this.a), 'rgba(')) +
 			channels.join(',') +
 			')'
 		);
-	};
+	}
 
-	p.toHexString = function () {
-		var r = this.r.toString(16);
-		var g = this.g.toString(16);
-		var b = this.b.toString(16);
+	toHexString() {
+		const r = this.r.toString(16);
+		const g = this.g.toString(16);
+		const b = this.b.toString(16);
+
 		return (
 			'#' +
 			(r.length < 2 ? '0' : '') +
@@ -255,23 +221,21 @@ var module_setup = function (undefined) {
 			(b.length < 2 ? '0' : '') +
 			b
 		);
-	};
+	}
 
-	p.toString = p.toHexString;
-
-	p.toInt = function () {
+	toInt() {
 		return (this.r << 16) | (this.g << 8) | this.b;
-	};
+	}
 
-	p.toArray = function () {
+	toArray() {
 		return [this.r, this.g, this.b, this.a];
-	};
+	}
 
-	p.clone = function () {
+	clone() {
 		return new Color(this.r, this.g, this.b, this.a);
-	};
+	}
 
-	p.getMidColor = function (targetCol, ratio) {
+	getMidColor(targetCol, ratio) {
 		ratio = !isNumber(ratio) ? 0.5 : clamp(ratio, 0, 1);
 
 		return new Color(
@@ -280,22 +244,7 @@ var module_setup = function (undefined) {
 			Color.getMidChannel(this.b, targetCol.b, ratio),
 			this.a + (targetCol.a - this.a) * ratio // does this need to be done in square space too?
 		);
-	};
-
-	return Color;
-};
-
-// ===================================================
-// Access control
-// ===================================================
-
-if (typeof define !== 'undefined') {
-	// AMD compatibility
-	define([], module_setup);
-} else if (typeof module !== 'undefined' && module.exports) {
-	// exports
-	module.exports = module_setup();
-} else {
-	// brings class to current context
-	this.Color = module_setup();
+	}
 }
+
+Color.prototype.toString = Color.prototype.toHexString;
