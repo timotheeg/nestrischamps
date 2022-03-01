@@ -56,16 +56,12 @@
 
 		<!-- Audio -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/Player.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script>
+		<script type="module">
 			// Game Genie code: OXYOUO VNIPZN VNTPYN
+
+			import bg from '/views/bg.js';
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
 
 			const player = new Player(
 				{
