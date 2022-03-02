@@ -1,3 +1,12 @@
+import QueryString from '/js/QueryString.js';
+import Connection from '/js/connection.js';
+import BinaryFrame from '/js/BinaryFrame.js';
+import loadDigitTemplates from '/ocr/templates.js';
+import loadPalettes from '/ocr/palettes.js';
+import TetrisOCR from '/ocr/TetrisOCR.js';
+import OCRSanitizer from '/ocr/OCRSanitizer.js';
+import { getCaptureCoordinates } from '/ocr/calibration.js';
+
 // NTSC NES resolution: 256x224 -> 512x448
 const LEVEL_COLORS = [
 	['#4A32FF', '#4AAFFE'],
@@ -366,7 +375,11 @@ go_btn.addEventListener('click', async evt => {
 		setTimeout(resolve, 0); // wait one tick for everything to be drawn nicely... just in case
 	});
 
-	let [ox, oy, ow, oh] = getCaptureCoordinates('reference_ui', 'video_capture');
+	let [ox, oy, ow, oh] = getCaptureCoordinates(
+		ocv,
+		'reference_ui',
+		'video_capture'
+	);
 
 	if (ow <= 0 || oh <= 0) {
 		console.log('Unable to match template');

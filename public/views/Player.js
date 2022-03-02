@@ -2,6 +2,7 @@ import QueryString from '/js/QueryString.js';
 import BinaryFrame from '/js/BinaryFrame.js';
 import renderBlock from '/views/renderBlock.js';
 import { css_size, clamp } from '/views/utils.js';
+import { SCORE_BASES, PIECE_COLORS } from '/views/constants.js';
 
 import {
 	DOM_DEV_NULL,

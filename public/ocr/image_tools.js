@@ -1,7 +1,7 @@
 // bicubic interpolation taken from
 // https://www.strauss-engineering.ch/js-bilinear-interpolation.html
 
-function TERP(t, a, b, c, d) {
+export function TERP(t, a, b, c, d) {
 	return (
 		0.5 *
 			(c -
@@ -12,7 +12,7 @@ function TERP(t, a, b, c, d) {
 	);
 }
 
-function BicubicInterpolation(x, y, values) {
+export function BicubicInterpolation(x, y, values) {
 	const i0 = TERP(x, values[0], values[1], values[2], values[3]);
 	const i1 = TERP(x, values[4], values[5], values[6], values[7]);
 	const i2 = TERP(x, values[8], values[9], values[10], values[11]);
@@ -22,7 +22,7 @@ function BicubicInterpolation(x, y, values) {
 }
 
 //
-function getBicubicPixels(srcImg, [dw, dh], destCoords) {
+export function getBicubicPixels(srcImg, [dw, dh], destCoords) {
 	const sdata = srcImg.data;
 	const sw = srcImg.width;
 	const sh = srcImg.height;
@@ -94,7 +94,7 @@ function getBicubicPixels(srcImg, [dw, dh], destCoords) {
 	});
 }
 
-function bicubic(srcImg, destImg) {
+export function bicubic(srcImg, destImg) {
 	const sdata = srcImg.data;
 	const sw = srcImg.width;
 	const sh = srcImg.height;
@@ -175,7 +175,7 @@ function bicubic(srcImg, destImg) {
 	}
 }
 
-function crop(source, x, y, w, h, target = null) {
+export function crop(source, x, y, w, h, target = null) {
 	if (!target) {
 		target = new ImageData(w, h);
 	}
@@ -195,7 +195,7 @@ function crop(source, x, y, w, h, target = null) {
 
 // if target is not supplied, modifies source image in place
 // with resulting top half being the deinterlaced copy
-function deinterlace(source, target) {
+export function deinterlace(source, target) {
 	const row_len = source.width << 2;
 	const max_rows = source.height >>> 1;
 
@@ -222,10 +222,10 @@ function deinterlace(source, target) {
 	}
 }
 
-function luma(r, g, b) {
+export function luma(r, g, b) {
 	return r * 0.299 + g * 0.587 + b * 0.114;
 }
 
-function roundedLuma(r, g, b) {
+export function roundedLuma(r, g, b) {
 	return Math.round(luma(r, g, b));
 }
