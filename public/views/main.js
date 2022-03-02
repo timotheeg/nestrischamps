@@ -1,3 +1,4 @@
+import '/views/utils.js';
 import QueryString from '/js/QueryString.js';
 import Connection from '/js/connection.js';
 import DomRefs from '/views/DomRefs.js';
@@ -9,6 +10,7 @@ import {
 	LINES,
 	DAS_COLORS,
 	BOARD_COLORS,
+	PIECE_COLORS,
 	DROUGHT_PANIC_THRESHOLD,
 	DAS_THRESHOLDS,
 	BLOCK_PIXEL_SIZE,
