@@ -234,24 +234,15 @@
 				peer = new Peer(competition.connection.id);
 
 				peer.on('call', call => {
-					querySelector;
 					console.log(`Received media call from ${call.peer}`);
 
-					const player_idx = competition.getPlayerIndexByPeerId(call.peer);
+					if (!competition.getPlayersByPeerId(call.peer).length) return;
 
-					if (player_idx > -1) {
-						// at least one match
-
-						call.answer();
-
-						call.on('stream', remoteStream => {
-							players.forEach((player, player_idx) => {
-								console.log(player_idx, player.peerid, call.peer);
-
-								if (player.peerid != call.peer) return;
-
-								const player_num = player_idx + 1;
-								const video = document.querySelector(`video.p${player_num}`);
+					call.on('stream', remoteStream => {
+						competition
+							.getPlayersByPeerId(call.peer) // rechecking because async!
+							.forEach(player => {
+								const video = player.dom.video;
 
 								video.srcObject = remoteStream;
 								video.addEventListener(
@@ -259,11 +250,14 @@
 									() => {
 										video.play();
 									},
-									{ once: true }
+									{
+										once: true,
+									}
 								);
 							});
-						});
-					}
+					});
+
+					call.answer();
 				});
 			};
 		</script>

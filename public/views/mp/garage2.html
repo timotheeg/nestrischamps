@@ -292,21 +292,13 @@
 			});
 		</script>
 		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/color.js"></script>
-		<script src="/views/gradient.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/CompetitionPlayer.js"></script>
-		<script src="/views/CTMCompetitionPlayer.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script>
+		<script type="module">
+			import '/views/bg.js';
+			import { translate } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+
 			const numberFormatter = new Intl.NumberFormat();
 			const players = [1, 2].map(num => {
 				const player = new CTMCompetitionPlayer(
@@ -364,14 +356,14 @@
 
 				return player;
 			});
-		</script>
-		<script src="/views/competition.js"></script>
-		<script>
+
+			const competition = new Competition(players);
+
 			if (QueryString.get('video') === '1') {
 				let is_secondary = false;
 				let peer = null;
 
-				API.setSecondary = function () {
+				competition.API.setSecondary = function () {
 					if (peer) {
 						peer.destroy();
 						peer = null;
@@ -380,7 +372,7 @@
 					is_secondary = true;
 				};
 
-				connection.onInit = () => {
+				competition.connection.onInit = () => {
 					if (is_secondary) return;
 
 					if (peer) {
@@ -388,40 +380,31 @@
 						peer = null;
 					}
 
-					peer = new Peer(connection.id);
+					peer = new Peer(competition.connection.id);
 
 					peer.on('call', call => {
 						if (is_secondary) return;
 
 						console.log(`Received media call from ${call.peer}`);
 
-						const player_idx = getPlayerIndexByPeerId(call.peer);
+						if (!competition.getPlayersByPeerId(call.peer).length) return;
 
-						if (player_idx > -1) {
-							// at least one match
+						call.answer();
+						call.on('stream', remoteStream => {
+							competition.getPlayersByPeerId(call.peer).forEach(player => {
+								const player_num = player_idx + 1;
+								const video = document.querySelector(`video.p${player_num}`);
 
-							call.answer();
-
-							call.on('stream', remoteStream => {
-								players.forEach((player, player_idx) => {
-									console.log(player_idx, player.peerid, call.peer);
-
-									if (player.peerid != call.peer) return;
-
-									const player_num = player_idx + 1;
-									const video = document.querySelector(`video.p${player_num}`);
-
-									video.srcObject = remoteStream;
-									video.addEventListener(
-										'loadedmetadata',
-										() => {
-											video.play();
-										},
-										{ once: true }
-									);
-								});
+								video.srcObject = remoteStream;
+								video.addEventListener(
+									'loadedmetadata',
+									() => {
+										video.play();
+									},
+									{ once: true }
+								);
 							});
-						}
+						});
 					});
 				};
 			}

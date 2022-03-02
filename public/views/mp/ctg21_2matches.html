@@ -567,24 +567,28 @@
 				peer.on('call', call => {
 					console.log(`Received media call from ${call.peer}`);
 
-					const players = competition.getPlayersByPeerId(call.peer);
+					if (!competition.getPlayersByPeerId(call.peer).length) return;
 
-					if (players.length) {
-						call.answer();
+					call.on('stream', remoteStream => {
+						competition
+							.getPlayersByPeerId(call.peer) // rechecking because async!
+							.forEach(player => {
+								const video = player.dom.video;
 
-						call.on('stream', remoteStream => {
-							competition
-								.getPlayersByPeerId(call.peer) // rechecking because async!
-								.forEach(player => {
-									const video = player.dom.video;
-
-									video.srcObject = remoteStream;
-									video.addEventListener('loadedmetadata', video.play, {
+								video.srcObject = remoteStream;
+								video.addEventListener(
+									'loadedmetadata',
+									() => {
+										video.play();
+									},
+									{
 										once: true,
-									});
-								});
-						});
-					}
+									}
+								);
+							});
+					});
+
+					call.answer();
 				});
 			};
 		</script>
