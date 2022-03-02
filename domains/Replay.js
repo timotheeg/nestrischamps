@@ -1,6 +1,5 @@
 import got from 'got';
 import zlib from 'zlib';
-import path from 'path';
 import fs from 'fs';
 
 import BinaryFrame from '../public/js/BinaryFrame.js';
