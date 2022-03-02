@@ -9,7 +9,8 @@
 	"extends": ["eslint:recommended", "prettier"],
 	"ignorePatterns": ["opencv.js"],
 	"parserOptions": {
-		"ecmaVersion": 12
+		"ecmaVersion": 12,
+		"sourceType": "module"
 	},
 	"rules": {}
 }
