@@ -26,9 +26,9 @@ const named = {
 	yellow: '#ff0',
 };
 
-const color_format = [
+const colorFormats = [
 	[
-		new RegExp('^#([0-9a-f])$'),
+		/^#([0-9a-f])$/i,
 		function (m) {
 			const v = parseInt(m[1] + m[1], 16);
 			return new Color(v, v, v);
@@ -36,7 +36,7 @@ const color_format = [
 	],
 
 	[
-		new RegExp('^#([0-9a-f]{2})$'),
+		/^#([0-9a-f]{2})$/i,
 		function (m) {
 			const v = parseInt(m[1], 16);
 			return new Color(v, v, v);
@@ -44,7 +44,7 @@ const color_format = [
 	],
 
 	[
-		new RegExp('^#([0-9a-f]{3})$'),
+		/^#([0-9a-f]{3})$/i,
 		function (m) {
 			const s = m[1];
 			return new Color(
@@ -56,7 +56,7 @@ const color_format = [
 	],
 
 	[
-		new RegExp('^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$'),
+		/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i,
 		function (m) {
 			return new Color(
 				parseInt(m[1], 16),
@@ -71,13 +71,13 @@ const color_format = [
 function localCreateFromHexString(str) {
 	let m;
 
-	for (let idx = res.length; idx-- > 0; ) {
-		if ((m = res[idx][0].exec(str))) {
-			return res[idx][1](m);
+	for (const [formatRegex, parse] of colorFormats) {
+		if ((m = `${str}`.match(formatRegex))) {
+			return parse(m);
 		}
 	}
 
-	throw new SyntaxError('Not a valid hex color: ' + s);
+	throw new SyntaxError('Not a valid hex color: ' + str);
 }
 
 export default class Color {
