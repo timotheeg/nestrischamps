@@ -99,16 +99,12 @@
 		</div>
 		<!-- End Stream BG -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
-		<script>
+		<script type="module">
+			import bg from '/views/bg.js';
+			import { translate } from '/views/utils.js';
+			import Player from '/views/Player.js';
+			import Competition from '/views/competition.js';
+
 			const numberFormatter = new Intl.NumberFormat();
 			const players = [1, 2].map(
 				num =>
@@ -153,14 +149,14 @@
 					player.drought_box.classList.remove('active');
 				};
 			});
-		</script>
-		<script src="/views/competition.js"></script>
-		<script>
-			API.setLogo = function (url) {
+
+			const competition = new Competition(players);
+
+			competition.API.setLogo = function (url) {
 				document.querySelector(`#logo`).style.backgroundImage = `url(${url})`;
 			};
 
-			function computeScoreDifferentials() {
+			competition.computeScoreDifferentials = function () {
 				const score_p1 = players[0].getScore(),
 					score_p2 = players[1].getScore();
 
@@ -232,7 +228,7 @@
 						tdiff_elem.textContent = `${tfmt}T>`;
 					}
 				}
-			}
+			};
 		</script>
 	</body>
 </html>

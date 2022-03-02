@@ -306,20 +306,13 @@
 
 		<!-- Audio -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/color.js"></script>
-		<script src="/views/gradient.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/CompetitionPlayer.js"></script>
-		<script src="/views/CTMCompetitionPlayer.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script>
+		<script type="module">
+			import bg from '/views/bg.js';
+			import { translate } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+
 			function easeInOutBack(t, b, c, d, s) {
 				if (s == undefined) s = 1.70158;
 				if ((t /= d / 2) < 1)
@@ -456,7 +449,8 @@
 
 				return player;
 			});
+
+			const competition = new Competition(players);
 		</script>
-		<script src="/views/competition.js"></script>
 	</body>
 </html>
