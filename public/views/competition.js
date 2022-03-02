@@ -1,4 +1,5 @@
 import Connection from '/js/connection.js';
+import { TRANSITIONS } from '/views/constants.js';
 
 // very simple RPC system to allow server to send data to client
 
@@ -24,7 +25,7 @@ function getSortedPlayers(players, getter = 'getScore') {
 	});
 }
 
-function getTetrisDiff(leader, laggard, getter = 'getScore') {
+export function getTetrisDiff(leader, laggard, getter = 'getScore') {
 	const leader_score = leader[getter]();
 	const laggard_score = laggard[getter]();
 
@@ -193,8 +194,10 @@ export default class Competition {
 	constructor(_players) {
 		this.players = players = _players;
 
+		this._onPlayerScoreChanged = this._onPlayerScoreChanged.bind(this);
+
 		players.forEach(player => {
-			player.onScore = this.onPlayerScoreChanged;
+			player.onScore = this._onPlayerScoreChanged;
 		});
 
 		this.API = new TetrisCompetitionAPI();

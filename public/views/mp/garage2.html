@@ -328,6 +328,7 @@
 						drought_box: document.querySelector(`.drought.p${num}`),
 						runway_tr_box: document.querySelector(`.runway.transition.p${num}`),
 						runway_box: document.querySelector(`.runway.game.p${num}`),
+						video: document.querySelector(`.player_vid.p${num}`),
 					},
 					{
 						preview_pixel_size: 2,
@@ -392,8 +393,7 @@
 						call.answer();
 						call.on('stream', remoteStream => {
 							competition.getPlayersByPeerId(call.peer).forEach(player => {
-								const player_num = player_idx + 1;
-								const video = document.querySelector(`video.p${player_num}`);
+								const video = player.dom.video;
 
 								video.srcObject = remoteStream;
 								video.addEventListener(
