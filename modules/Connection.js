@@ -97,13 +97,15 @@ class Connection extends EventEmitter {
 		this.emit('close', code, reason);
 	}
 
-	_onMessage(message) {
-		if (message instanceof Uint8Array) {
+	_onMessage(message, isBinary) {
+		if (isBinary) {
 			// binary frames are always game frames
 			try {
 				message = BinaryFrame.getFrameFromBuffer(message); // throws if message is invalid
 			} catch (err) {
-				console.warn(`Unable to process binary frame: ${err.message}`);
+				console.warn(
+					`Unable to process binary frame: ${err.message} - ${message.length}`
+				);
 				return;
 			}
 		} else {
