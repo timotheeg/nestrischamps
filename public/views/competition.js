@@ -1,4 +1,8 @@
+import Connection from '/js/connection.js';
+
 // very simple RPC system to allow server to send data to client
+
+let players;
 
 function getPlayer(idx) {
 	return players[idx];
@@ -232,30 +236,33 @@ function onPlayerScoreChanged() {
 	computeScoreDifferentials(players);
 }
 
-players.forEach(player => {
-	player.onScore = onPlayerScoreChanged;
-});
+// TODO: modularize this file better
+export default class Competition {
+	constructor(_players) {
+		players = _players;
 
-const API = new TetrisCompetitionAPI();
+		players.forEach(player => {
+			player.onScore = onPlayerScoreChanged;
+		});
 
-let connection;
+		this.API = new TetrisCompetitionAPI();
 
-try {
-	connection = new Connection(null, view_meta); // sort of gross T_T
-} catch (_err) {
-	connection = new Connection();
-}
+		try {
+			this.connection = new Connection(null, view_meta); // sort of gross T_T
+		} catch (_err) {
+			this.connection = new Connection();
+		}
 
-connection.onMessage = function (frame) {
-	try {
-		const [method, ...args] = frame;
+		this.connection.onMessage = frame => {
+			try {
+				const [method, ...args] = frame;
 
-		// urgh, API is instantiated outside of this file -_-
-		// encapsulation totally broken T_T
-		API[method](...args);
-	} catch (e) {
-		// socket.close();
-		console.error(e);
-		console.log(frame);
+				this.API[method](...args);
+			} catch (e) {
+				// socket.close();
+				console.error(e);
+				console.log(frame);
+			}
+		};
 	}
-};
+}
