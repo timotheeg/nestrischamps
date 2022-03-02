@@ -172,7 +172,7 @@
 					let rows = Array(20);
 
 					for (let i = 0; i < 20; i++) {
-						row = plaintext_field.slice(i * 10, (i + 1) * 10).join('');
+						const row = plaintext_field.slice(i * 10, (i + 1) * 10).join('');
 
 						rows[i] = row;
 					}

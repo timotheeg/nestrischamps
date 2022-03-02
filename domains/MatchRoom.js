@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Room from './Room.js';
 
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
