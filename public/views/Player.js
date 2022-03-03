@@ -1,14 +1,16 @@
 import QueryString from '/js/QueryString.js';
 import BinaryFrame from '/js/BinaryFrame.js';
 import renderBlock from '/views/renderBlock.js';
-import { css_size, clamp } from '/views/utils.js';
-import { SCORE_BASES, PIECE_COLORS } from '/views/constants.js';
+import { css_size, clamp, getPercent, peek } from '/views/utils.js';
 
 import {
+	SCORE_BASES,
+	PIECE_COLORS,
 	DOM_DEV_NULL,
 	PIECES,
 	LINES,
 	RUNWAY,
+	EFF_LINE_VALUES,
 	getRunway,
 } from '/views/constants.js';
 

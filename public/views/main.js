@@ -518,7 +518,7 @@ function reportGame(game) {
 	game.setGameOver();
 	game.reported = true;
 
-	this.getStats();
+	getStats();
 }
 
 function clearStage() {

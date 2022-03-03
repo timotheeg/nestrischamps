@@ -2,9 +2,11 @@ import Board from '/views/Board.js';
 import {
 	PIECES,
 	DROUGHT_PANIC_THRESHOLD,
+	SCORE_BASES,
 	DAS_THRESHOLDS,
 	RUNWAY,
 	TRANSITIONS,
+	EFF_LINE_VALUES,
 	getRunway,
 } from '/views/constants.js';
 
@@ -193,7 +195,7 @@ export default class Game {
 			PIECES.forEach(name => (counts[name] = 0));
 
 			for (let offset = 28; offset > 0; offset--) {
-				counts[game.pieces[len - offset].piece]++;
+				counts[this.pieces[len - offset].piece]++;
 			}
 
 			this.data.pieces.deviation_28 = Math.sqrt(
@@ -205,7 +207,7 @@ export default class Game {
 
 			if (this.data.pieces.count >= 56) {
 				for (let offset = 28; offset > 0; offset--) {
-					counts[game.pieces[len - 28 - offset].piece]++;
+					counts[this.pieces[len - 28 - offset].piece]++;
 				}
 
 				this.data.pieces.deviation_56 = Math.sqrt(
