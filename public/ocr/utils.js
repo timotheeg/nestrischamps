@@ -1,4 +1,4 @@
-function timingDecorator(name, func) {
+export function timingDecorator(name, func) {
 	// func must be prebound
 	return function (...args) {
 		performance.mark(`start_${name}`);
@@ -12,7 +12,7 @@ function timingDecorator(name, func) {
 	};
 }
 
-function rgb2lab_normalizeRgbChannel(channel) {
+export function rgb2lab_normalizeRgbChannel(channel) {
 	channel /= 255;
 
 	return (
@@ -23,13 +23,13 @@ function rgb2lab_normalizeRgbChannel(channel) {
 	);
 }
 
-function rgb2lab_normalizeXyzChannel(channel) {
+export function rgb2lab_normalizeXyzChannel(channel) {
 	return channel > 0.008856
 		? Math.pow(channel, 1 / 3)
 		: 7.787 * channel + 16 / 116;
 }
 
-function rgb2lab([r, g, b]) {
+export function rgb2lab([r, g, b]) {
 	r = rgb2lab_normalizeRgbChannel(r);
 	g = rgb2lab_normalizeRgbChannel(g);
 	b = rgb2lab_normalizeRgbChannel(b);

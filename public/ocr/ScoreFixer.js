@@ -1,4 +1,4 @@
-class ScoreFixer {
+export default class ScoreFixer {
 	constructor() {
 		this.last_good_digits = null;
 	}

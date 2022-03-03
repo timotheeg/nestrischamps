@@ -1,4 +1,6 @@
-class Connection {
+import BinaryFrame from '/js/BinaryFrame.js';
+
+export default class Connection {
 	constructor(uri = null, extra_search_params = null) {
 		let url;
 

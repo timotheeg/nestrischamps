@@ -35,7 +35,7 @@ class Column {
 	}
 }
 
-class Board {
+export default class Board {
 	constructor(board_str) {
 		this.rows = Array();
 

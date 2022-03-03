@@ -1,13 +1,11 @@
-const EventEmitter = require('events');
-const PrivateRoom = require('./PrivateRoom');
-const MatchRoom = require('./MatchRoom');
-const Producer = require('./Producer');
+import EventEmitter from 'events';
+import PrivateRoom from './PrivateRoom.js';
+import MatchRoom from './MatchRoom.js';
+import Producer from './Producer.js';
 
 // Twitch stuff
-const TwitchAuth = require('twitch-auth');
-const StaticAuthProvider = TwitchAuth.StaticAuthProvider;
-const RefreshableAuthProvider = TwitchAuth.RefreshableAuthProvider;
-const ChatClient = require('twitch-chat-client').ChatClient;
+import { RefreshingAuthProvider } from '@twurple/auth';
+import { ChatClient } from '@twurple/chat';
 
 const USER_SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes before we destroy user! TODO: Make tunable
 
@@ -127,7 +125,6 @@ class User extends EventEmitter {
 	setTwitchToken(token) {
 		// in memory only, not in DB
 		this.token = token;
-		this.token.expiry = new Date(Date.now() + token.expires_in * 1000);
 
 		if (this.connections.length) {
 			this._connectToTwitchChat();
@@ -222,34 +219,40 @@ class User extends EventEmitter {
 			return;
 		}
 
-		const auth = new RefreshableAuthProvider(
-			new StaticAuthProvider(
-				process.env.TWITCH_CLIENT_ID,
-				this.token.access_token
-			),
+		const twurpleToken = {
+			accessToken: this.token.access_token,
+			refreshToken: this.token.refresh_token,
+			expiresIn: 0,
+			obtainmentTimestamp: 0,
+		};
+
+		const authProvider = new RefreshingAuthProvider(
 			{
+				clientId: process.env.TWITCH_CLIENT_ID,
 				clientSecret: process.env.TWITCH_CLIENT_SECRET,
-				refreshToken: this.token.refresh_token,
-				expiry: this.token.expiry,
-				onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
+				onRefresh: args => {
+					const { accessToken, refreshToken, expiresIn } = args;
+
 					// How to update the session object(s) directly?
 					this.token.access_token = accessToken;
 					this.token.refresh_token = refreshToken;
-					this.token.expiry = expiryDate;
-					this.token.expires_in = Math.max(
-						0,
-						Math.floor((expiryDate.getTime() - Date.now()) / 1000)
-					);
+					this.token.expires_in = expiresIn;
 				},
-			}
+			},
+			twurpleToken
 		);
 
-		this.chat_client = new ChatClient(auth, {
+		this.chat_client = new ChatClient({
+			authProvider,
 			channels: [this.login],
 			readOnly: true,
+			logger: {
+				minLevel: 'info',
+			},
 		});
 
 		this.chat_client.onMessage((channel, user, message) => {
+			console.log('onMessage', user, message);
 			if (is_spam(message)) {
 				// TODO: find API to do ban user automatically
 				return;
@@ -296,4 +299,4 @@ class User extends EventEmitter {
 	}
 }
 
-module.exports = User;
+export default User;

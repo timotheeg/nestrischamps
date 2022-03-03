@@ -639,18 +639,14 @@
 		</div>
 		<!-- End Stream BG -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/Board.js"></script>
-		<script src="/views/Game.js"></script>
-		<script src="/views/DomRefs.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/main.js"></script>
-		<script src="/views/bg.js"></script>
-		<script>
+		<script type="module" src="/views/main.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import QueryString from '/js/QueryString.js';
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
+			import { PIECES } from '/views/constants.js';
+
 			const stream_bg = document.querySelector('#stream_bg');
 			const flash_div = document.createElement('div');
 

@@ -1,4 +1,4 @@
-function getCaptureCoordinates(template_id, capture_id) {
+export function getCaptureCoordinates(ocv, template_id, capture_id) {
 	const template = ocv.imread(template_id);
 	const capture = ocv.imread(capture_id);
 

@@ -43,7 +43,7 @@ We correct all possible misreads of A/4 and B/8
 
 /**/
 
-class LevelFixer {
+export default class LevelFixer {
 	constructor() {
 		this.last_good_digits = null;
 	}

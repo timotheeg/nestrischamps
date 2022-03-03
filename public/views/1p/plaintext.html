@@ -103,16 +103,10 @@
 
 		<!-- Audio -->
 
-		<script src="/js/BinaryFrame.js"></script>
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
+		<script type="module">
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
 
-		<script>
 			const board_content = document.querySelector(`#board .content`);
 			const stats_dl = document.querySelector(`#stats dl`);
 			const player_fields = {};
@@ -178,7 +172,7 @@
 					let rows = Array(20);
 
 					for (let i = 0; i < 20; i++) {
-						row = plaintext_field.slice(i * 10, (i + 1) * 10).join('');
+						const row = plaintext_field.slice(i * 10, (i + 1) * 10).join('');
 
 						rows[i] = row;
 					}

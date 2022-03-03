@@ -1,6 +1,8 @@
+import { PIECES } from '/views/constants.js';
+
 // Sort of like a pageObject to have quick references to the things that matter
 
-class DomRefs {
+export default class DomRefs {
 	constructor(doc) {
 		this.stream_bg = {
 			element: doc.querySelector('#stream_bg'),

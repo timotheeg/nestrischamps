@@ -1,3 +1,5 @@
+import { bicubic, crop, luma } from '/ocr/image_tools.js';
+
 const DIGITS = '0123456789ABCDEF'.split('');
 
 DIGITS.unshift('null');
@@ -9,7 +11,7 @@ async function getTemplateData(digit) {
 	return createImageBitmap(blob);
 }
 
-async function loadDigitTemplates() {
+export default async function loadDigitTemplates() {
 	const imgs = await Promise.all(DIGITS.map(getTemplateData));
 
 	// we write all the templates in a row in a canva with 1px spacing in between

@@ -1,4 +1,6 @@
-function renderBlock(
+import { LEVEL_COLORS } from '/views/constants.js';
+
+export default function renderBlock(
 	level,
 	block_index,
 	pixel_size,

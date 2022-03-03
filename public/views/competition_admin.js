@@ -1,3 +1,5 @@
+import Connection from '/js/connection.js';
+
 const dom = {
 	roomid: document.querySelector('#roomid'),
 	producer_count: document.querySelector('#producer_count'),

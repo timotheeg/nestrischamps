@@ -1,13 +1,16 @@
-const WebSocket = require('ws');
+import { WebSocketServer } from 'ws';
+import { Server } from 'http';
 
-const app = require('./modules/app');
+import app from './modules/app.js';
 
-const server = require('http').Server(app);
-const wss = new WebSocket.Server({
+const server = Server(app);
+const wss = new WebSocketServer({
 	clientTracking: false,
 	noServer: true,
 });
 
-require('./routes/websocket.js')(server, wss);
+import websocketInitializer from './routes/websocket.js';
+
+websocketInitializer(server, wss);
 
 server.listen(process.env.PORT || 5000);

@@ -1,11 +1,12 @@
-const path = require('path');
-const express = require('express');
-const router = express.Router();
+import path from 'path';
+import express from 'express';
 
-const middlewares = require('../modules/middlewares');
-const layouts = require('../modules/layouts');
-const UserDAO = require('../daos/UserDAO');
-const ScoreDAO = require('../daos/ScoreDAO');
+import middlewares from '../modules/middlewares.js';
+import layouts from '../modules/layouts.js';
+import UserDAO from '../daos/UserDAO.js';
+import ScoreDAO from '../daos/ScoreDAO.js';
+
+const router = express.Router();
 
 router.get('/debug/session', (req, res) => {
 	res.send(JSON.stringify(req.session));
@@ -21,7 +22,7 @@ router.get(
 	middlewares.checkToken,
 	(req, res) => {
 		res.sendFile(
-			path.join(__dirname, '../public/views/competition_admin.html')
+			path.join(path.resolve(), 'public/views/competition_admin.html')
 		);
 	}
 );
@@ -39,7 +40,7 @@ router.get(
 		}
 
 		res.sendFile(
-			path.join(__dirname, '../public/views/competition_admin.html')
+			path.join(path.resolve(), 'public/views/competition_admin.html')
 		);
 	}
 );
@@ -49,7 +50,7 @@ router.get(
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
-		res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+		res.sendFile(path.join(path.resolve(), 'public/ocr/ocr.html'));
 	}
 );
 
@@ -65,7 +66,7 @@ router.get(
 			return;
 		}
 
-		res.sendFile(path.join(__dirname, '../public/ocr/ocr.html'));
+		res.sendFile(path.join(path.resolve(), 'public/ocr/ocr.html'));
 	}
 );
 
@@ -90,7 +91,10 @@ router.get(
 		}
 
 		res.sendFile(
-			path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+			path.join(
+				path.resolve(),
+				`public/views/${layout.type}/${layout.file}.html`
+			)
 		);
 	}
 );
@@ -150,7 +154,7 @@ router.get('/view/:layout/:secret', (req, res) => {
 	}
 
 	res.sendFile(
-		path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+		path.join(path.resolve(), `public/views/${layout.type}/${layout.file}.html`)
 	);
 });
 
@@ -163,8 +167,8 @@ router.get('/replay/:layout/:gamedef', (req, res) => {
 	}
 
 	res.sendFile(
-		path.join(__dirname, `../public/views/${layout.type}/${layout.file}.html`)
+		path.join(path.resolve(), `public/views/${layout.type}/${layout.file}.html`)
 	);
 });
 
-module.exports = router;
+export default router;

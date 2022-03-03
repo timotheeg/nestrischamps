@@ -1,4 +1,4 @@
-const Room = require('./Room');
+import Room from './Room.js';
 
 class PrivateRoom extends Room {
 	constructor(owner) {
@@ -30,4 +30,4 @@ class PrivateRoom extends Room {
 	}
 }
 
-module.exports = PrivateRoom;
+export default PrivateRoom;

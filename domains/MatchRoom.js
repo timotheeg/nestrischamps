@@ -1,6 +1,5 @@
-const _ = require('lodash');
-
-const Room = require('./Room');
+import _ from 'lodash';
+import Room from './Room.js';
 
 const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
 const MAX_PLAYERS = 8;
@@ -535,4 +534,4 @@ class MatchRoom extends Room {
 	}
 }
 
-module.exports = MatchRoom;
+export default MatchRoom;

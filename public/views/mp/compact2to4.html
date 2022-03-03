@@ -188,20 +188,13 @@
 
 		<!-- Audio -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/color.js"></script>
-		<script src="/views/gradient.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/CompetitionPlayer.js"></script>
-		<script src="/views/CTMCompetitionPlayer.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script>
+		<script type="module">
+			import '/views/bg.js';
+			import { translate } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+
 			const TEMPLATE_WIDTH = 1280;
 			const PLAYER_WIDTH = 320;
 			const players_node = document.querySelector('#players');
@@ -278,10 +271,11 @@
 				}
 			}
 
-			for (idx = 0; idx < num_players; idx++) {
+			for (let idx = num_players; idx--; ) {
 				addPlayer();
 			}
+
+			const competition = new Competition(players);
 		</script>
-		<script src="/views/competition.js"></script>
 	</body>
 </html>

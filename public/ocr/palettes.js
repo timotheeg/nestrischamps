@@ -10,7 +10,7 @@ async function getPalette(name) {
 	]);
 }
 
-async function loadPalettes() {
+export default async function loadPalettes() {
 	return (await Promise.all(LIST.map(getPalette))).reduce(
 		(acc, palette, idx) => {
 			acc[LIST[idx]] = palette;

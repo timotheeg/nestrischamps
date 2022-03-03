@@ -1,9 +1,9 @@
-const BinaryFrame = require('../public/js/BinaryFrame');
-const ScoreDAO = require('../daos/ScoreDAO');
-const got = require('got');
-const zlib = require('zlib');
-const path = require('path');
-const fs = require('fs');
+import got from 'got';
+import zlib from 'zlib';
+import fs from 'fs';
+
+import BinaryFrame from '../public/js/BinaryFrame.js';
+import ScoreDAO from '../daos/ScoreDAO.js';
 
 class Replay {
 	constructor(connection, player_num, game_id_or_url, time_scale = 1) {
@@ -48,7 +48,7 @@ class Replay {
 			} else {
 				// data comes from local file
 				this.game_stream = fs
-					.createReadStream(path.join(__dirname, '..', file_path))
+					.createReadStream(file_path)
 					.pipe(zlib.createGunzip());
 			}
 		}
@@ -146,4 +146,4 @@ class Replay {
 	}
 }
 
-module.exports = Replay;
+export default Replay;

@@ -99,16 +99,12 @@
 		</div>
 		<!-- End Stream BG -->
 
-		<script src="/js/QueryString.js"></script>
-		<script src="/js/BinaryFrame.js"></script>
-		<script src="/views/constants.js"></script>
-		<script src="/views/utils.js"></script>
-		<script src="/views/bg.js"></script>
-		<script src="/js/connection.js"></script>
-		<script src="/views/renderBlock.js"></script>
-		<script src="/views/FrameBuffer.js"></script>
-		<script src="/views/Player.js"></script>
-		<script>
+		<script type="module">
+			import '/views/bg.js';
+			import { translate } from '/views/utils.js';
+			import Player from '/views/Player.js';
+			import Competition, { getTetrisDiff } from '/views/competition.js';
+
 			const numberFormatter = new Intl.NumberFormat();
 			const players = [1, 2].map(
 				num =>
@@ -153,14 +149,14 @@
 					player.drought_box.classList.remove('active');
 				};
 			});
-		</script>
-		<script src="/views/competition.js"></script>
-		<script>
-			API.setLogo = function (url) {
+
+			const competition = new Competition(players);
+
+			competition.API.setLogo = function (url) {
 				document.querySelector(`#logo`).style.backgroundImage = `url(${url})`;
 			};
 
-			function computeScoreDifferentials() {
+			competition.computeScoreDifferentials = function () {
 				const score_p1 = players[0].getScore(),
 					score_p2 = players[1].getScore();
 
@@ -212,7 +208,7 @@
 				} else {
 					const player1_leading = diff > 0;
 					const abs_diff = Math.abs(diff);
-					const fmt = player.options.format_score(abs_diff);
+					const fmt = players[0].options.format_score(abs_diff);
 
 					let tdiff;
 
@@ -222,7 +218,7 @@
 						tdiff = getTetrisDiff(players[1], players[0], 'getGameRunwayScore');
 					}
 
-					const tfmt = player.options.format_tetris_diff(tdiff);
+					const tfmt = tdiff > 100 ? Math.round(tdiff) : tdiff.toFixed(1);
 
 					if (player1_leading) {
 						diff_elem.textContent = `<${fmt}`;
@@ -232,7 +228,7 @@
 						tdiff_elem.textContent = `${tfmt}T>`;
 					}
 				}
-			}
+			};
 		</script>
 	</body>
 </html>

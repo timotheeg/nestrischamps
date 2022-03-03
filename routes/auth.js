@@ -1,8 +1,8 @@
-const express = require('express');
-const ULID = require('ulid');
-const got = require('got');
+import express from 'express';
+import ULID from 'ulid';
+import got from 'got';
 
-const UserDAO = require('../daos/UserDAO');
+import UserDAO from '../daos/UserDAO.js';
 
 const router = express.Router();
 
@@ -133,4 +133,4 @@ router.get('/twitch/callback', async (req, res) => {
 	}
 });
 
-module.exports = router;
+export default router;

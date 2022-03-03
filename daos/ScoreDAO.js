@@ -1,4 +1,4 @@
-const dbPool = require('../modules/db');
+import dbPool from '../modules/db.js';
 
 class ScoreDAO {
 	async getStats(user) {
@@ -334,4 +334,4 @@ class ScoreDAO {
 	}
 }
 
-module.exports = new ScoreDAO();
+export default new ScoreDAO();

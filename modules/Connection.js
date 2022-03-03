@@ -1,10 +1,10 @@
 // thin wrapper above websocket to handle destruction
 
-const _ = require('lodash');
-const EventEmitter = require('events');
-const ULID = require('ulid');
+import _ from 'lodash';
+import EventEmitter from 'events';
+import ULID from 'ulid';
 
-const BinaryFrame = require('../public/js/BinaryFrame');
+import BinaryFrame from '../public/js/BinaryFrame.js';
 
 const KICK_DESTROY_DELAY = 1000; // allows UI to get message and know it should not attempt to reconnect
 const PING_INTERVAL = 15000;
@@ -97,13 +97,15 @@ class Connection extends EventEmitter {
 		this.emit('close', code, reason);
 	}
 
-	_onMessage(message) {
-		if (message instanceof Uint8Array) {
+	_onMessage(message, isBinary) {
+		if (isBinary) {
 			// binary frames are always game frames
 			try {
 				message = BinaryFrame.getFrameFromBuffer(message); // throws if message is invalid
 			} catch (err) {
-				console.warn(`Unable to process binary frame: ${err.message}`);
+				console.warn(
+					`Unable to process binary frame: ${err.message} - ${message.length}`
+				);
 				return;
 			}
 		} else {
@@ -149,4 +151,4 @@ class Connection extends EventEmitter {
 	}
 }
 
-module.exports = Connection;
+export default Connection;

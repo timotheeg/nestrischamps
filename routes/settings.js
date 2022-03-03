@@ -1,16 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const ULID = require('ulid');
-const nocache = require('nocache');
-const _ = require('lodash');
+import express from 'express';
+import ULID from 'ulid';
+import nocache from 'nocache';
+import _ from 'lodash';
 
-const middlewares = require('../modules/middlewares');
-const UserDAO = require('../daos/UserDAO');
-const ScoreDAO = require('../daos/ScoreDAO');
+import middlewares from '../modules/middlewares.js';
+import UserDAO from '../daos/UserDAO.js';
+import ScoreDAO from '../daos/ScoreDAO.js';
+import timezones from '../modules/timezones.js';
 
 // Country Management
 
-const { overwrite, getData } = require('country-list');
+import { overwrite, getData } from 'country-list';
 
 overwrite([
 	{
@@ -24,7 +24,8 @@ overwrite([
 ]);
 
 const countries = getData().sort((a, b) => (a.name < b.name ? -1 : 1)); // Sort by country name
-const timezones = require('../modules/timezones');
+
+const router = express.Router();
 
 router.use(middlewares.assertSession);
 router.use(middlewares.checkToken);
@@ -197,4 +198,4 @@ router.post('/set_pb', express.json(), async (req, res) => {
 	res.status(400).json({ errors: ['Bad Request'] });
 });
 
-module.exports = router;
+export default router;
