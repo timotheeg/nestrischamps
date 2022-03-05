@@ -21,33 +21,33 @@ export default class ArrayView {
 	}
 
 	get(target, prop) {
-		const requested_index = parseInt(prop, 10);
+		let requested_index = NaN;
+
+		try {
+			requested_index = parseInt(prop, 10);
+		} catch (err) {}
 
 		if (!isNaN(requested_index)) {
-			if (requested_index < 0 || requested_index >= this.length) {
-				return undefined;
-			}
-
-			return this._source[this._start_index + requested_index];
+			return this.at(requested_index);
 		}
 
 		switch (prop) {
 			case 'length':
 				return this.length;
 
-			case 'slice':
-			case 'join':
-			case 'find':
-			case 'filter':
 			case 'reduce':
 				throw new Error(`ArrayView TODO: implement ${prop}()`);
 
 			case 'at':
+			case 'find':
+			case 'filter':
 			case 'every':
 			case 'some':
 			case 'forEach':
 			case 'map':
 			case 'includes':
+			case 'slice':
+			case 'join':
 				// lazy binding of methods
 				if (!this[prop].bound) {
 					this[prop] = this[prop].bind(this);
@@ -67,7 +67,7 @@ export default class ArrayView {
 				);
 		}
 
-		throw new Error(`Error (${prop}): Not understood`);
+		throw new Error(`Error: Property not understood`, prop);
 	}
 
 	set(target, prop) {
@@ -75,36 +75,56 @@ export default class ArrayView {
 	}
 
 	at(idx) {
+		if (idx < 0 || idx >= this.length) {
+			return undefined;
+		}
+
 		return this._source[this._start_index + idx];
 	}
 
-	forEach(cb) {
+	forEach(cb, thisArg = null) {
 		for (let idx = 0; idx < this.length; idx++) {
-			cb(this.at(idx), idx, this._proxy);
+			if (thisArg) {
+				cb.call(thisArg, this.at(idx), idx, this._proxy);
+			} else {
+				cb(this.at(idx), idx, this._proxy);
+			}
 		}
 	}
 
-	map(cb) {
+	map(cb, thisArg = null) {
 		const res = Array(this.length);
 
 		for (let idx = 0; idx < this.length; idx++) {
-			res[idx] = cb(this.at(idx), idx, this._proxy);
+			if (thisArg) {
+				res[idx] = cb.call(thisArg, this.at(idx), idx, this._proxy);
+			} else {
+				res[idx] = cb(this.at(idx), idx, this._proxy);
+			}
 		}
 
 		return res;
 	}
 
-	every(cb) {
+	every(cb, thisArg = null) {
 		for (let idx = 0; idx < this.length; idx++) {
-			if (!cb(this.at(idx), idx, this._proxy)) return false;
+			if (thisArg) {
+				if (cb.call(thisArg, this.at(idx), idx, this._proxy)) return false;
+			} else {
+				if (cb(this.at(idx), idx, this._proxy)) return false;
+			}
 		}
 
 		return true;
 	}
 
-	some(cb) {
+	some(cb, thisArg = null) {
 		for (let idx = 0; idx < this.length; idx++) {
-			if (cb(this.at(idx), idx, this._proxy)) return true;
+			if (thisArg) {
+				if (cb.call(thisArg, this.at(idx), idx, this._proxy)) return true;
+			} else {
+				if (cb(this.at(idx), idx, this._proxy)) return true;
+			}
 		}
 
 		return false;
@@ -116,5 +136,51 @@ export default class ArrayView {
 		}
 
 		return false;
+	}
+
+	find(cb, thisArg = null) {
+		for (let idx = from_index; idx < this.length; idx++) {
+			if (thisArg) {
+				if (cb.call(thisArg, this.at(idx), idx, this._proxy))
+					return this.at(idx);
+			} else {
+				if (cb(this.at(idx), idx, this._proxy)) return this.at(idx);
+			}
+		}
+	}
+
+	filter(cb, thisArg = null) {
+		const res = [];
+
+		for (let idx = from_index; idx < this.length; idx++) {
+			if (thisArg) {
+				if (cb.call(thisArg, this.at(idx), idx, this._proxy))
+					res.push(this.at(idx));
+			} else {
+				if (cb(this.at(idx), idx, this._proxy)) res.push(this.at(idx));
+			}
+		}
+
+		return res;
+	}
+
+	slice(start, end) {
+		// TODO: make sure no "hidden" values from the source are returned
+		return this._source.slice(
+			this._start_index + start,
+			this._start_index + start + end
+		);
+	}
+
+	join(separator) {
+		return this.slice(0, this.length).join(separator);
+	}
+
+	toString() {
+		return this.join(',');
+	}
+
+	[Symbol.toPrimitive]() {
+		return this.toString();
 	}
 }
