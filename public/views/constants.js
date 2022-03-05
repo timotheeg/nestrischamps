@@ -87,8 +87,6 @@ export const TRANSITIONS = {
 	19: 140,
 };
 
-export const BLOCK_PIXEL_SIZE = 3;
-
 export const PIECE_COLORS = {
 	T: 1,
 	J: 2,

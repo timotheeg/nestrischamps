@@ -16,6 +16,8 @@ import {
 	BLOCK_PIXEL_SIZE,
 } from '/views/constants.js';
 
+export const BLOCK_PIXEL_SIZE = 3;
+
 const dom = new DomRefs(document);
 
 // initial setup for colors based con constants.js
