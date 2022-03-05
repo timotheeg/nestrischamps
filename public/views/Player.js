@@ -11,6 +11,7 @@ import {
 	LINES,
 	RUNWAY,
 	EFF_LINE_VALUES,
+	CLEAR_ANIMATION_NUM_FRAMES,
 	getRunway,
 } from '/views/constants.js';
 
@@ -1101,8 +1102,6 @@ export default class Player {
 
 			return;
 		}
-
-		const CLEAR_ANIMATION_NUM_FRAMES = 7;
 
 		// assuming we aren't dropping any frame, the number of blocks only reduces when the
 		// line animation starts, the diff is twice the number of lines being cleared.

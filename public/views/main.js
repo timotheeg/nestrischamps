@@ -12,6 +12,7 @@ import {
 	BOARD_COLORS,
 	PIECE_COLORS,
 	DROUGHT_PANIC_THRESHOLD,
+	CLEAR_ANIMATION_NUM_FRAMES,
 	DAS_THRESHOLDS,
 } from '/views/constants.js';
 
@@ -167,8 +168,6 @@ function onMessage(entry) {
 	dom.chat.element.scrollTop =
 		dom.chat.element.scrollHeight - dom.chat.element.clientHeight;
 }
-
-const LINE_CLEAR_IGNORE_FRAMES = 7;
 
 let game = null,
 	gameid = -1,
@@ -441,7 +440,7 @@ function onFrame(event, debug) {
 			if (clear_frame_idx >= 0) {
 				// we found the clear!
 				line_animation_remaining_frames =
-					LINE_CLEAR_IGNORE_FRAMES - 1 - clear_frame_idx;
+					CLEAR_ANIMATION_NUM_FRAMES - 1 - clear_frame_idx;
 				last_valid_state.stage.num_blocks -= full_rows.length * 10;
 
 				if (full_rows.length === 4) {
@@ -468,7 +467,7 @@ function onFrame(event, debug) {
 
 				// we found the clear!
 				line_animation_remaining_frames =
-					LINE_CLEAR_IGNORE_FRAMES - 1 - clear_frame_idx;
+					CLEAR_ANIMATION_NUM_FRAMES - 1 - clear_frame_idx;
 				last_valid_state.stage.num_blocks -= clear * 10;
 
 				if (clear === 4) {
