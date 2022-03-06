@@ -33,9 +33,10 @@ frames[
             pieces_length,
         }
 
-        // views into main arrays
+        // array views into main arrays
         pieces[]
         points[]
+
 
         T,J,Z,O,S,L,I {
             count,
@@ -88,7 +89,6 @@ pieces[
 ]
 
 T,J,Z,O,S,L,I {
-    count,
     percent,
     drought,
     indexes[]
