@@ -13,7 +13,6 @@ import {
 	PIECE_COLORS,
 	DROUGHT_PANIC_THRESHOLD,
 	DAS_THRESHOLDS,
-	BLOCK_PIXEL_SIZE,
 } from '/views/constants.js';
 
 export const BLOCK_PIXEL_SIZE = 3;
