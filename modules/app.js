@@ -34,7 +34,9 @@ app.use((req, res, next) => {
 
 		TWITCH_LOGIN_QS.set(
 			'redirect_uri',
-			`${req.protocol}://${req.get('host')}/auth/twitch/callback`
+			`${process.env.IS_PUBLIC_SERVER ? 'https' : req.protocol}://${req.get(
+				'host'
+			)}/auth/twitch/callback`
 		);
 
 		const qs = TWITCH_LOGIN_QS.toString();
