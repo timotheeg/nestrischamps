@@ -639,13 +639,9 @@
 		</div>
 		<!-- End Stream BG -->
 
-		<script type="module" src="/views/main.js"></script>
 		<script type="module">
+			import { setOnTetris } from '/views/main.js';
 			import '/views/bg.js';
-			import QueryString from '/js/QueryString.js';
-			import Connection from '/js/connection.js';
-			import Player from '/views/Player.js';
-			import { PIECES } from '/views/constants.js';
 
 			const stream_bg = document.querySelector('#stream_bg');
 			const flash_div = document.createElement('div');
@@ -667,7 +663,7 @@
 				stream_bg.prepend(bg);
 			}
 
-			function onTetris() {
+			setOnTetris(function () {
 				let remaining_frames = 12;
 
 				function steps() {
@@ -681,7 +677,7 @@
 				}
 
 				window.requestAnimationFrame(steps);
-			}
+			});
 		</script>
 	</body>
 </html>

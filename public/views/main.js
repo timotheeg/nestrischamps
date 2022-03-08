@@ -114,7 +114,7 @@ if (QueryString.get('video') === '1') {
 // get High Scores
 getStats();
 
-function onTetris() {
+let onTetris = function () {
 	let remaining_frames = 12;
 
 	function steps() {
@@ -128,7 +128,7 @@ function onTetris() {
 	}
 
 	window.requestAnimationFrame(steps);
-}
+};
 
 const user_colors = {};
 
@@ -1194,4 +1194,8 @@ function commentate(message) {
 
 if (QueryString.get('commentate') === '1') {
 	getVoices();
+}
+
+export function setOnTetris(func) {
+	onTetris = func;
 }
