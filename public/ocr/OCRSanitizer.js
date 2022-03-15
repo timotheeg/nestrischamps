@@ -4,6 +4,19 @@ import LevelFixer from '/ocr/LevelFixer.js';
 
 const FIX_LEVEL = QueryString.get('fixlevel') !== '0';
 
+const requested_buffer_size = parseInt(QueryString.get('fixbuffer'), 10);
+
+const BUFFER_MAXSIZE =
+	!isNaN(requested_buffer_size) &&
+	requested_buffer_size > 0 &&
+	requested_buffer_size < 5
+		? requested_buffer_size
+		: 1;
+
+function peek(arr, offset = 0) {
+	return arr[arr.length - (offset + 1)];
+}
+
 /*
  * OCRSanitizer sanitizes a stream of Tetris OCRed data.
  *
@@ -14,9 +27,9 @@ const FIX_LEVEL = QueryString.get('fixlevel') !== '0';
  * So, each change is buffered for 1 frame to hopefully read a clean stable value.
  *
  * The buffering is done with an understanding of how Tetris fields are connected
- * Score: may change independently (push down points), but also always changes with lines increase
- * Lines: can change independently
- * Level: Only changes if lines changes too
+ * Score: may change independently (push down points)
+ * Lines: can only increase if score increase
+ * Level: can only increase if lines increase
  * Piece counters: Can change independently (but only one at a time!)
  * Instant Das: changes at every frame: cannot be buffered to stability (read and hope for the best)
  * Cur piece Das: Changes on piece change
@@ -31,75 +44,55 @@ export default class OCRSanitizer {
 		this.config = config;
 		this.tetris_ocr = tetris_ocr;
 
-		this.last_frame = null;
+		this.frame_buffer = [];
 
 		this.score_fixer = new ScoreFixer();
 		this.level_fixer = new LevelFixer();
 
-		this._handleFirstFrame = this._handleFirstFrame.bind(this);
+		this._prefillFrameBuffer = this._prefillFrameBuffer.bind(this);
 		this._sanitize = this._sanitize.bind(this);
 
-		this.tetris_ocr.onMessage = this._handleFirstFrame;
+		this.tetris_ocr.onMessage = this._prefillFrameBuffer;
 
 		this.gameid = 1;
 		this.in_game = false;
 
-		this.pending_score = false;
-		this.pending_line = false;
-		this.pending_piece = false;
+		this.score_frame_delay = 0;
+		this.piece_frame_delay = 0;
 	}
 
 	onMessage() {
 		// class user to implement
 	}
 
-	_handleFirstFrame(data) {
-		this.last_frame = { ...data }; // first frame is assumed "good" - because no choice!
-		this.previous_preview = data.preview; // used in das trainer to populate the current_frame
+	_prefillFrameBuffer(data) {
+		this.frame_buffer.push(data); // assume good frame at the beginning - what to do 🤷
 
-		this.tetris_ocr.onMessage = this._sanitize;
+		if (this.frame_buffer.length >= BUFFER_MAXSIZE) {
+			this.tetris_ocr.onMessage = this._sanitize;
+		}
 	}
 
 	_sanitize(data) {
 		performance.mark('start_sanitize');
 
-		do {
-			if (this.pending_lines) {
-				this.pending_lines = false;
-
-				this.last_frame.lines = data.lines;
-				this.last_frame.level = data.level;
-
-				// a line change always has a score change
-				// if score readwas not pending, force a read now anyway to synchronize with the lines
-				this.pending_score = true;
-			} else if (!OCRSanitizer.arrEqual(data.lines, this.last_frame.lines)) {
-				this.pending_lines = true;
-
-				if (this.pending_score) {
-					// because score was already pending, the lines value is (probably) already
-					// clean to read but we somehow didn't detect the change previously
-					// let's read it right away after all by looping back up!
-					continue;
-				}
-			}
-
-			break;
-		} while (true);
-
-		// ==========
-
-		if (this.pending_score) {
-			this.pending_score = false;
-
-			this.last_frame.score = data.score;
-		} else if (!OCRSanitizer.arrEqual(data.score, this.last_frame.score)) {
-			this.pendig_score = true;
+		if (--this.score_frame_delay > 0) {
+			// just wait
+		} else if (this.score_frame_delay === 0) {
+			this.frame_buffer.forEach(frame => {
+				frame.score = data.score;
+				frame.lines = data.lines;
+				frame.level = data.level;
+			});
+		} else if (
+			!OCRSanitizer.arrEqual(data.score, peek(this.frame_buffer).score)
+		) {
+			this.score_frame_delay = this.frame_buffer.length;
 		}
 
 		// ==========
 
-		// mutually exclusive pendding_piece checks based on selected rom
+		// mutually exclusive check for piece checks based on selected rom
 		if (this.config.tasks.T) {
 			// In classic rom, we have several way of determining the cur_piece
 			// 1. on piece change, cur_piece is the previous preview
@@ -107,36 +100,46 @@ export default class OCRSanitizer {
 			// So... Should this populate the cur_piece? it's not OCR...
 			// then again, the corrections are not really OCR too either
 			// TODO: populate cur_piece into the frame for classic rom (maybe?)
-			if (this.pending_piece) {
-				this.pending_piece = false;
-
-				this.last_frame.preview = data.preview;
-				this.last_frame.T = data.T;
-				this.last_frame.J = data.J;
-				this.last_frame.Z = data.Z;
-				this.last_frame.O = data.O;
-				this.last_frame.S = data.S;
-				this.last_frame.L = data.L;
-				this.last_frame.I = data.I;
-			} else if (!OCRSanitizer.pieceCountersEqual(this.last_frame, data)) {
-				this.pending_piece = true;
+			if (--this.piece_frame_delay > 0) {
+				// just wait
+			} else if (this.piece_frame_delay === 0) {
+				this.frame_buffer.forEach(frame => {
+					frame.preview = data.preview;
+					frame.T = data.T;
+					frame.J = data.J;
+					frame.Z = data.Z;
+					frame.O = data.O;
+					frame.S = data.S;
+					frame.L = data.L;
+					frame.I = data.I;
+				});
+			} else if (
+				!OCRSanitizer.pieceCountersEqual(data, peek(this.frame_buffer))
+			) {
+				this.piece_frame_delay = this.frame_buffer.length;
 			}
 		} else if (this.config.tasks.instant_das) {
-			if (this.pending_piece) {
-				this.pending_piece = false;
-
-				this.last_frame.preview = data.preview;
-				this.last_frame.cur_piece = data.cur_piece;
-				this.last_frame.cur_piece_das = data.cur_piece_das;
-			} else if (
-				!OCRSanitizer.arrEqual(
-					data.cur_piece_das,
-					this.last_frame.cur_piece_das
-				)
-			) {
-				this.pending_piece = true;
+			if (--this.piece_frame_delay > 0) {
+				// just wait
+			} else if (this.piece_frame_delay === 0) {
+				this.frame_buffer.forEach(frame => {
+					frame.preview = data.preview;
+					frame.cur_piece = data.cur_piece;
+					frame.cur_piece_das = data.cur_piece_das;
+				});
+			} else {
+				const last_frame = peek(this.frame_buffer);
+				if (
+					data.preview != last_frame.preview ||
+					data.cur_piece != last_frame.cur_piece ||
+					!OCRSanitizer.arrEqual(data.cur_piece_das, last_frame.cur_piece_das)
+				) {
+					this.piece_frame_delay = this.frame_buffer.length;
+				}
 			}
 		}
+
+		this.frame_buffer.push(data);
 
 		performance.mark('end_sanitize');
 		performance.measure('sanitize', 'start_sanitize', 'end_sanitize');
@@ -148,82 +151,77 @@ export default class OCRSanitizer {
 
 		// inform listener that a frame is ready
 		this._emitLastFrameData();
-
-		// Finally, record current frame for next iteration
-		// (and keep previous frame around in case we want to do more change comparison
-		this.previous_frame = this.last_frame;
-		this.last_frame = data;
 	}
 
 	_emitLastFrameData() {
 		performance.mark('start_fix_and_convert');
 
+		const dispatch_frame = this.frame_buffer.shift();
+
 		// replicate NESTrisOCR gameid logic
 		// also check if the fixers must be reset
 		if (
-			this.last_frame.lines == null ||
-			this.last_frame.score == null ||
-			this.last_frame.level == null
+			dispatch_frame.lines == null ||
+			dispatch_frame.score == null ||
+			dispatch_frame.level == null
 		) {
 			this.in_game = false;
 		} else if (!this.in_game) {
 			this.in_game = true;
 
 			if (
-				OCRSanitizer.arrEqual(this.last_frame.score, [0, 0, 0, 0, 0, 0]) &&
-				(OCRSanitizer.arrEqual(this.last_frame.lines, [0, 0, 0]) || // mode A
-					OCRSanitizer.arrEqual(this.last_frame.lines, [0, 2, 5])) // mode B
+				OCRSanitizer.arrEqual(dispatch_frame.score, [0, 0, 0, 0, 0, 0]) &&
+				(OCRSanitizer.arrEqual(dispatch_frame.lines, [0, 0, 0]) || // mode A
+					OCRSanitizer.arrEqual(dispatch_frame.lines, [0, 2, 5])) // mode B
 			) {
 				this.gameid++;
 
 				this.score_fixer.reset();
-				this.score_fixer.fix(this.last_frame.score);
+				this.score_fixer.fix(dispatch_frame.score);
 
 				if (FIX_LEVEL) {
 					this.level_fixer.reset();
-					this.level_fixer.fix(this.last_frame.level);
+					this.level_fixer.fix(dispatch_frame.level);
 				}
 			}
 		}
 
 		const pojo = {
 			gameid: this.gameid,
-			lines: OCRSanitizer.digitsToValue(this.last_frame.lines),
-			field: this.last_frame.field,
-			preview: this.last_frame.preview,
+			lines: OCRSanitizer.digitsToValue(dispatch_frame.lines),
+			field: dispatch_frame.field,
+			preview: dispatch_frame.preview,
 
 			score: OCRSanitizer.digitsToValue(
-				this.score_fixer.fix(this.last_frame.score)
+				this.score_fixer.fix(dispatch_frame.score)
 			), // note: nulls are passthrough
 			level: OCRSanitizer.digitsToValue(
 				FIX_LEVEL
-					? this.level_fixer.fix(this.last_frame.level)
-					: OCRSanitizer.arrEqual(this.last_frame.level, [10, 9])
+					? this.level_fixer.fix(dispatch_frame.level)
+					: OCRSanitizer.arrEqual(dispatch_frame.level, [10, 9])
 					? [6, 1] // special correction for Cheez 2.3M game with broken Tetris Gym 🤷
-					: this.last_frame.level
+					: dispatch_frame.level
 			), // note: nulls are passthrough
 		};
 
 		if (this.config.tasks.T) {
-			pojo.T = OCRSanitizer.digitsToValue(this.last_frame.T);
-			pojo.J = OCRSanitizer.digitsToValue(this.last_frame.J);
-			pojo.Z = OCRSanitizer.digitsToValue(this.last_frame.Z);
-			pojo.O = OCRSanitizer.digitsToValue(this.last_frame.O);
-			pojo.S = OCRSanitizer.digitsToValue(this.last_frame.S);
-			pojo.L = OCRSanitizer.digitsToValue(this.last_frame.L);
-			pojo.I = OCRSanitizer.digitsToValue(this.last_frame.I);
+			pojo.T = OCRSanitizer.digitsToValue(dispatch_frame.T);
+			pojo.J = OCRSanitizer.digitsToValue(dispatch_frame.J);
+			pojo.Z = OCRSanitizer.digitsToValue(dispatch_frame.Z);
+			pojo.O = OCRSanitizer.digitsToValue(dispatch_frame.O);
+			pojo.S = OCRSanitizer.digitsToValue(dispatch_frame.S);
+			pojo.L = OCRSanitizer.digitsToValue(dispatch_frame.L);
+			pojo.I = OCRSanitizer.digitsToValue(dispatch_frame.I);
 
-			pojo.color1 = this.last_frame.color1;
-			pojo.color2 = this.last_frame.color2;
-			pojo.color3 = this.last_frame.color3;
+			pojo.color1 = dispatch_frame.color1;
+			pojo.color2 = dispatch_frame.color2;
+			pojo.color3 = dispatch_frame.color3;
 		} else {
-			pojo.instant_das = OCRSanitizer.digitsToValue(
-				this.last_frame.instant_das
-			);
+			pojo.instant_das = OCRSanitizer.digitsToValue(dispatch_frame.instant_das);
 			pojo.cur_piece_das = OCRSanitizer.digitsToValue(
-				this.last_frame.cur_piece_das
+				dispatch_frame.cur_piece_das
 			);
-			pojo.cur_piece = this.last_frame.cur_piece;
+			pojo.cur_piece = dispatch_frame.cur_piece;
 		}
 
 		performance.mark('end_fix_and_convert');
