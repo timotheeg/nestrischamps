@@ -6,6 +6,7 @@ import loadPalettes from '/ocr/palettes.js';
 import TetrisOCR from '/ocr/TetrisOCR.js';
 import OCRSanitizer from '/ocr/OCRSanitizer.js';
 import { getCaptureCoordinates } from '/ocr/calibration.js';
+import speak from '/views/tts.js';
 
 // NTSC NES resolution: 256x224 -> 512x448
 const LEVEL_COLORS = [
