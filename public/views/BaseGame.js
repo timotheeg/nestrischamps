@@ -1,23 +1,30 @@
 // Minimum amount of game tracking to do server side to be able to report games
 import ArrayView from './ArrayView.js';
-import BinaryFrame from '../js/BinaryFrame.js';
+import Board from '/views/Board.js';
+import peek from '/views/utils.js';
+import {
+	PIECES,
+	DROUGHT_PANIC_THRESHOLD,
+	SCORE_BASES,
+	DAS_THRESHOLDS,
+	RUNWAY,
+	TRANSITIONS,
+	EFF_LINE_VALUES,
+	getRunway,
+} from '/views/constants.js';
 
-const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
-const SCORE_BASES = [0, 40, 100, 300, 1200];
 const LINE_CLEAR_IGNORE_FRAMES = 7;
+
 const ALL_POSSIBLE_NEGATIVE_DIFFS = [
 	-2, -4, -6, -8, -10, -12, -16, -18, -20, -24, -30, -32, -40,
 ];
+
 const CLEAR_DIFFS = [
 	[-2, -4, -6, -8, -10],
 	[-4, -8, -12, -16, -20],
 	[-6, -12, -18, -24, -30],
 	[-8, -16, -24, -32, -40],
 ];
-
-function peek(array) {
-	return array[array.length - 1];
-}
 
 function fuzzyBinarySearchWithLowerBias(array, prop, target_value) {
 	const last_entry = peek(array);
@@ -69,50 +76,6 @@ export default class BaseGame {
 		this.pieces = [];
 		this.points = [];
 		this.clears = [];
-		this.piece_stats = {
-			T: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-			J: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-			Z: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-			O: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-			S: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-			L: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-			I: {
-				percent: 0,
-				drought: 0,
-				indexes: [],
-			},
-		};
-
-		this.array_views = {
-			pieces: null,
-			points: null,
-			clears: null,
-			piece_stats: null,
-		};
 	}
 
 	end() {
@@ -129,40 +92,9 @@ export default class BaseGame {
 			return;
 		}
 
-		this.frame_count++;
-
 		if (!this.data) {
-			// Game initialization frame
-			// Assume good timing and record initial state from it as-is
-
-			this.IS_CLASSIC_ROM = data.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
-
-			this.gameid = data.gameid;
-			this.start_ctime = data.ctime;
-			this.start_ts = Date.now();
-			this.start_level = data.level;
-
-			this.num_blocks = this._getNumBlocks(data); // assume correct
-			this.prior_preview = null;
-
-			this.tetris_lines = 0;
-			this.cur_drought = 0;
-			this.max_drought = 0;
-			this.num_droughts = 0;
-
-			this.das_total = 0;
-
-			this.transition = null;
-
-			this.pending_score = false;
-			this.pending_piece = true;
-
-			this.clear_animation_remaining_frames = 0;
-
-			this.data = data; // record frame as current state
-
-			this._addFrame(frame);
-
+			// Game initialization frame - Assume good
+			this._doStartGame(data);
 			return;
 		}
 
@@ -201,7 +133,7 @@ export default class BaseGame {
 			this.pending_piece = false;
 			this._doPiece(data);
 		} else {
-			if (this.IS_CLASSIC_ROM) {
+			if (this.is_classic_rom) {
 				const num_pieces = this._getNumPieces(data);
 
 				if (num_pieces != this.num_pieces) {
@@ -270,6 +202,100 @@ export default class BaseGame {
 		}
 	}
 
+	_doStartGame(data) {
+		this.gameid = data.gameid;
+		this.start_ctime = data.ctime;
+		this.start_ts = Date.now();
+		this.is_classic_rom = data.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
+
+		this.data = {
+			start_level: data.level,
+
+			level: data.level,
+			burn: 0,
+
+			score: {
+				current: data.score,
+				runway: data.score + getRunway(data.level, RUNWAY.GAME, data.lines),
+				tr_runway: data.score + getRunway(level, RUNWAY.TRANSITION, data.lines),
+				normalized: 0,
+				transition: null,
+			},
+
+			i_droughts: {
+				count: 0,
+				cur: 0,
+				last: 0,
+				max: 0,
+			},
+
+			das: {
+				cur: 0,
+				total: 0, // running total, used for average computation
+				avg: 0,
+				great: 0,
+				ok: 0,
+				bad: 0,
+			},
+
+			pieces: {
+				count: 0,
+				deviation: 0,
+				deviation_28: 0,
+				deviation_56: 0,
+			},
+
+			lines: {
+				count: lines,
+			},
+
+			points: {
+				drops: {
+					count: 0, // "count" is a bad name
+					percent: 0,
+				},
+			},
+
+			num_blocks: this._getNumBlocks(data),
+		};
+
+		PIECES.forEach(name => {
+			this.data.pieces[name] = {
+				count: 0,
+				percent: 0,
+				drought: 0,
+				indexes: [],
+			};
+		});
+
+		[1, 2, 3, 4].forEach(name => {
+			this.data.lines[name] = {
+				count: 0,
+				lines: 0,
+				percent: 0,
+			};
+
+			this.data.points[name] = {
+				count: 0,
+				percent: 0,
+			};
+		});
+
+		this.array_views = {
+			pieces: null,
+			points: null,
+			clears: null,
+			piece_stats: null,
+		};
+
+		this.prior_preview = null;
+		this.pending_score = false;
+		this.pending_piece = true;
+		this._addFrame(frame);
+
+		this.onGameStart();
+	}
+
 	_doGameOver() {
 		if (this.over) return;
 
@@ -307,9 +333,11 @@ export default class BaseGame {
 		const cleared = data.lines - this.data.lines;
 		const line_score = (SCORE_BASES[cleared] || 0) * (data.level + 1);
 
+		let real_score = data.score;
+
 		if (data.score === 999999 && this.data.score + line_score >= 999999) {
 			// Compute score beyond maxout
-			this.data.score += line_score;
+			real_score = this.data.score + line_score;
 		} else if (data.score < this.data.score) {
 			const num_wraps = Math.floor((this.data.score + line_score) / 1600000);
 
@@ -317,15 +345,18 @@ export default class BaseGame {
 				// Using Hex score Game Genie code XNEOOGEX
 				// The GG code makes the score display wrap around to 0
 				// when reaching 1,600,000. We correct accordingly here.
-				this.data.score = 1600000 * num_wraps + data.score;
+				real_score = 1600000 * num_wraps + data.score;
 			} else {
-				// weird reading
-				// but we take the new value anyway 🤷‍♂️
-				this.data.score = data.score;
+				// weird reading (score goes lower than it was)
+				// but we do nothing and will accept it anyway
 			}
-		} else {
-			this.data.score = data.score;
 		}
+
+		const score_increment = real_score - this.data.score;
+
+		this.data.score = real_score;
+		this.data.points.drops.count += Math.max(0, score_increment - lines_score);
+		this.data.lines.count = data.lines;
 
 		// when score changes, lines may have changed
 		if (cleared) {
@@ -353,10 +384,12 @@ export default class BaseGame {
 		this.onScore();
 	}
 
+	_doLines(cleared) {}
+
 	_doPiece(data) {
 		let cur_piece;
 
-		if (this.IS_CLASSIC_ROM) {
+		if (this.is_classic_rom) {
 			if (this.num_pieces === 0) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
 			} else {
@@ -427,6 +460,10 @@ export default class BaseGame {
 		return this.frames[idx];
 	}
 
+	getLastFrame() {
+		return peek(this.frames);
+	}
+
 	getFrameAtElapsed(ms /* 0 based */) {
 		return fuzzyBinarySearchWithLowerBias(
 			this.frames,
@@ -441,6 +478,7 @@ export default class BaseGame {
 	onPiece() {}
 	onLines() {}
 	onLevel() {}
+	onDasLoss() {}
 	onTransition() {}
 	onKillScreen() {}
 	onDroughtStart() {}
