@@ -26,6 +26,9 @@ const CLEAR_DIFFS = [
 	[-8, -16, -24, -32, -40],
 ];
 
+const CLEAR_TYPES = [1, 2, 3, 4];
+const POINT_TYPES = [...CLEAR_TYPES, 'drops'];
+
 function fuzzyBinarySearchWithLowerBias(array, prop, target_value) {
 	const last_entry = peek(array);
 
@@ -331,15 +334,15 @@ export default class BaseGame {
 
 	_doScore(data) {
 		const cleared = data.lines - this.data.lines;
-		const line_score = (SCORE_BASES[cleared] || 0) * (data.level + 1);
+		const lines_score = (SCORE_BASES[cleared] || 0) * (data.level + 1);
 
 		let real_score = data.score;
 
-		if (data.score === 999999 && this.data.score + line_score >= 999999) {
+		if (data.score === 999999 && this.data.score + lines_score >= 999999) {
 			// Compute score beyond maxout
-			real_score = this.data.score + line_score;
+			real_score = this.data.score + lines_score;
 		} else if (data.score < this.data.score) {
-			const num_wraps = Math.floor((this.data.score + line_score) / 1600000);
+			const num_wraps = Math.floor((this.data.score + lines_score) / 1600000);
 
 			if (num_wraps >= 1) {
 				// Using Hex score Game Genie code XNEOOGEX
@@ -354,16 +357,35 @@ export default class BaseGame {
 
 		const score_increment = real_score - this.data.score;
 
-		this.data.score = real_score;
 		this.data.points.drops.count += Math.max(0, score_increment - lines_score);
 		this.data.lines.count = data.lines;
 
 		// when score changes, lines may have changed
 		if (cleared) {
-			this.data.lines = data.lines;
+			if (cleared > 0 && cleared <= 4) {
+				this.data.score.normalized += EFF_LINE_VALUES[cleared] * cleared;
+
+				// update lines stats for clearing type (single, double, etc...)
+				this.data.lines[cleared].count += 1;
+				this.data.lines[cleared].lines += cleared;
+
+				// update points stats for clearing type (single, double, etc...)
+				this.data.points[cleared].count += lines_score;
+
+				// update percentages for everyone
+				CLEAR_TYPES.forEach(clear_type => {
+					const clear_stats = this.data.lines[clear_type];
+					clear_stats.percent = clear_stats.lines / data.lines;
+				});
+			} else {
+				console.warn(`Invalid clear: ${cleared} lines`);
+			}
 
 			if (cleared === 4) {
 				this.tetris_lines += cleared;
+				this.data.burn = 0;
+			} else {
+				this.data.burn += cleared;
 			}
 
 			// when line changes, level may have changed
@@ -371,20 +393,34 @@ export default class BaseGame {
 				this.data.level = data.level;
 
 				if (this.transition === null) {
-					this.transition = data.score;
+					this.data.score.transition = real_score;
+					this.data.score.tr_runway = real_score;
 					this.onTransition();
 				}
 
 				this.onLevel();
+			} else if (this.transition === null) {
+				this.data.score.tr_runway =
+					real_score +
+					getRunway(this.data.start_level, RUNWAY.TRANSITION, data.lines);
 			}
 
 			this.onLines();
 		}
 
+		// update point percentages for all point types
+		POINT_TYPES.forEach(point_type => {
+			const point_stats = this.data.points[point_type];
+			point_stats.percent = point_stats.count / real_score;
+		});
+
+		// update score
+		this.data.score.current = real_score;
+		this.data.score.runway =
+			real_score + getRunway(this.data.start_level, RUNWAY.GAME, real_score);
+
 		this.onScore();
 	}
-
-	_doLines(cleared) {}
 
 	_doPiece(data) {
 		let cur_piece;
