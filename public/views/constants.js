@@ -47,8 +47,9 @@ export const DAS_THRESHOLDS = {
 };
 
 export const DROUGHT_PANIC_THRESHOLD = 13;
-export const SCORE_BASES = [0, 40, 100, 300, 1200];
 export const EFF_LINE_VALUES = [0, 40, 50, 100, 300];
+export const SCORE_BASES = [0, 40, 100, 300, 1200]; // equivalent to EFF_LINE_VALUES.map((v, i) => v * i)
+
 export const CLEAR_ANIMATION_NUM_FRAMES = 7;
 
 // arrays of color 1 and color 2
