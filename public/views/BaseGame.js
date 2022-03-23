@@ -75,19 +75,25 @@ export default class BaseGame {
 		this.num_frames = 0;
 
 		this.frames = [];
-
-		this.points = [];
-		this.clears = [];
-		this.pieces = [];
-
-		this.array_views = {
-			pieces: [],
-			points: [],
-			clears: [],
-		};
-
 		this.setFrame(frame);
 	}
+
+	// Declare events
+	// TODO: change callbacks to emit events instead
+	onValidFrame() {}
+	onScore() {}
+	onPiece() {}
+	onLines() {}
+	onLevel() {}
+	onDasLoss() {}
+	onTransition() {}
+	onKillScreen() {}
+	onDroughtStart() {}
+	onDroughtEnd() {}
+	onGameStart() {}
+	onGameOver() {}
+	onCurtainDown() {}
+	onTetris() {}
 
 	end() {
 		if (!this.over) {
@@ -135,6 +141,16 @@ export default class BaseGame {
 		this.start_ts = Date.now();
 		this.is_classic_rom = data.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
 
+		this.points = [];
+		this.clears = [];
+		this.pieces = [];
+
+		this.array_views = {
+			pieces: [],
+			points: [],
+			clears: [],
+		};
+
 		// this.data is used to track game stats and data as they progress
 		// snapshots of them will be stored in frames as needed
 		this.data = {
@@ -175,9 +191,6 @@ export default class BaseGame {
 
 			pieces: {
 				count: 0,
-				deviation: 0,
-				deviation_28: 0,
-				deviation_56: 0,
 			},
 
 			lines: {},
@@ -200,6 +213,8 @@ export default class BaseGame {
 				drought: 0,
 				indexes: [],
 			};
+
+			this.array_views[name] = [];
 		});
 
 		[1, 2, 3, 4].forEach(name => {
@@ -214,6 +229,8 @@ export default class BaseGame {
 				percent: 0,
 			};
 		});
+
+		this;
 
 		this._recordPointEvent();
 		this._recordLineClearEvent();
@@ -252,9 +269,10 @@ export default class BaseGame {
 	_addFrame(data) {
 		const frame = {
 			raw: data,
-			...this.array_views,
 
-			num_blocks: this.data.num_blocks,
+			pieces: this.array_views.pieces,
+			points: this.array_views.points,
+			clears: this.array_views.clears,
 		};
 
 		this.frames.push(frame);
@@ -555,26 +573,13 @@ export default class BaseGame {
 		this.data.pieces.count++;
 		this.data.pieces[cur_piece].count++;
 
-		// computation for the variance
-		let distance_square = 0;
-
+		// handle droughts
 		PIECES.forEach(name => {
 			const stats = this.data.pieces[name];
-
-			stats.percent = stats.count / (this.pieces.length + 1);
-
-			distance_square += Math.pow(
-				stats.count / this.data.pieces.count - 1 / 7,
-				2
-			);
-
-			stats.drought++;
+			stats.drought++; // all droughts increase
+			stats.percent = stats.count / this.data.pieces.count;
 		});
-
-		this.data.pieces[cur_piece].drought = 0;
-		this.data.pieces.deviation = Math.sqrt(distance_square / PIECES.length);
-		this.data.pieces.deviation_28 = this.data.pieces.deviation;
-		this.data.pieces.deviation_56 = this.data.pieces.deviation;
+		this.data.pieces[cur_piece].drought = 0; // current piece drought resets
 
 		// handle I droughts
 		if (cur_piece === 'I') {
@@ -599,8 +604,25 @@ export default class BaseGame {
 			}
 		}
 
-		// record piece event before calculating deviation to add the data in later
+		// record piece event before calculating deviation, so the array fuly represent the sequence
+		// we will update piece event with the deviation reactively
 		this._recordPieceEvent(cur_piece);
+
+		// Handle deviation
+		let distance_square = 0;
+
+		const last_piece_event = peek(this.pieces);
+
+		PIECES.forEach(name => {
+			const stats = this.data.pieces[name];
+
+			distance_square += Math.pow(stats.count / this.pieces.length - 1 / 7, 2);
+		});
+
+		last_piece_event.deviation =
+			last_piece_event.deviation_28 =
+			last_piece_event.deviation_56 =
+				Math.sqrt(distance_square / PIECES.length);
 
 		// handle deviation
 		const len = this.pieces.length;
@@ -616,19 +638,19 @@ export default class BaseGame {
 				counts[this.pieces[len - offset].piece]++;
 			}
 
-			this.data.pieces.deviation_28 = Math.sqrt(
+			last_piece_event.deviation_28 = Math.sqrt(
 				Object.values(counts).reduce(
 					(sum, count) => sum + Math.pow(count / 28 - 1 / 7, 2),
 					0
 				) / PIECES.length
 			);
 
-			if (this.data.pieces.count >= 56) {
+			if (len >= 56) {
 				for (let offset = 28; offset > 0; offset--) {
 					counts[this.pieces[len - 28 - offset].piece]++;
 				}
 
-				this.data.pieces.deviation_56 = Math.sqrt(
+				last_piece_event.deviation_56 = Math.sqrt(
 					Object.values(counts).reduce(
 						(sum, count) => sum + Math.pow(count / 56 - 1 / 7, 2),
 						0
@@ -636,6 +658,8 @@ export default class BaseGame {
 				);
 			}
 		}
+
+		this.onPiece();
 	}
 
 	_recordPieceEvent(piece) {
@@ -648,20 +672,24 @@ export default class BaseGame {
 			pieces: { ...this.data.pieces }, // copy all including pieces - duplicate action below :'(
 		};
 
+		// update tracker arrays
 		this.pieces.push(evt);
-		evt.pieces[piece].indexes.push(evt);
+		this.data.pieces[piece].indexes.push(evt);
 
-		PIECES.forEach(name => {
-			evt.pieces[name] = { ...this.data.pieces[name] };
-
-			// TODO: Do NOT create one ArrayView for all piece types!
-			// Array views can be memoized, and only curent piece needs to be remade
-			evt.pieces[name].indexes = new ArrayView(evt.pieces[name].indexes);
-		});
-
+		// update aray view snapshots
 		this.array_views.pieces = new ArrayView(this.pieces);
+		this.array_views[piece] = new ArrayView(this.data.pieces[piece].indexes);
+
+		// update event object
+		PIECES.forEach(name => {
+			evt.pieces[name] = {
+				...this.data.pieces[name],
+				indexes: this.array_views[name],
+			};
+		});
 	}
 
+	/*
 	getReport() {
 		if (!this.data) return null;
 
@@ -697,6 +725,7 @@ export default class BaseGame {
 			frame_file: this.frame_file,
 		};
 	}
+	/**/
 
 	getFrame(idx) {
 		return this.frames[idx];
@@ -713,20 +742,4 @@ export default class BaseGame {
 			this.start_ctime + ms
 		)[1];
 	}
-
-	// TODO: change callbacks to emit events instead
-	onValidFrame() {}
-	onScore() {}
-	onPiece() {}
-	onLines() {}
-	onLevel() {}
-	onDasLoss() {}
-	onTransition() {}
-	onKillScreen() {}
-	onDroughtStart() {}
-	onDroughtEnd() {}
-	onGameStart() {}
-	onGameOver() {}
-	onCurtainDown() {}
-	onTetris() {}
 }
