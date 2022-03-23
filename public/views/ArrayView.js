@@ -166,6 +166,15 @@ export default class ArrayView {
 
 	slice(start, end) {
 		// TODO: make sure no "hidden" values from the source are returned
+
+		if (end === undefined) {
+			if (start < 0) {
+				return this._source.slice(this.length + start, this.length);
+			} else {
+				return this._source.slice(this._start_index + start, this.length);
+			}
+		}
+
 		return this._source.slice(
 			this._start_index + start,
 			this._start_index + start + end

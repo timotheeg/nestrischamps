@@ -68,14 +68,12 @@ class PointData {
 }
 
 export default class BaseGame {
-	constructor(frame) {
+	constructor() {
 		this.start_ts = 0;
 		this.data = null;
 		this.over = false;
 		this.num_frames = 0;
-
 		this.frames = [];
-		this.setFrame(frame);
 	}
 
 	// Declare events
@@ -92,6 +90,7 @@ export default class BaseGame {
 	onDroughtEnd() {}
 	onGameStart() {}
 	onGameOver() {}
+	onNewGame() {}
 	onCurtainDown() {}
 	onTetris() {}
 
@@ -383,7 +382,7 @@ export default class BaseGame {
 					getRunway(this.data.start_level, RUNWAY.TRANSITION, data.lines);
 			}
 
-			this._recordLineClearEvent();
+			this._recordLineClearEvent(cleared);
 		}
 
 		// update point percentages for all point types
@@ -419,9 +418,10 @@ export default class BaseGame {
 		this.array_views.points = new ArrayView(this.points);
 	}
 
-	_recordLineClearEvent() {
+	_recordLineClearEvent(cleared) {
 		const evt = {
-			running_stats: { ...this.data.running_stats },
+			...this.data.running_stats,
+			cleared,
 			lines: CLEAR_TYPES.reduce(
 				(acc, type) => (acc[type] = { ...this.data.lines[type] }),
 				{}
@@ -606,7 +606,7 @@ export default class BaseGame {
 
 		// record piece event before calculating deviation, so the array fuly represent the sequence
 		// we will update piece event with the deviation reactively
-		this._recordPieceEvent(cur_piece);
+		this._recordPieceEvent(cur_piece, data);
 
 		// Handle deviation
 		let distance_square = 0;
@@ -662,7 +662,7 @@ export default class BaseGame {
 		this.onPiece();
 	}
 
-	_recordPieceEvent(piece) {
+	_recordPieceEvent(piece, data) {
 		const evt = {
 			piece,
 			in_drought: this.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD,
@@ -670,6 +670,7 @@ export default class BaseGame {
 			i_droughts: { ...this.data.i_droughts },
 			das: { ...this.data.das },
 			pieces: { ...this.data.pieces }, // copy all including pieces - duplicate action below :'(
+			board: new Board(data.field).stats,
 		};
 
 		// update tracker arrays
