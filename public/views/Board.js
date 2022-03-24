@@ -18,7 +18,7 @@ class Row {
 	}
 
 	hasWell() {
-		return this.well !== 'undefined';
+		return this.well !== undefined;
 	}
 }
 

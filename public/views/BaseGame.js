@@ -124,9 +124,23 @@ export default class BaseGame {
 			return;
 		}
 
-		this._checkScore(data);
-		this._checkPiece(data);
-		this._addFrame(data);
+		const score_events = this._checkScore(data);
+		const piece_events = this._checkPiece(data);
+		const last_frame = this._addFrame(data);
+
+		// Fire events as needed
+		if (score_events) {
+			this.onScore(last_frame);
+			if (score_events.lines) this.onLines(last_frame);
+			if (score_events.level) this.onLevel(last_frame);
+			if (score_events.transition) this.onTransition(last_frame);
+		}
+
+		if (piece_events) {
+			this.onPiece(last_frame);
+		}
+
+		this.onValidFrame(last_frame);
 
 		// Check board for gameover event (curtain has fallen)
 		if (this.data.num_blocks >= 200) {
@@ -276,14 +290,13 @@ export default class BaseGame {
 
 		this.frames.push(frame);
 
-		this.onValidFrame(frame);
+		return frame;
 	}
 
 	_checkScore(data) {
 		if (this.pending_score) {
 			this.pending_score = false;
-			this._doScore(data);
-			return;
+			return this._doScore(data);
 		}
 
 		if (data.score === 999999) {
@@ -399,11 +412,7 @@ export default class BaseGame {
 		// record point event with snapshot of all data
 		this._recordPointEvent();
 
-		// finally, fire events as needed
-		this.onScore();
-		if (events.lines) this.onLines();
-		if (events.level) this.onLevel();
-		if (events.transition) this.onTransition();
+		return events;
 	}
 
 	_recordPointEvent() {
@@ -429,13 +438,16 @@ export default class BaseGame {
 		};
 		this.clears.push(evt);
 		this.array_views.clears = new ArrayView(this.clears);
+
+		// record the fact that the last piece caused a clear event
+		// warning this assume order that score/clear events are ALWAYS processes becfore checking pieces
+		peek(this.pieces).clear = evt;
 	}
 
 	_checkPiece(data) {
 		if (this.pending_piece) {
 			this.pending_piece = false;
-			this._doPiece(data);
-			return;
+			return this._doPiece(data);
 		}
 
 		if (this.is_classic_rom) {
@@ -547,6 +559,8 @@ export default class BaseGame {
 	}
 
 	_doPiece(data) {
+		const events = {};
+
 		let cur_piece;
 
 		if (this.is_classic_rom) {
@@ -659,7 +673,7 @@ export default class BaseGame {
 			}
 		}
 
-		this.onPiece();
+		return events;
 	}
 
 	_recordPieceEvent(piece, data) {

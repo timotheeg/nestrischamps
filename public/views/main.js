@@ -181,18 +181,13 @@ function createGame() {
 	game = new BaseGame();
 	game.onScore = renderScore;
 	game.onPiece = renderPiece;
-	game.onLines = checkTransitionWarning;
+	game.onLines = renderLines;
+	game.onLevel = renderLevel;
 	game.onNewgame = onNewGame;
 	game.onValidFrame = onValidFrame;
 	game.onDasLoss = onDasLoss;
 	game.onTetris = () => onTetris();
 	// game.onGameOver = ???
-
-	game.onTransitionWarning = warning_lines => {
-		commentate(
-			`${game.transition_lines - game.data.lines.count} lines till transition`
-		);
-	};
 }
 
 function onNewGame(frame) {
@@ -200,9 +195,8 @@ function onNewGame(frame) {
 	game.setFrame(frame);
 }
 
-function onValidFrame() {
-	const frame = game.getLastFrame();
-	renderStage(frame.raw.field);
+function onValidFrame(frame) {
+	renderStage(frame);
 	renderInstantDas(frame.raw.instant_das);
 }
 
@@ -343,23 +337,8 @@ function renderPastGamesAndPBs(data) {
 
 function renderScore(frame) {
 	const point_evt = peek(frame.points);
-	const clear_evt = peek(frame.clears);
 
-	// do the small boxes first
-	dom.tetris_rate.value.textContent = getPercent(clear_evt.tetris_rate);
-	dom.efficiency.value.textContent = (Math.floor(clear_evt.efficiency) || 0)
-		.toString()
-		.padStart(3, '0');
-	dom.level.value.textContent = frame.raw.level.toString().padStart(2, '0');
-	dom.burn.count.textContent = clear_evt.burn.toString().padStart(2, '0');
-
-	const line_count = frame.raw.lines.toString().padStart(3, '0');
-
-	if (dom.lines) {
-		dom.lines.count.textContent = line_count;
-	}
-
-	dom.score.current.textContent = frame.raw.score
+	dom.score.current.textContent = point_evt.score.current
 		.toString()
 		.padStart(6, '0')
 		.padStart(7, ' ');
@@ -374,6 +353,7 @@ function renderScore(frame) {
 		}
 	}
 
+	// could be moved to a different method renderTransition()
 	if (point_evt.score.transition) {
 		dom.score.transition.textContent = point_evt.score.transition
 			.toString()
@@ -383,22 +363,12 @@ function renderScore(frame) {
 		dom.score.transition.textContent = '------';
 	}
 
-	// lines and points
-	dom.lines_stats.count.textContent = line_count;
-	dom.points.count.textContent = frame.raw.score;
+	// Update points by clear type (and drops)
+	// Necessary because percentage of each change at every point increase
+	dom.points.count.textContent = point_evt.score.current;
 
 	for (const [num_lines, values] of Object.entries(LINES)) {
 		const { name } = values;
-
-		dom.lines_stats[name].count.textContent = clear_evt.lines[num_lines].count
-			.toString()
-			.padStart(3, '0');
-		dom.lines_stats[name].lines.textContent = clear_evt.lines[num_lines].lines
-			.toString()
-			.padStart(3, '0');
-		dom.lines_stats[name].percent.textContent = getPercent(
-			clear_evt.lines[num_lines].percent
-		);
 
 		dom.points[name].count.textContent = point_evt.points[num_lines].count
 			.toString()
@@ -416,15 +386,48 @@ function renderScore(frame) {
 	dom.points.drops.percent.textContent = getPercent(
 		point_evt.points.drops.percent
 	);
+}
 
-	dom.lines_stats.trt_ctx.clear();
+function renderLines(frame) {
+	const clear_evt = peek(frame.clears);
 
+	// Do the small boxes first
+	dom.tetris_rate.value.textContent = getPercent(clear_evt.tetris_rate);
+	dom.efficiency.value.textContent = (Math.floor(clear_evt.efficiency) || 0)
+		.toString()
+		.padStart(3, '0');
+	dom.burn.count.textContent = clear_evt.burn.toString().padStart(2, '0');
+
+	const line_count = frame.raw.lines.toString().padStart(3, '0');
+
+	if (dom.lines) {
+		dom.lines.count.textContent = line_count;
+	}
+
+	dom.lines_stats.count.textContent = line_count;
+
+	for (const [num_lines, values] of Object.entries(LINES)) {
+		const { name } = values;
+
+		dom.lines_stats[name].count.textContent = clear_evt.lines[num_lines].count
+			.toString()
+			.padStart(3, '0');
+		dom.lines_stats[name].lines.textContent = clear_evt.lines[num_lines].lines
+			.toString()
+			.padStart(3, '0');
+		dom.lines_stats[name].percent.textContent = getPercent(
+			clear_evt.lines[num_lines].percent
+		);
+	}
+
+	// Update running tetris rate graph
 	const trt_ctx = dom.lines_stats.trt_ctx,
 		pixel_size = 4,
 		max_pixels = Math.floor(trt_ctx.canvas.width / (pixel_size + 1)),
 		y_scale = (trt_ctx.canvas.height - pixel_size) / pixel_size,
-		cur_x = 0,
 		to_draw = frame.clears.slice(-1 * max_pixels);
+
+	trt_ctx.clear();
 
 	for (let idx = to_draw.length; idx--; ) {
 		const { cleared, tetris_rate } = to_draw[idx];
@@ -438,7 +441,18 @@ function renderScore(frame) {
 		);
 	}
 
-	// set piece colors for piece distribution
+	// TODO: Do transition warning
+	game.onTransitionWarning = warning_lines => {
+		commentate(
+			`${game.transition_lines - game.data.lines.count} lines till transition`
+		);
+	};
+}
+
+function renderLevel(frame) {
+	dom.level.value.textContent = frame.raw.level.toString().padStart(2, '0');
+
+	// Level update for
 	dom.pieces.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
 	dom.pieces.element.classList.add(`l${frame.raw.level % 10}`);
 
@@ -446,24 +460,26 @@ function renderScore(frame) {
 	dom.next.element.classList.add(`l${frame.raw.level % 10}`);
 }
 
-function renderPiece(event) {
-	dom.pieces.count.textContent = game.data.pieces.count
+function renderPiece(frame) {
+	const piece_evt = peek(frame.pieces);
+
+	dom.pieces.count.textContent = frame.pieces.length
 		.toString()
 		.padStart(3, '0');
 
-	dom.pieces.deviation.textContent = (game.data.pieces.deviation * 100).toFixed(
+	// Render deviation data
+	dom.pieces.deviation.textContent = (piece_evt.deviation * 100).toFixed(1);
+	dom.pieces.deviation_28.textContent = (piece_evt.deviation_28 * 100).toFixed(
 		1
 	);
-	dom.pieces.deviation_28.textContent = (
-		game.data.pieces.deviation_28 * 100
-	).toFixed(1);
-	dom.pieces.deviation_56.textContent = (
-		game.data.pieces.deviation_56 * 100
-	).toFixed(1);
+	dom.pieces.deviation_56.textContent = (piece_evt.deviation_56 * 100).toFixed(
+		1
+	);
 
+	// Render piece distribution graphs
 	let pixel_size = 4,
 		max_pixels = Math.floor(dom.pieces.T.ctx.canvas.width / (pixel_size + 1)),
-		draw_start = Math.max(0, game.pieces.length - max_pixels);
+		draw_start = Math.max(0, frame.pieces.length - max_pixels);
 
 	PIECES.forEach(name => {
 		const piece_data = game.data.pieces[name],
@@ -525,18 +541,17 @@ function renderPiece(event) {
 		}
 	});
 
-	// droughts
-	// TODO: Use Canvas rather than span
-	dom.droughts.count.textContent = game.data.i_droughts.count
+	// Render droughts
+	dom.droughts.count.textContent = frame.i_droughts.count
 		.toString()
 		.padStart(3, '0');
-	dom.droughts.cur.value.textContent = game.data.i_droughts.cur
+	dom.droughts.cur.value.textContent = frame.i_droughts.cur
 		.toString()
 		.padStart(2, '0');
-	dom.droughts.last.value.textContent = game.data.i_droughts.last
+	dom.droughts.last.value.textContent = frame.i_droughts.last
 		.toString()
 		.padStart(2, '0');
-	dom.droughts.max.value.textContent = game.data.i_droughts.max
+	dom.droughts.max.value.textContent = frame.i_droughts.max
 		.toString()
 		.padStart(2, '0');
 
@@ -544,11 +559,11 @@ function renderPiece(event) {
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
 
 	const color = 'orange',
-		cur_drought = game.data.i_droughts.cur,
+		cur_drought = frame.i_droughts.cur,
 		cur_ctx = dom.droughts.cur.ctx,
-		last_drought = game.data.i_droughts.last,
+		last_drought = frame.i_droughts.last,
 		last_ctx = dom.droughts.last.ctx,
-		max_drought = game.data.i_droughts.max,
+		max_drought = frame.i_droughts.max,
 		max_ctx = dom.droughts.max.ctx;
 
 	if (cur_drought > 0) {
@@ -591,10 +606,10 @@ function renderPiece(event) {
 		);
 	}
 
-	if (game.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
-		if (game.data.i_droughts.max == game.data.i_droughts.cur) {
+	if (frame.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
+		if (frame.i_droughts.max == frame.i_droughts.cur) {
 			dom.droughts.element.classList.remove('panic');
-			dom.droughts.element.classList.add('max_panic'); // doing this to synchronize animation
+			dom.droughts.element.classList.add('max_panic'); // doing this to synchronize animation - not working! -_-'
 		} else {
 			dom.droughts.element.classList.remove('max_panic');
 			dom.droughts.element.classList.add('panic');
@@ -605,14 +620,14 @@ function renderPiece(event) {
 	}
 
 	// das
-	renderDasNBoardStats();
+	renderDasNBoardStats(frame);
 
-	renderNextPiece(event.level, event.next_piece);
+	renderNextPiece(frame.raw.level, frame.raw.preview);
 }
 
 function renderInstantDas(das) {
 	if (!dom.das) return;
-	if (das == null || das < 0) return;
+	if (das == null || das === undefined || das < 0) return;
 
 	dom.das.instant.textContent = das.toString().padStart(2, '0');
 
@@ -630,24 +645,29 @@ function renderInstantDas(das) {
 	}
 }
 
-function renderDasNBoardStats() {
-	if (dom.das) {
-		dom.das.avg.textContent = game.data.das.avg.toFixed(1).padStart(4, '0');
-		dom.das.great.textContent = game.data.das.great.toString().padStart(3, '0');
-		dom.das.ok.textContent = game.data.das.ok.toString().padStart(3, '0');
-		dom.das.bad.textContent = game.data.das.bad.toString().padStart(3, '0');
+function renderDasNBoardStats(frame) {
+	const piece_evt = peek(frame.pieces);
 
-		// assume same width for das and board stats
+	// Function assumes same width for das and board stats
+	// Both das and board stats are renderered in the same function to share the iteration loop
+	// We could separate this to be clearer (loop should be actually quite cheap)
+
+	if (dom.das) {
+		dom.das.avg.textContent = piece_evt.das.avg.toFixed(1).padStart(4, '0');
+		dom.das.great.textContent = piece_evt.das.great.toString().padStart(3, '0');
+		dom.das.ok.textContent = piece_evt.das.ok.toString().padStart(3, '0');
+		dom.das.bad.textContent = piece_evt.das.bad.toString().padStart(3, '0');
+
 		dom.das.ctx.clear();
 	}
 
 	dom.board_stats.ctx.clear();
 
-	const pixel_size = 4;
-	const max_pixels = Math.floor(
-		dom.board_stats.ctx.canvas.width / (pixel_size + 1)
-	);
-	const to_draw = game.pieces.slice(-1 * max_pixels);
+	const pixel_size = 4,
+		max_pixels = Math.floor(
+			dom.board_stats.ctx.canvas.width / (pixel_size + 1)
+		),
+		to_draw = frame.pieces.slice(-1 * max_pixels);
 
 	let cur_x = 0;
 
@@ -682,8 +702,10 @@ function renderDasNBoardStats() {
 
 		const board_stats = piece.board;
 
-		if (piece.lines && piece.lines.num_lines) {
-			dom.board_stats.ctx.fillStyle = LINES[piece.lines.num_lines].color;
+		// draw line clear event in between pieces
+		if (piece.clear && piece.clear.cleared) {
+			dom.board_stats.ctx.fillStyle =
+				LINES[piece.lines.num_lines].color || '#555';
 
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) + pixel_size,
@@ -746,18 +768,22 @@ function renderDasNBoardStats() {
 	}
 }
 
-let stage_currently_rendered = null;
+let last_level, last_field;
 
-function renderStage(level, stage) {
-	const stage_id = `${level}${stage.field_string}`;
+function renderStage(frame) {
+	// If no change, don't draw
+	if (
+		frame.raw.level === last_level &&
+		frame.raw.field.every((cell, idx) => cell === last_field[idx])
+	)
+		return;
 
-	if (stage_id === stage_currently_rendered) return;
-
-	stage_currently_rendered = stage_id;
+	last_level = frame.raw.level;
+	last_field = frame.raw.field;
 
 	const ctx = dom.stage.ctx,
 		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
-		field = stage.field;
+		field = frame.raw.field;
 
 	ctx.clear();
 
