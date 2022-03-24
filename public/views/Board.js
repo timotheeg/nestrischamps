@@ -5,7 +5,7 @@ class Row {
 		this.emptys = [];
 
 		this.cells.forEach((val, idx) => {
-			if (!val) emptys.push(idx);
+			if (!val) this.emptys.push(idx);
 		});
 
 		if (this.emptys.length === 1) {

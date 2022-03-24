@@ -1,9 +1,9 @@
-import '/views/utils.js';
+import { peek } from '/views/utils.js';
 import QueryString from '/js/QueryString.js';
 import Connection from '/js/connection.js';
 import DomRefs from '/views/DomRefs.js';
 import renderBlock from '/views/renderBlock.js';
-import Game from '/views/Game.js';
+import BaseGame from '/views/BaseGame.js';
 
 import {
 	PIECES,
@@ -14,7 +14,6 @@ import {
 	DROUGHT_PANIC_THRESHOLD,
 	DAS_THRESHOLDS,
 } from '/views/constants.js';
-import BaseGame from './BaseGame';
 
 export const BLOCK_PIXEL_SIZE = 3;
 
@@ -185,7 +184,6 @@ function createGame() {
 	game.onLevel = renderLevel;
 	game.onNewgame = onNewGame;
 	game.onValidFrame = onValidFrame;
-	game.onDasLoss = onDasLoss;
 	game.onTetris = () => onTetris();
 	// game.onGameOver = ???
 }
@@ -198,21 +196,6 @@ function onNewGame(frame) {
 function onValidFrame(frame) {
 	renderStage(frame);
 	renderInstantDas(frame.raw.instant_das);
-}
-
-function renderPiece() {
-	// quick check for das loss
-	if (dom.das && transformed.cur_piece_das && transformed.instant_das === 0) {
-		if (game.pieces.length) {
-			game.onDasLoss();
-			renderDasNBoardStats();
-		}
-	}
-
-	if (transformed.level != null) {
-		renderStage(transformed.level, transformed.stage);
-		renderNextPiece(transformed.level, transformed.next_piece);
-	}
 }
 
 function getStats() {
@@ -440,13 +423,6 @@ function renderLines(frame) {
 			pixel_size
 		);
 	}
-
-	// TODO: Do transition warning
-	game.onTransitionWarning = warning_lines => {
-		commentate(
-			`${game.transition_lines - game.data.lines.count} lines till transition`
-		);
-	};
 }
 
 function renderLevel(frame) {
@@ -458,6 +434,13 @@ function renderLevel(frame) {
 
 	dom.next.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
 	dom.next.element.classList.add(`l${frame.raw.level % 10}`);
+
+	// TODO: Do transition warning
+	game.onTransitionWarning = warning_lines => {
+		commentate(
+			`${game.transition_lines - game.data.lines.count} lines till transition`
+		);
+	};
 }
 
 function renderPiece(frame) {
@@ -790,8 +773,8 @@ function renderStage(frame) {
 	for (let x = 0; x < 10; x++) {
 		for (let y = 0; y < 20; y++) {
 			renderBlock(
-				level,
-				field[y * 10 + x],
+				last_level,
+				last_field[y * 10 + x],
 				BLOCK_PIXEL_SIZE,
 				ctx,
 				x * pixels_per_block,

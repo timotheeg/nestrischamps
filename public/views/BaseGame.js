@@ -1,14 +1,14 @@
 // Minimum amount of game tracking to do server side to be able to report games
 import ArrayView from './ArrayView.js';
+import BinaryFrame from '/js/BinaryFrame.js';
 import Board from '/views/Board.js';
-import peek from '/views/utils.js';
+import { peek } from '/views/utils.js';
 import {
 	PIECES,
 	DROUGHT_PANIC_THRESHOLD,
 	SCORE_BASES,
 	DAS_THRESHOLDS,
 	RUNWAY,
-	TRANSITIONS,
 	EFF_LINE_VALUES,
 	CLEAR_ANIMATION_NUM_FRAMES,
 	getRunway,
@@ -67,8 +67,18 @@ class PointData {
 	constructor() {}
 }
 
+const DEFAULT_OPTIONS = {
+	usePieceStats: true,
+	seekableFrames: true,
+};
+
 export default class BaseGame {
-	constructor() {
+	constructor(options) {
+		this.options = {
+			...DEFAULT_OPTIONS,
+			...options,
+		};
+
 		this.start_ts = 0;
 		this.data = null;
 		this.over = false;
@@ -101,20 +111,18 @@ export default class BaseGame {
 	}
 
 	setFrame(frame) {
-		const data = BinaryFrame.parse(frame);
-
-		if (data.score === null || data.lines === null || data.level === null) {
+		if (frame.score === null || frame.lines === null || frame.level === null) {
 			// not in game
 			return;
 		}
 
 		if (!this.data) {
 			// Game initialization frame - Assume good
-			this._doStartGame(data);
+			this._doStartGame(frame);
 			return;
 		}
 
-		if (data.gameid != this.gameid) {
+		if (frame.gameid != this.gameid) {
 			this.end();
 			this.onNewGame(frame);
 			return;
@@ -124,9 +132,14 @@ export default class BaseGame {
 			return;
 		}
 
-		const score_events = this._checkScore(data);
-		const piece_events = this._checkPiece(data);
-		const last_frame = this._addFrame(data);
+		const score_events = this._checkScore(frame);
+		const piece_events = this._checkPiece(frame);
+		const last_frame = this._addFrame(frame);
+
+		// check for das loss
+		if (!this.is_classic_rom && last_frame.raw.instant_das === 0) {
+			peek(this.pieces).das_loss = true;
+		}
 
 		// Fire events as needed
 		if (score_events) {
@@ -148,11 +161,11 @@ export default class BaseGame {
 		}
 	}
 
-	_doStartGame(data) {
-		this.gameid = data.gameid;
-		this.start_ctime = data.ctime;
+	_doStartGame(frame) {
+		this.gameid = frame.gameid;
+		this.start_ctime = frame.ctime;
 		this.start_ts = Date.now();
-		this.is_classic_rom = data.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
+		this.is_classic_rom = frame.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
 
 		this.points = [];
 		this.clears = [];
@@ -167,10 +180,10 @@ export default class BaseGame {
 		// this.data is used to track game stats and data as they progress
 		// snapshots of them will be stored in frames as needed
 		this.data = {
-			start_level: data.level,
+			start_level: frame.level,
 
 			lines,
-			level: data.level,
+			level: frame.level,
 
 			running_stats: {
 				tetris_rate: 0,
@@ -179,9 +192,10 @@ export default class BaseGame {
 			},
 
 			score: {
-				current: data.score,
-				runway: data.score + getRunway(data.level, RUNWAY.GAME, data.lines),
-				tr_runway: data.score + getRunway(level, RUNWAY.TRANSITION, data.lines),
+				current: frame.score,
+				runway: frame.score + getRunway(frame.level, RUNWAY.GAME, frame.lines),
+				tr_runway:
+					frame.score + getRunway(level, RUNWAY.TRANSITION, frame.lines),
 				normalized: 0,
 				transition: null,
 			},
@@ -215,7 +229,7 @@ export default class BaseGame {
 				},
 			},
 
-			num_blocks: this._getNumBlocks(data),
+			num_blocks: this._getNumBlocks(frame),
 			num_pieces: 0,
 		};
 
@@ -246,16 +260,16 @@ export default class BaseGame {
 		this;
 
 		this._recordPointEvent();
-		this._recordLineClearEvent();
-		this._recordPieceEvent();
-
+		this._doPiece(frame);
 		this._addFrame(frame);
 
 		this.pending_score = false;
-		this.pending_piece = true;
-
+		this.pending_piece = false;
 		this.clear_animation_remaining_frames = 0;
-		(this.full_rows = []), (this.last_negative_diff = null), this.onGameStart();
+		this.full_rows = [];
+		this.last_negative_diff = null;
+
+		this.onGameStart();
 	}
 
 	_doGameOver() {
@@ -302,12 +316,12 @@ export default class BaseGame {
 		if (data.score === 999999) {
 			this.pending_score = data.lines != this.data.lines;
 		} else {
-			const high_score = this.data.score / 1600000;
+			const high_score = this.data.score.current / 1600000;
 
 			if (high_score >= 1) {
-				this.pending_score = data.score != this.data.score % 1600000;
+				this.pending_score = data.score != this.data.score.current % 1600000;
 			} else {
-				this.pending_score = data.score != this.data.score;
+				this.pending_score = data.score != this.data.score.current;
 			}
 		}
 	}
@@ -450,7 +464,7 @@ export default class BaseGame {
 			return this._doPiece(data);
 		}
 
-		if (this.is_classic_rom) {
+		if (this.is_classic_rom && this.options.usePieceStats) {
 			// TODO: allow classic rom to work with block count with a query string arg
 			const num_pieces = this._getNumPieces(data);
 
@@ -563,7 +577,7 @@ export default class BaseGame {
 
 		let cur_piece;
 
-		if (this.is_classic_rom) {
+		if (this.is_classic_rom && this.options.usePieceStats) {
 			if (this.data.num_pieces === 0) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece - not great when recording starts mid-game
 			} else {
@@ -703,44 +717,6 @@ export default class BaseGame {
 			};
 		});
 	}
-
-	/*
-	getReport() {
-		if (!this.data) return null;
-
-		let tetris_rate = null;
-		let das_avg = -1;
-
-		if (this.clears.length) {
-			tetris_rate = this.tetris_lines / this.data.lines;
-		}
-
-		if (this.pieces.length && this.data.das.total) {
-			das_avg = this.data.das.total / this.pieces.length;
-		}
-
-		return {
-			start_level: this.start_level,
-			end_level: this.data.level,
-			score: this.data.score,
-			lines: this.data.lines,
-			num_droughts: this.num_droughts,
-			max_drought: this.data.i_droughts.max,
-			duration: this.end_ts
-				? this.end_ctime - this.start_ctime
-				: Date.now() - this.start_ts,
-			transition: this.transition,
-			clears: this.clears.join(''),
-			pieces: this.pieces.join(''),
-
-			tetris_rate,
-			das_avg,
-
-			num_frames: this.num_frames,
-			frame_file: this.frame_file,
-		};
-	}
-	/**/
 
 	getFrame(idx) {
 		return this.frames[idx];
