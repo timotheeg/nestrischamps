@@ -68,7 +68,7 @@ class PointData {
 }
 
 const DEFAULT_OPTIONS = {
-	usePieceStats: true,
+	usePieceStats: false,
 	seekableFrames: true,
 };
 
@@ -182,8 +182,9 @@ export default class BaseGame {
 		this.data = {
 			start_level: frame.level,
 
-			lines,
+			lines: frame.lines,
 			level: frame.level,
+			field: frame.field,
 
 			running_stats: {
 				tetris_rate: 0,
@@ -193,9 +194,11 @@ export default class BaseGame {
 
 			score: {
 				current: frame.score,
-				runway: frame.score + getRunway(frame.level, RUNWAY.GAME, frame.lines),
 				tr_runway:
-					frame.score + getRunway(level, RUNWAY.TRANSITION, frame.lines),
+					frame.score + getRunway(frame.level, RUNWAY.TRANSITION, frame.lines),
+				runway: frame.score + getRunway(frame.level, RUNWAY.GAME, frame.lines),
+				projection:
+					frame.score + getRunway(frame.level, RUNWAY.GAME, frame.lines),
 				normalized: 0,
 				transition: null,
 			},
@@ -220,7 +223,7 @@ export default class BaseGame {
 				count: 0,
 			},
 
-			lines: {},
+			clears: {},
 
 			points: {
 				drops: {
@@ -230,7 +233,6 @@ export default class BaseGame {
 			},
 
 			num_blocks: this._getNumBlocks(frame),
-			num_pieces: 0,
 		};
 
 		PIECES.forEach(name => {
@@ -245,7 +247,7 @@ export default class BaseGame {
 		});
 
 		[1, 2, 3, 4].forEach(name => {
-			this.data.lines[name] = {
+			this.data.clears[name] = {
 				count: 0,
 				lines: 0,
 				percent: 0,
@@ -257,14 +259,17 @@ export default class BaseGame {
 			};
 		});
 
-		this;
-
 		this._recordPointEvent();
-		this._doPiece(frame);
 		this._addFrame(frame);
 
+		// custom "funny" logic to handle start of the game
+		if (this.options.usePieceStats) {
+			this.pending_piece = false;
+		} else {
+			this.pending_piece = this.data.num_blocks != 0;
+		}
+
 		this.pending_score = false;
-		this.pending_piece = false;
 		this.clear_animation_remaining_frames = 0;
 		this.full_rows = [];
 		this.last_negative_diff = null;
@@ -338,11 +343,16 @@ export default class BaseGame {
 
 		let real_score = data.score;
 
-		if (data.score === 999999 && this.data.score + lines_score >= 999999) {
+		if (
+			data.score === 999999 &&
+			this.data.score.current + lines_score >= 999999
+		) {
 			// Compute score beyond maxout
-			real_score = this.data.score + lines_score;
-		} else if (data.score < this.data.score) {
-			const num_wraps = Math.floor((this.data.score + lines_score) / 1600000);
+			real_score = this.data.score.current + lines_score;
+		} else if (data.score < this.data.score.current) {
+			const num_wraps = Math.floor(
+				(this.data.score.current + lines_score) / 1600000
+			);
 
 			if (num_wraps >= 1) {
 				// Using Hex score Game Genie code XNEOOGEX
@@ -355,10 +365,10 @@ export default class BaseGame {
 			}
 		}
 
-		const score_increment = real_score - this.data.score;
+		const score_increment = real_score - this.data.score.current;
 
 		this.data.points.drops.count += Math.max(0, score_increment - lines_score);
-		this.data.lines.count = data.lines;
+		this.data.lines = data.lines;
 
 		// point evet to track snapshot of state
 		// when score changes, lines may have changed
@@ -368,24 +378,24 @@ export default class BaseGame {
 				this.data.score.normalized += EFF_LINE_VALUES[cleared] * cleared;
 
 				// update lines stats for clearing type (single, double, etc...)
-				this.data.lines[cleared].count += 1;
-				this.data.lines[cleared].lines += cleared;
+				this.data.clears[cleared].count += 1;
+				this.data.clears[cleared].lines += cleared;
 
 				// update points stats for clearing type (single, double, etc...)
 				this.data.points[cleared].count += lines_score;
 
 				// update percentages for everyone
 				CLEAR_TYPES.forEach(clear_type => {
-					const clear_stats = this.data.lines[clear_type];
+					const clear_stats = this.data.clears[clear_type];
 					clear_stats.percent = clear_stats.lines / data.lines;
 				});
 			} else {
 				console.warn(`Invalid clear: ${cleared} lines`);
 			}
 
-			this.data.running_stats.tetris_rate = this.data.lines[4].percent;
+			this.data.running_stats.tetris_rate = this.data.clears[4].percent;
 			this.data.running_stats.efficiency =
-				this.data.score.normalized / data.lines / 300;
+				this.data.score.normalized / data.lines;
 
 			if (cleared === 4) {
 				this.data.running_stats.burn = 0;
@@ -422,6 +432,8 @@ export default class BaseGame {
 		this.data.score.current = real_score;
 		this.data.score.runway =
 			real_score + getRunway(this.data.start_level, RUNWAY.GAME, real_score);
+		this.data.score.projection =
+			(this.data.score.runway * this.data.running_stats.efficiency) / 300;
 
 		// record point event with snapshot of all data
 		this._recordPointEvent();
@@ -432,10 +444,10 @@ export default class BaseGame {
 	_recordPointEvent() {
 		const evt = {
 			score: { ...this.data.score },
-			points: POINT_TYPES.reduce(
-				(acc, type) => (acc[type] = { ...this.data.points[type] }),
-				{}
-			),
+			points: POINT_TYPES.reduce((acc, type) => {
+				acc[type] = { ...this.data.points[type] };
+				return acc;
+			}, {}),
 		};
 		this.points.push(evt);
 		this.array_views.points = new ArrayView(this.points);
@@ -445,10 +457,10 @@ export default class BaseGame {
 		const evt = {
 			...this.data.running_stats,
 			cleared,
-			lines: CLEAR_TYPES.reduce(
-				(acc, type) => (acc[type] = { ...this.data.lines[type] }),
-				{}
-			),
+			clears: CLEAR_TYPES.reduce((acc, type) => {
+				acc[type] = { ...this.data.clears[type] };
+				return acc;
+			}, {}),
 		};
 		this.clears.push(evt);
 		this.array_views.clears = new ArrayView(this.clears);
@@ -460,15 +472,15 @@ export default class BaseGame {
 
 	_checkPiece(data) {
 		if (this.pending_piece) {
+			if (!data.preview) return;
+
 			this.pending_piece = false;
 			return this._doPiece(data);
 		}
 
 		if (this.is_classic_rom && this.options.usePieceStats) {
 			// TODO: allow classic rom to work with block count with a query string arg
-			const num_pieces = this._getNumPieces(data);
-
-			if (num_pieces != this.data.num_pieces) {
+			if (this._getNumPieces(data) != this.pieces.length) {
 				this.pending_piece = true;
 			}
 
@@ -522,14 +534,14 @@ export default class BaseGame {
 		// We only use the full rows data for triple and tetris
 		// That is in the hope that we can fire the Tetris Flash
 		if (this.full_rows.length > 2) {
-			const clears = CLEAR_DIFFS[full_rows.length - 1];
+			const clears = CLEAR_DIFFS[this.full_rows.length - 1];
 			const clear_frame_idx = clears.indexOf(block_diff);
 
 			if (clear_frame_idx >= 0) {
 				// we found the clear!
 				this.clear_animation_remaining_frames =
 					CLEAR_ANIMATION_NUM_FRAMES - 1 - clear_frame_idx;
-				this.data.num_blocks -= full_rows.length * 10;
+				this.data.num_blocks -= this.full_rows.length * 10;
 
 				if (this.full_rows.length === 4) {
 					this.onTetris();
@@ -547,9 +559,7 @@ export default class BaseGame {
 			for (let clear = CLEAR_DIFFS.length; clear > 0; clear--) {
 				if (!CLEAR_DIFFS[clear - 1].includes(this.last_negative_diff)) continue;
 
-				const clear_frame_idx = CLEAR_DIFFS[clear - 1].indexOf(
-					diff.stage_blocks
-				);
+				const clear_frame_idx = CLEAR_DIFFS[clear - 1].indexOf(block_diff);
 
 				if (clear_frame_idx < 0) continue;
 
@@ -562,8 +572,8 @@ export default class BaseGame {
 					this.onTetris();
 				}
 
-				full_rows.length = 0;
-				last_negative_diff = null;
+				this.full_rows.length = 0;
+				this.last_negative_diff = null;
 				return;
 			}
 		}
@@ -577,21 +587,26 @@ export default class BaseGame {
 
 		let cur_piece;
 
-		if (this.is_classic_rom && this.options.usePieceStats) {
-			if (this.data.num_pieces === 0) {
+		if (this.pieces.length <= 0) {
+			if (data.cur_piece) {
+				cur_piece = data.curPiece;
+			} else if (this.is_classic_rom) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece - not great when recording starts mid-game
 			} else {
-				cur_piece = this.prior_preview; // should be in sync 🤞
+				console.warn('Unable to detect first piece - picking O arbitrarily');
+				cur_piece = 'O';
 			}
-
-			// record new state
-			this.data.num_pieces = this._getNumPieces(data);
-			PIECES.forEach(p => (this.data[p] = data[p]));
-			this.prior_preview = data.preview;
 		} else {
-			cur_piece = data.cur_piece; // 💪 - could use prior preview too??
+			cur_piece = this.prior_preview; // should be in sync 🤞
+		}
 
-			// record das stats
+		this.prior_preview = data.preview;
+
+		if (this.is_classic_rom) {
+			// fake das stats
+			this.data.das.cur = -1;
+		} else {
+			// record real das stats
 			this.data.das.cur = data.cur_piece_das;
 			this.data.das.total += data.cur_piece_das;
 			this.data.das.avg = this.data.das.total / (this.pieces.length + 1); // +1 because we add piece event to array later
@@ -696,7 +711,7 @@ export default class BaseGame {
 			in_drought: this.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD,
 			index: this.pieces.length,
 			i_droughts: { ...this.data.i_droughts },
-			das: { ...this.data.das },
+			das: { ...this.data.das }, // TODO, make this more efficient for classic rom, no need to carry das object copies
 			pieces: { ...this.data.pieces }, // copy all including pieces - duplicate action below :'(
 			board: new Board(data.field).stats,
 		};

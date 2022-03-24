@@ -1,4 +1,4 @@
-import { peek } from '/views/utils.js';
+import { peek, getPercent } from '/views/utils.js';
 import QueryString from '/js/QueryString.js';
 import Connection from '/js/connection.js';
 import DomRefs from '/views/DomRefs.js';
@@ -185,7 +185,8 @@ function createGame() {
 	game.onNewgame = onNewGame;
 	game.onValidFrame = onValidFrame;
 	game.onTetris = () => onTetris();
-	// game.onGameOver = ???
+
+	window.game = game;
 }
 
 function onNewGame(frame) {
@@ -374,6 +375,8 @@ function renderScore(frame) {
 function renderLines(frame) {
 	const clear_evt = peek(frame.clears);
 
+	if (!clear_evt) return;
+
 	// Do the small boxes first
 	dom.tetris_rate.value.textContent = getPercent(clear_evt.tetris_rate);
 	dom.efficiency.value.textContent = (Math.floor(clear_evt.efficiency) || 0)
@@ -392,14 +395,14 @@ function renderLines(frame) {
 	for (const [num_lines, values] of Object.entries(LINES)) {
 		const { name } = values;
 
-		dom.lines_stats[name].count.textContent = clear_evt.lines[num_lines].count
+		dom.lines_stats[name].count.textContent = clear_evt.clears[num_lines].count
 			.toString()
 			.padStart(3, '0');
-		dom.lines_stats[name].lines.textContent = clear_evt.lines[num_lines].lines
+		dom.lines_stats[name].lines.textContent = clear_evt.clears[num_lines].lines
 			.toString()
 			.padStart(3, '0');
 		dom.lines_stats[name].percent.textContent = getPercent(
-			clear_evt.lines[num_lines].percent
+			clear_evt.clears[num_lines].percent
 		);
 	}
 
@@ -446,6 +449,8 @@ function renderLevel(frame) {
 function renderPiece(frame) {
 	const piece_evt = peek(frame.pieces);
 
+	if (!piece_evt) return;
+
 	dom.pieces.count.textContent = frame.pieces.length
 		.toString()
 		.padStart(3, '0');
@@ -465,7 +470,7 @@ function renderPiece(frame) {
 		draw_start = Math.max(0, frame.pieces.length - max_pixels);
 
 	PIECES.forEach(name => {
-		const piece_data = game.data.pieces[name],
+		const piece_data = piece_evt.pieces[name],
 			ctx = dom.pieces[name].ctx,
 			indexes = piece_data.indexes,
 			drought_color = name == 'I' ? 'orange' : '#747474';
@@ -482,9 +487,9 @@ function renderPiece(frame) {
 		ctx.clear();
 		ctx.transform(1, 0, 0, 1, -draw_start * (pixel_size + 1), 0);
 
-		for (let idx = 0; idx < indexes.length; idx++) {
-			const piece_idx = indexes[idx].index,
-				das = indexes[idx].das,
+		piece_data.indexes.forEach((evt, idx) => {
+			const piece_idx = evt.index,
+				das = evt.das.cur,
 				color = DAS_COLORS[DAS_THRESHOLDS[das]];
 
 			ctx.fillStyle = color;
@@ -493,7 +498,7 @@ function renderPiece(frame) {
 			const last_piece_idx = idx > 0 ? indexes[idx - 1].index : -1;
 
 			if (piece_idx - last_piece_idx - 1 < DROUGHT_PANIC_THRESHOLD) {
-				continue;
+				return;
 			}
 
 			ctx.fillStyle = drought_color;
@@ -503,7 +508,7 @@ function renderPiece(frame) {
 				(piece_idx - last_piece_idx - 1) * (pixel_size + 1) - 1,
 				pixel_size
 			);
-		}
+		});
 
 		// handle current drought if necessary
 		if (piece_data.drought >= DROUGHT_PANIC_THRESHOLD) {
@@ -525,16 +530,16 @@ function renderPiece(frame) {
 	});
 
 	// Render droughts
-	dom.droughts.count.textContent = frame.i_droughts.count
+	dom.droughts.count.textContent = piece_evt.i_droughts.count
 		.toString()
 		.padStart(3, '0');
-	dom.droughts.cur.value.textContent = frame.i_droughts.cur
+	dom.droughts.cur.value.textContent = piece_evt.i_droughts.cur
 		.toString()
 		.padStart(2, '0');
-	dom.droughts.last.value.textContent = frame.i_droughts.last
+	dom.droughts.last.value.textContent = piece_evt.i_droughts.last
 		.toString()
 		.padStart(2, '0');
-	dom.droughts.max.value.textContent = frame.i_droughts.max
+	dom.droughts.max.value.textContent = piece_evt.i_droughts.max
 		.toString()
 		.padStart(2, '0');
 
@@ -542,11 +547,11 @@ function renderPiece(frame) {
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
 
 	const color = 'orange',
-		cur_drought = frame.i_droughts.cur,
+		cur_drought = piece_evt.i_droughts.cur,
 		cur_ctx = dom.droughts.cur.ctx,
-		last_drought = frame.i_droughts.last,
+		last_drought = piece_evt.i_droughts.last,
 		last_ctx = dom.droughts.last.ctx,
-		max_drought = frame.i_droughts.max,
+		max_drought = piece_evt.i_droughts.max,
 		max_ctx = dom.droughts.max.ctx;
 
 	if (cur_drought > 0) {
@@ -589,8 +594,8 @@ function renderPiece(frame) {
 		);
 	}
 
-	if (frame.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
-		if (frame.i_droughts.max == frame.i_droughts.cur) {
+	if (piece_evt.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
+		if (piece_evt.i_droughts.max == piece_evt.i_droughts.cur) {
 			dom.droughts.element.classList.remove('panic');
 			dom.droughts.element.classList.add('max_panic'); // doing this to synchronize animation - not working! -_-'
 		} else {
@@ -630,6 +635,8 @@ function renderInstantDas(das) {
 
 function renderDasNBoardStats(frame) {
 	const piece_evt = peek(frame.pieces);
+
+	if (!piece_evt) return;
 
 	// Function assumes same width for das and board stats
 	// Both das and board stats are renderered in the same function to share the iteration loop
@@ -688,7 +695,7 @@ function renderDasNBoardStats(frame) {
 		// draw line clear event in between pieces
 		if (piece.clear && piece.clear.cleared) {
 			dom.board_stats.ctx.fillStyle =
-				LINES[piece.lines.num_lines].color || '#555';
+				LINES[piece.clear.cleared].color || '#555';
 
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) + pixel_size,
@@ -916,3 +923,14 @@ if (QueryString.get('commentate') === '1') {
 export function setOnTetris(func) {
 	onTetris = func;
 }
+
+window.showFrame = function (idx) {
+	const frame = game.getFrame(idx);
+
+	renderStage(frame);
+	renderInstantDas(frame.raw.instant_das);
+	renderDasNBoardStats(frame);
+	renderScore(frame);
+	renderLines(frame);
+	renderPiece(frame);
+};
