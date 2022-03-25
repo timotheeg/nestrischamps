@@ -68,7 +68,7 @@ class PointData {
 }
 
 const DEFAULT_OPTIONS = {
-	usePieceStats: false,
+	usePieceStats: true,
 	seekableFrames: true,
 };
 
@@ -481,6 +481,7 @@ export default class BaseGame {
 		if (this.is_classic_rom && this.options.usePieceStats) {
 			// TODO: allow classic rom to work with block count with a query string arg
 			if (this._getNumPieces(data) != this.pieces.length) {
+				this.data.field = data.field;
 				this.pending_piece = true;
 			}
 
@@ -714,6 +715,7 @@ export default class BaseGame {
 			das: { ...this.data.das }, // TODO, make this more efficient for classic rom, no need to carry das object copies
 			pieces: { ...this.data.pieces }, // copy all including pieces - duplicate action below :'(
 			board: new Board(data.field).stats,
+			field: data.field, // Recorded for Stack rabbit integration - Ideally we should store the version WITHOUT The falling piece
 		};
 
 		// update tracker arrays

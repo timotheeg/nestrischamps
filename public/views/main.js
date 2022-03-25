@@ -372,10 +372,24 @@ function renderScore(frame) {
 	);
 }
 
-function renderLines(frame) {
-	const clear_evt = peek(frame.clears);
+const fake_data = { count: 0, lines: 0, percent: 0, drought: 0, indexes: [] };
+const fake_clear_evt = {
+	tetris_rate: 0,
+	efficiency: 0,
+	burn: 0,
+	lines: 0,
+	clears: {
+		1: fake_data,
+		2: fake_data,
+		3: fake_data,
+		4: fake_data,
+	},
+};
 
-	if (!clear_evt) return;
+function renderLines(frame) {
+	let clear_evt = peek(frame.clears);
+
+	if (!clear_evt) clear_evt = fake_clear_evt;
 
 	// Do the small boxes first
 	dom.tetris_rate.value.textContent = getPercent(clear_evt.tetris_rate);
@@ -446,10 +460,30 @@ function renderLevel(frame) {
 	};
 }
 
-function renderPiece(frame) {
-	const piece_evt = peek(frame.pieces);
+const fake_piece_evt = {
+	deviation: 0,
+	deviation_28: 0,
+	deviation_56: 0,
+	pieces: {},
+	i_droughts: {
+		count: 0,
+		cur: 0,
+		max: 0,
+		last: 0,
+	},
+	das: {
+		avg: 0,
+		ok: 0,
+		great: 0,
+		bad: 0,
+	},
+};
+PIECES.forEach(name => (fake_piece_evt.pieces[name] = fake_data));
 
-	if (!piece_evt) return;
+function renderPiece(frame) {
+	let piece_evt = peek(frame.pieces);
+
+	if (!piece_evt) piece_evt = fake_piece_evt;
 
 	dom.pieces.count.textContent = frame.pieces.length
 		.toString()
@@ -634,9 +668,9 @@ function renderInstantDas(das) {
 }
 
 function renderDasNBoardStats(frame) {
-	const piece_evt = peek(frame.pieces);
+	let piece_evt = peek(frame.pieces);
 
-	if (!piece_evt) return;
+	if (!piece_evt) piece_evt = fake_piece_evt;
 
 	// Function assumes same width for das and board stats
 	// Both das and board stats are renderered in the same function to share the iteration loop
