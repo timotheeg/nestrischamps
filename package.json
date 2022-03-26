@@ -28,6 +28,7 @@
 		"@twurple/api": "^5.0.18",
 		"@twurple/auth": "^5.0.18",
 		"@twurple/chat": "^5.0.18",
+		"celebrate": "^15.0.1",
 		"connect-pg-simple": "^7.0.0",
 		"country-list": "^2.2.0",
 		"ejs": "^3.1.6",

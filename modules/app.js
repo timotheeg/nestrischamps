@@ -48,11 +48,13 @@ app.use((req, res, next) => {
 });
 
 import authRoutes from '../routes/auth.js';
+import apiRoutes from '../routes/api.js';
 import scoreRoutes from '../routes/score.js';
 import settingsRoute from '../routes/settings.js';
 import defaultRoutes from '../routes/routes.js';
 
 app.use('/auth', authRoutes);
+app.use('/api', apiRoutes);
 app.use('/stats', scoreRoutes);
 app.use('/settings', settingsRoute);
 app.use('', defaultRoutes);
