@@ -28,12 +28,20 @@ const CLEAR_DIFFS = [
 const CLEAR_TYPES = [1, 2, 3, 4];
 const POINT_TYPES = [...CLEAR_TYPES, 'drops'];
 
-function fuzzyBinarySearchWithLowerBias(array, prop, target_value) {
+function get(obj, path) {
+	try {
+		return path.split('.').reduce((acc, prop) => acc[prop], obj);
+	} catch (err) {
+		return;
+	}
+}
+
+function fuzzyBinarySearchWithLowerBias(array, path, target_value) {
 	const last_entry = peek(array);
 
 	// one check for last frame first
-	if (last_entry[prop] <= target_value) {
-		return [array.length - 1, last_entry];
+	if (get(last_entry, path) <= target_value) {
+		return last_entry;
 	}
 
 	let left = 0;
@@ -45,7 +53,7 @@ function fuzzyBinarySearchWithLowerBias(array, prop, target_value) {
 
 		if (mid === left) break;
 
-		const value = array[mid][prop];
+		const value = get(array[mid], path);
 
 		if (value === target_value) break;
 
@@ -56,7 +64,7 @@ function fuzzyBinarySearchWithLowerBias(array, prop, target_value) {
 		}
 	}
 
-	return [mid, array[mid]];
+	return array[mid];
 }
 
 class PieceData {
@@ -80,6 +88,7 @@ export default class BaseGame {
 		};
 
 		this.start_ts = 0;
+		this.duration = 0;
 		this.data = null;
 		this.over = false;
 		this.num_frames = 0;
@@ -130,6 +139,10 @@ export default class BaseGame {
 
 		if (this.over) {
 			return;
+		}
+
+		if (this.frames.length > 0) {
+			this.duration = frame.ctime - this.frames[0].raw.ctime;
 		}
 
 		const score_events = this._checkScore(frame);
@@ -300,6 +313,7 @@ export default class BaseGame {
 
 	_addFrame(data) {
 		const frame = {
+			idx: this.frames.length,
 			raw: data,
 
 			pieces: this.array_views.pieces,
@@ -746,8 +760,8 @@ export default class BaseGame {
 	getFrameAtElapsed(ms /* 0 based */) {
 		return fuzzyBinarySearchWithLowerBias(
 			this.frames,
-			'ctime',
+			'raw.ctime',
 			this.start_ctime + ms
-		)[1];
+		);
 	}
 }

@@ -547,6 +547,7 @@ function renderPiece(frame) {
 	});
 
 	// Render droughts
+	// Since we allow seeking, we redraw everything
 	dom.droughts.count.textContent = piece_evt.i_droughts.count
 		.toString()
 		.padStart(3, '0');
@@ -570,36 +571,28 @@ function renderPiece(frame) {
 		last_ctx = dom.droughts.last.ctx,
 		max_drought = piece_evt.i_droughts.max,
 		max_ctx = dom.droughts.max.ctx;
-
-	if (cur_drought > 0) {
-		if (cur_drought <= max_pixels) {
-			cur_ctx.fillStyle = color;
-			cur_ctx.fillRect(
-				(cur_drought - 1) * (pixel_size + 1),
-				0,
-				pixel_size,
-				cur_ctx.canvas.height
-			);
-		}
-
-		if (max_drought === cur_drought) {
-			// draw the same block current has
-			max_ctx.fillStyle = color;
-			max_ctx.fillRect(
-				(max_drought - 1) * (pixel_size + 1),
-				0,
-				pixel_size,
-				max_ctx.canvas.height
-			);
-		}
-	} else {
-		// clear current but not max (only a new game would clear max)
-		cur_ctx.clear();
+	cur_ctx.clear();
+	cur_ctx.fillStyle = color;
+	for (let idx = Math.min(cur_drought, max_pixels); idx-- > 0; ) {
+		cur_ctx.fillRect(
+			idx * (pixel_size + 1),
+			0,
+			pixel_size,
+			cur_ctx.canvas.height
+		);
 	}
 
-	// we clear and redraw the last gauge,
-	// could be optimize by storing previous value and redraw on change,
-	// but this will do for now
+	max_ctx.clear();
+	max_ctx.fillStyle = color;
+	for (let idx = Math.min(max_drought, max_pixels); idx-- > 0; ) {
+		max_ctx.fillRect(
+			idx * (pixel_size + 1),
+			0,
+			pixel_size,
+			max_ctx.canvas.height
+		);
+	}
+
 	last_ctx.clear();
 	last_ctx.fillStyle = color;
 	for (let idx = Math.min(last_drought, max_pixels); idx-- > 0; ) {
