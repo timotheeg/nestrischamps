@@ -76,7 +76,7 @@ class PointData {
 }
 
 const DEFAULT_OPTIONS = {
-	usePieceStats: true,
+	usePieceStats: false,
 	seekableFrames: true,
 };
 
@@ -319,6 +319,8 @@ export default class BaseGame {
 			pieces: this.array_views.pieces,
 			points: this.array_views.points,
 			clears: this.array_views.clears,
+
+			in_clear_animation: this.clear_animation_remaining_frames >= 0,
 		};
 
 		this.frames.push(frame);

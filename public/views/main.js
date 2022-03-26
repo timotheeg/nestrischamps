@@ -787,7 +787,7 @@ function renderStage(frame, force = false) {
 
 	const piece_evt = peek(frame.pieces);
 
-	if (piece_evt && piece_evt.recommendation) {
+	if (piece_evt && piece_evt.recommendation && !frame.in_clear_animation) {
 		field = addStackRabbitRecommendation(
 			field,
 			piece_evt.piece,
