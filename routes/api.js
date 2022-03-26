@@ -2,7 +2,6 @@ import zlib from 'zlib';
 import fs from 'fs';
 import _ from 'lodash';
 import express from 'express';
-import { celebrate, Joi, Segments } from 'celebrate';
 import got from 'got';
 import ScoreDAO from '../daos/ScoreDAO.js';
 
@@ -69,7 +68,11 @@ router.get('/files/games/:id/:bucket/:filename', async (req, res) => {
 		res.status(400).json({ error: 'Invalid Request' });
 	}
 
-	fs.createReadStream(file_path).pipe(zlib.createGunzip()).pipe(res);
+	fs.createReadStream(
+		`games/${req.params.id}/${req.params.bucket}/${req.params.filename}`
+	)
+		.pipe(zlib.createGunzip())
+		.pipe(res);
 });
 
 router.get('/games/:id', async (req, res) => {
