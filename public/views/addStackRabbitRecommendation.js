@@ -64,9 +64,9 @@ const ROTATIONS = {
 		],
 		[
 			[0, 0, 0, 0],
+			[0, 0, 0, 6],
+			[0, 0, 6, 6],
 			[0, 0, 6, 0],
-			[0, 6, 6, 0],
-			[0, 6, 0, 0],
 		],
 	],
 	O: [
@@ -86,9 +86,9 @@ const ROTATIONS = {
 		],
 		[
 			[0, 0, 0, 0],
-			[0, 5, 0, 0],
-			[0, 5, 5, 0],
 			[0, 0, 5, 0],
+			[0, 0, 5, 5],
+			[0, 0, 0, 5],
 		],
 	],
 	L: [
@@ -150,17 +150,17 @@ export default function addStackRabbitRecommendation(field, piece, placement) {
 			const target_x = offset_x + x;
 			if (target_x < 0 || target_x >= 10) continue;
 			const target_y = offset_y + y;
-			if (target_y < 0 || target_y >= 19) continue;
+			if (target_y < 0 || target_y >= 20) continue;
 
 			const target_idx = target_y * 10 + target_x;
 
 			if (field_copy[target_idx]) {
 				console.warn(
-					`Stack Rabbit pLacement collides with board block at ${target_x}x${target_y}`
+					`Stack Rabbit placement collides with board block at (${target_x},${target_y})`
 				);
+			} else {
+				field_copy[target_idx] = block;
 			}
-
-			field_copy[target_idx] = block;
 		}
 	}
 

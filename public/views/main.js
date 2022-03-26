@@ -5,6 +5,7 @@ import DomRefs from '/views/DomRefs.js';
 import renderBlock from '/views/renderBlock.js';
 import BaseGame from '/views/BaseGame.js';
 import manageReplay from '/views/replay.js';
+import addStackRabbitRecommendation from '/views/addStackRabbitRecommendation.js';
 
 import {
 	PIECES,
@@ -770,9 +771,10 @@ function renderDasNBoardStats(frame) {
 
 let last_level, last_field;
 
-function renderStage(frame) {
+function renderStage(frame, force = false) {
 	// If no change, don't draw
 	if (
+		!force &&
 		frame.raw.level === last_level &&
 		frame.raw.field.every((cell, idx) => cell === last_field[idx])
 	)
@@ -781,9 +783,20 @@ function renderStage(frame) {
 	last_level = frame.raw.level;
 	last_field = frame.raw.field;
 
+	let field = last_field;
+
+	const piece_evt = peek(frame.pieces);
+
+	if (piece_evt && piece_evt.recommendation) {
+		field = addStackRabbitRecommendation(
+			field,
+			piece_evt.piece,
+			piece_evt.recommendation
+		);
+	}
+
 	const ctx = dom.stage.ctx,
-		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
-		field = frame.raw.field;
+		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1);
 
 	ctx.clear();
 
@@ -791,7 +804,7 @@ function renderStage(frame) {
 		for (let y = 0; y < 20; y++) {
 			renderBlock(
 				last_level,
-				last_field[y * 10 + x],
+				field[y * 10 + x],
 				BLOCK_PIXEL_SIZE,
 				ctx,
 				x * pixels_per_block,
@@ -935,13 +948,17 @@ export function setOnTetris(func) {
 }
 
 function showFrame(frame) {
-	renderStage(frame);
+	window.curFrame = frame;
+
+	renderStage(frame, true); // always clear and render...
 	renderInstantDas(frame.raw.instant_das);
 	renderDasNBoardStats(frame);
 	renderScore(frame);
 	renderLines(frame);
 	renderPiece(frame);
 }
+
+window.showFrame = showFrame;
 
 // TODO: Only connect websocket if replay is not active
 if (!manageReplay(showFrame)) {
