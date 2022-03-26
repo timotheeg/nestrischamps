@@ -4,6 +4,7 @@ import Connection from '/js/connection.js';
 import DomRefs from '/views/DomRefs.js';
 import renderBlock from '/views/renderBlock.js';
 import BaseGame from '/views/BaseGame.js';
+import manageReplay from '/views/replay.js';
 
 import {
 	PIECES,
@@ -51,24 +52,6 @@ const API = {
 };
 
 /* check query string to see if video is active */
-
-let connection;
-
-try {
-	connection = new Connection(null, view_meta); // sort of gross T_T
-} catch (_err) {
-	connection = new Connection();
-}
-
-connection.onMessage = function (frame) {
-	try {
-		let [method, ...args] = frame;
-
-		API[method](...args);
-	} catch (e) {
-		console.error(e);
-	}
-};
 
 if (QueryString.get('video') === '1') {
 	const holder = document.querySelector('#video');
@@ -958,13 +941,32 @@ export function setOnTetris(func) {
 	onTetris = func;
 }
 
-window.showFrame = function (idx) {
-	const frame = game.getFrame(idx);
-
+function showFrame(frame) {
 	renderStage(frame);
 	renderInstantDas(frame.raw.instant_das);
 	renderDasNBoardStats(frame);
 	renderScore(frame);
 	renderLines(frame);
 	renderPiece(frame);
-};
+}
+
+// TODO: Only connect websocket if replay is not active
+if (!manageReplay(showFrame)) {
+	let connection;
+
+	try {
+		connection = new Connection(null, view_meta); // sort of gross T_T
+	} catch (_err) {
+		connection = new Connection();
+	}
+
+	connection.onMessage = function (frame) {
+		try {
+			let [method, ...args] = frame;
+
+			API[method](...args);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+}

@@ -1,8 +1,10 @@
-import path from 'path';
+import zlib from 'zlib';
+import fs from 'fs';
+import _ from 'lodash';
 import express from 'express';
-import { pick } from 'lodash';
 import { celebrate, Joi, Segments } from 'celebrate';
 import got from 'got';
+import ScoreDAO from '../daos/ScoreDAO.js';
 
 const STACKRABBIT_URL = 'https://stackrabbit.herokuapp.com/engine';
 
@@ -24,16 +26,14 @@ function parseStackRabbitRequest(query) {
 	if (!query.inputFrameTimeline || !/^[X.]{5}$/.test(query.inputFrameTimeline))
 		throw new Error('Invalid inputFrameTimeline');
 
-	return pick(
-		query[
-			('board',
-			'currentPiece',
-			'nextPiece',
-			'level',
-			'lines, reactionTime',
-			'inputFrameTimeline')
-		]
-	);
+	return _.pick(query, [
+		'board',
+		'currentPiece',
+		'nextPiece',
+		'level',
+		'lines, reactionTime',
+		'inputFrameTimeline',
+	]);
 }
 
 // proxy to stack rabbit engine API
@@ -45,6 +45,42 @@ router.get('/recommendation/:id', async (req, res) => {
 		id: req.params.id,
 		recommendation: data[0],
 	}); // only send top recommendation
+});
+
+router.get('/files/games/:id/:bucket/:filename', async (req, res) => {
+	if (
+		!/^[1-9]\d+$/.test(req.params.id) ||
+		!/^[0-9A-Z]+$/.test(req.params.bucket) ||
+		!/^[0-9A-Z]+.ngf$/.test(req.params.filename)
+	) {
+		res.status(400).json({ error: 'Invalid Request' });
+	}
+
+	fs.createReadStream(file_path).pipe(zlib.createGunzip()).pipe(res);
+});
+
+router.get('/games/:id', async (req, res) => {
+	if (!/^[1-9]\d+$/.test(req.params.id)) {
+		res.status(400).json({ error: 'Invalid Game id' });
+	}
+
+	const game = await ScoreDAO.getAnonymousScore(req.params.id);
+
+	console.log(req);
+
+	if (!game) {
+		res.status(404).json({ error: `Game id ${req.params.id} not found` });
+	}
+
+	if (process.env.GAME_FRAMES_BUCKET) {
+		const base_url = `https://${process.env.GAME_FRAMES_BUCKET}.s3-${process.env.GAME_FRAMES_REGION}.amazonaws.com/`;
+
+		game.frame_url = `${base_url}${game.frame_file}`;
+	} else {
+		game.frame_url = `http://${req.headers.host}/files/${game.frame_file}`;
+	}
+
+	res.json(game);
 });
 
 export default router;

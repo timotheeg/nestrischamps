@@ -8,16 +8,6 @@
 			#points .header {
 				padding-bottom: 6px;
 			}
-
-			#replay {
-				position: absolute;
-				bottom: 0;
-				width: 100%;
-			}
-			#replay input[type='range'] {
-				margin: 0;
-				width: 100%;
-			}
 		</style>
 	</head>
 	<body>
@@ -418,18 +408,6 @@
 			</div>
 		</div>
 		<!-- End Stream BG -->
-		<div id="replay">
-			<div>
-				<button id="prev">Prev Frame</button>
-				<button id="play">Play</button>
-				<button id="pause">Pause</button>
-				<button id="next">Next Frame</button>
-				<button id="next">Ask StackRabbit</button>
-			</div>
-			<div>
-				<input id="timeline" type="range" min="0" max="11" value="7" step="1" />
-			</div>
-		</div>
 
 		<script>
 			const view_meta = new URLSearchParams({
