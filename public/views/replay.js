@@ -270,8 +270,8 @@ async function askStackRabbit() {
 	const params = {
 		level: reference_frame.raw.level <= 18 ? 18 : 19,
 		lines: reference_frame.raw.lines,
-		reactionTime: 24,
-		inputFrameTimeline: 'X....',
+		reactionTime: 24, // this is 400ms delay
+		inputFrameTimeline: 'X....', // this is 12 Hz, should put 10 for NTSC DAS :/
 		currentPiece: piece_evt.piece,
 		nextPiece: reference_frame.raw.preview,
 		board: board.rows
