@@ -9,6 +9,7 @@ import {
 	SCORE_BASES,
 	DAS_THRESHOLDS,
 	RUNWAY,
+	TRANSITIONS,
 	EFF_LINE_VALUES,
 	CLEAR_ANIMATION_NUM_FRAMES,
 	getRunway,
@@ -104,6 +105,7 @@ export default class BaseGame {
 	onLevel() {}
 	onDasLoss() {}
 	onTransition() {}
+	onTransitionWarning() {}
 	onKillScreen() {}
 	onDroughtStart() {}
 	onDroughtEnd() {}
@@ -160,6 +162,8 @@ export default class BaseGame {
 			if (score_events.lines) this.onLines(last_frame);
 			if (score_events.level) this.onLevel(last_frame);
 			if (score_events.transition) this.onTransition(last_frame);
+			if (score_events.transition_warning)
+				this.onTransitionWarning(score_events.transition_warning);
 		}
 
 		if (piece_events) {
@@ -287,6 +291,11 @@ export default class BaseGame {
 		this.full_rows = [];
 		this.last_negative_diff = null;
 
+		this.transition_lines = TRANSITIONS[frame.level] || 0;
+		this.transition_warnings = [30, 20, 10]
+			.map(diff => this.transition_lines - diff)
+			.filter(lines => lines > frame.lines);
+
 		this.onGameStart();
 	}
 
@@ -350,6 +359,7 @@ export default class BaseGame {
 	_doScore(data) {
 		const events = {
 			transition: false,
+			transition_warning: false,
 			level: false,
 			lines: false,
 		};
@@ -417,6 +427,14 @@ export default class BaseGame {
 				this.data.running_stats.burn = 0;
 			} else {
 				this.data.running_stats.burn += cleared;
+			}
+
+			if (
+				this.transition === null &&
+				this.transition_warnings.length &&
+				data.lines > this.transition_warnings[0]
+			) {
+				events.transition_warning = this.transition_warnings.shift();
 			}
 
 			// when line changes, level may have changed

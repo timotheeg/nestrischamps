@@ -123,6 +123,9 @@ function createGame() {
 	game.onNewGame = onNewGame;
 	game.onValidFrame = onValidFrame;
 	game.onTetris = () => onTetris();
+	game.onTransitionWarning = warning_lines => {
+		commentate(`${warning_lines} lines till transition`);
+	};
 
 	window.game = game;
 }
@@ -390,15 +393,6 @@ function renderLevel(frame) {
 
 	dom.next.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
 	dom.next.element.classList.add(`l${frame.raw.level % 10}`);
-
-	// TODO: Do transition warning
-	/*
-	game.onTransitionWarning = warning_lines => {
-		commentate(
-			`${game.transition_lines - game.data.lines.count} lines till transition`
-		);
-	};
-	/**/
 }
 
 const fake_piece_evt = {
