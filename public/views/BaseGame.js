@@ -169,7 +169,7 @@ export default class BaseGame {
 		this.onValidFrame(last_frame);
 
 		// Check board for gameover event (curtain has fallen)
-		if (this.data.num_blocks >= 200) {
+		if (this._getNumBlocks(frame) >= 200) {
 			this.end();
 		}
 	}

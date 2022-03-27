@@ -166,7 +166,7 @@ function createGame() {
 	game.onPiece = renderPiece;
 	game.onLines = renderLines;
 	game.onLevel = renderLevel;
-	game.onNewgame = onNewGame;
+	game.onNewGame = onNewGame;
 	game.onValidFrame = onValidFrame;
 	game.onTetris = () => onTetris();
 
@@ -176,6 +176,7 @@ function createGame() {
 function onNewGame(frame) {
 	createGame();
 	game.setFrame(frame);
+	showFrame(game.frames[0]); // full reset
 }
 
 function onValidFrame(frame) {
@@ -416,7 +417,7 @@ function renderLines(frame) {
 	for (let idx = to_draw.length; idx--; ) {
 		const { cleared, tetris_rate } = to_draw[idx];
 
-		trt_ctx.fillStyle = LINES[cleared].color;
+		trt_ctx.fillStyle = LINES[cleared] ? LINES[cleared].color : '#555';
 		trt_ctx.fillRect(
 			idx * (pixel_size + 1),
 			Math.round((1 - tetris_rate) * y_scale * pixel_size),
@@ -705,8 +706,9 @@ function renderDasNBoardStats(frame) {
 
 		// draw line clear event in between pieces
 		if (piece.clear && piece.clear.cleared) {
-			dom.board_stats.ctx.fillStyle =
-				LINES[piece.clear.cleared].color || '#555';
+			const line_data = LINES[piece.clear.cleared];
+
+			dom.board_stats.ctx.fillStyle = line_data ? line_data.color : '#555';
 
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) + pixel_size,
