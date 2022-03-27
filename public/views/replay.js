@@ -114,8 +114,8 @@ async function startReplay(_showFrame) {
 	refs.nextframe.onclick = nextFrame;
 	refs.prevpiece.onclick = prevPiece;
 	refs.nextpiece.onclick = nextPiece;
-	// refs.slower.onclick = slower;
-	// refs.faster.onclick = faster;
+	refs.slower.onclick = slower;
+	refs.faster.onclick = faster;
 	refs.stackrabbit.onclick = askStackRabbit;
 	refs.getlink.onclick = getLink;
 
@@ -143,10 +143,10 @@ function addReplayControl() {
 	[
 		['prevpiece', '<< Piece'],
 		['prevframe', '< Frame'],
-		// ['slower', 'Slower'],
+		['slower', 'Slower'],
 		['play', 'Play'],
 		['pause', 'Pause'],
-		// ['faster', 'Faster'],
+		['faster', 'Faster'],
 		['nextframe', 'Frame >'],
 		['nextpiece', 'Piece >>'],
 		['stackrabbit', 'Ask StackRabbit'],
@@ -195,7 +195,7 @@ function play() {
 	const cur_time = Date.now();
 
 	start_ctime = reference_game.frames[0].raw.ctime;
-	start_time = cur_time - (cur_ctime - start_ctime);
+	start_time = cur_time - (cur_ctime - start_ctime) / time_scale;
 
 	showNextFrame();
 }
@@ -261,6 +261,7 @@ function prevPiece() {
 async function askStackRabbit() {
 	refs.stackrabbit.disabled = true;
 
+	const then = Date.now();
 	const reqid = `${reference_game._gameid}-${reference_frame.pieces.length}`;
 	const piece_evt = peek(reference_frame.pieces);
 	const url = new URL(`${document.location.origin}/api/recommendation`);
@@ -287,6 +288,8 @@ async function askStackRabbit() {
 	const res = await fetch(url);
 	const data = await res.json();
 
+	console.log(`Fetched StackRabbit recommendation in ${Date.now() - then}ms.`);
+
 	const new_reqid = `${reference_game._gameid}-${reference_frame.pieces.length}`;
 
 	// async sanity protection
@@ -297,6 +300,12 @@ async function askStackRabbit() {
 	refs.stackrabbit.disabled = false;
 
 	doFrame(getElapsedFromReference(reference_frame));
+
+	console.log(
+		`Fetched and renderered StackRabbit recommendation in ${
+			Date.now() - then
+		}ms.`
+	);
 }
 
 function getLink() {
@@ -318,19 +327,20 @@ function getLink() {
 function faster() {
 	// some complication here :(
 	// changing the time scale needs to change the reference start_time too.
-	return;
 
 	if (time_scale >= 1) {
 		time_scale += 1;
 	} else {
 		time_scale = Math.min(1, time_scale * 2);
 	}
+
+	pause();
+	play();
 }
 
 function slower() {
 	// some complication here :(
 	// changing the time scale needs to change the reference start_time too.
-	return;
 
 	console.log('slower', time_scale);
 	if (time_scale > 1) {
@@ -338,6 +348,9 @@ function slower() {
 	} else {
 		time_scale /= 2;
 	}
+
+	pause();
+	play();
 }
 
 function getElapsedFromReference(frame) {
