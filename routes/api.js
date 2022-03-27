@@ -5,7 +5,7 @@ import express from 'express';
 import got from 'got';
 import ScoreDAO from '../daos/ScoreDAO.js';
 
-const STACKRABBIT_URL = 'https://stackrabbit.herokuapp.com/engine';
+const STACKRABBIT_URL = 'https://stackrabbit.herokuapp.com/get-move';
 
 const router = express.Router();
 
@@ -50,7 +50,7 @@ router.get('/recommendation', async (req, res) => {
 	let data;
 	try {
 		const then = Date.now();
-		data = await got(STACKRABBIT_URL, { searchParams }).json();
+		data = await got(STACKRABBIT_URL, { searchParams }).text();
 		console.log(`Stack Rabbit response in ${Date.now() - then}`);
 	} catch (err) {
 		console.error(err);
@@ -58,7 +58,7 @@ router.get('/recommendation', async (req, res) => {
 		return;
 	}
 
-	res.send(data[0]); // only send top recommendation!
+	res.send(data);
 });
 
 router.get('/files/games/:id/:bucket/:filename', async (req, res) => {

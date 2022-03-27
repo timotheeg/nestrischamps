@@ -438,11 +438,13 @@ function renderLevel(frame) {
 	dom.next.element.classList.add(`l${frame.raw.level % 10}`);
 
 	// TODO: Do transition warning
+	/*
 	game.onTransitionWarning = warning_lines => {
 		commentate(
 			`${game.transition_lines - game.data.lines.count} lines till transition`
 		);
 	};
+	/**/
 }
 
 const fake_piece_evt = {
@@ -957,6 +959,7 @@ function showFrame(frame) {
 	renderDasNBoardStats(frame);
 	renderScore(frame);
 	renderLines(frame);
+	renderLevel(frame);
 	renderPiece(frame);
 }
 

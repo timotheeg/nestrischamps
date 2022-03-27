@@ -260,8 +260,7 @@ async function askStackRabbit() {
 	refs.stackrabbit.disabled = true;
 
 	const then = Date.now();
-	const reqid = `${reference_game._gameid}-${reference_frame.pieces.length}`;
-	const piece_evt = peek(reference_frame.pieces);
+	const piece_evt = peek(reference_frame.pieces); // this reference will never change in a game, so it's safe to mutate it later even if the playhead has moved.
 	const url = new URL(`${document.location.origin}/api/recommendation`);
 
 	const board = new Board(piece_evt.field);
@@ -286,21 +285,19 @@ async function askStackRabbit() {
 	console.log(url.toString());
 	const res = await fetch(url);
 	console.log(`Fetched StackRabbit recommendation in ${Date.now() - then}ms.`);
-	const data = await res.json();
-	console.log(`Extracted JSON recommendation in ${Date.now() - then}ms.`);
-
-	const new_reqid = `${reference_game._gameid}-${reference_frame.pieces.length}`;
-
-	// async sanity protection
-	if (new_reqid === reqid) {
-		if (data.adjustments && data.adjustments.length) {
-			piece_evt.recommendation = data.adjustments[0].placement;
-		} else {
-			piece_evt.recommendation = data.placement;
-		}
-	}
+	const data = await res.text();
+	console.log(`Extracted recommendation in ${Date.now() - then}ms: ${data}`);
 
 	refs.stackrabbit.disabled = false;
+
+	const match = data.match(/^(-?\d),(-?\d),(\d{1,2})\|/);
+	if (match) {
+		piece_evt.recommendation = [
+			parseInt(match[1], 10), // rotation (right!)
+			parseInt(match[2], 10), // x shift
+			parseInt(match[3], 10), // y shift
+		];
+	}
 
 	doFrame(getElapsedFromReference(reference_frame));
 }
