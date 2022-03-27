@@ -285,27 +285,26 @@ async function askStackRabbit() {
 		url.searchParams.append(key, value)
 	);
 
+	console.log(url.toString());
 	const res = await fetch(url);
-	const data = await res.json();
-
 	console.log(`Fetched StackRabbit recommendation in ${Date.now() - then}ms.`);
+	const data = await res.json();
+	console.log(`Extracted JSON recommendation in ${Date.now() - then}ms.`);
 
 	const new_reqid = `${reference_game._gameid}-${reference_frame.pieces.length}`;
 
 	// async sanity protection
 	if (new_reqid === reqid) {
-		piece_evt.recommendation = data.placement;
+		if (data.adjustments && data.adjustments.length) {
+			piece_evt.recommendation = data.adjustments[0].placement;
+		} else {
+			piece_evt.recommendation = data.placement;
+		}
 	}
 
 	refs.stackrabbit.disabled = false;
 
 	doFrame(getElapsedFromReference(reference_frame));
-
-	console.log(
-		`Fetched and renderered StackRabbit recommendation in ${
-			Date.now() - then
-		}ms.`
-	);
 }
 
 function getLink() {
@@ -342,7 +341,6 @@ function slower() {
 	// some complication here :(
 	// changing the time scale needs to change the reference start_time too.
 
-	console.log('slower', time_scale);
 	if (time_scale > 1) {
 		time_scale -= 1;
 	} else {

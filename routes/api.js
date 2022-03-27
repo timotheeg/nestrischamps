@@ -49,7 +49,9 @@ router.get('/recommendation', async (req, res) => {
 
 	let data;
 	try {
+		const then = Date.now();
 		data = await got(STACKRABBIT_URL, { searchParams }).json();
+		console.log(`Stack Rabbit response in ${Date.now() - then}`);
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: err.message });
