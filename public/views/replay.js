@@ -205,6 +205,8 @@ function pause() {
 	refs.play.hidden = false;
 	refs.pause.hidden = true;
 
+	refs.getlink.disabled = false;
+
 	play_timeout = clearTimeout(play_timeout);
 
 	doFrame(getElapsedFromReference(reference_frame));
