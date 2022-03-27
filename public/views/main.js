@@ -52,52 +52,6 @@ const API = {
 	frame: (idx, frame) => onFrame(frame),
 };
 
-/* check query string to see if video is active */
-
-if (QueryString.get('video') === '1') {
-	const holder = document.querySelector('#video');
-	const video = document.createElement('video');
-
-	holder.innerHTML = '';
-	holder.appendChild(video);
-
-	let peer;
-
-	connection.onInit = () => {
-		if (peer) {
-			peer.destroy();
-			peer = null;
-		}
-
-		peer = new Peer(connection.id);
-
-		peer.on('call', call => {
-			call.answer(); // assume correct!
-			call.on('stream', remoteStream => {
-				video.srcObject = remoteStream;
-				video.addEventListener(
-					'loadedmetadata',
-					() => {
-						video.play();
-					},
-					{ once: true }
-				);
-			});
-			call.on('error', () => {
-				video.stop();
-				video.srcObject = null;
-			});
-			call.on('close', () => {
-				video.stop();
-				video.srcObject = null;
-			});
-		});
-	};
-}
-
-// get High Scores
-getStats();
-
 function onTetris() {
 	let remaining_frames = 12;
 
@@ -984,4 +938,49 @@ if (!manageReplay(showFrame)) {
 			console.error(e);
 		}
 	};
+
+	/* check query string to see if video is active */
+	if (QueryString.get('video') === '1') {
+		const holder = document.querySelector('#video');
+		const video = document.createElement('video');
+
+		holder.innerHTML = '';
+		holder.appendChild(video);
+
+		let peer;
+
+		connection.onInit = () => {
+			if (peer) {
+				peer.destroy();
+				peer = null;
+			}
+
+			peer = new Peer(connection.id);
+
+			peer.on('call', call => {
+				call.answer(); // assume correct!
+				call.on('stream', remoteStream => {
+					video.srcObject = remoteStream;
+					video.addEventListener(
+						'loadedmetadata',
+						() => {
+							video.play();
+						},
+						{ once: true }
+					);
+				});
+				call.on('error', () => {
+					video.stop();
+					video.srcObject = null;
+				});
+				call.on('close', () => {
+					video.stop();
+					video.srcObject = null;
+				});
+			});
+		};
+	}
+
+	// get High Scores
+	getStats();
 }
