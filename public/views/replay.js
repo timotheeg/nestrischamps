@@ -290,7 +290,7 @@ async function askStackRabbit() {
 
 	refs.stackrabbit.disabled = false;
 
-	const match = data.match(/^(-?\d),(-?\d),(\d{1,2})\|/);
+	const match = data.match(/^(-?\d+),(-?\d+),(\d+)\|/);
 	if (match) {
 		piece_evt.recommendation = [
 			parseInt(match[1], 10), // rotation (right!)
