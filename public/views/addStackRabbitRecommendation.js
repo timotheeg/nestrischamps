@@ -154,11 +154,7 @@ export default function addStackRabbitRecommendation(field, piece, placement) {
 
 			const target_idx = target_y * 10 + target_x;
 
-			if (field_copy[target_idx]) {
-				console.warn(
-					`Stack Rabbit placement collides with board block at (${target_x},${target_y})`
-				);
-			} else {
+			if (!field_copy[target_idx]) {
 				field_copy[target_idx] = block;
 			}
 		}

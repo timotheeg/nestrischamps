@@ -150,7 +150,7 @@ export default class BaseGame {
 		const last_frame = this._addFrame(frame);
 
 		// Check for das loss
-		if (!this.is_classic_rom && last_frame.raw.instant_das === 0) {
+		if (last_frame.raw.instant_das === 0 && this.pieces.length >= 1) {
 			peek(this.pieces).das_loss = true;
 		}
 
