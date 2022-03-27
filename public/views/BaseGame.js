@@ -149,7 +149,7 @@ export default class BaseGame {
 		const piece_events = this._checkPiece(frame);
 		const last_frame = this._addFrame(frame);
 
-		// check for das loss
+		// Check for das loss
 		if (!this.is_classic_rom && last_frame.raw.instant_das === 0) {
 			peek(this.pieces).das_loss = true;
 		}
@@ -606,7 +606,7 @@ export default class BaseGame {
 
 		if (this.pieces.length <= 0) {
 			if (data.cur_piece) {
-				cur_piece = data.curPiece;
+				cur_piece = data.cur_piece;
 			} else if (this.is_classic_rom) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece - not great when recording starts mid-game
 			} else {

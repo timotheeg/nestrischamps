@@ -165,19 +165,24 @@ export default class ArrayView {
 	}
 
 	slice(start, end) {
-		// TODO: make sure no "hidden" values from the source are returned
-
-		if (end === undefined) {
-			if (start < 0) {
-				return this._source.slice(this.length + start, this.length);
-			} else {
-				return this._source.slice(this._start_index + start, this.length);
-			}
+		// normalizes indexes before calling the native slice
+		if (end === undefined || end > this.length) {
+			end = this.length;
+		} else if (end < 0) {
+			end = this.length + end;
+			if (end <= 0) return [];
 		}
+
+		if (start < 0) {
+			start = this.length + start;
+			if (start < 0) start = 0;
+		}
+
+		if (start >= end) return [];
 
 		return this._source.slice(
 			this._start_index + start,
-			this._start_index + start + end
+			this._start_index + end
 		);
 	}
 

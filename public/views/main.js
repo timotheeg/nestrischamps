@@ -681,7 +681,7 @@ function renderDasNBoardStats(frame) {
 
 		if (dom.das) {
 			const das = piece.das,
-				color = DAS_COLORS[DAS_THRESHOLDS[das]];
+				color = DAS_COLORS[DAS_THRESHOLDS[das.cur]];
 
 			if (piece.das_loss) {
 				dom.das.ctx.fillStyle = '#550000';
@@ -696,7 +696,7 @@ function renderDasNBoardStats(frame) {
 			dom.das.ctx.fillStyle = color;
 			dom.das.ctx.fillRect(
 				idx * (pixel_size + 1),
-				(16 - das) * (pixel_size - 1),
+				(16 - das.cur) * (pixel_size - 1),
 				pixel_size,
 				pixel_size
 			);
