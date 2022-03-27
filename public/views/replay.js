@@ -182,9 +182,9 @@ function play() {
 	playing = true;
 	refs.play.hidden = true;
 	refs.pause.hidden = false;
-	refs.stackrabbit.hidden = true;
-	refs.getlink.hidden = true;
 
+	refs.stackrabbit.disabled = true;
+	refs.getlink.disabled = true;
 	refs.prevframe.disabled = true;
 	refs.nextframe.disabled = true;
 	refs.prevpiece.disabled = true;
@@ -204,8 +204,6 @@ function pause() {
 	playing = false;
 	refs.play.hidden = false;
 	refs.pause.hidden = true;
-	refs.stackrabbit.hidden = false;
-	refs.getlink.hidden = false;
 
 	play_timeout = clearTimeout(play_timeout);
 
