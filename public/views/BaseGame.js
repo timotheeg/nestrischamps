@@ -430,7 +430,7 @@ export default class BaseGame {
 			}
 
 			if (
-				this.transition === null &&
+				this.data.score.transition === null &&
 				this.transition_warnings.length &&
 				data.lines > this.transition_warnings[0]
 			) {
@@ -442,12 +442,12 @@ export default class BaseGame {
 				events.level = true;
 				this.data.level = data.level;
 
-				if (this.transition === null) {
+				if (this.data.score.transition === null) {
 					events.transition = true;
 					this.data.score.transition = real_score;
 					this.data.score.tr_runway = real_score;
 				}
-			} else if (this.transition === null) {
+			} else if (this.data.score.transition === null) {
 				this.data.score.tr_runway =
 					real_score +
 					getRunway(this.data.start_level, RUNWAY.TRANSITION, data.lines);
@@ -465,7 +465,7 @@ export default class BaseGame {
 		// update score
 		this.data.score.current = real_score;
 		this.data.score.runway =
-			real_score + getRunway(this.data.start_level, RUNWAY.GAME, real_score);
+			real_score + getRunway(this.data.start_level, RUNWAY.GAME, data.lines);
 		this.data.score.projection =
 			(this.data.score.runway * this.data.running_stats.efficiency) / 300;
 
