@@ -627,12 +627,14 @@ export default class BaseGame {
 				cur_piece = data.cur_piece;
 			} else if (this.is_classic_rom) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece - not great when recording starts mid-game
-			} else {
-				console.warn('Unable to detect first piece - picking O arbitrarily');
-				cur_piece = 'O';
 			}
 		} else {
 			cur_piece = this.prior_preview; // should be in sync 🤞
+		}
+
+		if (!cur_piece) {
+			console.warn('Unable to detect first piece - picking O arbitrarily 🤷');
+			cur_piece = 'O';
 		}
 
 		this.prior_preview = data.preview;
