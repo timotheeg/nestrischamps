@@ -366,9 +366,9 @@ VNTPYN</pre>
 		<p>NestrisChamps first and foremost is meant for individual players. There's nothing to install locally to use NestrisChamps, and while the complexity of setup is a little high initially, it is a one time affair. Nestrischamps aims to provide features valuable for individual players.</p>
 		<ul>
 			<li>Details stats are tracked per game so if a game "feels" odd, you can check what happened. Maybe there were multiple droughts going on at the same time for example.</li>
-			<li>The renderers are sharpener of sorts, allowing you to stream in crisp HD glory.</li>
+			<li>The renderers are sharpeners of sorts, allowing you to stream in crisp HD glory.</li>
 			<li>All your scores and stats are tracked. You can see your progress over time.</li>
-			<li>You can replay and share your games with very little bandwidth.</li>
+			<li>You can replay and share your games, and ask <a href="https://github.com/GregoryCannon/StackRabbit">StackRabbit AI</a> for placement advice when you review your games.</li>
 			<li>You can make your own renderers to use whatever branding you want.</li>
 		</ul>
 
@@ -391,7 +391,7 @@ VNTPYN</pre>
 		<p>Doing that specifically addresses the issues with classical restreaming:</p>
 		<ul>
 			<li>Players send data streams, not video streams. That requires very little bandwidth (in the order of 4KB/s or less).</li>
-			<li>Data streams are real time, without Twitch as an intermediary video broadcaster. When both players start a game at the same time on count-down, the match in the game hosts' stream will show both players starting at the same time.</li>
+			<li>Data streams are real time, without Twitch as an intermediary video broadcaster. When both players start a game at the same time on count-down, the match in the game host's stream will show both players starting at the same time.</li>
 			<li>The renderer draws players' fields in exactly the same way. Perfect alignment and matching colors for a consistent render in crisp HD.</li>
 			<li>The comparative stats just work out of the box. The game host can chose amongst a variety of layouts with more or less stats, to their taste.</li>
 		</ul>
@@ -399,19 +399,19 @@ VNTPYN</pre>
 
 		<h3>Maturity of the technology</h3>
 		<p>Nestrischamps works with data. Accurate score differential can only be achieved if the data streams of both players are clean and correct.</p>
-		<p>Sadly, not all video capture devices are equal. Players use whatever they have. Video capture and processing software are both mature technologies. OBS can handle pretty much any video input device. For a restreamer, it means the final look of the stream may not be consistent, and may not have comparative stats, but it's unlikely to "not work" or display invalid data.</p>
-		<p>NestrisChamps on the other hand needs to do more than just capture the input video. It needs to process it, and understand what is in it. This makes it dependent on the quality of the capture itself. Some video capture device just cannot output a clear or bright enough video stream, which makes it impossible to get clean data from it (causing much frustration to the player who is trying to calibrate).</p>
+		<p>Sadly, not all video capture devices are equal, and players use whatever they have. Video capture and processing software are both mature technologies. OBS can handle pretty much any video input device. For a restreamer, that means the final look of the stream may not be consistent, and may not have comparative stats, but it's unlikely to "not work", or display invalid data.</p>
+		<p>NestrisChamps on the other hand needs to do more than just capture the video input. It needs to process it, and understand what is in it. This makes it dependent on the quality of the capture itself. Some video capture devices just cannot output a clear or bright enough video stream, which makes it impossible to get clean data from it (causing much frustration to the player who is trying to calibrate).</p>
 		<p>Still, this is the trade off Nestrischamps makes. If you want to use NestrisChamps' features for yourself, then eventually make sure you have a good capture setup.</p>
 
 		<h3>Good Capture Setup</h3>
 		<p>One major problem with analogue AV and video capture devices is power loss. The NES video output is meant to be consumed by the TV, where it'll display a clear image.</p>
-		<p>When doing AV capture with a simple <a href="https://www.amazon.com/Splitter-Female-Adapter-Composite-Output/dp/B09226KT7G">AV Y-splitter cable</a>, the video output power is split between the TV and the capture device, making them both receive a much darker image than the console output. This is not a problem for raw capture, and OBS provides some filter to brighten the image again. Not so for NestrisChamps (so far anyway). Because of that, depending on the NES output, and the quality of the capture device, the input is sometimes just too drak for Nestrischamps to use, and it is impossible to produce a clean data stream from it.</p>
+		<p>When doing AV capture with a simple <a href="https://www.amazon.com/Splitter-Female-Adapter-Composite-Output/dp/B09226KT7G">AV Y-splitter cable</a>, the video output power is split between the TV and the capture device, making them both receive a much darker image than intended. This is not too big of a problem for raw capture, and OBS provides some filter to brighten the image again. Not so for NestrisChamps (so far anyway). Because of that, depending on the NES output, and the quality of the capture device, the input is sometimes just too dark for Nestrischamps to use, and it is impossible to produce a clean data stream from it.</p>
 		<p>There are several ways to work around that. One might be to use the <a href="https://www.nintendo.com/consumer/systems/nes/hook_rftotv_nes.jsp">NES RF output</a> for the TV, and the AV output for the capture device only. Doing that ensures that the AV signal's is not split and there's no power loss.</p>
 		<p>Another method might be to use a <a href="https://www.amazon.com/gp/product/B00CAIBQ9E">powered splitter</a>, with which the NES video output is amplified to be delivered in full to both the TV and the video capture device. In both cases, since the signal received by the capture device will be of good quality (i.e. not too dark), NestrisChamps will have an easier time processing it.</p>
 
 		<h3>Future improvements</h3>
 		<p>One might say that if NestrisChamps "competes" with systems for which the quality of the output signal is not an issue, then it is on NestrisChamps' court to make itself work in the same conditions. That's a fair criticism.</p>
-		<p>And it may happen! NestrisChamps is open source, and used actively by a number of people, some of whom are very technical. It is possible that eventually NestrisChamps will have an "magical" capture calibration wizard, and a way to work on low quality input, with some image correction and smart detection. Sadly there's no ETA for those. NestrisChamps is still the work of one person (me!), and NestrisChamps works great for me, so while I try to address issues and make NestrisChamps more robust, it takes time to make progress, time I have unfortunately rather little of. Because of that, for the moment NestrisChamps is a tool that requires users to spend an initial effort to setup. But once you get past that initial time/effort investment, using NestrisChamps is very easy, and supporting competitions is a nice bonus that would just work.</p>
+		<p>And That may happen! NestrisChamps is open source, and used actively by a number of people, some of whom are very technical. It is possible that eventually NestrisChamps will have an "magical" capture calibration wizard, and a way to work on low quality input, with some image correction and smart detection. Sadly there's no ETA for those. NestrisChamps is still the work of one person (me!), and NestrisChamps works great for me, so while I try to address issues and make NestrisChamps more robust, it takes time to make progress, time I have unfortunately rather little of. Because of that, for the moment NestrisChamps is a tool that requires users to spend an initial effort to setup. But once you get past that initial time/effort investment, using NestrisChamps is very easy, and supporting competitions is a nice bonus that would just work.</p>
 	</div>
 </section>
 
