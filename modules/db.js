@@ -43,6 +43,9 @@ if (process.env.IS_PUBLIC_SERVER) {
 
 	pool = new pg.Pool({
 		connectionString: process.env.DATABASE_URL,
+		ssl: {
+			rejectUnauthorized: false,
+		},
 	});
 
 	// the pool will emit an error on behalf of any idle clients

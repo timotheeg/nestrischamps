@@ -1,9 +1,11 @@
-import '/views/utils.js';
+import { peek, getPercent } from '/views/utils.js';
 import QueryString from '/js/QueryString.js';
 import Connection from '/js/connection.js';
 import DomRefs from '/views/DomRefs.js';
 import renderBlock from '/views/renderBlock.js';
-import Game from '/views/Game.js';
+import BaseGame from '/views/BaseGame.js';
+import manageReplay from '/views/replay.js';
+import addStackRabbitRecommendation from '/views/addStackRabbitRecommendation.js';
 
 import {
 	PIECES,
@@ -50,71 +52,7 @@ const API = {
 	frame: (idx, frame) => onFrame(frame),
 };
 
-/* check query string to see if video is active */
-
-let connection;
-
-try {
-	connection = new Connection(null, view_meta); // sort of gross T_T
-} catch (_err) {
-	connection = new Connection();
-}
-
-connection.onMessage = function (frame) {
-	try {
-		let [method, ...args] = frame;
-
-		API[method](...args);
-	} catch (e) {
-		console.error(e);
-	}
-};
-
-if (QueryString.get('video') === '1') {
-	const holder = document.querySelector('#video');
-	const video = document.createElement('video');
-
-	holder.innerHTML = '';
-	holder.appendChild(video);
-
-	let peer;
-
-	connection.onInit = () => {
-		if (peer) {
-			peer.destroy();
-			peer = null;
-		}
-
-		peer = new Peer(connection.id);
-
-		peer.on('call', call => {
-			call.answer(); // assume correct!
-			call.on('stream', remoteStream => {
-				video.srcObject = remoteStream;
-				video.addEventListener(
-					'loadedmetadata',
-					() => {
-						video.play();
-					},
-					{ once: true }
-				);
-			});
-			call.on('error', () => {
-				video.stop();
-				video.srcObject = null;
-			});
-			call.on('close', () => {
-				video.stop();
-				video.srcObject = null;
-			});
-		});
-	};
-}
-
-// get High Scores
-getStats();
-
-let onTetris = function () {
+function onTetris() {
 	let remaining_frames = 12;
 
 	function steps() {
@@ -128,7 +66,7 @@ let onTetris = function () {
 	}
 
 	window.requestAnimationFrame(steps);
-};
+}
 
 const user_colors = {};
 
@@ -168,333 +106,41 @@ function onMessage(entry) {
 		dom.chat.element.scrollHeight - dom.chat.element.clientHeight;
 }
 
-const LINE_CLEAR_IGNORE_FRAMES = 7;
-
-let game = null,
-	gameid = -1,
-	last_valid_state = null,
-	pending_delay_frames = 1,
-	last_piece_count = 0,
-	cur_piece = null,
-	pending_game = true,
-	pending_piece = -1,
-	pending_line = -1,
-	line_animation_remaining_frames = 0,
-	full_rows = [],
-	last_negative_diff = null,
-	game_frames = [];
-
-function getTotalPieceCount(event) {
-	return PIECES.reduce((acc, p) => acc + (event[p] || 0), 0);
-}
-
-function getCurPiece(transformed) {
-	if (transformed.cur_piece) return transformed.cur_piece;
-
-	if (transformed.total_piece_count === 1) {
-		return PIECES.find(p => transformed[p] === 1);
-	}
-
-	// compare with last valid_state
-	// return first difference (assumes +1 jump .. could verify that or print warning?)
-	// if there are frame drop, this may be incorrect...
-	const piece = PIECES.find(p => transformed[p] != last_valid_state[p]);
-
-	// piece may beundefined, at the beginning of capture for classic rom
-	// the capture starts mid-game, there's no cur_piece supplied
-	// the piece counts is arbitrary
-	// we *could* try to inspect the board, but that's much more complicated :/
-
-	return piece || 'I'; // Just pick something...
-}
+let game = null;
 
 function onFrame(event, debug) {
-	// game_frames.push({ ...event });
+	if (!game) createGame();
 
-	// transformation
-	const transformed = {
-		gameid: event.gameid,
-		diff: {
-			cleared_lines: 0,
-			score: 0,
-			cur_piece_das: false,
-			cur_piece: false,
-			next_piece: false,
-			stage_blocks: 0,
-		},
-
-		score: event.score,
-		lines: event.lines,
-		level: event.level,
-
-		next_piece: event.preview,
-
-		T: event.T,
-		J: event.J,
-		Z: event.Z,
-		O: event.O,
-		S: event.S,
-		L: event.L,
-		I: event.I,
-
-		cur_piece_das: dom.das != null ? event.cur_piece_das : -1,
-		instant_das: dom.das != null ? event.instant_das : -1,
-		cur_piece: event.cur_piece,
-
-		stage: {
-			num_blocks: event.field.reduce((acc, v) => acc + (v ? 1 : 0), 0),
-			field: event.field,
-			field_string: event.field.join(''),
-		},
-	};
-
-	if (debug) {
-		debugger;
-	}
-
-	if (pending_game) {
-		if (game && game.id === transformed.gameid) {
-			// this discards which are considered within a game
-			// but don't actually show gameplay
-			// i.e. rocket animation, score, menu
-			return;
-		}
-
-		pending_game = false;
-
-		game = new Game(transformed);
-		gameid = game.id;
-
-		game.onTransitionWarning = warning_lines => {
-			commentate(
-				`${game.transition_lines - game.data.lines.count} lines till transition`
-			);
-		};
-
-		clearStage();
-		renderPiece(transformed);
-		renderLine();
-
-		last_valid_state = { ...transformed };
-
-		line_animation_remaining_frames = 0;
-		last_negative_diff = null;
-		full_rows = [];
-
-		pending_piece = 1;
-	}
-
-	if (!game.over) {
-		// game is ongoing, quick check on possible transitions
-
-		// Is game over?
-		if (transformed.stage.num_blocks === 200) {
-			reportGame(game);
-			pending_game = true;
-
-			renderStage(transformed.level, transformed.stage);
-			return;
-		}
-
-		// Has new game started before player waited for the fill animation?
-		if (game.id != transformed.gameid) {
-			reportGame(game);
-			pending_game = true;
-			return;
-		}
-	}
-
-	renderInstantDas(transformed.instant_das);
-
-	// quick check for das loss
-	if (dom.das && transformed.cur_piece_das && transformed.instant_das === 0) {
-		if (game.pieces.length) {
-			game.onDasLoss();
-			renderDasNBoardStats();
-		}
-	}
-
-	// populate diff
-	const diff = transformed.diff;
-
-	diff.level = transformed.level !== last_valid_state.level;
-	diff.cleared_lines = transformed.lines - last_valid_state.lines;
-	diff.score = transformed.score - last_valid_state.score;
-	diff.cur_piece_das =
-		transformed.cur_piece_das !== last_valid_state.cur_piece_das;
-	diff.cur_piece = transformed.cur_piece !== last_valid_state.cur_piece;
-	diff.next_piece = transformed.next_piece !== last_valid_state.next_piece;
-	diff.stage_blocks =
-		transformed.stage.num_blocks - last_valid_state.stage.num_blocks;
-
-	// check if a change to cur_piece_stats
-	if (--pending_piece === 0) {
-		transformed.total_piece_count = getTotalPieceCount(transformed);
-
-		if (
-			transformed.next_piece &&
-			(transformed.cur_piece || transformed.total_piece_count)
-		) {
-			transformed.cur_piece = getCurPiece(transformed);
-
-			game.onPiece(transformed);
-			renderPiece(transformed);
-
-			Object.assign(last_valid_state, {
-				cur_piece: transformed.cur_piece,
-				next_piece: transformed.next_piece,
-				cur_piece_das: transformed.cur_piece_das,
-
-				T: transformed.T,
-				J: transformed.J,
-				Z: transformed.Z,
-				O: transformed.O,
-				S: transformed.S,
-				L: transformed.L,
-				I: transformed.I,
-			});
-		} else {
-			pending_piece = 1; // check again next frame
-		}
-	}
-
-	// check for score change or score stayed at 999999 but the line count changed.
-	if (--pending_line === 0) {
-		if (
-			transformed.score != null &&
-			transformed.lines != null &&
-			transformed.level != null &&
-			(diff.score > 0 || // standard game progression
-				(diff.cleared_lines > 0 &&
-					(transformed.score == 999999 || // score frozen on maxout
-						diff.score < 0))) // 1.6M wraparound
-		) {
-			game.onLine(transformed);
-			renderLine();
-
-			Object.assign(last_valid_state, {
-				score: transformed.score,
-				lines: transformed.lines,
-				level: transformed.level,
-			});
-		} else {
-			pending_line = 1; // check again next frame
-		}
-	} else if (pending_line < 0 && diff.score) {
-		// always wait one frame to read score and line
-		// this is to protect against transition blur causing incorrect OCR
-		pending_line = pending_delay_frames;
-	}
-
-	if (transformed.level != null) {
-		renderStage(transformed.level, transformed.stage);
-		renderNextPiece(transformed.level, transformed.next_piece);
-	}
-
-	if (game.over) {
-		// no need to count block, we just need to wait for the next game now
-		return;
-	}
-
-	if (last_valid_state.stage.field_string == transformed.stage.field_string)
-		return;
-
-	last_valid_state.stage.field_string = transformed.stage.field_string;
-
-	if (line_animation_remaining_frames-- > 0) return;
-
-	if (diff.stage_blocks === 0) {
-		// piece is still falling, compute full rows
-		full_rows = Array(20)
-			.fill()
-			.map((_, ridx) => {
-				return Array(10)
-					.fill()
-					.every((_, cidx) => transformed.stage.field[ridx * 10 + cidx])
-					? ridx
-					: 0;
-			})
-			.filter(v => v);
-
-		last_negative_diff = null;
-	} else if (diff.stage_blocks === 4) {
-		last_valid_state.stage = transformed.stage;
-		pending_piece = pending_delay_frames;
-		last_negative_diff = null;
-		full_rows.length = 0;
-	} else if (
-		diff.stage_blocks > 0 ||
-		!all_possible_negative_diffs.includes(diff.stage_blocks)
-	) {
-		// unexpected negative value, ignore
-		last_negative_diff = null;
-		full_rows.length = 0;
-	} else {
-		// when we reach here diff.stage_blocks is a *valid* negative diff
-
-		// We only use the full rows data for triple and tetris
-		// That is in the hope that we can fire the Tetris Flash
-		if (full_rows.length > 2) {
-			const clears = clear_diffs[full_rows.length - 1];
-			const clear_frame_idx = clears.indexOf(diff.stage_blocks);
-
-			if (clear_frame_idx >= 0) {
-				// we found the clear!
-				line_animation_remaining_frames =
-					LINE_CLEAR_IGNORE_FRAMES - 1 - clear_frame_idx;
-				last_valid_state.stage.num_blocks -= full_rows.length * 10;
-
-				if (full_rows.length === 4) {
-					onTetris();
-				}
-
-				full_rows.length = 0;
-				last_negative_diff = null;
-				return;
-			}
-		} else if (
-			last_negative_diff != null &&
-			last_negative_diff != diff.stage_blocks
-		) {
-			// inspect all clear diffs to see if we have 2 consecutive values
-			for (let clear = clear_diffs.length; clear > 0; clear--) {
-				if (!clear_diffs[clear - 1].includes(last_negative_diff)) continue;
-
-				const clear_frame_idx = clear_diffs[clear - 1].indexOf(
-					diff.stage_blocks
-				);
-
-				if (clear_frame_idx < 0) continue;
-
-				// we found the clear!
-				line_animation_remaining_frames =
-					LINE_CLEAR_IGNORE_FRAMES - 1 - clear_frame_idx;
-				last_valid_state.stage.num_blocks -= clear * 10;
-
-				if (clear === 4) {
-					onTetris();
-				}
-
-				full_rows.length = 0;
-				last_negative_diff = null;
-				return;
-			}
-		}
-
-		last_negative_diff = diff.stage_blocks;
-		full_rows.length = 0;
-	}
+	game.setFrame(event);
 }
 
-const all_possible_negative_diffs = [
-	-2, -4, -6, -8, -10, -12, -16, -18, -20, -24, -30, -32, -40,
-];
-const clear_diffs = [
-	[-2, -4, -6, -8, -10],
-	[-4, -8, -12, -16, -20],
-	[-6, -12, -18, -24, -30],
-	[-8, -16, -24, -32, -40],
-];
+function createGame() {
+	game = new BaseGame();
+	game.onScore = renderScore;
+	game.onPiece = renderPiece;
+	game.onLines = renderLines;
+	game.onLevel = renderLevel;
+	game.onNewGame = onNewGame;
+	game.onValidFrame = onValidFrame;
+	game.onTetris = () => onTetris();
+	game.onGameOver = getStats;
+	game.onTransitionWarning = warning_lines => {
+		commentate(`${warning_lines} lines till transition`);
+	};
+
+	window.game = game;
+}
+
+function onNewGame(frame) {
+	createGame();
+	game.setFrame(frame);
+	showFrame(game.frames[0]); // full reset
+}
+
+function onValidFrame(frame) {
+	renderStage(frame);
+	renderInstantDas(frame.raw.instant_das);
+}
 
 function getStats() {
 	let m;
@@ -511,15 +157,6 @@ function getStats() {
 			.then(renderPastGamesAndPBs)
 			.catch(console.error); // noop
 	}
-}
-
-function reportGame(game) {
-	if (game.reported) return;
-
-	game.setGameOver();
-	game.reported = true;
-
-	getStats();
 }
 
 function clearStage() {
@@ -625,49 +262,27 @@ function renderPastGamesAndPBs(data) {
 	});
 }
 
-// return a [0-1] ratio as percentage over exacly 3 characters: 100 OR XX%
-function getPercent(ratio) {
-	const percent = Math.round(ratio * 100);
+function renderScore(frame) {
+	const point_evt = peek(frame.points);
 
-	return percent >= 100 ? '100' : percent.toString().padStart(2, '0') + '%';
-}
-
-function renderLine() {
-	// massive population of all data shown on screen
-
-	// do the small boxes first
-	dom.tetris_rate.value.textContent = getPercent(game.data.lines[4].percent);
-	dom.efficiency.value.textContent = (
-		Math.floor(game.data.score.normalized / game.data.lines.count) || 0
-	)
-		.toString()
-		.padStart(3, '0');
-	dom.level.value.textContent = game.data.level.toString().padStart(2, '0');
-	dom.burn.count.textContent = game.data.burn.toString().padStart(2, '0');
-
-	const line_count = game.data.lines.count.toString().padStart(3, '0');
-
-	if (dom.lines) {
-		dom.lines.count.textContent = line_count;
-	}
-
-	dom.score.current.textContent = game.data.score.current
+	dom.score.current.textContent = point_evt.score.current
 		.toString()
 		.padStart(6, '0')
 		.padStart(7, ' ');
 
 	if (dom.runway) {
-		if (game.data.score.transition === null) {
+		if (point_evt.score.transition === null) {
 			dom.runway.header.textContent = 'TRAN RUNWAY';
-			dom.runway.value.textContent = game.data.score.tr_runway.toString();
+			dom.runway.value.textContent = point_evt.score.tr_runway.toString();
 		} else {
 			dom.runway.header.textContent = 'GAME RUNWAY';
-			dom.runway.value.textContent = game.data.score.runway.toString();
+			dom.runway.value.textContent = point_evt.score.runway.toString();
 		}
 	}
 
-	if (game.data.score.transition) {
-		dom.score.transition.textContent = game.data.score.transition
+	// could be moved to a different method renderTransition()
+	if (point_evt.score.transition) {
+		dom.score.transition.textContent = point_evt.score.transition
 			.toString()
 			.padStart(6, '0')
 			.padStart(7, ' ');
@@ -675,53 +290,92 @@ function renderLine() {
 		dom.score.transition.textContent = '------';
 	}
 
-	// lines and points
-	dom.lines_stats.count.textContent = line_count;
-	dom.points.count.textContent = game.data.score.current; // .toString().padStart(6, '0').padStart(7, ' ');
+	// Update points by clear type (and drops)
+	// Necessary because percentage of each change at every point increase
+	dom.points.count.textContent = point_evt.score.current;
 
 	for (const [num_lines, values] of Object.entries(LINES)) {
 		const { name } = values;
 
-		dom.lines_stats[name].count.textContent = game.data.lines[num_lines].count
-			.toString()
-			.padStart(3, '0');
-		dom.lines_stats[name].lines.textContent = game.data.lines[num_lines].lines
-			.toString()
-			.padStart(3, '0');
-		dom.lines_stats[name].percent.textContent = getPercent(
-			game.data.lines[num_lines].percent
-		);
-
-		dom.points[name].count.textContent = game.data.points[num_lines].count
+		dom.points[name].count.textContent = point_evt.points[num_lines].count
 			.toString()
 			.padStart(6, '0')
 			.padStart(7, ' ');
 		dom.points[name].percent.textContent = getPercent(
-			game.data.points[num_lines].percent
+			point_evt.points[num_lines].percent
 		);
 	}
 
-	dom.points.drops.count.textContent = game.data.points.drops.count
+	dom.points.drops.count.textContent = point_evt.points.drops.count
 		.toString()
 		.padStart(6, '0')
 		.padStart(7, ' ');
 	dom.points.drops.percent.textContent = getPercent(
-		game.data.points.drops.percent
+		point_evt.points.drops.percent
 	);
+}
 
-	dom.lines_stats.trt_ctx.clear();
+const fake_data = { count: 0, lines: 0, percent: 0, drought: 0, indexes: [] };
+const fake_clear_evt = {
+	tetris_rate: 0,
+	efficiency: 0,
+	burn: 0,
+	lines: 0,
+	clears: {
+		1: fake_data,
+		2: fake_data,
+		3: fake_data,
+		4: fake_data,
+	},
+};
 
+function renderLines(frame) {
+	let clear_evt = peek(frame.clears);
+
+	if (!clear_evt) clear_evt = fake_clear_evt;
+
+	// Do the small boxes first
+	dom.tetris_rate.value.textContent = getPercent(clear_evt.tetris_rate);
+	dom.efficiency.value.textContent = (Math.floor(clear_evt.efficiency) || 0)
+		.toString()
+		.padStart(3, '0');
+	dom.burn.count.textContent = clear_evt.burn.toString().padStart(2, '0');
+
+	const line_count = frame.raw.lines.toString().padStart(3, '0');
+
+	if (dom.lines) {
+		dom.lines.count.textContent = line_count;
+	}
+
+	dom.lines_stats.count.textContent = line_count;
+
+	for (const [num_lines, values] of Object.entries(LINES)) {
+		const { name } = values;
+
+		dom.lines_stats[name].count.textContent = clear_evt.clears[num_lines].count
+			.toString()
+			.padStart(3, '0');
+		dom.lines_stats[name].lines.textContent = clear_evt.clears[num_lines].lines
+			.toString()
+			.padStart(3, '0');
+		dom.lines_stats[name].percent.textContent = getPercent(
+			clear_evt.clears[num_lines].percent
+		);
+	}
+
+	// Update running tetris rate graph
 	const trt_ctx = dom.lines_stats.trt_ctx,
 		pixel_size = 4,
 		max_pixels = Math.floor(trt_ctx.canvas.width / (pixel_size + 1)),
 		y_scale = (trt_ctx.canvas.height - pixel_size) / pixel_size,
-		cur_x = 0,
-		to_draw = game.line_events.slice(-1 * max_pixels);
+		to_draw = frame.clears.slice(-1 * max_pixels);
+
+	trt_ctx.clear();
 
 	for (let idx = to_draw.length; idx--; ) {
-		const { num_lines, tetris_rate } = to_draw[idx];
+		const { cleared, tetris_rate } = to_draw[idx];
 
-		trt_ctx.fillStyle = LINES[num_lines].color;
+		trt_ctx.fillStyle = LINES[cleared] ? LINES[cleared].color : '#555';
 		trt_ctx.fillRect(
 			idx * (pixel_size + 1),
 			Math.round((1 - tetris_rate) * y_scale * pixel_size),
@@ -729,36 +383,64 @@ function renderLine() {
 			pixel_size
 		);
 	}
-
-	// set piece colors for piece distribution
-	dom.pieces.element.classList.remove(`l${(game.data.level - 1) % 10}`);
-	dom.pieces.element.classList.add(`l${game.data.level % 10}`);
-
-	dom.next.element.classList.remove(`l${(game.data.level - 1) % 10}`);
-	dom.next.element.classList.add(`l${game.data.level % 10}`);
 }
 
-function renderPiece(event) {
-	dom.pieces.count.textContent = game.data.pieces.count
+function renderLevel(frame) {
+	dom.level.value.textContent = frame.raw.level.toString().padStart(2, '0');
+
+	// Level update for
+	dom.pieces.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
+	dom.pieces.element.classList.add(`l${frame.raw.level % 10}`);
+
+	dom.next.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
+	dom.next.element.classList.add(`l${frame.raw.level % 10}`);
+}
+
+const fake_piece_evt = {
+	deviation: 0,
+	deviation_28: 0,
+	deviation_56: 0,
+	pieces: {},
+	i_droughts: {
+		count: 0,
+		cur: 0,
+		max: 0,
+		last: 0,
+	},
+	das: {
+		avg: 0,
+		ok: 0,
+		great: 0,
+		bad: 0,
+	},
+};
+PIECES.forEach(name => (fake_piece_evt.pieces[name] = fake_data));
+
+function renderPiece(frame) {
+	let piece_evt = peek(frame.pieces);
+
+	if (!piece_evt) piece_evt = fake_piece_evt;
+
+	dom.pieces.count.textContent = frame.pieces.length
 		.toString()
 		.padStart(3, '0');
 
-	dom.pieces.deviation.textContent = (game.data.pieces.deviation * 100).toFixed(
+	// Render deviation data
+	dom.pieces.deviation.textContent = (piece_evt.deviation * 100).toFixed(1);
+	dom.pieces.deviation_28.textContent = (piece_evt.deviation_28 * 100).toFixed(
 		1
 	);
-	dom.pieces.deviation_28.textContent = (
-		game.data.pieces.deviation_28 * 100
-	).toFixed(1);
-	dom.pieces.deviation_56.textContent = (
-		game.data.pieces.deviation_56 * 100
-	).toFixed(1);
+	dom.pieces.deviation_56.textContent = (piece_evt.deviation_56 * 100).toFixed(
+		1
+	);
 
+	// Render piece distribution graphs
 	let pixel_size = 4,
 		max_pixels = Math.floor(dom.pieces.T.ctx.canvas.width / (pixel_size + 1)),
-		draw_start = Math.max(0, game.pieces.length - max_pixels);
+		draw_start = Math.max(0, frame.pieces.length - max_pixels);
 
 	PIECES.forEach(name => {
-		const piece_data = game.data.pieces[name],
+		const piece_data = piece_evt.pieces[name],
 			ctx = dom.pieces[name].ctx,
 			indexes = piece_data.indexes,
 			drought_color = name == 'I' ? 'orange' : '#747474';
@@ -775,9 +457,9 @@ function renderPiece(event) {
 		ctx.clear();
 		ctx.transform(1, 0, 0, 1, -draw_start * (pixel_size + 1), 0);
 
-		for (let idx = 0; idx < indexes.length; idx++) {
-			const piece_idx = indexes[idx].index,
-				das = indexes[idx].das,
+		piece_data.indexes.forEach((evt, idx) => {
+			const piece_idx = evt.index,
+				das = evt.das.cur,
 				color = DAS_COLORS[DAS_THRESHOLDS[das]];
 
 			ctx.fillStyle = color;
@@ -786,7 +468,7 @@ function renderPiece(event) {
 			const last_piece_idx = idx > 0 ? indexes[idx - 1].index : -1;
 
 			if (piece_idx - last_piece_idx - 1 < DROUGHT_PANIC_THRESHOLD) {
-				continue;
+				return;
 			}
 
 			ctx.fillStyle = drought_color;
@@ -796,7 +478,7 @@ function renderPiece(event) {
 				(piece_idx - last_piece_idx - 1) * (pixel_size + 1) - 1,
 				pixel_size
 			);
-		}
+		});
 
 		// handle current drought if necessary
 		if (piece_data.drought >= DROUGHT_PANIC_THRESHOLD) {
@@ -817,18 +499,18 @@ function renderPiece(event) {
 		}
 	});
 
-	// droughts
-	// TODO: Use Canvas rather than span
-	dom.droughts.count.textContent = game.data.i_droughts.count
+	// Render droughts
+	// Since we allow seeking, we redraw everything
+	dom.droughts.count.textContent = piece_evt.i_droughts.count
 		.toString()
 		.padStart(3, '0');
-	dom.droughts.cur.value.textContent = game.data.i_droughts.cur
+	dom.droughts.cur.value.textContent = piece_evt.i_droughts.cur
 		.toString()
 		.padStart(2, '0');
-	dom.droughts.last.value.textContent = game.data.i_droughts.last
+	dom.droughts.last.value.textContent = piece_evt.i_droughts.last
 		.toString()
 		.padStart(2, '0');
-	dom.droughts.max.value.textContent = game.data.i_droughts.max
+	dom.droughts.max.value.textContent = piece_evt.i_droughts.max
 		.toString()
 		.padStart(2, '0');
 
@@ -836,42 +518,34 @@ function renderPiece(event) {
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
 
 	const color = 'orange',
-		cur_drought = game.data.i_droughts.cur,
+		cur_drought = piece_evt.i_droughts.cur,
 		cur_ctx = dom.droughts.cur.ctx,
-		last_drought = game.data.i_droughts.last,
+		last_drought = piece_evt.i_droughts.last,
 		last_ctx = dom.droughts.last.ctx,
-		max_drought = game.data.i_droughts.max,
+		max_drought = piece_evt.i_droughts.max,
 		max_ctx = dom.droughts.max.ctx;
-
-	if (cur_drought > 0) {
-		if (cur_drought <= max_pixels) {
-			cur_ctx.fillStyle = color;
-			cur_ctx.fillRect(
-				(cur_drought - 1) * (pixel_size + 1),
-				0,
-				pixel_size,
-				cur_ctx.canvas.height
-			);
-		}
-
-		if (max_drought === cur_drought) {
-			// draw the same block current has
-			max_ctx.fillStyle = color;
-			max_ctx.fillRect(
-				(max_drought - 1) * (pixel_size + 1),
-				0,
-				pixel_size,
-				max_ctx.canvas.height
-			);
-		}
-	} else {
-		// clear current but not max (only a new game would clear max)
-		cur_ctx.clear();
+	cur_ctx.clear();
+	cur_ctx.fillStyle = color;
+	for (let idx = Math.min(cur_drought, max_pixels); idx-- > 0; ) {
+		cur_ctx.fillRect(
+			idx * (pixel_size + 1),
+			0,
+			pixel_size,
+			cur_ctx.canvas.height
+		);
 	}
 
-	// we clear and redraw the last gauge,
-	// could be optimize by storing previous value and redraw on change,
-	// but this will do for now
+	max_ctx.clear();
+	max_ctx.fillStyle = color;
+	for (let idx = Math.min(max_drought, max_pixels); idx-- > 0; ) {
+		max_ctx.fillRect(
+			idx * (pixel_size + 1),
+			0,
+			pixel_size,
+			max_ctx.canvas.height
+		);
+	}
+
 	last_ctx.clear();
 	last_ctx.fillStyle = color;
 	for (let idx = Math.min(last_drought, max_pixels); idx-- > 0; ) {
@@ -883,10 +557,10 @@ function renderPiece(event) {
 		);
 	}
 
-	if (game.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
-		if (game.data.i_droughts.max == game.data.i_droughts.cur) {
+	if (piece_evt.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
+		if (piece_evt.i_droughts.max == piece_evt.i_droughts.cur) {
 			dom.droughts.element.classList.remove('panic');
-			dom.droughts.element.classList.add('max_panic'); // doing this to synchronize animation
+			dom.droughts.element.classList.add('max_panic'); // doing this to synchronize animation - not working! -_-'
 		} else {
 			dom.droughts.element.classList.remove('max_panic');
 			dom.droughts.element.classList.add('panic');
@@ -897,14 +571,14 @@ function renderPiece(event) {
 	}
 
 	// das
-	renderDasNBoardStats();
+	renderDasNBoardStats(frame);
 
-	renderNextPiece(event.level, event.next_piece);
+	renderNextPiece(frame.raw.level, frame.raw.preview);
 }
 
 function renderInstantDas(das) {
 	if (!dom.das) return;
-	if (das == null || das < 0) return;
+	if (das == null || das === undefined || das < 0) return;
 
 	dom.das.instant.textContent = das.toString().padStart(2, '0');
 
@@ -922,24 +596,31 @@ function renderInstantDas(das) {
 	}
 }
 
-function renderDasNBoardStats() {
-	if (dom.das) {
-		dom.das.avg.textContent = game.data.das.avg.toFixed(1).padStart(4, '0');
-		dom.das.great.textContent = game.data.das.great.toString().padStart(3, '0');
-		dom.das.ok.textContent = game.data.das.ok.toString().padStart(3, '0');
-		dom.das.bad.textContent = game.data.das.bad.toString().padStart(3, '0');
+function renderDasNBoardStats(frame) {
+	let piece_evt = peek(frame.pieces);
 
-		// assume same width for das and board stats
+	if (!piece_evt) piece_evt = fake_piece_evt;
+
+	// Function assumes same width for das and board stats
+	// Both das and board stats are renderered in the same function to share the iteration loop
+	// We could separate this to be clearer (loop should be actually quite cheap)
+
+	if (dom.das) {
+		dom.das.avg.textContent = piece_evt.das.avg.toFixed(1).padStart(4, '0');
+		dom.das.great.textContent = piece_evt.das.great.toString().padStart(3, '0');
+		dom.das.ok.textContent = piece_evt.das.ok.toString().padStart(3, '0');
+		dom.das.bad.textContent = piece_evt.das.bad.toString().padStart(3, '0');
+
 		dom.das.ctx.clear();
 	}
 
 	dom.board_stats.ctx.clear();
 
-	const pixel_size = 4;
-	const max_pixels = Math.floor(
-		dom.board_stats.ctx.canvas.width / (pixel_size + 1)
-	);
-	const to_draw = game.pieces.slice(-1 * max_pixels);
+	const pixel_size = 4,
+		max_pixels = Math.floor(
+			dom.board_stats.ctx.canvas.width / (pixel_size + 1)
+		),
+		to_draw = frame.pieces.slice(-1 * max_pixels);
 
 	let cur_x = 0;
 
@@ -951,7 +632,7 @@ function renderDasNBoardStats() {
 
 		if (dom.das) {
 			const das = piece.das,
-				color = DAS_COLORS[DAS_THRESHOLDS[das]];
+				color = DAS_COLORS[DAS_THRESHOLDS[das.cur]];
 
 			if (piece.das_loss) {
 				dom.das.ctx.fillStyle = '#550000';
@@ -966,7 +647,7 @@ function renderDasNBoardStats() {
 			dom.das.ctx.fillStyle = color;
 			dom.das.ctx.fillRect(
 				idx * (pixel_size + 1),
-				(16 - das) * (pixel_size - 1),
+				(16 - das.cur) * (pixel_size - 1),
 				pixel_size,
 				pixel_size
 			);
@@ -974,8 +655,11 @@ function renderDasNBoardStats() {
 
 		const board_stats = piece.board;
 
-		if (piece.lines && piece.lines.num_lines) {
-			dom.board_stats.ctx.fillStyle = LINES[piece.lines.num_lines].color;
+		// draw line clear event in between pieces
+		if (piece.clear && piece.clear.cleared) {
+			const line_data = LINES[piece.clear.cleared];
+
+			dom.board_stats.ctx.fillStyle = line_data ? line_data.color : '#555';
 
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) + pixel_size,
@@ -1038,25 +722,41 @@ function renderDasNBoardStats() {
 	}
 }
 
-let stage_currently_rendered = null;
+let last_level, last_field;
 
-function renderStage(level, stage) {
-	const stage_id = `${level}${stage.field_string}`;
+function renderStage(frame, force = false) {
+	// If no change, don't draw
+	if (
+		!force &&
+		frame.raw.level === last_level &&
+		frame.raw.field.every((cell, idx) => cell === last_field[idx])
+	)
+		return;
 
-	if (stage_id === stage_currently_rendered) return;
+	last_level = frame.raw.level;
+	last_field = frame.raw.field;
 
-	stage_currently_rendered = stage_id;
+	let field = last_field;
+
+	const piece_evt = peek(frame.pieces);
+
+	if (piece_evt && piece_evt.recommendation && !frame.in_clear_animation) {
+		field = addStackRabbitRecommendation(
+			field,
+			piece_evt.piece,
+			piece_evt.recommendation
+		);
+	}
 
 	const ctx = dom.stage.ctx,
-		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
-		field = stage.field;
+		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1);
 
 	ctx.clear();
 
 	for (let x = 0; x < 10; x++) {
 		for (let y = 0; y < 20; y++) {
 			renderBlock(
-				level,
+				last_level,
 				field[y * 10 + x],
 				BLOCK_PIXEL_SIZE,
 				ctx,
@@ -1198,4 +898,84 @@ if (QueryString.get('commentate') === '1') {
 
 export function setOnTetris(func) {
 	onTetris = func;
+}
+
+function showFrame(frame) {
+	window.curFrame = frame;
+
+	renderStage(frame, true); // always clear and render...
+	renderInstantDas(frame.raw.instant_das);
+	renderDasNBoardStats(frame);
+	renderScore(frame);
+	renderLines(frame);
+	renderLevel(frame);
+	renderPiece(frame);
+}
+
+window.showFrame = showFrame;
+
+// TODO: Only connect websocket if replay is not active
+if (!manageReplay(showFrame)) {
+	let connection;
+
+	try {
+		connection = new Connection(null, view_meta); // sort of gross T_T
+	} catch (_err) {
+		connection = new Connection();
+	}
+
+	connection.onMessage = function (frame) {
+		try {
+			let [method, ...args] = frame;
+
+			API[method](...args);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
+	/* check query string to see if video is active */
+	if (QueryString.get('video') === '1') {
+		const holder = document.querySelector('#video');
+		const video = document.createElement('video');
+
+		holder.innerHTML = '';
+		holder.appendChild(video);
+
+		let peer;
+
+		connection.onInit = () => {
+			if (peer) {
+				peer.destroy();
+				peer = null;
+			}
+
+			peer = new Peer(connection.id);
+
+			peer.on('call', call => {
+				call.answer(); // assume correct!
+				call.on('stream', remoteStream => {
+					video.srcObject = remoteStream;
+					video.addEventListener(
+						'loadedmetadata',
+						() => {
+							video.play();
+						},
+						{ once: true }
+					);
+				});
+				call.on('error', () => {
+					video.stop();
+					video.srcObject = null;
+				});
+				call.on('close', () => {
+					video.stop();
+					video.srcObject = null;
+				});
+			});
+		};
+	}
+
+	// get High Scores
+	getStats();
 }

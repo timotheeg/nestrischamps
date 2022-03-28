@@ -23,9 +23,7 @@ export function css_size(css_pixel_width) {
 	return parseInt(css_pixel_width.replace(/px$/, ''), 10);
 }
 
-export function peek(arr, offset) {
-	if (offset === undefined) offset = 0;
-
+export function peek(arr, offset = 0) {
 	return arr[arr.length - (offset + 1)];
 }
 

@@ -1,0 +1,168 @@
+const { drop, countBy } = require("lodash")
+const { transformTwitchApiResponse } = require("twitch-api-call/lib")
+
+frames[
+    frame {
+        raw {
+            // shared
+            ctime
+            score,
+            lines,
+            level,
+            board
+            preview,
+
+            // classic
+            piece_stats: {
+                T,
+                J,
+                Z,
+                O,
+                S,
+                L,
+                I,
+            },
+
+            // das trainer
+            instant_das,
+            cur_piece_das,
+            cur_piece
+
+            // augmentation data
+            // piece_events, // supplied on get
+            pieces_length,
+        }
+
+        // array views into main arrays
+        pieces[]
+        points[]
+
+
+        T,J,Z,O,S,L,I {
+            count,
+            percent,
+            drought,
+            indexes[]
+        }
+    }
+]
+
+pieces[
+    piece {
+        index,
+        piece: TJZOSLI,
+        preview: TJZOSLI,
+        in_drought: true|false,
+
+        das_stats {
+            spawn,
+            total,
+            average,
+            loss: true|false,
+            das_stats {
+                great,
+                good,
+                bad
+            }
+        }
+
+        distribution_stats {
+            deviation,
+            deviation_28
+            deviation_56
+        }
+
+        i_drought_stats {
+            count,
+            current,
+            last,
+            max,
+        }
+
+        board_stats {
+            height,
+            tetris_ready: true|false,
+            clean_slope: true|false,
+            double_well: true|false,
+        }
+    }
+]
+
+T,J,Z,O,S,L,I {
+    percent,
+    drought,
+    indexes[]
+}
+
+points[
+    point {
+        index,
+        game_stats {
+            lines,
+            level
+            tetris_lines,
+        }
+
+        line: 0,1,2,3,4 // can be larger, but means undefined clear
+        points:
+
+        score {
+            current,
+            normalized,
+            transition,
+            runway,
+            tr_runway
+        },
+
+        performance_stats {
+            tetris_rate,
+            efficiency
+        },
+
+        line_stats {
+            single {
+                count,
+                lines,
+                percent
+            },
+            double {
+                count,
+                lines,
+                percent
+            },
+            triple {
+                count,
+                lines,
+                percent
+            },
+            tetris {
+                count,
+                lines,
+                percent
+            },
+        },
+
+        point_stats {
+            drop {
+                count,
+                percent
+            },
+            single {
+                count,
+                percent
+            },
+            double {
+                count,
+                percent
+            },
+            triple {
+                count,
+                percent
+            },
+            tetris {
+                count,
+                percent
+            }
+        }
+    }
+]

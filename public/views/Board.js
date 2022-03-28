@@ -1,17 +1,24 @@
 class Row {
-	constructor(line, row_idx) {
-		this.cells = line.split('');
+	constructor(cells, row_idx) {
+		this.cells = cells;
 		this.idx = row_idx;
-
-		const emptys = (this.emptys = []);
+		this.emptys = [];
 
 		this.cells.forEach((val, idx) => {
-			if (val === '0') emptys.push(idx);
+			if (!val) this.emptys.push(idx);
 		});
 
-		if (emptys.length === 1) {
-			this.well = emptys[0] + 1;
+		if (this.emptys.length === 1) {
+			this.well = this.emptys[0];
 		}
+	}
+
+	isEmpty() {
+		return this.emptys.length >= 10;
+	}
+
+	hasWell() {
+		return this.well !== undefined;
 	}
 }
 
@@ -20,23 +27,18 @@ class Column {
 		this.cells = cells;
 		this.idx = col_idx;
 
-		const len = this.cells.length;
+		this.top_fill_idx = this.cells.findIndex(cell => cell); // return index of first non-empty cell
 
-		this.top_fill_idx = len;
-
-		for (let idx = 0; idx < len; idx++) {
-			if (this.cells[idx] != '0') {
-				this.top_fill_idx = idx;
-				break;
-			}
+		if (this.top_fill_idx <= -1) {
+			this.top_fill_idx = this.cells.length;
 		}
 
-		this.has_holes = this.cells.indexOf('0', this.top_fill_idx) > -1;
+		this.has_holes = this.cells.indexOf(0, this.top_fill_idx) > -1;
 	}
 }
 
 export default class Board {
-	constructor(board_str) {
+	constructor(field) {
 		this.rows = Array();
 
 		const columns = Array(10)
@@ -50,15 +52,18 @@ export default class Board {
 			let row;
 
 			if (!top_seen) {
-				row = new Row(board_str.substr(10 * yidx, 10), 20 - this.rows.length);
+				row = new Row(
+					field.slice(10 * yidx, 10 * yidx + 10),
+					20 - this.rows.length
+				);
 
-				if (row.emptys.length === 10) {
+				if (row.isEmpty()) {
 					top_seen = true;
 					top_idx = yidx + 1;
 				}
 			} else {
 				// removes falling piece
-				row = new Row('0000000000', this.rows.length);
+				row = new Row([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], this.rows.length);
 			}
 
 			this.rows.unshift(row);
@@ -68,7 +73,7 @@ export default class Board {
 			});
 		}
 
-		this.columns = columns.map((col, idx) => new Column(col, idx));
+		this.columns = columns.map((cells, idx) => new Column(cells, idx));
 
 		this.tetris_top_row = this.getTetrisTopRow();
 
@@ -82,12 +87,13 @@ export default class Board {
 
 	getTetrisTopRow() {
 		for (let idx = this.rows.length; idx-- > 4; ) {
+			// we check against 4 because for each row, we inspect the 3 rows below
 			const row = this.rows[idx];
 
-			if (!row.well) continue;
+			if (!row.hasWell()) continue;
 
 			// blocked below and free above
-			if (this.columns[row.well - 1].top_fill_idx !== idx + 1) continue;
+			if (this.columns[row.well].top_fill_idx !== idx + 1) continue;
 
 			// well is 4 row deep
 			if (
@@ -120,14 +126,14 @@ export default class Board {
 		if (
 			!this.tetris_top_row ||
 			this.tetris_top_row.idx === 0 || // tetris ready all the way to the top
-			this.tetris_top_row.well != 10
+			this.tetris_top_row.well != 9
 		)
 			return false;
 
 		for (let idx = this.tetris_top_row.idx; idx--; ) {
 			let prev_row = this.rows[idx];
 
-			if (prev_row.well === 10) continue; // tetris well still going!
+			if (prev_row.well === 9) continue; // tetris well still going!
 			if (
 				prev_row.emptys.length == 2 &&
 				prev_row.emptys[0] === 8 &&
