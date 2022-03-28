@@ -123,6 +123,7 @@ function createGame() {
 	game.onNewGame = onNewGame;
 	game.onValidFrame = onValidFrame;
 	game.onTetris = () => onTetris();
+	game.onGameOver = getStats;
 	game.onTransitionWarning = warning_lines => {
 		commentate(`${warning_lines} lines till transition`);
 	};
