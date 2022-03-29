@@ -115,7 +115,19 @@ const reference_ui = document.querySelector('#reference_ui'),
 	frame_data = document.querySelector('#frame_data'),
 	perf_data = document.querySelector('#perf_data'),
 	capture = document.querySelector('#capture'),
-	adjustments = document.querySelector('#adjustments');
+	adjustments = document.querySelector('#adjustments'),
+	brightness_slider = document.querySelector(
+		'#image_corrections .brightness input'
+	),
+	brightness_value = document.querySelector(
+		'#image_corrections .brightness span'
+	),
+	brightness_reset = document.querySelector('#image_corrections .brightness a'),
+	contrast_slider = document.querySelector(
+		'#image_corrections .contrast input'
+	),
+	contrast_value = document.querySelector('#image_corrections .contrast span'),
+	contrast_reset = document.querySelector('#image_corrections .contrast a');
 const IN_GAME = {};
 const IN_MENU = {};
 
@@ -465,6 +477,68 @@ function onFocusAlarmChanged() {
 }
 
 focus_alarm.addEventListener('change', onFocusAlarmChanged);
+
+// ====================
+// START: Image corrections
+
+function updateImageCorrection() {
+	const filters = [];
+
+	if (config.brightness > 1) {
+		filters.push(`brightness(${config.brightness})`);
+	}
+
+	if (config.contrast !== 0) {
+		filters.push(`contrast(${config.contrast})`);
+	}
+
+	if (filters.length) {
+		video.style.filter = filters.join(' ');
+	} else {
+		video.style.filter = null;
+		delete video.style.filter;
+	}
+
+	if (tetris_ocr) {
+		tetris_ocr.setConfig(config);
+	}
+}
+
+function onBrightnessChange() {
+	const value = parseFloat(brightness_slider.value);
+	brightness_value.textContent = value.toFixed(2);
+	config.brightness = value;
+	saveConfig(config);
+	updateImageCorrection();
+}
+
+function onBrightnessReset(evt) {
+	evt.preventDefault();
+	brightness_slider.value = 1;
+	onBrightnessChange();
+}
+
+function onContrastChange() {
+	const value = parseFloat(contrast_slider.value);
+	contrast_value.textContent = value.toFixed(2);
+	config.contrast = value;
+	saveConfig(config);
+	updateImageCorrection();
+}
+
+function onContrastReset(evt) {
+	evt.preventDefault();
+	contrast_slider.value = 1;
+	onContrastChange();
+}
+
+brightness_slider.addEventListener('change', onBrightnessChange);
+brightness_reset.addEventListener('click', onBrightnessReset);
+contrast_slider.addEventListener('change', onContrastChange);
+contrast_reset.addEventListener('click', onContrastReset);
+
+// ====================
+// STOP: Image corrections
 
 let hide_show_parts_timer;
 
@@ -1157,6 +1231,8 @@ function saveConfig(config) {
 		focus_alarm: config.focus_alarm,
 		allow_video_feed: config.allow_video_feed,
 		video_feed_device_id: config.video_feed_device_id,
+		brightness: config.brightness,
+		contrast: config.contrast,
 		tasks: {},
 	};
 
@@ -1372,6 +1448,16 @@ function trackAndSendFrames() {
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
 		privacy.style.display = 'block';
+
+		const brightness = config.brightness === undefined ? 1 : config.brightness;
+		brightness_slider.value = brightness;
+		brightness_value.textContent = brightness.toFixed(2);
+
+		const contrast = config.contrast === undefined ? 1 : config.contrast;
+		contrast_slider.value = contrast;
+		contrast_value.textContent = contrast.toFixed(2);
+
+		updateImageCorrection();
 
 		await playVideoFromConfig();
 		trackAndSendFrames();
