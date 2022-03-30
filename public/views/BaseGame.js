@@ -434,7 +434,8 @@ export default class BaseGame {
 				this.transition_warnings.length &&
 				data.lines > this.transition_warnings[0]
 			) {
-				events.transition_warning = this.transition_warnings.shift();
+				this.transition_warnings.shift();
+				events.transition_warning = this.transition_lines - data.lines;
 			}
 
 			// when line changes, level may have changed
