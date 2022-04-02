@@ -552,10 +552,9 @@ export default class BaseGame {
 		if (block_diff === 4) {
 			this.data.field = data.field;
 			this.data.num_blocks = cur_num_blocks;
-			this.pending_piece = true;
 			this.full_rows.length = 0;
 			this.last_negative_diff = null;
-			return;
+			return this._doPiece(data);
 		}
 
 		if (block_diff > 0 || !ALL_POSSIBLE_NEGATIVE_DIFFS.includes(block_diff)) {
