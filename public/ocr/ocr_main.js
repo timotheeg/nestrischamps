@@ -488,7 +488,7 @@ function updateImageCorrection() {
 		filters.push(`brightness(${config.brightness})`);
 	}
 
-	if (config.contrast !== 0) {
+	if (config.contrast !== 1) {
 		filters.push(`contrast(${config.contrast})`);
 	}
 
