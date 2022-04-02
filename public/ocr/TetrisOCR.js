@@ -130,6 +130,8 @@ export default class TetrisOCR extends EventTarget {
 			w: bounds.right - bounds.left,
 			h: bounds.bottom - bounds.top,
 		};
+
+		this.updateCaptureContextFilters();
 	}
 
 	fixPalette() {
@@ -178,6 +180,28 @@ export default class TetrisOCR extends EventTarget {
 		return min_idx;
 	}
 
+	updateCaptureContextFilters() {
+		if (!this.capture_canvas_ctx) return;
+		if (!this.config) return;
+
+		const filters = [];
+
+		if (this.config.brightness > 1) {
+			filters.push(`brightness(${this.config.brightness})`);
+		}
+
+		if (this.config.contrast !== 1) {
+			filters.push(`contrast(${this.config.contrast})`);
+		}
+
+		if (filters.length) {
+			this.capture_canvas_ctx.filter = filters.join(' ');
+		} else {
+			this.capture_canvas_ctx.filter = null;
+			delete this.capture_canvas_ctx.filter;
+		}
+	}
+
 	initCaptureContext(frame, half_height) {
 		this.capture_canvas = document.createElement('canvas');
 
@@ -203,6 +227,8 @@ export default class TetrisOCR extends EventTarget {
 		});
 		this.scaled_field_canvas_ctx.imageSmoothingEnabled = true;
 		this.scaled_field_canvas_ctx.imageSmoothingQuality = 'medium';
+
+		this.updateCaptureContextFilters();
 	}
 
 	async processFrame(frame, half_height) {
