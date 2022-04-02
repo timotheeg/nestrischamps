@@ -11,6 +11,10 @@ function getBasePlayerData() {
 		display_name: '',
 		profile_image_url: '',
 		victories: 0,
+		camera: {
+			mirror: 0, // horizontal mirror only (for now)
+			// can potentially add more here in term of xshift, yshift, zoomin, zoomout, etc...
+		},
 	};
 }
 
@@ -334,6 +338,42 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'restartCamera': {
+					update_admin = false;
+					forward_to_views = false;
+
+					const [p_num] = args;
+
+					this.assertValidPlayer(p_num);
+
+					const player_id = this.state.players[p_num].id;
+					const user = this.getProducer(player_id);
+
+					if (user) {
+						user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]); // should reset camera!
+					}
+
+					break;
+				}
+
+				case 'mirrorCamera': {
+					update_admin = false;
+					forward_to_views = false;
+
+					const [p_num] = args;
+
+					this.assertValidPlayer(p_num);
+
+					const camera_state = this.state.players[p_num].camera;
+
+					camera_state.mirror += 1;
+					camera_state.mirror %= 2;
+
+					this.sendToViews(['setCameraState', p_num, camera_state]);
+
+					break; // simple passthrough
+				}
+
 				case 'setDisplayName': {
 					const [p_num, name] = args;
 
@@ -375,11 +415,12 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'showProfileCard':
 				case 'setWinner':
 				case 'setGameOver':
 				case 'cancelGameOver': {
 					update_admin = false;
-					break;
+					break; // simple passthrough
 				}
 
 				case 'addPlayer': {
@@ -468,11 +509,6 @@ class MatchRoom extends Room {
 
 				case 'setMatch': {
 					this.state.selected_match = args[0];
-					update_admin = false;
-					break; // simple passthrough
-				}
-
-				case 'showProfileCard': {
 					update_admin = false;
 					break; // simple passthrough
 				}
