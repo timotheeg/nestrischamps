@@ -366,6 +366,7 @@ class MatchRoom extends Room {
 
 					const camera_state = this.state.players[p_num].camera;
 
+					// 0 not mirrored - 1 mirrored
 					camera_state.mirror += 1;
 					camera_state.mirror %= 2;
 
