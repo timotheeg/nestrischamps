@@ -567,7 +567,13 @@ export default class Player {
 	}
 
 	setCameraState(camera_state) {
-		this.camera_state = state;
+		this.camera_state = camera_state;
+		if (camera_state.mirror) {
+			this.dom.video.style.transform = 'scale(-1, 1)';
+		} else {
+			this.dom.video.style.transform = null;
+			delete this.dom.video.style.transform;
+		}
 	}
 
 	setId(id) {
