@@ -47,6 +47,12 @@ const remoteAPI = {
 	setProfileImageURL: function (player_idx, url) {
 		connection.send(['setProfileImageURL', player_idx, url]);
 	},
+	restartCamera: function (player_idx) {
+		connection.send(['restartCamera', player_idx]);
+	},
+	mirrorCamera: function (player_idx) {
+		connection.send(['mirrorCamera', player_idx]);
+	},
 	resetVictories: function () {
 		connection.send(['resetVictories']);
 	},
@@ -116,6 +122,14 @@ class Player {
 
 		this.dom.remove_btn.onclick = () => {
 			remoteAPI.removePlayer(this.idx);
+		};
+
+		this.dom.camera_restart_btn.onclick = () => {
+			remoteAPI.restartCamera(this.idx);
+		};
+
+		this.dom.camera_mirror_btn.onclick = () => {
+			remoteAPI.mirrorCamera(this.idx);
 		};
 	}
 
@@ -291,6 +305,8 @@ function addPlayer() {
 		game_over_btn: player_node.querySelector('.game_over'),
 		cancel_game_over_btn: player_node.querySelector('.cancel_game_over'),
 		remove_btn: player_node.querySelector('.remove_player'),
+		camera_restart_btn: player_node.querySelector('.camera_restart'),
+		camera_mirror_btn: player_node.querySelector('.camera_mirror'),
 	});
 
 	players_node.appendChild(player_node);

@@ -11,6 +11,10 @@ function getBasePlayerData() {
 		display_name: '',
 		profile_image_url: '',
 		victories: 0,
+		camera: {
+			mirror: 0, // horizontal mirror only (for now)
+			// can potentially add more here in term of xshift, yshift, zoomin, zoomout, etc...
+		},
 	};
 }
 
@@ -306,11 +310,11 @@ class MatchRoom extends Room {
 						return;
 					}
 
-					this.state.players[p_num] = {
+					this.state.players[p_num] = _.cloneDeep({
 						...this.state.players[p_num],
 						...player_data,
 						victories: 0,
-					};
+					});
 
 					const peerid = user ? user.getProducer().getPeerId() : '';
 
@@ -324,6 +328,7 @@ class MatchRoom extends Room {
 						p_num,
 						player_data.profile_image_url,
 					]);
+					this.sendToViews(['setCameraState', p_num, player_data.camera]);
 
 					// inform producer it is a now a player
 					if (user) {
@@ -332,6 +337,47 @@ class MatchRoom extends Room {
 
 					forward_to_views = false;
 					break;
+				}
+
+				case 'restartCamera': {
+					update_admin = false;
+					forward_to_views = false;
+
+					const [p_num] = args;
+
+					this.assertValidPlayer(p_num);
+
+					const player_id = this.state.players[p_num].id;
+					const user = this.getProducer(player_id);
+
+					if (user && this.last_view) {
+						const producer = user.getProducer();
+
+						producer.send(['dropPlayer']);
+						producer.send(['setViewPeerId', this.last_view.id]);
+						producer.send(['makePlayer', p_num, this.getViewMeta()]); // should reset camera!
+					}
+
+					break;
+				}
+
+				case 'mirrorCamera': {
+					update_admin = false;
+					forward_to_views = false;
+
+					const [p_num] = args;
+
+					this.assertValidPlayer(p_num);
+
+					const camera_state = this.state.players[p_num].camera;
+
+					// 0 not mirrored - 1 mirrored
+					camera_state.mirror += 1;
+					camera_state.mirror %= 2;
+
+					this.sendToViews(['setCameraState', p_num, camera_state]);
+
+					break; // simple passthrough
 				}
 
 				case 'setDisplayName': {
@@ -375,11 +421,12 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'showProfileCard':
 				case 'setWinner':
 				case 'setGameOver':
 				case 'cancelGameOver': {
 					update_admin = false;
-					break;
+					break; // simple passthrough
 				}
 
 				case 'addPlayer': {
@@ -468,11 +515,6 @@ class MatchRoom extends Room {
 
 				case 'setMatch': {
 					this.state.selected_match = args[0];
-					update_admin = false;
-					break; // simple passthrough
-				}
-
-				case 'showProfileCard': {
 					update_admin = false;
 					break; // simple passthrough
 				}
