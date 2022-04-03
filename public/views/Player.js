@@ -376,6 +376,7 @@ export default class Player {
 
 		this.reset();
 
+		this.camera_state = { mirror: 0 };
 		this.game_over = true; // we start at game over, waiting for the first good frame
 		this.curtain_down = true;
 	}
@@ -563,6 +564,10 @@ export default class Player {
 		} else {
 			this.dom.name.innerHTML = '&nbsp;';
 		}
+	}
+
+	setCameraState(camera_state) {
+		this.camera_state = state;
 	}
 
 	setId(id) {

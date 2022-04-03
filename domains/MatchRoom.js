@@ -328,6 +328,7 @@ class MatchRoom extends Room {
 						p_num,
 						player_data.profile_image_url,
 					]);
+					this.sendToViews(['setCameraState', p_num, player_data.camera]);
 
 					// inform producer it is a now a player
 					if (user) {
@@ -349,8 +350,12 @@ class MatchRoom extends Room {
 					const player_id = this.state.players[p_num].id;
 					const user = this.getProducer(player_id);
 
-					if (user) {
-						user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]); // should reset camera!
+					if (user && this.last_view) {
+						const producer = user.getProducer();
+
+						producer.send(['dropPlayer']);
+						producer.send(['setViewPeerId', this.last_view.id]);
+						producer.send(['makePlayer', p_num, this.getViewMeta()]); // should reset camera!
 					}
 
 					break;

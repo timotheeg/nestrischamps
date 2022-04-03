@@ -109,6 +109,10 @@ class TetrisCompetitionAPI {
 		this.setName(player_idx, name);
 	}
 
+	setCameraState(player_idx, camera_state) {
+		getPlayer(player_idx).setCameraState(camera_state);
+	}
+
 	setFirstTo(num_games_to_win) {
 		this.first_to = num_games_to_win;
 
