@@ -1,3 +1,10 @@
+export const peerServerOptions = {
+	host: 'peerturn.herokuapp.com',
+	path: '/',
+	port: 443,
+	secure: true,
+};
+
 export const DOM_DEV_NULL = document.createElement('div');
 
 export const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];

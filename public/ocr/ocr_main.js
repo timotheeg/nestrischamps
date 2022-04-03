@@ -6,6 +6,7 @@ import loadPalettes from '/ocr/palettes.js';
 import TetrisOCR from '/ocr/TetrisOCR.js';
 import OCRSanitizer from '/ocr/OCRSanitizer.js';
 import { getCaptureCoordinates } from '/ocr/calibration.js';
+import { peerServerOptions } from '/views/constants.js';
 import speak from '/views/tts.js';
 
 // NTSC NES resolution: 256x224 -> 512x448
@@ -268,7 +269,7 @@ function connect() {
 			peer_opened = false;
 		}
 
-		peer = new Peer(connection.id);
+		peer = new Peer(connection.id, peerServerOptions);
 
 		peer.on('open', err => {
 			peer_opened = true;

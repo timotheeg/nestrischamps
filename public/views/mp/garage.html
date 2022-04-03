@@ -292,6 +292,7 @@
 		z
 		<script type="module">
 			import '/views/bg.js';
+			import { peerServerOptions } from '/views/constants.js';
 			import { translate } from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
@@ -380,7 +381,7 @@
 						peer = null;
 					}
 
-					peer = new Peer(competition.connection.id);
+					peer = new Peer(competition.connection.id, peerServerOptions);
 
 					peer.on('call', call => {
 						console.log(`Received media call from ${call.peer}`);

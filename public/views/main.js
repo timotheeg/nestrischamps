@@ -15,6 +15,7 @@ import {
 	PIECE_COLORS,
 	DROUGHT_PANIC_THRESHOLD,
 	DAS_THRESHOLDS,
+	peerServerOptions,
 } from '/views/constants.js';
 
 export const BLOCK_PIXEL_SIZE = 3;
@@ -950,7 +951,7 @@ if (!manageReplay(showFrame)) {
 				peer = null;
 			}
 
-			peer = new Peer(connection.id);
+			peer = new Peer(connection.id, peerServerOptions);
 
 			peer.on('call', call => {
 				call.answer(); // assume correct!

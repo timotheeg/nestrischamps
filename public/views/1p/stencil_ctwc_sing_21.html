@@ -128,7 +128,7 @@
 			import BinaryFrame from '/js/BinaryFrame.js';
 			import Connection from '/js/connection.js';
 			import Player from '/views/Player.js';
-			import { PIECES } from '/views/constants.js';
+			import { PIECES, peerServerOptions } from '/views/constants.js';
 
 			// client side time is not reliable, supply a date from the future
 			let received_time_from_server = false;
@@ -372,7 +372,7 @@
 					peer = null;
 				}
 
-				peer = new Peer(connection.id);
+				peer = new Peer(connection.id, peerServerOptions);
 
 				peer.on('call', call => {
 					const video = document.querySelector('video');
