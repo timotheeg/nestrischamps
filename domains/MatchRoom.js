@@ -310,11 +310,11 @@ class MatchRoom extends Room {
 						return;
 					}
 
-					this.state.players[p_num] = {
+					this.state.players[p_num] = _.cloneDeep({
 						...this.state.players[p_num],
 						...player_data,
 						victories: 0,
-					};
+					});
 
 					const peerid = user ? user.getProducer().getPeerId() : '';
 
