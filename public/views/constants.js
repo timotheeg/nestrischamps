@@ -94,6 +94,7 @@ export const TRANSITIONS = {
 	17: 120,
 	18: 130,
 	19: 140,
+	29: 200,
 };
 
 export const PIECE_COLORS = {

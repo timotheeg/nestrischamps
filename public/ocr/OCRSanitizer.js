@@ -1,8 +1,10 @@
 import QueryString from '/js/QueryString.js';
 import ScoreFixer from '/ocr/ScoreFixer.js';
 import LevelFixer from '/ocr/LevelFixer.js';
+import { TRANSITIONS } from '/views/constants.js';
 
 const FIX_LEVEL = QueryString.get('fixlevel') !== '0';
+const LEVEL_FROM_LINES = QueryString.get('level_from_lines') === '1';
 
 const requested_buffer_size = parseInt(QueryString.get('fixbuffer'), 10);
 
@@ -71,6 +73,12 @@ export default class OCRSanitizer {
 		if (this.frame_buffer.length >= BUFFER_MAXSIZE) {
 			this.tetris_ocr.onMessage = this._sanitize;
 		}
+	}
+
+	_getLevelFromLines(lines) {
+		if (lines === null) return null;
+		if (lines < this.transition) return this.start_level;
+		return this.start_level + 1 + Math.floor((lines - this.transition) / 10);
 	}
 
 	_sanitize(data) {
@@ -179,29 +187,37 @@ export default class OCRSanitizer {
 				this.score_fixer.reset();
 				this.score_fixer.fix(dispatch_frame.score);
 
-				if (FIX_LEVEL) {
+				if (LEVEL_FROM_LINES) {
+					this.start_level = OCRSanitizer.digitsToValue(dispatch_frame.level);
+					this.transition = TRANSITIONS[this.start_level];
+				}
+
+				if (!this.transition && FIX_LEVEL) {
 					this.level_fixer.reset();
 					this.level_fixer.fix(dispatch_frame.level);
 				}
 			}
 		}
 
+		const lines = OCRSanitizer.digitsToValue(dispatch_frame.lines);
+
 		const pojo = {
 			gameid: this.gameid,
-			lines: OCRSanitizer.digitsToValue(dispatch_frame.lines),
+			lines: lines,
 			field: dispatch_frame.field,
 			preview: dispatch_frame.preview,
 
 			score: OCRSanitizer.digitsToValue(
 				this.score_fixer.fix(dispatch_frame.score)
 			), // note: nulls are passthrough
-			level: OCRSanitizer.digitsToValue(
-				FIX_LEVEL
-					? this.level_fixer.fix(dispatch_frame.level)
-					: OCRSanitizer.arrEqual(dispatch_frame.level, [10, 9])
-					? [6, 1] // special correction for Cheez 2.3M game with broken Tetris Gym 🤷
-					: dispatch_frame.level
-			), // note: nulls are passthrough
+			level:
+				LEVEL_FROM_LINES && this.transition
+					? this._getLevelFromLines(lines)
+					: OCRSanitizer.digitsToValue(
+							FIX_LEVEL
+								? this.level_fixer.fix(dispatch_frame.level)
+								: dispatch_frame.level
+					  ), // note: nulls are passthrough
 		};
 
 		if (this.config.tasks.T) {
