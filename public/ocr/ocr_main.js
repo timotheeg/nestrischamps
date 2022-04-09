@@ -1451,11 +1451,11 @@ function trackAndSendFrames() {
 		privacy.style.display = 'block';
 
 		const brightness = config.brightness === undefined ? 1 : config.brightness;
-		brightness_slider.value = brightness;
+		brightness_slider.value = config.brightness = brightness;
 		brightness_value.textContent = brightness.toFixed(2);
 
 		const contrast = config.contrast === undefined ? 1 : config.contrast;
-		contrast_slider.value = contrast;
+		contrast_slider.value = config.contrast = contrast;
 		contrast_value.textContent = contrast.toFixed(2);
 
 		updateImageCorrection();
