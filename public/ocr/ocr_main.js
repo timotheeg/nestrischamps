@@ -87,6 +87,12 @@ const configs = {
 			'cur_piece',
 		],
 	},
+	minimal: {
+		game_type: BinaryFrame.GAME_TYPE.MINIMAL,
+		reference: '/ocr/reference_ui_classic.png',
+		palette: 'easiercap',
+		fields: ['score', 'level', 'lines', 'field', 'preview'],
+	},
 };
 
 const send_binary = QueryString.get('binary') !== '0';
@@ -1355,7 +1361,9 @@ function loadConfig() {
 		if (!parsed.hasOwnProperty('game_type')) {
 			parsed.game_type = parsed.tasks.T
 				? BinaryFrame.GAME_TYPE.CLASSIC
-				: BinaryFrame.GAME_TYPE.DAS_TRAINER;
+				: parsed.tasks.cur_piece_das
+				? BinaryFrame.GAME_TYPE.DAS_TRAINER
+				: BinaryFrame.GAME_TYPE.MINIMAL;
 		}
 
 		return parsed;

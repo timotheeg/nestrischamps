@@ -277,10 +277,12 @@ export default class TetrisOCR extends EventTarget {
 
 		const colors = [res.color1, res.color2, res.color3];
 
+		/*
 		if (level_units != 6 && level_units != 7) {
 			// TOCHECK: is this still needed now that we work in lab color space?
 			colors.unshift(DEFAULT_COLOR_0); // add black
 		}
+		/**/
 
 		res.field = await this.scanField(source_img, colors);
 		res.preview = this.scanPreview(source_img);

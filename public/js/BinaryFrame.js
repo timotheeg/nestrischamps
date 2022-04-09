@@ -8,6 +8,7 @@ const FRAME_SIZE_BY_VERSION = {
 const GAME_TYPE = {
 	CLASSIC: 1,
 	DAS_TRAINER: 2,
+	MINIMAL: 3,
 };
 
 const PIECE_TO_VALUE = {
