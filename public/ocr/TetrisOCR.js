@@ -186,11 +186,11 @@ export default class TetrisOCR extends EventTarget {
 
 		const filters = [];
 
-		if (this.config.brightness > 1) {
+		if (this.config.brightness && this.config.brightness > 1) {
 			filters.push(`brightness(${this.config.brightness})`);
 		}
 
-		if (this.config.contrast !== 1) {
+		if (this.config.contrast && this.config.contrast !== 1) {
 			filters.push(`contrast(${this.config.contrast})`);
 		}
 
