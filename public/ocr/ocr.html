@@ -135,6 +135,10 @@
 			.warning {
 				color: #ff8c00;
 			}
+
+			#instructions {
+				display: none;
+			}
 		</style>
 	</head>
 
@@ -142,7 +146,6 @@
 		<div class="notice"></div>
 
 		<div id="calibration">
-			<img id="reference_ui" />
 			<canvas id="video_capture" />
 		</div>
 
@@ -168,8 +171,19 @@
 					<select id="palette"></select>
 				</div>
 
-				<div>
-					<button id="go">Calibrate and Capture</button>
+				<div id="instructions">
+					<p><strong>Next steps:</strong></p>
+					<ol start="0">
+						<li>
+							With your selection above, your tetris capture should now be
+							visible in the video below
+						</li>
+						<li>
+							Start a game at level 0, and in the video below, click somewhere
+							BLACK in the central Tetris field.
+						</li>
+						<li>Fine-tune all the fields (location and size)</li>
+					</ol>
 				</div>
 			</fieldset>
 

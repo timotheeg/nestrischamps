@@ -5,7 +5,10 @@ import loadDigitTemplates from '/ocr/templates.js';
 import loadPalettes from '/ocr/palettes.js';
 import TetrisOCR from '/ocr/TetrisOCR.js';
 import OCRSanitizer from '/ocr/OCRSanitizer.js';
-import { getCaptureCoordinates } from '/ocr/calibration.js';
+import {
+	getFieldCoordinates,
+	getCaptureCoordinates,
+} from '/ocr/calibration.js';
 import { peerServerOptions } from '/views/constants.js';
 import speak from '/views/tts.js';
 
@@ -28,6 +31,7 @@ const reference_locations = {
 	score: { crop: [384, 112, 94, 14], pattern: 'ADDDDD' },
 	level: { crop: [416, 320, 30, 14], pattern: 'LA' },
 	lines: { crop: [304, 32, 46, 14], pattern: 'DDD' },
+	field_w_borders: { crop: [190, 78, 162, 324] },
 	field: { crop: [192, 80, 158, 318] },
 	preview: { crop: [384, 224, 62, 30] },
 	color1: { crop: [76, 170, 10, 10] },
@@ -92,6 +96,10 @@ const is_match_room = /^\/room\/u\//.test(new URL(location).pathname);
 
 let do_half_height = true;
 
+export function css_size(css_pixel_width) {
+	return parseFloat(css_pixel_width.replace(/px$/, ''));
+}
+
 const reference_ui = document.querySelector('#reference_ui'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
@@ -102,8 +110,8 @@ const reference_ui = document.querySelector('#reference_ui'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
-	go_btn = document.querySelector('#go'),
 	controls = document.querySelector('#controls'),
+	instructions = document.querySelector('#instructions'),
 	capture_rate = document.querySelector('#capture_rate'),
 	show_parts = document.querySelector('#show_parts'),
 	focus_alarm = document.querySelector('#focus_alarm'),
@@ -129,25 +137,24 @@ const reference_ui = document.querySelector('#reference_ui'),
 	),
 	contrast_value = document.querySelector('#image_corrections .contrast span'),
 	contrast_reset = document.querySelector('#image_corrections .contrast a');
-const IN_GAME = {};
-const IN_MENU = {};
 
 const UNFOCUSED_ALARM_SND = new Audio('/ocr/alarm.mp3');
 const UNFOCUSED_SILENCE_SND = new Audio('/ocr/silence.mp3');
 const UNFOCUSED_ALARM_LOOPS = 4;
 
-let ocv;
 let templates;
 let palettes;
 let tetris_ocr;
 let ocr_corrector;
 let config;
 let connection;
+let pending_calibration = false;
+let in_calibration = false;
 
 device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
 	playVideoFromConfig();
-	checkActivateGoButton();
+	checkReadyToCalibrate();
 });
 
 video_feed_selector.addEventListener('change', evt => {
@@ -159,7 +166,7 @@ video_feed_selector.addEventListener('change', evt => {
 palette_selector.disabled = true;
 palette_selector.addEventListener('change', evt => {
 	config.palette = palette_selector.value;
-	checkActivateGoButton();
+	checkReadyToCalibrate();
 });
 
 rom_selector.addEventListener('change', evt => {
@@ -175,16 +182,18 @@ rom_selector.addEventListener('change', evt => {
 
 	config.palette = palette_selector.value;
 
-	checkActivateGoButton();
+	checkReadyToCalibrate();
 });
 
 capture_rate.addEventListener('change', updateFrameRate);
 
-function checkActivateGoButton() {
+function checkReadyToCalibrate() {
 	// no need to check palette, if rom_selector has a value, then palette automatically has a valid value too
 	const all_ready = device_selector.value && rom_selector.value;
 
-	go_btn.disabled = !all_ready;
+	pending_calibration = !!all_ready;
+
+	instructions.style.display = pending_calibration ? 'block' : 'none';
 }
 
 const notice = document.querySelector('div.notice');
@@ -360,19 +369,29 @@ start_timer.addEventListener('click', evt => {
 	connection.send(['startTimer', minutes * 60]);
 });
 
-go_btn.disabled = true;
-go_btn.addEventListener('click', async evt => {
-	if (device_selector.value == 0) return;
+video.addEventListener('click', async evt => {
+	evt.preventDefault();
+	if (!pending_calibration || in_calibration) return;
+
+	// TODO: should be a state system
+	// pending_calibration = false;
+	// in_calibration = true;
+
+	const video_styles = getComputedStyle(video);
+	const ratioX = evt.offsetX / css_size(video_styles.width);
+	const ratioY = evt.offsetY / css_size(video_styles.height);
+	const floodStartPoint = [
+		Math.round(video.videoWidth * ratioX),
+		Math.round(video.videoHeight * ratioY),
+	];
 
 	device_selector.disabled = true;
 	rom_selector.disabled = true;
-	go_btn.disabled = true;
 
 	// set up config per rom selection
 	const rom_config = configs[rom_selector.value];
 
-	await loadImage(reference_ui, rom_config.reference);
-
+	const video_capture_ctx = video_capture.getContext('2d', { alpha: false });
 	const bitmap = await createImageBitmap(
 		video,
 		0,
@@ -383,16 +402,27 @@ go_btn.addEventListener('click', async evt => {
 
 	updateCanvasSizeIfNeeded(video_capture, video.videoWidth, video.videoHeight);
 
-	video_capture.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0);
+	video_capture_ctx.filter = 'contrast(2)';
+	video_capture_ctx.drawImage(bitmap, 0, 0);
 
 	await new Promise(resolve => {
 		setTimeout(resolve, 0); // wait one tick for everything to be drawn nicely... just in case
 	});
 
+	const img_data = video_capture_ctx.getImageData(
+		0,
+		0,
+		video.videoWidth,
+		video.videoHeight
+	);
+
+	const field_xywh = getFieldCoordinates(img_data, floodStartPoint);
+	console.log('field coordinates', field_xywh);
+
 	let [ox, oy, ow, oh] = getCaptureCoordinates(
-		ocv,
-		'reference_ui',
-		'video_capture'
+		reference_size,
+		reference_locations,
+		field_xywh
 	);
 
 	if (ow <= 0 || oh <= 0) {
@@ -438,6 +468,15 @@ go_btn.addEventListener('click', async evt => {
 	wizard.style.display = 'none';
 	privacy.style.display = 'block';
 	controls.style.display = 'block';
+
+	if (video.ntcType === 'device') {
+		brightness_slider.value = 1.65;
+		onBrightnessChange();
+	}
+
+	alert(
+		'Rough identification has been completed.\n\nYou MUST now inspect and fine tune all the fields (location and size) to make them pixel perfect.'
+	);
 });
 
 function onShowPartsChanged() {
@@ -485,11 +524,11 @@ focus_alarm.addEventListener('change', onFocusAlarmChanged);
 function updateImageCorrection() {
 	const filters = [];
 
-	if (config.brightness > 1) {
+	if (config.brightness !== undefined && config.brightness > 1) {
 		filters.push(`brightness(${config.brightness})`);
 	}
 
-	if (config.contrast !== 1) {
+	if (config.contrast !== undefined && config.contrast !== 1) {
 		filters.push(`contrast(${config.contrast})`);
 	}
 
@@ -689,6 +728,7 @@ async function playVideoFromDevice(device_id, fps) {
 
 		// when an actual device id is supplied, we start everything
 		video.srcObject = stream;
+		video.ntcType = 'device';
 		video.play();
 	} catch (error) {
 		console.error('Error opening video camera.', error);
@@ -710,6 +750,7 @@ async function playVideoFromScreenCap(fps) {
 
 		// when an actual device id is supplied, we start everything
 		video.srcObject = stream;
+		video.ntcType = 'screencap';
 		video.play();
 	} catch (error) {
 		console.error('Error capturing window.', error);
@@ -1463,20 +1504,9 @@ function trackAndSendFrames() {
 		await playVideoFromConfig();
 		trackAndSendFrames();
 	} else {
-		// Dynamically load openCV we need to load opencv now
-		const script = document.createElement('script');
-
-		await new Promise(resolve => {
-			script.onload = resolve;
-			script.src = '/ocr/opencv.js';
-			document.head.appendChild(script);
-		});
-
 		await resetDevices();
 
 		capture_rate.value = default_frame_rate;
-
-		ocv = await cv;
 
 		// create default dummy waiting to be populated by user selection
 		config = {
