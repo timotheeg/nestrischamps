@@ -11,6 +11,7 @@ import {
 } from '/ocr/calibration.js';
 import { peerServerOptions } from '/views/constants.js';
 import speak from '/views/tts.js';
+import { PIECES } from '/views/constants.js';
 
 // NTSC NES resolution: 256x224 -> 512x448
 const LEVEL_COLORS = [
@@ -974,8 +975,14 @@ function updateCanvasSizeIfNeeded(canvas, w, h) {
 	}
 }
 
-function resetConfig(config, task_name, task_crop) {
+function resetConfig(task_name) {
 	if (task_name) {
+		const task_crop = [
+			...document.querySelectorAll(
+				`#adjustments fieldset.${task_name} input.coordinate_input`
+			),
+		].map(el => parseInt(el.value, 10));
+
 		config.tasks[task_name].crop = task_crop;
 
 		// update display canvas with new data
@@ -1005,21 +1012,60 @@ function resetConfig(config, task_name, task_crop) {
 	saveConfig(config);
 }
 
+function bindPieceStatsXWInputs() {
+	// bind field 0 (x) and 2 (width)
+	[0, 2].forEach(input_idx => {
+		const inputs = PIECES.map(name =>
+			document.querySelector(`fieldset.${name}`)
+		).map(parent => parent.querySelectorAll('input')[input_idx]);
+
+		inputs.forEach(input => {
+			input.addEventListener('change', () => {
+				const value = input.value;
+				inputs.forEach((link, idx) => {
+					if (link === input) return;
+					link.value = value;
+					resetConfig(PIECES[idx]);
+				});
+			});
+		});
+	});
+}
+
+function bindColorsXInputs() {
+	const inputs = [1, 2, 3]
+		.map(num => document.querySelector(`fieldset.color${num}`))
+		.map(parent => parent.querySelectorAll('input')[0]);
+
+	inputs.forEach(input => {
+		input.addEventListener('change', () => {
+			const value = input.value;
+			inputs.forEach((link, idx) => {
+				if (link === input) return;
+				link.value = value;
+				resetConfig(`color${idx + 1}`);
+			});
+		});
+	});
+}
+
 function showColorControls(palettes, config) {
 	const has_valid_palette = !!(config.palette && palettes[config.palette]);
 	const display = has_valid_palette ? 'none' : 'block';
 
 	const color_fieldset = document.querySelector(`fieldset.color1`);
 
-	if (color_fieldset) {
-		[1, 2, 3].forEach(num => {
-			const col_elmt = document.querySelector(`fieldset.color${num}`);
+	if (!color_fieldset) return;
 
-			if (col_elmt) {
-				col_elmt.style.display = display;
-			}
-		});
-	}
+	[1, 2, 3].forEach(num => {
+		const col_elmt = document.querySelector(`fieldset.color${num}`);
+
+		if (col_elmt) {
+			col_elmt.style.display = display;
+		}
+	});
+
+	if (!has_valid_palette) bindColorsXInputs();
 }
 
 function showConfigControls(templates, palettes, config) {
@@ -1046,6 +1092,10 @@ function showConfigControls(templates, palettes, config) {
 	}
 
 	showColorControls(palettes, config);
+
+	if (config.tasks.T) {
+		bindPieceStatsXWInputs();
+	}
 }
 
 function addCropControls(parent, config, name, onChangeCallback) {
@@ -1053,11 +1103,7 @@ function addCropControls(parent, config, name, onChangeCallback) {
 	const inputs = [];
 
 	function onChange() {
-		onChangeCallback(
-			config,
-			name,
-			inputs.map(input => parseInt(input.value, 10))
-		);
+		onChangeCallback(name);
 	}
 
 	['x', 'y', 'width', 'height'].forEach((label, idx) => {
