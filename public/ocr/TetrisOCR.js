@@ -197,8 +197,7 @@ export default class TetrisOCR extends EventTarget {
 		if (filters.length) {
 			this.capture_canvas_ctx.filter = filters.join(' ');
 		} else {
-			this.capture_canvas_ctx.filter = null;
-			delete this.capture_canvas_ctx.filter;
+			this.capture_canvas_ctx.filter = 'none';
 		}
 	}
 
