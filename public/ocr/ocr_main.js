@@ -126,18 +126,13 @@ const reference_ui = document.querySelector('#reference_ui'),
 	perf_data = document.querySelector('#perf_data'),
 	capture = document.querySelector('#capture'),
 	adjustments = document.querySelector('#adjustments'),
-	brightness_slider = document.querySelector(
-		'#image_corrections .brightness input'
-	),
-	brightness_value = document.querySelector(
-		'#image_corrections .brightness span'
-	),
-	brightness_reset = document.querySelector('#image_corrections .brightness a'),
-	contrast_slider = document.querySelector(
-		'#image_corrections .contrast input'
-	),
-	contrast_value = document.querySelector('#image_corrections .contrast span'),
-	contrast_reset = document.querySelector('#image_corrections .contrast a');
+	image_corrections = document.querySelector('#image_corrections'),
+	brightness_slider = image_corrections.querySelector('.brightness input'),
+	brightness_value = image_corrections.querySelector('.brightness span'),
+	brightness_reset = image_corrections.querySelector('.brightness a'),
+	contrast_slider = image_corrections.querySelector('.contrast input'),
+	contrast_value = image_corrections.querySelector('.contrast span'),
+	contrast_reset = image_corrections.querySelector('.contrast a');
 
 const UNFOCUSED_ALARM_SND = new Audio('/ocr/alarm.mp3');
 const UNFOCUSED_SILENCE_SND = new Audio('/ocr/silence.mp3');
@@ -487,6 +482,7 @@ function onShowPartsChanged() {
 	const display = show_parts.checked ? 'block' : 'none';
 
 	adjustments.style.display = display;
+	// image_corrections.style.display = display;
 	config.source_canvas.style.display = display;
 
 	if (show_parts.checked) {
@@ -831,6 +827,7 @@ async function startCapture(stream) {
 
 	if (show_parts.checked) {
 		adjustments.style.display = 'block';
+		// image_corrections.style.display = 'block';
 		ocr_results.style.display = 'flex';
 	}
 
