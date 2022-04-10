@@ -370,6 +370,7 @@ start_timer.addEventListener('click', evt => {
 	connection.send(['startTimer', minutes * 60]);
 });
 
+video.controls = false;
 video.addEventListener('click', async evt => {
 	evt.preventDefault();
 	if (!pending_calibration || in_calibration) return;
@@ -471,13 +472,15 @@ video.addEventListener('click', async evt => {
 	controls.style.display = 'block';
 
 	if (video.ntcType === 'device') {
-		brightness_slider.value = 1.65;
+		brightness_slider.value = 1.75;
 		onBrightnessChange();
 	}
 
-	alert(
-		'Rough calibration has been completed 🎉!\n\nYou now MUST inspect and fine tune all the fields (location and size) to make them pixel perfect.'
-	);
+	setTimeout(() => {
+		alert(
+			'Rough calibration has been completed 🎉!\n\nYou now MUST inspect and fine tune all the fields (location and size) to make them pixel perfect.'
+		);
+	}, 100); // sad (and gross) delay
 });
 
 function onShowPartsChanged() {
