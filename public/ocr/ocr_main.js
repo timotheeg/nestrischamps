@@ -110,8 +110,8 @@ const reference_ui = document.querySelector('#reference_ui'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
-	go_btn = document.querySelector('#go'),
 	controls = document.querySelector('#controls'),
+	instructions = document.querySelector('#instructions'),
 	capture_rate = document.querySelector('#capture_rate'),
 	show_parts = document.querySelector('#show_parts'),
 	focus_alarm = document.querySelector('#focus_alarm'),
@@ -137,14 +137,11 @@ const reference_ui = document.querySelector('#reference_ui'),
 	),
 	contrast_value = document.querySelector('#image_corrections .contrast span'),
 	contrast_reset = document.querySelector('#image_corrections .contrast a');
-const IN_GAME = {};
-const IN_MENU = {};
 
 const UNFOCUSED_ALARM_SND = new Audio('/ocr/alarm.mp3');
 const UNFOCUSED_SILENCE_SND = new Audio('/ocr/silence.mp3');
 const UNFOCUSED_ALARM_LOOPS = 4;
 
-let ocv;
 let templates;
 let palettes;
 let tetris_ocr;
@@ -157,7 +154,7 @@ let in_calibration = false;
 device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
 	playVideoFromConfig();
-	checkActivateGoButton();
+	checkReadyToCalibrate();
 });
 
 video_feed_selector.addEventListener('change', evt => {
@@ -169,7 +166,7 @@ video_feed_selector.addEventListener('change', evt => {
 palette_selector.disabled = true;
 palette_selector.addEventListener('change', evt => {
 	config.palette = palette_selector.value;
-	checkActivateGoButton();
+	checkReadyToCalibrate();
 });
 
 rom_selector.addEventListener('change', evt => {
@@ -185,16 +182,18 @@ rom_selector.addEventListener('change', evt => {
 
 	config.palette = palette_selector.value;
 
-	checkActivateGoButton();
+	checkReadyToCalibrate();
 });
 
 capture_rate.addEventListener('change', updateFrameRate);
 
-function checkActivateGoButton() {
+function checkReadyToCalibrate() {
 	// no need to check palette, if rom_selector has a value, then palette automatically has a valid value too
 	const all_ready = device_selector.value && rom_selector.value;
 
 	pending_calibration = !!all_ready;
+
+	instructions.style.display = pending_calibration ? 'block' : 'none';
 }
 
 const notice = document.querySelector('div.notice');
@@ -371,6 +370,7 @@ start_timer.addEventListener('click', evt => {
 });
 
 video.addEventListener('click', async evt => {
+	evt.preventDefault();
 	if (!pending_calibration || in_calibration) return;
 
 	// TODO: should be a state system
@@ -387,7 +387,6 @@ video.addEventListener('click', async evt => {
 
 	device_selector.disabled = true;
 	rom_selector.disabled = true;
-	go_btn.disabled = true;
 
 	// set up config per rom selection
 	const rom_config = configs[rom_selector.value];
@@ -1494,6 +1493,10 @@ function trackAndSendFrames() {
 		await playVideoFromConfig();
 		trackAndSendFrames();
 	} else {
+		await resetDevices();
+
+		capture_rate.value = default_frame_rate;
+
 		// create default dummy waiting to be populated by user selection
 		config = {
 			frame_rate: default_frame_rate,
