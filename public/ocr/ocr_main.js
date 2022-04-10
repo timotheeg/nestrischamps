@@ -468,6 +468,11 @@ video.addEventListener('click', async evt => {
 	wizard.style.display = 'none';
 	privacy.style.display = 'block';
 	controls.style.display = 'block';
+
+	if (video.ntcType === 'device') {
+		brightness_slider.value = 1.65;
+		onBrightnessChange();
+	}
 });
 
 function onShowPartsChanged() {
@@ -515,11 +520,11 @@ focus_alarm.addEventListener('change', onFocusAlarmChanged);
 function updateImageCorrection() {
 	const filters = [];
 
-	if (config.brightness > 1) {
+	if (config.brightness !== undefined && config.brightness > 1) {
 		filters.push(`brightness(${config.brightness})`);
 	}
 
-	if (config.contrast !== 1) {
+	if (config.contrast !== undefined && config.contrast !== 1) {
 		filters.push(`contrast(${config.contrast})`);
 	}
 
@@ -719,6 +724,7 @@ async function playVideoFromDevice(device_id, fps) {
 
 		// when an actual device id is supplied, we start everything
 		video.srcObject = stream;
+		video.ntcType = 'device';
 		video.play();
 	} catch (error) {
 		console.error('Error opening video camera.', error);
@@ -740,6 +746,7 @@ async function playVideoFromScreenCap(fps) {
 
 		// when an actual device id is supplied, we start everything
 		video.srcObject = stream;
+		video.ntcType = 'screencap';
 		video.play();
 	} catch (error) {
 		console.error('Error capturing window.', error);
