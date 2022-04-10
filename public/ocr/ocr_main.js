@@ -475,7 +475,7 @@ video.addEventListener('click', async evt => {
 	}
 
 	alert(
-		'Rough identification has been completed.\n\nYou MUST now inspect and fine tune all the fields (location and size) to make them pixel perfect.'
+		'Rough calibration has been completed 🎉!\n\nYou now MUST inspect and fine tune all the fields (location and size) to make them pixel perfect.'
 	);
 });
 
