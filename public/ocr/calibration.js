@@ -23,18 +23,17 @@ export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
 	}
 
 	function maybeAddToQueue(tx, ty) {
+		if (tx < 0 || ty >= img_data.width) return;
+		if (ty < 0 || ty >= img_data.height) return;
+
 		if (!handled(tx, ty)) {
 			queue.push([tx, ty]);
 		}
 	}
 
-	let inspected = 0;
-	let x = startX,
-		y = startY;
-	const queue = [[x, y]];
+	const queue = [[startX, startY]];
 
 	while (queue.length) {
-		++inspected;
 		const [x, y] = queue.shift();
 		if (handled(x, y)) continue;
 
@@ -42,17 +41,17 @@ export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
 
 		if (!seen[x][y]) continue;
 
-		if (x > 0) maybeAddToQueue(x - 1, y);
-		if (x < img_data.width - 1) maybeAddToQueue(x + 1, y);
-		if (y > 0) maybeAddToQueue(x, y - 1);
-		if (y < img_data.height - 1) maybeAddToQueue(x, y + 1);
+		maybeAddToQueue(x - 1, y);
+		maybeAddToQueue(x + 1, y);
+		maybeAddToQueue(x, y - 1);
+		maybeAddToQueue(x, y + 1);
 	}
 
 	return seen;
 }
 
 export function getFieldCoordinates(img_data, startPoint, color = [0, 0, 0]) {
-	const result = flood(img_data, startPoint, (color = [0, 0, 0]));
+	const result = flood(img_data, startPoint, color);
 
 	const [top, left, bottom, right] = result.reduce(
 		([t, l, b, r], column, x) => {
