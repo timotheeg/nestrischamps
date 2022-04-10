@@ -473,6 +473,10 @@ video.addEventListener('click', async evt => {
 		brightness_slider.value = 1.65;
 		onBrightnessChange();
 	}
+
+	alert(
+		'Rough identification has been completed.\n\nYou MUST now inspect and fine tune all the fields (location and size) to make them pixel perfect.'
+	);
 });
 
 function onShowPartsChanged() {
