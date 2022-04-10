@@ -1,72 +1,91 @@
-export function getCaptureCoordinates(ocv, template_id, capture_id) {
-	const template = ocv.imread(template_id);
-	const capture = ocv.imread(capture_id);
-
-	const orb = new ocv.ORB();
-
-	const kp1 = new ocv.KeyPointVector();
-	const kp2 = new ocv.KeyPointVector();
-	const des1 = new ocv.Mat();
-	const des2 = new ocv.Mat();
-
-	orb.detect(template, kp1);
-	orb.compute(template, kp1, des1);
-
-	orb.detect(capture, kp2);
-	orb.compute(capture, kp2, des2);
-
-	const bf = new ocv.BFMatcher(ocv.NORM_HAMMING, true);
-	const matches = new ocv.DMatchVector();
-	bf.match(des1, des2, matches);
-
-	const local_matches = Array(matches.size())
+export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
+	console.log(startX, startY);
+	const seen = new Array(img_data.width)
 		.fill()
-		.map((_, idx) => matches.get(idx));
-	local_matches.sort((a, b) => a.distance - b.distance);
+		.map(_ => new Array(img_data.height).fill());
 
-	// console.log('matches', local_matches);
+	function check(x, y) {
+		const start_index = 4 * (y * img_data.width + x);
+		const data = img_data.data;
+		return (
+			data[start_index] === color[0] &&
+			data[start_index + 1] === color[1] &&
+			data[start_index + 2] === color[2]
+		);
+	}
 
-	const src_pts = local_matches.map(m => {
-		const pt = kp1.get(m.queryIdx).pt;
-		return [pt.x, pt.y];
-	});
+	function handled(x, y) {
+		return seen[x][y] !== undefined;
+	}
 
-	const dst_pts = local_matches.map(m => {
-		const pt = kp2.get(m.trainIdx).pt;
-		return [pt.x, pt.y];
-	});
+	if (!check(startX, startY)) {
+		throw new Error('Starting point does not match color');
+	}
 
-	// console.log(src_pts);
-	// console.log(dst_pts);
+	function maybeAddToQueue(tx, ty) {
+		if (!handled(tx, ty)) {
+			queue.push([tx, ty]);
+		}
+	}
 
-	const src_mat = ocv.matFromArray(
-		src_pts.length,
-		1,
-		ocv.CV_64FC2,
-		[].concat(...src_pts)
+	let inspected = 0;
+	let x = startX,
+		y = startY;
+	const queue = [[x, y]];
+
+	while (queue.length) {
+		++inspected;
+		const [x, y] = queue.shift();
+		if (handled(x, y)) continue;
+
+		seen[x][y] = check(x, y);
+
+		if (!seen[x][y]) continue;
+
+		if (x > 0) maybeAddToQueue(x - 1, y);
+		if (x < img_data.width - 1) maybeAddToQueue(x + 1, y);
+		if (y > 0) maybeAddToQueue(x, y - 1);
+		if (y < img_data.height - 1) maybeAddToQueue(x, y + 1);
+	}
+
+	return seen;
+}
+
+export function getFieldCoordinates(img_data, startPoint, color = [0, 0, 0]) {
+	const result = flood(img_data, startPoint, (color = [0, 0, 0]));
+
+	const [top, left, bottom, right] = result.reduce(
+		([t, l, b, r], column, x) => {
+			column.forEach((isBlack, y) => {
+				if (isBlack) {
+					if (x < l) l = x;
+					if (x > r) r = x;
+					if (y < t) t = y;
+					if (y > b) b = y;
+				}
+			});
+			return [t, l, b, r];
+		},
+		[Infinity, Infinity, -1, -1]
 	);
-	const dst_mat = ocv.matFromArray(
-		src_pts.length,
-		1,
-		ocv.CV_64FC2,
-		[].concat(...dst_pts)
-	);
 
-	const transform = ocv.findHomography(src_mat, dst_mat, ocv.RANSAC, 5.0);
-	const size = template.size();
+	return [left, top, right - left + 1, bottom - top + 1];
+}
 
-	const boundary_pts = ocv.matFromArray(2, 1, ocv.CV_64FC2, [
-		0,
-		0,
-		size.width,
-		size.height,
-	]);
+export function getCaptureCoordinates(
+	reference_size,
+	reference_location,
+	field_w_border_xywh
+) {
+	const ideal_field_xywh = reference_location.field_w_borders.crop;
 
-	const target_pts = new ocv.Mat();
-	ocv.perspectiveTransform(boundary_pts, target_pts, transform);
+	const scaleX = field_w_border_xywh[2] / ideal_field_xywh[2];
+	const scaleY = field_w_border_xywh[3] / ideal_field_xywh[3];
 
-	const [l, t, r, b] = target_pts.data64F.map(v => v + 0);
-
-	// return in [x,y,w,h] format
-	return [l, t, r - l, b - t];
+	return [
+		field_w_border_xywh[0] - ideal_field_xywh[0] * scaleX,
+		field_w_border_xywh[1] - ideal_field_xywh[1] * scaleY,
+		scaleX * reference_size[0],
+		scaleY * reference_size[1],
+	];
 }

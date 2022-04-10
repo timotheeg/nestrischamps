@@ -8,7 +8,7 @@ import OCRSanitizer from '/ocr/OCRSanitizer.js';
 import {
 	getFieldCoordinates,
 	getCaptureCoordinates,
-} from '/ocr/calibration2.js';
+} from '/ocr/calibration.js';
 import { peerServerOptions } from '/views/constants.js';
 import speak from '/views/tts.js';
 
@@ -1494,21 +1494,6 @@ function trackAndSendFrames() {
 		await playVideoFromConfig();
 		trackAndSendFrames();
 	} else {
-		// Dynamically load openCV we need to load opencv now
-		const script = document.createElement('script');
-
-		await new Promise(resolve => {
-			script.onload = resolve;
-			script.src = '/ocr/opencv.js';
-			document.head.appendChild(script);
-		});
-
-		await resetDevices();
-
-		capture_rate.value = default_frame_rate;
-
-		ocv = await cv;
-
 		// create default dummy waiting to be populated by user selection
 		config = {
 			frame_rate: default_frame_rate,
