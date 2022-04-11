@@ -674,13 +674,14 @@ function updateDeviceList(devices) {
 }
 
 async function getConnectedDevices(type) {
+	let stream;
+
 	try {
 		// prompt for permission if needed
 		// on windows, this requests the first available capture device and it may fail
 		// BUT if permission has been granted, then listing the devices below might still work
 		// SO, we wrap the device call in a try..catch, and ignore errors
-		const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-		stream.getTracks()[0].stop();
+		stream = await navigator.mediaDevices.getUserMedia({ video: true });
 	} catch (err) {
 		// We log a warning but we do nothing
 		console.log(
@@ -688,9 +689,13 @@ async function getConnectedDevices(type) {
 		);
 	}
 
-	return (await navigator.mediaDevices.enumerateDevices()).filter(
+	const devices = (await navigator.mediaDevices.enumerateDevices()).filter(
 		device => device.kind === type && device.deviceId
 	);
+
+	if (stream) stream.getTracks()[0].stop();
+
+	return devices;
 }
 
 async function resetDevices() {
