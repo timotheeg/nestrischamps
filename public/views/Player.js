@@ -482,7 +482,7 @@ export default class Player {
 		this.pieces.length = 0;
 		this.clear_events.length = 0;
 		this.preview = '';
-		this.prev_preview = 'I';
+		this.prev_preview = 'O';
 		this.score = 0;
 		this.lines = 0;
 		this.start_level = 0;
@@ -699,7 +699,7 @@ export default class Player {
 		if (this.pending_piece) {
 			this.pending_piece = false;
 
-			let cur_piece = data.cur_piece || this.prev_preview;
+			let cur_piece = data.cur_piece || this.prev_preview || 'O';
 			let has_change = true;
 			let drought_change;
 

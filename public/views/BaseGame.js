@@ -642,7 +642,7 @@ export default class BaseGame {
 		if (this.is_classic_rom) {
 			// fake das stats
 			this.data.das.cur = -1;
-		} else {
+		} else if (data.cur_piece_das !== null) {
 			// record real das stats
 			this.data.das.cur = data.cur_piece_das;
 			this.data.das.total += data.cur_piece_das;
