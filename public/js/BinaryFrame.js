@@ -6,9 +6,9 @@ const FRAME_SIZE_BY_VERSION = {
 };
 
 const GAME_TYPE = {
+	MINIMAL: 0,
 	CLASSIC: 1,
 	DAS_TRAINER: 2,
-	MINIMAL: 3,
 };
 
 const PIECE_TO_VALUE = {
@@ -116,7 +116,7 @@ export default class BinaryFrame {
 			((sanitized.cur_piece_das & 0b11111) << 3) |
 			(sanitized.cur_piece & 0b111);
 
-		// piece stats (9 bits each - does not lign nicely to byte boundaries 😓)
+		// piece stats (9 bits each - does not align nicely to byte boundaries 😓)
 		buffer[bidx++] = ((sanitized.T & 0b111111110) >> 1);
 		buffer[bidx++] = ((sanitized.T & 0b000000001) << 7) | ((sanitized.J & 0b111111100) >> 2);
 		buffer[bidx++] = ((sanitized.J & 0b000000011) << 6) | ((sanitized.Z & 0b111111000) >> 3);

@@ -1420,7 +1420,7 @@ function trackAndSendFrames() {
 
 	// TODO: better event system and name for frame data events
 	ocr_corrector.onMessage = async function (data) {
-		data.game_type = config.game_type || BinaryFrame.GAME_TYPE.CLASSIC;
+		data.game_type = config.game_type ?? BinaryFrame.GAME_TYPE.CLASSIC;
 		data.ctime = Date.now() - start_time;
 
 		if (show_parts.checked) {
