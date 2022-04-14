@@ -262,7 +262,8 @@ export default class TetrisOCR extends EventTarget {
 
 		// color are either supplied from palette or read, there's no other choice
 		if (this.palette) {
-			[res.color1, res.color2, res.color3] = this.palette[level_units];
+			[res.color1, res.color2, res.color3] =
+				this.palette[level_units] || this.palette[0];
 		} else {
 			// assume tasks color1 and color2 are set
 			res.color2 = this.scanColor2(source_img);

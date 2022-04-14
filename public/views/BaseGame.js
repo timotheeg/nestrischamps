@@ -228,7 +228,7 @@ export default class BaseGame {
 			},
 
 			das: {
-				cur: 0,
+				cur: -1,
 				total: 0, // running total, used for average computation
 				avg: 0,
 				great: 0,
