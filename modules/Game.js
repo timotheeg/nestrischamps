@@ -99,7 +99,7 @@ class Game {
 
 			this.num_blocks = this._getNumBlocks(data); // assume correct...
 			this.num_pieces = 0;
-			this.prior_preview = null;
+			this.prior_preview = 'O';
 
 			this.tetris_lines = 0;
 
@@ -334,13 +334,15 @@ class Game {
 			// record new state
 			this.num_pieces = this._getNumPieces(data);
 			PIECES.forEach(p => (this.data[p] = data[p]));
-			this.prior_preview = data.preview;
-		} else {
+		} else if (data.cur_piece_das !== null) {
 			cur_piece = data.cur_piece; // 💪
 			this.das_total += data.cur_piece_das;
+		} else {
+			cur_piece = this.prior_preview;
 		}
 
 		this.pieces.push(cur_piece);
+		this.prior_preview = data.preview;
 
 		if (cur_piece == 'I') {
 			if (this.cur_drought > this.max_drought) {

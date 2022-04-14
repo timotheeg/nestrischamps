@@ -232,7 +232,7 @@ export default class OCRSanitizer {
 			pojo.color1 = dispatch_frame.color1;
 			pojo.color2 = dispatch_frame.color2;
 			pojo.color3 = dispatch_frame.color3;
-		} else {
+		} else if (this.config.tasks.cur_piece_das) {
 			pojo.instant_das = OCRSanitizer.digitsToValue(dispatch_frame.instant_das);
 			pojo.cur_piece_das = OCRSanitizer.digitsToValue(
 				dispatch_frame.cur_piece_das
