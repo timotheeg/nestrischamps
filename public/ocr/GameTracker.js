@@ -140,7 +140,7 @@ export default class GameTracker {
 					frame.preview = last_frame.preview;
 				});
 			} else {
-				if (last_frame.preview != last_frame.preview) {
+				if (last_frame.preview != peek(this.frame_buffer).preview) {
 					this.piece_frame_delay = this.frame_buffer.length;
 				}
 			}
