@@ -1,21 +1,10 @@
 import QueryString from '/js/QueryString.js';
-import BinaryFrame from '/js/BinaryFrame.js';
 import renderBlock from '/views/renderBlock.js';
 import FrameBuffer from '/views/FrameBuffer.js';
 import BaseGame from '/views/BaseGame.js';
 import { css_size, clamp, getPercent, peek } from '/views/utils.js';
 
-import {
-	SCORE_BASES,
-	PIECE_COLORS,
-	DOM_DEV_NULL,
-	PIECES,
-	LINES,
-	RUNWAY,
-	EFF_LINE_VALUES,
-	CLEAR_ANIMATION_NUM_FRAMES,
-	getRunway,
-} from '/views/constants.js';
+import { PIECE_COLORS, DOM_DEV_NULL, LINES } from '/views/constants.js';
 
 const WINNER_FACE_BLOCKS = [
 	[12, 3],
