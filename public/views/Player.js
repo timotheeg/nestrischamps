@@ -626,18 +626,24 @@ export default class Player {
 	}
 
 	getScore() {
-		if (!this.game || !this.game.frames) return;
-		return peek(peek(this.game.frames).points).score.current;
+		if (!this.game || !this.game.frames.length) return;
+		const points = peek(this.game.frames);
+		if (!points.length) return;
+		return peek(points).score.current;
 	}
 
 	getGameRunwayScore() {
-		if (!this.game || !this.game.frames) return;
-		return peek(peek(this.game.frames).points).score.runway;
+		if (!this.game || !this.game.frames.length) return;
+		const points = peek(this.game.frames);
+		if (!points.length) return;
+		return peek(points).score.runway;
 	}
 
 	getProjection() {
-		if (!this.game || !this.game.frames) return;
-		return peek(peek(this.game.frames).points).score.projection;
+		if (!this.game || !this.game.frames.length) return;
+		const points = peek(this.game.frames);
+		if (!points.length) return;
+		return peek(points).score.projection;
 	}
 
 	_setFrameOuter(data) {
