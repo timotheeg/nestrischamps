@@ -147,16 +147,17 @@
 				player_fields.next.textContent = '';
 			};
 
-			player.onLines = cleared => {
-				document.querySelector('dd.clears').textContent = player.clear_events
-					.map(ev => ev.cleared)
+			player.onLines = frame => {
+				document.querySelector('dd.clears').textContent = frame.clears
+					.map(evt => evt.cleared)
 					.join('');
 			};
 
-			player.onPiece = current_piece => {
-				player_fields.next.textContent = player.last_frame.preview || '';
-				document.querySelector('dd.pieces').textContent =
-					player.pieces.join('');
+			player.onPiece = frame => {
+				player_fields.next.textContent = frame.raw.preview || '';
+				document.querySelector('dd.pieces').textContent = frame.pieces
+					.map(evt => evt.piece)
+					.join('');
 			};
 
 			const API = {

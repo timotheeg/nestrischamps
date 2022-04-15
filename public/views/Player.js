@@ -657,9 +657,6 @@ export default class Player {
 	}
 
 	_setFrameOuter(data) {
-		// DO NOT DELETE... Is used by Stencil layout -_-
-		this.last_frame = data;
-
 		this.game.setFrame(data);
 	}
 
@@ -690,7 +687,7 @@ export default class Player {
 			point_evt.score.current
 		);
 
-		if (this.transition === null) {
+		if (point_evt.score.transition === null) {
 			this.dom.runway_tr.textContent = this.options.format_score(
 				point_evt.score.tr_runway,
 				6
