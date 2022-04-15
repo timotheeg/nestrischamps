@@ -418,6 +418,7 @@ export default class Player {
 		this._renderCurtainDown = this._renderCurtainDown.bind(this);
 		this._renderNewGame = this._renderNewGame.bind(this);
 		this._renderGameOver = this._renderGameOver.bind(this);
+		this._doTetris = this._doTetris.bind(this);
 
 		this.reset();
 
