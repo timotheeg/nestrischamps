@@ -212,6 +212,33 @@ let view_peer_id = null;
 let is_player = false;
 let view_meta = null;
 
+const API = {
+	message(msg) {
+		if (QueryString.get('tts') === '1') {
+			speak(msg);
+		}
+	},
+
+	setViewPeerId(_view_peer_id) {
+		view_peer_id = _view_peer_id;
+	},
+
+	makePlayer(player_index, _view_meta) {
+		// producer is player, share video
+		is_player = true;
+		view_meta = _view_meta;
+
+		startSharingVideoFeed();
+	},
+
+	dropPlayer() {
+		is_player = false;
+		view_meta = null;
+		// producer is no longer player
+		stopSharingVideoFeed();
+	},
+};
+
 function connect() {
 	if (connection) {
 		connection.close();
@@ -221,35 +248,9 @@ function connect() {
 
 	connection.onMessage = function (frame) {
 		try {
-			let [method, ...args] = frame;
+			const [method, ...args] = frame;
 
-			switch (method) {
-				case 'message': {
-					if (QueryString.get('tts') === '1') {
-						speak(args[0]);
-					}
-					break;
-				}
-				case 'setViewPeerId': {
-					view_peer_id = args[0];
-					break;
-				}
-				case 'makePlayer': {
-					// producer is player, share video
-					is_player = true;
-					view_meta = args[1];
-
-					startSharingVideoFeed();
-					break;
-				}
-				case 'dropPlayer': {
-					is_player = false;
-					view_meta = null;
-					// producer is no longer player
-					stopSharingVideoFeed();
-					break;
-				}
-			}
+			API[method](...args);
 		} catch (e) {
 			console.error(e);
 		}
