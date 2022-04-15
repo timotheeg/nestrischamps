@@ -90,6 +90,15 @@ const BORDER_BLOCKS = [
 	[0, 1],
 ];
 
+const PASSTHROUGH_HANDLERS = [
+	'onGameStart',
+	'onTransition',
+	'onDroughtStart',
+	'onDroughtEnd',
+	'onKillScreen',
+	'onCurtainDown',
+];
+
 const fake_data = { count: 0, lines: 0, percent: 0, drought: 0, indexes: [] };
 const fake_clear_evt = {
 	tetris_rate: 0,
@@ -399,16 +408,15 @@ export default class Player {
 		this._renderLevel = this._renderLevel.bind(this);
 		this._renderLines = this._renderLines.bind(this);
 		this._renderPiece = this._renderPiece.bind(this);
-		this._renderTransition = this._renderTransition.bind(this);
-		this._renderDroughtStart = this._renderDroughtStart.bind(this);
-		this._renderDroughtEnd = this._renderDroughtEnd.bind(this);
-		this._renderTransition = this._renderTransition.bind(this);
-		this._renderKillScreen = this._renderKillScreen.bind(this);
-		this._renderCurtainDown = this._renderCurtainDown.bind(this);
 		this._renderNewGame = this._renderNewGame.bind(this);
-		this._renderGameStart = this._renderGameStart.bind(this);
 		this._renderGameOver = this._renderGameOver.bind(this);
 		this._doTetris = this._doTetris.bind(this);
+
+		PASSTHROUGH_HANDLERS.forEach(on_name => {
+			this[`_${on_name}`] = (...args) => {
+				this[on_name](...args);
+			};
+		});
 
 		this.reset();
 
@@ -594,6 +602,8 @@ export default class Player {
 
 	createGame() {
 		this.game = new BaseGame();
+
+		// Handlers with local rendering actions
 		this.game.onScore = this._renderScore;
 		this.game.onPiece = this._renderPiece;
 		this.game.onLines = this._renderLines;
@@ -601,8 +611,12 @@ export default class Player {
 		this.game.onNewGame = this._renderNewGame;
 		this.game.onValidFrame = this._renderValidFrame;
 		this.game.onTetris = this._doTetris;
-		this.game.onGameStart = this._renderGameStart;
 		this.game.onGameOver = this._renderGameOver;
+
+		// Pass-throughs handlers
+		PASSTHROUGH_HANDLERS.forEach(on_name => {
+			this.game[on_name] = this[`_${on_name}`];
+		});
 	}
 
 	setGame(game) {
@@ -739,33 +753,9 @@ export default class Player {
 		this.onPiece(frame);
 	}
 
-	_renderTransition() {
-		this.ontransition();
-	}
-
-	_renderGameStart() {
-		this.onGameStart();
-	}
-
 	_renderGameOver() {
 		this._showCurtain();
 		this.onGameOver();
-	}
-
-	_renderDroughtStart() {
-		this.onDroughtStart();
-	}
-
-	_renderDroughtEnd() {
-		this.onDroughtEnd();
-	}
-
-	_renderKillScreen() {
-		this.onKillScreen();
-	}
-
-	_renderCurtainDown() {
-		this.onCurtainDown();
 	}
 
 	renderPreview(level, preview) {
