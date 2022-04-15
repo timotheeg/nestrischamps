@@ -417,6 +417,7 @@ export default class Player {
 		this._renderKillScreen = this._renderKillScreen.bind(this);
 		this._renderCurtainDown = this._renderCurtainDown.bind(this);
 		this._renderNewGame = this._renderNewGame.bind(this);
+		this._renderGameStart = this._renderGameStart.bind(this);
 		this._renderGameOver = this._renderGameOver.bind(this);
 		this._doTetris = this._doTetris.bind(this);
 
@@ -611,6 +612,7 @@ export default class Player {
 		this.game.onNewGame = this._renderNewGame;
 		this.game.onValidFrame = this._renderValidFrame;
 		this.game.onTetris = this._doTetris;
+		this.game.onGameStart = this._renderGameStart;
 		this.game.onGameOver = this._renderGameOver;
 	}
 
@@ -632,6 +634,21 @@ export default class Player {
 		} else {
 			this._setFrameOuter(data);
 		}
+	}
+
+	getScore() {
+		if (!this.game || !this.game.frames) return;
+		return peek(peek(this.game.frames).points).score.current;
+	}
+
+	getGameRunwayScore() {
+		if (!this.game || !this.game.frames) return;
+		return peek(peek(this.game.frames).points).score.runway;
+	}
+
+	getProjection() {
+		if (!this.game || !this.game.frames) return;
+		return peek(peek(this.game.frames).points).score.projection;
 	}
 
 	_setFrameOuter(data) {
@@ -729,6 +746,10 @@ export default class Player {
 
 	_renderTransition() {
 		this.ontransition();
+	}
+
+	_renderGameStart() {
+		this.onGameStart();
 	}
 
 	_renderGameOver() {
