@@ -123,7 +123,7 @@ function createGame() {
 	game.onLevel = renderLevel;
 	game.onNewGame = onNewGame;
 	game.onValidFrame = onValidFrame;
-	game.onTetris = () => onTetris();
+	game.onTetris = () => onTetris(); // one lambda of indirection to allow overwrite
 	game.onGameOver = getStats;
 	game.onTransitionWarning = warning_lines => {
 		commentate(`${warning_lines} lines till transition`);
@@ -337,7 +337,7 @@ function renderLines(frame) {
 
 	// Do the small boxes first
 	dom.tetris_rate.value.textContent = getPercent(clear_evt.tetris_rate);
-	dom.efficiency.value.textContent = (Math.floor(clear_evt.efficiency) || 0)
+	dom.efficiency.value.textContent = (Math.round(clear_evt.efficiency) || 0)
 		.toString()
 		.padStart(3, '0');
 	dom.burn.count.textContent = clear_evt.burn.toString().padStart(2, '0');
