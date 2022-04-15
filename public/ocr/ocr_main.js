@@ -3,8 +3,7 @@ import Connection from '/js/connection.js';
 import BinaryFrame from '/js/BinaryFrame.js';
 import loadDigitTemplates from '/ocr/templates.js';
 import loadPalettes from '/ocr/palettes.js';
-import TetrisOCR from '/ocr/TetrisOCR.js';
-import OCRSanitizer from '/ocr/OCRSanitizer.js';
+import GameTracker from '/ocr/GameTracker.js';
 import {
 	getFieldCoordinates,
 	getCaptureCoordinates,
@@ -30,7 +29,7 @@ const LEVEL_COLORS = [
 const reference_size = [512, 448];
 const reference_locations = {
 	score: { crop: [384, 112, 94, 14], pattern: 'ADDDDD' },
-	level: { crop: [416, 320, 30, 14], pattern: 'LA' },
+	level: { crop: [416, 320, 30, 14], pattern: 'TD' }, // TD, because we only care about start level, which is 29 or lower
 	lines: { crop: [304, 32, 46, 14], pattern: 'DDD' },
 	field_w_borders: { crop: [190, 78, 162, 324] },
 	field: { crop: [192, 80, 158, 318] },
@@ -146,8 +145,7 @@ const UNFOCUSED_ALARM_LOOPS = 4;
 
 let templates;
 let palettes;
-let tetris_ocr;
-let ocr_corrector;
+let game_tracker;
 let config;
 let connection;
 let pending_calibration = false;
@@ -177,6 +175,7 @@ rom_selector.addEventListener('change', evt => {
 		palette_selector.value = '';
 		palette_selector.disabled = false;
 	} else {
+		// TODO, load user palette!
 		color_matching.style.display = 'none';
 		palette_selector.disabled = true;
 		palette_selector.value = Object.keys(palettes)[0];
@@ -545,8 +544,8 @@ function updateImageCorrection() {
 		delete video.style.filter;
 	}
 
-	if (tetris_ocr) {
-		tetris_ocr.setConfig(config);
+	if (game_tracker) {
+		game_tracker.setConfig(config);
 	}
 }
 
@@ -951,7 +950,7 @@ async function captureFrame() {
 		}
 		performance.mark('capture_end');
 
-		tetris_ocr.processFrame(bitmap, do_half_height || force_half_height);
+		game_tracker.processFrame(bitmap, do_half_height || force_half_height);
 	} catch (err) {
 		console.error(err);
 	}
@@ -1012,7 +1011,7 @@ function resetConfig(task_name) {
 	}
 
 	// set the new config
-	tetris_ocr.setConfig(config);
+	game_tracker.setConfig(config);
 
 	updateCanvasSizeIfNeeded(
 		config.source_canvas,
@@ -1411,15 +1410,13 @@ function trackAndSendFrames() {
 		showConfigControls(templates, palettes, config);
 	}
 
-	tetris_ocr = new TetrisOCR(templates, palettes, config);
-	ocr_corrector = new OCRSanitizer(tetris_ocr, config);
+	game_tracker = new GameTracker(templates, palettes, config);
 
 	let start_time = Date.now();
-	let gameid = 1;
 	let last_frame = { field: [] };
 
 	// TODO: better event system and name for frame data events
-	ocr_corrector.onMessage = async function (data) {
+	game_tracker.onMessage = async function (data) {
 		data.game_type = config.game_type ?? BinaryFrame.GAME_TYPE.CLASSIC;
 		data.ctime = Date.now() - start_time;
 
