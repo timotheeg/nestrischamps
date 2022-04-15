@@ -532,6 +532,8 @@ export default class Player {
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
 		this.dom.score.textContent = this.options.format_score(0);
+		this.dom.lines.textContent = '000';
+		this.dom.level.textContent = '00';
 		this.dom.runway_tr.textContent = this.options.format_score(0, 6);
 		this.dom.runway_game.textContent = this.options.format_score(0, 7);
 		this.dom.projection.textContent = this.options.format_score(0, 7);
@@ -644,10 +646,19 @@ export default class Player {
 		this._hideCurtain();
 		this.createGame();
 		this.game.setFrame(frame);
+
+		const last_frame = peek(this.game.frames);
+
+		this._renderScore(last_frame);
+		this._renderLevel(last_frame);
+		this._renderLines(last_frame);
+		this._renderPiece(last_frame);
 	}
 
 	_renderValidFrame(frame) {
-		this.renderField(frame.raw.level, frame.raw.field);
+		if (!this.game.over) {
+			this.renderField(frame.raw.level, frame.raw.field);
+		}
 	}
 
 	_renderScore(frame) {
@@ -683,12 +694,15 @@ export default class Player {
 
 		this.dom.lines.textContent = `${frame.raw.lines}`.padStart(3, '0');
 		this.dom.burn.textContent = clear_evt.burn;
-		this.dom.trt.textContent = getPercent(clear_evt.tetris_rate);
-		this.dom.eff.textContent = (Math.round(clear_evt.efficiency) || 0)
-			.toString()
-			.padStart(3, '0');
 
-		this.renderRunningTRT(frame.clears);
+		if (frame.clears.length) {
+			this.dom.trt.textContent = getPercent(clear_evt.tetris_rate);
+			this.dom.eff.textContent = (Math.round(clear_evt.efficiency) || 0)
+				.toString()
+				.padStart(3, '0');
+
+			this.renderRunningTRT(frame.clears);
+		}
 
 		this.onLines(frame);
 	}
