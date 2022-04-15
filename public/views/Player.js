@@ -540,10 +540,6 @@ export default class Player {
 		this.dom.burn.textContent = 0;
 	}
 
-	getScore() {
-		// return this.game.;
-	}
-
 	setDiff(diff, t_diff) {
 		// implement in subclasses
 	}
