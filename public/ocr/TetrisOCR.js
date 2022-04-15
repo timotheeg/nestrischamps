@@ -230,12 +230,10 @@ export default class TetrisOCR extends EventTarget {
 		this.updateCaptureContextFilters();
 	}
 
-	async processFrame(frame, half_height) {
+	processsFrameStep1(frame, half_height) {
 		if (!this.capture_canvas_ctx) {
 			this.initCaptureContext(frame, half_height);
 		}
-
-		const res = {};
 
 		performance.mark('start');
 		this.capture_canvas_ctx.drawImage(
@@ -250,41 +248,13 @@ export default class TetrisOCR extends EventTarget {
 
 		const source_img = this.getSourceImageData();
 
-		res.score = this.scanScore(source_img);
-		res.level = this.scanLevel(source_img);
-		res.lines = this.scanLines(source_img);
-
-		// WARNING: We need to use the level for color and board reads
-		// WARNING: level *may* be read incorrectly when changing value
-		// TODO: Store source_img, and level and board should be read after the 1-frame sanitization pipeline
-
-		const level_units = res.level == null ? 0 : res.level[1];
-
-		// color are either supplied from palette or read, there's no other choice
-		if (this.palette) {
-			[res.color1, res.color2, res.color3] =
-				this.palette[level_units] || this.palette[0];
-		} else {
-			// assume tasks color1 and color2 are set
-			res.color2 = this.scanColor2(source_img);
-			res.color3 = this.scanColor3(source_img);
-
-			if (this.config.tasks.color1) {
-				res.color1 = this.scanColor1(source_img);
-			} else {
-				res.color1 = DEFAULT_COLOR_1;
-			}
-		}
-
-		const colors = [res.color1, res.color2, res.color3];
-
-		if (level_units != 6 && level_units != 7) {
-			// TOCHECK: is this still needed now that we work in lab color space?
-			colors.unshift(DEFAULT_COLOR_0); // add black
-		}
-
-		res.field = await this.scanField(source_img, colors);
-		res.preview = this.scanPreview(source_img);
+		const res = {
+			source_img,
+			score: this.scanScore(source_img),
+			level: this.scanLevel(source_img),
+			lines: this.scanLines(source_img),
+			preview: this.scanPreview(source_img),
+		};
 
 		if (this.config.tasks.instant_das) {
 			// assumes all 3 das tasks are a unit
@@ -297,13 +267,46 @@ export default class TetrisOCR extends EventTarget {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
 
+		return res;
+	}
+
+	async processsFrameStep2(partial_frame, level) {
+		const res = {};
+		const level_units = level % 10;
+
+		// color are either supplied from palette or read, there's no other choice
+		if (this.palette) {
+			[res.color1, res.color2, res.color3] = this.palette[level_units];
+		} else {
+			// assume tasks color1 and color2 are set
+			res.color2 = this.scanColor2(partial_frame.source_img);
+			res.color3 = this.scanColor3(partial_frame.source_img);
+
+			if (this.config.tasks.color1) {
+				res.color1 = this.scanColor1(partial_frame.source_img);
+			} else {
+				res.color1 = DEFAULT_COLOR_1;
+			}
+		}
+
+		const colors = [res.color1, res.color2, res.color3];
+
+		if (this.palette || (level_units != 6 && level_units != 7)) {
+			// INFO: rolor for level X6 and X7 are terrible on Retron, so we don't add black to ensure they don't get mixed up
+			// When we use a palette
+			// TOCHECK: is this still needed now that we work in lab color space?
+			colors.unshift(DEFAULT_COLOR_0); // add black
+		}
+
+		res.field = await this.scanField(partial_frame.source_img, colors);
+
 		// round the colors if needed
 		if (res.color2) {
 			res.color2 = res.color2.map(v => Math.round(v));
 			res.color3 = res.color3.map(v => Math.round(v));
 		}
 
-		this.onMessage(res);
+		return res;
 	}
 
 	scanScore(source_img) {
