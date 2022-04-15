@@ -139,7 +139,7 @@ export default class BaseGame {
 			return;
 		}
 
-		if (this.over) {
+		if (this.over && !this.curtain_falling) {
 			return;
 		}
 
@@ -170,12 +170,18 @@ export default class BaseGame {
 			this.onPiece(last_frame);
 		}
 
-		this.onValidFrame(last_frame);
-
-		// Check board for gameover event (curtain has fallen)
-		if (this._getNumBlocks(frame) >= 200) {
+		// Check board for gameover event (curtain is falling)
+		if (!this.over && this._isTopRowFilled(frame)) {
+			this.curtain_falling = true;
 			this.end();
 		}
+
+		if (this._getNumBlocks(frame) >= 200) {
+			this.curtain_falling = false;
+			this.onCurtainDown();
+		}
+
+		this.onValidFrame(last_frame);
 	}
 
 	_doStartGame(frame) {
@@ -310,6 +316,13 @@ export default class BaseGame {
 
 	_isSameField(data) {
 		return data.field.every((cell, idx) => cell === this.data.field[idx]);
+	}
+
+	_isTopRowFilled(data) {
+		for (let idx = 10; idx--; ) {
+			if (!data.field[idx]) return false;
+		}
+		return true;
 	}
 
 	_getNumBlocks(data) {
@@ -467,8 +480,9 @@ export default class BaseGame {
 		this.data.score.current = real_score;
 		this.data.score.runway =
 			real_score + getRunway(this.data.start_level, RUNWAY.GAME, data.lines);
-		this.data.score.projection =
-			(this.data.score.runway * this.data.running_stats.efficiency) / 300;
+		this.data.score.projection = Math.round(
+			(this.data.score.runway * this.data.running_stats.efficiency) / 300
+		);
 
 		// record point event with snapshot of all data
 		this._recordPointEvent();

@@ -1,19 +1,10 @@
 import QueryString from '/js/QueryString.js';
-import BinaryFrame from '/js/BinaryFrame.js';
 import renderBlock from '/views/renderBlock.js';
+import FrameBuffer from '/views/FrameBuffer.js';
+import BaseGame from '/views/BaseGame.js';
 import { css_size, clamp, getPercent, peek } from '/views/utils.js';
 
-import {
-	SCORE_BASES,
-	PIECE_COLORS,
-	DOM_DEV_NULL,
-	PIECES,
-	LINES,
-	RUNWAY,
-	EFF_LINE_VALUES,
-	CLEAR_ANIMATION_NUM_FRAMES,
-	getRunway,
-} from '/views/constants.js';
+import { PIECE_COLORS, DOM_DEV_NULL, LINES } from '/views/constants.js';
 
 const WINNER_FACE_BLOCKS = [
 	[12, 3],
@@ -98,6 +89,47 @@ const BORDER_BLOCKS = [
 	[0, 2],
 	[0, 1],
 ];
+
+const PASSTHROUGH_HANDLERS = [
+	'onGameStart',
+	'onTransition',
+	'onDroughtStart',
+	'onDroughtEnd',
+	'onKillScreen',
+	'onCurtainDown',
+];
+
+const fake_data = { count: 0, lines: 0, percent: 0, drought: 0, indexes: [] };
+const fake_clear_evt = {
+	tetris_rate: 0,
+	efficiency: 0,
+	burn: 0,
+	lines: 0,
+	clears: {
+		1: fake_data,
+		2: fake_data,
+		3: fake_data,
+		4: fake_data,
+	},
+};
+const fake_piece_evt = {
+	deviation: 0,
+	deviation_28: 0,
+	deviation_56: 0,
+	pieces: {},
+	i_droughts: {
+		count: 0,
+		cur: 0,
+		max: 0,
+		last: 0,
+	},
+	das: {
+		avg: 0,
+		ok: 0,
+		great: 0,
+		bad: 0,
+	},
+};
 
 /*
 dom: {
@@ -199,9 +231,6 @@ export default class Player {
 			this.options.preview_pixel_size || this.options.pixel_size;
 		this.render_running_trt_rtl = !!this.options.running_trt_rtl;
 		this.render_wins_rtl = !!this.options.wins_rtl;
-
-		this.pieces = [];
-		this.clear_events = [];
 
 		const styles = getComputedStyle(this.dom.field);
 
@@ -374,6 +403,21 @@ export default class Player {
 		this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
 		this._setFrameOuter = this._setFrameOuter.bind(this);
 
+		this._renderValidFrame = this._renderValidFrame.bind(this);
+		this._renderScore = this._renderScore.bind(this);
+		this._renderLevel = this._renderLevel.bind(this);
+		this._renderLines = this._renderLines.bind(this);
+		this._renderPiece = this._renderPiece.bind(this);
+		this._renderNewGame = this._renderNewGame.bind(this);
+		this._renderGameOver = this._renderGameOver.bind(this);
+		this._doTetris = this._doTetris.bind(this);
+
+		PASSTHROUGH_HANDLERS.forEach(on_name => {
+			this[`_${on_name}`] = (...args) => {
+				this[on_name](...args);
+			};
+		});
+
 		this.reset();
 
 		this.camera_state = { mirror: 0 };
@@ -474,38 +518,6 @@ export default class Player {
 	}
 
 	reset() {
-		this.pending_piece = false;
-		this.pending_single = false;
-
-		// TODO use the Game Class T_T
-
-		this.pieces.length = 0;
-		this.clear_events.length = 0;
-		this.preview = '';
-		this.prev_preview = 'O';
-		this.score = 0;
-		this.lines = 0;
-		this.start_level = 0;
-		this.level = 0;
-		this.transition = null;
-		this.game_runway_score = this.getGameRunwayScore();
-		this.tr_runway_score = this.getTransitionRunwayScore();
-		this.drought = 0;
-		this.field_num_blocks = 0;
-		this.field_string = '';
-		this.burn = 0;
-
-		this.piece_stats = {
-			frame: PIECES.reduce((acc, p) => ((acc[p] = 0), acc), { count: 0 }),
-			board: PIECES.reduce((acc, p) => ((acc[p] = 0), acc), { count: 0 }),
-		};
-
-		this.lines_trt = 0;
-		this.total_eff = 0;
-		this.projection = 0;
-
-		this.gameid = -1;
-		this.game_over = false;
 		this.curtain_down = false;
 		this.winner_frame = 0;
 
@@ -517,26 +529,19 @@ export default class Player {
 		this.clearWinnerAnimation();
 		this.field_bg.style.background = 'rbga(0,0,0,0)';
 
-		this.dom.score.textContent = this.options.format_score(this.score);
-		this.dom.runway_tr.textContent = this.options.format_score(
-			this.tr_runway_score,
-			6
-		);
-		this.dom.runway_game.textContent = this.options.format_score(
-			this.game_runway_score,
-			7
-		);
-		this.dom.projection.textContent = this.options.format_score(
-			this.projection,
-			7
-		);
+		this.dom.score.textContent = this.options.format_score(0);
+		this.dom.lines.textContent = '000';
+		this.dom.level.textContent = '00';
+		this.dom.runway_tr.textContent = this.options.format_score(0, 6);
+		this.dom.runway_game.textContent = this.options.format_score(0, 7);
+		this.dom.projection.textContent = this.options.format_score(0, 7);
 		this.dom.trt.textContent = '-';
 		this.dom.eff.textContent = '-';
 		this.dom.burn.textContent = 0;
 	}
 
 	getScore() {
-		return this.score;
+		// return this.game.;
 	}
 
 	setDiff(diff, t_diff) {
@@ -595,28 +600,32 @@ export default class Player {
 		this.profile_card.src = `/view/profile_card/${login}`;
 	}
 
-	_getPieceStats(data) {
-		return PIECES.reduce(
-			(acc, piece) => {
-				const num = data[piece];
+	createGame() {
+		this.game = new BaseGame();
 
-				acc[piece] = num === null ? this.piece_stats.frame[piece] : num;
-				acc.count += acc[piece];
+		// Handlers with local rendering actions
+		this.game.onScore = this._renderScore;
+		this.game.onPiece = this._renderPiece;
+		this.game.onLines = this._renderLines;
+		this.game.onLevel = this._renderLevel;
+		this.game.onNewGame = this._renderNewGame;
+		this.game.onValidFrame = this._renderValidFrame;
+		this.game.onTetris = this._doTetris;
+		this.game.onGameOver = this._renderGameOver;
 
-				return acc;
-			},
-			{ count: 0 }
-		);
+		// Pass-throughs handlers
+		PASSTHROUGH_HANDLERS.forEach(on_name => {
+			this.game[on_name] = this[`_${on_name}`];
+		});
 	}
 
-	_isTopRowFull(data) {
-		for (let cell_idx = 10; cell_idx--; ) {
-			if (!data.field[cell_idx]) return false;
-		}
-		return true;
+	setGame(game) {
+		this.game = game;
 	}
 
 	setFrame(data) {
+		if (!this.game) this.createGame();
+
 		if (this.options.buffer_time) {
 			if (!this.frame_buffer) {
 				this.frame_buffer = new FrameBuffer(
@@ -630,352 +639,123 @@ export default class Player {
 		}
 	}
 
-	_setFrameOuter(data) {
-		const old_score = this.getScore();
-		const old_runway = this.getGameRunwayScore();
-
-		this._setFrameInner(data);
-
-		const new_score = this.getScore();
-		const new_runway = this.getGameRunwayScore();
-
-		if (new_score === old_score && new_runway === old_runway) return;
-
-		this.onScore();
-	}
-
-	_doGameOver() {
-		if (this.game_over) return;
-
-		this.game_over = true;
-		this._showCurtain();
-		this.onGameOver();
-	}
-
-	_setFrameInner(data) {
-		if (this.game_over && this.curtain_down && data.gameid == this.gameid) {
-			return;
-		}
-
-		const lines = data.lines;
-		const level = data.level;
-		const num_blocks = data.field.reduce((acc, v) => acc + (v ? 1 : 0), 0);
-		const field_string = data.field.join('');
-
-		// DO NOT DELETE... Is used by Stencil layout -_-
-		this.last_frame = data;
-
-		if (data.gameid != this.gameid) {
-			this._doGameOver();
-			// new game!
-			this.reset();
-
-			// we initialize the game state based on this first frame
-			// dangerous for field data if input is badly detected, but what to do -_-
-
-			this.gameid = data.gameid;
-			this.field_num_blocks = num_blocks;
-			this.start_level = level;
-			this.level = level;
-			this.lines = lines;
-			this.score = data.score;
-			this.pending_score = true;
-			this.prev_preview = data.cur_piece || data.preview || 'I';
-
-			this._hideCurtain();
-			this.onGameStart();
-		}
-
-		if (data.lines != null) {
-			this.dom.lines.textContent = `${data.lines}`.padStart(3, '0');
-		}
-
-		if (data.level != null) {
-			this.dom.level.textContent = `${data.level}`.padStart(2, '0');
-		}
-
-		let allow_field_piece_spawn_detection = false;
-
-		if (this.pending_piece) {
-			this.pending_piece = false;
-
-			let cur_piece = data.cur_piece || this.prev_preview || 'O';
-			let has_change = true;
-			let drought_change;
-
-			this.piece_stats.board[cur_piece]++;
-			this.piece_stats.board.count++;
-
-			if (cur_piece === 'I') {
-				drought_change = -this.drought;
-			} else {
-				drought_change = 1;
-			}
-
-			// for classic rom, we get piece data from piece stats
-			// TODO: Add more resilience here (wait for good data)
-			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
-				const piece_stats = this._getPieceStats(data);
-				const diff = piece_stats.count - this.piece_stats.frame.count;
-				const sane_state = PIECES.every(
-					piece => piece_stats[piece] >= this.piece_stats.frame[piece]
-				);
-
-				has_change = sane_state && diff;
-
-				if (!has_change) {
-					// frame stats are not good, we should wait a bit more for valid data to come?
-					// revert the changes
-					this.pending_piece = true;
-					this.piece_stats.board[cur_piece]--;
-					this.piece_stats.board.count--;
-				} else {
-					const i_diff = piece_stats.I - this.piece_stats.frame.I;
-
-					if (i_diff === 0) {
-						drought_change = diff; // expected to be +1 in most cases
-						cur_piece = PIECES.find(
-							piece => piece_stats[piece] != this.piece_stats.frame[piece]
-						);
-					} else {
-						drought_change = -this.drought;
-						cur_piece = 'I';
-					}
-
-					Object.assign(this.piece_stats.frame, piece_stats);
-				}
-			}
-
-			if (has_change) {
-				const drought = this.drought + drought_change;
-
-				if (drought === 0) {
-					if (this.drought >= 13) {
-						this.onDroughtEnd(this.drought);
-					}
-				} else if (drought === 13) {
-					if (this.drought < 13) {
-						this.onDroughtStart();
-					}
-				}
-
-				this.drought = drought;
-				this.dom.drought.textContent = this.options.format_drought(
-					this.drought
-				);
-				this.prev_preview = data.preview;
-
-				this.pieces.push(cur_piece);
-				this.onPiece(cur_piece);
-			}
-		} else {
-			if (data.game_type === BinaryFrame.GAME_TYPE.CLASSIC) {
-				this.pending_piece = PIECES.some(
-					piece => this.piece_stats.frame[piece] != data[piece]
-				);
-			} else {
-				allow_field_piece_spawn_detection = true;
-			}
-		}
-
-		if (level != null) {
-			const is_level_change = level != this.level;
-
-			this.level = level;
-
-			if (is_level_change) {
-				this.onLevel();
-
-				if (this.level === 29) {
-					this.onKillScreen();
-				}
-			}
-		}
-
-		if (!this.game_over && this._isTopRowFull(data)) {
-			this.game_over = true;
-			this._lockRunWayToScore();
-			this._showCurtain();
-			this.onGameOver();
-		}
-
-		if (!(this.game_over && this.has_curtain)) {
-			this.renderField(this.level, data.field, field_string);
-		}
-
-		this.renderPreview(this.level, data.preview);
-
-		if (num_blocks === 200) {
-			this.curtain_down = true;
-			if (!this.has_curtain) this.onCurtainDown();
-		} else {
-			this.updateField(
-				data.field,
-				num_blocks,
-				field_string,
-				allow_field_piece_spawn_detection
-			);
-		}
-
-		if (this.pending_score) {
-			if (lines === null || data.score === null) {
-				return;
-			}
-
-			if (lines < this.lines) {
-				// weird reading, wait one more frame
-				return;
-			}
-
-			const cleared = lines - this.lines;
-			const line_score = (SCORE_BASES[cleared] || 0) * (this.level + 1);
-
-			if (data.score === 999999 && this.score + line_score >= 999999) {
-				// Compute score beyond maxout
-				this.score += line_score;
-			} else if (data.score < this.score) {
-				const num_wraps = Math.floor((this.score + line_score) / 1600000);
-
-				if (num_wraps >= 1) {
-					// Using Hex score Game Genie code XNEOOGEX
-					// The GG code makes the score display wrap around to 0
-					// when reaching 1,600,000. We correct accordingly here.
-					this.score = 1600000 * num_wraps + data.score;
-				} else {
-					// weird readings... wait one more frame
-					return;
-				}
-			} else {
-				this.score = data.score;
-			}
-
-			this.dom.score.textContent = this.options.format_score(this.score);
-			this.pending_score = false;
-
-			if (lines > this.lines) {
-				if (cleared === 4) {
-					this.lines_trt += 4;
-
-					if (!this.options.reliable_field) {
-						this._doTetris();
-					}
-					this.burn = 0;
-				} else {
-					this.burn += cleared;
-				}
-
-				const line_value =
-					cleared <= 4 ? EFF_LINE_VALUES[cleared] : EFF_LINE_VALUES[1];
-
-				this.total_eff += line_value * cleared;
-
-				const trt = this.lines_trt / lines;
-				const eff = this.total_eff / lines;
-
-				this.clear_events.push({ trt, eff, cleared });
-				this.dom.burn.textContent = this.burn;
-				this.dom.trt.textContent = getPercent(trt);
-				this.dom.eff.textContent = (Math.round(eff) || 0)
-					.toString()
-					.padStart(3, '0');
-				this.renderRunningTRT();
-				this.lines = lines;
-
-				if (level != this.start_level && this.transition === null) {
-					this.transition = this.score;
-					this.tr_runway_score = this.score;
-					this.onTransition();
-				}
-
-				this.onLines(cleared);
-			}
-
-			if (this.transition === null) {
-				this.tr_runway_score = this.getTransitionRunwayScore();
-				this.dom.runway_tr.textContent = this.options.format_score(
-					this.tr_runway_score,
-					6
-				);
-			}
-
-			this.game_runway_score = this.getGameRunwayScore();
-			this.dom.runway_game.textContent = this.options.format_score(
-				this.game_runway_score,
-				7
-			);
-
-			this.projection = this.getProjection();
-			this.dom.projection.textContent = this.options.format_score(
-				this.projection,
-				7
-			);
-		} else if (data.score != null) {
-			// added extra checks here due to data.score always being different to this.score after maxout
-			if (data.score === 999999) {
-				this.pending_score = lines != this.lines;
-			} else {
-				const high_score = this.score / 1600000;
-
-				if (high_score >= 1) {
-					this.pending_score = data.score != this.score % 1600000;
-				} else {
-					this.pending_score = data.score != this.score;
-				}
-			}
-		}
-	}
-
-	_lockRunWayToScore() {
-		this.tr_runway_score = this.getTransitionRunwayScore();
-		this.dom.runway_tr.textContent = this.options.format_score(
-			this.tr_runway_score,
-			7
-		);
-
-		this.game_runway_score = this.getGameRunwayScore();
-		this.dom.runway_game.textContent = this.options.format_score(
-			this.game_runway_score,
-			7
-		);
-
-		this.projection = this.getProjection();
-		this.dom.projection.textContent = this.options.format_score(
-			this.projection,
-			7
-		);
+	getScore() {
+		if (!this.game || !this.game.frames.length) return;
+		const points = peek(this.game.frames);
+		if (!points.length) return;
+		return peek(points).score.current;
 	}
 
 	getGameRunwayScore() {
-		if (this.game_over) {
-			return this.score;
-		}
-
-		return this.score + getRunway(this.start_level, RUNWAY.GAME, this.lines);
+		if (!this.game || !this.game.frames.length) return;
+		const points = peek(this.game.frames);
+		if (!points.length) return;
+		return peek(points).score.runway;
 	}
 
-	getTransitionRunwayScore() {
-		if (this.transition) {
-			return this.transition;
-		} else if (this.game_over) {
-			return this.score;
-		} else {
-			return (
-				this.score + getRunway(this.start_level, RUNWAY.TRANSITION, this.lines)
+	getProjection() {
+		if (!this.game || !this.game.frames.length) return;
+		const points = peek(this.game.frames);
+		if (!points.length) return;
+		return peek(points).score.projection;
+	}
+
+	_setFrameOuter(data) {
+		// DO NOT DELETE... Is used by Stencil layout -_-
+		this.last_frame = data;
+
+		this.game.setFrame(data);
+	}
+
+	_renderNewGame(frame) {
+		this.reset();
+		this._hideCurtain();
+		this.createGame();
+		this.game.setFrame(frame);
+
+		const last_frame = peek(this.game.frames);
+
+		this._renderScore(last_frame);
+		this._renderLevel(last_frame);
+		this._renderLines(last_frame);
+		this._renderPiece(last_frame);
+	}
+
+	_renderValidFrame(frame) {
+		if (!this.game.over) {
+			this.renderField(frame.raw.level, frame.raw.field);
+		}
+	}
+
+	_renderScore(frame) {
+		const point_evt = peek(frame.points);
+
+		this.dom.score.textContent = this.options.format_score(
+			point_evt.score.current
+		);
+
+		if (this.transition === null) {
+			this.dom.runway_tr.textContent = this.options.format_score(
+				point_evt.score.tr_runway,
+				6
 			);
 		}
+
+		this.dom.runway_game.textContent = this.options.format_score(
+			point_evt.score.runway,
+			7
+		);
+		this.dom.projection.textContent = this.options.format_score(
+			point_evt.score.projection,
+			7
+		);
+
+		this.onScore(frame);
 	}
 
-	// TODO: Use a exponentially smoothed
-	getProjection() {
-		if (this.game_over) {
-			return this.score;
+	_renderLines(frame) {
+		let clear_evt = peek(frame.clears);
+
+		if (!clear_evt) clear_evt = fake_clear_evt;
+
+		this.dom.lines.textContent = `${frame.raw.lines}`.padStart(3, '0');
+		this.dom.burn.textContent = clear_evt.burn;
+
+		if (frame.clears.length) {
+			this.dom.trt.textContent = getPercent(clear_evt.tetris_rate);
+			this.dom.eff.textContent = (Math.round(clear_evt.efficiency) || 0)
+				.toString()
+				.padStart(3, '0');
+
+			this.renderRunningTRT(frame.clears);
 		}
 
-		const eff = (this.lines ? this.total_eff / this.lines : 300) / 300;
+		this.onLines(frame);
+	}
 
-		return Math.floor(
-			this.score + eff * getRunway(this.start_level, RUNWAY.GAME, this.lines)
+	_renderLevel(frame) {
+		this.dom.level.textContent = `${frame.raw.level}`.padStart(2, '0');
+
+		this.onLevel(frame);
+	}
+
+	_renderPiece(frame) {
+		this.renderPreview(frame.raw.level, frame.raw.preview);
+
+		let piece_evt = peek(frame.pieces);
+
+		if (!piece_evt) piece_evt = fake_piece_evt;
+
+		this.dom.drought.textContent = this.options.format_drought(
+			piece_evt.i_droughts.cur
 		);
+
+		this.onPiece(frame);
+	}
+
+	_renderGameOver() {
+		this._showCurtain();
+		this.onGameOver();
 	}
 
 	renderPreview(level, preview) {
@@ -1094,79 +874,7 @@ export default class Player {
 		});
 	}
 
-	updateField(field, num_blocks, field_string, allow_setting_pending_piece) {
-		if (field_string == this.field_string) return;
-
-		// state is considered valid, track data
-		this.field_string = field_string;
-
-		if (this.clear_animation_remaining_frames-- > 0) return;
-
-		const block_diff = num_blocks - (this.field_num_blocks || 0);
-
-		if (block_diff === 4) {
-			this.field_num_blocks = num_blocks;
-
-			if (allow_setting_pending_piece) {
-				this.pending_piece = true;
-			}
-
-			return;
-		}
-
-		// assuming we aren't dropping any frame, the number of blocks only reduces when the
-		// line animation starts, the diff is twice the number of lines being cleared.
-		//
-		// Note: diff.stage_blocks can be negative at weird amounts when the piece is rotated
-		// while still being at the top of the field with some block moved out of view
-
-		switch (block_diff) {
-			case -8:
-				if (this.options.reliable_field) {
-					this._doTetris();
-				}
-			case -6:
-				// indicate animation for triples and tetris
-				this.clear_animation_remaining_frames = CLEAR_ANIMATION_NUM_FRAMES - 1;
-				this.field_num_blocks += block_diff * 5; // equivalent to fast forward on how many blocks will have gone after the animation
-
-				break;
-
-			case -4:
-				if (this.pending_single) {
-					// verified single (second frame of clear animation)
-					this.clear_animation_remaining_frames =
-						CLEAR_ANIMATION_NUM_FRAMES - 2;
-					this.field_num_blocks -= 10;
-				} else {
-					// genuine double
-					this.clear_animation_remaining_frames =
-						CLEAR_ANIMATION_NUM_FRAMES - 1;
-					this.field_num_blocks -= 20;
-				}
-
-				this.pending_single = false;
-				break;
-
-			case -2:
-				// -2 can happen on the first clear animation frame of a single
-				// -2 can also happen when the piece is at the top of the field and gets rotated and is then partially off field
-				// to differentiate the 2, we must wait for the next frame, if it goes to -4, then it is the clear animation continuing
-				this.pending_single = true;
-				break;
-
-			default:
-				this.pending_single = false;
-		}
-	}
-
-	renderField(level, field, field_string) {
-		const stage_id = `${level}${field_string}`;
-
-		if (stage_id === this.current_field) return;
-
-		this.current_field = stage_id;
-
+	renderField(level, field) {
 		if (!this.options.draw_field) return;
 
 		const pixels_per_block = this.field_pixel_size * (7 + 1);
@@ -1188,9 +896,9 @@ export default class Player {
 		}
 	}
 
-	renderRunningTRT() {
+	renderRunningTRT(clear_events) {
 		const ctx = this.running_trt_ctx,
-			current_trt = peek(this.clear_events).trt,
+			current_trt = peek(clear_events).tetris_rate,
 			pixel_size_line_clear = 4,
 			pixel_size_baseline = 2;
 
@@ -1220,17 +928,17 @@ export default class Player {
 		max_pixels = Math.floor(ctx.canvas.width / (pixel_size + 1));
 		y_scale = (ctx.canvas.height - pixel_size) / pixel_size;
 
-		let to_draw = this.clear_events.slice(-1 * max_pixels),
+		let to_draw = clear_events.slice(-1 * max_pixels),
 			len = to_draw.length;
 
 		for (let idx = len; idx--; ) {
-			const { cleared, trt } = to_draw[idx];
+			const { cleared, tetris_rate } = to_draw[idx];
 			const color = LINES[cleared] ? LINES[cleared].color : 'grey';
 
 			ctx.fillStyle = color;
 			ctx.fillRect(
 				idx * (pixel_size + 1),
-				Math.round((1 - trt) * y_scale * pixel_size),
+				Math.round((1 - tetris_rate) * y_scale * pixel_size),
 				pixel_size,
 				pixel_size
 			);
@@ -1244,8 +952,8 @@ export default class Player {
 	}
 
 	setGameOver() {
-		this._doGameOver();
-		this._lockRunWayToScore();
+		this._renderGameOver();
+		// this._lockRunWayToScore();
 		this.curtain_down = true; // set early to force all frames to be ignored from that point on
 	}
 

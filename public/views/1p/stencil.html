@@ -79,6 +79,7 @@
 			import Connection from '/js/connection.js';
 			import Player from '/views/Player.js';
 			import { PIECES } from '/views/constants.js';
+			import { peek } from '/views/utils.js';
 
 			const init_time = Date.now();
 
@@ -176,14 +177,11 @@
 				updateLevel();
 			};
 
-			player.onPiece = () => {
-				const is_classic =
-					player.last_frame.game_type === BinaryFrame.GAME_TYPE.CLASSIC;
-
-				const piece_stats = player.piece_stats[is_classic ? 'frame' : 'board'];
+			player.onPiece = frame => {
+				const piece_stats = peek(frame.pieces).pieces;
 
 				PIECES.forEach(p => {
-					custom_doms.piece_stats[p].textContent = piece_stats[p]
+					custom_doms.piece_stats[p].textContent = piece_stats[p].count
 						.toString()
 						.padStart(3, '0');
 				});
