@@ -56,8 +56,9 @@ export default class GameTracker {
 		// class user to implement
 	}
 
-	_getLevelFromLines(lines) {
+	_getLevelFromLines(lines, ocr_level_digits) {
 		if (lines === null) return null;
+		if (!this.transition) return GameTracker.digitsToValue(ocr_level_digits);
 		if (lines < this.transition) return this.start_level;
 		return this.start_level + 1 + Math.floor((lines - this.transition) / 10);
 	}
@@ -187,7 +188,7 @@ export default class GameTracker {
 		}
 
 		const lines = GameTracker.digitsToValue(dispatch_frame.lines);
-		const level = this._getLevelFromLines(lines); // this is no longer OCR!
+		const level = this._getLevelFromLines(lines, dispatch_frame.level); // this is no longer OCR!
 
 		const { field, color1, color2, color3 } =
 			await this.tetris_ocr.processsFrameStep2(dispatch_frame, level);

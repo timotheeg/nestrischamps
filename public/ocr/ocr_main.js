@@ -1277,7 +1277,7 @@ async function showParts(data) {
 
 			let colors;
 
-			if (data.level != null) {
+			if (data.level != null && !isNaN(data.level)) {
 				colors = ['#000000', '#ffffff', ...LEVEL_COLORS[data.level % 10]];
 			} else if (data.color1) {
 				colors = [
