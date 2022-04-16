@@ -620,8 +620,6 @@ export default class Player {
 	}
 
 	setFrame(data) {
-		if (!this.game) this.createGame();
-
 		if (this.options.buffer_time) {
 			if (!this.frame_buffer) {
 				this.frame_buffer = new FrameBuffer(
@@ -650,7 +648,11 @@ export default class Player {
 	}
 
 	_setFrameOuter(data) {
-		this.game.setFrame(data);
+		if (!this.game) {
+			this._renderNewGame(data);
+		} else {
+			this.game.setFrame(data);
+		}
 	}
 
 	_renderNewGame(frame) {
