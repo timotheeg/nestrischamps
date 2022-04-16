@@ -635,25 +635,21 @@ export default class Player {
 		}
 	}
 
+	// TODO: for the 3 getters below
+	// Add ability to specify a frame, or timestamp
 	getScore() {
-		if (!this.game || !this.game.frames.length) return;
-		const points = peek(this.game.frames);
-		if (!points.length) return;
-		return peek(points).score.current;
+		if (!this.game || !this.game.data) return 0;
+		return this.game.data.score.current;
 	}
 
 	getGameRunwayScore() {
-		if (!this.game || !this.game.frames.length) return;
-		const points = peek(this.game.frames);
-		if (!points.length) return;
-		return peek(points).score.runway;
+		if (!this.game || !this.game.data) return 0;
+		return this.game.data.score.runway;
 	}
 
 	getProjection() {
-		if (!this.game || !this.game.frames.length) return;
-		const points = peek(this.game.frames);
-		if (!points.length) return;
-		return peek(points).score.projection;
+		if (!this.game || !this.game.data) return 0;
+		return this.game.data.score.projection;
 	}
 
 	_setFrameOuter(data) {
