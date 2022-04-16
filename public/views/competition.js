@@ -32,9 +32,10 @@ export function getTetrisDiff(leader, laggard, getter = 'getScore') {
 	if (leader_score === laggard_score) return 0;
 	if (!laggard.game?.data) return 0; // stupid value 🤷
 
-	const { lines, level, start_level } = laggard.game.data;
+	const start_level = laggard.game.data.start_level;
 	const transition = TRANSITIONS[start_level];
 
+	let { lines, level } = laggard.game.data;
 	let tetrises = 0;
 	let diff = leader_score - laggard_score;
 
