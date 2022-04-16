@@ -638,18 +638,15 @@ export default class Player {
 	// TODO: for the 3 getters below
 	// Add ability to specify a frame, or timestamp
 	getScore() {
-		if (!this.game || !this.game.data) return 0;
-		return this.game.data.score.current;
+		return this.game?.data?.score.current || 0;
 	}
 
 	getGameRunwayScore() {
-		if (!this.game || !this.game.data) return 0;
-		return this.game.data.score.runway;
+		return this.game?.data?.score.runway || 0;
 	}
 
 	getProjection() {
-		if (!this.game || !this.game.data) return 0;
-		return this.game.data.score.projection;
+		return this.game?.data?.score.projection || 0;
 	}
 
 	_setFrameOuter(data) {
