@@ -194,7 +194,7 @@ class User extends EventEmitter {
 		}
 	}
 
-	_send(msg) {
+	send(msg) {
 		const msg_str = JSON.stringify(msg);
 
 		// TODO: maybe no need to send to producer and admin connections? 🤔
@@ -258,7 +258,7 @@ class User extends EventEmitter {
 				return;
 			}
 
-			this._send([
+			this.send([
 				'message',
 				{
 					user: user,
@@ -270,7 +270,7 @@ class User extends EventEmitter {
 		});
 
 		this.chat_client.onSub((channel, user) => {
-			this._send([
+			this.send([
 				'message',
 				{
 					user: this.login,
@@ -282,7 +282,7 @@ class User extends EventEmitter {
 		});
 
 		this.chat_client.onRaid((channel, user, raidInfo) => {
-			this._send([
+			this.send([
 				'message',
 				{
 					user: this.login,

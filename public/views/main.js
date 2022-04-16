@@ -51,6 +51,7 @@ const API = {
 	message: onMessage,
 	player_data: renderPastGamesAndPBs,
 	frame: (idx, frame) => onFrame(frame),
+	scoreRecorded: getStats,
 };
 
 function onTetris() {
@@ -124,7 +125,6 @@ function createGame() {
 	game.onNewGame = onNewGame;
 	game.onValidFrame = onValidFrame;
 	game.onTetris = () => onTetris(); // one lambda of indirection to allow overwrite
-	game.onGameOver = getStats;
 	game.onTransitionWarning = warning_lines => {
 		commentate(`${warning_lines} lines till transition`);
 	};

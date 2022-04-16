@@ -251,10 +251,12 @@ class Game {
 		}
 
 		ScoreDAO.recordGame(this.user, report).then(
-			score_id =>
+			score_id => {
 				console.log(
 					`Recorded new game for user ${this.user.id} with id ${score_id}`
-				),
+				);
+				this.user.send(['scoreRecorded', score_id]);
+			},
 			err => {
 				console.log('Unable to record game');
 				console.error(err);
