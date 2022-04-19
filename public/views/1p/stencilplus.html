@@ -128,7 +128,7 @@
 
 			function updateLevel() {
 				piece_stats.className = '';
-				piece_stats.classList.add(`l${(player.level || 0) % 10}`);
+				piece_stats.classList.add(`l${(player.game?.data?.level || 0) % 10}`);
 			}
 
 			const player = new Player(
