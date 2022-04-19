@@ -23,7 +23,7 @@ export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
 	}
 
 	function maybeAddToQueue(tx, ty) {
-		if (tx < 0 || ty >= img_data.width) return;
+		if (tx < 0 || tx >= img_data.width) return;
 		if (ty < 0 || ty >= img_data.height) return;
 
 		if (!handled(tx, ty)) {
