@@ -267,6 +267,8 @@
 			};
 
 			player.onPiece = frame => {
+				if (frame.pieces.length <= 0) return;
+
 				const piece_stats = peek(frame.pieces).pieces;
 
 				PIECES.forEach(p => {
