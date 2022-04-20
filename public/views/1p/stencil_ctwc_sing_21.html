@@ -266,7 +266,7 @@
 				updateLevel();
 			};
 
-			player.onPiece = () => {
+			player.onPiece = frame => {
 				const piece_stats = peek(frame.pieces).pieces;
 
 				PIECES.forEach(p => {
