@@ -672,6 +672,7 @@ export default class Player {
 	_renderValidFrame(frame) {
 		if (!this.game.over) {
 			this.renderField(frame.raw.level, frame.raw.field);
+			this.renderPreview(frame.raw.level, frame.raw.preview);
 		}
 	}
 
