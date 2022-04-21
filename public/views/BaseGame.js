@@ -168,6 +168,8 @@ export default class BaseGame {
 
 		if (piece_events) {
 			this.onPiece(last_frame);
+			if (piece_events.drought_start) this.onDroughtStart(last_frame);
+			if (piece_events.drought_end) this.onDroughtEnd(last_frame);
 		}
 
 		// Check board for gameover event (curtain is falling)
@@ -632,7 +634,10 @@ export default class BaseGame {
 	}
 
 	_doPiece(data) {
-		const events = {};
+		const events = {
+			drought_start: false,
+			drought_end: false,
+		};
 
 		let cur_piece;
 
@@ -679,12 +684,17 @@ export default class BaseGame {
 		if (cur_piece === 'I') {
 			if (this.data.i_droughts.cur > 0) {
 				this.data.i_droughts.last = this.data.i_droughts.cur;
+
+				if (this.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD) {
+					events.drought_end = true;
+				}
 			}
 			this.data.i_droughts.cur = 0;
 		} else {
 			this.data.i_droughts.cur++;
 
-			if (this.data.i_droughts.cur == DROUGHT_PANIC_THRESHOLD) {
+			if (this.data.i_droughts.cur === DROUGHT_PANIC_THRESHOLD) {
+				events.drought_start = true;
 				this.data.i_droughts.count++;
 
 				// mark past pieces as being in drought
