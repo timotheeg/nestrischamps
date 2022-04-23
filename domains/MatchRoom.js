@@ -187,6 +187,8 @@ class MatchRoom extends Room {
 			if (player.id) {
 				const user = this.getProducer(player.id);
 
+				if (!user) return; // how is this happening? 🤔😞
+
 				connection.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
 				user.getProducer().send(['makePlayer', pidx, this.getViewMeta()]); // could be too fast for call to work ??
 			}
