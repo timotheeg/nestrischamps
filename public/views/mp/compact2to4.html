@@ -231,16 +231,16 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
-			const TEMPLATE_WIDTH = 1280;
-			const PLAYER_WIDTH = 320;
-			const players_node = document.querySelector('#players');
-			const players = [];
-
 			let num_players = parseInt(QueryString.get('players'), 10);
 
 			if (isNaN(num_players) || num_players < 2 || num_players > 4) {
 				num_players = 2;
 			}
+
+			const TEMPLATE_WIDTH = 1280;
+			const PLAYER_WIDTH = num_players >= 4 ? 320 : 392;
+			const players_node = document.querySelector('#players');
+			const players = [];
 
 			const spacing =
 				(TEMPLATE_WIDTH - PLAYER_WIDTH * num_players) / (num_players + 1);
