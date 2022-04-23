@@ -405,7 +405,11 @@ video.addEventListener('click', async evt => {
 
 	updateCanvasSizeIfNeeded(video_capture, video.videoWidth, video.videoHeight);
 
-	video_capture_ctx.filter = 'contrast(2)';
+	if (video.ntcType === 'device') {
+		video_capture_ctx.filter = 'brightness(1.75) contrast(1.75)';
+	} else {
+		video_capture_ctx.filter = 'contrast(1.5)';
+	}
 	video_capture_ctx.drawImage(bitmap, 0, 0);
 
 	await new Promise(resolve => {
