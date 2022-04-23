@@ -1,5 +1,10 @@
+import QueryString from '/js/QueryString.js';
 import Connection from '/js/connection.js';
-import { TRANSITIONS } from '/views/constants.js';
+import {
+	TRANSITIONS,
+	DOM_DEV_NULL,
+	peerServerOptions,
+} from '/views/constants.js';
 
 // very simple RPC system to allow server to send data to client
 
@@ -190,9 +195,19 @@ class TetrisCompetitionAPI {
 	}
 
 	setSecondaryView() {
-		// TODO: the player video streams will end, should clear the view
+		// Implemented conditionally in competition class below
+	}
+
+	scoreRecorded() {
+		// only relevant for single player layouts
 	}
 }
+
+let has_video = false;
+
+try {
+	has_video = !!(QueryString.get('video') !== '0' && view_meta.get('video')); // view_meta is a JS global (if it exists!) -- sort of gross
+} catch (err) {}
 
 // TODO: modularize this file better
 export default class Competition {
@@ -207,11 +222,7 @@ export default class Competition {
 
 		this.API = new TetrisCompetitionAPI();
 
-		try {
-			this.connection = new Connection(null, view_meta); // sort of gross T_T
-		} catch (_err) {
-			this.connection = new Connection();
-		}
+		this.connection = new Connection(null, has_video ? view_meta : null);
 
 		this.connection.onMessage = frame => {
 			try {
@@ -224,6 +235,64 @@ export default class Competition {
 				console.log(frame);
 			}
 		};
+
+		if (
+			has_video &&
+			Peer &&
+			_players[0] &&
+			_players[0].dom.video !== DOM_DEV_NULL
+		) {
+			this.is_secondary = false;
+			this.peer = null;
+
+			this.API.setSecondary = () => {
+				this.is_secondary = true;
+
+				if (this.peer) {
+					this.peer.destroy();
+					this.peer = null;
+				}
+			};
+
+			this.connection.onInit = () => {
+				if (this.is_secondary) return;
+
+				if (this.peer) {
+					this.peer.destroy();
+					this.peer = null;
+				}
+
+				this.peer = new Peer(this.connection.id, peerServerOptions);
+
+				this.peer.on('call', call => {
+					if (this.is_secondary) return;
+
+					console.log(`Received media call from ${call.peer}`);
+
+					if (!this.getPlayersByPeerId(call.peer).length) return;
+
+					call.on('stream', remoteStream => {
+						this.getPlayersByPeerId(call.peer) // rechecking because async!
+							.forEach(player => {
+								const video = player.dom.video;
+
+								video.srcObject = remoteStream;
+								video.addEventListener(
+									'loadedmetadata',
+									() => {
+										video.play();
+									},
+									{
+										once: true,
+									}
+								);
+							});
+					});
+
+					call.answer();
+				});
+			};
+		}
 	}
 
 	computeScoreDifferentials(_players) {

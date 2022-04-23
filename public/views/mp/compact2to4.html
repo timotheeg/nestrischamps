@@ -117,6 +117,30 @@
 				left: 0;
 				top: 688px;
 			}
+
+			.video {
+				position: absolute;
+				top: 95px;
+				width: 112px;
+				height: 150px;
+				left: 251px;
+			}
+
+			.players4 .video {
+				position: absolute;
+				top: 628px;
+				width: 57px;
+				height: 49px;
+				left: 251px;
+				border-image-slice: 0;
+				padding: 9px 9px 0 9px;
+			}
+
+			.video video {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
 		</style>
 	</head>
 	<body>
@@ -172,6 +196,11 @@
 					<div class="header">EFF</div>
 					<div class="value">---</div>
 				</div>
+
+				<div class="box video">
+					<video></video>
+				</div>
+
 				<div class="box board">
 					<div class="level"></div>
 					<div class="next_piece"></div>
@@ -188,6 +217,13 @@
 
 		<!-- Audio -->
 
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '240x180',
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
 			import { translate } from '/views/utils.js';
@@ -195,21 +231,22 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
-			const TEMPLATE_WIDTH = 1280;
-			const PLAYER_WIDTH = 320;
-			const players_node = document.querySelector('#players');
-			const players = [];
-
 			let num_players = parseInt(QueryString.get('players'), 10);
 
 			if (isNaN(num_players) || num_players < 2 || num_players > 4) {
 				num_players = 2;
 			}
 
+			const TEMPLATE_WIDTH = 1280;
+			const PLAYER_WIDTH = num_players >= 4 ? 320 : 392;
+			const players_node = document.querySelector('#players');
+			const players = [];
+
 			const spacing =
 				(TEMPLATE_WIDTH - PLAYER_WIDTH * num_players) / (num_players + 1);
 
 			players_node.style.left = `${Math.round(spacing)}px`;
+			players_node.classList.add(`players${num_players}`);
 
 			function addPlayer() {
 				const player_template = document.getElementById('player');
@@ -255,6 +292,7 @@
 
 						drought_box: player_node.querySelector('.drought'),
 						runway_box: player_node.querySelector('.runway'),
+						video: player_node.querySelector('video'),
 					},
 					{
 						field_real_border: 13,

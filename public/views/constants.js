@@ -1,5 +1,5 @@
 export const peerServerOptions = {
-	host: 'peerturn.herokuapp.com',
+	host: '0.peerjs.com',
 	path: '/',
 	port: 443,
 	secure: true,

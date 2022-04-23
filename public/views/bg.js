@@ -96,10 +96,10 @@ if (QueryString.get('bg') === '0') {
 
 	Object.assign(bg.style, {
 		position: 'absolute',
-		width: '121%',
+		width: '119%',
 		height: '133%',
-		top: '-16%',
-		left: '-15%',
+		top: '-15%',
+		left: '-14%',
 		background: `url(/views/${bg_file}) 0 0 repeat`,
 		transform: 'rotate(-11deg)',
 	});
