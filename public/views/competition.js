@@ -206,7 +206,7 @@ class TetrisCompetitionAPI {
 let has_video = false;
 
 try {
-	has_video = !!view_meta.get('video'); // view_meta is a JS global (if it exists!) -- sort of gross
+	has_video = !!(QueryString.get('video') !== '0' && view_meta.get('video')); // view_meta is a JS global (if it exists!) -- sort of gross
 } catch (err) {}
 
 // TODO: modularize this file better
@@ -222,7 +222,7 @@ export default class Competition {
 
 		this.API = new TetrisCompetitionAPI();
 
-		this.connection = new Connection(null, has_video && view_meta); // undefined or view_meta
+		this.connection = new Connection(null, has_video ? view_meta : null);
 
 		this.connection.onMessage = frame => {
 			try {
@@ -237,7 +237,6 @@ export default class Competition {
 		};
 
 		if (
-			QueryString.get('video') !== '0' &&
 			has_video &&
 			Peer &&
 			_players[0] &&
