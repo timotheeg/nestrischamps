@@ -212,54 +212,6 @@
 			);
 
 			const competition = new Competition(players);
-
-			let is_secondary = false;
-			let peer = null;
-
-			competition.API.setSecondary = function () {
-				if (peer) {
-					peer.destroy();
-					peer = null;
-				}
-			};
-
-			competition.connection.onInit = () => {
-				if (is_secondary) return;
-
-				if (peer) {
-					peer.destroy();
-					peer = null;
-				}
-
-				peer = new Peer(competition.connection.id);
-
-				peer.on('call', call => {
-					console.log(`Received media call from ${call.peer}`);
-
-					if (!competition.getPlayersByPeerId(call.peer).length) return;
-
-					call.on('stream', remoteStream => {
-						competition
-							.getPlayersByPeerId(call.peer) // rechecking because async!
-							.forEach(player => {
-								const video = player.dom.video;
-
-								video.srcObject = remoteStream;
-								video.addEventListener(
-									'loadedmetadata',
-									() => {
-										video.play();
-									},
-									{
-										once: true,
-									}
-								);
-							});
-					});
-
-					call.answer();
-				});
-			};
 		</script>
 	</body>
 </html>
