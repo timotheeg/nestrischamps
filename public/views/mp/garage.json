@@ -1,3 +1,3 @@
 {
-	"description": "This layout is slightly larger than 720p. Ensure the browser source is set to 1334x750 and then scale appropriately. To activate native video, add query string ?video=1 to the layout URL."
+	"description": "This layout is slightly larger than 720p. Ensure the browser source is set to 1334x750 and then scale appropriately."
 }

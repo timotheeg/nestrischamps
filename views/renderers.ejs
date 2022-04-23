@@ -60,6 +60,8 @@
 
 		<h2 class="title is-2" id="competition">Competition layouts</h2>
 
+		<p>All competition layouts have native video enabled by default. To disable video, add a query string argument <strong>?video=0</strong> to the renderer URL.</p>
+
 		<dl>
 		<% layouts._types.mp.forEach(layout => { %>
 		<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
