@@ -13,6 +13,9 @@
 			<div id="playing_fields">
 				<div id="logo"></div>
 
+				<video class="box player_vid p1"></video>
+				<video class="box player_vid p2"></video>
+
 				<!-- Player 1 -->
 
 				<div class="box score">
@@ -99,6 +102,13 @@
 		</div>
 		<!-- End Stream BG -->
 
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '320x240',
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
 			import { translate } from '/views/utils.js';
@@ -121,6 +131,7 @@
 							field: document.querySelector(`.board.p${num}`),
 							drought: document.querySelector(`.drought.p${num} .value`),
 							hearts: document.querySelector(`.wins .p${num}`),
+							video: document.querySelector(`.player_vid.p${num}`),
 						},
 						{
 							wins_rtl: num === 1,

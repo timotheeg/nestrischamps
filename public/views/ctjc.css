@@ -209,3 +209,14 @@ html {
 	font-size: 12px;
 	overflow: hidden;
 }
+
+.player_vid {
+	position: absolute;
+	top: 140px;
+	width: 240px;
+	height: 180px;
+	object-fit: cover;
+
+	--offset: 364px;
+	right: var(--offset);
+}
