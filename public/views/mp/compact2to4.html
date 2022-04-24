@@ -118,28 +118,23 @@
 				top: 688px;
 			}
 
-			.video {
+			video.box {
 				position: absolute;
 				top: 95px;
 				width: 112px;
 				height: 150px;
 				left: 251px;
+				object-fit: cover;
 			}
 
-			.players4 .video {
+			.players4 video.box {
 				position: absolute;
 				top: 628px;
 				width: 57px;
-				height: 49px;
+				height: 46px;
 				left: 251px;
 				border-image-slice: 0;
 				padding: 9px 9px 0 9px;
-			}
-
-			.video video {
-				width: 100%;
-				height: 100%;
-				object-fit: cover;
 			}
 		</style>
 	</head>
@@ -197,9 +192,7 @@
 					<div class="value">---</div>
 				</div>
 
-				<div class="box video">
-					<video></video>
-				</div>
+				<video class="box"></video>
 
 				<div class="box board">
 					<div class="level"></div>

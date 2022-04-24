@@ -203,12 +203,6 @@ class TetrisCompetitionAPI {
 	}
 }
 
-let has_video = false;
-
-try {
-	has_video = !!(QueryString.get('video') !== '0' && view_meta.get('video')); // view_meta is a JS global (if it exists!) -- sort of gross
-} catch (err) {}
-
 // TODO: modularize this file better
 export default class Competition {
 	constructor(_players) {
@@ -216,13 +210,21 @@ export default class Competition {
 
 		this._onPlayerScoreChanged = this._onPlayerScoreChanged.bind(this);
 
+		try {
+			this.has_video = !!(
+				QueryString.get('video') !== '0' && view_meta.get('video')
+			); // view_meta is a JS global (if it exists!) -- sort of gross
+		} catch (err) {
+			this.has_video = false;
+		}
+
 		players.forEach(player => {
 			player.onScore = this._onPlayerScoreChanged;
 		});
 
 		this.API = new TetrisCompetitionAPI();
 
-		this.connection = new Connection(null, has_video ? view_meta : null);
+		this.connection = new Connection(null, this.has_video ? view_meta : null);
 
 		this.connection.onMessage = frame => {
 			try {
@@ -237,7 +239,7 @@ export default class Competition {
 		};
 
 		if (
-			has_video &&
+			this.has_video &&
 			Peer &&
 			_players[0] &&
 			_players[0].dom.video !== DOM_DEV_NULL
@@ -292,6 +294,10 @@ export default class Competition {
 					call.answer();
 				});
 			};
+		} else {
+			_players.forEach(player => {
+				player.dom.video.style.display = 'none';
+			});
 		}
 	}
 
