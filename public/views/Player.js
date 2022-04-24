@@ -447,13 +447,16 @@ export default class Player {
 		if (url) {
 			const custom_logo = document.createElement('img');
 			custom_logo.src = url;
-			custom_logo.style.maxWidth = '160px';
+			Object.assign(custom_logo.style, {
+				maxWidth: '160px',
+				marginTop: '-60px',
+			});
 
 			const small_nestrischamps_logo = document.createElement('img');
 			small_nestrischamps_logo.src = '/brand/logo.v3.white.png';
 			Object.assign(small_nestrischamps_logo.style, {
 				position: 'absolute',
-				bottom: '1em',
+				bottom: '10px',
 			});
 
 			this.curtain_container.appendChild(custom_logo);
