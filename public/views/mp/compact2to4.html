@@ -121,10 +121,14 @@
 			video.box {
 				position: absolute;
 				top: 95px;
-				width: 112px;
+				width: 200px;
 				height: 150px;
 				left: 251px;
 				object-fit: cover;
+			}
+
+			.players3 video.box {
+				width: 112px;
 			}
 
 			.players4 video.box {
@@ -224,6 +228,8 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
+			const PLAYER_SIZES = [480, 480, 480, 392, 320];
+
 			let num_players = parseInt(QueryString.get('players'), 10);
 
 			if (isNaN(num_players) || num_players < 2 || num_players > 4) {
@@ -231,7 +237,7 @@
 			}
 
 			const TEMPLATE_WIDTH = 1280;
-			const PLAYER_WIDTH = num_players >= 4 ? 320 : 392;
+			const PLAYER_WIDTH = PLAYER_SIZES[num_players];
 			const players_node = document.querySelector('#players');
 			const players = [];
 
