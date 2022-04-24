@@ -85,7 +85,7 @@ export default class TetrisOCR extends EventTarget {
 	 */
 	setConfig(config) {
 		this.config = config;
-		this.palette = this.palettes && this.palettes[config.palette]; // will reset to undefined when needed
+		this.palette = this.palettes?.[config.palette]; // will reset to undefined when needed
 
 		this.fixPalette();
 

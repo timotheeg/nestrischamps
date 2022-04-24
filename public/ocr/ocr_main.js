@@ -181,6 +181,7 @@ rom_selector.addEventListener('change', evt => {
 		palette_selector.value = Object.keys(palettes)[0];
 	}
 
+	config.game_type = configs[rom_selector.value].game_type;
 	config.palette = palette_selector.value;
 
 	checkReadyToCalibrate();
@@ -1329,6 +1330,7 @@ function saveConfig(config) {
 	// need to drop non-serializable fields
 	const config_copy = {
 		device_id: config.device_id,
+		game_type: config.game_type,
 		palette: config.palette,
 		frame_rate: config.frame_rate,
 		focus_alarm: config.focus_alarm,
@@ -1356,6 +1358,14 @@ function hasConfig() {
 	return !!localStorage.getItem('config');
 }
 
+function getGameTypeFromTasks(tasks) {
+	return tasks.T
+		? BinaryFrame.GAME_TYPE.CLASSIC
+		: tasks.cur_piece_das
+		? BinaryFrame.GAME_TYPE.DAS_TRAINER
+		: BinaryFrame.GAME_TYPE.MINIMAL;
+}
+
 function loadConfig() {
 	const config = localStorage.getItem('config');
 
@@ -1363,11 +1373,7 @@ function loadConfig() {
 		const parsed = JSON.parse(config);
 
 		if (!parsed.hasOwnProperty('game_type')) {
-			parsed.game_type = parsed.tasks.T
-				? BinaryFrame.GAME_TYPE.CLASSIC
-				: parsed.tasks.cur_piece_das
-				? BinaryFrame.GAME_TYPE.DAS_TRAINER
-				: BinaryFrame.GAME_TYPE.MINIMAL;
+			parsed.game_type = getGameTypeFromTasks(parsed.tasks);
 		}
 
 		return parsed;
