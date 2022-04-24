@@ -339,16 +339,7 @@ export default class Player {
 			});
 			this.curtain_viewport.appendChild(this.curtain_container);
 
-			if (this.dom.curtain) {
-				this.curtain_container.appendChild(this.dom.curtain);
-			} else {
-				const img = document.createElement('img');
-
-				img.src = '/brand/logo.v3.white.2x.png';
-
-				this.curtain_container.appendChild(img);
-			}
-
+			this.setCurtainLogo();
 			this._hideCurtain();
 		}
 
@@ -440,6 +431,40 @@ export default class Player {
 
 	showProfileCard(visible) {
 		this.profile_card.hidden = !visible;
+	}
+
+	setCurtainLogo(url) {
+		if (!this.has_curtain) return;
+
+		// empty curtain container now
+		[...this.curtain_container.children].forEach(child => child.remove());
+
+		if (this.dom.curtain) {
+			this.curtain_container.appendChild(this.dom.curtain);
+			return;
+		}
+
+		if (url) {
+			const custom_logo = document.createElement('img');
+			custom_logo.src = url;
+			custom_logo.style.maxWidth = '160px';
+
+			const small_nestrischamps_logo = document.createElement('img');
+			small_nestrischamps_logo.src = '/brand/logo.v3.white.png';
+			Object.assign(small_nestrischamps_logo.style, {
+				position: 'absolute',
+				bottom: '1em',
+			});
+
+			this.curtain_container.appendChild(custom_logo);
+			this.curtain_container.appendChild(small_nestrischamps_logo);
+		} else {
+			const big_nestrischamps_logo = document.createElement('img');
+
+			big_nestrischamps_logo.src = '/brand/logo.v3.white.2x.png';
+
+			this.curtain_container.appendChild(big_nestrischamps_logo);
+		}
 	}
 
 	_showCurtain() {

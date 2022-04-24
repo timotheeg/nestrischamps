@@ -11,6 +11,7 @@ const dom = {
 		'#show_profile_cards_controls'
 	),
 	add_player: document.querySelector('#add_player'),
+	curtain_logo_url: document.querySelector('#curtain_logo_url'),
 };
 
 const MAX_BEST_OF = 13;
@@ -19,6 +20,9 @@ const MAX_BEST_OF = 13;
 const remoteAPI = {
 	setBestOf: function (n) {
 		connection.send(['setBestOf', n]);
+	},
+	setCurtainLogo: function (url) {
+		connection.send(['setCurtainLogo', url]);
 	},
 	addPlayer: function () {
 		connection.send(['addPlayer']);
@@ -246,6 +250,8 @@ function setState(_room_data) {
 	// room stats
 	room_data.producers.sort((a, b) => a < b);
 
+	dom.curtain_logo_url.value = room_data.curtain_logo;
+
 	dom.producer_count.textContent = room_data.producers.length;
 
 	// synchronize with remote players
@@ -325,6 +331,9 @@ function bootstrap() {
 
 	dom.bestof.onchange = () =>
 		remoteAPI.setBestOf(parseInt(dom.bestof.value, 10));
+
+	dom.curtain_logo_url.onchange = () =>
+		remoteAPI.setCurtainLogo(dom.curtain_logo_url.value);
 
 	dom.clear_victories.addEventListener('click', () => {
 		remoteAPI.resetVictories();

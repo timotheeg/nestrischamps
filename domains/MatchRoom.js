@@ -30,6 +30,7 @@ class MatchRoom extends Room {
 			bestof: 3,
 			concurrent_2_matches: undefined, // undefined|true|false
 			selected_match: null, // 0|1|null
+			curtain_logo: null, // url to image or null
 			players: [
 				// flat user objects - starts with 2 players
 				getBasePlayerData(),
@@ -176,6 +177,7 @@ class MatchRoom extends Room {
 
 		// do a room state dump for this new view
 		connection.send(['setBestOf', this.state.bestof]);
+		connection.send(['setCurtainLogo', this.state.curtain_logo]);
 
 		this.state.players.forEach((player, pidx) => {
 			connection.send(['setId', pidx, player.id]);
@@ -423,6 +425,12 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'setCurtainLogo': {
+					this.state.curtain_logo = args[0];
+
+					break;
+				}
+
 				case 'showProfileCard':
 				case 'setWinner':
 				case 'setGameOver':
@@ -522,6 +530,7 @@ class MatchRoom extends Room {
 				}
 
 				default: {
+					console.warn(`Received unknown commands ${command}`);
 					// reject any unknown command
 					return;
 				}
