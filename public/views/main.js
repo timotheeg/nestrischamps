@@ -1,6 +1,7 @@
 import { peek, getPercent } from '/views/utils.js';
 import QueryString from '/js/QueryString.js';
 import Connection from '/js/connection.js';
+import FrameBuffer from '/views/FrameBuffer.js';
 import DomRefs from '/views/DomRefs.js';
 import renderBlock from '/views/renderBlock.js';
 import BaseGame from '/views/BaseGame.js';
@@ -47,10 +48,20 @@ for (const [type, color] of Object.entries(BOARD_COLORS)) {
 	label.style.color = color;
 }
 
+let buffer_time = QueryString.get('buffer_time') || '';
+
+if (/^\d+$/.test(buffer_time)) {
+	buffer_time = parseInt(buffer_time, 10);
+} else {
+	buffer_time = 0;
+}
+
+const frame_buffer = new FrameBuffer(buffer_time, onFrame);
+
 const API = {
 	message: onMessage,
 	player_data: renderPastGamesAndPBs,
-	frame: (idx, frame) => onFrame(frame),
+	frame: (idx, data) => frame_buffer.setFrame(data),
 	scoreRecorded: getStats,
 };
 
