@@ -397,15 +397,29 @@ function renderLines(frame) {
 	}
 }
 
-function renderLevel(frame) {
+function renderLevel(frame, full_reset = false) {
 	dom.level.value.textContent = frame.raw.level.toString().padStart(2, '0');
 
-	// Level update for
-	dom.pieces.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
-	dom.pieces.element.classList.add(`l${frame.raw.level % 10}`);
+	if (full_reset) {
+		// can we just do this everytime? 🤔
+		dom.pieces.element.classList.remove(
+			'l0',
+			'l1',
+			'l2',
+			'l3',
+			'l4',
+			'l5',
+			'l6',
+			'l7',
+			'l8',
+			'l9'
+		);
+	} else {
+		// removal due to regular score increment in game
+		dom.pieces.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
+	}
 
-	dom.next.element.classList.remove(`l${(frame.raw.level - 1) % 10}`);
-	dom.next.element.classList.add(`l${frame.raw.level % 10}`);
+	dom.pieces.element.classList.add(`l${frame.raw.level % 10}`);
 }
 
 const fake_piece_evt = {
@@ -920,7 +934,7 @@ function showFrame(frame) {
 	renderDasNBoardStats(frame);
 	renderScore(frame);
 	renderLines(frame);
-	renderLevel(frame);
+	renderLevel(frame, true);
 	renderPiece(frame);
 }
 
