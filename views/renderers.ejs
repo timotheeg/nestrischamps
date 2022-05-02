@@ -50,7 +50,12 @@
 		<dl>
 		<% layouts._types['1p'].forEach(layout => { %>
 		<dt id="<%= layout.file %>"><%= layout.file.replace(/_/g, ' ') %></dt>
-		<dd><a href="/view/<%= layout.file %>/<%= secret %>">-</a>
+		<dd>
+			<% if (layout.info && layout.info.description) { %>
+				<p><%= layout.info.description %></p>
+			<% } %>
+			
+			<a href="/view/<%= layout.file %>/<%= secret %>">-</a>
 			<% layout.screenshot_uris.forEach(uri => { %>
 			<img src="<%= uri %>" width="640"/>
 			<% }) %>
