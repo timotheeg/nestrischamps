@@ -170,17 +170,15 @@ html {
 #playing_fields {
 	position: absolute;
 	left: 825px;
-	top: 260px;
+	top: 0;
+	width: 455px;
+	height: 720px;
 }
 
 .box {
 	width: 95px;
-	height: 45px;
+	height: 40px;
 	text-align: center;
-}
-
-.box .header {
-	padding: 2px 0;
 }
 
 .box .content,
@@ -190,23 +188,23 @@ html {
 }
 
 .burn {
-	top: 163px;
+	top: 440px;
 	left: 5px;
 }
 
 .runway {
-	top: 163px;
+	top: 440px;
 	left: 121px;
 	width: 298px;
 }
 
 .eff {
-	top: 229px;
+	top: 501px;
 	left: 5px;
 }
 
 .projection {
-	top: 229px;
+	top: 501px;
 	left: 121px;
 	width: 298px;
 }
@@ -229,12 +227,12 @@ html {
 
 .timer {
 	display: none; /**/
-	top: 5px;
+	top: 386px;
 	left: 5px;
-	width: 415px;
+	width: 411px;
 	text-align: center;
 	height: 29px;
-	padding-top: 16px;
+	padding: 17px;
 }
 
 .bounded {
@@ -247,13 +245,13 @@ html {
 	padding: 15px 12px 12px 12px;
 
 	width: 420px;
-	height: 133px;
-	top: 295px;
+	height: 126px;
+	top: 562px;
 	left: 5px;
 }
 
 .running_trt .header {
-	padding-bottom: 0.5em;
+	padding-bottom: 2px;
 }
 
 .running_trt .value {

@@ -29,32 +29,40 @@
 			}
 
 			.qualifier_result {
-				top: 88px;
+				top: 440px;
 				left: 5px;
 				width: 414px;
-				height: 146px;
+				height: 120px;
 			}
 
 			.qualifier_result .average {
 				font-size: 24px;
 				line-height: 32px;
-				padding: 5px 0 15px;
+				padding: 3px 0;
+			}
+
+			.running_trt {
+				top: 581px;
+				height: 107px;
+				left: 5px;
+			}
+			.running_trt .value {
+				height: 84px;
+				position: relative;
 			}
 
 			video {
 				position: absolute;
 				top: 0;
-				left: 825px;
+				left: 0;
 				width: 455px;
-				height: 253px;
+				height: 386px;
 				object-fit: cover;
 			}
 		</style>
 	</head>
 	<body>
 		<div id="stream_bg">
-			<video></video>
-
 			<div id="nestris_ui">
 				<label class="value lines">000</label>
 				<label class="value top">000000</label>
@@ -90,6 +98,8 @@
 			</div>
 
 			<div id="playing_fields">
+				<video></video>
+
 				<div class="box timer">
 					<div class="content">-</div>
 				</div>
