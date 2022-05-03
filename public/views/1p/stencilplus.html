@@ -244,7 +244,7 @@
 				message() {}, // noop
 			};
 
-			const connection = new Connection();
+			const connection = new Connection(null, view_meta);
 
 			connection.onMessage = function (frame) {
 				try {
