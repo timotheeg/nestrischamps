@@ -188,23 +188,23 @@ html {
 }
 
 .burn {
-	top: 440px;
+	top: 442px;
 	left: 5px;
 }
 
 .runway {
-	top: 440px;
+	top: 442px;
 	left: 121px;
 	width: 298px;
 }
 
 .eff {
-	top: 501px;
+	top: 503px;
 	left: 5px;
 }
 
 .projection {
-	top: 501px;
+	top: 503px;
 	left: 121px;
 	width: 298px;
 }
@@ -227,7 +227,7 @@ html {
 
 .timer {
 	display: none; /**/
-	top: 386px;
+	top: 388px;
 	left: 5px;
 	width: 411px;
 	text-align: center;
@@ -246,7 +246,7 @@ html {
 
 	width: 420px;
 	height: 126px;
-	top: 562px;
+	top: 564px;
 	left: 5px;
 }
 
