@@ -3,31 +3,8 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/stencil.css" />
+		<link rel="stylesheet" type="text/css" href="/views/stencilplus.css" />
 		<style>
-			#nestris_ui {
-				background: url('/views/stencil_champs_bg.png');
-			}
-
-			.eff {
-				top: 392px;
-				left: 448px;
-			}
-
-			.trt {
-				top: 368px;
-				left: 448px;
-			}
-
-			.runway {
-				top: 46px;
-				left: 32px;
-			}
-
-			.projection {
-				top: 82px;
-				left: 32px;
-			}
-
 			.qualifier_result {
 				top: 440px;
 				left: 5px;
@@ -46,18 +23,10 @@
 				height: 107px;
 				left: 5px;
 			}
+
 			.running_trt .value {
 				height: 84px;
 				position: relative;
-			}
-
-			video {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 455px;
-				height: 386px;
-				object-fit: cover;
 			}
 		</style>
 	</head>
@@ -132,7 +101,6 @@
 			});
 		</script>
 		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
-
 		<script type="module">
 			import QueryString from '/js/QueryString.js';
 			import BinaryFrame from '/js/BinaryFrame.js';
@@ -274,6 +242,7 @@
 			player.onGameStart = () => {
 				custom_doms.drought_box.hidden = true;
 				updateLevel();
+				getTop3();
 			};
 
 			player.onPiece = frame => {
@@ -342,6 +311,8 @@
 					// startTimer(allowed_time);
 				},
 
+				scoreRecorded: getTop3,
+
 				message() {}, // noop
 			};
 
@@ -372,7 +343,6 @@
 					startTimer();
 				}
 
-				player.onCurtainDown = getTop3;
 				player.onLevel = updateLevel;
 
 				getTop3();

@@ -282,3 +282,12 @@ html {
 .drought .value {
 	padding-bottom: 2px;
 }
+
+video {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 455px;
+	height: 386px;
+	object-fit: cover;
+}

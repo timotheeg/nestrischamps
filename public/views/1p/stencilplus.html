@@ -3,31 +3,7 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/stencil.css" />
-		<style>
-			#nestris_ui {
-				background: url('/views/stencil_champs_bg.png');
-			}
-
-			.eff {
-				top: 392px;
-				left: 448px;
-			}
-
-			.trt {
-				top: 368px;
-				left: 448px;
-			}
-
-			.runway {
-				top: 46px;
-				left: 32px;
-			}
-
-			.projection {
-				top: 82px;
-				left: 32px;
-			}
-		</style>
+		<link rel="stylesheet" type="text/css" href="/views/stencilplus.css" />
 	</head>
 	<body>
 		<div id="stream_bg">
@@ -66,6 +42,8 @@
 			</div>
 
 			<div id="playing_fields">
+				<video></video>
+
 				<div class="box timer">
 					<div class="content">02:00:00</div>
 				</div>
@@ -81,6 +59,12 @@
 
 		<!-- Audio -->
 
+		<script>
+			const view_meta = new URLSearchParams({
+				video: '640x480',
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 		<script type="module">
 			import QueryString from '/js/QueryString.js';
 			import BinaryFrame from '/js/BinaryFrame.js';
@@ -182,6 +166,7 @@
 			player.onGameStart = () => {
 				custom_doms.drought_box.hidden = true;
 				updateLevel();
+				getPB();
 			};
 
 			player.onPiece = frame => {
@@ -196,7 +181,6 @@
 				});
 			};
 
-			player.onGameOver = getPB;
 			player.onLevel = updateLevel;
 
 			getPB();
@@ -255,6 +239,8 @@
 					startTimer(allowed_time);
 				},
 
+				scoreRecorded: getPB,
+
 				message() {}, // noop
 			};
 
@@ -273,6 +259,41 @@
 			function onFrame(frame, debug) {
 				API.frame(1, frame, debug);
 			}
+
+			let peer = null;
+
+			connection.onInit = () => {
+				if (peer) {
+					peer.destroy();
+					peer = null;
+				}
+
+				peer = new Peer(connection.id, peerServerOptions);
+
+				peer.on('call', call => {
+					const video = document.querySelector('video');
+
+					call.answer(); // assume correct!
+					call.on('stream', remoteStream => {
+						video.srcObject = remoteStream;
+						video.addEventListener(
+							'loadedmetadata',
+							() => {
+								video.play();
+							},
+							{ once: true }
+						);
+					});
+					call.on('error', () => {
+						video.stop();
+						video.srcObject = null;
+					});
+					call.on('close', () => {
+						video.stop();
+						video.srcObject = null;
+					});
+				});
+			};
 		</script>
 	</body>
 </html>

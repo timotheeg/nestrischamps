@@ -1,0 +1,23 @@
+#nestris_ui {
+	background: url('/views/stencil_champs_bg.png');
+}
+
+.eff {
+	top: 392px;
+	left: 448px;
+}
+
+.trt {
+	top: 368px;
+	left: 448px;
+}
+
+.runway {
+	top: 46px;
+	left: 32px;
+}
+
+.projection {
+	top: 82px;
+	left: 32px;
+}
