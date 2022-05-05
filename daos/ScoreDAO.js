@@ -271,7 +271,8 @@ class ScoreDAO {
 			SELECT
 				Date(s.datetime AT TIME ZONE u.timezone) AS date,
 				count(s.id) AS num_games,
-				max(s.score) AS max_score
+				max(s.score) AS max_score,
+				round(avg(s.score)) AS avg_score
 			FROM scores s, twitch_users u
 			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
 			GROUP BY date

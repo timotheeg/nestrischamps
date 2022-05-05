@@ -200,7 +200,7 @@
 				}
 			},
 
-			colors: ['#6CF', color],
+			colors: ['#6CF', color, '#007200'],
 
 			series: [{
 				name: `Num games`,
@@ -211,6 +211,10 @@
 				name: `Max score`,
 				type: 'spline',
 				data: progress1819[level].map(({timestamp, max_score}) => [timestamp, max_score])
+			},{
+				name: `Average score`,
+				type: 'spline',
+				data: progress1819[level].map(({timestamp, avg_score}) => [timestamp, parseInt(avg_score, 10)])
 			}],
 
 			responsive: {
