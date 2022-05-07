@@ -255,7 +255,7 @@ class Game {
 				console.log(
 					`Recorded new game for user ${this.user.id} with id ${score_id}`
 				);
-				this.user.send(['scoreRecorded', score_id]);
+				this.user.send(['scoreRecorded', this.user.id, score_id]);
 			},
 			err => {
 				console.log('Unable to record game');
