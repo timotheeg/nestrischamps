@@ -12,7 +12,7 @@
 				background: url(/views/ctct_bg.png);
 			}
 
-			.box {
+			.no-border {
 				background: black;
 				border-image-source: none;
 				border-image-width: 0 0;
@@ -22,7 +22,7 @@
 				line-height: 26px;
 			}
 
-			.box .header {
+			.no-border .header {
 				font-size: 17px;
 				line-height: 24px;
 			}
@@ -154,33 +154,49 @@
 
 			.player_vid {
 				position: absolute;
-				top: 6px;
-				width: 382px;
+				top: 11px;
+				width: 385px;
 				height: 662px;
 				object-fit: cover;
+			}
 
-				--offset: 258px;
+			.player_vid.p1 {
+				left: 0;
+			}
+
+			.player_vid.p2 {
+				right: 0;
+			}
+
+			.handcam {
+				position: absolute;
+				top: 520px;
+				width: 167px;
+				height: 121px;
+				object-fit: cover;
+
+				--offset: 344px;
 				right: var(--offset);
 			}
 		</style>
 	</head>
 	<body>
 		<div id="stream_bg">
+			<video class="player_vid p1"></video>
+			<video class="player_vid p2"></video>
+
 			<div id="layout_skeletton"></div>
 			<div id="playing_fields">
-				<video class="player_vid p1"></video>
-				<video class="player_vid p2"></video>
-
 				<!-- Player 1 -->
 
-				<div class="box score p1">
+				<div class="box no-border score p1">
 					<div class="aligner">
 						<div class="header">0000000</div>
 						<div class="value">0000000</div>
 					</div>
 				</div>
 
-				<div class="box runway p1">
+				<div class="box no-border runway p1">
 					<div class="header">RUNWAY</div>
 					<div class="content">
 						<div class="value">000000</div>
@@ -189,7 +205,7 @@
 					</div>
 				</div>
 
-				<div class="box projection p1">
+				<div class="box no-border projection p1">
 					<div class="header">PROJECTION</div>
 					<div class="content">
 						<div class="value">000000</div>
@@ -198,52 +214,54 @@
 					</div>
 				</div>
 
-				<div class="box tetris_rate p1">
+				<div class="box no-border tetris_rate p1">
 					<div class="header">TRT</div>
 					<div class="content">---</div>
 				</div>
 
-				<div class="box running_trt p1"></div>
+				<div class="box no-border running_trt p1"></div>
 
-				<div class="box name p1">
+				<div class="box no-border name p1">
 					<div class="header">PLAYER 1</div>
 					<div class="content hearts">&#338;&#338;&#338;</div>
 				</div>
 
-				<div class="box board p1"></div>
+				<div class="box no-border board p1"></div>
 
-				<div class="box next_piece p1"></div>
+				<div class="box no-border next_piece p1"></div>
 
-				<div class="box level p1">
+				<div class="box no-border level p1">
 					<div class="header">LV</div>
 					<div class="value">99</div>
 				</div>
 
-				<div class="box lines p1">
+				<div class="box no-border lines p1">
 					<div class="header">LINES</div>
 					<div class="value">000</div>
 				</div>
 
-				<div class="box drought p1">
+				<div class="box no-border drought p1">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
 				</div>
 
-				<div class="box runway transition p1">
+				<div class="box no-border runway transition p1">
 					<div class="header">TR RUNWAY</div>
 					<div class="content">0000000</div>
 				</div>
 
+				<video class="box handcam p1"></video>
+
 				<!-- Player 2 -->
 
-				<div class="box score p2">
+				<div class="box no-border score p2">
 					<div class="aligner">
 						<div class="header">0000000</div>
 						<div class="value">0000000</div>
 					</div>
 				</div>
 
-				<div class="box runway p2">
+				<div class="box no-border runway p2">
 					<div class="header">RUNWAY</div>
 					<div class="content">
 						<div class="value">000000</div>
@@ -252,7 +270,7 @@
 					</div>
 				</div>
 
-				<div class="box projection p2">
+				<div class="box no-border projection p2">
 					<div class="header">PROJECTION</div>
 					<div class="content">
 						<div class="value">000000</div>
@@ -261,41 +279,43 @@
 					</div>
 				</div>
 
-				<div class="box tetris_rate p2">
+				<div class="box no-border tetris_rate p2">
 					<div class="header">TRT</div>
 					<div class="content">---</div>
 				</div>
 
-				<div class="box running_trt p2"></div>
+				<div class="box no-border running_trt p2"></div>
 
-				<div class="box name p2">
+				<div class="box no-border name p2">
 					<div class="header">PLAYER 2</div>
 					<div class="content hearts">&#338;&#338;&#338;</div>
 				</div>
 
-				<div class="box board p2"></div>
+				<div class="box no-border board p2"></div>
 
-				<div class="box next_piece p2"></div>
+				<div class="box no-border next_piece p2"></div>
 
-				<div class="box level p2">
+				<div class="box no-border level p2">
 					<div class="header">LV</div>
 					<div class="value">99</div>
 				</div>
 
-				<div class="box lines p2">
+				<div class="box no-border lines p2">
 					<div class="header">LINES</div>
 					<div class="value">000</div>
 				</div>
 
-				<div class="box drought p2">
+				<div class="box no-border drought p2">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
 				</div>
 
-				<div class="box runway transition p2">
+				<div class="box no-border runway transition p2">
 					<div class="header">TR RUNWAY</div>
 					<div class="content">0000000</div>
 				</div>
+
+				<video class="box handcam p2"></video>
 
 				<div class="dev_null"></div>
 			</div>
@@ -416,6 +436,11 @@
 					// Hide the name and hearts
 					// It is expected another program like CTCT will show the data underneath
 					document.querySelector(`.name.p${num}`).remove();
+				}
+
+				// ability to hide handcam
+				if (QueryString.get('handcam') === '0') {
+					document.querySelector(`.handcam.p${num}`).remove();
 				}
 
 				// Undo the CTM logic of hiding the level and preview
