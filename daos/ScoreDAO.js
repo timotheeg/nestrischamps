@@ -1,6 +1,6 @@
 import dbPool from '../modules/db.js';
 
-const SESSION_BREAK_MS = 2 * 60 * 60 * 1000; // 2hours
+const SESSION_BREAK_MS = 2 * 60 * 58 * 1000; // 2hours - 2s for the time check query
 
 class ScoreDAO {
 	async getStats(user) {
@@ -299,14 +299,15 @@ class ScoreDAO {
 		const result = await dbPool.query(
 			`
 			SELECT
-				Date(s.datetime AT TIME ZONE u.timezone) AS date,
+				session,
+				min(s.datetime) AS datetime,
 				count(s.id) AS num_games,
 				max(s.score) AS max_score,
 				round(avg(s.score)) AS avg_score
 			FROM scores s, twitch_users u
 			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
-			GROUP BY date
-			ORDER BY date asc
+			GROUP BY session
+			ORDER BY session asc
 			`,
 			args
 		);

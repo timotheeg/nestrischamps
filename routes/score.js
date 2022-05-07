@@ -317,7 +317,7 @@ router.get(
 		const progress = await ScoreDAO.getProgress(req.session.user);
 
 		progress.forEach(datapoint => {
-			datapoint.timestamp = datapoint.date.getTime();
+			datapoint.timestamp = datapoint.datetime.getTime();
 			delete datapoint.date;
 		});
 
@@ -333,14 +333,14 @@ router.get(
 		const progress18 = await ScoreDAO.getProgress(req.session.user, 18);
 
 		progress18.forEach(datapoint => {
-			datapoint.timestamp = datapoint.date.getTime();
+			datapoint.timestamp = datapoint.datetime.getTime();
 			delete datapoint.date;
 		});
 
 		const progress19 = await ScoreDAO.getProgress(req.session.user, 19);
 
 		progress19.forEach(datapoint => {
-			datapoint.timestamp = datapoint.date.getTime();
+			datapoint.timestamp = datapoint.datetime.getTime();
 			delete datapoint.date;
 		});
 
