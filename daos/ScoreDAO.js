@@ -178,7 +178,7 @@ class ScoreDAO {
 			(
 				datetime,
 				player_id,
-				session
+				session,
 				start_level,
 				end_level,
 				score,
@@ -193,7 +193,7 @@ class ScoreDAO {
 				transition,
 				num_frames,
 				frame_file,
-				manual,
+				manual
 			)
 			VALUES
 			(
