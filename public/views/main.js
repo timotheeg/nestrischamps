@@ -242,7 +242,7 @@ function renderPastGamesAndPBs(data) {
 		dom.high_scores.element.clientHeight > 200 ? 10 : 5;
 
 	// high scores
-	['today', 'overall'].forEach(category => {
+	['session', 'overall'].forEach(category => {
 		if (data.high_scores[category].length <= 0) {
 			data.high_scores[category].push(null);
 		}

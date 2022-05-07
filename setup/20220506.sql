@@ -1,0 +1,2 @@
+ALTER TABLE scores
+  ADD COLUMN session INTEGER DEFAULT 1;

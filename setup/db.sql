@@ -28,6 +28,7 @@ CREATE TABLE scores (
 	id SERIAL PRIMARY KEY,
 	datetime timestamptz NOT NULL,
 	player_id BIGINT NOT NULL,
+	session INTEGER DEFAULT 1,
 	start_level SMALLINT,
 	end_level SMALLINT,
 	score INTEGER,

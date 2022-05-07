@@ -1,11 +1,13 @@
 import dbPool from '../modules/db.js';
 
+const SESSION_BREAK_MS = 2 * 60 * 58 * 1000; // 2hours - 2s for the time check query
+
 class ScoreDAO {
 	async getStats(user) {
 		const db_client = await dbPool.connect();
 
 		try {
-			return {
+			const data = {
 				current_player: user.login,
 				pbs: [
 					await this._getPBs(db_client, user, 18),
@@ -13,9 +15,14 @@ class ScoreDAO {
 				],
 				high_scores: {
 					overall: await this._getBestOverall(db_client, user),
-					today: await this._getBest24Hours(db_client, user),
+					session: await this._getBestInSession(db_client, user),
 				},
 			};
+
+			// Temporary ... For backward compatibility - Remove after 2022-06-01
+			data.high_scores.today = data.high_scores.session;
+
+			return data;
 		} catch (err) {
 			console.log('Error getting user stats');
 			console.error(err);
@@ -55,25 +62,6 @@ class ScoreDAO {
 		return result.rows;
 	}
 
-	async _getBestToday(db_client, user) {
-		const now = new Date();
-		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-		const result = await db_client.query(
-			`
-			SELECT start_level, score, tetris_rate
-			FROM scores
-			WHERE player_id=$1
-				AND datetime>=$2
-			ORDER BY score DESC
-			LIMIT 10
-			`,
-			[user.id, today.toISOString()]
-		);
-
-		return result.rows;
-	}
-
 	async _getBest24Hours(db_client, user) {
 		const result = await db_client.query(
 			`
@@ -86,6 +74,23 @@ class ScoreDAO {
 			LIMIT 10
 			`,
 			[user.id]
+		);
+
+		return result.rows;
+	}
+
+	async _getBestInSession(db_client, user) {
+		const session = await this._getCurrentSessionId(user, db_client);
+		const result = await db_client.query(
+			`
+			SELECT start_level, score, tetris_rate
+			FROM scores
+			WHERE player_id=$1
+				AND session=$2
+			ORDER BY score DESC
+			LIMIT 10
+			`,
+			[user.id, session]
 		);
 
 		return result.rows;
@@ -136,15 +141,44 @@ class ScoreDAO {
 		}
 	}
 
+	async _getCurrentSessionId(user, db_client = null) {
+		const result = await (db_client || dbPool).query(
+			`
+			SELECT id, datetime, session
+			FROM scores
+			WHERE player_id=$1
+			ORDER BY datetime DESC
+			LIMIT 1
+			`,
+			[user.id]
+		);
+
+		const last_game = result.rows[0];
+
+		let session = 1;
+
+		if (last_game) {
+			session = last_game.session;
+
+			if (Date.now() - last_game.datetime > SESSION_BREAK_MS) {
+				session += 1;
+			}
+		}
+
+		return session;
+	}
+
 	async recordGame(user, game_data) {
 		if (!game_data) return;
 
+		const session = await this._getCurrentSessionId(user);
 		const result = await dbPool.query(
 			`
 			INSERT INTO scores
 			(
 				datetime,
 				player_id,
+				session
 				start_level,
 				end_level,
 				score,
@@ -159,16 +193,17 @@ class ScoreDAO {
 				transition,
 				num_frames,
 				frame_file,
-				manual
+				manual,
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 			)
 			RETURNING id
 			`,
 			[
 				user.id,
+				session,
 				game_data.start_level,
 				game_data.end_level,
 				game_data.score,
@@ -269,14 +304,15 @@ class ScoreDAO {
 		const result = await dbPool.query(
 			`
 			SELECT
-				Date(s.datetime AT TIME ZONE u.timezone) AS date,
+				session,
+				min(s.datetime) AS datetime,
 				count(s.id) AS num_games,
 				max(s.score) AS max_score,
 				round(avg(s.score)) AS avg_score
 			FROM scores s, twitch_users u
 			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
-			GROUP BY date
-			ORDER BY date asc
+			GROUP BY session
+			ORDER BY session asc
 			`,
 			args
 		);

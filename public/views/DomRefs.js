@@ -124,7 +124,7 @@ export default class DomRefs {
 		this.high_scores = {
 			element: high_scores,
 
-			today: high_scores.querySelector('.today tbody'),
+			session: high_scores.querySelector('.session tbody'),
 			overall: high_scores.querySelector('.overall tbody'),
 		};
 

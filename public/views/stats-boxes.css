@@ -421,13 +421,13 @@ i {
 	padding-bottom: 6px;
 }
 
-#high_scores td.today,
+#high_scores td.session,
 #high_scores td.overall {
 	vertical-align: top;
 	width: 220px;
 }
 
-#high_scores td.today {
+#high_scores td.session {
 	padding-right: 16px;
 }
 
