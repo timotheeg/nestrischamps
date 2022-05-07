@@ -1,5 +1,7 @@
 import dbPool from '../modules/db.js';
 
+const SESSION_BREAK_MS = 2 * 60 * 60 * 1000; // 2hours
+
 class ScoreDAO {
 	async getStats(user) {
 		const db_client = await dbPool.connect();
@@ -136,8 +138,34 @@ class ScoreDAO {
 		}
 	}
 
+	async _getLastGame(user) {
+		const result = await dbPool.query(
+			`
+			SELECT id, datetime, session, start_level, score, tetris_rate
+			FROM scores
+			WHERE player_id=$1
+			ORDER BY datetime DESC
+			LIMIT 1
+			`,
+			[user.id]
+		);
+
+		return result.rows[0];
+	}
+
 	async recordGame(user, game_data) {
 		if (!game_data) return;
+
+		const last_game = await this._getLastGame(user);
+		let session = 1;
+
+		if (last_game) {
+			session = last_game.session;
+
+			if (Date.now() - last_game.datetime > SESSION_BREAK_MS) {
+				session += 1;
+			}
+		}
 
 		const result = await dbPool.query(
 			`
@@ -145,6 +173,7 @@ class ScoreDAO {
 			(
 				datetime,
 				player_id,
+				session
 				start_level,
 				end_level,
 				score,
@@ -159,16 +188,17 @@ class ScoreDAO {
 				transition,
 				num_frames,
 				frame_file,
-				manual
+				manual,
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 			)
 			RETURNING id
 			`,
 			[
 				user.id,
+				session,
 				game_data.start_level,
 				game_data.end_level,
 				game_data.score,
