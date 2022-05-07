@@ -7,7 +7,7 @@ class ScoreDAO {
 		const db_client = await dbPool.connect();
 
 		try {
-			return {
+			const data = {
 				current_player: user.login,
 				pbs: [
 					await this._getPBs(db_client, user, 18),
@@ -18,6 +18,11 @@ class ScoreDAO {
 					session: await this._getBestInSession(db_client, user),
 				},
 			};
+
+			// Temporary ... For backward compatibility - Remove after 2022-06-01
+			data.high_scores.today = data.high_scores.session;
+
+			return data;
 		} catch (err) {
 			console.log('Error getting user stats');
 			console.error(err);
