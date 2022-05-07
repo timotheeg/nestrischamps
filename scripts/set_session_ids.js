@@ -15,12 +15,12 @@ async function setSessionInGames(db_client, playerid, sessionid, gameids) {
 
 		await db_client.query(
 			`
-            UPDATE scores
-            SET session=$1
-            WHERE
-                player_id=$2
-                AND id IN (${id_chunk.join(',')})
-            `,
+			UPDATE scores
+			SET session=$1
+			WHERE
+				player_id=$2
+				AND id IN (${id_chunk.join(',')})
+			`,
 			[sessionid, playerid]
 		);
 	}
@@ -32,8 +32,8 @@ async function run() {
 	let players = (
 		await db_client.query(
 			`
-        SELECT id, login from twitch_users
-        `
+		SELECT id, login from twitch_users
+		`
 		)
 	).rows;
 
@@ -45,11 +45,11 @@ async function run() {
 		let scores = (
 			await db_client.query(
 				`
-            SELECT id, datetime
-            FROM scores
-            WHERE player_id=$1
-            ORDER BY datetime asc
-            `,
+				SELECT id, datetime
+				FROM scores
+				WHERE player_id=$1
+				ORDER BY datetime asc
+			`,
 				[playerid]
 			)
 		).rows;
