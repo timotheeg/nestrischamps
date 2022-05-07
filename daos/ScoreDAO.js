@@ -15,7 +15,7 @@ class ScoreDAO {
 				],
 				high_scores: {
 					overall: await this._getBestOverall(db_client, user),
-					today: await this._getBest24Hours(db_client, user),
+					session: await this._getBestInSession(db_client, user),
 				},
 			};
 		} catch (err) {
@@ -57,25 +57,6 @@ class ScoreDAO {
 		return result.rows;
 	}
 
-	async _getBestToday(db_client, user) {
-		const now = new Date();
-		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-		const result = await db_client.query(
-			`
-			SELECT start_level, score, tetris_rate
-			FROM scores
-			WHERE player_id=$1
-				AND datetime>=$2
-			ORDER BY score DESC
-			LIMIT 10
-			`,
-			[user.id, today.toISOString()]
-		);
-
-		return result.rows;
-	}
-
 	async _getBest24Hours(db_client, user) {
 		const result = await db_client.query(
 			`
@@ -88,6 +69,23 @@ class ScoreDAO {
 			LIMIT 10
 			`,
 			[user.id]
+		);
+
+		return result.rows;
+	}
+
+	async _getBestInSession(db_client, user) {
+		const session = await this._getCurrentSessionId(user, db_client);
+		const result = await db_client.query(
+			`
+			SELECT start_level, score, tetris_rate
+			FROM scores
+			WHERE player_id=$1
+				AND session=$2
+			ORDER BY score DESC
+			LIMIT 10
+			`,
+			[user.id, session]
 		);
 
 		return result.rows;
@@ -138,10 +136,10 @@ class ScoreDAO {
 		}
 	}
 
-	async _getLastGame(user) {
-		const result = await dbPool.query(
+	async _getCurrentSessionId(user, db_client = null) {
+		const result = await (db_client || dbPool).query(
 			`
-			SELECT id, datetime, session, start_level, score, tetris_rate
+			SELECT id, datetime, session
 			FROM scores
 			WHERE player_id=$1
 			ORDER BY datetime DESC
@@ -150,13 +148,8 @@ class ScoreDAO {
 			[user.id]
 		);
 
-		return result.rows[0];
-	}
+		const last_game = result.rows[0];
 
-	async recordGame(user, game_data) {
-		if (!game_data) return;
-
-		const last_game = await this._getLastGame(user);
 		let session = 1;
 
 		if (last_game) {
@@ -167,6 +160,13 @@ class ScoreDAO {
 			}
 		}
 
+		return session;
+	}
+
+	async recordGame(user, game_data) {
+		if (!game_data) return;
+
+		const session = await this._getCurrentSessionId(user);
 		const result = await dbPool.query(
 			`
 			INSERT INTO scores
