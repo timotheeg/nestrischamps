@@ -27,6 +27,7 @@ CREATE INDEX IDX_users_email ON twitch_users (email);
 CREATE TABLE scores (
 	id SERIAL PRIMARY KEY,
 	datetime timestamptz NOT NULL,
+	session INTEGER DEFAULT 1,
 	player_id BIGINT NOT NULL,
 	start_level SMALLINT,
 	end_level SMALLINT,
