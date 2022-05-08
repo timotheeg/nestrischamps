@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.box .header {
+				width: 100%;
+				text-align: center;
+			}
+
+			.box .value {
+				text-align: left;
+			}
+
+			.player {
+				position: absolute;
+				left: 0;
+				width: 250px;
+			}
+
+			.score,
+			.board {
+				left: 0;
+			}
+
+			.score {
+				top: 133px;
+				width: 198px;
+				height: 48px;
+			}
+
+			.score .header {
+				color: #f3ed55;
+				overflow: hidden;
+				padding-bottom: 4px;
+			}
+
+			.score .value {
+				width: 100%;
+				text-align: center;
+				font-size: 20px;
+				line-height: 24px;
+			}
+
+			.board {
+				width: 198px;
+				height: 398px;
+				top: 202px;
+			}
+
+			.board .lines {
+				position: absolute;
+				top: 15px;
+				left: 15px;
+				text-align: left;
+				width: 48px;
+				line-height: 16px;
+				z-index: 1;
+			}
+
+			.board .next_piece {
+				position: absolute;
+				top: 14px;
+				right: 12px;
+				width: 64px;
+				height: 32px;
+				z-index: 2;
+			}
+
+			.running_trt {
+				width: 198px;
+				height: 88px;
+				top: 621px;
+			}
+
+			video.box {
+				top: 0;
+				width: 198px;
+				height: 112px;
+			}
+
+			.team {
+				position: absolute;
+				top: 230px;
+				left: 40px;
+			}
+
+			#team2 {
+				left: 990px;
+			}
+
+			.team-score {
+				width: 855px;
+				height: 576px;
+			}
+
+			.team-score {
+				font-size: 48px;
+				line-height: 60px;
+				height: 114px;
+				top: -135px;
+			}
+
+			.team-score .diff {
+				margin-top: -3px;
+			}
+
+			.aligner {
+				display: inline-block;
+				text-align: right;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="team1" class="team">
+				<div class="players"></div>
+				<div class="box team-score">
+					<div class="aligner">
+						<div class="sum">00000000</div>
+						<div class="diff">00000000</div>
+					</div>
+				</div>
+			</div>
+			<div id="team2" class="team">
+				<div class="players"></div>
+				<div class="box team-score">
+					<div class="aligner">
+						<div class="sum">00000000</div>
+						<div class="diff">00000000</div>
+					</div>
+				</div>
+			</div>
+
+			<template id="player">
+				<div class="player">
+					<div class="box board">
+						<div class="lines">000</div>
+						<div class="next_piece"></div>
+					</div>
+
+					<div class="box score">
+						<div class="header">PLAYER</div>
+						<div class="value">0000000</div>
+					</div>
+
+					<div class="box running_trt"></div>
+
+					<video class="box"></video>
+				</div>
+			</template>
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '352x240',
+				players: 8,
+			});
+		</script>
+		<script type="module">
+			import QueryString from '/js/QueryString.js';
+			import '/views/bg.js';
+			import Connection from '/js/connection.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { translate } from '/views/utils.js';
+			import Player from '/views/Player.js';
+
+			const stream_bg = document.querySelector('#stream_bg');
+			const player_template = document.getElementById('player');
+			const players = [];
+
+			let connection;
+
+			const topScores = {};
+
+			// Check team configuration
+			let team_setup = [
+				[1, 2, 3, 4],
+				[1, 2, 3, 4],
+			];
+
+			const player_setup_re = /^[1234]-[1234]$/;
+
+			if (player_setup_re.test(QueryString.get('players'))) {
+				team_setup = QueryString.get('players')
+					.split('-')
+					.map(n => parseInt(n, 10))
+					.map(n =>
+						Array(n)
+							.fill()
+							.map((_, idx) => idx + 1)
+					);
+			}
+
+			function udpatePlayerScore(player) {
+				// team1 score
+				const team1_score = team_setup[0].reduce(
+					(acc, _, idx) => acc + players[idx].getScore(),
+					0
+				);
+				const team1_node = document.querySelector(`#team1 .team-score`);
+
+				// team1 score
+				const team2_score = team_setup[1].reduce(
+					(acc, _, idx) => acc + players[idx + team_setup[0].length].getScore(),
+					0
+				);
+				const team2_node = document.querySelector(`#team2 .team-score`);
+
+				const diff = Math.abs(team1_score - team2_score);
+
+				team1_node.querySelector('.sum').textContent = team1_score;
+				team2_node.querySelector('.sum').textContent = team2_score;
+
+				const team1_diff_node = team1_node.querySelector('.diff');
+				const team2_diff_node = team2_node.querySelector('.diff');
+
+				const green = '#0eff0e';
+				const red = '#fd0009';
+
+				team1_diff_node.textContent = diff;
+				team2_diff_node.textContent = diff;
+
+				team1_diff_node.style.color =
+					team1_score >= team2_score ? '#0eff0e' : '#fd0009';
+				team2_diff_node.style.color =
+					team2_score >= team1_score ? '#0eff0e' : '#fd0009';
+			}
+
+			window.onload = () => {
+				// wait for css
+				console.log('window.onload');
+
+				const base_offset_y = 20;
+				const player_width = 219;
+
+				let player_num = 0;
+
+				team_setup.forEach((player_setup, team_idx) => {
+					const team_node = document.querySelector(
+						`#team${team_idx + 1} .players`
+					);
+
+					const base_offset_x = ((4 - player_setup.length) * player_width) / 2;
+
+					player_setup.forEach(col_num => {
+						const player_idx = player_num++;
+						const player_fragment = document.importNode(
+							player_template.content,
+							true
+						);
+						const player_node = player_fragment.querySelector('.player');
+
+						player_node.classList.add(`p${player_num}`);
+						team_node.appendChild(player_node);
+
+						const player = new Player(
+							{
+								name: player_node.querySelector(`.score .header`),
+								score: player_node.querySelector(`.score .value`),
+								lines: player_node.querySelector(`.board .lines`),
+								preview: player_node.querySelector(`.board .next_piece`),
+								field: player_node.querySelector(`.board`),
+								running_trt: player_node.querySelector(`.running_trt`),
+								video: player_node.querySelector(`video`),
+							},
+							{
+								field_pixel_size: 2.5,
+								preview_pixel_size: 2,
+								preview_align: 'tr',
+								stereo: translate([0, 1], [-1, 1], team_idx),
+							}
+						);
+
+						players.push(player);
+
+						Object.assign(player_node.style, {
+							left: `${base_offset_x + (col_num - 1) * player_width}px`,
+						});
+
+						player.onScore = frame => {
+							udpatePlayerScore(player, frame.raw.score);
+						};
+					});
+				});
+
+				const API = {
+					setId(player_idx, id) {
+						players[player_idx].setId(id);
+					},
+
+					setLogin(player_idx, login) {
+						players[player_idx].setLogin(login);
+					},
+
+					setName(player_idx, name) {
+						players[player_idx].setName(name);
+					},
+
+					setAvatar(player_idx, avatar_url) {
+						players[player_idx].setAvatar(avatar_url);
+					},
+
+					// Twitch like command aliases
+					setProfileImageURL(player_idx, avatar_url) {
+						this.setAvatar(player_idx, avatar_url);
+					},
+
+					setDisplayName(player_idx, name) {
+						this.setName(player_idx, name);
+					},
+
+					showProfileCard(visible) {
+						players.forEach(player => player.showProfileCard(visible));
+					},
+
+					setGameOver(player_idx) {
+						players[player_idx].setGameOver();
+					},
+
+					cancelGameOver(player_idx) {
+						players[player_idx].cancelGameOver();
+					},
+
+					setCurtainLogo(url) {
+						players.forEach(player => player.setCurtainLogo(url));
+					},
+
+					frame(player_idx, data) {
+						const player = players[player_idx];
+
+						if (!player) return;
+
+						player.setFrame(data);
+					},
+
+					setSecondaryView() {
+						// Implemented conditionally in competition class below
+					},
+
+					scoreRecorded() {
+						// only relevant for single player layouts
+					},
+				};
+
+				connection = new Connection(null, view_meta);
+
+				connection.onMessage = frame => {
+					try {
+						const [method, ...args] = frame;
+
+						API[method](...args);
+					} catch (e) {
+						// socket.close();
+						console.error(e);
+						console.log(frame);
+					}
+				};
+			};
+		</script>
+	</body>
+</html>
