@@ -323,8 +323,10 @@ class ScoreDAO {
 	async getAnonymousScore(score_id) {
 		const result = await dbPool.query(
 			`
-			SELECT * FROM scores
-			WHERE id=$1
+			SELECT s.*, u.login
+			FROM scores s, twitch_users u
+			WHERE s.player_id=u.id
+				AND s.id=$1
 			`,
 			[score_id]
 		);

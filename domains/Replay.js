@@ -39,6 +39,17 @@ class Replay {
 				return;
 			}
 
+			this.connection.send([
+				'setLogin',
+				this.player_num,
+				score_data.login || `Player ${this.player_num + 1}`,
+			]);
+			this.connection.send([
+				'setDisplayName',
+				this.player_num,
+				score_data.login || `Player ${this.player_num + 1}`,
+			]);
+
 			if (process.env.GAME_FRAMES_BUCKET) {
 				// data comes from S3
 				//https://nestrischamps.s3-us-west-1.amazonaws.com/

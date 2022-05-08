@@ -8,6 +8,20 @@
 				height: 1080px;
 			}
 
+			.box .header {
+				width: 100%;
+				text-align: center;
+				font-size: 20px;
+				line-height: 26px;
+				padding-bottom: 4px;
+			}
+
+			.box .value {
+				text-align: left;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
 			.player {
 				position: absolute;
 				left: 0;
@@ -20,16 +34,14 @@
 			}
 
 			.score {
-				width: 198px;
+				width: 229px;
 				height: 59px;
+				margin-left: -16px;
 			}
 
 			.score .header {
-				width: 100%;
-				text-align: center;
-				font-size: 20px;
-				line-height: 26px;
-				padding-bottom: 4px;
+				color: #f3ed55;
+				overflow: hidden;
 			}
 
 			.score .value {
@@ -47,8 +59,8 @@
 
 			.board .lines {
 				position: absolute;
-				top: 13px;
-				left: 14px;
+				top: 15px;
+				left: 15px;
 				text-align: left;
 				width: 48px;
 				z-index: 1;
@@ -66,21 +78,87 @@
 			.player.p2 {
 				top: 540px;
 			}
+
+			.leaderboard {
+				top: 20px;
+				left: 1030px;
+				width: 830px;
+				height: 600px;
+			}
+
+			.leaderboard .header {
+				padding-bottom: 10px;
+			}
+
+			.leaderboard .value {
+				line-height: 22px;
+				text-transform: uppercase;
+				columns: 2 auto;
+				column-rule: 1px solid;
+			}
+
+			.entry > * {
+				display: inline-block;
+				vertical-align: top;
+			}
+
+			.rank {
+				text-align: right;
+				width: 40px;
+				color: #29dcf1;
+			}
+
+			.entry.top8 .rank {
+				color: #f3ed55;
+			}
+
+			.entry.top16 .rank {
+				color: #bfb8be;
+			}
+
+			.entry.top32 .rank {
+				color: #736122;
+			}
+
+			.name {
+				text-align: center;
+				width: 210px;
+				overflow: hidden;
+			}
+
+			.best {
+				text-align: right;
+				width: 114px;
+				color: #01ce0a;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="stream_bg">
+			<div class="box leaderboard">
+				<div class="header">LEADERBOARD</div>
+				<div class="value"></div>
+			</div>
+
 			<template id="player">
 				<div class="player">
-					<div class="box score">
-						<div class="header">PLAYER</div>
-						<div class="value">0000000</div>
-					</div>
-
 					<div class="box board">
 						<div class="lines">000</div>
 						<div class="next_piece"></div>
 					</div>
+
+					<div class="box score">
+						<div class="header">PLAYER</div>
+						<div class="value">0000000</div>
+					</div>
+				</div>
+			</template>
+
+			<template id="rank">
+				<div class="entry">
+					<span class="rank">99</span>
+					<span class="name">yobi9</span>
+					<span class="best">1197901</span>
 				</div>
 			</template>
 		</div>
@@ -102,9 +180,76 @@
 
 			const stream_bg = document.querySelector('#stream_bg');
 			const player_template = document.getElementById('player');
+			const rank_template = document.getElementById('rank');
+			const leaderboard_values = document.querySelector('.leaderboard  .value');
 			const players = [];
 
 			let connection;
+
+			const topScores = {};
+
+			function sortTopScores() {
+				// super inefficient destroy-rebuild sorting, but I'll optimize later if needed
+				// considering scores areupdated one at a time, we could move the nodes without recreating everything
+
+				for (let i = leaderboard_values.children.length; i--; ) {
+					leaderboard_values.children[i].remove();
+				}
+
+				Object.values(topScores)
+					.sort((p1, p2) => {
+						return p2.score - p1.score;
+					})
+					.slice(0, 64)
+					.forEach((item, idx) => {
+						// Update score
+						item.node.querySelector('.rank').textContent = idx + 1;
+
+						// Update class
+						item.node.classList.remove('top8', 'top16', 'top32');
+						if (idx <= 7) {
+							item.node.classList.add('top8');
+						} else if (idx <= 15) {
+							item.node.classList.add('top16');
+						} else if (idx <= 31) {
+							item.node.classList.add('top32');
+						}
+
+						leaderboard_values.appendChild(item.node);
+					});
+			}
+
+			function udpatePlayerScore(player) {
+				if (!player.login) return;
+
+				let topScore = topScores[player.login];
+
+				if (!topScore) {
+					const rank_fragment = document.importNode(
+						rank_template.content,
+						true
+					);
+					const rank_node = rank_fragment.querySelector('.entry');
+
+					topScore = topScores[player.login] = {
+						login: player.login,
+						score: 0,
+						node: rank_node,
+					};
+
+					rank_node.querySelector('.name').textContent =
+						player.player_name || player.login || 'Player';
+				}
+
+				const new_score = player.getScore();
+				const old_score = topScore.score;
+
+				if (new_score > old_score) {
+					topScore.score = new_score;
+					topScore.node.querySelector('.best').textContent = new_score;
+					sortTopScores();
+				}
+			}
 
 			window.onload = () => {
 				// wait for css
@@ -117,6 +262,7 @@
 				[1, 2].forEach(row_num => {
 					[1, 2, 3, 4].forEach(col_num => {
 						const player_num = (row_num - 1) * 4 + col_num;
+						const player_idx = player_num - 1;
 
 						const player_fragment = document.importNode(
 							player_template.content,
@@ -149,6 +295,10 @@
 							top: `${base_offset_y + (row_num - 1) * 530}px`,
 							left: `${base_offset_x + (col_num - 1) * player_width}px`,
 						});
+
+						player.onScore = frame => {
+							udpatePlayerScore(player, frame.raw.score);
+						};
 					});
 				});
 
