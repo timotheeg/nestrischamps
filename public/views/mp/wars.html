@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.player {
+				position: absolute;
+				left: 0;
+				width: 250px;
+			}
+
+			.score,
+			.board {
+				left: 0;
+			}
+
+			.score {
+				width: 198px;
+				height: 59px;
+			}
+
+			.score .header {
+				width: 100%;
+				text-align: center;
+				font-size: 20px;
+				line-height: 26px;
+				padding-bottom: 4px;
+			}
+
+			.score .value {
+				width: 100%;
+				text-align: center;
+				font-size: 28px;
+				line-height: 32px;
+			}
+
+			.board {
+				width: 198px;
+				height: 398px;
+				top: 80px;
+			}
+
+			.board .lines {
+				position: absolute;
+				top: 13px;
+				left: 14px;
+				text-align: left;
+				width: 48px;
+				z-index: 1;
+			}
+
+			.board .next_piece {
+				position: absolute;
+				top: 14px;
+				right: 13px;
+				width: 64px;
+				height: 32px;
+				z-index: 2;
+			}
+
+			.player.p2 {
+				top: 540px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<template id="player">
+				<div class="player">
+					<div class="box score">
+						<div class="header">PLAYER</div>
+						<div class="value">0000000</div>
+					</div>
+
+					<div class="box board">
+						<div class="lines">000</div>
+						<div class="next_piece"></div>
+					</div>
+				</div>
+			</template>
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				players: 8,
+			});
+		</script>
+		<script type="module">
+			import '/views/bg.js';
+			import Connection from '/js/connection.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { translate } from '/views/utils.js';
+			import Player from '/views/Player.js';
+
+			const stream_bg = document.querySelector('#stream_bg');
+			const player_template = document.getElementById('player');
+			const players = [];
+
+			let connection;
+
+			window.onload = () => {
+				// wait for css
+				console.log('window.onload');
+
+				const base_offset_x = 20;
+				const base_offset_y = 20;
+				const player_width = 250;
+
+				[1, 2].forEach(row_num => {
+					[1, 2, 3, 4].forEach(col_num => {
+						const player_num = (row_num - 1) * 4 + col_num;
+
+						const player_fragment = document.importNode(
+							player_template.content,
+							true
+						);
+						const player_node = player_fragment.querySelector('.player');
+
+						player_node.classList.add(`p${player_num}`);
+						stream_bg.appendChild(player_node);
+
+						const player = new Player(
+							{
+								name: player_node.querySelector(`.score .header`),
+								score: player_node.querySelector(`.score .value`),
+								lines: player_node.querySelector(`.board .lines`),
+								preview: player_node.querySelector(`.board .next_piece`),
+								field: player_node.querySelector(`.board`),
+							},
+							{
+								field_pixel_size: 2.5,
+								preview_pixel_size: 2,
+								preview_align: 'tr',
+								stereo: translate([1, 4], [-1, 1], col_num),
+							}
+						);
+
+						players.push(player);
+
+						Object.assign(player_node.style, {
+							top: `${base_offset_y + (row_num - 1) * 530}px`,
+							left: `${base_offset_x + (col_num - 1) * player_width}px`,
+						});
+					});
+				});
+
+				const API = {
+					setId(player_idx, id) {
+						players[player_idx].setId(id);
+					},
+
+					setLogin(player_idx, login) {
+						players[player_idx].setLogin(login);
+					},
+
+					setName(player_idx, name) {
+						players[player_idx].setName(name);
+					},
+
+					setAvatar(player_idx, avatar_url) {
+						players[player_idx].setAvatar(avatar_url);
+					},
+
+					// Twitch like command aliases
+					setProfileImageURL(player_idx, avatar_url) {
+						this.setAvatar(player_idx, avatar_url);
+					},
+
+					setDisplayName(player_idx, name) {
+						this.setName(player_idx, name);
+					},
+
+					showProfileCard(visible) {
+						players.forEach(player => player.showProfileCard(visible));
+					},
+
+					setGameOver(player_idx) {
+						players[player_idx].setGameOver();
+					},
+
+					cancelGameOver(player_idx) {
+						players[player_idx].cancelGameOver();
+					},
+
+					setCurtainLogo(url) {
+						players.forEach(player => player.setCurtainLogo(url));
+					},
+
+					frame(player_idx, data) {
+						const player = players[player_idx];
+
+						if (!player) return;
+
+						player.setFrame(data);
+					},
+
+					setSecondaryView() {
+						// Implemented conditionally in competition class below
+					},
+
+					scoreRecorded() {
+						// only relevant for single player layouts
+					},
+				};
+
+				connection = new Connection(null, view_meta);
+
+				connection.onMessage = frame => {
+					try {
+						const [method, ...args] = frame;
+
+						API[method](...args);
+					} catch (e) {
+						// socket.close();
+						console.error(e);
+						console.log(frame);
+					}
+				};
+			};
+		</script>
+	</body>
+</html>
