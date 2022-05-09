@@ -169,6 +169,8 @@ class TetrisCompetitionAPI {
 
 		const hearts = player.dom.hearts;
 
+		if (!hearts || !hearts.childNodes) return;
+
 		// clear all the hearts
 		while (hearts.childNodes.length) {
 			hearts.removeChild(hearts.childNodes[0]);

@@ -114,6 +114,22 @@
 				display: inline-block;
 				text-align: right;
 			}
+
+			.no-video .team {
+				top: 300px;
+			}
+
+			.no-video .score {
+				top: 0;
+			}
+
+			.no-video .board {
+				top: 69px;
+			}
+
+			.no-video .running_trt {
+				top: 488px;
+			}
 		</style>
 	</head>
 	<body>
@@ -165,6 +181,7 @@
 				players: 8,
 			});
 		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 		<script type="module">
 			import QueryString from '/js/QueryString.js';
 			import '/views/bg.js';
@@ -172,6 +189,7 @@
 			import { peerServerOptions } from '/views/constants.js';
 			import { translate } from '/views/utils.js';
 			import Player from '/views/Player.js';
+			import Competition from '/views/competition.js';
 
 			const stream_bg = document.querySelector('#stream_bg');
 			const player_template = document.getElementById('player');
@@ -229,10 +247,8 @@
 				team1_diff_node.textContent = diff;
 				team2_diff_node.textContent = diff;
 
-				team1_diff_node.style.color =
-					team1_score >= team2_score ? '#0eff0e' : '#fd0009';
-				team2_diff_node.style.color =
-					team2_score >= team1_score ? '#0eff0e' : '#fd0009';
+				team1_diff_node.style.color = team1_score >= team2_score ? green : red;
+				team2_diff_node.style.color = team2_score >= team1_score ? green : red;
 			}
 
 			window.onload = () => {
@@ -280,90 +296,35 @@
 							}
 						);
 
+						player.onGameStart = function () {
+							this.dom.lines.hidden = false;
+							this.dom.preview.hidden = false;
+						};
+
+						player.onGameOver = function () {
+							this.dom.lines.hidden = true;
+							this.dom.preview.hidden = true;
+						};
+
+						player.onGameOver();
+
 						players.push(player);
 
 						Object.assign(player_node.style, {
 							left: `${base_offset_x + (col_num - 1) * player_width}px`,
 						});
-
-						player.onScore = frame => {
-							udpatePlayerScore(player, frame.raw.score);
-						};
 					});
 				});
 
-				const API = {
-					setId(player_idx, id) {
-						players[player_idx].setId(id);
-					},
+				const competition = new Competition(players);
 
-					setLogin(player_idx, login) {
-						players[player_idx].setLogin(login);
-					},
+				players.forEach(player => {
+					player.onScore = udpatePlayerScore;
+				});
 
-					setName(player_idx, name) {
-						players[player_idx].setName(name);
-					},
-
-					setAvatar(player_idx, avatar_url) {
-						players[player_idx].setAvatar(avatar_url);
-					},
-
-					// Twitch like command aliases
-					setProfileImageURL(player_idx, avatar_url) {
-						this.setAvatar(player_idx, avatar_url);
-					},
-
-					setDisplayName(player_idx, name) {
-						this.setName(player_idx, name);
-					},
-
-					showProfileCard(visible) {
-						players.forEach(player => player.showProfileCard(visible));
-					},
-
-					setGameOver(player_idx) {
-						players[player_idx].setGameOver();
-					},
-
-					cancelGameOver(player_idx) {
-						players[player_idx].cancelGameOver();
-					},
-
-					setCurtainLogo(url) {
-						players.forEach(player => player.setCurtainLogo(url));
-					},
-
-					frame(player_idx, data) {
-						const player = players[player_idx];
-
-						if (!player) return;
-
-						player.setFrame(data);
-					},
-
-					setSecondaryView() {
-						// Implemented conditionally in competition class below
-					},
-
-					scoreRecorded() {
-						// only relevant for single player layouts
-					},
-				};
-
-				connection = new Connection(null, view_meta);
-
-				connection.onMessage = frame => {
-					try {
-						const [method, ...args] = frame;
-
-						API[method](...args);
-					} catch (e) {
-						// socket.close();
-						console.error(e);
-						console.log(frame);
-					}
-				};
+				if (!competition.has_video) {
+					stream_bg.classList.add('no-video');
+				}
 			};
 		</script>
 	</body>
