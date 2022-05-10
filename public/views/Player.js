@@ -409,11 +409,7 @@ export default class Player {
 			};
 		});
 
-		this.reset();
-
-		this.camera_state = { mirror: 0 };
-		this.game_over = true; // we start at game over, waiting for the first good frame
-		this.curtain_down = true;
+		this._playerReset();
 	}
 
 	onScore() {}
@@ -545,7 +541,18 @@ export default class Player {
 		this.clear_animation_remaining_frames = -1;
 	}
 
-	reset() {
+	// to be invoked when player id changes
+	_playerReset() {
+		this._gameReset();
+		this._resetFrameBuffer();
+
+		this.camera_state = { mirror: 0 };
+		this.game_over = true; // we start at game over, waiting for the first good frame
+		this.curtain_down = true;
+	}
+
+	// to be invoked in between Games
+	_gameReset() {
 		this.curtain_down = false;
 		this.winner_frame = 0;
 
@@ -566,6 +573,9 @@ export default class Player {
 		this.dom.trt.textContent = '-';
 		this.dom.eff.textContent = '-';
 		this.dom.burn.textContent = 0;
+
+		this._destroyGame();
+		this._showCurtain();
 	}
 
 	setDiff(diff, t_diff) {
@@ -607,6 +617,7 @@ export default class Player {
 
 	setId(id) {
 		this.id = id;
+		this._playerReset();
 	}
 
 	setPeerId(peerid) {
@@ -625,6 +636,8 @@ export default class Player {
 	}
 
 	createGame() {
+		this._destroyGame();
+
 		this.game = new BaseGame();
 
 		// Handlers with local rendering actions
@@ -643,18 +656,48 @@ export default class Player {
 		});
 	}
 
+	_destroyGame() {
+		if (!this.game) return;
+
+		// Stop listening to any game events to prevent accidental rendering
+
+		// Handlers with local rendering actions
+		delete this.game.onScore;
+		delete this.game.onPiece;
+		delete this.game.onLines;
+		delete this.game.onLevel;
+		delete this.game.onNewGame;
+		delete this.game.onValidFrame;
+		delete this.game.onTetris;
+		delete this.game.onGameOver;
+
+		// Pass-throughs handlers
+		PASSTHROUGH_HANDLERS.forEach(on_name => {
+			delete this.game[on_name];
+		});
+
+		this.game = null;
+	}
+
 	setGame(game) {
 		this.game = game;
 	}
 
-	setFrame(data) {
+	_resetFrameBuffer() {
+		if (this.frame_buffer) {
+			this.frame_buffer.destroy();
+		}
+
 		if (this.options.buffer_time) {
-			if (!this.frame_buffer) {
-				this.frame_buffer = new FrameBuffer(
-					this.options.buffer_time,
-					this._setFrameOuter
-				);
-			}
+			this.frame_buffer = new FrameBuffer(
+				this.options.buffer_time,
+				this._setFrameOuter
+			);
+		}
+	}
+
+	setFrame(data) {
+		if (this.frame_buffer) {
 			this.frame_buffer.setFrame(data);
 		} else {
 			this._setFrameOuter(data);
@@ -684,7 +727,7 @@ export default class Player {
 	}
 
 	_renderNewGame(frame) {
-		this.reset();
+		this._gameReset();
 		this._hideCurtain();
 		this.createGame();
 		this.game.setFrame(frame);

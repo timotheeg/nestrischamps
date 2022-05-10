@@ -58,4 +58,11 @@ export default class FrameBuffer {
 			);
 		}
 	}
+
+	_destroy() {
+		this.frame_to = clearTimeout(this.frame_to);
+		this.local_time_base = 0;
+		this.client_time_base = 0;
+		this.buffer.length = 0;
+	}
 }

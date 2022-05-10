@@ -323,7 +323,7 @@ class MatchRoom extends Room {
 					const peerid = user ? user.getProducer().getPeerId() : '';
 
 					// Send data to all views
-					this.sendToViews(['setId', p_num, player_data.id]);
+					this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
 					this.sendToViews(['setPeerId', p_num, peerid]);
 					this.sendToViews(['setLogin', p_num, player_data.login]);
 					this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
