@@ -70,15 +70,15 @@ class TetrisCompetitionAPI {
 	constructor() {
 		this.first_to = 3; // defaults to Best of 5
 
-		this.resetVictories();
+		this.resetVictories(false);
 	}
 
-	resetVictories() {
+	resetVictories(clear_field = true) {
 		this.victories = players.map(p => 0);
 
 		players.forEach((player, idx) => {
 			this._repaintVictories(idx);
-			player.clearField();
+			if (clear_field) player.clearField();
 		});
 	}
 
@@ -216,8 +216,10 @@ export default class Competition {
 			this.has_video = !!(
 				QueryString.get('video') !== '0' && view_meta.get('video')
 			); // view_meta is a JS global (if it exists!) -- sort of gross
+			this.view_meta = view_meta;
 		} catch (err) {
 			this.has_video = false;
+			this.view_meta = new URLSearchParams({});
 		}
 
 		players.forEach(player => {
@@ -226,7 +228,7 @@ export default class Competition {
 
 		this.API = new TetrisCompetitionAPI();
 
-		this.connection = new Connection(null, this.has_video ? view_meta : null);
+		this.connection = new Connection(null, this.view_meta);
 
 		this.connection.onMessage = frame => {
 			try {

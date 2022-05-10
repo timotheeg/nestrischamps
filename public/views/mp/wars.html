@@ -178,6 +178,7 @@
 			import { peerServerOptions } from '/views/constants.js';
 			import { translate } from '/views/utils.js';
 			import Player from '/views/Player.js';
+			import Competition from '/views/competition.js';
 
 			const stream_bg = document.querySelector('#stream_bg');
 			const player_template = document.getElementById('player');
@@ -284,11 +285,24 @@
 							},
 							{
 								field_pixel_size: 2.5,
+								field_real_border: 15,
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([1, 4], [-1, 1], col_num),
 							}
 						);
+
+						player.onGameStart = function () {
+							this.dom.lines.hidden = false;
+							this.dom.preview.hidden = false;
+						};
+
+						player.onGameOver = function () {
+							this.dom.lines.hidden = true;
+							this.dom.preview.hidden = true;
+						};
+
+						player.onGameOver();
 
 						players.push(player);
 
@@ -296,85 +310,16 @@
 							top: `${base_offset_y + (row_num - 1) * 530}px`,
 							left: `${base_offset_x + (col_num - 1) * player_width}px`,
 						});
-
-						player.onScore = frame => {
-							udpatePlayerScore(player, frame.raw.score);
-						};
 					});
 				});
 
-				const API = {
-					setId(player_idx, id) {
-						players[player_idx].setId(id);
-					},
+				const competition = new Competition(players);
 
-					setLogin(player_idx, login) {
-						players[player_idx].setLogin(login);
-					},
-
-					setName(player_idx, name) {
-						players[player_idx].setName(name);
-					},
-
-					setAvatar(player_idx, avatar_url) {
-						players[player_idx].setAvatar(avatar_url);
-					},
-
-					// Twitch like command aliases
-					setProfileImageURL(player_idx, avatar_url) {
-						this.setAvatar(player_idx, avatar_url);
-					},
-
-					setDisplayName(player_idx, name) {
-						this.setName(player_idx, name);
-					},
-
-					showProfileCard(visible) {
-						players.forEach(player => player.showProfileCard(visible));
-					},
-
-					setGameOver(player_idx) {
-						players[player_idx].setGameOver();
-					},
-
-					cancelGameOver(player_idx) {
-						players[player_idx].cancelGameOver();
-					},
-
-					setCurtainLogo(url) {
-						players.forEach(player => player.setCurtainLogo(url));
-					},
-
-					frame(player_idx, data) {
-						const player = players[player_idx];
-
-						if (!player) return;
-
-						player.setFrame(data);
-					},
-
-					setSecondaryView() {
-						// Implemented conditionally in competition class below
-					},
-
-					scoreRecorded() {
-						// only relevant for single player layouts
-					},
-				};
-
-				connection = new Connection(null, view_meta);
-
-				connection.onMessage = frame => {
-					try {
-						const [method, ...args] = frame;
-
-						API[method](...args);
-					} catch (e) {
-						// socket.close();
-						console.error(e);
-						console.log(frame);
-					}
-				};
+				players.forEach(player => {
+					player.onScore = frame => {
+						udpatePlayerScore(player, frame.raw.score);
+					};
+				});
 			};
 		</script>
 	</body>

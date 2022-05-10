@@ -490,7 +490,6 @@ export default class Player {
 			if (elapsed < duration) {
 				this.curtain_animation_ID = window.requestAnimationFrame(steps);
 			} else {
-				this.curtain_down = true;
 				this.onCurtainDown();
 			}
 		};
@@ -542,18 +541,19 @@ export default class Player {
 	}
 
 	// to be invoked when player id changes
-	_playerReset() {
+	_playerReset(id) {
 		this._gameReset();
 		this._resetFrameBuffer();
 
 		this.camera_state = { mirror: 0 };
-		this.game_over = true; // we start at game over, waiting for the first good frame
-		this.curtain_down = true;
+
+		if (id) {
+			this._hideCurtain(); // we're expecting frames, so no need to show curtain
+		}
 	}
 
 	// to be invoked in between Games
 	_gameReset() {
-		this.curtain_down = false;
 		this.winner_frame = 0;
 
 		this.preview_ctx.clear();
@@ -617,7 +617,7 @@ export default class Player {
 
 	setId(id) {
 		this.id = id;
-		this._playerReset();
+		this._playerReset(id);
 	}
 
 	setPeerId(peerid) {
@@ -680,6 +680,7 @@ export default class Player {
 	}
 
 	setGame(game) {
+		this._destroyGame();
 		this.game = game;
 	}
 
@@ -1014,13 +1015,16 @@ export default class Player {
 	setGameOver() {
 		this._renderGameOver();
 		// this._lockRunWayToScore();
-		this.curtain_down = true; // set early to force all frames to be ignored from that point on
+		if (this.game) {
+			this.game.over = true;
+		}
 	}
 
 	cancelGameOver() {
 		this.clearField();
-		this.curtain_down = false;
-		this.game_over = false;
+		if (game) {
+			this.game.over = false;
+		}
 	}
 
 	showLoserFrame() {
@@ -1028,11 +1032,17 @@ export default class Player {
 		this.clearField();
 		this.renderLoserFace();
 		this.renderBorder(false);
+
+		if (this.game) {
+			this.game.over = true;
+		}
 	}
 
 	playWinnerAnimation() {
 		// cancel rendering for current game
-		this.game_over = this.curtain_down = true;
+		if (this.game) {
+			this.game.over = true;
+		}
 
 		this.winner_frame = 0;
 		this.clearField();

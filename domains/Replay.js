@@ -39,6 +39,7 @@ class Replay {
 				return;
 			}
 
+			// For attribution!
 			this.connection.send([
 				'setLogin',
 				this.player_num,
@@ -47,7 +48,12 @@ class Replay {
 			this.connection.send([
 				'setDisplayName',
 				this.player_num,
-				score_data.login || `Player ${this.player_num + 1}`,
+				score_data.display_name || `Player ${this.player_num + 1}`,
+			]);
+			this.connection.send([
+				'setProfileImageURL',
+				this.player_num,
+				score_data.profile_image_url,
 			]);
 
 			if (process.env.GAME_FRAMES_BUCKET) {

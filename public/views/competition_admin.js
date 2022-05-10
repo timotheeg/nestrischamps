@@ -205,8 +205,6 @@ class Player {
 	}
 
 	setVictories(n) {
-		if (this.victories == n) return;
-
 		this.victories = n;
 
 		this.dom.victories.querySelectorAll('span').forEach((span, idx) => {
@@ -251,7 +249,7 @@ function setState(_room_data) {
 	room_data.producers.sort((a, b) => a < b);
 
 	dom.curtain_logo_url.value = room_data.curtain_logo;
-
+	dom.bestof.value = room_data.bestof;
 	dom.producer_count.textContent = room_data.producers.length;
 
 	// synchronize with remote players
