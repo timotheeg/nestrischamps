@@ -186,7 +186,6 @@
 		<script type="module">
 			import QueryString from '/js/QueryString.js';
 			import '/views/bg.js';
-			import Connection from '/js/connection.js';
 			import { peerServerOptions } from '/views/constants.js';
 			import { translate } from '/views/utils.js';
 			import Player from '/views/Player.js';
@@ -196,7 +195,7 @@
 			const player_template = document.getElementById('player');
 			const players = [];
 
-			let connection;
+			// TODO create a team class like in the pairs layout
 
 			// Check team configuration
 			let team_setup = [
@@ -248,6 +247,22 @@
 
 				team1_diff_node.style.color = team1_score >= team2_score ? green : red;
 				team2_diff_node.style.color = team2_score >= team1_score ? green : red;
+			}
+
+			function setWinner(player_idx) {
+				players.forEach(player => player.setGameOver());
+
+				if (player_idx < team_setup[0].length) {
+					team_setup[0].forEach((_, idx) => players[idx].playWinnerAnimation());
+					team_setup[1].forEach((_, idx) =>
+						players[idx + team_setup[0].length].showLoserFrame()
+					);
+				} else {
+					team_setup[0].forEach((_, idx) => players[idx].showLoserFrame());
+					team_setup[1].forEach((_, idx) =>
+						players[idx + team_setup[0].length].playWinnerAnimation()
+					);
+				}
 			}
 
 			window.onload = () => {
@@ -313,7 +328,7 @@
 					});
 				});
 
-				const competition = new Competition(players);
+				const competition = new Competition(players, { setWinner });
 
 				players.forEach(player => {
 					player.onScore = udpatePlayerScore;

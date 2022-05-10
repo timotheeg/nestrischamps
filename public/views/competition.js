@@ -207,7 +207,7 @@ class TetrisCompetitionAPI {
 
 // TODO: modularize this file better
 export default class Competition {
-	constructor(_players) {
+	constructor(_players, api_overrides = {}) {
 		this.players = players = _players;
 
 		this._onPlayerScoreChanged = this._onPlayerScoreChanged.bind(this);
@@ -227,6 +227,8 @@ export default class Competition {
 		});
 
 		this.API = new TetrisCompetitionAPI();
+
+		Object.assign(this.API, api_overrides);
 
 		this.connection = new Connection(null, this.view_meta);
 

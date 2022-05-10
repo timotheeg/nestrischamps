@@ -224,7 +224,6 @@
 			import QueryString from '/js/QueryString.js';
 			import Color from '/views/color.js';
 			import Gradient from '/views/gradient.js';
-			import Connection from '/js/connection.js';
 			import { peerServerOptions } from '/views/constants.js';
 			import { translate } from '/views/utils.js';
 			import Player from '/views/Player.js';
@@ -308,14 +307,9 @@
 				}
 			}
 
-			const players = [];
-
-			let connection;
-
-			const topScores = {};
-
-			const pair_width = 447;
 			const pairs_re = /^[234]$/;
+			const pair_width = 447;
+			const players = [];
 
 			let num_teams = 2;
 
@@ -327,40 +321,18 @@
 				.fill()
 				.map((_, idx) => new Team(idx));
 
-			function udpatePlayerScore(player) {
-				player.team.updateScore();
-				return;
+			function setWinner(player_idx) {
+				const winning_team = players[player_idx]?.team;
 
-				// team1 score
-				const team1_score = team_setup[0].reduce(
-					(acc, _, idx) => acc + players[idx].getScore(),
-					0
-				);
-				const team1_node = document.querySelector(`#team1 .team-score`);
+				players.forEach(player => player.setGameOver());
 
-				// team1 score
-				const team2_score = team_setup[1].reduce(
-					(acc, _, idx) => acc + players[idx + team_setup[0].length].getScore(),
-					0
-				);
-				const team2_node = document.querySelector(`#team2 .team-score`);
-
-				const diff = Math.abs(team1_score - team2_score);
-
-				team1_node.querySelector('.sum').textContent = team1_score;
-				team2_node.querySelector('.sum').textContent = team2_score;
-
-				const team1_diff_node = team1_node.querySelector('.diff');
-				const team2_diff_node = team2_node.querySelector('.diff');
-
-				const green = '#0eff0e';
-				const red = '#fd0009';
-
-				team1_diff_node.textContent = diff;
-				team2_diff_node.textContent = diff;
-
-				team1_diff_node.style.color = team1_score >= team2_score ? green : red;
-				team2_diff_node.style.color = team2_score >= team1_score ? green : red;
+				teams.forEach(team => {
+					if (team === winning_team) {
+						team.players.forEach(player => player.playWinnerAnimation());
+					} else {
+						team.players.forEach(player => player.showLoserFrame());
+					}
+				});
 			}
 
 			window.onload = () => {
@@ -434,10 +406,10 @@
 					});
 				});
 
-				const competition = new Competition(players);
+				const competition = new Competition(players, { setWinner });
 
 				players.forEach(player => {
-					player.onScore = () => udpatePlayerScore(player);
+					player.onScore = () => player.team.updateScore();
 				});
 
 				if (!competition.has_video) {
