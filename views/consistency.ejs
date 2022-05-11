@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>NestrisChamps: user settings</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+
+		<script src="https://code.highcharts.com/highcharts.js"></script>
+		<script src="https://code.highcharts.com/modules/series-label.js"></script>
+		<script src="https://code.highcharts.com/modules/exporting.js"></script>
+		<script src="https://code.highcharts.com/modules/export-data.js"></script>
+		<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+		
+		<style>
+			.navbar-item img {
+				max-height: 2.5rem;
+			}
+
+			.highcharts-figure,
+			.highcharts-data-table table {
+				min-width: 310px;
+				margin: 1em auto;
+			}
+
+			.highcharts-data-table table {
+				font-family: Verdana, sans-serif;
+				border-collapse: collapse;
+				border: 1px solid #ebebeb;
+				margin: 10px auto;
+				text-align: center;
+				width: 100%;
+			}
+
+			.highcharts-data-table caption {
+				padding: 1em 0;
+				font-size: 1.2em;
+				color: #555;
+			}
+
+			.highcharts-data-table th {
+				font-weight: 600;
+				padding: 0.5em;
+			}
+
+			.highcharts-data-table td,
+			.highcharts-data-table th,
+			.highcharts-data-table caption {
+				padding: 0.5em;
+			}
+
+			.highcharts-data-table thead tr,
+			.highcharts-data-table tr:nth-child(even) {
+				background: #f8f8f8;
+			}
+
+			.highcharts-data-table tr:hover {
+				background: #f1f7ff;
+			}
+		</style>
+</head>
+<body>
+
+<%- include('header'); %>
+
+<section class="section">
+	<div class="container content">
+		<h1 class="title is-1">Consistency</h1>
+		<figure class="highcharts-figure">
+			<div id="container_overall"></div>
+            <div id="distribution"></div>
+		</figure>
+	</div>
+</section>
+
+<script>
+function peek(arr) {
+    return arr[arr.length - 1];
+}
+
+(async function showChart() {
+	const response = await fetch('/stats/progress/data/consistency')
+	const progress = await response.json()
+
+    const sessions = [];
+    let cur_session = {};
+
+    for (let sess_band of progress) {
+        if (cur_session.session != sess_band.session) {
+            cur_session = {
+                ...sess_band,
+                total_score: sess_band.avg * sess_band.num_games,
+                bands: [ sess_band ]
+            };
+            sessions.push(cur_session);
+        }
+        else {
+            cur_session.timestamp = Math.min(cur_session.timestamp, sess_band.timestamp);
+            cur_session.num_games += sess_band.num_games;
+            cur_session.total_score += sess_band.avg * sess_band.num_games;
+            cur_session.bands.push(sess_band);
+        }
+    }
+
+    // getting range of data
+    const band_range = [+Infinity, -Infinity];
+    let max_num_games = 0;
+
+    sessions.forEach(session => {
+        session.consistency_score = [...session.bands].sort((b1, b2) => {
+            b2.num_games - b1.num_games
+        })[0].avg;
+
+        if (session.bands[0].band < band_range[0]) {
+            band_range[0] = session.bands[0].band;
+        }
+
+        if (peek(session.bands).band > band_range[1]) {
+            band_range[1] = peek(session.bands).band;
+        }
+
+        max_num_games = Math.max(
+            max_num_games,
+            session.bands.reduce((acc, band) => Math.max(acc, band.num_games), 0)
+        );
+    });
+
+	Highcharts.chart('container_overall', {
+		chart: {
+			zoomType: 'x',
+		},
+		title: {
+			text: 'Games per session'
+		},
+		xAxis: {
+			type: 'datetime',
+			title: {
+				text: 'Date'
+			}
+		},
+		yAxis: [{
+			title: {
+				text: 'Average Score'
+			},
+			min: 0
+		},{
+			title: {
+				text: 'Consistency score'
+			},
+			min: 0
+		},{
+			title: {
+				text: 'Number of games'
+			},
+			min: 0,
+			opposite: true
+		}],
+		tooltip: {
+			shared: true
+		},
+
+		plotOptions: {
+			series: {
+				marker: {
+					enabled: true
+				}
+			}
+		},
+
+		colors: ['#6CF', '#333', '#4A32FF', '#F69B00'],
+
+		series: [{
+			name: "Num games",
+			type: 'column',
+			yAxis: 1,
+			data: sessions.map(({timestamp, num_games}) => [timestamp, num_games])
+		},{
+			name: "Average score",
+			type: 'spline',
+			data: sessions.map(({timestamp, total_score, num_games}) => [timestamp, Math.round(total_score / num_games)])
+		},{
+			name: "Consistency score",
+			type: 'spline',
+			data: sessions.map(({timestamp, consistency_score}) => [timestamp, consistency_score])
+		}],
+
+		responsive: {
+			rules: [{
+				condition: {
+					maxWidth: 500
+				},
+				chartOptions: {
+					plotOptions: {
+						series: {
+							marker: {
+								radius: 2.5
+							}
+						}
+					}
+				}
+			}]
+		}
+	});
+
+	const distribution = Highcharts.chart('distribution', {
+		chart: {
+            type: 'column',
+			zoomType: 'x',
+		},
+		title: {
+			text: `Games per session - ${new Date(sessions[0].timestamp).toLocaleString()}`
+		},
+		xAxis: {
+			type: 'linear',
+            min: 0,
+            max: band_range[1],
+			title: {
+				text: 'Score Bands'
+			}
+		},
+		yAxis: [{
+			type: 'linear',
+			title: {
+				text: 'Number of games'
+			},
+			min: 0,
+            max: max_num_games,
+		}],
+
+		colors: ['#6CF'],
+
+		series: [{
+			name: "Number of Games",
+			type: 'column',
+			data: sessions[0].bands.map(({band, num_games}) => [band, num_games])
+		}],
+
+		responsive: {
+			rules: [{
+				condition: {
+					maxWidth: 500
+				},
+			}]
+		}
+	});
+
+    let index = 0;
+
+    setInterval(() => {
+        index = (index + 1) % sessions.length;
+        distribution.series[0].setData(sessions[index].bands.map(({band, num_games}) => [band, num_games]));
+        distribution.setTitle({
+            text: `Games per session - ${new Date(sessions[index].timestamp).toLocaleString()}`
+        });
+    }, 1500);
+
+})();
+</script>
+
+</body>
+</html>

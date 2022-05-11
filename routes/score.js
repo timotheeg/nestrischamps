@@ -310,6 +310,23 @@ router.delete(
 );
 
 router.get(
+	'/progress/data/consistency',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		const progress = await ScoreDAO.getConsistency(req.session.user);
+
+		progress.forEach(datapoint => {
+			datapoint.timestamp = datapoint.datetime.getTime();
+			datapoint.timestamp = datapoint.datetime.getTime();
+			delete datapoint.datetime;
+		});
+
+		res.json(progress);
+	}
+);
+
+router.get(
 	'/progress/data',
 	middlewares.assertSession,
 	middlewares.checkToken,
@@ -318,7 +335,7 @@ router.get(
 
 		progress.forEach(datapoint => {
 			datapoint.timestamp = datapoint.datetime.getTime();
-			delete datapoint.date;
+			delete datapoint.datetime;
 		});
 
 		res.json(progress);
@@ -334,14 +351,14 @@ router.get(
 
 		progress18.forEach(datapoint => {
 			datapoint.timestamp = datapoint.datetime.getTime();
-			delete datapoint.date;
+			delete datapoint.datetime;
 		});
 
 		const progress19 = await ScoreDAO.getProgress(req.session.user, 19);
 
 		progress19.forEach(datapoint => {
 			datapoint.timestamp = datapoint.datetime.getTime();
-			delete datapoint.date;
+			delete datapoint.datetime;
 		});
 
 		res.json({
@@ -357,6 +374,15 @@ router.get(
 	middlewares.checkToken,
 	async (req, res) => {
 		res.render('progress');
+	}
+);
+
+router.get(
+	'/progress/consistency',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		res.render('consistency');
 	}
 );
 

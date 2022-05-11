@@ -124,19 +124,19 @@
 			name: "Num games",
 			type: 'column',
 			yAxis: 1,
-			data: progress.map(({timestamp, num_games}) => [timestamp, parseInt(num_games, 10)])
+			data: progress.map(({timestamp, num_games}) => [timestamp, num_games])
 		},{
 			name: "Max score (overall)",
 			type: 'spline',
-			data: progress.map(({timestamp, max_score}) => [timestamp, max_score])
+			data: progress.map(({timestamp, max}) => [timestamp, max])
 		},{
 			name: "18 start",
 			type: 'spline',
-			data: progress1819[18].map(({timestamp, max_score}) => [timestamp, max_score])
+			data: progress1819[18].map(({timestamp, max}) => [timestamp, max])
 		},{
 			name: "19 start",
 			type: 'spline',
-			data: progress1819[19].map(({timestamp, max_score}) => [timestamp, max_score])
+			data: progress1819[19].map(({timestamp, max}) => [timestamp, max])
 		}],
 
 		responsive: {
@@ -200,21 +200,25 @@
 				}
 			},
 
-			colors: ['#6CF', color, '#007200'],
+			colors: ['#6CF', color, '#007200', '#9932CC'],
 
 			series: [{
 				name: `Num games`,
 				type: 'column',
 				yAxis: 1,
-				data: progress1819[level].map(({timestamp, num_games}) => [timestamp, parseInt(num_games, 10)])
+				data: progress1819[level].map(({timestamp, num_games}) => [timestamp, num_games])
 			},{
 				name: `Max score`,
 				type: 'spline',
-				data: progress1819[level].map(({timestamp, max_score}) => [timestamp, max_score])
+				data: progress1819[level].map(({timestamp, max}) => [timestamp, max])
 			},{
 				name: `Average score`,
 				type: 'spline',
-				data: progress1819[level].map(({timestamp, avg_score}) => [timestamp, parseInt(avg_score, 10)])
+				data: progress1819[level].map(({timestamp, avg}) => [timestamp, avg])
+			},{
+				name: `Median score`,
+				type: 'spline',
+				data: progress1819[level].map(({timestamp, median}) => [timestamp, median])
 			}],
 
 			responsive: {

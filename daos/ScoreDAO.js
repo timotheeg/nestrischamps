@@ -228,14 +228,14 @@ class ScoreDAO {
 	async getNumberOfScores(user) {
 		const result = await dbPool.query(
 			`
-				SELECT count(*)
+				SELECT count(*)::int
 				FROM scores
 				WHERE player_id=$1
 			`,
 			[user.id]
 		);
 
-		return parseInt(result.rows[0].count, 10);
+		return result.rows[0].count;
 	}
 
 	async getScorePage(user, options = {}) {
@@ -306,13 +306,42 @@ class ScoreDAO {
 			SELECT
 				session,
 				min(s.datetime) AS datetime,
-				count(s.id) AS num_games,
-				max(s.score) AS max_score,
-				round(avg(s.score)) AS avg_score
+				count(s.id)::int AS num_games,
+				max(s.score) AS max,
+				round(avg(s.score))::int AS avg,
+				round(percentile_cont(0.5) WITHIN GROUP (order by score))::int AS median
 			FROM scores s, twitch_users u
 			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
 			GROUP BY session
 			ORDER BY session asc
+			`,
+			args
+		);
+
+		return result.rows;
+	}
+
+	async getConsistency(user, start_level = 18) {
+		const args = [user.id];
+		let level_condition = '';
+
+		if (start_level !== null && start_level >= 0 && start_level <= 29) {
+			args.push(start_level);
+			level_condition = `AND s.start_level=$2 `;
+		}
+
+		const result = await dbPool.query(
+			`
+			SELECT
+				s.session,
+				min(s.datetime) AS datetime,
+				floor(s.score / 50000) as band,
+				count(s.id)::int as num_games,
+				round(avg(s.score))::int as avg
+			FROM scores s, twitch_users u
+			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
+			GROUP BY session, band
+			ORDER BY session asc, band asc
 			`,
 			args
 		);
