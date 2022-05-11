@@ -721,17 +721,10 @@ async function playVideoFromDevice(device_id, fps) {
 		const constraints = {
 			audio: false,
 			video: {
-				width: { ideal: 640 },
 				height: { ideal: 480 },
 				frameRate: { ideal: fps }, // Should we always try to get the highest the card can support?
 			},
 		};
-
-		// whhhyyyyyy???
-		if (navigator.userAgent.indexOf('Firefox/') > -1) {
-			constraints.video.width.ideal = 1280;
-			delete constraints.video.height;
-		}
 
 		if (device_id) {
 			constraints.video.deviceId = { exact: device_id };
