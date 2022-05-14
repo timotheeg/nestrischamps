@@ -187,6 +187,7 @@ const DEFAULT_OPTIONS = {
 	field_real_border: 0, // represents the actual border
 	field_pixel_size: 3,
 	preview_pixel_size: 3,
+	running_trt_dot_size: 4,
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
@@ -969,8 +970,8 @@ export default class Player {
 	renderRunningTRT(clear_events) {
 		const ctx = this.running_trt_ctx,
 			current_trt = peek(clear_events).tetris_rate,
-			pixel_size_line_clear = 4,
-			pixel_size_baseline = 2;
+			pixel_size_line_clear = this.options.running_trt_dot_size,
+			pixel_size_baseline = pixel_size_line_clear / 2;
 
 		let pixel_size, max_pixels, y_scale;
 
