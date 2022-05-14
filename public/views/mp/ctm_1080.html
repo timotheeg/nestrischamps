@@ -4,14 +4,141 @@
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
 		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			#playing_fields {
+				position: absolute;
+				left: 960px;
+				top: 0;
+			}
+
+			.box {
+				font-size: 24px;
+				line-height: 30px;
+			}
+
+			.score,
+			.name,
+			.board,
+			.running_trt {
+				--offset: 0;
+				right: var(--offset);
+			}
+
+			.board {
+				width: 356px;
+				height: 716px;
+				top: 100px;
+			}
+
+			.running_trt {
+				top: 837px;
+				width: 362px;
+				height: 104px;
+			}
+
+			.runway,
+			.projection {
+				width: 172px;
+				height: 110px;
+				--offset: 448px;
+			}
+
+			.runway .header,
+			.projection .header {
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+			.projection {
+				--offset: 718px;
+			}
+
+			.score {
+				width: 358px;
+				height: 79px;
+			}
+
+			.score .value,
+			.score .diff {
+				font-size: 32px;
+				line-height: 38px;
+			}
+
+			.score .lines,
+			.score .tetris_diff {
+				font-size: 24px;
+				line-height: 24px;
+			}
+
+			.level {
+				line-height: 24px;
+			}
+
+			.name,
+			.hearts,
+			.flag {
+				top: 956px;
+				width: 448px;
+				height: 41px;
+				font-size: 32px;
+				line-height: 32px;
+				padding-top: 24px;
+			}
+
+			.hearts {
+				--offset: 469px;
+				width: 356px;
+			}
+
+			.tetris_rate,
+			.drought,
+			.eff {
+				--offset: 377px;
+				width: 71px;
+				height: 98px;
+			}
+
+			.tetris_rate {
+				height: 98px;
+				top: 837px;
+			}
+
+			.eff,
+			.drought {
+				height: 61px;
+				top: 755px;
+			}
+
+			.drought {
+				top: 673px;
+			}
+
+			.tetris_rate .content {
+				padding-top: 20px;
+			}
+
+			.flag {
+				position: absolute;
+				width: 84px;
+
+				font-size: 48px;
+				line-height: 48px;
+
+				--offset: 846px;
+				right: var(--offset);
+			}
+
 			.player_vid {
 				position: absolute;
-				top: -5px;
-				width: 363px;
-				height: 720px;
+				width: 577px;
+				height: 959px;
 				object-fit: cover;
 
-				--offset: 277px;
+				--offset: 383px;
 				right: var(--offset);
 			}
 		</style>
@@ -80,7 +207,9 @@
 					<div class="next_piece"></div>
 				</div>
 
-				<div class="hearts p1"></div>
+				<div class="box hearts p1"></div>
+
+				<div class="box flag p1"></div>
 
 				<!-- Player 2 -->
 
@@ -140,9 +269,8 @@
 					<div class="next_piece"></div>
 				</div>
 
-				<div class="hearts p2"></div>
-
-				<div class="dev_null"></div>
+				<div class="box hearts p2"></div>
+				<div class="box flag p2"></div>
 			</div>
 			<!-- End Playing Fields -->
 		</div>
@@ -159,6 +287,7 @@
 		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
+			import QueryString from '/js/QueryString.js';
 			import { translate } from '/views/utils.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
@@ -207,7 +336,9 @@
 						video: document.querySelector(`.player_vid.p${num}`),
 					},
 					{
-						preview_pixel_size: 2,
+						field_pixel_size: 4.5,
+						field_real_border: 15,
+						preview_pixel_size: 3,
 						preview_align: 'tr',
 						stereo: translate([1, 2], [-1, 1], num),
 					}
