@@ -6,16 +6,20 @@
 			#playing_fields {
 				position: absolute;
 				left: 640px;
-				top: 2px;
+			}
+
+			.score,
+			.board,
+			.name,
+			.running_trt {
+				--offset: 7px;
+				right: var(--offset);
 			}
 
 			.score {
 				width: 237px;
 				height: 54px;
 				font-size: 24px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.score .aligner {
@@ -26,36 +30,15 @@
 				padding-top: 6px;
 			}
 
-			.next_piece {
-				width: 90px;
-				top: 61px;
-
-				--offset: 273px;
-				right: var(--offset);
-			}
-
-			.lines {
-				width: 90px;
-
-				--offset: 273px;
-				right: var(--offset);
-			}
-
 			.board {
 				width: 237px;
 				height: 477px;
 				top: 75px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.name {
 				width: 237px;
 				top: 573px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.name .content {
@@ -68,21 +51,31 @@
 				color: #fb0204;
 			}
 
+			.lines,
+			.tetris_rate,
+			.drought,
+			.next_piece {
+				--offset: 265px;
+				right: var(--offset);
+				width: 90px;
+			}
+
+			.next_piece {
+				top: 61px;
+			}
+
 			.tetris_rate,
 			.drought {
 				width: 50px;
 				top: 634px;
-
-				--offset: 273px;
-				right: var(--offset);
 			}
 
 			.tetris_rate {
-				height: 52px;
+				height: 56px;
 			}
 
 			.tetris_rate .content {
-				padding-top: 5px;
+				padding-top: 6px;
 			}
 
 			.drought {
@@ -92,17 +85,14 @@
 			.running_trt {
 				padding: 12px;
 				width: 243px;
-				height: 58px;
+				height: 62px;
 				top: 634px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.level {
 				width: 40px;
 
-				--offset: 384px;
+				--offset: 376px;
 				right: var(--offset);
 			}
 
@@ -120,12 +110,11 @@
 
 			.player_vid {
 				position: absolute;
-				top: -2px;
-				width: 358px;
+				width: 369px;
 				height: 720px;
 				object-fit: cover;
 
-				--offset: 282px;
+				--offset: 271px;
 				right: var(--offset);
 			}
 
@@ -135,9 +124,9 @@
 
 			.divider {
 				position: absolute;
-				left: -15px;
-				width: 30px;
-				height: 710px;
+				left: -12px;
+				width: 24px;
+				height: 720px;
 				background-color: #000;
 				color: #f8e889;
 				font-size: 16px;
@@ -154,7 +143,7 @@
 			<div id="playing_fields">
 				<!-- divider -->
 
-				<div class="divider">vs</div>
+				<div class="divider">v</div>
 
 				<video class="player_vid p1"></video>
 				<video class="player_vid p2"></video>
