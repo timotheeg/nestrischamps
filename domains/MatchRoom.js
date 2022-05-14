@@ -15,7 +15,7 @@ function getBasePlayerData() {
 		id: '',
 		login: '',
 		display_name: '',
-		country_code: 'US',
+		country_code: '',
 		profile_image_url: '',
 		victories: 0,
 		camera: {

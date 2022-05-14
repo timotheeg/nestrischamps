@@ -619,7 +619,9 @@ export default class Player {
 	setCountryCode(code) {
 		if (!this.dom.flag) return;
 
-		this.dom.flag.innerHTML = `<img id="country_flag" src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg"></img>`;
+		this.dom.flag.innerHTML = code
+			? `<img id="country_flag" src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg"></img>`
+			: '';
 	}
 
 	setId(id) {
