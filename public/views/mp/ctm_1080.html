@@ -91,7 +91,9 @@
 
 			.hearts {
 				--offset: 469px;
-				width: 356px;
+				width: 365px;
+				height: 38px;
+				padding-top: 27px;
 			}
 
 			.tetris_rate,
@@ -123,12 +125,14 @@
 
 			.flag {
 				position: absolute;
-				width: 84px;
+				padding-top: 15px;
+				width: 75px;
+				height: 50px;
 
 				font-size: 48px;
 				line-height: 48px;
 
-				--offset: 846px;
+				--offset: 855px;
 				right: var(--offset);
 			}
 
@@ -334,6 +338,7 @@
 						runway_box: document.querySelector(`.runway.p${num}`),
 						projection_box: document.querySelector(`.projection.p${num}`),
 						video: document.querySelector(`.player_vid.p${num}`),
+						flag: document.querySelector(`.flag.p${num}`),
 					},
 					{
 						field_pixel_size: 4.5,

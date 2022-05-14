@@ -1,7 +1,13 @@
 import _ from 'lodash';
 import Room from './Room.js';
 
-const PRODUCER_FIELDS = ['id', 'login', 'display_name', 'profile_image_url'];
+const PRODUCER_FIELDS = [
+	'id',
+	'login',
+	'display_name',
+	'profile_image_url',
+	'country_code',
+];
 const MAX_PLAYERS = 8;
 
 function getBasePlayerData() {
@@ -9,6 +15,7 @@ function getBasePlayerData() {
 		id: '',
 		login: '',
 		display_name: '',
+		country_code: 'US',
 		profile_image_url: '',
 		victories: 0,
 		camera: {
@@ -183,6 +190,7 @@ class MatchRoom extends Room {
 			connection.send(['setId', pidx, player.id]);
 			connection.send(['setLogin', pidx, player.login]);
 			connection.send(['setDisplayName', pidx, player.display_name]);
+			connection.send(['setCountryCode', pidx, player.country_code]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);
 			connection.send(['setVictories', pidx, player.victories]);
 
@@ -327,6 +335,7 @@ class MatchRoom extends Room {
 					this.sendToViews(['setPeerId', p_num, peerid]);
 					this.sendToViews(['setLogin', p_num, player_data.login]);
 					this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
+					this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
 					this.sendToViews([
 						'setProfileImageURL',
 						p_num,
@@ -449,6 +458,7 @@ class MatchRoom extends Room {
 						this.sendToViews(['setId', pidx, player.id]);
 						this.sendToViews(['setLogin', pidx, player.login]);
 						this.sendToViews(['setDisplayName', pidx, player.display_name]);
+						this.sendToViews(['setCountryCode', pidx, player.country_code]);
 						this.sendToViews([
 							'setProfileImageURL',
 							pidx,
@@ -481,6 +491,7 @@ class MatchRoom extends Room {
 						this.sendToViews(['setId', pidx, player.id]);
 						this.sendToViews(['setLogin', pidx, player.login]);
 						this.sendToViews(['setDisplayName', pidx, player.display_name]);
+						this.sendToViews(['setCountryCode', pidx, player.country_code]);
 						this.sendToViews([
 							'setProfileImageURL',
 							pidx,

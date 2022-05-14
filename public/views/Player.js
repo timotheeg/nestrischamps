@@ -179,6 +179,7 @@ const DEFAULT_DOM_REFS = {
 	drought: DOM_DEV_NULL,
 	burn: DOM_DEV_NULL,
 	video: DOM_DEV_NULL,
+	flag: null,
 	curtain: null,
 };
 
@@ -613,6 +614,12 @@ export default class Player {
 			this.dom.video.style.transform = null;
 			delete this.dom.video.style.transform;
 		}
+	}
+
+	setCountryCode(code) {
+		if (!this.dom.flag) return;
+
+		this.dom.flag.innerHTML = `<img id="country_flag" src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg"></img>`;
 	}
 
 	setId(id) {
