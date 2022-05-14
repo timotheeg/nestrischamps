@@ -6,15 +6,18 @@
 			#playing_fields {
 				position: absolute;
 				left: 640px;
-				top: 2px;
+			}
+
+			.board,
+			.score,
+			.next_piece {
+				--offset: 0;
+				right: var(--offset);
 			}
 
 			.score {
 				width: 237px;
 				height: 97px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.aligner {
@@ -30,16 +33,13 @@
 			.next_piece {
 				width: 108px;
 				top: 118px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.lines {
 				top: 118px;
 				width: 108px;
 
-				--offset: 144px;
+				--offset: 129px;
 				right: var(--offset);
 			}
 
@@ -47,13 +47,10 @@
 				width: 237px;
 				height: 477px;
 				top: 178px;
-
-				--offset: 15px;
-				right: var(--offset);
 			}
 
 			.name {
-				width: 337px;
+				width: 352px;
 				height: 39px;
 			}
 
@@ -73,7 +70,7 @@
 			.level,
 			.runway.transition,
 			.runway.game {
-				--offset: 273px;
+				--offset: 258px;
 				right: var(--offset);
 			}
 
@@ -117,30 +114,30 @@
 			}
 
 			.lines.p2 {
-				left: 15px;
+				left: 0;
 			}
 			.next_piece.p2 {
-				left: 144px;
+				left: 129px;
 			}
 
 			.player_vid {
 				position: absolute;
 				top: 66px;
-				width: 358px;
+				width: 373px;
 				height: 616px;
 				padding: 0;
 				object-fit: cover;
 				/* background: yellow; /**/
 
-				--offset: 282px;
+				--offset: 267px;
 				right: var(--offset);
 			}
 
 			.divider {
 				position: absolute;
-				left: -15px;
-				width: 30px;
-				height: 680px;
+				left: -6px;
+				width: 12px;
+				height: 688px;
 				background-color: #000;
 				color: #f8e889;
 				font-size: 16px;
@@ -166,8 +163,7 @@
 			<div id="ticker"></div>
 			<div id="playing_fields">
 				<!-- divider -->
-
-				<div class="divider">vs</div>
+				<div class="divider"></div>
 
 				<!-- Player 1 -->
 				<video class="player_vid p1"></video>
