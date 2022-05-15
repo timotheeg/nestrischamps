@@ -166,6 +166,7 @@ class UserDAO {
 		// In case user was already in memory, we update its data
 		// Note: small risk that DB changed something (e.g. truncate)
 		// and the assignment here is not consistent, but we'll live with it for now
+
 		Object.assign(user, update);
 
 		return user;

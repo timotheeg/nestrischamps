@@ -8,6 +8,7 @@
 		"start": "node server.js",
 		"env-linux": "export $(cat .env | xargs) && env",
 		"start-linux": "export $(cat .env | xargs) && npm start",
+		"session": "export $(cat .env | xargs) && node scripts/set_session_ids.js",
 		"env-windows": "(for /F \"tokens=*\" %i in (.env) do set %i)",
 		"start-windows": "(for /F \"tokens=*\" %i in (.env) do set %i) && npm start",
 		"test": "echo \"Error: no test specified\" && exit 1",
