@@ -55,6 +55,11 @@ class Replay {
 				this.player_num,
 				score_data.profile_image_url,
 			]);
+			this.connection.send([
+				'setCountryCode',
+				this.player_num,
+				score_data.country_code,
+			]);
 
 			if (process.env.GAME_FRAMES_BUCKET) {
 				// data comes from S3
