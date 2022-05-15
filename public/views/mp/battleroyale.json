@@ -1,0 +1,3 @@
+{
+	"description": "This is 1080p layout (1920x1080). Specity the number of players with players=X, where X is between 2 and 8 (defaults to 8). video boxes can be removed with query string video=0 . Running TRT box can be removed with rtrt=0 ."
+}
