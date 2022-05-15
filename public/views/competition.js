@@ -111,6 +111,10 @@ class TetrisCompetitionAPI {
 		this.setName(player_idx, name);
 	}
 
+	setCountryCode(player_idx, code) {
+		getPlayer(player_idx).setCountryCode(code);
+	}
+
 	setCameraState(player_idx, camera_state) {
 		getPlayer(player_idx).setCameraState(camera_state);
 	}

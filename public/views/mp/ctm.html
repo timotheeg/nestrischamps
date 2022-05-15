@@ -164,11 +164,6 @@
 			import Competition from '/views/competition.js';
 
 			const players = [1, 2].map(num => {
-				if (QueryString.get('runway') === '0') {
-					document.querySelector(`.runway.p${num}`).style.display = 'none';
-					document.querySelector(`.projection.p${num}`).style.display = 'none';
-				}
-
 				const player = new CTMCompetitionPlayer(
 					{
 						name: document.querySelector(`.name.p${num} .header`),
@@ -212,6 +207,11 @@
 						stereo: translate([1, 2], [-1, 1], num),
 					}
 				);
+
+				if (QueryString.get('runway') === '0') {
+					player.dom.runway_box.remove();
+					player.dom.projection_box.remove();
+				}
 
 				return player;
 			});

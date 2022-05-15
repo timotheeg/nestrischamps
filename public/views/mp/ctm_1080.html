@@ -34,10 +34,16 @@
 				top: 100px;
 			}
 
+			.board .next_piece {
+				width: 96px;
+				height: 48px;
+			}
+
 			.running_trt {
+				padding: 15px;
 				top: 837px;
-				width: 362px;
-				height: 104px;
+				width: 356px;
+				height: 98px;
 			}
 
 			.runway,
@@ -74,6 +80,10 @@
 				line-height: 24px;
 			}
 
+			.score .tetris_diff {
+				padding-top: 10px;
+			}
+
 			.level {
 				line-height: 24px;
 			}
@@ -82,7 +92,7 @@
 			.hearts,
 			.flag {
 				top: 956px;
-				width: 448px;
+				width: 460px;
 				height: 41px;
 				font-size: 32px;
 				line-height: 32px;
@@ -90,31 +100,32 @@
 			}
 
 			.hearts {
-				--offset: 469px;
-				width: 356px;
+				--offset: 481px;
+				width: 353px;
 			}
 
 			.tetris_rate,
 			.drought,
 			.eff {
 				--offset: 377px;
-				width: 71px;
+				width: 72px;
 				height: 98px;
+				padding: 18px 21px;
 			}
 
 			.tetris_rate {
-				height: 98px;
+				height: 92px;
 				top: 837px;
 			}
 
 			.eff,
 			.drought {
 				height: 61px;
-				top: 755px;
+				top: 749px;
 			}
 
 			.drought {
-				top: 673px;
+				top: 661px;
 			}
 
 			.tetris_rate .content {
@@ -123,12 +134,14 @@
 
 			.flag {
 				position: absolute;
-				width: 84px;
+				padding: 15px;
+				width: 75px;
+				height: 50px;
 
 				font-size: 48px;
 				line-height: 48px;
 
-				--offset: 846px;
+				--offset: 855px;
 				right: var(--offset);
 			}
 
@@ -293,11 +306,6 @@
 			import Competition from '/views/competition.js';
 
 			const players = [1, 2].map(num => {
-				if (QueryString.get('runway') === '0') {
-					document.querySelector(`.runway.p${num}`).style.display = 'none';
-					document.querySelector(`.projection.p${num}`).style.display = 'none';
-				}
-
 				const player = new CTMCompetitionPlayer(
 					{
 						name: document.querySelector(`.name.p${num} .header`),
@@ -334,15 +342,22 @@
 						runway_box: document.querySelector(`.runway.p${num}`),
 						projection_box: document.querySelector(`.projection.p${num}`),
 						video: document.querySelector(`.player_vid.p${num}`),
+						flag: document.querySelector(`.flag.p${num}`),
 					},
 					{
 						field_pixel_size: 4.5,
 						field_real_border: 15,
+						running_trt_dot_size: 5,
 						preview_pixel_size: 3,
 						preview_align: 'tr',
 						stereo: translate([1, 2], [-1, 1], num),
 					}
 				);
+
+				if (QueryString.get('runway') === '0') {
+					player.dom.runway_box.remove();
+					player.dom.projection_box.remove();
+				}
 
 				return player;
 			});
