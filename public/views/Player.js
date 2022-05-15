@@ -546,6 +546,7 @@ export default class Player {
 	_playerReset(id) {
 		this._gameReset();
 		this._resetFrameBuffer();
+		this.setPeerId();
 
 		this.camera_state = { mirror: 0 };
 
