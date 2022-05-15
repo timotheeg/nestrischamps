@@ -31,6 +31,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 			login: user.login,
 			secret: user.secret,
 			profile_image_url: user.profile_image_url,
+			country_code: user.country_code,
 		};
 
 		console.log('Stored session user as', req.session.user);

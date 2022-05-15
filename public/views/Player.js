@@ -187,7 +187,7 @@ const DEFAULT_OPTIONS = {
 	field_real_border: 0, // represents the actual border
 	field_pixel_size: 3,
 	preview_pixel_size: 3,
-	running_trt_dot_size: 3,
+	running_trt_dot_size: 4,
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
