@@ -37,7 +37,8 @@
 			.score .header {
 				color: #f3ed55;
 				overflow: hidden;
-				padding-bottom: 4px;
+				padding-bottom: 3px;
+				padding-top: 2px;
 			}
 
 			.score .value {
@@ -325,6 +326,10 @@
 						Object.assign(player_node.style, {
 							left: `${base_offset_x + (col_num - 1) * player_width}px`,
 						});
+
+						if (QueryString.get('rtrt') === '0') {
+							player.dom.running_trt.remove();
+						}
 					});
 				});
 
