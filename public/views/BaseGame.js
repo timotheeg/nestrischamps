@@ -368,8 +368,8 @@ export default class BaseGame {
 			return false;
 		}
 
-		if (data.ctime - this.pending_topout_start_ts < 200) {
-			// 200ms is equivalent to 12 frames at 60fps
+		if (data.ctime - this.pending_topout_start_ts < 500) {
+			// We wait till half a second has passed
 			return false;
 		}
 
