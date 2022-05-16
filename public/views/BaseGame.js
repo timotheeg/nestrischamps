@@ -139,8 +139,14 @@ export default class BaseGame {
 			return;
 		}
 
-		if (this.over && !this.curtain_falling) {
-			return;
+		if (this.over) {
+			if (this.no_curtain_top_out) {
+				return;
+			}
+
+			if (!this.curtain_falling) {
+				return;
+			}
 		}
 
 		if (this.frames.length > 0) {
@@ -173,14 +179,19 @@ export default class BaseGame {
 		}
 
 		// Check board for gameover event (curtain is falling)
-		if (!this.over && this._isTopRowFilled(frame)) {
-			this.curtain_falling = true;
-			this.end();
-		}
+		if (!this.over) {
+			if (this._isCurtainFalling(frame)) {
+				this.curtain_falling = true;
+				this.end();
 
-		if (this._getNumBlocks(frame) >= 200) {
-			this.curtain_falling = false;
-			this.onCurtainDown();
+				if (this._getNumBlocks(frame) >= 200) {
+					this.curtain_falling = false;
+					this.onCurtainDown();
+				}
+			} else if (this._isNoCurtainTopOut(frame)) {
+				this.no_curtain_top_out = true;
+				this.end();
+			}
 		}
 
 		this.onValidFrame(last_frame);
@@ -320,9 +331,63 @@ export default class BaseGame {
 		return data.field.every((cell, idx) => cell === this.data.field[idx]);
 	}
 
-	_isTopRowFilled(data) {
-		for (let idx = 10; idx--; ) {
-			if (!data.field[idx]) return false;
+	_isCurtainFalling(data) {
+		return this._isRowFull(data.field, 0);
+	}
+
+	_isNoCurtainTopOut(data) {
+		// topped out if:
+		// 1. all rows have blocks
+		// 2. top row hasn't changed over some frames
+		// 3. 167ms of nothing new happening
+
+		for (let rowidx = 0; rowidx < 20; rowidx++) {
+			if (this._isRowEmpty(data.field, rowidx)) {
+				this.pending_topout = false;
+				this.pending_topout_start_ts = 0;
+
+				return false;
+			}
+		}
+
+		if (!this.pending_topout) {
+			// first frame of potential top out - record top row for later
+			this.pending_topout = data.field.slice(0, 20);
+			this.pending_topout_start_ts = data.ctime;
+
+			return false;
+		}
+
+		if (
+			!this.pending_topout.every(
+				(cell, idx) => (cell && data.field[idx]) || (!cell && !data.field[idx])
+			)
+		) {
+			// top row has changed, record current top row as potential top out again
+			this.pending_topout = data.field.slice(0, 20);
+			this.pending_topout_start_ts = data.ctime;
+
+			return false;
+		}
+
+		if (data.ctime - this.pending_topout_start_ts < 200) {
+			// 200ms is equivalent to 12 frames at 60fps
+			return false;
+		}
+
+		return true;
+	}
+
+	_isRowFull(field, rowIdx = 0) {
+		for (let colIdx = 10; colIdx--; ) {
+			if (!field[rowIdx * 10 + colIdx]) return false;
+		}
+		return true;
+	}
+
+	_isRowEmpty(field, rowIdx) {
+		for (let colIdx = 10; colIdx--; ) {
+			if (field[rowIdx * 10 + colIdx]) return false;
 		}
 		return true;
 	}
