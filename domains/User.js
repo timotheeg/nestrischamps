@@ -252,7 +252,6 @@ class User extends EventEmitter {
 		});
 
 		this.chat_client.onMessage((channel, user, message) => {
-			console.log('onMessage', user, message);
 			if (is_spam(message)) {
 				// TODO: find API to do ban user automatically
 				return;
