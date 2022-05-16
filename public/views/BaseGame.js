@@ -359,9 +359,7 @@ export default class BaseGame {
 		}
 
 		if (
-			!this.pending_topout.every(
-				(cell, idx) => (cell && data.field[idx]) || (!cell && !data.field[idx])
-			)
+			!this.pending_topout.every((cell, idx) => !(!cell ^ !data.field[idx]))
 		) {
 			// top row has changed, record current top row as potential top out again
 			this.pending_topout = data.field.slice(0, 20);
