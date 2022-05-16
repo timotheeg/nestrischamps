@@ -355,11 +355,9 @@
 				players.forEach(player => {
 					player.onScore = function () {
 						// TODO optimize actions to take if nothing is actually changing
-						let scores = [...this.best_scores, this.getScore()].sort(
-							(s1, s2) => s2 - s1
-						);
-
-						if (scores.length > MAX_AVG_SCORES) scores.length = MAX_AVG_SCORES;
+						let scores = [...this.best_scores, this.getScore()]
+							.sort((s1, s2) => s2 - s1)
+							.slice(0, MAX_AVG_SCORES);
 
 						this.avg_score = avg(scores);
 
