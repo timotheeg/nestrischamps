@@ -21,7 +21,7 @@
 				position: absolute;
 				left: 0;
 				width: 250px;
-				top: 260px;
+				top: 341px;
 			}
 
 			.score,
@@ -32,7 +32,7 @@
 			.score {
 				top: 133px;
 				width: 198px;
-				height: 83px;
+				height: 47px;
 				padding: 18px 15px;
 				font-size: 24px;
 				line-height: 24px;
@@ -46,16 +46,6 @@
 				line-height: 20px;
 			}
 
-			.score .hearts {
-				color: #b0afb0;
-				letter-spacing: 5px;
-				line-height: 36px;
-			}
-
-			.hearts .win {
-				color: #fb0204;
-			}
-
 			.score .value {
 				width: 100%;
 				text-align: center;
@@ -64,7 +54,7 @@
 			.board {
 				width: 198px;
 				height: 398px;
-				top: 243px;
+				top: 207px;
 			}
 
 			.board .lines {
@@ -88,8 +78,8 @@
 
 			.running_trt {
 				width: 198px;
-				height: 88px;
-				top: 662px;
+				height: 82px;
+				top: 626px;
 			}
 
 			video.box {
@@ -105,7 +95,7 @@
 			}
 
 			.no-video .player {
-				top: 330px;
+				top: 410px;
 			}
 
 			.no-video .score {
@@ -113,15 +103,15 @@
 			}
 
 			.no-video .board {
-				top: 110px;
+				top: 74px;
 			}
 
 			.no-video .running_trt {
-				top: 529px;
+				top: 493px;
 			}
 
 			.leaderboard {
-				top: 20px;
+				top: 130px;
 				left: 156px;
 				width: 1560px;
 				height: 169px;
@@ -177,7 +167,6 @@
 
 					<div class="box score">
 						<div class="header">PLAYER</div>
-						<div class="hearts"></div>
 						<div class="value">0000000</div>
 					</div>
 
@@ -297,7 +286,6 @@
 							{
 								name: player_node.querySelector(`.score .header`),
 								score: player_node.querySelector(`.score .value`),
-								hearts: player_node.querySelector(`.score .hearts`),
 								lines: player_node.querySelector(`.board .lines`),
 								preview: player_node.querySelector(`.board .next_piece`),
 								field: player_node.querySelector(`.board`),
