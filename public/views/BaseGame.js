@@ -188,13 +188,13 @@ export default class BaseGame {
 					this.curtain_falling = false;
 					this.onCurtainDown();
 				}
-
-				this.onValidFrame(last_frame);
 			} else if (this._isNoCurtainTopOut(frame)) {
 				this.no_curtain_top_out = true;
 				this.end();
 			}
 		}
+
+		this.onValidFrame(last_frame);
 	}
 
 	_doStartGame(frame) {
@@ -352,7 +352,7 @@ export default class BaseGame {
 
 		if (!this.pending_topout) {
 			// first frame of potential top out - record top row for later
-			this.pending_topout = data.field.slice(0, 10);
+			this.pending_topout = data.field.slice(0, 20);
 			this.pending_topout_start_ts = data.ctime;
 
 			return false;
@@ -364,14 +364,14 @@ export default class BaseGame {
 			)
 		) {
 			// top row has changed, record current top row as potential top out again
-			this.pending_topout = data.field.slice(0, 10);
+			this.pending_topout = data.field.slice(0, 20);
 			this.pending_topout_start_ts = data.ctime;
 
 			return false;
 		}
 
-		if (data.ctime - this.pending_topout_start_ts < 167) {
-			// 167ms is equivalent to 10 frames at 60fps
+		if (data.ctime - this.pending_topout_start_ts < 200) {
+			// 200ms is equivalent to 12 frames at 60fps
 			return false;
 		}
 
