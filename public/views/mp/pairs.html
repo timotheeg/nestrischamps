@@ -242,10 +242,6 @@
 			);
 
 			function updateDiffs() {
-				for (let idx = leaderboard_values.children.length; idx--; ) {
-					leaderboard_values.children[idx].remove();
-				}
-
 				teams
 					.sort((t1, t2) =>
 						t2.score === t1.score ? t1.idx - t2.idx : t2.score - t1.score
@@ -262,8 +258,8 @@
 						team.node.querySelector('.aligner .letter').style.color = color;
 
 						if (idx > 0) {
-							const diff = teams[idx - 1].score - team.score;
-							team.rank_node.querySelector('.diff').textContent = `-${diff}`;
+							const diff = team.score - teams[idx - 1].score;
+							team.rank_node.querySelector('.diff').textContent = `${diff}`;
 						} else {
 							team.rank_node.querySelector('.diff').textContent = '';
 						}
