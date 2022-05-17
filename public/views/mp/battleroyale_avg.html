@@ -331,7 +331,12 @@
 						player.onGameOver = function () {
 							this.dom.lines.hidden = true;
 							this.dom.preview.hidden = true;
+
+							// TODO: binary insert
 							this.best_scores.push(this.getScore());
+							this.best_scores = this.best_scores
+								.sort((s1, s2) => s2 - s1)
+								.slice(0, MAX_AVG_SCORES);
 						};
 
 						player.onGameOver();
@@ -362,7 +367,7 @@
 						this.avg_score = avg(scores);
 
 						this.rank_node.querySelector('.score2').textContent = Math.round(
-							player.avg_score
+							this.avg_score
 						);
 						this.rank_node.querySelector('.diff').innerHTML = scores
 							.map(s => `${s}`.padStart(7, '_').replace(/_/g, '&nbsp;'))
