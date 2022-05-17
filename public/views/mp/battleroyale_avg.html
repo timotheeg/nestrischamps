@@ -236,10 +236,6 @@
 			}
 
 			function updateScores() {
-				for (let idx = leaderboard_values.children.length; idx--; ) {
-					leaderboard_values.children[idx].remove();
-				}
-
 				[...players]
 					.sort((p1, p2) => {
 						const p1_score = p1.avg_score || 0;
