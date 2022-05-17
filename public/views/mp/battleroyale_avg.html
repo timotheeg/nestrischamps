@@ -240,22 +240,24 @@
 					leaderboard_values.children[idx].remove();
 				}
 
-				const sorted_players = [...players].sort((p1, p2) => {
-					const p1_score = p1.avg_score || 0;
-					const p2_score = p2.avg_score || 0;
-					return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
-				});
+				[...players]
+					.sort((p1, p2) => {
+						const p1_score = p1.avg_score || 0;
+						const p2_score = p2.avg_score || 0;
+						return p1_score === p2_score
+							? p1.idx - p2.idx
+							: p2_score - p1_score;
+					})
+					.forEach((player, idx) => {
+						const color = color_gradient
+							.getColorAt(idx / (num_players - 1))
+							.toHexString();
 
-				sorted_players.forEach((player, idx) => {
-					const color = color_gradient
-						.getColorAt(idx / (num_players - 1))
-						.toHexString();
+						player.rank_node.style.color = color;
+						player.rank_node.querySelector('.rank').textContent = idx + 1;
 
-					player.rank_node.style.color = color;
-					player.rank_node.querySelector('.rank').textContent = idx + 1;
-
-					leaderboard_values.appendChild(player.rank_node);
-				});
+						leaderboard_values.appendChild(player.rank_node);
+					});
 			}
 
 			window.onload = () => {
