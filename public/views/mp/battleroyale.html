@@ -229,10 +229,6 @@
 			const spacer = (1920 - num_players * player_width) / (num_players + 1);
 
 			function updateScore() {
-				for (let idx = leaderboard_values.children.length; idx--; ) {
-					leaderboard_values.children[idx].remove();
-				}
-
 				const sorted_players = [...players].sort((p1, p2) => {
 					const p1_score = p1.getScore();
 					const p2_score = p2.getScore();
