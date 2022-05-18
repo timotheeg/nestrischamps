@@ -825,7 +825,11 @@ export default class Player {
 		this.onPiece(frame);
 	}
 
-	_renderGameOver() {
+	_renderGameOver(frame) {
+		if (frame) {
+			this._renderScore(frame); // locks the runway and projection scores
+		}
+
 		this._showCurtain();
 		this.onGameOver();
 	}
@@ -1027,6 +1031,7 @@ export default class Player {
 		this._renderGameOver();
 		// this._lockRunWayToScore();
 		if (this.game) {
+			// This is not a true game over that locks the runway score 🤔
 			this.game.over = true;
 		}
 	}

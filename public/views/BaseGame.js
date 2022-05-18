@@ -321,10 +321,32 @@ export default class BaseGame {
 	_doGameOver() {
 		if (this.over) return;
 
+		const last_frame = peek(this.frames);
+
 		this.over = true;
 		this.end_ts = Date.now();
-		this.end_ctime = peek(this.frames).ctime;
-		this.onGameOver();
+		this.end_ctime = last_frame.ctime;
+
+		// pin runway and projection scores
+
+		const death_score = this.data.score.current;
+
+		this.data.score.runway = death_score;
+		this.data.score.projection = death_score;
+
+		if (!this.data.score.transition) {
+			this.data.score.tr_runway = death_score;
+		}
+
+		const last_point_evt = peek(last_frame.points);
+
+		if (last_point_evt) {
+			last_point_evt.score.runway = death_score;
+			last_point_evt.score.projection = death_score;
+			last_point_evt.score.tr_runway = this.data.score.tr_runway;
+		}
+
+		this.onGameOver(last_frame);
 	}
 
 	_isSameField(data) {
