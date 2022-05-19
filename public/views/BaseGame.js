@@ -325,7 +325,7 @@ export default class BaseGame {
 
 		this.over = true;
 		this.end_ts = Date.now();
-		this.end_ctime = last_frame.ctime;
+		this.end_ctime = last_frame?.ctime || this.end_ts;
 
 		// pin runway and projection scores
 
@@ -338,7 +338,7 @@ export default class BaseGame {
 			this.data.score.tr_runway = death_score;
 		}
 
-		const last_point_evt = peek(last_frame.points);
+		const last_point_evt = peek(last_frame?.points || []);
 
 		if (last_point_evt) {
 			last_point_evt.score.runway = death_score;
