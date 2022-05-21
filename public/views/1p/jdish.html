@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/simple_1p.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			#playing_fields {
+				left: 1460px;
+				top: 10px;
+			}
+
+			.box {
+				font-size: 24px;
+				line-height: 24px;
+				width: 120px;
+				height: 68px;
+				padding: 21px;
+			}
+
+			.box .content {
+				font-size: 32px;
+				line-height: 32px;
+			}
+
+			.board,
+			.next_piece,
+			.running_trt {
+				padding: 15px;
+			}
+
+			.board {
+				width: 395px;
+				height: 795px;
+				left: 0;
+				top: 90px;
+			}
+
+			.next_piece {
+				width: 140px;
+				height: 66px;
+				top: 0;
+				left: 0;
+				padding-top: 18px;
+				padding-left: 18px;
+			}
+
+			.running_trt {
+				padding: 15px;
+				left: 0;
+				top: 906px;
+				width: 395px;
+				height: 114px;
+			}
+
+			.score,
+			.runway,
+			.lines,
+			.level,
+			.efficiency,
+			.tetris_rate {
+				left: unset;
+				right: -9px;
+			}
+
+			.score,
+			.runway {
+				top: 90px;
+				width: 284px;
+			}
+
+			.score {
+				top: 0px;
+				height: 158px;
+			}
+
+			.score .content.top {
+				padding-bottom: 0.75em;
+			}
+
+			.runway.transition {
+				top: 191px;
+			}
+
+			.runway.game {
+				top: 292px;
+			}
+
+			.tetris_rate {
+				top: 906px;
+				height: 102px;
+			}
+
+			.tetris_rate .header {
+				padding-bottom: 27px;
+			}
+
+			.efficiency {
+				top: 805px;
+			}
+
+			.lines {
+				top: 393px;
+			}
+
+			.level {
+				top: 494px;
+				width: 80px;
+			}
+
+			.drought {
+				top: 0;
+				left: 164px;
+				height: 66px;
+				padding: 15px 21px 18px 21px;
+				width: 92px;
+			}
+
+			.drought .header {
+				padding-bottom: 0.5em;
+			}
+
+			video {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 1920px;
+				height: 1080px;
+				object-fit: cover;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<video></video>
+			<div id="playing_fields">
+				<div class="box level">
+					<div class="header">LEVEL</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box lines">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box runway game">
+					<div class="header">LV29 RUNWAY</div>
+					<div class="content">0</div>
+				</div>
+
+				<div class="box runway transition">
+					<div class="header">TRANSITION RUNWAY</div>
+					<div class="content">0</div>
+				</div>
+
+				<div class="box score">
+					<div class="header">TOP</div>
+					<div class="content top">0</div>
+					<div class="header">SCORE</div>
+					<div class="content score">0</div>
+				</div>
+
+				<div class="box tetris_rate">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box efficiency">
+					<div class="header">EFF</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box running_trt"></div>
+				<div class="box next_piece"></div>
+
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="content">99</div>
+				</div>
+
+				<div class="box board"></div>
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			const view_meta = new URLSearchParams({
+				video: '1920x1080',
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+		<script type="module">
+			import QueryString from '/js/QueryString.js';
+			import '/views/bg.js';
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
+			import { peerServerOptions } from '/views/constants.js';
+
+			window.onload = function () {
+				const player = new Player(
+					{
+						score: document.querySelector(`.score .content.score`),
+						top: document.querySelector(`.score .content.top`),
+						runway_tr: document.querySelector(`.runway.transition .content`),
+						runway_game: document.querySelector(`.runway.game .content`),
+						level: document.querySelector(`.level .content`),
+						lines: document.querySelector(`.lines .content`),
+						trt: document.querySelector(`.tetris_rate .content`),
+						eff: document.querySelector(`.efficiency .content`),
+						running_trt: document.querySelector(`.running_trt`),
+						preview: document.querySelector(`.next_piece`),
+						field: document.querySelector(`.board`),
+						drought: document.querySelector(`.drought .content`),
+						video: document.querySelector(`video`),
+					},
+					{
+						field_real_border: 12,
+						preview_pixel_size: 4,
+						field_pixel_size: 5,
+						running_trt_dot_size: 5,
+						tetris_sound: 0,
+						reliable_field: 0,
+					}
+				);
+
+				let max_score = 0;
+
+				player.drought_box = document.querySelector(`.drought`);
+				player.runway_tr_box = document.querySelector(`.runway.transition`);
+
+				player.onDroughtStart = () => {
+					console.log('onDroughtStart');
+					player.drought_box.classList.add('active');
+				};
+
+				player.onDroughtEnd = count => {
+					console.log('onDroughtEnd', count);
+					player.drought_box.classList.remove('active');
+				};
+
+				player.onTransition = () => {
+					player.runway_tr_box.querySelector('.header').textContent =
+						'TRANSITION';
+				};
+
+				player.onScore = () => {
+					if (player.getScore() > max_score) {
+						player.dom.top.textContent = max_score = player.getScore();
+					}
+				};
+
+				player.onGameStart = () => {
+					player.runway_tr_box.querySelector('.header').textContent =
+						'TRANSITION RUNWAY';
+					player.runway_tr_box.hidden = false;
+				};
+
+				const API = {
+					frame(player_idx, data) {
+						player.setFrame(data);
+					},
+
+					scoreRecorded() {}, // noop
+					message() {}, // noop
+				};
+
+				const connection = new Connection(null, view_meta);
+
+				connection.onMessage = function (frame) {
+					try {
+						const [method, ...args] = frame;
+
+						API[method].apply(API, args);
+					} catch (e) {
+						console.error(e);
+					}
+				};
+
+				function onFrame(frame, debug) {
+					API.frame(0, frame, debug);
+				}
+
+				let received_time_from_server;
+				let init_time;
+				let peer = null;
+
+				connection.onInit = () => {
+					if (!received_time_from_server) {
+						received_time_from_server = true;
+
+						init_time = connection.start_ts; // use server time
+					}
+
+					if (peer) {
+						peer.destroy();
+						peer = null;
+					}
+
+					peer = new Peer(connection.id, peerServerOptions);
+
+					peer.on('call', call => {
+						const video = document.querySelector('video');
+
+						call.answer(); // assume correct!
+						call.on('stream', remoteStream => {
+							video.srcObject = remoteStream;
+							video.addEventListener(
+								'loadedmetadata',
+								() => {
+									video.play();
+								},
+								{ once: true }
+							);
+						});
+						call.on('error', () => {
+							video.stop();
+							video.srcObject = null;
+						});
+						call.on('close', () => {
+							video.stop();
+							video.srcObject = null;
+						});
+					});
+				};
+			};
+		</script>
+	</body>
+</html>
