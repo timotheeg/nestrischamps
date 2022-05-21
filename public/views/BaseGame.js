@@ -373,7 +373,7 @@ export default class BaseGame {
 		}
 
 		if (!this.pending_topout) {
-			// first frame of potential top out - record top row for later
+			// first frame of potential top out - record top 2 rows for later
 			this.pending_topout = data.field.slice(0, 20);
 			this.pending_topout_start_ts = data.ctime;
 
@@ -383,15 +383,15 @@ export default class BaseGame {
 		if (
 			!this.pending_topout.every((cell, idx) => !(!cell ^ !data.field[idx]))
 		) {
-			// top row has changed, record current top row as potential top out again
+			// top 2 rows have changed, record current top 2 rows as new state of potential top out again
 			this.pending_topout = data.field.slice(0, 20);
 			this.pending_topout_start_ts = data.ctime;
 
 			return false;
 		}
 
-		if (data.ctime - this.pending_topout_start_ts < 500) {
-			// We wait till half a second has passed
+		if (data.ctime - this.pending_topout_start_ts < 1150) {
+			// We wait till 1.150 seconds have elapsed
 			return false;
 		}
 
