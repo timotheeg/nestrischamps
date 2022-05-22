@@ -10,8 +10,57 @@
 			}
 
 			#playing_fields {
-				left: 1460px;
 				top: 10px;
+			}
+
+			#playing_fields.right {
+				left: 1470px;
+			}
+
+			.right .board,
+			.right .running_trt,
+			.right .next_piece {
+				left: 0;
+			}
+
+			.right .drought {
+				left: 164px;
+			}
+
+			.right .score,
+			.right .runway,
+			.right .lines,
+			.right .level,
+			.right .efficiency,
+			.right .tetris_rate {
+				left: unset;
+				right: -9px;
+			}
+
+			#playing_fields.left {
+				left: 450px;
+			}
+
+			.left .board,
+			.left .running_trt,
+			.left .next_piece {
+				left: unset;
+				right: 0;
+			}
+
+			.left .drought {
+				left: unset;
+				right: 164px;
+			}
+
+			.left .score,
+			.left .runway,
+			.left .lines,
+			.left .level,
+			.left .efficiency,
+			.left .tetris_rate {
+				right: unset;
+				left: -9px;
 			}
 
 			.box {
@@ -36,7 +85,6 @@
 			.board {
 				width: 395px;
 				height: 795px;
-				left: 0;
 				top: 90px;
 			}
 
@@ -44,27 +92,15 @@
 				width: 140px;
 				height: 66px;
 				top: 0;
-				left: 0;
 				padding-top: 18px;
 				padding-left: 18px;
 			}
 
 			.running_trt {
 				padding: 15px;
-				left: 0;
 				top: 906px;
 				width: 395px;
 				height: 114px;
-			}
-
-			.score,
-			.runway,
-			.lines,
-			.level,
-			.efficiency,
-			.tetris_rate {
-				left: unset;
-				right: -9px;
 			}
 
 			.score,
@@ -114,7 +150,6 @@
 
 			.drought {
 				top: 0;
-				left: 164px;
 				height: 66px;
 				padding: 15px 21px 18px 21px;
 				width: 92px;
@@ -203,6 +238,12 @@
 			import Connection from '/js/connection.js';
 			import Player from '/views/Player.js';
 			import { peerServerOptions } from '/views/constants.js';
+
+			if (QueryString.get('left') === '1') {
+				document.querySelector('#playing_fields').classList.add('left');
+			} else {
+				document.querySelector('#playing_fields').classList.add('right');
+			}
 
 			window.onload = function () {
 				const player = new Player(
