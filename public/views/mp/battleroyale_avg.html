@@ -2,112 +2,18 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
 		<style>
-			#stream_bg {
-				width: 1920px;
-				height: 1080px;
-			}
-
-			.box .header {
-				width: 100%;
-				text-align: center;
-			}
-
-			.box .value {
-				text-align: left;
-			}
-
 			.player {
-				position: absolute;
-				left: 0;
-				width: 250px;
 				top: 341px;
-			}
-
-			.score,
-			.board {
-				left: 0;
-			}
-
-			.score {
-				top: 133px;
-				width: 198px;
-				height: 50px;
-				padding: 18px 15px;
-				font-size: 24px;
-				line-height: 24px;
-			}
-
-			.score .header {
-				color: #f3ed55;
-				overflow: hidden;
-				padding-bottom: 7px;
-				font-size: 16px;
-				line-height: 20px;
-			}
-
-			.score .value {
-				width: 100%;
-				text-align: center;
-			}
-
-			.board {
-				width: 198px;
-				height: 398px;
-				top: 210px;
-			}
-
-			.board .lines {
-				position: absolute;
-				top: 15px;
-				left: 15px;
-				text-align: left;
-				width: 48px;
-				line-height: 16px;
-				z-index: 1;
-			}
-
-			.board .next_piece {
-				position: absolute;
-				top: 14px;
-				right: 12px;
-				width: 64px;
-				height: 32px;
-				z-index: 2;
-			}
-
-			.running_trt {
-				width: 198px;
-				height: 79px;
-				top: 629px;
-			}
-
-			video.box {
-				top: 0;
-				width: 198px;
-				height: 112px;
-				object-fit: cover;
-			}
-
-			.aligner {
-				display: inline-block;
-				text-align: right;
 			}
 
 			.no-video .player {
 				top: 410px;
 			}
 
-			.no-video .score {
-				top: 0;
-			}
-
-			.no-video .board {
-				top: 77px;
-			}
-
-			.no-video .running_trt {
-				top: 496px;
+			.running_trt {
+				height: 79px;
 			}
 
 			.leaderboard {
@@ -115,39 +21,16 @@
 				left: 11px;
 				width: 1850px;
 				height: 169px;
-				font-size: 24px;
-				line-height: 30px;
-				padding: 21px 24px 15px 24px;
-			}
-
-			.leaderboard .header {
-				padding-bottom: 12px;
-			}
-
-			.leaderboard .value {
-				text-transform: uppercase;
-				columns: 2 auto;
-				column-rule: 1px solid;
-			}
-
-			.entry > * {
-				display: inline-block;
-				vertical-align: top;
-				text-align: right;
 			}
 
 			.entry .name {
-				width: 300px;
+				width: 288px;
 				text-align: center;
 				overflow: hidden;
 			}
 
-			.entry .score2 {
-				width: 175px;
-			}
-
 			.entry .diff {
-				width: 320px;
+				width: 312px;
 				font-size: 8px;
 			}
 		</style>
@@ -218,6 +101,7 @@
 				new Color(255, 165, 0),
 				'#fd0009'
 			);
+			const numberFormatter = new Intl.NumberFormat();
 
 			const players_re = /^[2345678]$/;
 			const player_width = 228;
@@ -294,6 +178,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([0, num_players - 1], [-1, 1], player_idx),
+								format_score: v => numberFormatter.format(v),
 							}
 						);
 
@@ -364,9 +249,8 @@
 
 						this.avg_score = avg(scores);
 
-						this.rank_node.querySelector('.score2').textContent = Math.round(
-							this.avg_score
-						);
+						this.rank_node.querySelector('.score2').textContent =
+							numberFormatter.format(Math.round(this.avg_score));
 						this.rank_node.querySelector('.diff').innerHTML = scores
 							.map(s => `${s}`.padStart(7, '_').replace(/_/g, '&nbsp;'))
 							.join('&nbsp;');

@@ -2,166 +2,39 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
 		<style>
-			#stream_bg {
-				width: 1920px;
-				height: 1080px;
-			}
-
-			.box .header {
-				width: 100%;
-				text-align: center;
-			}
-
-			.box .value {
-				text-align: left;
-			}
-
-			.player {
-				position: absolute;
-				left: 0;
-				width: 250px;
-			}
-
-			.score,
-			.board {
-				left: 0;
-			}
-
-			.score {
-				top: 133px;
-				width: 198px;
-				height: 48px;
-			}
-
-			.score .header {
-				color: #f3ed55;
-				overflow: hidden;
-				padding-bottom: 3px;
-				padding-top: 2px;
-			}
-
-			.score .value {
-				width: 100%;
-				text-align: center;
-				font-size: 20px;
-				line-height: 24px;
-			}
-
-			.board {
-				width: 198px;
-				height: 398px;
-				top: 202px;
-			}
-
-			.board .lines {
-				position: absolute;
-				top: 15px;
-				left: 15px;
-				text-align: left;
-				width: 48px;
-				line-height: 16px;
-				z-index: 1;
-			}
-
-			.board .next_piece {
-				position: absolute;
-				top: 14px;
-				right: 12px;
-				width: 64px;
-				height: 32px;
-				z-index: 2;
-			}
-
-			.running_trt {
-				width: 198px;
-				height: 88px;
-				top: 621px;
-			}
-
-			video.box {
-				top: 0;
-				width: 198px;
-				height: 112px;
-				object-fit: cover;
-			}
-
 			.team {
 				position: absolute;
 				top: 300px;
 			}
 
 			.team-score {
-				width: 419px;
-				height: 576px;
-			}
-
-			.team-score {
 				font-size: 32px;
 				line-height: 48px;
+				width: 419px;
 				height: 45px;
 				top: -66px;
-			}
-
-			.team-score .diff {
-				margin-top: -3px;
-			}
-
-			.aligner {
-				display: inline-block;
-				text-align: right;
 			}
 
 			.no-video .team {
 				top: 370px;
 			}
 
-			.no-video .score {
-				top: 0;
-			}
-
-			.no-video .board {
-				top: 69px;
-			}
-
-			.no-video .running_trt {
-				top: 488px;
-			}
-
 			.leaderboard {
 				top: 20px;
-				left: 673px;
+				left: 672px;
 				width: 528px;
 				height: 169px;
-				font-size: 24px;
-				line-height: 30px;
-				padding-left: 24px;
-				padding-right: 21spx;
-			}
-
-			.leaderboard .header {
-				padding-bottom: 10px;
 			}
 
 			.leaderboard .value {
-				text-transform: uppercase;
+				columns: 1 auto;
 			}
 
-			.entry > * {
-				display: inline-block;
-				vertical-align: top;
-				text-align: right;
-			}
-
-			.entry .letter {
-				padding-left: 1em;
-			}
-
-			.entry .score2 {
-				width: 216px;
-			}
-			.entry .diff {
-				width: 240px;
+			.entry .name {
+				width: 24px;
+				text-align: left;
 			}
 		</style>
 	</head>

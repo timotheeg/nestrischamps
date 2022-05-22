@@ -2,79 +2,21 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
 		<style>
-			#stream_bg {
-				width: 1920px;
-				height: 1080px;
-			}
-
-			.box .header {
-				width: 100%;
-				text-align: center;
-				font-size: 16px;
-				line-height: 26px;
-				padding-bottom: 4px;
-			}
-
-			.box .value {
-				text-align: left;
-				font-size: 16px;
-				line-height: 20px;
-			}
-
-			.player {
-				position: absolute;
-				left: 0;
-				width: 250px;
-			}
-
-			.score,
-			.board {
-				left: 0;
-			}
-
 			.score {
+				top: 0;
 				width: 229px;
-				height: 59px;
 				margin-left: -16px;
 			}
 
-			.score .header {
-				color: #f3ed55;
-				overflow: hidden;
-				padding-top: 1px;
-			}
-
 			.score .value {
-				width: 100%;
-				text-align: center;
 				font-size: 24px;
 				line-height: 28px;
 			}
 
 			.board {
-				width: 198px;
-				height: 398px;
-				top: 80px;
-			}
-
-			.board .lines {
-				position: absolute;
-				top: 15px;
-				left: 15px;
-				text-align: left;
-				width: 48px;
-				line-height: 16px;
-				z-index: 1;
-			}
-
-			.board .next_piece {
-				position: absolute;
-				top: 14px;
-				right: 12px;
-				width: 64px;
-				height: 32px;
-				z-index: 2;
+				top: 77px;
 			}
 
 			.player.p2 {
@@ -85,27 +27,13 @@
 				top: 20px;
 				left: 1022px;
 				width: 850px;
-				height: 600px;
+				height: 608px;
+				font-size: 16px;
+				line-height: 24px;
+				padding: 18px;
 			}
 
-			.leaderboard .header {
-				padding-bottom: 10px;
-			}
-
-			.leaderboard .value {
-				line-height: 25px;
-				text-transform: uppercase;
-				columns: 2 auto;
-				column-rule: 1px solid;
-			}
-
-			.entry > * {
-				display: inline-block;
-				vertical-align: top;
-			}
-
-			.rank {
-				text-align: right;
+			.entry .rank {
 				width: 32px;
 				color: #29dcf1;
 			}
@@ -122,14 +50,11 @@
 				color: #736122;
 			}
 
-			.name {
-				text-align: center;
+			.entry .name {
 				width: 208px;
-				overflow: hidden;
 			}
 
-			.best {
-				text-align: right;
+			.entry .best {
 				width: 144px;
 				color: #01ce0a;
 			}
@@ -199,7 +124,7 @@
 					.sort((p1, p2) => {
 						return p2.score - p1.score;
 					})
-					.slice(0, 64)
+					.slice(0, 48)
 					.forEach((item, idx) => {
 						// Update score
 						item.node.querySelector('.rank').textContent = idx + 1;
