@@ -988,7 +988,7 @@ export default class Player {
 		// show the current tetris rate baseline
 		// always vertically centered on the line clear event dot
 		pixel_size = pixel_size_baseline;
-		max_pixels = Math.floor(ctx.canvas.width / (pixel_size + 1));
+		max_pixels = Math.ceil(ctx.canvas.width / (pixel_size + 1));
 		y_scale = (ctx.canvas.height - pixel_size_line_clear) / pixel_size;
 
 		const pos_y = Math.round(
