@@ -195,6 +195,7 @@
 			const stream_bg = document.querySelector('#stream_bg');
 			const player_template = document.getElementById('player');
 			const players = [];
+			const numberFormatter = new Intl.NumberFormat();
 
 			// TODO create a team class like in the pairs layout
 
@@ -234,8 +235,10 @@
 
 				const diff = Math.abs(team1_score - team2_score);
 
-				team1_node.querySelector('.sum').textContent = team1_score;
-				team2_node.querySelector('.sum').textContent = team2_score;
+				team1_node.querySelector('.sum').textContent =
+					numberFormatter.format(team1_score);
+				team2_node.querySelector('.sum').textContent =
+					numberFormatter.format(team2_score);
 
 				const team1_diff_node = team1_node.querySelector('.diff');
 				const team2_diff_node = team2_node.querySelector('.diff');
@@ -243,8 +246,8 @@
 				const green = '#0eff0e';
 				const red = '#fd0009';
 
-				team1_diff_node.textContent = diff;
-				team2_diff_node.textContent = diff;
+				team1_diff_node.textContent = numberFormatter.format(diff);
+				team2_diff_node.textContent = numberFormatter.format(diff);
 
 				team1_diff_node.style.color = team1_score >= team2_score ? green : red;
 				team2_diff_node.style.color = team2_score >= team1_score ? green : red;
@@ -306,6 +309,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([0, 1], [-1, 1], team_idx),
+								format_score: v => numberFormatter.format(v),
 							}
 						);
 
