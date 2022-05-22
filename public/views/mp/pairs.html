@@ -130,13 +130,13 @@
 
 			.leaderboard {
 				top: 20px;
-				left: 715px;
-				width: 450px;
+				left: 673px;
+				width: 528px;
 				height: 169px;
 				font-size: 24px;
 				line-height: 30px;
-				padding-left: 30px;
-				padding-right: 20px;
+				padding-left: 24px;
+				padding-right: 21spx;
 			}
 
 			.leaderboard .header {
@@ -158,10 +158,10 @@
 			}
 
 			.entry .score2 {
-				width: 175px;
+				width: 216px;
 			}
 			.entry .diff {
-				width: 195px;
+				width: 240px;
 			}
 		</style>
 	</head>
@@ -240,6 +240,7 @@
 				new Color(255, 165, 0),
 				'#fd0009'
 			);
+			const numberFormatter = new Intl.NumberFormat();
 
 			function updateDiffs() {
 				teams
@@ -259,7 +260,8 @@
 
 						if (idx > 0) {
 							const diff = team.score - teams[idx - 1].score;
-							team.rank_node.querySelector('.diff').textContent = `${diff}`;
+							team.rank_node.querySelector('.diff').textContent =
+								numberFormatter.format(diff);
 						} else {
 							team.rank_node.querySelector('.diff').textContent = '';
 						}
@@ -297,8 +299,10 @@
 						(acc, player) => acc + player.getScore(),
 						0
 					);
-					this.node.querySelector('.aligner .sum').textContent = this.score;
-					this.rank_node.querySelector('.score2').textContent = this.score;
+					this.node.querySelector('.aligner .sum').textContent =
+						numberFormatter.format(this.score);
+					this.rank_node.querySelector('.score2').textContent =
+						numberFormatter.format(this.score);
 					updateDiffs();
 				}
 			}
@@ -307,7 +311,7 @@
 			const pair_width = 447;
 			const players = [];
 
-			let num_teams = 2;
+			let num_teams = 4;
 
 			if (pairs_re.test(QueryString.get('pairs'))) {
 				num_teams = parseInt(QueryString.get('pairs'), 10);
@@ -375,6 +379,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([0, num_teams - 1], [-1, 1], team_idx),
+								format_score: v => numberFormatter.format(v),
 							}
 						);
 
