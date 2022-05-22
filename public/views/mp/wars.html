@@ -11,7 +11,7 @@
 			.box .header {
 				width: 100%;
 				text-align: center;
-				font-size: 20px;
+				font-size: 16px;
 				line-height: 26px;
 				padding-bottom: 4px;
 			}
@@ -48,8 +48,8 @@
 			.score .value {
 				width: 100%;
 				text-align: center;
-				font-size: 28px;
-				line-height: 32px;
+				font-size: 24px;
+				line-height: 28px;
 			}
 
 			.board {
@@ -83,8 +83,8 @@
 
 			.leaderboard {
 				top: 20px;
-				left: 1030px;
-				width: 830px;
+				left: 1022px;
+				width: 850px;
 				height: 600px;
 			}
 
@@ -93,7 +93,7 @@
 			}
 
 			.leaderboard .value {
-				line-height: 22px;
+				line-height: 25px;
 				text-transform: uppercase;
 				columns: 2 auto;
 				column-rule: 1px solid;
@@ -106,7 +106,7 @@
 
 			.rank {
 				text-align: right;
-				width: 40px;
+				width: 32px;
 				color: #29dcf1;
 			}
 
@@ -124,13 +124,13 @@
 
 			.name {
 				text-align: center;
-				width: 210px;
+				width: 208px;
 				overflow: hidden;
 			}
 
 			.best {
 				text-align: right;
-				width: 114px;
+				width: 144px;
 				color: #01ce0a;
 			}
 		</style>
@@ -158,9 +158,9 @@
 
 			<template id="rank">
 				<div class="entry">
-					<span class="rank">99</span>
-					<span class="name">yobi9</span>
-					<span class="best">1197901</span>
+					<span class="rank">1</span>
+					<span class="name">-</span>
+					<span class="best">0</span>
 				</div>
 			</template>
 		</div>
@@ -186,6 +186,7 @@
 			const rank_template = document.getElementById('rank');
 			const leaderboard_values = document.querySelector('.leaderboard  .value');
 			const players = [];
+			const numberFormatter = new Intl.NumberFormat();
 
 			let connection;
 
@@ -194,11 +195,6 @@
 			function sortTopScores() {
 				// super inefficient destroy-rebuild sorting, but I'll optimize later if needed
 				// considering scores areupdated one at a time, we could move the nodes without recreating everything
-
-				for (let i = leaderboard_values.children.length; i--; ) {
-					leaderboard_values.children[i].remove();
-				}
-
 				Object.values(topScores)
 					.sort((p1, p2) => {
 						return p2.score - p1.score;
@@ -249,7 +245,8 @@
 
 				if (new_score > old_score) {
 					topScore.score = new_score;
-					topScore.node.querySelector('.best').textContent = new_score;
+					topScore.node.querySelector('.best').textContent =
+						numberFormatter.format(new_score);
 					sortTopScores();
 				}
 			}
@@ -290,6 +287,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([1, 4], [-1, 1], col_num),
+								format_score: v => numberFormatter.format(v),
 							}
 						);
 
