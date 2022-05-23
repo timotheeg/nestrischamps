@@ -92,7 +92,6 @@ const BORDER_BLOCKS = [
 
 const PASSTHROUGH_HANDLERS = [
 	'onGameStart',
-	'onTransition',
 	'onDroughtStart',
 	'onDroughtEnd',
 	'onKillScreen',
@@ -400,6 +399,7 @@ export default class Player {
 		this._renderScore = this._renderScore.bind(this);
 		this._renderLevel = this._renderLevel.bind(this);
 		this._renderLines = this._renderLines.bind(this);
+		this._renderTransition = this._renderTransition.bind(this);
 		this._renderPiece = this._renderPiece.bind(this);
 		this._renderNewGame = this._renderNewGame.bind(this);
 		this._renderGameOver = this._renderGameOver.bind(this);
@@ -659,6 +659,7 @@ export default class Player {
 		this.game.onPiece = this._renderPiece;
 		this.game.onLines = this._renderLines;
 		this.game.onLevel = this._renderLevel;
+		this.game.onTransition = this._renderTransition;
 		this.game.onNewGame = this._renderNewGame;
 		this.game.onValidFrame = this._renderValidFrame;
 		this.game.onTetris = this._doTetris;
@@ -786,6 +787,17 @@ export default class Player {
 		);
 
 		this.onScore(frame);
+	}
+
+	_renderTransition(frame) {
+		const point_evt = peek(frame.points);
+
+		this.dom.runway_tr.textContent = this.options.format_score(
+			point_evt.score.transition,
+			6
+		);
+
+		this.onTransition(frame);
 	}
 
 	_renderLines(frame) {
