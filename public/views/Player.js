@@ -190,7 +190,7 @@ const DEFAULT_OPTIONS = {
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
-	tetris_flash: 1,
+	tetris_flash: QueryString.get('tetris_flash') !== '0',
 	tetris_sound: 1,
 	stereo: 0, // [-1, 1] representing left:-1 to right:1
 	reliable_field: 1,
