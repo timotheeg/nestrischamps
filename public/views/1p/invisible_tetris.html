@@ -102,6 +102,7 @@
 			let game_id;
 			let top_empty;
 			let clear_animation_remaining_frames;
+			let clear_animation_covered;
 
 			function reset() {
 				combined_board = Array(20)
@@ -403,7 +404,7 @@
 						if (!new_top_empty && last_board && last_board.num_block == 4) {
 							// we only settle pieces, not animation frames
 							// check if last_board's piece was below 16
-							last_top_idx = last_board
+							let last_top_idx = last_board
 								.map((row, idx) => (row.some(cell => cell > 0) ? idx : -1))
 								.find(v => v > -1);
 
