@@ -8,16 +8,17 @@ html {
 #nestris_ui {
 	position: absolute;
 	overflow: hidden;
+	--nes_pixel_size: 3;
 	top: 0;
 	left: 0;
-	width: 768px;
-	height: 672px;
+	width: calc(256px * var(--nes_pixel_size));
+	height: calc(224px * var(--nes_pixel_size));
 	background: url('/views/stencil_bg.3x.png');
 	background-repeat: no-repeat;
-	background-size: 768px 672px;
+	background-size: calc(256px * var(--nes_pixel_size))
+		calc(224px * var(--nes_pixel_size));
 	transform-origin: top left;
 	transform: scale(1.0714285714285714);
-	--nes_pixel_size: 3;
 }
 
 #nestris_ui label {
