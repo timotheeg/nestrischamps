@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/stencil.css" />
+		<link rel="stylesheet" type="text/css" href="/views/stencilplus.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			#nestris_ui {
+				background: url('/views/stencil_champs_bg.5x.png');
+				--nes_pixel_size: 5;
+				transform: scale(0.9642857142857143);
+			}
+
+			#piece_stats .piece {
+				background: url(/views/pieces_sprites.5x.png);
+			}
+
+			#playing_fields {
+				left: 1234px;
+				width: 686px;
+				height: 1080px;
+			}
+
+			video {
+				width: 686px;
+				height: 579px;
+			}
+
+			.running_trt {
+				width: 654px;
+				height: 200px;
+				top: 850px;
+				left: 5px;
+			}
+
+			.running_trt .value {
+				width: 654px;
+				height: 177px;
+			}
+
+			.box.timer .content {
+				font-size: 32px;
+				line-height: 48px;
+			}
+
+			.timer {
+				display: none; /**/
+				top: 582px;
+				left: 5px;
+				width: 645px;
+				height: 44px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="nestris_ui">
+				<label class="value lines">000</label>
+				<label class="value top">000000</label>
+				<label class="value score">000000</label>
+				<label class="value level">00</label>
+				<label class="value eff">000</label>
+				<label class="value trt">000</label>
+				<label class="value runway">00000</label>
+				<label class="value projection">00000</label>
+
+				<label class="value stat T">000</label>
+				<label class="value stat J">000</label>
+				<label class="value stat Z">000</label>
+				<label class="value stat O">000</label>
+				<label class="value stat S">000</label>
+				<label class="value stat L">000</label>
+				<label class="value stat I">000</label>
+
+				<div id="piece_stats" class="l0">
+					<p class="piece T"></p>
+					<p class="piece J"></p>
+					<p class="piece Z"></p>
+					<p class="piece O"></p>
+					<p class="piece S"></p>
+					<p class="piece L"></p>
+					<p class="piece I"></p>
+				</div>
+
+				<div class="board"></div>
+				<div class="next_piece"></div>
+
+				<div class="drought">DRT <span class="value">000</span></div>
+			</div>
+
+			<div id="playing_fields">
+				<video></video>
+
+				<div class="box timer">
+					<div class="content">02:00:00</div>
+				</div>
+
+				<div class="box running_trt">
+					<div class="header">RUNNING TETRIS RATE</div>
+					<div class="value bounded"></div>
+				</div>
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			const view_meta = new URLSearchParams({
+				video: '1280x720',
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+		<script type="module">
+			import QueryString from '/js/QueryString.js';
+			import BinaryFrame from '/js/BinaryFrame.js';
+			import Connection from '/js/connection.js';
+			import Player from '/views/Player.js';
+			import { PIECES, peerServerOptions } from '/views/constants.js';
+			import { peek } from '/views/utils.js';
+
+			const init_time = Date.now();
+
+			if (QueryString.get('bg') === '0') {
+				document.querySelector(`#stream_bg`).style.background = 'transparent';
+			}
+
+			function format_score(v) {
+				const tail = `${v % 100000}`.padStart(5, '0');
+				const head = Math.floor(v / 100000);
+				const v_str = `${head.toString(16).toUpperCase()}${tail}`;
+
+				return v_str.padStart(6, '0');
+			}
+
+			function getPB() {
+				let m;
+
+				if (
+					(m = location.pathname.match(/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/))
+				) {
+					fetch(
+						`${location.protocol}//${location.host}/stats/pb/${m[1]}?since=${init_time}`,
+						{
+							cache: 'no-cache',
+							headers: {
+								'Cache-Control': 'no-cache',
+							},
+							// mode: 'no-cors'
+						}
+					)
+						.then(response => response.json())
+						.catch(err => 0)
+						.then(pb => {
+							custom_doms.pb.textContent = format_score(pb || 0);
+						});
+				}
+			}
+
+			function updateLevel() {
+				piece_stats.className = '';
+				piece_stats.classList.add(`l${(player.game?.data?.level || 0) % 10}`);
+			}
+
+			const player = new Player(
+				{
+					lines: document.querySelector(`label.lines`),
+					score: document.querySelector(`label.score`),
+					level: document.querySelector(`label.level`),
+					runway_game: document.querySelector(`label.runway`),
+					trt: document.querySelector(`label.trt`),
+					running_trt: document.querySelector(`.running_trt .value`),
+					preview: document.querySelector(`.next_piece`),
+					field: document.querySelector(`.board`),
+					drought: document.querySelector(`.drought .value`),
+
+					eff: document.querySelector(`label.eff`),
+					projection: document.querySelector(`label.projection`),
+				},
+				{
+					field_pixel_size: 5,
+					preview_pixel_size: 5,
+					running_trt_dot_size: 6,
+					tetris_flash: 0,
+					tetris_sound: 0,
+					format_score,
+					format_drought: v => v.toString().padStart(3, '0'),
+				}
+			);
+
+			const custom_doms = {
+				pb: document.querySelector(`label.top`),
+				drought_box: document.querySelector(`.drought`),
+				piece_stats: {},
+			};
+
+			custom_doms.drought_box.hidden = true;
+
+			PIECES.forEach(p => {
+				custom_doms.piece_stats[p] = document.querySelector(`label.${p}`);
+			});
+
+			player.onDroughtStart = () => {
+				console.log('onDroughtStart');
+				custom_doms.drought_box.hidden = false;
+			};
+
+			player.onDroughtEnd = count => {
+				console.log('onDroughtEnd', count);
+				custom_doms.drought_box.hidden = true;
+			};
+
+			player.onGameStart = () => {
+				custom_doms.drought_box.hidden = true;
+				updateLevel();
+				getPB();
+			};
+
+			player.onPiece = frame => {
+				if (frame.pieces.length <= 0) return;
+
+				const piece_stats = peek(frame.pieces).pieces;
+
+				PIECES.forEach(p => {
+					custom_doms.piece_stats[p].textContent = piece_stats[p].count
+						.toString()
+						.padStart(3, '0');
+				});
+			};
+
+			player.onLevel = updateLevel;
+
+			getPB();
+
+			// timer management
+			const ALLOWED_TIME = 2 * 60 * 60;
+			const timer_el = document.querySelector(`.timer .content`);
+			let start_time = 0;
+			let timer = null;
+
+			function startTimer(allowed) {
+				document.querySelector('.timer').style.display = 'block';
+
+				timer = clearInterval(timer);
+				start_time = Date.now();
+
+				const allowed_time = allowed || ALLOWED_TIME;
+
+				timer = setInterval(() => {
+					const elapsed = Math.floor((Date.now() - start_time) / 1000);
+					let remainder = allowed_time - elapsed;
+
+					if (remainder < 0) {
+						remainder = 0;
+						timer = clearInterval(timer);
+					}
+
+					const hours = Math.floor(remainder / (60 * 60));
+
+					remainder = remainder % (60 * 60);
+
+					const minutes = Math.floor(remainder / 60);
+					const seconds = remainder % 60;
+
+					timer_el.textContent =
+						`${hours}`.padStart(2, '0') +
+						':' +
+						`${minutes}`.padStart(2, '0') +
+						':' +
+						`${seconds}`.padStart(2, '0');
+				}, 500);
+			}
+
+			const piece_stats = document.querySelector('#piece_stats');
+
+			const API = {
+				frame(player_num, data) {
+					if (!data) {
+						data = player_num;
+					}
+
+					player.setFrame(data);
+				},
+
+				startTimer(allowed_time) {
+					startTimer(allowed_time);
+				},
+
+				scoreRecorded: getPB,
+
+				message() {}, // noop
+			};
+
+			const connection = new Connection(null, view_meta);
+
+			connection.onMessage = function (frame) {
+				try {
+					const [method, ...args] = frame;
+
+					API[method].apply(API, args);
+				} catch (e) {
+					console.error(e);
+				}
+			};
+
+			function onFrame(frame, debug) {
+				API.frame(1, frame, debug);
+			}
+
+			let peer = null;
+
+			connection.onInit = () => {
+				if (peer) {
+					peer.destroy();
+					peer = null;
+				}
+
+				peer = new Peer(connection.id, peerServerOptions);
+
+				peer.on('call', call => {
+					const video = document.querySelector('video');
+
+					call.answer(); // assume correct!
+					call.on('stream', remoteStream => {
+						video.srcObject = remoteStream;
+						video.addEventListener(
+							'loadedmetadata',
+							() => {
+								video.play();
+							},
+							{ once: true }
+						);
+					});
+					call.on('error', () => {
+						video.stop();
+						video.srcObject = null;
+					});
+					call.on('close', () => {
+						video.stop();
+						video.srcObject = null;
+					});
+				});
+			};
+		</script>
+	</body>
+</html>
