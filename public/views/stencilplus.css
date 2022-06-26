@@ -1,23 +1,23 @@
 #nestris_ui {
-	background: url('/views/stencil_champs_bg.png');
+	background: url('/views/stencil_champs_bg.3x.png');
 }
 
 .eff {
-	top: 392px;
-	left: 448px;
+	top: calc(196px * var(--nes_pixel_size));
+	left: calc(224px * var(--nes_pixel_size));
 }
 
 .trt {
-	top: 368px;
-	left: 448px;
+	top: calc(184px * var(--nes_pixel_size));
+	left: calc(224px * var(--nes_pixel_size));
 }
 
 .runway {
-	top: 46px;
-	left: 32px;
+	top: calc(23px * var(--nes_pixel_size));
+	left: calc(16px * var(--nes_pixel_size));
 }
 
 .projection {
-	top: 82px;
-	left: 32px;
+	top: calc(41px * var(--nes_pixel_size));
+	left: calc(16px * var(--nes_pixel_size));
 }
