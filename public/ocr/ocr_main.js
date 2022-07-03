@@ -29,6 +29,7 @@ const LEVEL_COLORS = [
 const reference_size = [512, 448];
 const reference_locations = {
 	score: { crop: [384, 112, 94, 14], pattern: 'ADDDDD' },
+	score7: { crop: [384, 112, 110, 14], pattern: 'DDDDDDD' },
 	level: { crop: [416, 320, 30, 14], pattern: 'TD' }, // TD, because we only care about start level, which is 29 or lower
 	lines: { crop: [304, 32, 46, 14], pattern: 'DDD' },
 	field_w_borders: { crop: [190, 78, 162, 324] },
@@ -120,6 +121,7 @@ const reference_ui = document.querySelector('#reference_ui'),
 	instructions = document.querySelector('#instructions'),
 	capture_rate = document.querySelector('#capture_rate'),
 	show_parts = document.querySelector('#show_parts'),
+	score7 = document.querySelector('#score7'),
 	focus_alarm = document.querySelector('#focus_alarm'),
 	timer_control = document.querySelector('#timer_control'),
 	start_timer = document.querySelector('#start_timer'),
@@ -470,6 +472,8 @@ video.addEventListener('click', async evt => {
 		console.log(name, 'crop after', crop);
 	});
 
+	config.score7 = false;
+
 	saveConfig(config);
 	trackAndSendFrames();
 
@@ -502,6 +506,33 @@ function onShowPartsChanged() {
 }
 
 show_parts.addEventListener('change', onShowPartsChanged);
+
+function onScore7Changed() {
+	config.score7 = score7.checked;
+
+	const scale6to7 =
+		reference_locations.score7.crop[2] / reference_locations.score.crop[2];
+
+	// assume transition is valid
+	if (config.score7) {
+		config.tasks.score.crop[2] *= scale6to7;
+		config.tasks.score.pattern = reference_locations.score7.pattern;
+	} else {
+		config.tasks.score.crop[2] /= scale6to7;
+		config.tasks.score.pattern = reference_locations.score.pattern;
+	}
+
+	config.tasks.score.crop[2] = Math.round(config.tasks.score.crop[2]);
+
+	// update score input field for width
+	const inputs = document.querySelectorAll(`fieldset.score input`);
+
+	inputs[2].value = config.tasks.score.crop[2];
+
+	resetConfig('score');
+}
+
+score7.addEventListener('change', onScore7Changed);
 
 function onPrivacyChanged() {
 	config.allow_video_feed = !!allow_video_feed.checked;
@@ -981,6 +1012,9 @@ function updateCanvasSizeIfNeeded(canvas, w, h) {
 	if (canvas.width != w || canvas.height != h) {
 		canvas.width = w;
 		canvas.height = h;
+
+		// must restore no smoothing after change of size
+		canvas.getContext('2d', { alpha: false }).imageSmoothingEnabled = false;
 	}
 }
 
@@ -1003,14 +1037,22 @@ function resetConfig(task_name) {
 			task_crop[2] * scale_factor,
 			task_crop[3] * scale_factor
 		);
-		config.tasks[task_name].crop_canvas_ctx = canvas.getContext('2d', {
-			alpha: false,
-		});
-		config.tasks[task_name].crop_canvas_ctx.imageSmoothingEnabled = false;
 	}
 
-	// set the new config
+	// set the new config - this may reset the scale_img size for score
 	game_tracker.setConfig(config);
+
+	if (task_name === 'score') {
+		const canvas = config.tasks.score.scale_canvas_ctx.canvas;
+		const scale_factor = 2;
+		const scale_img = config.tasks.score.scale_img;
+
+		updateCanvasSizeIfNeeded(
+			canvas,
+			scale_img.width * scale_factor,
+			scale_img.height * scale_factor
+		);
+	}
 
 	updateCanvasSizeIfNeeded(
 		config.source_canvas,
@@ -1331,6 +1373,7 @@ function saveConfig(config) {
 		video_feed_device_id: config.video_feed_device_id,
 		brightness: config.brightness,
 		contrast: config.contrast,
+		score7: config.score7,
 		tasks: {},
 	};
 
@@ -1547,6 +1590,7 @@ function trackAndSendFrames() {
 		capture_rate.value = config.frame_rate || default_frame_rate;
 		controls.style.display = 'block';
 
+		score7.checked = config.score7 === true;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
 		privacy.style.display = 'block';

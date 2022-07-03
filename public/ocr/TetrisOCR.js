@@ -41,6 +41,7 @@ function getDigitsWidth(n) {
 // Resize areas based on logical NES pixels (2x for digits)
 const TASK_RESIZE = {
 	score: [getDigitsWidth(6), 14],
+	score7: [getDigitsWidth(7), 14],
 	level: [getDigitsWidth(2), 14],
 	lines: [getDigitsWidth(3), 14],
 	field: [79, 159],
@@ -116,7 +117,12 @@ export default class TetrisOCR extends EventTarget {
 			if (name.length === 1) {
 				resize_tuple = TASK_RESIZE.piece_count;
 			} else {
-				resize_tuple = TASK_RESIZE[name];
+				// special handling for score 6 vs 7 digits
+				if (name === 'score') {
+					resize_tuple = config.score7 ? TASK_RESIZE.score7 : TASK_RESIZE.score;
+				} else {
+					resize_tuple = TASK_RESIZE[name];
+				}
 			}
 
 			task.crop_img = new ImageData(w, h);
