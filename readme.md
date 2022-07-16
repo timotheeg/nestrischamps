@@ -1,6 +1,6 @@
 # NESTrisChamps
 
-NESTrisChamps is a browser-based gamne capture and rendering system for NES classic Tetris.
+NESTrisChamps is a browser-based game capture and rendering system for NES classic Tetris.
 
 It is available online under the domain [`nestrischamps.herokuapp.com`](https://nestrischamps.herokuapp.com)
 
