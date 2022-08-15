@@ -71,20 +71,31 @@
 
 			.name,
 			.tetris_rate,
+			.flag,
 			.drought,
 			.level {
 				padding-top: 18px;
 				padding-bottom: 18px;
-				top: 595px;
+				top: 534px;
 				height: 34px;
 				--offset: 10px;
 				right: var(--offset);
 			}
 
+			.name,
+			.flag {
+				top: 595px;
+			}
+
 			.level,
 			.tetris_rate,
+			.flag,
 			.drought {
 				--offset: 248px;
+			}
+
+			.flag {
+				width: 58px;
 			}
 
 			.name .header {
@@ -103,7 +114,7 @@
 				padding-left: 18px;
 				padding-right: 18px;
 				width: 32px;
-				top: 534px;
+				top: 473px;
 			}
 
 			.tetris_rate .content {
@@ -194,13 +205,24 @@
 			.match.small .projection {
 				display: none;
 			}
+			.match.small .flag {
+				border: 12px solid transparent;
+				border-image-source: url('/views/border_3px.png');
+				border-image-slice: 12 12 12 12;
+				border-image-width: 12px 12px;
+
+				top: 403px;
+				width: 34px;
+				height: 4px;
+				--offset: 238px;
+			}
 			.match.small .name {
 				padding-top: 24px;
 				top: 403px;
-				width: 500px;
+				width: 521px;
 				height: 22px;
 				font-size: 24px;
-				--offset: 300px;
+				--offset: 317px;
 			}
 			.match.small .name .header,
 			.match.small .name .content {
@@ -308,6 +330,7 @@
 						<div class="content">100</div>
 					</div>
 
+					<div class="box flag"></div>
 					<div class="box running_trt"></div>
 
 					<div class="box name">
