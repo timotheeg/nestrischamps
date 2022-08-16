@@ -9,8 +9,31 @@ import {
 // very simple RPC system to allow server to send data to client
 
 let players;
+let playerMap = null;
+
+// Hack for CTWC Das -> allow mapping players to be players 1 and 2 in the renderer
+if (/^[1-9]{2}$/.test(QueryString.get('playermap'))) {
+	playerMap = QueryString.get('playermap')
+		.split('')
+		.reduce((acc, num, idx) => {
+			acc[parseInt(num, 10) - 1] = idx;
+			return acc;
+		}, {});
+}
+
+function getPlayerIndexFromPlayerMap(idx) {
+	if (idx in playerMap) {
+		return playerMap[idx];
+	} else {
+		throw new RangeError('Player index not suported');
+	}
+}
 
 function getPlayer(idx) {
+	if (playerMap) {
+		idx = getPlayerIndexFromPlayerMap(idx);
+	}
+
 	return players[idx];
 }
 
@@ -123,7 +146,7 @@ class TetrisCompetitionAPI {
 		this.first_to = num_games_to_win;
 
 		this.victories.forEach((num, idx) => {
-			this.setVictories(idx, num);
+			this.setVictories(idx, num, true);
 		});
 	}
 
@@ -131,13 +154,21 @@ class TetrisCompetitionAPI {
 		this.setFirstTo(Math.ceil(num_games / 2));
 	}
 
-	setVictories(player_idx, num_victories) {
+	setVictories(player_idx, num_victories, ignorePlayerMap = false) {
+		if (playerMap && !ignorePlayerMap) {
+			player_idx = getPlayerIndexFromPlayerMap(player_idx);
+		}
+
 		this.victories[player_idx] = num_victories;
 
 		this._repaintVictories(player_idx);
 	}
 
 	setWinner(player_idx) {
+		if (playerMap) {
+			player_idx = getPlayerIndexFromPlayerMap(player_idx);
+		}
+
 		players.forEach((player, pidx) => {
 			if (pidx === player_idx) {
 				player.playWinnerAnimation();
@@ -164,9 +195,8 @@ class TetrisCompetitionAPI {
 	}
 
 	_repaintVictories(player_idx) {
-		const player = getPlayer(player_idx);
+		const player = players[player_idx]; // direct access... not great
 		const victories = this.victories[player_idx];
-
 		const hearts = player.dom.hearts;
 
 		if (!hearts || !hearts.childNodes) return;
