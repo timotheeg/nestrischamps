@@ -84,7 +84,7 @@ html {
 }
 
 .running_trt {
-	padding: 12px;
+	--border-size: 12;
 	width: 244px;
 	height: 72px;
 	top: 574px;
