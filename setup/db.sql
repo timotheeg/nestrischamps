@@ -67,8 +67,8 @@ ALTER TABLE sessions ADD CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABL
 
 CREATE INDEX IDX_session_expire ON sessions (expire);
 
-INSERT INTO twitch_users VALUES (1, 'player1', 'player1@nestrischamps.com', 'PLAYER1', '', '', 'Player 1', '', NOW(), NOW());
-INSERT INTO twitch_users VALUES (2, 'player2', 'player2@nestrischamps.com', 'PLAYER2', '', '', 'Player 2', '', NOW(), NOW());
-INSERT INTO twitch_users VALUES (3, 'player3', 'player3@nestrischamps.com', 'PLAYER3', '', '', 'Player 3', '', NOW(), NOW());
-INSERT INTO twitch_users VALUES (4, 'player4', 'player4@nestrischamps.com', 'PLAYER4', '', '', 'Player 4', '', NOW(), NOW());
+INSERT INTO twitch_users VALUES (1, 'player1', 'player1@nestrischamps.com', 'PLAYER1', '', '', 'Player 1', '', NOW(), '', '', '', 'das', NOW(), NOW());
+INSERT INTO twitch_users VALUES (2, 'player2', 'player2@nestrischamps.com', 'PLAYER2', '', '', 'Player 2', '', NOW(), '', '', '', 'das', NOW(), NOW());
+INSERT INTO twitch_users VALUES (3, 'player3', 'player3@nestrischamps.com', 'PLAYER3', '', '', 'Player 3', '', NOW(), '', '', '', 'das', NOW(), NOW());
+INSERT INTO twitch_users VALUES (4, 'player4', 'player4@nestrischamps.com', 'PLAYER4', '', '', 'Player 4', '', NOW(), '', '', '', 'das', NOW(), NOW());
 
