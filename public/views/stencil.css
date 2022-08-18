@@ -233,10 +233,10 @@ html {
 	display: none; /**/
 	top: 388px;
 	left: 5px;
-	width: 411px;
+	width: 410px;
 	text-align: center;
 	height: 29px;
-	padding: 17px;
+	padding: 2px;
 }
 
 .bounded {
@@ -246,7 +246,8 @@ html {
 }
 
 .running_trt {
-	padding: 15px 12px 12px 12px;
+	--border-size: 12;
+	padding: 3px 0 0 0;
 
 	width: 420px;
 	height: 126px;
