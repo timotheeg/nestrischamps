@@ -20,12 +20,12 @@
 }
 
 .score {
+	--border-size: 12;
 	width: 239px;
 	height: 54px;
 	font-size: 24px;
 	line-height: 24px;
-	padding-left: 14px;
-	padding-right: 14px;
+	padding: 3px 2px;
 }
 
 .score > div {
@@ -122,7 +122,7 @@
 }
 
 .running_trt {
-	padding: 12px;
+	--border-size: 12;
 	width: 243px;
 	height: 68px;
 	top: 573px;
@@ -137,8 +137,8 @@
 	position: absolute;
 	width: 64px;
 	height: 32px;
-	right: 13px;
-	top: 15px;
+	right: -2px;
+	top: 0;
 	z-index: 1;
 }
 
