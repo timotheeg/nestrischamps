@@ -5,10 +5,9 @@
 		<link rel="stylesheet" type="text/css" href="/views/stats-boxes.css" />
 		<style>
 			.box {
+				--border-size: 10;
 				border-image-source: url('/views/border.png');
-				border-image-slice: 10 10 10 10 fill;
-				border-image-width: 10px 10px;
-				padding: 12px;
+				padding: 2px;
 			}
 
 			#tetris_rate {
@@ -16,6 +15,8 @@
 				top: 602px;
 				width: 255px;
 				height: 71px;
+				--border-size: 8;
+				padding: 2px 0;
 			}
 
 			#piece_stats {
@@ -97,7 +98,7 @@
 				height: 76px;
 				top: 425px;
 				left: 208px;
-				padding: 12px 10px;
+				padding: 2px 0;
 			}
 
 			#droughts .content {
@@ -173,10 +174,9 @@
 			}
 
 			#tetris_stage {
-				border-image: url('/views/big_border.png');
-				border-image-slice: 16 16 16 16 fill;
-				border-image-width: 16px 16px;
-				padding: 17px;
+				--border-size: 16;
+				border-image-source: url('/views/big_border.png');
+				padding: 1px;
 				left: 440px;
 				top: 93px;
 			}
@@ -184,7 +184,7 @@
 			#score {
 				left: 714px;
 				top: 93px;
-				padding: 12px 10px;
+				padding: 2px 0;
 			}
 
 			#lines {
