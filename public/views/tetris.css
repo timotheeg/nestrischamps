@@ -35,7 +35,7 @@ td {
 
 .box {
 	position: absolute;
-	padding: 15px;
+	padding: 0;
 	height: 40px;
 
 	color: white;
@@ -43,9 +43,14 @@ td {
 	line-height: 20px;
 	text-align: center;
 
+	/* css magic to handle borders 💪 */
+	--border-size: 15;
+	border: solid calc(var(--border-size) * 1px) transparent;
 	border-image-source: url('/views/border_3px.png');
-	border-image-slice: 12 12 12 12 fill;
-	border-image-width: 12px 12px;
+	border-image-slice: var(--border-size) var(--border-size) var(--border-size)
+		var(--border-size) fill;
+	border-image-width: calc(var(--border-size) * 1px)
+		calc(var(--border-size) * 1px);
 }
 
 @keyframes fadeIn {

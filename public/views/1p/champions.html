@@ -65,14 +65,13 @@
 			}
 
 			.board {
-				border-image: url('/views/big_border.png');
-				border-image-slice: 16 16 16 16 fill;
-				border-image-width: 16px 16px;
-				padding: 17px;
+				--border-size: 16;
+				border-image-source: url('/views/big_border.png');
+				padding: 1px; /* because NES pizel size is 3, but border pixel size in the image is 2 */
 				width: 320px;
 				height: 640px;
-				top: 0px;
 
+				top: 0px;
 				left: -450px;
 			}
 
