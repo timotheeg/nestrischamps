@@ -3,83 +3,10 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
+		<link rel="stylesheet" type="text/css" href="/views/ctg2m.css" />
 		<style>
-			.match {
-				position: absolute;
-				left: 640px;
-				top: 8px;
-			}
-
-			.box {
-				line-height: 18px;
-			}
-
-			.running_trt,
-			.runway,
-			.projection {
-				display: none;
-			}
-
-			.score {
-				padding: 18px 15px;
-				height: 49px;
-				line-height: 24px;
-				text-align: center;
-			}
-
-			.score .value {
-				white-space: normal;
-			}
-
-			.score .aligner {
-				display: inline-block;
-			}
-
-			.score .aligner div {
-				text-align: right;
-			}
-
-			.lines,
-			.next_piece {
-				top: 76px;
-				width: 98px;
-				height: 34px;
-				--offset: 129px;
-				right: var(--offset);
-			}
-
-			.lines {
-				padding-top: 18px;
-				padding-bottom: 18px;
-			}
-
-			.next_piece {
-				height: 40px;
-				--offset: 10px;
-			}
-
-			.score,
 			.name {
 				width: 217px;
-			}
-
-			.board {
-				width: 217px;
-				height: 437px;
-				top: 137px;
-			}
-
-			.name,
-			.tetris_rate,
-			.flag,
-			.drought,
-			.level {
-				padding-top: 18px;
-				padding-bottom: 18px;
-				top: 534px;
-				height: 34px;
-				--offset: 10px;
-				right: var(--offset);
 			}
 
 			.name,
@@ -87,138 +14,37 @@
 				top: 595px;
 			}
 
-			.level,
-			.tetris_rate,
-			.flag,
-			.drought {
-				--offset: 248px;
-			}
-
 			.flag {
+				--offset: 248px;
+				right: var(--offset);
 				width: 58px;
 			}
 
-			.name .header {
-				padding: 0;
-			}
-
-			.name .content {
-				padding-top: 1px;
-			}
-
-			.name .content .win {
-				color: #fb0204;
-			}
-
 			.level {
-				padding-left: 18px;
-				padding-right: 18px;
-				width: 32px;
 				top: 473px;
 			}
 
-			.tetris_rate .content {
-				padding: 0;
-			}
-
-			.runway.transition {
-				display: block;
-				--offset: 248px;
-				width: 160px;
-				height: 34px;
-				padding-top: 18px;
-				padding-bottom: 18px;
-			}
-
-			.runway.transition .header {
-				font-size: 16px;
-				line-height: 18px;
-				padding: 0;
-			}
-
-			.runway.transition .content {
-				text-align: center;
-			}
-
-			video {
-				position: absolute;
-				top: 0;
-				width: 386px;
-				height: 662px;
-				padding: 0;
-				object-fit: cover;
-
-				--offset: 254px;
-				right: var(--offset);
-			}
-
-			.separator {
-				position: absolute;
-				background: black;
-				top: 0;
-				width: 26px;
-				height: 665px;
-				left: -13px;
+			.tetris_rate,
+			.drought {
+				top: 534px;
 			}
 
 			/* Below are the styles for small display */
 
-			.match.small {
-				left: 640px;
-				top: 0;
-				transform: scale(0.7366167023554604); /* (720-32)/467/2 */
-			}
-			#match2.small {
-				top: 344px;
-			}
-			.match.small .board {
-				top: 0;
-				--offset: 0;
-				z-index: 7;
-			}
-			.match.small .score {
-				top: 0;
-				--offset: 238px;
-				z-index: 6;
-			}
-			.match.small .next_piece {
-				top: 137px;
-				--offset: 238px;
-				z-index: 4;
-			}
-			.match.small .lines {
-				top: 198px;
-				--offset: 238px;
-				z-index: 3;
-			}
-			.match.small .level {
-				top: 259px;
-				width: 44px;
-				--offset: 238px;
-				z-index: 2;
-			}
-			.match.small .runway.transition {
-				top: 76px;
-				--offset: 238px;
-				z-index: 5;
-			}
-			.match.small .projection {
-				display: none;
-			}
-			.match.small .flag {
-				border: 12px solid transparent;
-				border-image-source: url('/views/border_3px.png');
-				border-image-slice: 12 12 12 12;
-				border-image-width: 12px 12px;
-
+			.match.small .flag,
+			.match.small .name {
 				top: 403px;
-				width: 34px;
-				height: 4px;
+			}
+
+			.match.small .flag {
+				--border-size: 15;
+				border-image-slice: 15 15 15 15;
+
+				height: 34px;
 				--offset: 238px;
 			}
 			.match.small .name {
-				padding-top: 24px;
-				top: 403px;
+				padding-top: 9px;
 				width: 521px;
 				height: 22px;
 				font-size: 24px;
@@ -230,48 +56,6 @@
 			}
 			.match.small .name .header::after {
 				content: '\00a0\00a0\00a0';
-			}
-			.match.small .tetris_rate,
-			.match.small .drought {
-				top: 320px;
-				--offset: 238px;
-				z-index: 1;
-			}
-			.match.small video {
-				top: 0;
-				width: 627px;
-				height: 467px;
-				--offset: 242px;
-			}
-
-			.match.small .separator {
-				height: 467px;
-			}
-
-			/* Magic to have a mirror display 💪 */
-
-			.p2 > * {
-				left: var(--offset);
-			}
-
-			/* Annoying rules for the non-symmetry or lines and next_piece T_T */
-
-			.p2 > .lines {
-				--offset: 10px;
-			}
-
-			.p2 > .next_piece {
-				--offset: 129px;
-			}
-
-			#branding {
-				/* position: absolute;
-				background: orange; /**/
-				opacity: 0.5;
-				width: 1280px;
-				height: 32px;
-				left: 0;
-				top: 688px;
 			}
 		</style>
 	</head>

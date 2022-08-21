@@ -1,0 +1,233 @@
+.match {
+	position: absolute;
+	left: 640px;
+	top: 8px;
+}
+
+.box {
+	line-height: 18px;
+}
+
+.running_trt,
+.runway,
+.projection {
+	display: none;
+}
+
+.score {
+	padding: 6px 3px;
+	height: 49px;
+	line-height: 24px;
+	text-align: center;
+}
+
+.score .value {
+	white-space: normal;
+}
+
+.score .aligner {
+	display: inline-block;
+}
+
+.score .aligner div {
+	text-align: right;
+}
+
+.lines,
+.next_piece {
+	top: 76px;
+	width: 98px;
+	height: 34px;
+	--offset: 129px;
+	right: var(--offset);
+}
+
+.lines {
+	padding: 3px 0;
+}
+
+.next_piece {
+	height: 40px;
+	--offset: 10px;
+}
+
+.score,
+.name {
+	width: 217px;
+}
+
+.board {
+	width: 217px;
+	height: 437px;
+	top: 137px;
+}
+
+.name,
+.tetris_rate,
+.drought,
+.level {
+	padding: 3px 0;
+	top: 595px;
+	height: 34px;
+	--offset: 10px;
+	right: var(--offset);
+}
+
+.level,
+.tetris_rate,
+.drought {
+	--offset: 248px;
+}
+
+.name .header {
+	padding: 0;
+}
+
+.name .content {
+	padding-top: 1px;
+}
+
+.name .content .win {
+	color: #fb0204;
+}
+
+.level {
+	padding: 3px;
+	width: 32px;
+	top: 534px;
+}
+
+.tetris_rate .content {
+	padding: 0;
+}
+
+.runway.transition {
+	display: block;
+	--offset: 248px;
+	width: 160px;
+	height: 34px;
+	padding: 3px 0;
+}
+
+.runway.transition .header {
+	font-size: 16px;
+	line-height: 18px;
+	padding: 0;
+}
+
+.runway.transition .content {
+	text-align: center;
+}
+
+video {
+	position: absolute;
+	top: 0;
+	width: 386px;
+	height: 662px;
+	padding: 0;
+	object-fit: cover;
+
+	--offset: 254px;
+	right: var(--offset);
+}
+
+.separator {
+	position: absolute;
+	background: black;
+	top: 0;
+	width: 26px;
+	height: 665px;
+	left: -13px;
+}
+
+/* Below are the styles for small display */
+
+.match.small {
+	left: 640px;
+	top: 0;
+	transform: scale(0.7366167023554604); /* (720-32)/467/2 */
+}
+#match2.small {
+	top: 344px;
+}
+.match.small .board {
+	top: 0;
+	--offset: 0;
+	z-index: 7;
+}
+.match.small .score {
+	top: 0;
+	--offset: 238px;
+	z-index: 6;
+}
+.match.small .next_piece {
+	top: 137px;
+	--offset: 238px;
+	z-index: 4;
+}
+.match.small .lines {
+	top: 198px;
+	--offset: 238px;
+	z-index: 3;
+}
+.match.small .level {
+	top: 259px;
+	width: 44px;
+	--offset: 238px;
+	z-index: 2;
+}
+.match.small .runway.transition {
+	top: 76px;
+	--offset: 238px;
+	z-index: 5;
+}
+.match.small .projection {
+	display: none;
+}
+.match.small .name {
+	top: 397px;
+	width: 400px;
+	--offset: 394px;
+}
+.match.small .tetris_rate,
+.match.small .drought {
+	top: 320px;
+	--offset: 238px;
+	z-index: 1;
+}
+.match.small video {
+	top: 0;
+	width: 627px;
+	height: 467px;
+	--offset: 242px;
+}
+
+.match.small .separator {
+	height: 467px;
+}
+
+/* Magic to have a mirror display 💪 */
+
+.p2 > * {
+	left: var(--offset);
+}
+
+/* Annoying rules for the non-symmetry or lines and next_piece T_T */
+
+.p2 > .lines {
+	--offset: 10px;
+}
+
+.p2 > .next_piece {
+	--offset: 129px;
+}
+
+#branding {
+	/* position: absolute;
+    background: orange; /**/
+	opacity: 0.5;
+	width: 1280px;
+	height: 32px;
+	left: 0;
+	top: 688px;
+}
