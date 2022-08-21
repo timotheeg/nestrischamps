@@ -574,6 +574,12 @@
 					competition.computeScoreDifferentials(match_players);
 				};
 			});
+
+			// layout starts in 2 matches view
+			competition.API.setMatch(null);
+
+			// expose API into window for debugging
+			window._NTC_API = competition.API;
 		</script>
 	</body>
 </html>
