@@ -166,20 +166,15 @@ class MatchRoom extends Room {
 
 			const view_meta = this.getViewMeta();
 
-			if (this.state.concurrent_2_matches === view_meta.concurrent_2_matches) {
-				if (this.state.concurrent_2_matches) {
-					connection.send(['setMatch', this.state.selected_match]);
-				}
-			} else {
+			if (this.state.concurrent_2_matches !== view_meta.concurrent_2_matches) {
 				this.state.concurrent_2_matches = view_meta.concurrent_2_matches;
-				this.state.selected_match = undefined;
-
-				if (this.state.concurrent_2_matches) {
-					connection.send(['setMatch', this.state.selected_match]);
-				}
-
+				this.state.selected_match = null;
 				this.sendStateToAdmin();
 			}
+		}
+
+		if (this.state.concurrent_2_matches) {
+			connection.send(['setMatch', this.state.selected_match]);
 		}
 
 		// do a room state dump for this new view
