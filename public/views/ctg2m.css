@@ -79,6 +79,13 @@
 	--offset: 248px;
 }
 
+.level .header,
+.tetris_rate .header,
+.drought .header,
+.eff .header {
+	padding-bottom: 0;
+}
+
 .name .header {
 	padding: 0;
 }
