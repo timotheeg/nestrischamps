@@ -66,7 +66,7 @@ html {
 .level,
 .tetris_rate,
 .efficiency {
-	padding-left: 18px;
+	padding-left: 3px;
 	left: -115px;
 }
 
@@ -125,11 +125,12 @@ html {
 }
 
 .name {
+	--border-size: 12;
+	padding: 3px 0 1px 0;
 	width: 722px;
 	height: 20px;
 	left: -373px;
 	top: 669px;
-	padding: 16px 12px;
 }
 
 .name .wins {
@@ -150,7 +151,7 @@ html {
 }
 
 .running_trt {
-	padding: 12px;
+	--border-size: 12;
 	width: 243px;
 	height: 71px;
 	top: 583px;
