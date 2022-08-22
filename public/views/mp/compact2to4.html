@@ -39,8 +39,15 @@
 			}
 
 			.board {
-				padding: 13px;
+				--border-size: 12;
+				padding: 1px;
 				top: 59px;
+			}
+
+			.board .level {
+				top: 4px;
+				left: 4px;
+				line-height: 16px;
 			}
 
 			.runway,
@@ -55,10 +62,10 @@
 			}
 
 			.name {
+				--border-size: 12;
 				width: 239px;
 				height: 37px;
 				top: 628px;
-				padding: 12px;
 			}
 
 			.hearts {
@@ -73,9 +80,10 @@
 			.tetris_rate,
 			.eff,
 			.drought {
+				--border-size: 12;
 				width: 47px;
 				left: 251px;
-				padding: 15px 14px;
+				padding: 3px 2px;
 			}
 
 			.tetris_rate {
@@ -104,8 +112,8 @@
 			}
 
 			.board .next_piece {
-				right: 12px;
-				top: 14px;
+				right: 1px;
+				top: 3px;
 			}
 
 			#branding {
@@ -294,7 +302,6 @@
 						video: player_node.querySelector('video'),
 					},
 					{
-						field_real_border: 13,
 						preview_pixel_size: 2,
 						preview_align: 'tr',
 						stereo: translate([0, num_players - 1], [-1, 1], players.length),

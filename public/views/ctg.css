@@ -1,0 +1,193 @@
+#layout_skeletton {
+	position: absolute;
+	width: 1280px;
+	height: 720px;
+	overflow: hidden;
+	background: url(/views/ctct_bg.png);
+}
+
+.no-border {
+	background: black;
+	border-image-source: none;
+	border-image-width: 0 0;
+	padding: 2px 0 0 0;
+	height: 50px;
+	font-size: 22px;
+	line-height: 26px;
+}
+
+.no-border .header {
+	font-size: 17px;
+	line-height: 24px;
+}
+
+.tetris_rate,
+.score,
+.runway,
+.lines,
+.level,
+.board,
+.drought,
+.name,
+.next_piece {
+	border-width: 0;
+}
+
+.level .header,
+.tetris_rate .header,
+.drought .header,
+.eff .header {
+	padding-bottom: 0;
+}
+
+.board {
+	padding: 3px;
+	width: 217px;
+	height: 437px;
+	top: 145px;
+	--offset: 23px;
+}
+
+.runway,
+.projection,
+.running_trt {
+	display: none;
+}
+
+.tetris_rate,
+.drought,
+.level {
+	top: 603px;
+	width: 80px;
+	--offset: 261px;
+	right: var(--offset);
+}
+
+.tetris_rate .content {
+	padding: 0;
+}
+
+.level {
+	top: 532px;
+}
+
+.lines {
+	top: 77px;
+	padding-left: 3px;
+	width: 108px;
+	--offset: 135px;
+	right: var(--offset);
+}
+
+.lines .header {
+	line-height: 24px;
+}
+
+.lines.p2 {
+	left: 23px;
+}
+
+.next_piece {
+	width: 103px;
+	height: 53px;
+	top: 77px;
+	right: 23px;
+	padding-top: 0;
+}
+
+.next_piece.p2 {
+	left: 143px;
+}
+
+.score {
+	padding-top: 5px;
+	height: 48px;
+	width: 223px;
+	top: 15px;
+	--offset: 23px;
+	text-align: center;
+}
+
+.score .aligner {
+	display: inline-block;
+}
+
+.score .aligner div {
+	text-align: right;
+}
+
+.score .header {
+	font-size: 22px;
+	line-height: 22px;
+}
+
+.score .value {
+	padding: 0;
+	text-align: center;
+	white-space: normal;
+}
+
+.name {
+	--offset: 23px;
+	top: 603px;
+	width: 223px;
+	height: 53px;
+}
+
+.name .header {
+	padding: 0 0 0 3px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.name .hearts {
+	position: static;
+	font-size: 24px;
+	width: auto;
+	font-size: 22px;
+	line-height: 26px;
+	padding-top: 1px;
+}
+
+.runway.transition {
+	display: block;
+	width: 172px;
+	top: 15px;
+	--offset: 261px;
+	right: var(--offset);
+}
+
+.runway.transition .header {
+	padding: 0;
+}
+
+.runway.transition .content {
+	text-align: center;
+}
+
+.player_vid {
+	position: absolute;
+	top: 11px;
+	width: 385px;
+	height: 662px;
+	object-fit: cover;
+}
+
+.player_vid.p1 {
+	left: 0;
+}
+
+.player_vid.p2 {
+	right: 0;
+}
+
+.handcam {
+	position: absolute;
+	top: 520px;
+	width: 167px;
+	height: 121px;
+	object-fit: cover;
+
+	--offset: 344px;
+	right: var(--offset);
+}

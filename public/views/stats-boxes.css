@@ -12,11 +12,10 @@
 .box {
 	width: 105px;
 	height: 41px;
-	padding: 10px;
+	padding: 2px;
 
-	border-image: url('/views/border_no_black.png');
-	border-image-slice: 8 8 8 8 fill;
-	border-image-width: 8px 8px;
+	--border-size: 8;
+	border-image-source: url('/views/border_no_black.png');
 }
 
 i {
@@ -47,8 +46,8 @@ i {
 	top: 201px;
 	width: 238px;
 	height: 110px;
-	padding-right: 8px;
-	padding-left: 8px;
+	padding-right: 0;
+	padding-left: 0;
 }
 
 #runway {
@@ -82,7 +81,7 @@ i {
 	top: 6px;
 	width: 124px;
 	height: 73px;
-	padding: 10px 8px;
+	padding: 2px 0;
 }
 
 #score .header {
@@ -108,7 +107,7 @@ i {
 	top: 604px;
 	width: 241px;
 	height: 90px;
-	padding: 10px 8px;
+	padding: 2px 0;
 }
 
 #droughts .header {
@@ -358,7 +357,7 @@ i {
 	height: 73px;
 	top: 6px;
 	left: 904px;
-	padding: 10px 8px;
+	padding: 2px 0;
 }
 
 #next_piece .header {
@@ -370,7 +369,7 @@ i {
 	left: 1021px;
 	width: 238px;
 	height: 132px;
-	padding: 8px;
+	padding: 0;
 }
 
 #video video {

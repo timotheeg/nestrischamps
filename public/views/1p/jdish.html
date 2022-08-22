@@ -68,7 +68,7 @@
 				line-height: 24px;
 				width: 120px;
 				height: 68px;
-				padding: 21px;
+				padding: 6px;
 			}
 
 			.box .content {
@@ -79,10 +79,12 @@
 			.board,
 			.next_piece,
 			.running_trt {
-				padding: 15px;
+				padding: 0;
 			}
 
 			.board {
+				--border-size: 12;
+				padding: 3px;
 				width: 395px;
 				height: 795px;
 				top: 90px;
@@ -92,12 +94,12 @@
 				width: 140px;
 				height: 66px;
 				top: 0;
-				padding-top: 18px;
-				padding-left: 18px;
+				padding-top: 3px;
+				padding-left: 3px;
 			}
 
 			.running_trt {
-				padding: 15px;
+				--border-size: 15;
 				top: 906px;
 				width: 395px;
 				height: 114px;
@@ -265,7 +267,6 @@
 						video: document.querySelector(`video`),
 					},
 					{
-						field_real_border: 12,
 						preview_pixel_size: 4,
 						field_pixel_size: 5,
 						running_trt_dot_size: 5,
