@@ -48,6 +48,7 @@
 }
 
 .board {
+	--borders-size: 12;
 	width: 198px;
 	height: 398px;
 	top: 210px;
@@ -55,8 +56,7 @@
 
 .board .lines {
 	position: absolute;
-	top: 15px;
-	left: 15px;
+	top: 1px;
 	text-align: left;
 	width: 48px;
 	line-height: 16px;
@@ -65,8 +65,7 @@
 
 .board .next_piece {
 	position: absolute;
-	top: 14px;
-	right: 12px;
+	right: -2px;
 	width: 64px;
 	height: 32px;
 	z-index: 2;
