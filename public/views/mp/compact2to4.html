@@ -44,6 +44,12 @@
 				top: 59px;
 			}
 
+			.board .level {
+				top: 4px;
+				left: 4px;
+				line-height: 16px;
+			}
+
 			.runway,
 			.projection {
 				width: 112px;
@@ -296,7 +302,6 @@
 						video: player_node.querySelector('video'),
 					},
 					{
-						field_real_border: 1,
 						preview_pixel_size: 2,
 						preview_align: 'tr',
 						stereo: translate([0, num_players - 1], [-1, 1], players.length),

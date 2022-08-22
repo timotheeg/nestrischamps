@@ -183,7 +183,6 @@ const DEFAULT_DOM_REFS = {
 };
 
 const DEFAULT_OPTIONS = {
-	field_real_border: 0, // represents the actual border
 	field_pixel_size: 3,
 	preview_pixel_size: 3,
 	running_trt_dot_size: 4,
@@ -238,21 +237,18 @@ export default class Player {
 		// getComputedStyle returns padding in Chrome,
 		// but Firefox returns 4 individual properties paddingTop, paddingLeft, etc...
 
-		const field_padding = css_size(styles.paddingLeft); // we assume padding is the same on all sides
+		const field_padding = css_size(styles.paddingLeft); // we assume padding is the same on all sides!!!!
 
 		let bg_width, bg_height, bg_offset, field_canva_offset;
 
-		if (this.options.field_real_border) {
-			bg_width =
-				css_size(styles.width) +
-				2 * (field_padding - this.options.field_real_border);
-			bg_height =
-				css_size(styles.height) +
-				2 * (field_padding - this.options.field_real_border);
-			bg_offset = this.options.field_real_border;
-			field_canva_offset = field_padding - this.options.field_real_border;
+		if (field_padding) {
+			bg_width = css_size(styles.width) + 2 * field_padding;
+			bg_height = css_size(styles.height) + 2 * field_padding;
+			bg_offset = 0;
+			field_canva_offset = field_padding;
 		} else {
-			// we assume the border include one NES pixel of all sides
+			// when padding is zero, we assume the padding is embedded in the border itself,
+			// and thepadding has the size of this.field_pixel_size
 			bg_width = css_size(styles.width) + this.field_pixel_size * 2;
 			bg_height = css_size(styles.height) + this.field_pixel_size * 2;
 			bg_offset = field_padding - this.field_pixel_size;

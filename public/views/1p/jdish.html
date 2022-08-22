@@ -83,6 +83,8 @@
 			}
 
 			.board {
+				--border-size: 12;
+				padding: 3px;
 				width: 395px;
 				height: 795px;
 				top: 90px;
@@ -265,8 +267,6 @@
 						video: document.querySelector(`video`),
 					},
 					{
-						field_real_border:
-							-3 /* this is weird... is done like this for now because padding is 0 */,
 						preview_pixel_size: 4,
 						field_pixel_size: 5,
 						running_trt_dot_size: 5,
