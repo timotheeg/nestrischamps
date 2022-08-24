@@ -51,6 +51,9 @@ const remoteAPI = {
 	setProfileImageURL: function (player_idx, url) {
 		connection.send(['setProfileImageURL', player_idx, url]);
 	},
+	setCountryCode: function (player_idx, country_code) {
+		connection.send(['setCountryCode', player_idx, country_code]);
+	},
 	restartCamera: function (player_idx) {
 		connection.send(['restartCamera', player_idx]);
 	},
@@ -109,6 +112,13 @@ class Player {
 					this.dom.avatar_img.src = avatar_url;
 				}, 250);
 
+		this.dom.country_code_select.onchange = () => {
+			const country_code = this.dom.country_code_select.value;
+
+			remoteAPI.setCountryCode(this.idx, country_code);
+			this.setFlag(country_code);
+		};
+
 		this.dom.producers.onchange = () =>
 			this._pickProducer(parseInt(this.dom.producers.value, 10));
 
@@ -140,6 +150,11 @@ class Player {
 	setIndex(idx) {
 		this.idx = idx;
 		this.dom.num.textContent = idx + 1;
+	}
+
+	setFlag(country_code) {
+		this.dom.country_code_img.src =
+			this.dom.country_code_img.dataset.url.replace('{code}', country_code);
 	}
 
 	setProducers(producers) {
@@ -223,6 +238,9 @@ class Player {
 		this.dom.name.value = state.display_name;
 		this.dom.avatar_url.value = state.profile_image_url;
 		this.dom.avatar_img.src = state.profile_image_url;
+
+		this.dom.country_code_select.value = state.country_code;
+		this.setFlag(state.country_code);
 	}
 }
 
@@ -302,8 +320,10 @@ function addPlayer() {
 		num: player_node.querySelector('.num'),
 		producers: player_node.querySelector('.producers select'),
 		name: player_node.querySelector('.name'),
-		avatar_url: player_node.querySelector('.avatar'),
-		avatar_img: player_node.querySelector('img'),
+		avatar_url: player_node.querySelector('input.avatar'),
+		avatar_img: player_node.querySelector('img.avatar'),
+		country_code_select: player_node.querySelector('select.country_code'),
+		country_code_img: player_node.querySelector('img.country_code'),
 		victories: player_node.querySelector('.victories'),
 		win_btn: player_node.querySelector('.winner'),
 		game_over_btn: player_node.querySelector('.game_over'),

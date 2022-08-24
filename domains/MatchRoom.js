@@ -408,6 +408,16 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'setCountryCode': {
+					const [p_num, country_code] = args;
+
+					this.assertValidPlayer(p_num);
+
+					this.state.players[p_num].country_code = country_code;
+
+					break;
+				}
+
 				case 'resetVictories': {
 					this.state.players.forEach(player => (player.victories = 0));
 					break;

@@ -4,7 +4,7 @@ import nocache from 'nocache';
 import _ from 'lodash';
 
 import middlewares from '../modules/middlewares.js';
-import countries from '../modules/countries.js';
+import { countries } from '../modules/countries.js';
 import UserDAO from '../daos/UserDAO.js';
 import ScoreDAO from '../daos/ScoreDAO.js';
 import timezones from '../modules/timezones.js';

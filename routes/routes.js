@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 
 import middlewares from '../modules/middlewares.js';
+import { countries } from '../modules/countries.js';
 import layouts from '../modules/layouts.js';
 import UserDAO from '../daos/UserDAO.js';
 import ScoreDAO from '../daos/ScoreDAO.js';
@@ -21,9 +22,7 @@ router.get(
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
-		res.sendFile(
-			path.join(path.resolve(), 'public/views/competition_admin.html')
-		);
+		res.render('admin', { countries });
 	}
 );
 
@@ -39,9 +38,7 @@ router.get(
 			return;
 		}
 
-		res.sendFile(
-			path.join(path.resolve(), 'public/views/competition_admin.html')
-		);
+		res.render('admin', { countries });
 	}
 );
 

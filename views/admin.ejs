@@ -50,7 +50,7 @@
 			}
 
 			input[type='text'],
-			.producers select {
+			.inputs select {
 				text-align: center;
 				box-sizing: border-box;
 				width: 100%;
@@ -63,7 +63,7 @@
 				text-align: left;
 			}
 
-			.producers select {
+			.inputs select {
 				height: 32px; /* why though?? */
 				text-align-last: center;
 			}
@@ -77,9 +77,17 @@
 				background: lightgrey;
 			}
 
-			.avatar img {
+			img.avatar {
 				margin: 0.5em;
+				border: solid 1px transparent;
 				width: 60px;
+				height: 60px;
+			}
+
+			img.country_code {
+				margin: 0.5em;
+				border: solid 1px white;
+				width: 90px;
 				height: 60px;
 			}
 
@@ -187,8 +195,20 @@
 					<div>
 						<input type="text" class="avatar" placeholder="avatar url" />
 					</div>
+					<div>
+						<select class="country_code">
+							<option value="">Country</option>
+							<%
+								countries.forEach(country => { %>
+								<option value="<%= country.code %>"><%= country.name %></option>
+							<% }) %>
+						</select>	
+					</div>
 				</div>
-				<div class="avatar"><img /></div>
+				<div class="images">
+					<img class="avatar" />
+					<img class="country_code" data-url="http://purecatamphetamine.github.io/country-flag-icons/3x2/{code}.svg" />
+				</div>
 				<div class="victories"></div>
 				<div>
 					<p>

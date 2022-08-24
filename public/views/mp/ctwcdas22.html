@@ -17,6 +17,13 @@
 			.level {
 				top: 463px;
 			}
+
+			.flag {
+				background: black;
+				border: solid 2px black;
+				width: 74px;
+				border-width: 1px 3px 3px;
+			}
 		</style>
 	</head>
 	<body>
@@ -84,6 +91,8 @@
 					<div class="value">99</div>
 				</div>
 
+				<div class="box no-border flag p1"></div>
+
 				<div class="box no-border runway transition p1">
 					<div class="header">TR RUNWAY</div>
 					<div class="content">0000000</div>
@@ -148,6 +157,8 @@
 					<div class="header">DRT</div>
 					<div class="value">99</div>
 				</div>
+
+				<div class="box no-border flag p2"></div>
 
 				<div class="box no-border runway transition p2">
 					<div class="header">TR RUNWAY</div>
@@ -248,6 +259,7 @@
 						runway_tr_box: document.querySelector(`.runway.transition.p${num}`),
 						projection_box: document.querySelector(`.projection.p${num}`),
 						video: document.querySelector(`.player_vid.p${num}`),
+						flag: document.querySelector(`.flag.p${num}`),
 					},
 					{
 						field_pixel_size: 220 / 80,
