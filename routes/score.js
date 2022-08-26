@@ -330,24 +330,20 @@ router.get(
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
-		const progress18 = await ScoreDAO.getProgress(req.session.user, 18);
+		const data = {};
 
-		progress18.forEach(datapoint => {
-			datapoint.timestamp = datapoint.datetime.getTime();
-			delete datapoint.date;
-		});
+		for (const level of [18, 19, 29]) {
+			const progress = await ScoreDAO.getProgress(req.session.user, level);
 
-		const progress19 = await ScoreDAO.getProgress(req.session.user, 19);
+			progress.forEach(datapoint => {
+				datapoint.timestamp = datapoint.datetime.getTime();
+				delete datapoint.date;
+			});
 
-		progress19.forEach(datapoint => {
-			datapoint.timestamp = datapoint.datetime.getTime();
-			delete datapoint.date;
-		});
+			data[level] = progress;
+		}
 
-		res.json({
-			18: progress18,
-			19: progress19,
-		});
+		res.json(data);
 	}
 );
 

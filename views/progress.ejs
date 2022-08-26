@@ -70,6 +70,7 @@
 			<div id="container_overall"></div>
 			<div id="container_18"></div>
 			<div id="container_19"></div>
+			<div id="container_29"></div>
 		</figure>
 	</div>
 </section>
@@ -160,8 +161,11 @@
 	[
 		[18, '#4A32FF'],
 		[19, '#F69B00'],
+		[29, '#66001A'],
 	]
 	.forEach(([level, color]) => {
+
+		if (progress1819[level].length <= 0) return;
 
 		Highcharts.chart(`container_${level}`, {
 			chart: {
