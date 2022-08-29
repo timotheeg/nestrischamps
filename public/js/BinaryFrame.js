@@ -1,8 +1,9 @@
-const FORMAT_VERSION = 2;
+const FORMAT_VERSION = 3;
 
 const FRAME_SIZE_BY_VERSION = {
 	1: 71,
 	2: 72,
+	3: 73,
 };
 
 const GAME_TYPE = {
@@ -117,14 +118,18 @@ export default class BinaryFrame {
 			(sanitized.cur_piece & 0b111);
 
 		// piece stats (9 bits each - does not align nicely to byte boundaries 😓)
-		buffer[bidx++] = ((sanitized.T & 0b111111110) >> 1);
-		buffer[bidx++] = ((sanitized.T & 0b000000001) << 7) | ((sanitized.J & 0b111111100) >> 2);
-		buffer[bidx++] = ((sanitized.J & 0b000000011) << 6) | ((sanitized.Z & 0b111111000) >> 3);
-		buffer[bidx++] = ((sanitized.Z & 0b000000111) << 5) | ((sanitized.O & 0b111110000) >> 4);
-		buffer[bidx++] = ((sanitized.O & 0b000001111) << 4) | ((sanitized.S & 0b111100000) >> 5);
-		buffer[bidx++] = ((sanitized.S & 0b000011111) << 3) | ((sanitized.L & 0b111000000) >> 6);
-		buffer[bidx++] = ((sanitized.L & 0b000111111) << 2) | ((sanitized.I & 0b110000000) >> 7);
-		buffer[bidx++] = ((sanitized.I & 0b001111111) << 1);
+		buffer[bidx++] = ((sanitized.T & 0b1111111100) >> 2);
+		buffer[bidx++] = ((sanitized.T & 0b0000000011) << 6) | ((sanitized.J & 0b1111110000) >> 4);
+		buffer[bidx++] = ((sanitized.J & 0b0000001111) << 4) | ((sanitized.Z & 0b1111000000) >> 6);
+		buffer[bidx++] = ((sanitized.Z & 0b0000111111) << 2) | ((sanitized.O & 0b1100000000) >> 8);
+		buffer[bidx++] = ((sanitized.O & 0b0011111111) << 0);
+
+		buffer[bidx++] = ((sanitized.S & 0b1111111100) >> 2);
+		buffer[bidx++] = ((sanitized.S & 0b0000000011) << 6) | ((sanitized.L & 0b1111110000) >> 4);
+		buffer[bidx++] = ((sanitized.L & 0b0000001111) << 4) | ((sanitized.I & 0b1111000000) >> 6);
+		buffer[bidx++] = ((sanitized.I & 0b0000111111) << 2);
+
+		// 2 wasted bits here
 
 		// field
 		for (
@@ -161,7 +166,7 @@ export default class BinaryFrame {
 			(f[bidx++] << 4) |
 			((f[bidx] & 0xf0) >> 4);
 
-		if (pojo.version === FORMAT_VERSION) {
+		if (pojo.version >= 2) {
 			pojo.lines = ((f[bidx++] & 0x0f) << 8) | f[bidx++];
 
 			pojo.level = f[bidx++];
@@ -174,14 +179,26 @@ export default class BinaryFrame {
 			pojo.cur_piece_das = (f[bidx] & 0b11111000) >> 3;
 			pojo.cur_piece = f[bidx++] & 0b111;
 
-			// piece stats)
-			pojo.T = ((f[bidx++] & 0b11111111) << 1) | ((f[bidx] & 0b10000000) >> 7);
-			pojo.J = ((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
-			pojo.Z = ((f[bidx++] & 0b00111111) << 3) | ((f[bidx] & 0b11100000) >> 5);
-			pojo.O = ((f[bidx++] & 0b00011111) << 4) | ((f[bidx] & 0b11110000) >> 4);
-			pojo.S = ((f[bidx++] & 0b00001111) << 5) | ((f[bidx] & 0b11111000) >> 3);
-			pojo.L = ((f[bidx++] & 0b00000111) << 6) | ((f[bidx] & 0b11111100) >> 2);
-			pojo.I = ((f[bidx++] & 0b00000011) << 7) | ((f[bidx] & 0b11111110) >> 1);
+			// piece stats
+			if (pojo.version === 3) { // current format - 10 bits per field
+				pojo.T = ((f[bidx++] & 0b11111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+				pojo.J = ((f[bidx++] & 0b00111111) << 4) | ((f[bidx] & 0b11110000) >> 4);
+				pojo.Z = ((f[bidx++] & 0b00001111) << 6) | ((f[bidx] & 0b11111100) >> 2);
+				pojo.O = ((f[bidx++] & 0b00000011) << 8) | ((f[bidx] & 0b11111111) >> 0);
+				bidx++;
+				pojo.S = ((f[bidx++] & 0b11111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+				pojo.L = ((f[bidx++] & 0b00111111) << 4) | ((f[bidx] & 0b11110000) >> 4);
+				pojo.I = ((f[bidx++] & 0b00001111) << 6) | ((f[bidx] & 0b11111100) >> 2);
+			}
+			else { // v2 - 9 bits per fields
+				pojo.T = ((f[bidx++] & 0b11111111) << 1) | ((f[bidx] & 0b10000000) >> 7);
+				pojo.J = ((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
+				pojo.Z = ((f[bidx++] & 0b00111111) << 3) | ((f[bidx] & 0b11100000) >> 5);
+				pojo.O = ((f[bidx++] & 0b00011111) << 4) | ((f[bidx] & 0b11110000) >> 4);
+				pojo.S = ((f[bidx++] & 0b00001111) << 5) | ((f[bidx] & 0b11111000) >> 3);
+				pojo.L = ((f[bidx++] & 0b00000111) << 6) | ((f[bidx] & 0b11111100) >> 2);
+				pojo.I = ((f[bidx++] & 0b00000011) << 7) | ((f[bidx] & 0b11111110) >> 1);
+			}
 
 			bidx++;
 		} else {
@@ -224,13 +241,16 @@ export default class BinaryFrame {
 
 		// we've extracted all the value, now checks for nulls
 
-		if (pojo.version === FORMAT_VERSION) {
+		if (pojo.version >= 2) {
 			if (pojo.score === 0xffffff) pojo.score = null;
 			if (pojo.lines === 0xfff) pojo.lines = null;
 			if (pojo.level === 0xff) pojo.level = null;
 
+			// version 3: 10 bits, versioon 2: 9 bits
+			const piece_null_value = pojo.version === 3 ? 0x3ff : 0x1ff;
+
 			PIECES.forEach(piece => {
-				if (pojo[piece] === 0x1ff) {
+				if (pojo[piece] === piece_null_value) {
 					pojo[piece] = null;
 				}
 			});
@@ -249,7 +269,6 @@ export default class BinaryFrame {
 
 		if (pojo.instant_das === 0b11111) pojo.instant_das = null;
 		if (pojo.cur_piece_das === 0b11111) pojo.cur_piece_das = null;
-
 
 		if (pojo.preview === 0b111) {
 			pojo.preview = null;
