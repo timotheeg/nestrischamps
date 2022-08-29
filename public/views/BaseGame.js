@@ -608,14 +608,14 @@ export default class BaseGame {
 
 	_checkPiece(data) {
 		if (this.pending_piece) {
-			if (!data.preview) return;
+			if (!(this.is_classic_rom && this.options.usePieceStats) && !data.preview)
+				return;
 
 			this.pending_piece = false;
 			return this._doPiece(data);
 		}
 
 		if (this.is_classic_rom && this.options.usePieceStats) {
-			// TODO: allow classic rom to work with block count with a query string arg
 			if (this._getNumPieces(data) != this.pieces.length) {
 				this.data.field = data.field;
 				this.pending_piece = true;
@@ -732,6 +732,9 @@ export default class BaseGame {
 			} else if (this.is_classic_rom) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece - not great when recording starts mid-game
 			}
+		} else if (this.is_classic_rom && this.options.usePieceStats) {
+			const prev_raw = this.frames[this.frames.length - 2].raw; // -2 to account for read delay... dangerous...
+			cur_piece = PIECES.find(p => data[p] != prev_raw[p]); // could also look specifically for +1 increment
 		} else {
 			cur_piece = this.prior_preview; // should be in sync 🤞
 		}

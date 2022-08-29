@@ -58,6 +58,8 @@ if (/^\d+$/.test(buffer_time)) {
 
 const frame_buffer = new FrameBuffer(buffer_time, onFrame);
 
+const use_piece_stats = QueryString.get('use_piece_stats') === '1';
+
 const API = {
 	message: onMessage,
 	player_data: renderPastGamesAndPBs,
@@ -128,7 +130,9 @@ function onFrame(event, debug) {
 }
 
 function createGame() {
-	game = new BaseGame();
+	game = new BaseGame({
+		usePieceStats: use_piece_stats,
+	});
 	game.onScore = renderScore;
 	game.onPiece = renderPiece;
 	game.onLines = renderLines;

@@ -37,6 +37,8 @@ if (/^[1-9]\d+$/.test(QueryString.get('ts'))) {
 	start_ts = parseInt(QueryString.get('ts'), 10);
 }
 
+const use_piece_stats = QueryString.get('use_piece_stats') === '1';
+
 async function getReplayGame(gameid) {
 	const gamedata_res = await fetch(`/api/games/${gameid}`);
 	const gamedata = await gamedata_res.json();
@@ -47,7 +49,9 @@ async function getReplayGame(gameid) {
 	const version = buffer[0] >> 5 || 1;
 	const frame_size = BinaryFrame.FRAME_SIZE_BY_VERSION[version];
 
-	const game = new BaseGame();
+	const game = new BaseGame({
+		usePieceStats: use_piece_stats,
+	});
 	game._gameid = gameid; // game has a client id, this records the server id too, can be used later on
 
 	const then = Date.now();
