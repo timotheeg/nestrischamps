@@ -333,16 +333,43 @@ async function startSharingVideoFeed() {
 		video: video_constraints,
 	});
 
-	if (!peer_opened) {
-		peer.on(
-			'open',
-			() => {
-				ongoing_call = peer.call(view_peer_id, stream);
-			},
-			{ once: true }
-		);
-	} else {
+	function startSharing() {
+		// 1. player cam
 		ongoing_call = peer.call(view_peer_id, stream);
+
+		if (view_meta.raw) {
+			// 2. raw capture
+			const xywh = config.tasks.field.crop;
+
+			if (do_half_height) {
+				xywh[1] *= 2;
+				xywh[3] *= 2;
+			}
+
+			const r_xywh = getCaptureCoordinates(
+				reference_size,
+				reference_locations.field.crop,
+				xywh
+			);
+
+			r_xywh[0] /= video.videoWidth;
+			r_xywh[1] /= video.videoHeight;
+			r_xywh[2] /= video.videoWidth;
+			r_xywh[3] /= video.videoHeight;
+
+			peer.call(view_peer_id, video.srcObject, {
+				metadata: {
+					raw: true,
+					r_xywh,
+				},
+			});
+		}
+	}
+
+	if (!peer_opened) {
+		peer.on('open', startSharing, { once: true });
+	} else {
+		startSharing();
 	}
 }
 
@@ -431,7 +458,7 @@ video.addEventListener('click', async evt => {
 
 	let [ox, oy, ow, oh] = getCaptureCoordinates(
 		reference_size,
-		reference_locations,
+		reference_locations.field_w_borders.crop,
 		field_xywh
 	);
 

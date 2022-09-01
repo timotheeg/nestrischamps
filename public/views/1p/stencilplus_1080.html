@@ -94,7 +94,7 @@
 			</div>
 
 			<div id="playing_fields">
-				<video></video>
+				<video class="player_cam"></video>
 
 				<div class="box timer">
 					<div class="content">02:00:00</div>
@@ -105,6 +105,8 @@
 					<div class="value bounded"></div>
 				</div>
 			</div>
+
+			<div class="raw_capture"><video class="capture"></video></div>
 			<!-- End Playing Fields -->
 		</div>
 		<!-- End Stream BG -->
@@ -114,6 +116,7 @@
 		<script>
 			const view_meta = new URLSearchParams({
 				video: '1280x720',
+				raw: 1,
 			});
 		</script>
 		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
@@ -324,15 +327,60 @@
 				peer = new Peer(connection.id, peerServerOptions);
 
 				peer.on('call', call => {
-					const video = document.querySelector('video');
+					let video;
+					let postProcess;
+
+					console.log(call.metadata);
+
+					if (call.metadata?.raw) {
+						const mask = document.querySelector('div.raw_capture');
+
+						video = document.querySelector('video.capture');
+
+						video.style.position = 'absolute';
+						mask.style.position = 'absolute';
+						mask.style.transformOrigin = '0 0';
+						mask.style.overflow = 'clip';
+
+						function setSize() {
+							// video at full size
+							video.style.width = `${video.videoWidth}px`;
+							video.style.height = `${video.videoHeight}px`;
+
+							const r_xywh = call.metadata.r_xywh;
+
+							// mask at computed size
+							const x = Math.round(r_xywh[0] * video.videoWidth);
+							const y = Math.round(r_xywh[1] * video.videoHeight);
+							const w = Math.round(r_xywh[2] * video.videoWidth);
+							const h = Math.round(r_xywh[3] * video.videoHeight);
+
+							video.style.top = `${-y}px`;
+							video.style.left = `${-x}px`;
+							mask.style.width = `${w}px`;
+							mask.style.height = `${h}px`;
+
+							mask.style.left = '1245px';
+							mask.style.top = '595px';
+							mask.style.transform = `scale(${240 / h})`;
+						}
+
+						postProcess = function () {
+							setSize();
+							video.addEventListener('resize', setSize);
+						};
+					} else {
+						video = document.querySelector('video.player_cam');
+					}
 
 					call.answer(); // assume correct!
 					call.on('stream', remoteStream => {
 						video.srcObject = remoteStream;
 						video.addEventListener(
 							'loadedmetadata',
-							() => {
+							evt => {
 								video.play();
+								if (postProcess) postProcess();
 							},
 							{ once: true }
 						);

@@ -73,17 +73,15 @@ export function getFieldCoordinates(img_data, startPoint, color = [0, 0, 0]) {
 
 export function getCaptureCoordinates(
 	reference_size,
-	reference_location,
+	ideal_field_w_border_xywh,
 	field_w_border_xywh
 ) {
-	const ideal_field_xywh = reference_location.field_w_borders.crop;
-
-	const scaleX = field_w_border_xywh[2] / ideal_field_xywh[2];
-	const scaleY = field_w_border_xywh[3] / ideal_field_xywh[3];
+	const scaleX = field_w_border_xywh[2] / ideal_field_w_border_xywh[2];
+	const scaleY = field_w_border_xywh[3] / ideal_field_w_border_xywh[3];
 
 	return [
-		field_w_border_xywh[0] - ideal_field_xywh[0] * scaleX,
-		field_w_border_xywh[1] - ideal_field_xywh[1] * scaleY,
+		field_w_border_xywh[0] - ideal_field_w_border_xywh[0] * scaleX,
+		field_w_border_xywh[1] - ideal_field_w_border_xywh[1] * scaleY,
 		scaleX * reference_size[0],
 		scaleY * reference_size[1],
 	];
