@@ -344,21 +344,21 @@
 					data === null ? in_game : data.score != null && data.level != null;
 
 				if (incoming_in_game) {
-					if (!in_game) {
+					if (!in_game || data === null) {
 						// in game now, move to side
 						Object.assign(mask.style, {
 							top: '595px',
 							left: '1450px',
-							transform: scaleMask(240),
+							transform: scaleMask(274, 240),
 						});
 					}
 				} else {
-					if (in_game) {
+					if (in_game || data === null) {
 						// not in game now, cover
 						Object.assign(mask.style, {
 							top: 0,
 							left: 0,
-							transform: scaleMask(1080),
+							transform: scaleMask(1234, 1080),
 						});
 					}
 				}
@@ -366,9 +366,11 @@
 				in_game = incoming_in_game;
 			}
 
-			function getScaleSetter(capture_height) {
-				return function (target_height) {
-					return `scale(${target_height / capture_height})`;
+			function getScaleSetter(capture_width, capture_height) {
+				return function (target_width, target_height) {
+					return `scaleX(${target_width / capture_width}) scaleY(${
+						target_height / capture_height
+					})`;
 				};
 			}
 
@@ -402,7 +404,7 @@
 							const w = Math.round(r_xywh[2] * video.videoWidth);
 							const h = Math.round(r_xywh[3] * video.videoHeight);
 
-							scaleMask = getScaleSetter(h);
+							scaleMask = getScaleSetter(w, h);
 
 							video.style.top = `${-y}px`;
 							video.style.left = `${-x}px`;
