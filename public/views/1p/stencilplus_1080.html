@@ -26,7 +26,7 @@
 				height: 1080px;
 			}
 
-			video {
+			video.player_cam {
 				width: 686px;
 				height: 579px;
 			}
@@ -54,6 +54,21 @@
 				left: 5px;
 				width: 645px;
 				height: 44px;
+			}
+
+			div.raw_capture {
+				position: absolute;
+				top: 0;
+				left: 0;
+				transform-origin: 0 0;
+				overflow: clip;
+				transition: all 0.2s ease-in-out;
+			}
+
+			div.raw_capture video {
+				position: absolute;
+				width: 1px;
+				height: 1px;
 			}
 		</style>
 	</head>
@@ -289,6 +304,8 @@
 					}
 
 					player.setFrame(data);
+
+					positionRawCapture(data);
 				},
 
 				startTimer(allowed_time) {
@@ -316,7 +333,44 @@
 				API.frame(1, frame, debug);
 			}
 
+			const mask = document.querySelector('div.raw_capture');
+
 			let peer = null;
+			let scaleMask = () => 'scale(0)';
+			let in_game = false;
+
+			function positionRawCapture(data = null) {
+				const incoming_in_game =
+					data === null ? in_game : data.score != null && data.level != null;
+
+				if (incoming_in_game) {
+					if (!in_game) {
+						// in game now, move to side
+						Object.assign(mask.style, {
+							top: '595px',
+							left: '1450px',
+							transform: scaleMask(240),
+						});
+					}
+				} else {
+					if (in_game) {
+						// not in game now, cover
+						Object.assign(mask.style, {
+							top: 0,
+							left: 0,
+							transform: scaleMask(1080),
+						});
+					}
+				}
+
+				in_game = incoming_in_game;
+			}
+
+			function getScaleSetter(capture_height) {
+				return function (target_height) {
+					return `scale(${target_height / capture_height})`;
+				};
+			}
 
 			connection.onInit = () => {
 				if (peer) {
@@ -333,14 +387,7 @@
 					console.log(call.metadata);
 
 					if (call.metadata?.raw) {
-						const mask = document.querySelector('div.raw_capture');
-
 						video = document.querySelector('video.capture');
-
-						video.style.position = 'absolute';
-						mask.style.position = 'absolute';
-						mask.style.transformOrigin = '0 0';
-						mask.style.overflow = 'clip';
 
 						function setSize() {
 							// video at full size
@@ -355,14 +402,14 @@
 							const w = Math.round(r_xywh[2] * video.videoWidth);
 							const h = Math.round(r_xywh[3] * video.videoHeight);
 
+							scaleMask = getScaleSetter(h);
+
 							video.style.top = `${-y}px`;
 							video.style.left = `${-x}px`;
 							mask.style.width = `${w}px`;
 							mask.style.height = `${h}px`;
 
-							mask.style.left = '1245px';
-							mask.style.top = '595px';
-							mask.style.transform = `scale(${240 / h})`;
+							positionRawCapture();
 						}
 
 						postProcess = function () {
