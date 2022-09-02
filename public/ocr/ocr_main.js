@@ -339,7 +339,7 @@ async function startSharingVideoFeed() {
 
 		if (view_meta.raw) {
 			// 2. raw capture
-			const xywh = config.tasks.field.crop;
+			const xywh = [...config.tasks.field.crop];
 
 			if (do_half_height) {
 				xywh[1] *= 2;
