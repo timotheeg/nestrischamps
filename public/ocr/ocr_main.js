@@ -1544,7 +1544,7 @@ function trackAndSendFrames() {
 			}
 
 			// all fields equal, do a sanity check on time
-			if (data.ctime - last_frame.ctime >= 500) break;
+			if (data.ctime - last_frame.ctime >= 200) break; // max 1 in 12 frames
 
 			// no need to send frame
 			return;
