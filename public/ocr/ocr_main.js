@@ -255,6 +255,7 @@ function connect() {
 
 			API[method](...args);
 		} catch (e) {
+			console.log(`Could not process command ${frame[0]}`);
 			console.error(e);
 		}
 	};
