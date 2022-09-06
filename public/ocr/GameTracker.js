@@ -205,7 +205,8 @@ export default class GameTracker {
 
 		if (dispatch_frame.lines === null) {
 			lines = null;
-		} else {
+		} else if (this.cur_lines >= 300) {
+			// booohoo hardcoded value T_T
 			const new_lines_units = peek(dispatch_frame.lines);
 			const cur_lines_units = this.cur_lines % 10;
 
@@ -216,6 +217,8 @@ export default class GameTracker {
 			}
 
 			lines = this.cur_lines;
+		} else {
+			lines = this.cur_lines = GameTracker.digitsToValue(dispatch_frame.lines);
 		}
 
 		const level = this._getLevelFromLines(lines, dispatch_frame.level); // this is no longer OCR!
@@ -243,8 +246,8 @@ export default class GameTracker {
 				let value;
 
 				if (dispatch_frame[p] === null) {
-					value === null;
-				} else {
+					value = null;
+				} else if (this[`cur_${p}`] >= 100) {
 					const new_units = peek(dispatch_frame[p]);
 					const cur_units = this[`cur_${p}`] % 10;
 
@@ -256,6 +259,10 @@ export default class GameTracker {
 					}
 
 					value = this[`cur_${p}`];
+				} else {
+					value = this[`cur_${p}`] = GameTracker.digitsToValue(
+						dispatch_frame[p]
+					);
 				}
 
 				pojo[p] = value;
