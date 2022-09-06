@@ -1,7 +1,6 @@
 import ScoreFixer from '/ocr/ScoreFixer.js';
-import { TRANSITIONS } from '/views/constants.js';
+import { PIECES, TRANSITIONS } from '/views/constants.js';
 import TetrisOCR from '/ocr/TetrisOCR.js';
-import { PIECES } from '/views/constants.js';
 
 const BUFFER_MAXSIZE = 2; // all tracked changes are stable over 2 frames
 
