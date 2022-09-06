@@ -1,5 +1,5 @@
 import ScoreFixer from '/ocr/ScoreFixer.js';
-import { TRANSITIONS } from '/views/constants.js';
+import { PIECES, TRANSITIONS } from '/views/constants.js';
 import TetrisOCR from '/ocr/TetrisOCR.js';
 
 const BUFFER_MAXSIZE = 2; // all tracked changes are stable over 2 frames
@@ -9,7 +9,7 @@ function peek(arr, offset = 0) {
 }
 
 /*
- * GameTracker is in charge of OCRing from game frames and sanitixing game data
+ * GameTracker is in charge of OCRing from game frames and sanitizing game data
  * It produces onMessage events with a TWO FRAMES delay for tracking
  *
  * That is because with intelaced input, a change occurs over 2 frame.
@@ -165,17 +165,30 @@ export default class GameTracker {
 			this.in_game = true;
 
 			if (
-				GameTracker.arrEqual(dispatch_frame.score, [0, 0, 0, 0, 0, 0]) &&
-				(GameTracker.arrEqual(dispatch_frame.lines, [0, 0, 0]) || // mode A
-					GameTracker.arrEqual(dispatch_frame.lines, [0, 2, 5])) // mode B
+				/* game start */
+				(GameTracker.arrEqual(dispatch_frame.score, [0, 0, 0, 0, 0, 0]) &&
+					(GameTracker.arrEqual(dispatch_frame.lines, [0, 0, 0]) || // mode A
+						GameTracker.arrEqual(dispatch_frame.lines, [0, 2, 5]))) || // mode B
+				this.cur_lines === undefined
 			) {
 				this.gameid++;
 
 				this.score_fixer.reset();
 				this.score_fixer.fix(dispatch_frame.score);
 
+				this.cur_lines = GameTracker.digitsToValue(dispatch_frame.lines);
 				this.start_level = GameTracker.digitsToValue(dispatch_frame.level);
 				this.transition = TRANSITIONS[this.start_level];
+
+				if (this.config.tasks.T) {
+					this.cur_T = GameTracker.digitsToValue(dispatch_frame.T);
+					this.cur_J = GameTracker.digitsToValue(dispatch_frame.J);
+					this.cur_Z = GameTracker.digitsToValue(dispatch_frame.Z);
+					this.cur_O = GameTracker.digitsToValue(dispatch_frame.O);
+					this.cur_S = GameTracker.digitsToValue(dispatch_frame.S);
+					this.cur_L = GameTracker.digitsToValue(dispatch_frame.L);
+					this.cur_I = GameTracker.digitsToValue(dispatch_frame.I);
+				}
 
 				if (!this.transition) {
 					console.warn(
@@ -187,7 +200,26 @@ export default class GameTracker {
 			}
 		}
 
-		const lines = GameTracker.digitsToValue(dispatch_frame.lines);
+		let lines;
+
+		if (dispatch_frame.lines === null) {
+			lines = null;
+		} else if (this.cur_lines >= 300) {
+			// booohoo hardcoded value T_T
+			const new_lines_units = peek(dispatch_frame.lines);
+			const cur_lines_units = this.cur_lines % 10;
+
+			if (new_lines_units > cur_lines_units) {
+				this.cur_lines += new_lines_units - cur_lines_units;
+			} else if (new_lines_units < cur_lines_units) {
+				this.cur_lines = Math.ceil(this.cur_lines / 10) * 10 + new_lines_units;
+			}
+
+			lines = this.cur_lines;
+		} else {
+			lines = this.cur_lines = GameTracker.digitsToValue(dispatch_frame.lines);
+		}
+
 		const level = this._getLevelFromLines(lines, dispatch_frame.level); // this is no longer OCR!
 
 		const { field, color1, color2, color3 } =
@@ -209,13 +241,31 @@ export default class GameTracker {
 		};
 
 		if (this.config.tasks.T) {
-			pojo.T = GameTracker.digitsToValue(dispatch_frame.T);
-			pojo.J = GameTracker.digitsToValue(dispatch_frame.J);
-			pojo.Z = GameTracker.digitsToValue(dispatch_frame.Z);
-			pojo.O = GameTracker.digitsToValue(dispatch_frame.O);
-			pojo.S = GameTracker.digitsToValue(dispatch_frame.S);
-			pojo.L = GameTracker.digitsToValue(dispatch_frame.L);
-			pojo.I = GameTracker.digitsToValue(dispatch_frame.I);
+			PIECES.forEach(p => {
+				let value;
+
+				if (dispatch_frame[p] === null) {
+					value = null;
+				} else if (this[`cur_${p}`] >= 100) {
+					const new_units = peek(dispatch_frame[p]);
+					const cur_units = this[`cur_${p}`] % 10;
+
+					if (new_units > cur_units) {
+						this[`cur_${p}`] += new_units - cur_units;
+					} else if (new_units < cur_units) {
+						this[`cur_${p}`] =
+							Math.ceil(this[`cur_${p}`] / 10) * 10 + new_units;
+					}
+
+					value = this[`cur_${p}`];
+				} else {
+					value = this[`cur_${p}`] = GameTracker.digitsToValue(
+						dispatch_frame[p]
+					);
+				}
+
+				pojo[p] = value;
+			});
 		}
 
 		if (this.config.tasks.cur_piece_das) {
