@@ -123,6 +123,8 @@ const reference_ui = document.querySelector('#reference_ui'),
 	show_parts = document.querySelector('#show_parts'),
 	score7 = document.querySelector('#score7'),
 	focus_alarm = document.querySelector('#focus_alarm'),
+	clear_config = document.querySelector('#clear_config'),
+	save_game_palette = document.querySelector('#save_game_palette'),
 	timer_control = document.querySelector('#timer_control'),
 	start_timer = document.querySelector('#start_timer'),
 	conn_host = document.querySelector('#conn_host'),
@@ -172,18 +174,35 @@ palette_selector.addEventListener('change', evt => {
 });
 
 rom_selector.addEventListener('change', evt => {
-	if (rom_selector.value === 'classic') {
-		color_matching.style.display = 'block';
-		palette_selector.value = '';
-		palette_selector.disabled = false;
-	} else {
-		// TODO, load user palette!
+	const first_option = palette_selector.querySelector('option:first-child');
+
+	function hideAndResetColorMatching() {
 		color_matching.style.display = 'none';
 		palette_selector.disabled = true;
-		palette_selector.value = Object.keys(palettes)[0];
 	}
 
-	config.game_type = configs[rom_selector.value].game_type;
+	palette_selector.value = palettes._saved ? '_saved' : '';
+
+	if (rom_selector.value === '') {
+		hideAndResetColorMatching();
+	} else {
+		config.game_type = configs[rom_selector.value].game_type;
+
+		color_matching.style.display = 'block';
+		palette_selector.disabled = false;
+
+		if (rom_selector.value === 'classic') {
+			first_option.hidden = false;
+		} else {
+			first_option.hidden = true;
+
+			if (palettes.length <= 1) {
+				hideAndResetColorMatching();
+				palette_selector.value = Object.keys(palettes)[0];
+			}
+		}
+	}
+
 	config.palette = palette_selector.value;
 
 	checkReadyToCalibrate();
@@ -391,8 +410,20 @@ conn_host.addEventListener('change', connect);
 conn_port.addEventListener('change', connect);
 
 clear_config.addEventListener('click', evt => {
-	localStorage.clear();
+	localStorage.removeItem('config');
 	location.reload();
+});
+
+save_game_palette.addEventListener('click', evt => {
+	if (palettes && game_tracker && config) {
+		localStorage.setItem('palette', JSON.stringify(save_game_palette.palette));
+
+		palettes._saved = palette;
+		config.palette = '_saved';
+
+		saveConfig(config);
+		location.reload();
+	}
 });
 
 start_timer.addEventListener('click', evt => {
@@ -1235,6 +1266,8 @@ async function showParts(data) {
 	const y_offset = config.capture_area.y;
 
 	for (const name of Object.keys(data)) {
+		if (config.palette && name.startsWith('color')) continue;
+
 		const task = config.tasks[name];
 		const scale_factor = name.startsWith('color') ? 4 : 2;
 
@@ -1489,6 +1522,16 @@ function trackAndSendFrames() {
 
 	let start_time = Date.now();
 	let last_frame = { field: [] };
+
+	game_tracker.onNewGame = () => {
+		save_game_palette.disabled = true;
+	};
+
+	// Palette is ready to be used
+	game_tracker.onPalette = () => {
+		save_game_palette.palette = game_tracker.palette;
+		save_game_palette.disabled = false;
+	};
 
 	// TODO: better event system and name for frame data events
 	game_tracker.onMessage = async function (data) {

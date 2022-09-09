@@ -45,6 +45,8 @@ export default class GameTracker {
 
 		this.score_frame_delay = 0;
 		this.piece_frame_delay = 0;
+
+		this.palette = Array(10).fill();
 	}
 
 	setConfig(config) {
@@ -52,9 +54,10 @@ export default class GameTracker {
 		this.tetris_ocr.setConfig(config);
 	}
 
-	onMessage() {
-		// class user to implement
-	}
+	// class user to implement
+	onNewGame() {}
+	onMessage() {}
+	onPalette() {}
 
 	_getLevelFromLines(lines, ocr_level_digits) {
 		if (lines === null) return null;
@@ -179,6 +182,7 @@ export default class GameTracker {
 				this.cur_lines = GameTracker.digitsToValue(dispatch_frame.lines);
 				this.start_level = GameTracker.digitsToValue(dispatch_frame.level);
 				this.transition = TRANSITIONS[this.start_level];
+				this.palette = Array(10).fill();
 
 				if (this.config.tasks.T) {
 					this.cur_T = GameTracker.digitsToValue(dispatch_frame.T);
@@ -197,6 +201,8 @@ export default class GameTracker {
 					this.start_level = 18;
 					this.transition = TRANSITIONS[18];
 				}
+
+				this.onNewGame(this.gameid);
 			}
 		}
 
@@ -221,9 +227,22 @@ export default class GameTracker {
 		}
 
 		const level = this._getLevelFromLines(lines, dispatch_frame.level); // this is no longer OCR!
+		const level_unit = level % 10;
 
 		const { field, color1, color2, color3 } =
 			await this.tetris_ocr.processsFrameStep2(dispatch_frame, level);
+
+		if (this.palette[level_unit] === undefined) {
+			this.palette[level_unit] = BUFFER_MAXSIZE;
+		} else if (!Array.isArray(this.palette[level_unit])) {
+			if (--this.palette[level_unit] < 0) {
+				this.palette[level_unit] = [color1, color2, color3];
+
+				if (this.palette.every(Array.isArray)) {
+					this.onPalette();
+				}
+			}
+		}
 
 		const pojo = {
 			gameid: this.gameid,
