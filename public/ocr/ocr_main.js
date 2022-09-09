@@ -174,18 +174,35 @@ palette_selector.addEventListener('change', evt => {
 });
 
 rom_selector.addEventListener('change', evt => {
-	if (rom_selector.value === 'classic') {
-		color_matching.style.display = 'block';
-		palette_selector.value = '';
-		palette_selector.disabled = false;
-	} else {
-		// TODO, load user palette!
+	const first_option = palette_selector.querySelector('option:first-child');
+
+	function hideAndResetColorMatching() {
 		color_matching.style.display = 'none';
 		palette_selector.disabled = true;
-		palette_selector.value = Object.keys(palettes)[0];
 	}
 
-	config.game_type = configs[rom_selector.value].game_type;
+	palette_selector.value = palettes._saved ? '_saved' : '';
+
+	if (rom_selector.value === '') {
+		hideAndResetColorMatching();
+	} else {
+		config.game_type = configs[rom_selector.value].game_type;
+
+		color_matching.style.display = 'block';
+		palette_selector.disabled = false;
+
+		if (rom_selector.value === 'classic') {
+			first_option.hidden = false;
+		} else {
+			first_option.hidden = true;
+
+			if (palettes.length <= 1) {
+				hideAndResetColorMatching();
+				palette_selector.value = Object.keys(palettes)[0];
+			}
+		}
+	}
+
 	config.palette = palette_selector.value;
 
 	checkReadyToCalibrate();

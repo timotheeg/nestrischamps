@@ -11,17 +11,15 @@ async function getPalette(name) {
 }
 
 export default async function loadPalettes() {
-	const palettes = (await Promise.all(LIST.map(getPalette))).reduce(
-		(acc, palette, idx) => {
-			acc[LIST[idx]] = palette;
-			return acc;
-		},
-		{}
-	);
+	const palettes = {};
 
 	try {
 		palettes._saved = JSON.parse(localStorage.getItem('palette'));
 	} catch (err) {}
+
+	(await Promise.all(LIST.map(getPalette))).forEach((palette, idx) => {
+		palettes[LIST[idx]] = palette;
+	});
 
 	return palettes;
 }
