@@ -169,7 +169,7 @@ export default class GameTracker {
 
 			if (
 				/* game start */
-				(GameTracker.arrEqual(dispatch_frame.score, [0, 0, 0, 0, 0, 0]) &&
+				(dispatch_frame.score.every(v => v === 0) && // checks that all digits are 0; works for 6 and 7 digits scores
 					(GameTracker.arrEqual(dispatch_frame.lines, [0, 0, 0]) || // mode A
 						GameTracker.arrEqual(dispatch_frame.lines, [0, 2, 5]))) || // mode B
 				this.cur_lines === undefined
