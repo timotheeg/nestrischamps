@@ -118,9 +118,9 @@
 .drought,
 .eff {
 	--offset: 377px;
-	width: 72px;
+	width: 78px;
 	height: 98px;
-	padding: 3px 6px;
+	padding: 3px;
 }
 
 .tetris_rate {

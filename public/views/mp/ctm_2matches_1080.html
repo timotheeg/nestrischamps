@@ -36,6 +36,8 @@
 				z-index: 5;
 			}
 			.match.small .score {
+				padding-left: 9px;
+				padding-right: 6px;
 				z-index: 4;
 			}
 			.match.small .running_trt,
@@ -50,21 +52,21 @@
 			.match.small .eff,
 			.match.small .drought {
 				height: 61px;
-				width: 68px;
+				width: 69px;
 			}
 			.match.small .tetris_rate {
-				top: 230px;
+				top: 578px;
 				z-index: 2;
 			}
 			.match.small .tetris_rate .content {
 				padding-top: 0;
 			}
 			.match.small .eff {
-				top: 318px;
+				top: 490px;
 				z-index: 1;
 			}
 			.match.small .drought {
-				top: 406px;
+				top: 402px;
 				z-index: 1;
 			}
 			.match.small .hearts,
@@ -181,6 +183,7 @@
 		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
+			import QueryString from '/js/QueryString.js';
 			import { peerServerOptions } from '/views/constants.js';
 			import { translate } from '/views/utils.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
@@ -246,6 +249,11 @@
 					);
 
 					players.push(player);
+
+					if (QueryString.get('runway') === '0') {
+						player.dom.runway_box.remove();
+						player.dom.projection_box.remove();
+					}
 				});
 			});
 
