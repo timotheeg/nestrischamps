@@ -190,6 +190,12 @@
 	right: var(--offset);
 }
 
+.player_vid {
+	position: absolute;
+	object-fit: cover;
+	right: var(--offset);
+}
+
 .p2 > * {
 	left: var(--offset);
 }
