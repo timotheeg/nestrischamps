@@ -1,21 +1,20 @@
 #playing_fields {
 	position: absolute;
 	left: 640px;
-	top: 5px;
 }
 
 .score,
 .name,
 .board,
 .running_trt {
-	--offset: 0px;
+	--offset: -1px;
 	right: var(--offset);
 }
 
 .tetris_rate,
 .eff,
 .drought {
-	--offset: 258px;
+	--offset: 257px;
 	right: var(--offset);
 }
 
@@ -91,20 +90,33 @@
 	--offset: 468px;
 }
 
-.name {
-	width: 237px;
-	height: 23px;
+.name,
+.flag,
+.hearts {
 	top: 656px;
 }
 
-.name .header {
-	padding-top: 2px;
+.name {
+	width: 308px;
+	height: 25px;
+
+	padding-top: 8px;
+	font-size: 20px;
+	line-height: 20px;
 }
 
 .name .content {
 	color: #b0afb0;
 	letter-spacing: 5px;
 	text-indent: 5px;
+}
+
+.flag {
+	width: 50px;
+	height: 33px;
+
+	--offset: 328px;
+	right: var(--offset);
 }
 
 .hearts .win {
@@ -176,23 +188,29 @@
 
 .hearts {
 	position: absolute;
-	top: 638px;
-	width: 280px;
+	width: 210px;
+	height: 27px;
 
 	color: #b0afb0;
-	font-size: 32px;
-	line-height: 32px;
+	font-size: 24px;
+	line-height: 24px;
+	padding-top: 6px;
 	letter-spacing: 8px;
 	text-align: center;
-	text-shadow: 4px 4px rgba(0, 0, 0, 0.65);
 
-	--offset: 358px;
+	--offset: 399px;
 	right: var(--offset);
 }
 
 .player_vid {
 	position: absolute;
 	object-fit: cover;
+
+	top: 0;
+	width: 377px;
+	height: 662px;
+
+	--offset: 263px;
 	right: var(--offset);
 }
 
