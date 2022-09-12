@@ -7,34 +7,38 @@
 			.match {
 				position: absolute;
 				left: 640px;
-				top: 12px;
-			}
-
-			.score,
-			.name,
-			.board,
-			.running_trt {
-				--offset: -1px;
-			}
-
-			.tetris_rate,
-			.runway,
-			.projection,
-			.eff,
-			.drought {
-				--offset: 257px;
+				top: 6px;
 			}
 
 			.name {
-				width: 281px;
-				top: 612px;
+				width: 282px;
+				height: 18px;
+				top: 573px;
 				--offset: 328px;
+
+				padding-top: 2px;
+				font-size: 16px;
+				line-height: 16px;
+			}
+
+			.flag,
+			.hearts {
+				top: 614px;
 			}
 
 			.hearts {
-				top: 575px;
-				width: 295px;
-				--offset: 342px;
+				width: 216px;
+				padding-top: 5px;
+				height: 25px;
+				--offset: 394px;
+
+				font-size: 24px;
+				line-height: 24px;
+			}
+
+			.flag {
+				height: 30px;
+				width: 45px;
 			}
 
 			.runway {
@@ -47,11 +51,23 @@
 				--offset: 435px;
 			}
 
+			.tetris_rate {
+				height: 71px;
+			}
+
+			.tetris_rate .content {
+				padding-top: 15px;
+			}
+
+			.running_trt {
+				height: 77px;
+			}
+
 			.player_vid {
-				top: 3px;
-				width: 374px;
-				height: 659px;
-				--offset: 266px;
+				top: -6px;
+				width: 377px;
+				height: 585px;
+				--offset: 263px;
 			}
 
 			/* Below are the styles for small display */
@@ -69,7 +85,8 @@
 			.match.small .runway,
 			.match.small .tetris_rate,
 			.match.small .eff,
-			.match.small .drought {
+			.match.small .drought,
+			.match.small .flag {
 				--offset: 258px;
 			}
 
@@ -93,11 +110,6 @@
 			.match.small .projection {
 				display: none;
 			}
-			.match.small .name {
-				top: 445px;
-				width: 400px;
-				--offset: 398px;
-			}
 			.match.small .tetris_rate {
 				top: 170px;
 				height: 40px;
@@ -117,16 +129,36 @@
 				width: 68px;
 				z-index: 1;
 			}
+
+			.match.small .hearts,
+			.match.small .name,
+			.match.small .flag {
+				top: 447px;
+			}
+
+			.match.small .name {
+				height: 24px;
+				width: 369px;
+
+				padding-top: 6px;
+				font-size: 20px;
+				line-height: 20px;
+
+				--offset: 324px;
+			}
 			.match.small .hearts {
-				top: 405px;
-				width: 683px;
-				--offset: 268px;
+				width: 200px;
+				--offset: 714px;
+			}
+			.match.small .flag {
+				width: 45px;
+				height: 30px;
 			}
 			.match.small video {
 				top: 0;
-				width: 683px;
-				height: 507px;
-				--offset: 267px;
+				width: 680px;
+				height: 453px;
+				--offset: 264px;
 			}
 
 			/* Magic to have a mirror display 💪 */
@@ -209,7 +241,9 @@
 						<div class="next_piece"></div>
 					</div>
 
-					<div class="hearts"></div>
+					<div class="box flag"></div>
+
+					<div class="box hearts"></div>
 				</div>
 			</template>
 		</div>
@@ -281,6 +315,7 @@
 							drought_box: player_node.querySelector(`.drought`),
 							runway_box: player_node.querySelector(`.runway`),
 							projection_box: player_node.querySelector(`.projection`),
+							flag: player_node.querySelector(`.flag`),
 						},
 						{
 							preview_pixel_size: 2,
