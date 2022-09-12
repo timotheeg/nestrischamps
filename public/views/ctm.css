@@ -142,6 +142,7 @@
 
 .board .level {
 	position: absolute;
+	line-height: 16px;
 	z-index: 100;
 }
 
