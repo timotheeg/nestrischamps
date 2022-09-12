@@ -42,19 +42,16 @@
 			}
 
 			.projection {
-				display: none;
+				/**/
+				display: none; /**/
+				--offset: 435px;
 			}
 
-			video {
-				position: absolute;
+			.player_vid {
 				top: 3px;
 				width: 374px;
 				height: 659px;
-				padding: 0;
-				object-fit: cover;
-
 				--offset: 266px;
-				right: var(--offset);
 			}
 
 			/* Below are the styles for small display */
@@ -134,10 +131,6 @@
 
 			/* Magic to have a mirror display 💪 */
 
-			.p2 > * {
-				left: var(--offset);
-			}
-
 			#branding {
 				position: absolute;
 				/* background: orange;
@@ -158,7 +151,7 @@
 
 			<template id="player">
 				<div class="player">
-					<video></video>
+					<video class="player_vid"></video>
 
 					<div class="box score">
 						<div>
@@ -167,7 +160,7 @@
 						</div>
 						<div>
 							<div class="diff">0000000</div>
-							<div class="tetris_diff">99.99</div>
+							<div class="tetris_diff">0.00</div>
 						</div>
 					</div>
 
@@ -176,7 +169,7 @@
 						<div class="content">
 							<div class="value">0000000</div>
 							<div class="diff">0000000</div>
-							<div class="tetris_diff">00.00</div>
+							<div class="tetris_diff">0.00</div>
 						</div>
 					</div>
 
@@ -185,8 +178,13 @@
 						<div class="content">
 							<div class="value">0000000</div>
 							<div class="diff">0000000</div>
-							<div class="tetris_diff">00.00</div>
+							<div class="tetris_diff">0.00</div>
 						</div>
+					</div>
+
+					<div class="box name">
+						<div class="header">PLAYER</div>
+						<div class="content"></div>
 					</div>
 
 					<div class="box tetris_rate">
@@ -196,16 +194,6 @@
 
 					<div class="box running_trt"></div>
 
-					<div class="box name">
-						<div class="header">PLAYER</div>
-						<div class="content"></div>
-					</div>
-
-					<div class="box board">
-						<div class="level"></div>
-						<div class="next_piece"></div>
-					</div>
-
 					<div class="box drought">
 						<div class="header">DRT</div>
 						<div class="value">99</div>
@@ -214,6 +202,11 @@
 					<div class="box eff">
 						<div class="header">EFF</div>
 						<div class="value">---</div>
+					</div>
+
+					<div class="box board">
+						<div class="level"></div>
+						<div class="next_piece"></div>
 					</div>
 
 					<div class="hearts"></div>
