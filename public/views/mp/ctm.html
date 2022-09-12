@@ -3,14 +3,6 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
-		<style>
-			.player_vid {
-				top: -5px;
-				width: 373px;
-				height: 720px;
-				--offset: 267px;
-			}
-		</style>
 	</head>
 	<body>
 		<template id="player">
@@ -73,7 +65,9 @@
 					<div class="next_piece"></div>
 				</div>
 
-				<div class="hearts"></div>
+				<div class="box flag"></div>
+
+				<div class="box hearts"></div>
 			</div>
 		</template>
 
@@ -143,6 +137,7 @@
 						drought_box: player_node.querySelector(`.drought`),
 						runway_box: player_node.querySelector(`.runway`),
 						projection_box: player_node.querySelector(`.projection`),
+						flag: player_node.querySelector(`.flag`),
 						video: player_node.querySelector(`.player_vid`),
 					},
 					{
