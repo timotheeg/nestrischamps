@@ -8,14 +8,14 @@
 .name,
 .board,
 .running_trt {
-	--offset: 10px;
+	--offset: 0px;
 	right: var(--offset);
 }
 
 .tetris_rate,
 .eff,
 .drought {
-	--offset: 268px;
+	--offset: 258px;
 	right: var(--offset);
 }
 
@@ -190,6 +190,6 @@
 	right: var(--offset);
 }
 
-.p2 {
+.p2 > * {
 	left: var(--offset);
 }
