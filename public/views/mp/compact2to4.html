@@ -7,7 +7,7 @@
 		<style>
 			#players {
 				position: absolute;
-				top: 0px;
+				top: 6px;
 			}
 
 			.player {
@@ -17,19 +17,21 @@
 			.box {
 				left: -3px;
 				font-size: 16px;
-				line-height: 20px;
+				line-height: 16px;
 			}
 
 			.score {
-				width: 235px;
+				--border-size: 15;
+				padding: 0 0 0 3px;
+				width: 230px;
 				height: 38px;
 			}
 
 			.score .value,
 			.score .lines,
+			.score .diff,
 			.score .tetris_diff {
-				padding-top: 0;
-				padding-bottom: 0;
+				padding: 0;
 				line-height: 20px;
 			}
 
@@ -45,9 +47,8 @@
 			}
 
 			.board .level {
-				top: 4px;
-				left: 4px;
-				line-height: 16px;
+				top: 3px;
+				left: 3px;
 			}
 
 			.runway,
@@ -66,6 +67,7 @@
 				width: 239px;
 				height: 37px;
 				top: 628px;
+				padding: 8px 0 4px;
 			}
 
 			.hearts {
@@ -80,14 +82,21 @@
 			.tetris_rate,
 			.eff,
 			.drought {
+				height: 43px;
+				left: 251px;
+				padding-top: 2px;
+			}
+
+			.players4 .tetris_rate,
+			.players4 .eff,
+			.players4 .drought {
 				--border-size: 12;
 				width: 47px;
-				left: 251px;
-				padding: 3px 2px;
+				padding: 5px 2px 3px;
 			}
 
 			.tetris_rate {
-				height: 54px;
+				height: 52px;
 				top: 553px;
 			}
 
@@ -95,14 +104,17 @@
 				padding-top: 10px;
 			}
 
-			.eff,
 			.drought {
 				top: 421px;
-				height: 45px;
 			}
 
 			.eff {
 				top: 487px;
+			}
+
+			.eff .value,
+			.drought .value {
+				padding-top: 6px;
 			}
 
 			.running_trt {
@@ -141,12 +153,14 @@
 
 			.players4 video.box {
 				position: absolute;
-				top: 628px;
+				top: 637px;
 				width: 57px;
-				height: 46px;
-				left: 251px;
-				border-image-slice: 0;
-				padding: 9px 9px 0 9px;
+				height: 58px;
+				left: 260px;
+				border: 0;
+				padding: 0;
+				/* background: yellow;
+				opacity: 0.5; /**/
 			}
 		</style>
 	</head>
