@@ -115,7 +115,7 @@
 	width: 50px;
 	height: 33px;
 
-	--offset: 328px;
+	--offset: 560px;
 	right: var(--offset);
 }
 
@@ -189,7 +189,7 @@
 
 .hearts {
 	position: absolute;
-	width: 210px;
+	width: 211px;
 	height: 27px;
 
 	color: #b0afb0;
@@ -199,7 +199,7 @@
 	letter-spacing: 8px;
 	text-align: center;
 
-	--offset: 399px;
+	--offset: 328px;
 	right: var(--offset);
 }
 

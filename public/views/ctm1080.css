@@ -29,6 +29,12 @@
 	top: 96px;
 }
 
+.board .level {
+	top: 3px;
+	font-size: 24px;
+	line-height: 24px;
+}
+
 .board .next_piece {
 	top: 3px;
 	right: 0;
@@ -91,20 +97,15 @@
 	padding-top: 11px;
 }
 
-.level {
-	top: 4px;
-	line-height: 24px;
-}
-
 .name,
 .hearts,
 .flag {
 	top: 952px;
 	width: 461px;
-	height: 41px;
+	height: 39px;
 	font-size: 32px;
 	line-height: 32px;
-	padding-top: 9px;
+	padding-top: 11px;
 }
 
 .hearts {
