@@ -91,10 +91,6 @@
 				height: 669px;
 				--offset: 377px;
 			}
-
-			.p2 > * {
-				left: var(--offset);
-			}
 		</style>
 	</head>
 	<body>
@@ -114,7 +110,7 @@
 						</div>
 						<div>
 							<div class="diff">0000000</div>
-							<div class="tetris_diff">99.9</div>
+							<div class="tetris_diff">0.00</div>
 						</div>
 					</div>
 
@@ -189,13 +185,13 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
+			const player_template = document.getElementById('player');
 			const players = [];
 
 			[1, 2].forEach(match_num => {
 				const match_node = document.getElementById(`match${match_num}`);
 
 				[1, 2].forEach((player_num, player_idx) => {
-					const player_template = document.getElementById('player');
 					const player_fragment = document.importNode(
 						player_template.content,
 						true
