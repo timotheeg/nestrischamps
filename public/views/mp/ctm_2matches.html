@@ -272,13 +272,13 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
+			const player_template = document.getElementById('player');
 			const players = [];
 
 			[1, 2].forEach(match_num => {
 				const match_node = document.getElementById(`match${match_num}`);
 
 				[1, 2].forEach((player_num, player_idx) => {
-					const player_template = document.getElementById('player');
 					const player_fragment = document.importNode(
 						player_template.content,
 						true

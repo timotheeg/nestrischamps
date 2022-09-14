@@ -97,9 +97,9 @@
 			import Competition from '/views/competition.js';
 
 			const players_node = document.querySelector('#playing_fields');
+			const player_template = document.getElementById('player');
 
 			const players = [1, 2].map(num => {
-				const player_template = document.getElementById('player');
 				const player_fragment = document.importNode(
 					player_template.content,
 					true
