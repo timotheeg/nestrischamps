@@ -15,7 +15,8 @@
 				right: var(--offset);
 			}
 
-			.score {
+			.score,
+			.runway.game {
 				width: 237px;
 				height: 97px;
 			}
@@ -25,6 +26,7 @@
 				font-size: 24px;
 				padding-bottom: 6px;
 			}
+
 			.aligner div {
 				text-align: right;
 				padding-top: 6px;
@@ -100,13 +102,19 @@
 			}
 
 			.runway.game {
-				width: 237px;
-				height: 97px;
 				top: 559px;
 			}
 
 			.runway.game .header {
 				line-height: 20px;
+			}
+
+			.flag {
+				top: 585px;
+				--offset: 529px;
+				right: var(--offset);
+				width: 75px;
+				height: 50px;
 			}
 
 			.p2 > * {
@@ -124,7 +132,7 @@
 				position: absolute;
 				top: 66px;
 				width: 373px;
-				height: 616px;
+				height: 499px;
 				padding: 0;
 				object-fit: cover;
 				/* background: yellow; /**/
@@ -214,6 +222,8 @@
 				</div>
 
 				<div class="box board"></div>
+
+				<div class="box flag"></div>
 			</div>
 		</template>
 

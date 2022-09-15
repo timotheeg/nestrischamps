@@ -21,7 +21,8 @@
 				right: var(--offset);
 			}
 
-			.score {
+			.score,
+			.runway.game {
 				width: 237px;
 				height: 97px;
 			}
@@ -107,13 +108,19 @@
 			}
 
 			.runway.game {
-				width: 237px;
-				height: 97px;
 				top: 623px;
 			}
 
 			.runway.game .header {
 				line-height: 20px;
+			}
+
+			.flag {
+				top: 648px;
+				--offset: 542px;
+				right: var(--offset);
+				width: 75px;
+				height: 50px;
 			}
 
 			.p2 > * {
@@ -123,6 +130,7 @@
 			.p2 .lines {
 				left: 0;
 			}
+
 			.p2 .next_piece {
 				left: 129px;
 			}
@@ -142,7 +150,7 @@
 				position: absolute;
 				left: -6px;
 				width: 12px;
-				height: 750px;
+				height: 626px;
 				background-color: #000;
 			}
 		</style>
@@ -203,6 +211,8 @@
 				</div>
 
 				<div class="box board"></div>
+
+				<div class="box flag"></div>
 			</div>
 		</template>
 
@@ -273,6 +283,8 @@
 						runway_box: player_node.querySelector(`.runway.game`),
 
 						video: player_node.querySelector(`.player_vid`),
+
+						flag: player_node.querySelector(`.flag`),
 					},
 					{
 						preview_pixel_size: 2,
