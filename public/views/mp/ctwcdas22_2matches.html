@@ -5,19 +5,20 @@
 		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
 		<link rel="stylesheet" type="text/css" href="/views/ctg2m.css" />
 		<style>
-			.name {
-				width: 217px;
-			}
-
 			.name,
 			.flag {
 				top: 595px;
+			}
+
+			.name {
+				padding: 0;
 			}
 
 			.flag {
 				--offset: 248px;
 				right: var(--offset);
 				width: 51px;
+				height: 34px;
 			}
 
 			.level {
@@ -27,6 +28,11 @@
 			.tetris_rate,
 			.drought {
 				top: 534px;
+				width: 51px;
+			}
+
+			video {
+				height: 659px;
 			}
 
 			/* Below are the styles for small display */
@@ -45,8 +51,8 @@
 			}
 			.match.small .name {
 				padding-top: 9px;
-				width: 528px;
-				height: 22px;
+				width: 527px;
+				height: 25px;
 				font-size: 24px;
 				--offset: 310px;
 			}
@@ -179,12 +185,12 @@
 			}
 
 			const players = [];
+			const player_template = document.getElementById('player');
 
 			[1, 2].forEach(match_num => {
 				const match_node = document.getElementById(`match${match_num}`);
 
 				[1, 2].forEach((player_num, player_idx) => {
-					const player_template = document.getElementById('player');
 					const player_fragment = document.importNode(
 						player_template.content,
 						true
