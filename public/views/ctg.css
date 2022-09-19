@@ -45,7 +45,7 @@
 	padding: 3px;
 	width: 217px;
 	height: 437px;
-	top: 145px;
+	top: 150px;
 	--offset: 23px;
 }
 
@@ -59,7 +59,7 @@
 .drought,
 .level,
 .flag {
-	top: 603px;
+	top: 608px;
 	width: 80px;
 	--offset: 261px;
 	right: var(--offset);
@@ -70,11 +70,11 @@
 }
 
 .level {
-	top: 532px;
+	top: 537px;
 }
 
 .lines {
-	top: 77px;
+	top: 82px;
 	padding-left: 3px;
 	width: 108px;
 	--offset: 135px;
@@ -85,19 +85,19 @@
 	line-height: 24px;
 }
 
-.lines.p2 {
+.p2 > .lines {
 	left: 23px;
 }
 
 .next_piece {
 	width: 103px;
 	height: 53px;
-	top: 77px;
+	top: 82px;
 	right: 23px;
 	padding-top: 0;
 }
 
-.next_piece.p2 {
+.p2 > .next_piece {
 	left: 143px;
 }
 
@@ -105,7 +105,7 @@
 	padding-top: 5px;
 	height: 48px;
 	width: 223px;
-	top: 15px;
+	top: 20px;
 	--offset: 23px;
 	text-align: center;
 }
@@ -131,7 +131,7 @@
 
 .name {
 	--offset: 23px;
-	top: 603px;
+	top: 608px;
 	width: 223px;
 	height: 53px;
 }
@@ -154,8 +154,8 @@
 .runway.transition {
 	display: block;
 	width: 172px;
-	top: 15px;
-	--offset: 261px;
+	top: 20px;
+	--offset: 262px;
 	right: var(--offset);
 }
 
@@ -168,11 +168,9 @@
 }
 
 .player_vid {
-	position: absolute;
 	top: 11px;
 	width: 385px;
 	height: 662px;
-	object-fit: cover;
 }
 
 .player_vid.p1 {
@@ -185,7 +183,7 @@
 
 .handcam {
 	position: absolute;
-	top: 520px;
+	top: 525px;
 	width: 167px;
 	height: 121px;
 	object-fit: cover;
