@@ -222,12 +222,6 @@ video {
 	height: 467px;
 }
 
-/* Magic to have a mirror display 💪 */
-
-.p2 > * {
-	left: var(--offset);
-}
-
 /* Annoying rules for the non-symmetry or lines and next_piece T_T */
 
 .p2 > .lines {
