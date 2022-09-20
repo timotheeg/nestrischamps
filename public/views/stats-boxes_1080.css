@@ -143,7 +143,7 @@ i {
 }
 
 .hgauge th {
-	font-size: 8px;
+	font-size: 12px;
 }
 
 .hgauge .value {
@@ -336,7 +336,7 @@ i {
 
 #lines_stats th {
 	text-align: left;
-	font-size: 8px;
+	font-size: 12px;
 }
 
 #lines_stats td {
@@ -364,7 +364,7 @@ i {
 
 #points th {
 	text-align: left;
-	font-size: 8px;
+	font-size: 12px;
 }
 
 #points .drops th {
@@ -421,7 +421,7 @@ i {
 
 #pbs th {
 	padding: 0;
-	font-size: 8px;
+	font-size: 12px;
 	text-align: center;
 }
 
@@ -457,7 +457,7 @@ i {
 
 #high_scores th {
 	line-height: 16px;
-	font-size: 8px;
+	font-size: 12px;
 	vertical-align: bottom;
 }
 
