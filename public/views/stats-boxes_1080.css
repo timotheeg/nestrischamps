@@ -328,10 +328,15 @@ i {
 	border-width: 1px 0 0 0;
 }
 
+#lines_stats,
+#points {
+	left: 706px;
+	width: 375px;
+	line-height: 32px;
+}
+
 #lines_stats {
-	left: 486px;
-	width: 250px;
-	height: 120px;
+	height: 180px;
 }
 
 #lines_stats th {
@@ -356,10 +361,8 @@ i {
 }
 
 #points {
-	top: 150px;
-	left: 486px;
-	width: 250px;
-	height: 142px;
+	top: 230px;
+	height: 213px;
 }
 
 #points th {
@@ -405,10 +408,13 @@ i {
 	object-fit: cover;
 }
 
+#pbs,
+#high_scores {
+	width: 672px;
+}
+
 #pbs {
-	left: 3px;
-	width: 456px;
-	height: 85px;
+	height: 116px;
 }
 
 #pbs .header {
@@ -417,6 +423,10 @@ i {
 
 #pbs .content {
 	margin: 0 auto;
+}
+
+#pbs tbody {
+	line-height: 28px;
 }
 
 #pbs th {
@@ -432,9 +442,8 @@ i {
 }
 
 #high_scores {
-	top: 115px;
-	width: 456px;
-	height: 177px;
+	top: 150px;
+	height: 293px;
 }
 
 #high_scores table {
@@ -469,7 +478,7 @@ i {
 }
 
 #high_scores td table {
-	line-height: 21px;
+	line-height: 30px;
 }
 
 #chat {
