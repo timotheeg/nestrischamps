@@ -1,0 +1,502 @@
+#stream_bg {
+	background-color: #000;
+	width: 1920px;
+	height: 1080px;
+}
+
+#tetris_stage,
+#droughts,
+#score {
+	left: 1112px;
+}
+
+#tetris_stage {
+	top: 115px;
+	width: 395px;
+	height: 795px;
+}
+
+.box {
+	width: 160px;
+	height: 61px;
+	padding: 2px;
+
+	font-size: 24px;
+	line-height: 24px;
+
+	--border-size: 12;
+	border-image-source: url('/views/border_no_black_3px.png');
+}
+
+.box .header {
+	padding: 2px 0 9px;
+}
+
+i {
+	font-size: 12px;
+	font-style: normal;
+}
+
+.external {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: grey;
+}
+
+.bounded {
+	border-style: dashed;
+	border-color: #505050;
+	border-width: 1px 0;
+}
+
+#runway,
+#chat,
+#lines,
+#efficiency,
+#tetris_rate,
+#video {
+	left: 1538px;
+}
+
+#runway,
+#score,
+#next_piece,
+#pbs,
+#lines_stats {
+	top: 3px;
+}
+
+#pbs,
+#high_scores,
+#piece_stats,
+#das,
+#board_stats {
+	left: 3px;
+}
+
+#tetris_rate {
+	top: 279px;
+	width: 355px;
+	height: 165px;
+	padding-right: 0;
+	padding-left: 0;
+}
+
+#runway {
+	width: 351px;
+}
+
+#lines,
+#level {
+	top: 95px;
+}
+
+#level,
+#burn {
+	left: 1729px;
+}
+
+#efficiency,
+#burn {
+	top: 187px;
+}
+
+#score {
+	width: 200px;
+	height: 81px;
+	padding: 2px 0;
+}
+
+#score .header {
+	padding-bottom: 6px;
+}
+
+#score .content {
+	margin: auto;
+	text-align: left;
+}
+
+#score .content th {
+	font-size: 12px;
+	padding-right: 0px;
+}
+
+#score .content td.value {
+	text-align: right;
+	white-space: pre;
+}
+
+#droughts {
+	top: 941px;
+	width: 395px;
+	height: 108px;
+}
+
+#droughts .header {
+	padding-bottom: 4px;
+}
+
+#droughts .content {
+	text-align: left;
+}
+
+.hgauge th {
+	font-size: 8px;
+}
+
+.hgauge .value {
+	padding-left: 2px;
+}
+
+.panic .current .value {
+	animation: panic_colorize_wr 0.65s infinite;
+	animation-direction: alternate;
+}
+
+.max_panic .current .value,
+.max_panic .max .value {
+	animation: panic_colorize_wr 0.65s infinite;
+	animation-direction: alternate;
+}
+
+@keyframes panic_colorize_wr {
+	from {
+		color: white;
+	}
+	to {
+		color: red;
+	}
+}
+
+#piece_stats {
+	top: 474px;
+	height: 234px;
+}
+
+#piece_stats .content {
+	font-size: 12px;
+	line-height: 12px;
+	border-spacing: 3px;
+}
+
+#piece_stats .headers .header {
+	font-size: 24px;
+	line-height: 30px;
+	padding-bottom: 3px;
+}
+
+#piece_stats .content .headers th {
+	vertical-align: bottom;
+}
+
+#piece_stats .content .piece th {
+	display: inline-block;
+	background: url(/views/pieces_sprites.png);
+	background-repeat: no-repeat;
+	background-position-x: 0px;
+	background-size: 396px 164px;
+	--width: 36px;
+	--height: 24px;
+	width: var(--width);
+	height: var(--height);
+}
+
+#piece_stats.l0 .content .piece th {
+	background-position-x: calc(-1 * var(--width));
+}
+
+#piece_stats.l1 .content .piece th {
+	background-position-x: calc(-2 * var(--width));
+}
+
+#piece_stats.l2 .content .piece th {
+	background-position-x: calc(-3 * var(--width));
+}
+
+#piece_stats.l3 .content .piece th {
+	background-position-x: calc(-4 * var(--width));
+}
+
+#piece_stats.l4 .content .piece th {
+	background-position-x: calc(-5 * var(--width));
+}
+
+#piece_stats.l5 .content .piece th {
+	background-position-x: calc(-6 * var(--width));
+}
+
+#piece_stats.l6 .content .piece th {
+	background-position-x: calc(-7 * var(--width));
+}
+
+#piece_stats.l7 .content .piece th {
+	background-position-x: calc(-8 * var(--width));
+}
+
+#piece_stats.l8 .content .piece th {
+	background-position-x: calc(-9 * var(--width));
+}
+
+#piece_stats.l9 .content .piece th {
+	background-position-x: calc(-10 * var(--width));
+}
+
+#piece_stats .content .piece.T th {
+	background-position-y: 0px;
+}
+
+#piece_stats .content .piece.J th {
+	background-position-y: calc(-1 * var(--height));
+}
+
+#piece_stats .content .piece.Z th {
+	background-position-y: calc(-2 * var(--height));
+}
+
+#piece_stats .content .piece.O th {
+	background-position-y: calc(-3 * var(--height));
+}
+
+#piece_stats .content .piece.S th {
+	background-position-y: calc(-4 * var(--height));
+}
+
+#piece_stats .content .piece.L th {
+	background-position-y: calc(-5 * var(--height));
+}
+
+#piece_stats .content .piece.I th {
+	background-position-y: calc(-6 * var(--height));
+}
+
+#piece_stats .content .count {
+	padding-left: 9px;
+}
+
+#piece_stats .content .drought {
+	color: lightgrey;
+	padding-left: 4px;
+}
+
+#piece_stats .content .percent {
+	padding-right: 6px;
+	padding-left: 9px;
+}
+
+#piece_stats .content th.percent {
+	text-align: center;
+}
+
+#das,
+#board_stats,
+#piece_stats {
+	width: 1082px;
+	padding: 2px 0;
+}
+
+#das {
+	top: 739px;
+	height: 117px;
+}
+
+#das .header {
+	padding-bottom: 6px;
+}
+
+#das .gauge canvas {
+	border-style: solid;
+	border-color: #505050;
+	border-width: 1px 1px;
+}
+
+#board_stats {
+	top: 887px;
+	height: 162px;
+}
+
+#board_stats .header {
+	padding-bottom: 5px;
+}
+
+#board_stats .header .info_labels {
+	font-size: 12px;
+}
+
+#board_stats .bounded {
+	border-width: 1px 0 0 0;
+}
+
+#lines_stats {
+	left: 486px;
+	width: 250px;
+	height: 120px;
+}
+
+#lines_stats th {
+	text-align: left;
+	font-size: 8px;
+}
+
+#lines_stats td {
+	text-align: right;
+	padding-left: 13px;
+	white-space: pre;
+}
+
+#lines_stats .tetris_rate {
+	padding-top: 9px;
+}
+
+#lines_stats .tetris_rate canvas {
+	border-style: dashed;
+	border-color: #505050;
+	border-width: 1px 0;
+}
+
+#points {
+	top: 150px;
+	left: 486px;
+	width: 250px;
+	height: 142px;
+}
+
+#points th {
+	text-align: left;
+	font-size: 8px;
+}
+
+#points .drops th {
+	color: #747474;
+}
+
+#points td {
+	text-align: right;
+	padding-left: 13px;
+}
+
+#points td.count {
+	width: 115px;
+}
+
+#next_piece {
+	width: 172px;
+	height: 81px;
+	left: 1339px;
+	padding: 2px 0;
+}
+
+#next_piece .header {
+	padding-bottom: 4px;
+}
+
+#video {
+	top: 475px;
+	width: 355px;
+	height: 198px;
+	line-height: 32px;
+	padding: 0;
+}
+
+#video video {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+#pbs {
+	left: 3px;
+	width: 456px;
+	height: 85px;
+}
+
+#pbs .header {
+	padding-bottom: 0px;
+}
+
+#pbs .content {
+	margin: 0 auto;
+}
+
+#pbs th {
+	padding: 0;
+	font-size: 8px;
+	text-align: center;
+}
+
+#pbs td {
+	text-align: center;
+	padding: 0 9px;
+	white-space: pre;
+}
+
+#high_scores {
+	top: 115px;
+	width: 456px;
+	height: 177px;
+}
+
+#high_scores table {
+	border-spacing: 1px;
+}
+
+#high_scores .header {
+	padding-bottom: 6px;
+}
+
+#high_scores td.session,
+#high_scores td.overall {
+	vertical-align: top;
+	width: 220px;
+}
+
+#high_scores td.session {
+	padding-right: 16px;
+}
+
+#high_scores th {
+	line-height: 16px;
+	font-size: 8px;
+	vertical-align: bottom;
+}
+
+#high_scores td td {
+	vertical-align: top;
+	padding: 0 4px;
+	text-align: right;
+	white-space: pre;
+}
+
+#high_scores td table {
+	line-height: 21px;
+}
+
+#chat {
+	top: 700px;
+	width: 351px;
+	height: 349px;
+	overflow: hidden;
+}
+
+#chat .header {
+	padding-bottom: 6px;
+}
+
+#chat .content {
+	font-size: 16px;
+	line-height: 16px;
+	width: 100%;
+	height: 183px;
+	overflow: hidden;
+	text-align: left;
+}
+
+#chat .content p {
+	margin-top: 0;
+	margin-bottom: 6px;
+}
+
+#chat .content .text {
+	font-family: 'Press Start', monospace;
+}
