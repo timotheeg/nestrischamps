@@ -19,7 +19,8 @@ import {
 	peerServerOptions,
 } from '/views/constants.js';
 
-export const BLOCK_PIXEL_SIZE = 3;
+export const BLOCK_PIXEL_SIZE_STAGE = 5;
+export const BLOCK_PIXEL_SIZE_NEXT = 3;
 
 const dom = new DomRefs(document);
 
@@ -242,8 +243,7 @@ function renderPastGamesAndPBs(data) {
 	});
 
 	// Disgusting hardcoded values below T_T
-	const num_scores_to_show =
-		dom.high_scores.element.clientHeight > 200 ? 10 : 5;
+	const num_scores_to_show = dom.high_scores.element.clientHeight > 200 ? 7 : 5;
 
 	// high scores
 	['session', 'overall'].forEach(category => {
@@ -381,7 +381,7 @@ function renderLines(frame) {
 
 	// Update running tetris rate graph
 	const trt_ctx = dom.lines_stats.trt_ctx,
-		pixel_size = 4,
+		pixel_size = 5,
 		max_pixels = Math.floor(trt_ctx.canvas.width / (pixel_size + 1)),
 		y_scale = (trt_ctx.canvas.height - pixel_size) / pixel_size,
 		to_draw = frame.clears.slice(-1 * max_pixels);
@@ -465,7 +465,7 @@ function renderPiece(frame) {
 	);
 
 	// Render piece distribution graphs
-	let pixel_size = 4,
+	let pixel_size = 5,
 		max_pixels = Math.floor(dom.pieces.T.ctx.canvas.width / (pixel_size + 1)),
 		draw_start = Math.max(0, frame.pieces.length - max_pixels);
 
@@ -544,7 +544,7 @@ function renderPiece(frame) {
 		.toString()
 		.padStart(2, '0');
 
-	pixel_size = 2;
+	pixel_size = 3;
 	max_pixels = Math.floor(dom.droughts.cur.ctx.canvas.width / (pixel_size + 1));
 
 	const color = 'orange',
@@ -613,7 +613,7 @@ function renderInstantDas(das) {
 	dom.das.instant.textContent = das.toString().padStart(2, '0');
 
 	const ctx = dom.das.gauge_ctx,
-		pixel_size = 3,
+		pixel_size = 4,
 		height = dom.das.gauge_ctx.canvas.height;
 
 	// TODO: optimize!
@@ -646,7 +646,7 @@ function renderDasNBoardStats(frame) {
 
 	dom.board_stats.ctx.clear();
 
-	const pixel_size = 4,
+	const pixel_size = 5,
 		max_pixels = Math.floor(
 			dom.board_stats.ctx.canvas.width / (pixel_size + 1)
 		),
@@ -655,7 +655,12 @@ function renderDasNBoardStats(frame) {
 	let cur_x = 0;
 
 	dom.board_stats.ctx.fillStyle = BOARD_COLORS.floor;
-	dom.board_stats.ctx.fillRect(0, 60, dom.board_stats.ctx.canvas.width, 1);
+	dom.board_stats.ctx.fillRect(
+		0,
+		pixel_size * 20,
+		dom.board_stats.ctx.canvas.width,
+		1
+	);
 
 	for (let idx = 0; idx < to_draw.length; idx++) {
 		const piece = to_draw[idx];
@@ -695,7 +700,7 @@ function renderDasNBoardStats(frame) {
 				idx * (pixel_size + 1) + pixel_size,
 				0,
 				1,
-				60
+				100
 			);
 		}
 
@@ -704,9 +709,9 @@ function renderDasNBoardStats(frame) {
 		for (let yidx = 20; yidx-- > board_stats.top_idx; ) {
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1),
-				yidx * (pixel_size - 1),
+				yidx * pixel_size,
 				pixel_size,
-				2
+				pixel_size - 1
 			);
 		}
 
@@ -714,7 +719,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.tetris_ready;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				62,
+				pixel_size * 20 + 2,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -724,7 +729,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.clean_slope;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				67,
+				pixel_size * 20 + 2 + pixel_size + 1,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -734,7 +739,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.double_well;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				72,
+				pixel_size * 20 + 2 + (pixel_size + 1) * 2,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -744,7 +749,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.drought;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				77,
+				pixel_size * 20 + 2 + (pixel_size + 1) * 3,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -779,7 +784,7 @@ function renderStage(frame, force = false) {
 	}
 
 	const ctx = dom.stage.ctx,
-		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1);
+		pixels_per_block = BLOCK_PIXEL_SIZE_STAGE * (7 + 1);
 
 	ctx.clear();
 
@@ -788,7 +793,7 @@ function renderStage(frame, force = false) {
 			renderBlock(
 				last_level,
 				field[y * 10 + x],
-				BLOCK_PIXEL_SIZE,
+				BLOCK_PIXEL_SIZE_STAGE,
 				ctx,
 				x * pixels_per_block,
 				y * pixels_per_block
@@ -812,9 +817,9 @@ function renderNextPiece(level, next_piece) {
 
 	const ctx = dom.next.ctx,
 		col_index = PIECE_COLORS[next_piece],
-		pixels_per_block = BLOCK_PIXEL_SIZE * (7 + 1),
+		pixels_per_block = BLOCK_PIXEL_SIZE_NEXT * (7 + 1),
 		x_offset_3 = Math.floor(
-			(ctx.canvas.width - pixels_per_block * 3 + BLOCK_PIXEL_SIZE) / 2
+			(ctx.canvas.width - pixels_per_block * 3 + BLOCK_PIXEL_SIZE_NEXT) / 2
 		),
 		positions = [];
 
@@ -826,7 +831,7 @@ function renderNextPiece(level, next_piece) {
 
 	switch (next_piece) {
 		case 'I':
-			pos_y = Math.floor((ctx.canvas.height - BLOCK_PIXEL_SIZE * 7) / 2);
+			pos_y = Math.floor((ctx.canvas.height - BLOCK_PIXEL_SIZE_NEXT * 7) / 2);
 
 			positions.push([x_idx++ * pixels_per_block, pos_y]);
 			positions.push([x_idx++ * pixels_per_block, pos_y]);
@@ -836,7 +841,7 @@ function renderNextPiece(level, next_piece) {
 
 		case 'O':
 			pos_x = Math.floor(
-				(ctx.canvas.width - pixels_per_block * 2 + BLOCK_PIXEL_SIZE) / 2
+				(ctx.canvas.width - pixels_per_block * 2 + BLOCK_PIXEL_SIZE_NEXT) / 2
 			);
 
 			positions.push([pos_x, pos_y]);
@@ -885,7 +890,7 @@ function renderNextPiece(level, next_piece) {
 	}
 
 	positions.forEach(([pos_x, pos_y]) => {
-		renderBlock(level, col_index, BLOCK_PIXEL_SIZE, ctx, pos_x, pos_y);
+		renderBlock(level, col_index, BLOCK_PIXEL_SIZE_NEXT, ctx, pos_x, pos_y);
 	});
 }
 

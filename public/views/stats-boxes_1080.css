@@ -110,7 +110,7 @@ i {
 }
 
 #score .header {
-	padding-bottom: 6px;
+	padding-bottom: 5px;
 }
 
 #score .content {
@@ -120,7 +120,7 @@ i {
 
 #score .content th {
 	font-size: 12px;
-	padding-right: 0px;
+	padding-right: 4px;
 }
 
 #score .content td.value {
@@ -170,9 +170,17 @@ i {
 	}
 }
 
+#das,
+#board_stats,
 #piece_stats {
-	top: 474px;
-	height: 234px;
+	width: 1082px;
+	padding: 2px 0;
+}
+
+#piece_stats {
+	top: 482px;
+	height: 228px;
+	padding-top: 0;
 }
 
 #piece_stats .content {
@@ -289,13 +297,6 @@ i {
 	text-align: center;
 }
 
-#das,
-#board_stats,
-#piece_stats {
-	width: 1082px;
-	padding: 2px 0;
-}
-
 #das {
 	top: 739px;
 	height: 117px;
@@ -335,8 +336,13 @@ i {
 	line-height: 32px;
 }
 
+#lines_stats table,
+#points table {
+	margin: auto;
+}
+
 #lines_stats {
-	height: 180px;
+	height: 186px;
 }
 
 #lines_stats th {
@@ -346,7 +352,7 @@ i {
 
 #lines_stats td {
 	text-align: right;
-	padding-left: 13px;
+	padding-left: 20px;
 	white-space: pre;
 }
 
@@ -361,8 +367,8 @@ i {
 }
 
 #points {
-	top: 230px;
-	height: 213px;
+	top: 220px;
+	height: 231px;
 }
 
 #points th {
@@ -376,11 +382,11 @@ i {
 
 #points td {
 	text-align: right;
-	padding-left: 13px;
+	padding-left: 20px;
 }
 
 #points td.count {
-	width: 115px;
+	width: 165px;
 }
 
 #next_piece {
@@ -391,7 +397,7 @@ i {
 }
 
 #next_piece .header {
-	padding-bottom: 4px;
+	padding-bottom: 6px;
 }
 
 #video {
@@ -426,7 +432,7 @@ i {
 }
 
 #pbs tbody {
-	line-height: 28px;
+	line-height: 30px;
 }
 
 #pbs th {
@@ -443,7 +449,7 @@ i {
 
 #high_scores {
 	top: 150px;
-	height: 293px;
+	height: 301px;
 }
 
 #high_scores table {
@@ -461,7 +467,7 @@ i {
 }
 
 #high_scores td.session {
-	padding-right: 16px;
+	padding-right: 28px;
 }
 
 #high_scores th {
@@ -478,7 +484,7 @@ i {
 }
 
 #high_scores td table {
-	line-height: 30px;
+	line-height: 33px;
 }
 
 #chat {
