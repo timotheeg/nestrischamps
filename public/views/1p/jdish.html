@@ -66,7 +66,7 @@
 			.box {
 				font-size: 24px;
 				line-height: 24px;
-				width: 120px;
+				width: 178px;
 				height: 68px;
 				padding: 6px;
 			}
@@ -82,32 +82,40 @@
 				padding: 0;
 			}
 
+			.score,
+			.next_piece,
+			.drought {
+				top: 0;
+			}
+
 			.board {
 				--border-size: 12;
 				padding: 3px;
 				width: 395px;
 				height: 795px;
-				top: 90px;
+				top: 96px;
 			}
 
 			.next_piece {
-				width: 140px;
-				height: 66px;
-				top: 0;
-				padding-top: 3px;
-				padding-left: 3px;
+				width: 138px;
+				height: 70px;
+				padding-top: 5px;
+				padding-left: 5px;
+			}
+
+			.running_trt,
+			.tetris_rate {
+				top: 912px;
 			}
 
 			.running_trt {
 				--border-size: 15;
-				top: 906px;
 				width: 395px;
 				height: 114px;
 			}
 
 			.score,
 			.runway {
-				top: 90px;
 				width: 284px;
 			}
 
@@ -129,7 +137,6 @@
 			}
 
 			.tetris_rate {
-				top: 906px;
 				height: 102px;
 			}
 
@@ -138,7 +145,7 @@
 			}
 
 			.efficiency {
-				top: 805px;
+				top: 811px;
 			}
 
 			.lines {
@@ -147,17 +154,17 @@
 
 			.level {
 				top: 494px;
-				width: 80px;
+				width: 120px;
 			}
 
 			.drought {
-				top: 0;
-				height: 66px;
-				padding: 15px 21px 18px 21px;
-				width: 92px;
+				padding-top: 5px;
+				height: 64px;
+				width: 120px;
 			}
 
 			.drought .header {
+				line-height: 23px;
 				padding-bottom: 0.5em;
 			}
 
@@ -203,12 +210,12 @@
 				</div>
 
 				<div class="box tetris_rate">
-					<div class="header">TRT</div>
+					<div class="header">TETRIS RATE</div>
 					<div class="content">---</div>
 				</div>
 
 				<div class="box efficiency">
-					<div class="header">EFF</div>
+					<div class="header">EFFICIENCY</div>
 					<div class="content">---</div>
 				</div>
 
@@ -216,7 +223,7 @@
 				<div class="box next_piece"></div>
 
 				<div class="box drought">
-					<div class="header">DRT</div>
+					<div class="header">DROUGHT</div>
 					<div class="content">99</div>
 				</div>
 
