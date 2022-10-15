@@ -31,16 +31,16 @@
 			<div class="player">
 				<div class="box no-border score">
 					<div class="aligner">
-						<div class="header">0000000</div>
-						<div class="value">0000000</div>
+						<div class="header">0&#x202F;000&#x202F;000</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 
 				<div class="box no-border runway">
 					<div class="header">RUNWAY</div>
 					<div class="content">
-						<div class="value">000000</div>
-						<div class="diff">000000</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
+						<div class="diff">0&#x202F;000&#x202F;000</div>
 						<div class="tetris_diff">000</div>
 					</div>
 				</div>
@@ -48,8 +48,8 @@
 				<div class="box no-border projection">
 					<div class="header">PROJECTION</div>
 					<div class="content">
-						<div class="value">000000</div>
-						<div class="diff">000000</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
+						<div class="diff">0&#x202F;000&#x202F;000</div>
 						<div class="tetris_diff">000</div>
 					</div>
 				</div>
@@ -89,7 +89,7 @@
 
 				<div class="box no-border runway transition">
 					<div class="header">TR RUNWAY</div>
-					<div class="content">0000000</div>
+					<div class="content">000&#x202F;000</div>
 				</div>
 
 				<video class="box handcam"></video>
@@ -131,7 +131,7 @@
 		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
@@ -208,17 +208,7 @@
 						preview_pixel_size: 2.3,
 						preview_align: 'cc',
 						stereo: translate([1, 2], [-1, 1], num),
-						/*
-						format_score: v => {
-							const parts = [];
-							while (v) {
-								parts.unshift(v % 1000);
-								v = Math.floor(v / 1000);
-							}
-
-							return parts.length ? parts.join(' ') : '0';
-						},
-						/**/
+						format_score: readableScoreFomatter,
 					}
 				);
 
