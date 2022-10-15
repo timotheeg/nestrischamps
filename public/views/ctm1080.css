@@ -37,7 +37,7 @@
 
 .board .next_piece {
 	top: 3px;
-	right: 0;
+	right: 3px;
 	width: 96px;
 	height: 48px;
 }

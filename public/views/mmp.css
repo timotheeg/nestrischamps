@@ -65,7 +65,8 @@
 
 .board .next_piece {
 	position: absolute;
-	right: -2px;
+	top: o;
+	right: 0;
 	width: 64px;
 	height: 32px;
 	z-index: 2;

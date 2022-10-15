@@ -864,11 +864,17 @@ export default class Player {
 		if (this.options.preview_align == 'tr') {
 			// top-right alignment
 			pos_y = 0;
-			x_offset_3 = Math.ceil(ctx.canvas.width - pixels_per_block * 3);
+			x_offset_3 = Math.ceil(
+				ctx.canvas.width - (3 * 8 - 1) * this.preview_pixel_size
+			);
 		} else {
 			// default is center
-			pos_y = Math.ceil((ctx.canvas.height - pixels_per_block * 2) / 2);
-			x_offset_3 = Math.ceil((ctx.canvas.width - pixels_per_block * 3) / 2);
+			pos_y = Math.ceil(
+				(ctx.canvas.height - (2 * 8 - 1) * this.preview_pixel_size) / 2
+			);
+			x_offset_3 = Math.ceil(
+				(ctx.canvas.width - (3 * 8 - 1) * this.preview_pixel_size) / 2
+			);
 		}
 
 		let x_idx = 0;
@@ -876,27 +882,32 @@ export default class Player {
 		switch (preview) {
 			case 'I':
 				if (this.options.preview_align == 'tr') {
-					pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 4);
+					pos_x = Math.ceil(
+						ctx.canvas.width - (4 * 8 - 1) * this.preview_pixel_size
+					);
 				} else {
-					pos_x = Math.ceil((ctx.canvas.width - pixels_per_block * 4) / 2);
-					pos_y = Math.ceil((ctx.canvas.height - pixels_per_block) / 2);
+					pos_x = Math.ceil(
+						(ctx.canvas.width - (4 * 8 - 1) * this.preview_pixel_size) / 2
+					);
+					pos_y = Math.ceil(
+						(ctx.canvas.height - (1 * 8 - 1) * this.preview_pixel_size) / 2
+					);
 				}
 
-				positions.push([pos_x + pixels_per_block * 0, pos_y]);
-				positions.push([pos_x + pixels_per_block * 1, pos_y]);
-				positions.push([pos_x + pixels_per_block * 2, pos_y]);
-				positions.push([pos_x + pixels_per_block * 3, pos_y]);
+				positions.push([pos_x + 0 * pixels_per_block, pos_y]);
+				positions.push([pos_x + 1 * pixels_per_block, pos_y]);
+				positions.push([pos_x + 2 * pixels_per_block, pos_y]);
+				positions.push([pos_x + 3 * pixels_per_block, pos_y]);
 				break;
 
 			case 'O':
 				if (this.options.preview_align == 'tr') {
-					pos_x = Math.ceil(ctx.canvas.width - pixels_per_block * 2);
+					pos_x = Math.ceil(
+						ctx.canvas.width - (2 * 8 - 1) * this.preview_pixel_size
+					);
 				} else {
 					pos_x = Math.ceil(
-						(ctx.canvas.width -
-							pixels_per_block * 2 +
-							this.preview_pixel_size) /
-							2
+						(ctx.canvas.width - (2 * 8 - 1) * this.preview_pixel_size) / 2
 					);
 				}
 
@@ -910,16 +921,16 @@ export default class Player {
 			case 'J':
 			case 'L':
 				// top line is the same for both pieces
-				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
-				positions.push([x_offset_3 + x_idx++ * pixels_per_block, pos_y]);
-				positions.push([x_offset_3 + x_idx * pixels_per_block, pos_y]);
+				positions.push([x_offset_3 + 0 * pixels_per_block, pos_y]);
+				positions.push([x_offset_3 + 1 * pixels_per_block, pos_y]);
+				positions.push([x_offset_3 + 2 * pixels_per_block, pos_y]);
 
 				if (preview == 'L') {
 					x_idx = 0;
 				} else if (preview == 'T') {
 					x_idx = 1;
 				} else {
-					x_idx = 2;
+					x_idx = 2; // J
 				}
 
 				positions.push([

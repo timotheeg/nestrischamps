@@ -214,10 +214,13 @@ html {
 .next_piece {
 	position: absolute;
 
-	top: calc(112px * var(--nes_pixel_size));
-	left: calc(192px * var(--nes_pixel_size));
-	width: calc(32px * var(--nes_pixel_size));
-	height: calc(16px * var(--nes_pixel_size));
+	/* position and size account for center-rendering done by NTC,
+	where the right and bottom border is ignored */
+
+	top: calc(111px * var(--nes_pixel_size));
+	left: calc(191px * var(--nes_pixel_size));
+	width: calc(33px * var(--nes_pixel_size));
+	height: calc(17px * var(--nes_pixel_size));
 }
 
 .board {
