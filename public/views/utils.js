@@ -48,3 +48,18 @@ export function translate(iRange, oRange, value) {
 	const ratio = (value - iRange[0]) / (iRange[1] - iRange[0]);
 	return oRange[0] + ratio * (oRange[1] - oRange[0]);
 }
+
+export function readableScoreFomatter(score) {
+	if (isNaN(score) || score === 0) return '0';
+
+	const parts = [];
+
+	while (score) {
+		const chunk = score % 1000;
+
+		score = Math.floor(score / 1000);
+		parts.unshift(score ? `${chunk}`.padStart(3, '0') : chunk);
+	}
+
+	return parts.join('\u202F'); // narrow non-breakable space
+}

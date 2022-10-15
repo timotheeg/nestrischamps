@@ -12,12 +12,12 @@
 			.board,
 			.name,
 			.running_trt {
+				width: 237px;
 				--offset: 7px;
 				right: var(--offset);
 			}
 
 			.score {
-				width: 237px;
 				height: 54px;
 				font-size: 24px;
 			}
@@ -31,13 +31,11 @@
 			}
 
 			.board {
-				width: 237px;
 				height: 477px;
 				top: 75px;
 			}
 
 			.name {
-				width: 237px;
 				top: 573px;
 			}
 
@@ -118,7 +116,7 @@
 				right: var(--offset);
 			}
 
-			.p2 {
+			.p2 > * {
 				left: var(--offset);
 			}
 
@@ -139,100 +137,55 @@
 		</style>
 	</head>
 	<body>
-		<div id="stream_bg">
-			<div id="playing_fields">
-				<!-- divider -->
+		<template id="player">
+			<div class="player">
+				<video class="player_vid"></video>
 
-				<div class="divider">v</div>
-
-				<video class="player_vid p1"></video>
-				<video class="player_vid p2"></video>
-
-				<!-- Player 1 -->
-
-				<div class="box score p1">
+				<div class="box score">
 					<div class="aligner">
-						<div class="main">000,000</div>
-						<div class="diff winning">000,000</div>
+						<div class="main">0&#x202F;000&#x202F;000</div>
+						<div class="diff winning">0&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 
-				<div class="box lines p1">
+				<div class="box lines">
 					<div class="header">LINES</div>
 					<div class="content">000</div>
 				</div>
 
-				<div class="box next_piece p1"></div>
+				<div class="box next_piece"></div>
 
-				<div class="box level p1">
+				<div class="box level">
 					<div class="header">LV</div>
 					<div class="content">00</div>
 				</div>
 
-				<div class="box tetris_rate p1">
+				<div class="box tetris_rate">
 					<div class="header">TRT</div>
 					<div class="content">---</div>
 				</div>
 
-				<div class="box running_trt p1"></div>
+				<div class="box running_trt"></div>
 
-				<div class="box name p1">
-					<div class="header">PLAYER 1</div>
+				<div class="box name">
+					<div class="header">PLAYER</div>
 					<div class="content">&#338;&#338;&#338;</div>
 				</div>
 
-				<div class="box board p1"></div>
+				<div class="box board"></div>
 
-				<div class="box drought p1">
-					<div class="header">DRT</div>
-					<div class="value">99</div>
-				</div>
-
-				<!-- Player 2 -->
-
-				<div class="box score p2">
-					<div class="aligner">
-						<div class="main">000,000</div>
-						<div class="diff losing">000,000</div>
-					</div>
-				</div>
-
-				<div class="box lines p2">
-					<div class="header">LINES</div>
-					<div class="content">000</div>
-				</div>
-
-				<div class="box next_piece p2"></div>
-
-				<div class="box level p2">
-					<div class="header">LV</div>
-					<div class="content">00</div>
-				</div>
-
-				<div class="box tetris_rate p2">
-					<div class="header">TRT</div>
-					<div class="content">---</div>
-				</div>
-
-				<div class="box running_trt p2"></div>
-
-				<div class="box name p2">
-					<div class="header">PLAYER 2</div>
-					<div class="content">&#338;&#338;&#338;</div>
-				</div>
-
-				<div class="box board p2"></div>
-
-				<div class="box drought p2">
+				<div class="box drought">
 					<div class="header">DRT</div>
 					<div class="value">99</div>
 				</div>
 			</div>
-			<!-- End Playing Fields -->
-		</div>
-		<!-- End Stream BG -->
+		</template>
 
-		<!-- Audio -->
+		<div id="stream_bg">
+			<div id="playing_fields">
+				<div class="divider">v</div>
+			</div>
+		</div>
 
 		<script>
 			// custom view parameters which will be passed in the websocket URI
@@ -243,34 +196,45 @@
 		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
-			const numberFormatter = new Intl.NumberFormat();
+			const players_node = document.querySelector('#playing_fields');
+			const player_template = document.getElementById('player');
+
 			const players = [1, 2].map(num => {
+				const player_fragment = document.importNode(
+					player_template.content,
+					true
+				);
+				const player_node = player_fragment.querySelector('.player');
+
+				player_node.classList.add(`p${num}`);
+				players_node.appendChild(player_node);
+
 				const player = new CTMCompetitionPlayer(
 					{
-						name: document.querySelector(`.name.p${num} .header`),
-						score: document.querySelector(`.score.p${num} .main`),
-						level: document.querySelector(`.level.p${num} .content`),
-						lines: document.querySelector(`.lines.p${num} .content`),
-						trt: document.querySelector(`.tetris_rate.p${num} .content`),
-						running_trt: document.querySelector(`.running_trt.p${num}`),
-						preview: document.querySelector(`.next_piece.p${num}`),
-						field: document.querySelector(`.board.p${num}`),
-						drought: document.querySelector(`.drought.p${num} .value`),
+						name: player_node.querySelector(`.name .header`),
+						score: player_node.querySelector(`.score .main`),
+						level: player_node.querySelector(`.level .content`),
+						lines: player_node.querySelector(`.lines .content`),
+						trt: player_node.querySelector(`.tetris_rate .content`),
+						running_trt: player_node.querySelector(`.running_trt`),
+						preview: player_node.querySelector(`.next_piece`),
+						field: player_node.querySelector(`.board`),
+						drought: player_node.querySelector(`.drought .value`),
 
-						diff: document.querySelector(`.score.p${num} .diff`),
-						hearts: document.querySelector(`.name.p${num} .content`),
+						diff: player_node.querySelector(`.score .diff`),
+						hearts: player_node.querySelector(`.name .content`),
 
-						drought_box: document.querySelector(`.drought.p${num}`),
-						video: document.querySelector(`.player_vid.p${num}`),
+						drought_box: player_node.querySelector(`.drought`),
+						video: player_node.querySelector(`.player_vid`),
 					},
 					{
 						preview_pixel_size: 2,
-						format_score: v => numberFormatter.format(v),
+						format_score: readableScoreFomatter,
 						stereo: translate([1, 2], [-1, 1], num),
 					}
 				);
