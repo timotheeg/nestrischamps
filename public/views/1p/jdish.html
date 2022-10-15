@@ -194,7 +194,7 @@
 
 				<div class="box runway game">
 					<div class="header">LV29 RUNWAY</div>
-					<div class="content">0</div>
+					<div class="content">0&#x202F;000&#x202F;000</div>
 				</div>
 
 				<div class="box runway transition">
@@ -204,9 +204,9 @@
 
 				<div class="box score">
 					<div class="header">TOP</div>
-					<div class="content top">0</div>
+					<div class="content top">0&#x202F;000&#x202F;000</div>
 					<div class="header">SCORE</div>
-					<div class="content score">0</div>
+					<div class="content score">0&#x202F;000&#x202F;000</div>
 				</div>
 
 				<div class="box tetris_rate">
@@ -245,6 +245,7 @@
 			import QueryString from '/js/QueryString.js';
 			import '/views/bg.js';
 			import Connection from '/js/connection.js';
+			import { readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import { peerServerOptions } from '/views/constants.js';
 
@@ -253,8 +254,6 @@
 			} else {
 				document.querySelector('#playing_fields').classList.add('right');
 			}
-
-			const numberFormatter = new Intl.NumberFormat();
 
 			window.onload = function () {
 				const player = new Player(
@@ -279,7 +278,7 @@
 						running_trt_dot_size: 5,
 						tetris_sound: 0,
 						reliable_field: 0,
-						format_score: v => numberFormatter.format(v),
+						format_score: readableScoreFomatter,
 					}
 				);
 
@@ -306,7 +305,7 @@
 				player.onScore = () => {
 					if (player.getScore() > max_score) {
 						max_score = player.getScore();
-						player.dom.top.textContent = numberFormatter.format(max_score);
+						player.dom.top.textContent = readableScoreFomatter(max_score);
 					}
 				};
 

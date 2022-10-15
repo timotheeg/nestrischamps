@@ -65,7 +65,7 @@
 
 					<div class="box score">
 						<div class="header">PLAYER</div>
-						<div class="value">0000000</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
 					</div>
 
 					<div class="box running_trt"></div>
@@ -99,7 +99,7 @@
 			import Color from '/views/color.js';
 			import Gradient from '/views/gradient.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import Competition from '/views/competition.js';
 
@@ -113,7 +113,6 @@
 				new Color(255, 165, 0),
 				'#fd0009'
 			);
-			const numberFormatter = new Intl.NumberFormat();
 
 			function updateDiffs() {
 				teams
@@ -134,7 +133,7 @@
 						if (idx > 0) {
 							const diff = team.score - teams[idx - 1].score;
 							team.rank_node.querySelector('.diff').textContent =
-								numberFormatter.format(diff);
+								readableScoreFomatter(diff);
 						} else {
 							team.rank_node.querySelector('.diff').textContent = '';
 						}
@@ -173,9 +172,9 @@
 						0
 					);
 					this.node.querySelector('.aligner .sum').textContent =
-						numberFormatter.format(this.score);
+						readableScoreFomatter(this.score);
 					this.rank_node.querySelector('.score2').textContent =
-						numberFormatter.format(this.score);
+						readableScoreFomatter(this.score);
 					updateDiffs();
 				}
 			}
@@ -251,7 +250,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([0, num_teams - 1], [-1, 1], team_idx),
-								format_score: v => numberFormatter.format(v),
+								format_score: v => readableScoreFomatter(v),
 							}
 						);
 

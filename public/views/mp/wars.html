@@ -76,7 +76,7 @@
 
 					<div class="box score">
 						<div class="header">PLAYER</div>
-						<div class="value">0000000</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 			</template>
@@ -102,7 +102,7 @@
 			import '/views/bg.js';
 			import Connection from '/js/connection.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import Competition from '/views/competition.js';
 
@@ -111,7 +111,6 @@
 			const rank_template = document.getElementById('rank');
 			const leaderboard_values = document.querySelector('.leaderboard  .value');
 			const players = [];
-			const numberFormatter = new Intl.NumberFormat();
 
 			let connection;
 
@@ -171,7 +170,7 @@
 				if (new_score > old_score) {
 					topScore.score = new_score;
 					topScore.node.querySelector('.best').textContent =
-						numberFormatter.format(new_score);
+						readableScoreFomatter(new_score);
 					sortTopScores();
 				}
 			}
@@ -211,7 +210,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([1, 4], [-1, 1], col_num),
-								format_score: v => numberFormatter.format(v),
+								format_score: readableScoreFomatter,
 							}
 						);
 

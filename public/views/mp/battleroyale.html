@@ -68,7 +68,7 @@
 			import Color from '/views/color.js';
 			import Gradient from '/views/gradient.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import Competition from '/views/competition.js';
 
@@ -81,7 +81,6 @@
 				new Color(255, 165, 0),
 				'#fd0009'
 			);
-			const numberFormatter = new Intl.NumberFormat();
 
 			const players_re = /^[2345678]$/;
 			const player_width = 228;
@@ -113,7 +112,7 @@
 					if (idx > 0) {
 						const diff = player.getScore() - sorted_players[idx - 1].getScore(); // is negative!
 						player.rank_node.querySelector('.diff').textContent =
-							numberFormatter.format(diff);
+							readableScoreFomatter(diff);
 					} else {
 						player.rank_node.querySelector('.diff').textContent = '';
 					}
@@ -159,7 +158,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([0, num_players - 1], [-1, 1], player_idx),
-								format_score: v => numberFormatter.format(v),
+								format_score: readableScoreFomatter,
 							}
 						);
 
@@ -203,7 +202,7 @@
 				players.forEach(player => {
 					player.onScore = () => {
 						player.rank_node.querySelector('.score2').textContent =
-							numberFormatter.format(player.getScore());
+							readableScoreFomatter(player.getScore());
 						updateScore();
 					};
 				});

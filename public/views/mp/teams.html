@@ -46,8 +46,8 @@
 				<div class="players"></div>
 				<div class="box team-score">
 					<div class="aligner">
-						<div class="sum">00000000</div>
-						<div class="diff">00000000</div>
+						<div class="sum">00&#x202F;000&#x202F;000</div>
+						<div class="diff">00&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 			</div>
@@ -55,8 +55,8 @@
 				<div class="players"></div>
 				<div class="box team-score">
 					<div class="aligner">
-						<div class="sum">00000000</div>
-						<div class="diff">00000000</div>
+						<div class="sum">00&#x202F;000&#x202F;000</div>
+						<div class="diff">00&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 			</div>
@@ -70,7 +70,7 @@
 
 					<div class="box score">
 						<div class="header">PLAYER</div>
-						<div class="value">0000000</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
 					</div>
 
 					<div class="box running_trt"></div>
@@ -94,14 +94,13 @@
 			import QueryString from '/js/QueryString.js';
 			import '/views/bg.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import Competition from '/views/competition.js';
 
 			const stream_bg = document.querySelector('#stream_bg');
 			const player_template = document.getElementById('player');
 			const players = [];
-			const numberFormatter = new Intl.NumberFormat();
 
 			// TODO create a team class like in the pairs layout
 
@@ -142,9 +141,9 @@
 				const diff = Math.abs(team1_score - team2_score);
 
 				team1_node.querySelector('.sum').textContent =
-					numberFormatter.format(team1_score);
+					readableScoreFomatter(team1_score);
 				team2_node.querySelector('.sum').textContent =
-					numberFormatter.format(team2_score);
+					readableScoreFomatter(team2_score);
 
 				const team1_diff_node = team1_node.querySelector('.diff');
 				const team2_diff_node = team2_node.querySelector('.diff');
@@ -152,8 +151,8 @@
 				const green = '#0eff0e';
 				const red = '#fd0009';
 
-				team1_diff_node.textContent = numberFormatter.format(diff);
-				team2_diff_node.textContent = numberFormatter.format(diff);
+				team1_diff_node.textContent = readableScoreFomatter(diff);
+				team2_diff_node.textContent = readableScoreFomatter(diff);
 
 				team1_diff_node.style.color = team1_score >= team2_score ? green : red;
 				team2_diff_node.style.color = team2_score >= team1_score ? green : red;
@@ -214,7 +213,7 @@
 								preview_pixel_size: 2,
 								preview_align: 'tr',
 								stereo: translate([0, 1], [-1, 1], team_idx),
-								format_score: v => numberFormatter.format(v),
+								format_score: readableScoreFomatter,
 							}
 						);
 

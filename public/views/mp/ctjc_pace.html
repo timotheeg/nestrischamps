@@ -21,20 +21,20 @@
 				<div class="box score">
 					<div class="header">SCORE</div>
 					<div class="data">
-						<div class="p1">000000</div>
+						<div class="p1">0&#x202F;000&#x202F;000</div>
 						<div class="diff">0000</div>
 						<div class="tetris_diff">0000</div>
-						<div class="p2">000000</div>
+						<div class="p2">0&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 
 				<div class="box runway">
 					<div class="header">RUNWAY</div>
 					<div class="data">
-						<div class="p1">000000</div>
+						<div class="p1">0&#x202F;000&#x202F;000</div>
 						<div class="diff">0000</div>
 						<div class="tetris_diff">0000</div>
-						<div class="p2">000000</div>
+						<div class="p2">0&#x202F;000&#x202F;000</div>
 					</div>
 				</div>
 
@@ -111,11 +111,10 @@
 		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import Competition, { getTetrisDiff } from '/views/competition.js';
 
-			const numberFormatter = new Intl.NumberFormat();
 			const players = [1, 2].map(
 				num =>
 					new Player(
@@ -136,7 +135,7 @@
 						{
 							wins_rtl: num === 1,
 							reliable_field: 0,
-							format_score: v => numberFormatter.format(v),
+							format_score: readableScoreFomatter,
 							stereo: translate([1, 2], [-1, 1], num),
 						}
 					)
@@ -186,7 +185,7 @@
 				} else {
 					const player1_leading = diff > 0;
 					const abs_diff = Math.abs(diff);
-					const fmt = numberFormatter.format(abs_diff);
+					const fmt = readableScoreFomatter(abs_diff);
 
 					let tdiff;
 

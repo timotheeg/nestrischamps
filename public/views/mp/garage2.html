@@ -252,14 +252,13 @@
 		<script type="module">
 			import '/views/bg.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
 			const players_node = document.querySelector('#playing_fields');
 			const player_template = document.getElementById('player');
-			const numberFormatter = new Intl.NumberFormat();
 			const players = [1, 2].map(num => {
 				const player_fragment = document.importNode(
 					player_template.content,
@@ -299,7 +298,7 @@
 					},
 					{
 						preview_pixel_size: 2,
-						format_score: v => numberFormatter.format(v),
+						format_score: readableScoreFomatter,
 						stereo: translate([1, 2], [-1, 1], num),
 					}
 				);
