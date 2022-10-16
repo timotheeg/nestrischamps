@@ -24,18 +24,18 @@
 				</div>
 
 				<div class="box runway game">
-					<div class="header">GM RUNWAY</div>
-					<div class="content">000000</div>
+					<div class="header">GAME RUNWAY</div>
+					<div class="content">0&#x202F;000&#x202F;000</div>
 				</div>
 
 				<div class="box runway transition">
 					<div class="header">TR RUNWAY</div>
-					<div class="content">000000</div>
+					<div class="content">000&#x202F;000</div>
 				</div>
 
 				<div class="box score">
 					<div class="header">SCORE</div>
-					<div class="content">000000</div>
+					<div class="content">0&#x202F;000&#x202F;000</div>
 				</div>
 
 				<div class="box tetris_rate">
@@ -61,6 +61,7 @@
 		<script type="module">
 			import '/views/bg.js';
 			import Connection from '/js/connection.js';
+			import { readableScoreFomatter } from '/views/utils.js';
 			import Player from '/views/Player.js';
 
 			const player = new Player(
@@ -80,6 +81,7 @@
 				{
 					tetris_sound: 0,
 					reliable_field: 0,
+					format_score: v => readableScoreFomatter(v),
 				}
 			);
 

@@ -4,19 +4,19 @@ html {
 
 #playing_fields {
 	position: absolute;
-	left: 640px;
+	left: 375px;
 	top: 23px;
 }
 
 .box {
 	width: 95px;
 	height: 60px;
+	line-height: 16px;
 	text-align: center;
 }
 
 .box .header {
-	font-size: 16px;
-	padding-bottom: 0.5em;
+	padding: 6px 0;
 }
 
 .box .content,
@@ -31,13 +31,13 @@ html {
 .level,
 .efficiency,
 .tetris_rate {
-	left: -119px;
+	left: -9px;
 }
 
 .score,
 .runway {
 	top: 76px;
-	width: 168px;
+	width: 196px;
 }
 
 .runway {
@@ -49,7 +49,7 @@ html {
 	height: 60px;
 	top: 1px;
 
-	--offset: 176px;
+	--offset: 66px;
 	right: var(--offset);
 }
 
@@ -61,13 +61,16 @@ html {
 	top: 319px;
 }
 
+.board,
+.running_trt {
+	--offset: 0;
+	right: var(--offset);
+}
+
 .board {
 	width: 237px;
 	height: 477px;
 	top: 76px;
-
-	--offset: 110px;
-	right: var(--offset);
 }
 
 .tetris_rate {
@@ -88,25 +91,26 @@ html {
 	width: 244px;
 	height: 72px;
 	top: 574px;
-
-	--offset: 110px;
-	right: var(--offset);
 }
 
 .drought {
 	width: 46px;
 	top: 15px;
 	height: 40px;
-	opacity: 0;
 	color: red;
-	display: none;
 
-	--pos: 301px;
+	/**/
+	opacity: 0;
+	display: none;
+	/**/
+
+	--pos: 191px;
 	right: var(--pos);
 }
 
 .drought .header {
-	padding-bottom: 2px;
+	padding-top: 2px;
+	padding-bottom: 5px;
 }
 
 .drought.active {
