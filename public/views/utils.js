@@ -49,16 +49,18 @@ export function translate(iRange, oRange, value) {
 	return oRange[0] + ratio * (oRange[1] - oRange[0]);
 }
 
-export function readableScoreFomatter(score) {
-	if (isNaN(score) || score === 0) return '0';
+export function readableScoreFomatter(score, space_pad = 0, zero_pad = 0) {
+	if (isNaN(score)) score = 0;
 
+	score = `${score}`.padStart(zero_pad, '0').padStart(space_pad, '\u00A0');
+
+	let len = score.length;
 	const parts = [];
 
-	while (score) {
-		const chunk = score % 1000;
-
-		score = Math.floor(score / 1000);
-		parts.unshift(score ? `${chunk}`.padStart(3, '0') : chunk);
+	while (len) {
+		const start = Math.max(0, len - 3);
+		parts.unshift(score.slice(start, len));
+		len = start;
 	}
 
 	return parts.join('\u202F'); // narrow non-breakable space
