@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.match {
+				position: absolute;
+				left: 960px;
+			}
+
+			.box {
+				--border-size: 15;
+				padding: 5px 0;
+				font-size: 24px;
+				line-height: 24px;
+
+				width: 86px;
+				height: 51px;
+
+				--offset: 0;
+				right: var(--offset);
+			}
+
+			.box .header {
+				padding-bottom: 6px;
+			}
+
+			.score,
+			.board,
+			.name,
+			.running_trt {
+				width: 356px;
+				--offset: -1px;
+			}
+
+			.score {
+				padding-left: 9px;
+				padding-right: 3px;
+				width: 344px;
+				height: 96px;
+				font-size: 24px;
+			}
+
+			.score .header {
+				padding-bottom: 0;
+			}
+
+			.score .content > div {
+				display: flex;
+				flex-direction: row;
+				padding-top: 6px;
+
+				font-size: 32px;
+				line-height: 32px;
+			}
+
+			.score .main,
+			.score .diff {
+				white-space: pre;
+				text-align: left;
+			}
+
+			.score .tetris_diff {
+				flex-grow: 1;
+				text-align: right;
+
+				padding-top: 14px;
+				font-size: 16px;
+				line-height: 16px;
+			}
+
+			.board {
+				--border-size: 12;
+				padding: 3px;
+				height: 716px;
+				top: 209px;
+			}
+
+			.name,
+			.flag {
+				top: 946px;
+			}
+
+			.name {
+				height: 46px;
+			}
+
+			.name .header {
+				padding-bottom: 3px;
+			}
+
+			.name .content {
+				color: #b0afb0;
+				letter-spacing: 5px;
+				text-indent: 5px;
+			}
+
+			.name .content .win {
+				color: #fb0204;
+			}
+
+			.lines,
+			.next_piece {
+				top: 127px;
+			}
+
+			.runway.game,
+			.level,
+			.tetris_rate,
+			.drought,
+			.flag {
+				--offset: 376px;
+			}
+
+			.level {
+				width: 70px;
+				top: 782px;
+			}
+
+			.tetris_rate,
+			.drought {
+				top: 864px;
+			}
+
+			.next_piece {
+				padding: 0 19px;
+				height: 61px;
+				--offset: -1px;
+				width: 130px;
+			}
+
+			.lines {
+				--offset: 188px;
+				width: 167px;
+			}
+
+			.flag {
+				padding: 0;
+				height: 56px;
+				width: 86px;
+			}
+
+			.running_trt {
+				display: none;
+			}
+
+			.drought {
+				color: red;
+
+				/**/
+				opacity: 0;
+				display: none;
+				/**/
+			}
+
+			.drought.active {
+				display: block;
+				animation: fadeIn ease 1s;
+				animation-fill-mode: forwards;
+			}
+
+			.player_vid {
+				position: absolute;
+				width: 578px;
+				height: 1032px;
+				object-fit: cover;
+
+				--offset: 382px;
+				right: var(--offset);
+
+				/*
+				background: yellow;
+				/**/
+			}
+
+			.p2 > * {
+				left: var(--offset);
+			}
+
+			.p2 .next_piece {
+				left: 187px;
+			}
+
+			.p2 .lines {
+				left: -1px;
+			}
+
+			/* Below are the styles for small display */
+
+			.match.small {
+				top: 0;
+				transform: scale(0.6916890080428955); /* (1080-32)/741/2 */
+			}
+
+			#match2.small {
+				top: 516px;
+			}
+
+			.match.small .board {
+				top: 0;
+			}
+
+			.match.small .runway {
+				display: none;
+			}
+
+			.match.small .score,
+			.match.small .name,
+			.match.small .next_piece,
+			.match.small .level,
+			.match.small .lines,
+			.match.small .tetris_rate,
+			.match.small .drought,
+			.match.small .flag {
+				--offset: 376px;
+			}
+
+			.match.small .name {
+				top: 0;
+			}
+
+			.match.small .score {
+				width: 259px;
+				top: 77px;
+			}
+
+			.match.small .score .tetris_diff {
+				display: none;
+			}
+
+			.match.small .next_piece {
+				padding: 0;
+				top: 204px;
+			}
+
+			.match.small .p2 .next_piece,
+			.match.small .p2 .lines {
+				left: var(--offset);
+			}
+
+			.match.small .lines {
+				top: 286px;
+				width: 130px;
+			}
+
+			.match.small .level {
+				top: 368px;
+				width: 86px;
+			}
+
+			.match.small .level .header::after {
+				content: 'L';
+			}
+
+			.match.small .tetris_rate,
+			.match.small .drought {
+				top: 450px;
+			}
+
+			.match.small .flag {
+				top: 532px;
+			}
+
+			.match.small .player_vid {
+				width: 1006px;
+				height: 746px;
+			}
+
+			#branding {
+				position: absolute;
+				width: 1920px;
+				height: 48px;
+				top: 1032px;
+				left: 0;
+
+				/*
+				opacity: 0.25;
+				background: orange;
+				/**/
+			}
+		</style>
+	</head>
+	<body>
+		<template id="player">
+			<div class="player">
+				<video class="player_vid"></video>
+
+				<div class="box level">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box lines">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box next_piece"></div>
+
+				<div class="box score">
+					<div class="header">SCORE</div>
+					<div class="content">
+						<div>
+							<div class="main">0&#x202F;000&#x202F;000</div>
+						</div>
+						<div>
+							<div class="diff winning">0&#x202F;000&#x202F;000</div>
+							<div class="tetris_diff"><span class="value">0.00</span>T</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="box score runway game">
+					<div class="header">RUNWAY</div>
+					<div class="content">
+						<div>
+							<div class="main">0&#x202F;000&#x202F;000</div>
+						</div>
+						<div>
+							<div class="diff winning">0&#x202F;000&#x202F;000</div>
+							<div class="tetris_diff"><span class="value">0.00</span>T</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="box tetris_rate">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box running_trt"></div>
+				<div class="box flag"></div>
+
+				<div class="box name">
+					<div class="header">PLAYER</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box board"></div>
+			</div>
+		</template>
+
+		<div id="stream_bg">
+			<div id="match1" class="match small"></div>
+			<div id="match2" class="match small"></div>
+			<div id="branding"></div>
+		</div>
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '1280x720',
+				concurrent_2_matches: true,
+				players: 4,
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+
+			const player_template = document.getElementById('player');
+			const players = [];
+
+			[1, 2].forEach(match_num => {
+				const match_node = document.getElementById(`match${match_num}`);
+
+				[1, 2].forEach(player_num => {
+					const player_fragment = document.importNode(
+						player_template.content,
+						true
+					);
+					const player_node = player_fragment.querySelector('.player');
+
+					player_node.classList.add(`p${player_num}`);
+					match_node.appendChild(player_node);
+
+					const player = new CTMCompetitionPlayer(
+						{
+							name: player_node.querySelector(`.name .header`),
+							score: player_node.querySelector(`.score .main`),
+							level: player_node.querySelector(`.level .content`),
+							lines: player_node.querySelector(`.lines .content`),
+							trt: player_node.querySelector(`.tetris_rate .content`),
+							running_trt: player_node.querySelector(`.running_trt`),
+							preview: player_node.querySelector(`.next_piece`),
+							field: player_node.querySelector(`.board`),
+							drought: player_node.querySelector(`.drought .value`),
+
+							diff: player_node.querySelector(`.score .diff`),
+							t_diff: player_node.querySelector(`.score .tetris_diff .value`),
+							hearts: player_node.querySelector(`.name .content`),
+
+							drought_box: player_node.querySelector(`.drought`),
+							video: player_node.querySelector(`.player_vid`),
+							flag: player_node.querySelector(`.flag`),
+						},
+						{
+							field_pixel_size: 4.5,
+							running_trt_dot_size: 5,
+							preview_pixel_size: 3,
+							format_score: v => readableScoreFomatter(v, 7),
+							stereo: translate([1, 2], [-1, 1], player_num),
+						}
+					);
+					player.onGameOver = () => {};
+
+					players.push(player);
+				});
+			});
+
+			const competition = new Competition(players);
+
+			competition.API.setMatch = function (match_idx) {
+				if (match_idx !== 0 && match_idx !== 1) {
+					document.querySelectorAll('.match').forEach(match_node => {
+						match_node.classList.add('small');
+						match_node.hidden = false;
+					});
+
+					return;
+				}
+
+				let show_match, hide_match;
+
+				if (match_idx === 0) {
+					show_match = document.getElementById('match1');
+					hide_match = document.getElementById('match2');
+				} else {
+					show_match = document.getElementById('match2');
+					hide_match = document.getElementById('match1');
+				}
+
+				show_match.classList.remove('small');
+				hide_match.hidden = true;
+				show_match.hidden = false;
+			};
+
+			competition.API.showProfileCard = function (visible, match_idx) {
+				players
+					.slice(2 * match_idx, 2 * match_idx + 2)
+					.forEach(player => player.showProfileCard(visible));
+			};
+
+			competition.API.setWinner = function (player_idx) {
+				const match_index = player_idx < 2 ? 0 : 1;
+
+				players
+					.slice(2 * match_index, 2 * match_index + 2)
+					.forEach(player => player.showLoserFrame());
+
+				players[player_idx].playWinnerAnimation();
+			};
+
+			players.forEach((player, player_idx) => {
+				player.onScore = () => {
+					const match_index = player_idx < 2 ? 0 : 1;
+					const match_players = players.slice(
+						2 * match_index,
+						2 * match_index + 2
+					);
+
+					competition.computeScoreDifferentials(match_players);
+				};
+			});
+
+			// layout starts in 2 matches view
+			competition.API.setMatch(null);
+
+			// expose API into window for debugging
+			window._NTC_API = competition.API;
+		</script>
+	</body>
+</html>
