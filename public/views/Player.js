@@ -440,24 +440,29 @@ export default class Player {
 
 		if (url) {
 			const custom_logo = document.createElement('img');
+			custom_logo.classList.add('logo');
 			custom_logo.src = url;
 			Object.assign(custom_logo.style, {
-				maxWidth: this.options.field_pixel_size <= 4 ? '160px' : '200px',
-				marginTop: this.options.field_pixel_size <= 4 ? '-60px' : '-30px',
+				maxWidth: this.options.field_pixel_size <= 4 ? '180px' : '240px',
+				marginTop: this.options.field_pixel_size <= 4 ? '-100px' : '-70px',
 			});
 
 			const small_nestrischamps_logo = document.createElement('img');
-			small_nestrischamps_logo.src = '/brand/logo.v3.white.png';
+			small_nestrischamps_logo.src =
+				this.options.field_pixel_size <= 4
+					? '/brand/logo.v3.white.png'
+					: '/brand/logo.v3.white.2x.png';
+
 			Object.assign(small_nestrischamps_logo.style, {
 				position: 'absolute',
-				bottom: '10px',
+				bottom: this.options.field_pixel_size <= 4 ? '35px' : '55px',
 			});
 
 			this.curtain_container.appendChild(custom_logo);
 			this.curtain_container.appendChild(small_nestrischamps_logo);
 		} else {
 			const big_nestrischamps_logo = document.createElement('img');
-
+			big_nestrischamps_logo.classList.add('logo');
 			big_nestrischamps_logo.src =
 				this.options.field_pixel_size <= 4
 					? '/brand/logo.v3.white.2x.png'

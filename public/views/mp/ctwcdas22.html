@@ -106,20 +106,6 @@
 		</div>
 		<!-- End Stream BG -->
 
-		<template id="curtain">
-			<div class="curtain">
-				<br />
-				<br />
-				<br />
-				<img class="ctg" src="/images/ctwc_das.png" width="180" />
-				<br />
-				<br />
-				<br />
-				<br />
-				<img src="/brand/logo.v3.white.png" />
-			</div>
-		</template>
-
 		<!-- Audio -->
 
 		<script>
@@ -147,13 +133,6 @@
 			const player_template = document.getElementById('player');
 
 			const players = [1, 2].map(num => {
-				const curtain_template = document.getElementById('curtain');
-				const curtain_fragment = document.importNode(
-					curtain_template.content,
-					true
-				);
-				const curtain_node = curtain_fragment.querySelector('.curtain');
-
 				const player_fragment = document.importNode(
 					player_template.content,
 					true
@@ -176,7 +155,6 @@
 						hearts: player_node.querySelector(`.name .hearts`),
 						drought: player_node.querySelector(`.drought .value`),
 						runway_game: player_node.querySelector(`.runway .value`),
-						curtain: curtain_node,
 
 						projection: player_node.querySelector(`.projection .value`),
 
@@ -243,10 +221,11 @@
 				};
 
 				let rotate_animation_id;
-				const logo = curtain_node.querySelector('.ctg');
 
 				function rotateLogo() {
-					resetLogo();
+					const logo = player.curtain_container.querySelector('img.logo');
+
+					resetLogo(logo);
 
 					const start_ts = Date.now();
 					const duration = 850;
@@ -261,14 +240,14 @@
 						if (elapsed < duration) {
 							rotate_animation_id = window.requestAnimationFrame(steps);
 						} else {
-							resetLogo();
+							resetLogo(logo);
 						}
 					};
 
 					rotate_animation_id = window.requestAnimationFrame(steps);
 				}
 
-				function resetLogo() {
+				function resetLogo(logo) {
 					window.cancelAnimationFrame(rotate_animation_id);
 					logo.style.transform = null;
 				}

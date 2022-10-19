@@ -82,20 +82,6 @@
 					<div class="box board"></div>
 				</div>
 			</template>
-			<template id="curtain">
-				<div class="curtain">
-					<br />
-					<br />
-					<br />
-					<br />
-					<img class="ctg" src="/images/ctg.png" width="150" />
-					<br />
-					<br />
-					<br />
-					<br />
-					<img src="/brand/logo.v3.white.png" />
-				</div>
-			</template>
 		</div>
 		<!-- End Stream BG -->
 
@@ -140,13 +126,6 @@
 					player_node.classList.add(`p${player_num}`);
 					match_node.appendChild(player_node);
 
-					const curtain_template = document.getElementById('curtain');
-					const curtain_fragment = document.importNode(
-						curtain_template.content,
-						true
-					);
-					const curtain_node = curtain_fragment.querySelector('.curtain');
-
 					const player = new CTMCompetitionPlayer(
 						{
 							name: player_node.querySelector(`.name .header`),
@@ -161,7 +140,6 @@
 							drought: player_node.querySelector(`.drought .value`),
 							runway_game: player_node.querySelector(`.runway .value`),
 							video: player_node.querySelector(`video`),
-							curtain: curtain_node,
 
 							projection: player_node.querySelector(`.projection .value`),
 
@@ -211,10 +189,11 @@
 					};
 
 					let rotate_animation_id;
-					const logo = curtain_node.querySelector('.ctg');
 
 					function rotateLogo() {
-						resetLogo();
+						const logo = player.curtain_container.querySelector('img.logo');
+
+						resetLogo(logo);
 
 						const start_ts = Date.now();
 						const duration = 850;
@@ -229,14 +208,14 @@
 							if (elapsed < duration) {
 								rotate_animation_id = window.requestAnimationFrame(steps);
 							} else {
-								resetLogo();
+								resetLogo(logo);
 							}
 						};
 
 						rotate_animation_id = window.requestAnimationFrame(steps);
 					}
 
-					function resetLogo() {
+					function resetLogo(logo) {
 						window.cancelAnimationFrame(rotate_animation_id);
 						logo.style.transform = null;
 					}
