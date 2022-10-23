@@ -164,7 +164,7 @@
 		<script type="module">
 			import '/views/bg.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate } from '/views/utils.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
@@ -233,6 +233,7 @@
 							preview_pixel_size: 2,
 							preview_align: 'cc',
 							stereo: translate([1, 2], [-1, 1], player_num),
+							format_score: v => readableScoreFomatter(v),
 						}
 					);
 
