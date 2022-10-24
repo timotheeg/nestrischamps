@@ -215,8 +215,16 @@
 				top: calc(var(--heart-top) + var(--heart-offset) * 3);
 			}
 
+			.wins .heart:nth-child(5) {
+				top: calc(var(--heart-top) + var(--heart-offset) * 4);
+			}
+
+			.wins .heart:nth-child(6) {
+				top: calc(var(--heart-top) + var(--heart-offset) * 5);
+			}
+
 			.p2 .wins {
-				top: 240px;
+				top: 260px;
 			}
 
 			.p2 .wins .bg {
@@ -347,7 +355,9 @@
 						video: document.querySelector(`.player_vid.p${num}`),
 
 						gradient: player_node.querySelector(`.color_magic`),
-						custom_hearts: player_node.querySelector(`.wins .hearts`),
+
+						hearts_container: player_node.querySelector(`.wins`),
+						hearts_bg: player_node.querySelector(`.wins .bg`),
 					},
 					{
 						preview_pixel_size: 2.75,
@@ -387,19 +397,54 @@
 
 			// super gross, breaks encapsulation
 			/**/
+
+			// reference values for best of 5
+			players[0].wins_top = 410;
+			players[1].wins_top = 260;
+
+			const bo5_height = 200;
+			const heart_offset = 42;
+
 			competition.API._repaintVictories = function (player_idx) {
 				const player = players[player_idx]; // direct access... not great
-				const victories = competition.API.victories[player_idx];
-				const hearts = player.dom.custom_hearts.querySelectorAll('.heart');
+
+				if (!player) return;
+
+				const first_to = this.first_to || 3;
+				const victories = this.victories[player_idx];
+
+				const container = player.dom.hearts_container;
+				const bg = player.dom.hearts_bg;
+				const hearts = container.querySelector('.hearts');
 
 				// clear all the hearts
-				[...hearts].forEach((heart, idx) => {
+				while (hearts.childNodes.length) {
+					hearts.removeChild(hearts.childNodes[0]);
+				}
+
+				// reset to specified value
+				for (let idx = 0; idx < this.first_to; idx++) {
+					const heart = document.createElement('div');
+					heart.classList.add('heart');
+
 					if (idx < victories) {
 						heart.classList.add('win');
-					} else {
-						heart.classList.remove('win');
 					}
-				});
+
+					const insert_method = player.render_wins_rtl
+						? 'prepend'
+						: 'appendChild';
+
+					hearts[insert_method](heart);
+				}
+
+				// adjust height and position
+				const diff = this.first_to - 3;
+
+				container.style.height = bg.style.height = `${
+					bo5_height + diff * heart_offset
+				}px`;
+				container.style.top = `${player.wins_top - diff * heart_offset}px`;
 			};
 			/**/
 		</script>
