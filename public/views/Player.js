@@ -164,6 +164,7 @@ if (/^\d+$/.test(buffer_time)) {
 }
 
 const DEFAULT_DOM_REFS = {
+	name: DOM_DEV_NULL,
 	score: DOM_DEV_NULL,
 	runway_tr: DOM_DEV_NULL,
 	runway_game: DOM_DEV_NULL,
