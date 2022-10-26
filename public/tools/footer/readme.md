@@ -8,7 +8,7 @@ This provides a sample footer of ClassicTetris cycling banners.
 ## Usage
 
 To test the footer in your browser, simply load the page:
-https://nestrischamps.herokuapp.com/tools/footer/
+https://nestrischamps.io/tools/footer/
 
 To use the footer in OBS/SLOBS, add to your scene a new browser source, set its canva size to **`1280x32`**, and set the url to the url above.
 

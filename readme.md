@@ -2,7 +2,7 @@
 
 NESTrisChamps is a browser-based game capture and rendering system for NES classic Tetris.
 
-It is available online under the domain [`nestrischamps.herokuapp.com`](https://nestrischamps.herokuapp.com)
+It is available online under the domain [`nestrischamps.io`](https://nestrischamps.herokuapp.com)
 
 NESTrisChamps is composed of 3 main parts:
 * A browser based capture system
@@ -22,7 +22,7 @@ Basically, when we have Tetris game data (as opposed to images), the tetris game
 NEsTrisChamps provides many rendering layouts implemented in HTML+CSS+JavaScript at 720p resolution. This allows the templates to be dropped easily in [OBS](https://obsproject.com/) or [StreamLabs OBS](https://streamlabs.com/) as a [Browser Sources](https://obsproject.com/wiki/Sources-Guide#browsersource), and then adding player video stream or other sources like Twitch Chat on top of it.
 
 To get started, visit the online docs here:
-https://nestrischamps.herokuapp.com/docs
+https://nestrischamps.io/docs
 
 
 ## Sample Screenshots
@@ -66,14 +66,14 @@ The 2 semi finals and the final match of CTWC 2019's Invisible Tetris Competitio
 
 NESTrisChamps is only tested in Chrome, Chromium, and Firefox. It is unlikely I will support MS Edge unless someone contribute PRs.
 
-Read [the documentation](https://nestrischamps.herokuapp.com/docs).
+Read [the documentation](https://nestrischamps.io/docs).
 
 
 ### NEStrisChamps online
 
-1. In a window load your producer page [https://nestrischamps.herokuapp.com/room/producer](https://nestrischamps.herokuapp.com/room/producer)
-2. Calibrate your input. If you're lucky the autocalibration would have done a good job, and only needs minor fine tuning. You still **must** fine tune to have the capture areas pixel-perfect (refer to [the OCR section](https://nestrischamps.herokuapp.com/docs/#ocr) for details) of the documentation.
-3. Visit your personal renderers page to copy the renderer URL [https://nestrischamps.herokuapp.com/renderers](https://nestrischamps.herokuapp.com/renderers). I recommend using the layout `simple_1p` for a start
+1. In a window load your producer page [https://nestrischamps.io/room/producer](https://nestrischamps.herokuapp.com/room/producer)
+2. Calibrate your input. If you're lucky the autocalibration would have done a good job, and only needs minor fine tuning. You still **must** fine tune to have the capture areas pixel-perfect (refer to [the OCR section](https://nestrischamps.io/docs/#ocr) for details) of the documentation.
+3. Visit your personal renderers page to copy the renderer URL [https://nestrischamps.io/renderers](https://nestrischamps.herokuapp.com/renderers). I recommend using the layout `simple_1p` for a start
 4. Start playing. The renderer should render your game.
 
 Note: Both pages **must** be in their own windows. The producer cannot be a in background tab, or chrome would throttle its processing, and your capture would be all choppy.
@@ -96,7 +96,7 @@ Also, verify that Browser Source hardware acceleration is set (under Advanced Se
 
 ### Local Setup
 
-Warning: Local setup is for developpers and contributors. If you are a casual user, use [nestrischamps online](https://nestrischamps.herokuapp.com/) instead :)
+Warning: Local setup is for developpers and contributors. If you are a casual user, use [nestrischamps online](https://nestrischamps.io/) instead :)
 
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
@@ -170,7 +170,7 @@ If you know how to set up apps on your router (i.e. [port forwarding](https://ww
 
 ### Start Timer button
 
-If you use the Stencil renderer to qualify for CTM or other online competitions, to start the timer, load your producer URL with an extra Query String argument like this [https://nestrischamps.herokuapp.com/room/producer?timer=1](https://nestrischamps.herokuapp.com/room/producer?timer=1)
+If you use the Stencil renderer to qualify for CTM or other online competitions, to start the timer, load your producer URL with an extra Query String argument like this [https://nestrischamps.io/room/producer?timer=1](https://nestrischamps.herokuapp.com/room/producer?timer=1)
 
 ![Screenshot of Start Timer Button](./public/docs/start_timer.jpg)
 

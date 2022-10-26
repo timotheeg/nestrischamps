@@ -5,7 +5,7 @@ During qualifiers, people need a timer. Current solutions with screen cap of som
 ## Usage
 
 To test the timer in your browser, simply load the page:
-https://nestrischamps.herokuapp.com/tools/timer/
+https://nestrischamps.io/tools/timer/
 
 To use the footer in OBS/SLOBS, add to your scene a new browser source, set its canva size to 268x44, and set the url to the url above.
 
