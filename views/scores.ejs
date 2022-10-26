@@ -93,6 +93,30 @@
 		/**/
 	const pagination = <%- JSON.stringify(pagination) %>;
 
+	const SCORE_BASES = [0, 40, 100, 300, 1200];
+	const LVL_29_TRANS_LINES = 200;
+
+	function getLevel29StartScore(clears) {
+		if (!/^[1234]+$/.test(clears)) return '-';
+
+		let lines = 0;
+		let score = 0;
+		let level = 29;
+
+		clears.split('').forEach(clear => {
+			clear = parseInt(clear, 10);
+			lines += clear;
+
+			if (lines >= LVL_29_TRANS_LINES) {
+				level = 30 + Math.floor((lines - LVL_29_TRANS_LINES) / 10);
+			}
+
+			score += (level + 1) * SCORE_BASES[clear];
+		});
+
+		return `${score}`;
+	}
+
 	document.querySelectorAll('a.delete_score').forEach(a => {
 		a.addEventListener('click', async (evt) => {
 			evt.preventDefault();
@@ -180,6 +204,7 @@
 				const details = {
 					Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
 					Clears: data.clears || '-',
+					"Pseudo 29 Start Score": getLevel29StartScore(data.clears || '-'),
 					Pieces: data.pieces || '-',
 				};
 
