@@ -253,7 +253,7 @@ class Game {
 		ScoreDAO.recordGame(this.user, report).then(
 			score_id => {
 				console.log(
-					`Recorded new game for user ${this.user.id} with id ${score_id}`
+					`Recorded new game for user ${this.user.login} (${this.user.id}) with id ${score_id}`
 				);
 				this.user.send(['scoreRecorded', this.user.id, score_id]);
 			},

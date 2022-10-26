@@ -56,7 +56,9 @@ class Producer extends EventEmitter {
 		this.game = new Game(this.user);
 
 		this.game.onNewGame = frame => {
-			console.log(`${this.user.id} is starting a new game`);
+			console.log(
+				`${this.user.login} (${this.user.id}) is starting a new game`
+			);
 
 			this.setGame();
 
