@@ -227,6 +227,9 @@ class Game {
 		if (cur_num_blocks >= 200) {
 			this.end();
 		}
+
+		// TODO: Check if lines are filled to the top for an extended period of time
+		// (Needed to detect game over event for custom rom with no curtain)
 	}
 
 	_doGameOver() {
