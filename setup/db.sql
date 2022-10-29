@@ -17,6 +17,7 @@ CREATE TABLE twitch_users (
 	city VARCHAR( 100 ),
 	interests VARCHAR ( 300 ) default '',
 	style play_style default 'das',
+	timezone TEXT NOT NULL CHECK (now() AT TIME ZONE timezone IS NOT NULL) DEFAULT 'UTC',
 
 	created_on timestamptz NOT NULL,
 	last_login timestamptz NOT NULL
@@ -44,7 +45,6 @@ CREATE TABLE scores (
 	num_frames INTEGER DEFAULT 0,
 	frame_file VARCHAR(256) DEFAULT '',
 	manual BOOLEAN default false,
-	timezone TEXT NOT NULL CHECK (now() AT TIME ZONE timezone IS NOT NULL) DEFAULT 'UTC',
 
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)
