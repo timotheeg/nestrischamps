@@ -14,7 +14,11 @@ export default async function loadPalettes() {
 	const palettes = {};
 
 	try {
-		palettes._saved = JSON.parse(localStorage.getItem('palette'));
+		const saved_palette = localStorage.getItem('palette');
+		if (saved_palette) {
+			// TODO: verify that palette has right format too
+			palettes._saved = JSON.parse(saved_palette);
+		}
 	} catch (err) {}
 
 	(await Promise.all(LIST.map(getPalette))).forEach((palette, idx) => {

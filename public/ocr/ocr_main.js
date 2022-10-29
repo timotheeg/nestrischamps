@@ -192,13 +192,23 @@ rom_selector.addEventListener('change', evt => {
 		palette_selector.disabled = false;
 
 		if (rom_selector.value === 'classic') {
+			// Allows all color matching options
+			first_option.disabled = false;
 			first_option.hidden = false;
 		} else {
+			first_option.disabled = true;
 			first_option.hidden = true;
 
-			if (palettes.length <= 1) {
+			const valid_palettes = Object.keys(palettes);
+
+			if (palette_selector.value === '') {
+				// read from frame is not allowed!
+				palette_selector.value = valid_palettes[0]; // pick first palette as new default
+			}
+
+			// If there's a single valid palette, we hide the palette selector
+			if (valid_palettes.length <= 1) {
 				hideAndResetColorMatching();
-				palette_selector.value = Object.keys(palettes)[0];
 			}
 		}
 	}
