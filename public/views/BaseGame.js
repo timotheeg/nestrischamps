@@ -361,7 +361,7 @@ export default class BaseGame {
 		// topped out if:
 		// 1. all rows have blocks
 		// 2. top row hasn't changed over some frames
-		// 3. 167ms of nothing new happening
+		// 3. 1150ms of nothing new happening
 
 		for (let rowidx = 0; rowidx < 20; rowidx++) {
 			if (this._isRowEmpty(data.field, rowidx)) {

@@ -226,10 +226,57 @@ class Game {
 		// Check board for gameover event (curtain has fallen)
 		if (cur_num_blocks >= 200) {
 			this.end();
+		} else if (this._isNoCurtainTopOut()) {
+			this.end();
+		}
+	}
+
+	_isRowEmpty(field, rowIdx) {
+		for (let colIdx = 10; colIdx--; ) {
+			if (field[rowIdx * 10 + colIdx]) return false;
+		}
+		return true;
+	}
+
+	_isNoCurtainTopOut(data) {
+		// topped out if:
+		// 1. all rows have blocks
+		// 2. top row hasn't changed over some frames
+		// 3. 1150ms of nothing new happening
+
+		for (let rowidx = 0; rowidx < 20; rowidx++) {
+			if (this._isRowEmpty(data.field, rowidx)) {
+				this.pending_topout = false;
+				this.pending_topout_start_ts = 0;
+
+				return false;
+			}
 		}
 
-		// TODO: Check if lines are filled to the top for an extended period of time
-		// (Needed to detect game over event for custom rom with no curtain)
+		if (!this.pending_topout) {
+			// first frame of potential top out - record top 2 rows for later
+			this.pending_topout = data.field.slice(0, 20);
+			this.pending_topout_start_ts = Date.now();
+
+			return false;
+		}
+
+		if (
+			!this.pending_topout.every((cell, idx) => !(!cell ^ !data.field[idx]))
+		) {
+			// top 2 rows have changed, record current top 2 rows as new state of potential top out again
+			this.pending_topout = data.field.slice(0, 20);
+			this.pending_topout_start_ts = Date.now();
+
+			return false;
+		}
+
+		if (Date.now() - this.pending_topout_start_ts < 1150) {
+			// We wait till 1.150 seconds have elapsed
+			return false;
+		}
+
+		return true;
 	}
 
 	_doGameOver() {
@@ -397,6 +444,8 @@ class Game {
 	}
 
 	saveFrame(frame) {
+		this.last_frame_ts = Date.now();
+
 		if (process.env.FF_SAVE_GAME_FRAMES) {
 			this.num_frames++;
 			this.frame_stream.write(frame);
