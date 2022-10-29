@@ -226,7 +226,7 @@ class Game {
 		// Check board for gameover event (curtain has fallen)
 		if (cur_num_blocks >= 200) {
 			this.end();
-		} else if (this._isNoCurtainTopOut()) {
+		} else if (this._isNoCurtainTopOut(data)) {
 			this.end();
 		}
 	}
