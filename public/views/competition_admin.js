@@ -12,6 +12,11 @@ const dom = {
 	),
 	add_player: document.querySelector('#add_player'),
 	curtain_logo_url: document.querySelector('#curtain_logo_url'),
+
+	// round controls elements
+	start_round: document.querySelector('#start_round'),
+	end_round: document.querySelector('#end_round'),
+	view_round: document.querySelector('#view_round'),
 };
 
 const MAX_BEST_OF = 13;
@@ -74,6 +79,12 @@ const remoteAPI = {
 	},
 	showProfileCard: function (visible, match_idx) {
 		connection.send(['showProfileCard', visible, match_idx]);
+	},
+	startRound: function () {
+		connection.send(['startRound']);
+	},
+	endRound: function () {
+		connection.send(['endRound']);
 	},
 };
 
@@ -306,6 +317,22 @@ function setState(_room_data) {
 
 	dom.show_profile_cards_controls.querySelector('.matches').style.display =
 		room_data.concurrent_2_matches ? null : 'none';
+
+	if (_room_data.round) {
+		if (_room_data.round.ended) {
+			start_round.disabled = false;
+			end_round.disabled = true;
+			view_round.disabled = false;
+		} else if (_room_data.round.started) {
+			start_round.disabled = true;
+			end_round.disabled = false;
+			view_round.disabled = true;
+		} else {
+			start_round.disabled = false;
+			end_round.disabled = true;
+			view_round.disabled = true;
+		}
+	}
 }
 
 function addPlayer() {
@@ -376,6 +403,12 @@ function bootstrap() {
 				remoteAPI.showProfileCard(this.checked, this.value);
 			});
 		});
+
+	dom.start_round.addEventListener('click', () => remoteAPI.startRound());
+	dom.end_round.addEventListener('click', () => remoteAPI.endRound());
+	dom.view_round.addEventListener('click', () =>
+		window.open('/api/room/round', 'round')
+	);
 
 	// =====
 

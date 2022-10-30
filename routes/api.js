@@ -1,8 +1,11 @@
+import middlewares from '../modules/middlewares.js';
+
 import zlib from 'zlib';
 import fs from 'fs';
 import _ from 'lodash';
 import express from 'express';
 import got from 'got';
+import UserDAO from '../daos/UserDAO.js';
 import ScoreDAO from '../daos/ScoreDAO.js';
 
 const STACKRABBIT_URL = 'https://stackrabbit.herokuapp.com/get-move';
@@ -97,6 +100,35 @@ router.get('/games/:id', async (req, res) => {
 	}
 
 	res.json(game);
+});
+
+// kind of gross
+router.get('/room/round', middlewares.assertSession, async (req, res) => {
+	const user = await UserDAO.getUserById(req.session.user.id);
+
+	console.log('/api/room/round', user.id);
+
+	const room = user.getHostRoom();
+	const round = room.round;
+
+	const players = (round?.end?.players || []).filter(p => p.id);
+
+	if (players.length <= 0) {
+		res.json({
+			...round,
+			results: {},
+		});
+		return;
+	}
+
+	res.json({
+		...round,
+		results: await ScoreDAO.getRoundScores(
+			players,
+			Math.floor(round.start.ts / 1000),
+			Math.ceil(round.end.ts / 1000)
+		),
+	});
 });
 
 export default router;
