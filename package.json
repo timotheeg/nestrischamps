@@ -42,11 +42,11 @@
 		"pg": "^8.7.3",
 		"timezones.json": "^1.6.1",
 		"ulid": "^2.3.0",
-		"uuid": "^8.3.2",
+		"uuid": "^9.0.0",
 		"ws": "^8.8.1"
 	},
 	"engines": {
-		"node": "14.x"
+		"node": "18.x"
 	},
 	"devDependencies": {
 		"eslint": "^8.22.0",
