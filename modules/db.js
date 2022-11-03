@@ -44,7 +44,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 	console.log('DEV DB', process.env.DATABASE_URL);
 	pool = new pg.Pool({
 		connectionString: process.env.DATABASE_URL,
-		/**/
+		/*
 		ssl: {
 			rejectUnauthorized: false,
 		},
