@@ -335,6 +335,8 @@ class ScoreDAO {
 	}
 
 	async setPB(user, update) {
+		const session = await this._getCurrentSessionId(user);
+
 		// atomic upsert
 		const result = await dbPool.query(
 			`
@@ -342,6 +344,7 @@ class ScoreDAO {
 			(
 				datetime,
 				player_id,
+				session
 				start_level,
 				end_level,
 				score,
@@ -361,12 +364,12 @@ class ScoreDAO {
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
+				NOW(), $1, $2, $3, $4, $5, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
 			)
 			ON CONFLICT (player_id, start_level) where manual
-			DO UPDATE SET datetime=NOW(), end_level=$3, score=$4
+			DO UPDATE SET datetime=NOW(), end_level=$4, score=$5
 			`,
-			[user.id, update.start_level, update.end_level, update.score]
+			[user.id, session, update.start_level, update.end_level, update.score]
 		);
 
 		return result.rowCount === 1;
