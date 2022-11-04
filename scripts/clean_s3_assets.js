@@ -110,4 +110,5 @@ process.on('SIGINT', function () {
 	}
 
 	console.log(restituted);
+	process.exit(0);
 })();
