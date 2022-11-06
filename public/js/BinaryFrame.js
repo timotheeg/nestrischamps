@@ -117,7 +117,7 @@ export default class BinaryFrame {
 			((sanitized.cur_piece_das & 0b11111) << 3) |
 			(sanitized.cur_piece & 0b111);
 
-		// piece stats (9 bits each - does not align nicely to byte boundaries 😓)
+		// piece stats (10 bits each)
 		buffer[bidx++] = ((sanitized.T & 0b1111111100) >> 2);
 		buffer[bidx++] = ((sanitized.T & 0b0000000011) << 6) | ((sanitized.J & 0b1111110000) >> 4);
 		buffer[bidx++] = ((sanitized.J & 0b0000001111) << 4) | ((sanitized.Z & 0b1111000000) >> 6);
@@ -180,7 +180,7 @@ export default class BinaryFrame {
 			pojo.cur_piece = f[bidx++] & 0b111;
 
 			// piece stats
-			if (pojo.version === 3) { // current format - 10 bits per field
+			if (pojo.version === 3) { // v3 - 10 bits per field
 				pojo.T = ((f[bidx++] & 0b11111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
 				pojo.J = ((f[bidx++] & 0b00111111) << 4) | ((f[bidx] & 0b11110000) >> 4);
 				pojo.Z = ((f[bidx++] & 0b00001111) << 6) | ((f[bidx] & 0b11111100) >> 2);
@@ -190,7 +190,7 @@ export default class BinaryFrame {
 				pojo.L = ((f[bidx++] & 0b00111111) << 4) | ((f[bidx] & 0b11110000) >> 4);
 				pojo.I = ((f[bidx++] & 0b00001111) << 6) | ((f[bidx] & 0b11111100) >> 2);
 			}
-			else { // v2 - 9 bits per fields
+			else { // v2 - 9 bits per field
 				pojo.T = ((f[bidx++] & 0b11111111) << 1) | ((f[bidx] & 0b10000000) >> 7);
 				pojo.J = ((f[bidx++] & 0b01111111) << 2) | ((f[bidx] & 0b11000000) >> 6);
 				pojo.Z = ((f[bidx++] & 0b00111111) << 3) | ((f[bidx] & 0b11100000) >> 5);
@@ -202,7 +202,7 @@ export default class BinaryFrame {
 
 			bidx++;
 		} else {
-			// can only be version 1 for now, no need to check more
+			// version 1
 			pojo.score =
 				((f[bidx++] & 0x0f) << 17) |
 				(f[bidx++] << 9) |
@@ -246,7 +246,7 @@ export default class BinaryFrame {
 			if (pojo.lines === 0xfff) pojo.lines = null;
 			if (pojo.level === 0xff) pojo.level = null;
 
-			// version 3: 10 bits, versioon 2: 9 bits
+			// v3: 10 bits, v2: 9 bits
 			const piece_null_value = pojo.version === 3 ? 0x3ff : 0x1ff;
 
 			PIECES.forEach(piece => {
