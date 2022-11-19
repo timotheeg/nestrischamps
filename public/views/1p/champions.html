@@ -228,6 +228,7 @@
 		<!-- Audio -->
 
 		<script type="module">
+			import { shuffle } from '/views/utils.js';
 			import '/views/bg.js';
 			import Connection from '/js/connection.js';
 			import Player from '/views/Player.js';
@@ -257,13 +258,15 @@
 					);
 				}
 
-				// get 3 random champion tiles out of 4 champions
+				// get 3 random champion tiles out of the 5 champions
 				const tile_size = 32;
 				const tiles = await Promise.all(
 					[
 						'/views/tiles/32x32/jonas.png',
 						'/views/tiles/32x32/harry.png',
 						'/views/tiles/32x32/joseph.png',
+						'/views/tiles/32x32/dog.png',
+						'/views/tiles/32x32/ericicx.png',
 					].map(
 						uri =>
 							new Promise(resolve => {
@@ -275,10 +278,15 @@
 				);
 
 				let current_tiles;
+				let current_tiles_index = 0;
 
 				function getTiles() {
-					current_tiles = tiles;
-					// current_tiles = shuffle(tiles.slice(0)).slice(0, 3);
+					current_tiles = [...tiles, ...tiles].slice(
+						current_tiles_index,
+						current_tiles_index + 3
+					);
+					current_tiles_index = ++current_tiles_index % tiles.length;
+					// current_tiles = shuffle([...tiles]).slice(0, 3);
 				}
 
 				getTiles();
@@ -323,6 +331,7 @@
 				player.onGameStart = () => {
 					player.drought_box.classList.remove('active');
 					player.runway_tr_box.hidden = false;
+					getTiles();
 				};
 
 				player.onTetris = () => {
