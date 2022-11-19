@@ -1,8 +1,8 @@
 import dbPool from '../modules/db.js';
 import _ from 'lodash';
 
-const SESSION_BREAK_MS = 2 * 60 * 60 * 1000; // 2hours
-const MAX_IDS_PER_UPDATE = 25;
+const SESSION_BREAK_MS = 2 * 60 * 60 * 1000; // 2 hours
+const MAX_IDS_PER_UPDATE = 100;
 
 async function setSessionInGames(db_client, playerid, sessionid, gameids) {
 	if (gameids.length <= 0) return;
