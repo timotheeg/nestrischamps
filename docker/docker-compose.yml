@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+  nc:
+    build:
+      context: ./nestrischamps
+      dockerfile: Dockerfile
+    image: nestrischamps
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: 'postgres://nestrischamps:nestrischamps@db:5432/nestrischamps'
+      SESSION_SECRET: 1234567890ABCDEF
+      FF_SAVE_GAME_FRAMES: 1
+    #         TWITCH_CLIENT_ID:
+    #         TWITCH_CLIENT_SECRET:
+    volumes:
+      - ./nestrischamps/games:/nestrischamps/games
+    ports:
+      - '5000:5000'
+  db:
+    build:
+      context: ./postgresql
+      dockerfile: Dockerfile
+    image: postgres-nc
+    environment:
+      POSTGRES_PASSWORD: nestrischamps
+      POSTGRES_USER: nestrischamps
+      POSTGRES_DB: nestrischamps
+    volumes:
+      - ./postgresql/pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
