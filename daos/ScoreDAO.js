@@ -344,7 +344,7 @@ class ScoreDAO {
 			(
 				datetime,
 				player_id,
-				session
+				session,
 				start_level,
 				end_level,
 				score,
