@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
+		<style>
+			.player {
+				top: 341px;
+			}
+
+			.running_trt {
+				height: 79px;
+				display: none;
+			}
+
+			video.box {
+				position: absolute;
+				left: 219px;
+				width: 266px;
+				height: 200px;
+			}
+
+			.board,
+			video.box {
+				top: 62px;
+			}
+
+			.score {
+				left: 219px;
+				top: 283px;
+				width: 266px;
+				height: 60px;
+				padding-top: 6px;
+				padding-bottom: 6px;
+			}
+
+			.score .header {
+				font-size: 24px;
+				line-height: 24px;
+			}
+
+			.score .value {
+				font-size: 32px;
+				line-height: 32px;
+			}
+
+			.name {
+				font-size: 28px;
+				line-height: 28px;
+				width: 485px;
+				height: 28px;
+				padding: 7px 0 6px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<template id="player">
+				<div class="player">
+					<div class="box score">
+						<div class="header">SCORE</div>
+						<div class="value">0000000</div>
+					</div>
+
+					<div class="box running_trt"></div>
+
+					<video class="box"></video>
+
+					<div class="box board">
+						<div class="lines">000</div>
+						<div class="next_piece"></div>
+					</div>
+
+					<div class="box name"></div>
+				</div>
+			</template>
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '352x240',
+				players: 8,
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import QueryString from '/js/QueryString.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import Player from '/views/Player.js';
+			import Competition from '/views/competition.js';
+
+			const stream_bg = document.getElementById('stream_bg');
+			const player_template = document.getElementById('player');
+
+			const player_width = 515;
+			const player_height = 510;
+
+			const players = [];
+
+			let num_players = 6; // TODO: accomodate 8
+
+			const hspacer = (1920 - player_width * 3) / 4;
+			const vspacer = (1080 - player_height * 2) / 3;
+
+			window.onload = () => {
+				// wait for css
+				[1, 2].forEach((row_num, row_idx) => {
+					[1, 2, 3].forEach((col_num, col_idx) => {
+						const player_idx = row_idx * 3 + col_idx;
+
+						const player_fragment = document.importNode(
+							player_template.content,
+							true
+						);
+						const player_node = player_fragment.querySelector('.player');
+
+						player_node.classList.add(`p${player_idx + 1}`);
+						stream_bg.appendChild(player_node);
+
+						const player = new Player(
+							{
+								name: player_node.querySelector(`.name`),
+								score: player_node.querySelector(`.score .value`),
+								lines: player_node.querySelector(`.board .lines`),
+								preview: player_node.querySelector(`.board .next_piece`),
+								field: player_node.querySelector(`.board`),
+								running_trt: player_node.querySelector(`.running_trt`),
+								video: player_node.querySelector(`video`),
+							},
+							{
+								field_pixel_size: 2.5,
+								preview_pixel_size: 2,
+								preview_align: 'tr',
+								stereo: translate([0, num_players - 1], [-1, 1], player_idx),
+								format_score: readableScoreFomatter,
+							}
+						);
+
+						// adding extra properties to track
+						player.onGameStart = function () {
+							this.dom.lines.hidden = false;
+							this.dom.preview.hidden = false;
+						};
+
+						player.onGameOver = function () {
+							this.dom.lines.hidden = true;
+							this.dom.preview.hidden = true;
+						};
+
+						player.onGameOver();
+
+						players.push(player);
+
+						Object.assign(player_node.style, {
+							top: `${Math.round(
+								vspacer + row_idx * (player_width + vspacer)
+							)}px`,
+							left: `${Math.round(
+								hspacer + col_idx * (player_width + hspacer)
+							)}px`,
+						});
+
+						if (QueryString.get('rtrt') === '0') {
+							player.dom.running_trt.remove();
+						}
+					});
+				});
+
+				const competition = new Competition(players);
+
+				updateScore();
+			};
+		</script>
+	</body>
+</html>
