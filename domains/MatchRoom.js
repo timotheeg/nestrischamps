@@ -284,7 +284,7 @@ class MatchRoom extends Room {
 
 		// 1. add players in order of arrival
 		const sorted_producers = [...this.producers].sort(
-			(u1, u2) => u2.match_room_join_ts - u1.match_room_join_ts // breaks encapsulation T_T
+			(u1, u2) => u1.match_room_join_ts - u2.match_room_join_ts // breaks encapsulation -_-
 		);
 
 		// 3. fill as much players as the layout allows
