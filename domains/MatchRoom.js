@@ -150,6 +150,10 @@ class MatchRoom extends Room {
 
 			if (!is_replace_flow) {
 				this.sendStateToAdmin();
+			} else {
+				// TODO: if producer was assigned to user, shou;d we remove the user too?
+				// TODO: Question especially relevant for autojoin mode?
+				// NOTE: removing the player assignment, means that if the player has a connection blips, he might be kicked form the room and not have his game data resume as soon as he reconnects
 			}
 		}
 
