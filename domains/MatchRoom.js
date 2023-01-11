@@ -29,8 +29,6 @@ class MatchRoom extends Room {
 	constructor(owner, roomid) {
 		super(owner);
 
-		this.autojoin = false;
-
 		this.producers = new Set(); // users
 		this.admin = null;
 		this.roomid = roomid || '_default';
@@ -40,6 +38,7 @@ class MatchRoom extends Room {
 			concurrent_2_matches: undefined, // undefined|true|false
 			selected_match: null, // 0|1|null
 			curtain_logo: null, // url to image or null
+			autojoin: false,
 			players: [
 				// flat user objects - starts with 2 players
 				getBasePlayerData(),
@@ -96,7 +95,7 @@ class MatchRoom extends Room {
 			this.producers.add(user);
 			this.sendStateToAdmin();
 
-			if (this.autojoin) {
+			if (this.state.autjoin) {
 				this.autoJoinUser(user);
 			}
 		}
@@ -308,7 +307,7 @@ class MatchRoom extends Room {
 		}
 	}
 
-	setPlayer(player_num, p_id) {
+	setPlayer(p_num, p_id) {
 		console.log('setPlayer()', p_id, typeof p_id);
 
 		let player_data;
@@ -598,15 +597,15 @@ class MatchRoom extends Room {
 					break; // simple passthrough
 				}
 
-				case 'setAutoJoin': {
+				case 'allowAutoJoin': {
 					forward_to_views = false;
 					const new_autojoin = !!args[0];
 
-					if (new_autojoin && !this.autojoin) {
+					if (new_autojoin && !this.state.autjoin) {
 						this.initAutoJoin();
 					}
 
-					this.autojoin = new_autojoin;
+					this.state.autjoin = new_autojoin;
 
 					break;
 				}
