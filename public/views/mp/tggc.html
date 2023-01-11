@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
+		<style>
+			.leaderboard {
+				top: 36px;
+				left: 24px;
+				height: 288px;
+				width: 864px;
+			}
+
+			.leaderboard .value {
+				columns: unset;
+			}
+
+			.player {
+				top: 388px;
+			}
+
+			.no-video .player {
+				top: 410px;
+			}
+
+			.running_trt {
+				display: none;
+				height: 79px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div class="box leaderboard">
+				<div class="header">RANKING</div>
+				<div class="value"></div>
+			</div>
+
+			<template id="player">
+				<div class="player">
+					<div class="box board">
+						<div class="lines">000</div>
+						<div class="next_piece"></div>
+					</div>
+
+					<div class="box score">
+						<div class="header">PLAYER</div>
+						<div class="value">0000000</div>
+					</div>
+
+					<div class="box running_trt"></div>
+
+					<video class="box"></video>
+				</div>
+			</template>
+
+			<template id="rank">
+				<div class="entry">
+					<span class="rank">1</span>
+					<span class="name">PLAYER</span>
+					<span class="score2">0</span>
+					<span class="diff">0</span>
+				</div>
+			</template>
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '352x240',
+				players: 8,
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import QueryString from '/js/QueryString.js';
+			import Color from '/views/color.js';
+			import Gradient from '/views/gradient.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import Player from '/views/Player.js';
+			import Competition from '/views/competition.js';
+
+			const stream_bg = document.getElementById('stream_bg');
+			const rank_template = document.getElementById('rank');
+			const player_template = document.getElementById('player');
+			const leaderboard_values = document.querySelector('.leaderboard  .value');
+			const color_gradient = new Gradient( // green - orange - red
+				'#0eff0e',
+				new Color(255, 165, 0),
+				'#fd0009'
+			);
+
+			const players_re = /^[2345678]$/;
+			const player_width = 228;
+			const players = [];
+
+			let num_players = 8;
+
+			if (players_re.test(QueryString.get('players'))) {
+				num_players = parseInt(QueryString.get('players'), 10);
+			}
+
+			const spacer = (1920 - num_players * player_width) / (num_players + 1);
+
+			function updateScore() {
+				const sorted_players = [...players].sort((p1, p2) => {
+					const p1_score = p1.getScore();
+					const p2_score = p2.getScore();
+					return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
+				});
+
+				sorted_players.forEach((player, idx) => {
+					const color = color_gradient
+						.getColorAt(idx / (num_players - 1))
+						.toHexString();
+
+					player.rank_node.style.color = color;
+					player.rank_node.querySelector('.rank').textContent = idx + 1;
+
+					if (idx > 0) {
+						const diff = player.getScore() - sorted_players[idx - 1].getScore(); // is negative!
+						player.rank_node.querySelector('.diff').textContent =
+							readableScoreFomatter(diff);
+					} else {
+						player.rank_node.querySelector('.diff').textContent = '';
+					}
+
+					leaderboard_values.appendChild(player.rank_node);
+				});
+			}
+
+			window.onload = () => {
+				// wait for css
+				const base_offset_y = 20;
+
+				Array(num_players)
+					.fill()
+					.forEach((_, player_idx) => {
+						const player_fragment = document.importNode(
+							player_template.content,
+							true
+						);
+						const player_node = player_fragment.querySelector('.player');
+
+						player_node.classList.add(`p${player_idx + 1}`);
+						stream_bg.appendChild(player_node);
+
+						const rank_fragment = document.importNode(
+							rank_template.content,
+							true
+						);
+						const rank_node = rank_fragment.querySelector('.entry');
+
+						const player = new Player(
+							{
+								name: player_node.querySelector(`.score .header`),
+								score: player_node.querySelector(`.score .value`),
+								lines: player_node.querySelector(`.board .lines`),
+								preview: player_node.querySelector(`.board .next_piece`),
+								field: player_node.querySelector(`.board`),
+								running_trt: player_node.querySelector(`.running_trt`),
+								video: player_node.querySelector(`video`),
+							},
+							{
+								field_pixel_size: 2.5,
+								preview_pixel_size: 2,
+								preview_align: 'tr',
+								stereo: translate([0, num_players - 1], [-1, 1], player_idx),
+								format_score: readableScoreFomatter,
+							}
+						);
+
+						// adding extra properties to track
+						player.idx = player_idx; // For stable sort -_-
+						player.rank_node = rank_node;
+
+						player.__setName = player.setName;
+						player.setName = function (name) {
+							this.__setName(name);
+							this.rank_node.querySelector('.name').textContent = name || '';
+						};
+
+						player.onGameStart = function () {
+							this.dom.lines.hidden = false;
+							this.dom.preview.hidden = false;
+						};
+
+						player.onGameOver = function () {
+							this.dom.lines.hidden = true;
+							this.dom.preview.hidden = true;
+						};
+
+						player.onGameOver();
+
+						players.push(player);
+
+						Object.assign(player_node.style, {
+							left: `${Math.round(
+								spacer + player_idx * (player_width + spacer)
+							)}px`,
+						});
+
+						if (QueryString.get('rtrt') === '0') {
+							player.dom.running_trt.remove();
+						}
+					});
+
+				const competition = new Competition(players);
+
+				players.forEach(player => {
+					player.onScore = () => {
+						player.rank_node.querySelector('.score2').textContent =
+							readableScoreFomatter(player.getScore());
+						updateScore();
+					};
+				});
+
+				if (!competition.has_video) {
+					stream_bg.classList.add('no-video');
+				}
+
+				updateScore();
+			};
+		</script>
+	</body>
+</html>
