@@ -42,6 +42,7 @@ class User extends EventEmitter {
 
 		// match room links this user to the host room of another user
 		this.match_room = null;
+		this.match_room_join_ts = -1;
 
 		// keep track of all socket for the user
 		// dangerous, could lead to memory if not managed well
@@ -95,6 +96,7 @@ class User extends EventEmitter {
 			this.leaveMatchRoom();
 		}
 
+		this.match_room_join_ts = Date.now();
 		this.match_room = host_user.getHostRoom();
 		this.match_room.addProducer(this);
 		this.match_room.once('close', this._handleMatchRoomClose);
@@ -112,6 +114,7 @@ class User extends EventEmitter {
 		this.match_room = null;
 
 		if (this.producer.isMatchConnection()) {
+			this.match_room_join_ts = -1;
 			this.producer.kick('match_room_closed');
 		}
 	}

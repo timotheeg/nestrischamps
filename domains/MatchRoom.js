@@ -29,6 +29,8 @@ class MatchRoom extends Room {
 	constructor(owner, roomid) {
 		super(owner);
 
+		this.autojoin = false;
+
 		this.producers = new Set(); // users
 		this.admin = null;
 		this.roomid = roomid || '_default';
@@ -93,6 +95,10 @@ class MatchRoom extends Room {
 		if (is_new_user) {
 			this.producers.add(user);
 			this.sendStateToAdmin();
+
+			if (this.autojoin) {
+				this.autoJoinUser(user);
+			}
 		}
 
 		// whether or not the user was new, its peer id changed
@@ -247,6 +253,10 @@ class MatchRoom extends Room {
 			p_num < MAX_PLAYERS &&
 			!(p_num % 1)
 		) {
+			if (this.getViewMeta().players) {
+				return p_num < this.getViewMeta().players;
+			}
+
 			return true;
 		}
 
@@ -255,6 +265,116 @@ class MatchRoom extends Room {
 
 	getPlayerData(player_id) {
 		return this.state.players.find(player => player.id === player_id);
+	}
+
+	getMaxPossiblePlayers() {
+		return Math.min(this.getViewMeta().players || Infinity, MAX_PLAYERS);
+	}
+
+	initAutoJoin() {
+		// 1. drop all players
+		for (let idx = this.state.players.length; idx--; ) {
+			if (this.state.players[idx].id) {
+				this.setPlayer(idx, null);
+			}
+		}
+
+		// 1. add players in order of arrival
+		const sorted_producers = [...this.producers].sort(
+			(u1, u2) => u2.match_room_join_ts - u1.match_room_join_ts // breaks encapsulation T_T
+		);
+
+		// 3. fill as much players as the layout allows
+		for (
+			let idx = 0;
+			idx < Math.min(this.getMaxPossiblePlayers(), this.producers.size);
+			idx++
+		) {
+			this.setPlayer(idx, sorted_producers[idx].id);
+		}
+	}
+
+	autoJoinUser(user) {
+		for (let idx = 0; idx < this.getMaxPossiblePlayers(); idx++) {
+			if (!this.state.players[idx]?.id) {
+				this.setPlayer(idx, user.id);
+				this.sendStateToAdmin();
+				break;
+			}
+		}
+	}
+
+	setPlayer(player_num, p_id) {
+		console.log('setPlayer()', p_id, typeof p_id);
+
+		let player_data;
+		const player_id = `${p_id}`;
+
+		this.assertValidPlayer(p_num);
+
+		const old_player_id = this.state.players[p_num].id;
+
+		if (old_player_id && player_id != old_player_id) {
+			// player at p_num is being replaced
+			// check if old player was used in more than one slot
+			// if not, then user needs to be informed it is dropped as a player
+			const still_around =
+				this.state.players.filter(player => player.id === old_player_id)
+					.length > 1;
+
+			if (!still_around) {
+				const user = this.getProducer(this.state.players[p_num].id);
+
+				if (user) {
+					// hmm, is this necessary?
+					user.getProducer().send(['dropPlayer']);
+				}
+			}
+		}
+
+		const user = this.getProducer(player_id);
+
+		if (!p_id) {
+			// player is being erased, get a fresh data set
+			player_data = getBasePlayerData();
+		} else {
+			player_data = this.getPlayerData(player_id);
+
+			if (!player_data && user) {
+				player_data = this.getProducerFields(user);
+			}
+		}
+
+		if (!player_data) {
+			console.log(`Room ${this.roomid}: Player not found`);
+			return;
+		}
+
+		this.state.players[p_num] = _.cloneDeep({
+			...this.state.players[p_num],
+			...player_data,
+			victories: 0,
+		});
+
+		const peerid = user ? user.getProducer().getPeerId() : '';
+
+		// Send data to all views
+		this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
+		this.sendToViews(['setPeerId', p_num, peerid]);
+		this.sendToViews(['setLogin', p_num, player_data.login]);
+		this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
+		this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
+		this.sendToViews([
+			'setProfileImageURL',
+			p_num,
+			player_data.profile_image_url,
+		]);
+		this.sendToViews(['setCameraState', p_num, player_data.camera]);
+
+		// inform producer it is a now a player
+		if (user) {
+			user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]);
+		}
 	}
 
 	onAdminMessage(message) {
@@ -271,79 +391,8 @@ class MatchRoom extends Room {
 				}
 
 				case 'setPlayer': {
-					const [p_num, p_id] = args;
-					console.log('setPlayer()', p_id, typeof p_id);
-
-					let player_data;
-					let player_id = `${p_id}`;
-
-					this.assertValidPlayer(p_num);
-
-					const old_player_id = this.state.players[p_num].id;
-
-					if (old_player_id && player_id != old_player_id) {
-						// player at p_num is being replaced
-						// check if old player was used in more than one slot
-						// if not, then user needs to be informed it is dropped as a player
-						const still_around =
-							this.state.players.filter(player => player.id === old_player_id)
-								.length > 1;
-
-						if (!still_around) {
-							const user = this.getProducer(this.state.players[p_num].id);
-
-							if (user) {
-								// hmm, is this necessary?
-								user.getProducer().send(['dropPlayer']);
-							}
-						}
-					}
-
-					const user = this.getProducer(player_id);
-
-					if (!p_id) {
-						// player is being erased, get a fresh data set
-						player_data = getBasePlayerData();
-					} else {
-						player_data = this.getPlayerData(player_id);
-
-						if (!player_data && user) {
-							player_data = this.getProducerFields(user);
-						}
-					}
-
-					if (!player_data) {
-						console.log(`Room ${this.roomid}: Player not found`);
-						return;
-					}
-
-					this.state.players[p_num] = _.cloneDeep({
-						...this.state.players[p_num],
-						...player_data,
-						victories: 0,
-					});
-
-					const peerid = user ? user.getProducer().getPeerId() : '';
-
-					// Send data to all views
-					this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
-					this.sendToViews(['setPeerId', p_num, peerid]);
-					this.sendToViews(['setLogin', p_num, player_data.login]);
-					this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
-					this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
-					this.sendToViews([
-						'setProfileImageURL',
-						p_num,
-						player_data.profile_image_url,
-					]);
-					this.sendToViews(['setCameraState', p_num, player_data.camera]);
-
-					// inform producer it is a now a player
-					if (user) {
-						user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]);
-					}
-
 					forward_to_views = false;
+					this.setPlayer(...args);
 					break;
 				}
 
@@ -543,6 +592,19 @@ class MatchRoom extends Room {
 					this.state.selected_match = args[0];
 					update_admin = false;
 					break; // simple passthrough
+				}
+
+				case 'setAutoJoin': {
+					forward_to_views = false;
+					const new_autojoin = !!args[0];
+
+					if (new_autojoin && !this.autojoin) {
+						this.initAutoJoin();
+					}
+
+					this.autojoin = new_autojoin;
+
+					break;
 				}
 
 				default: {
