@@ -267,10 +267,6 @@ class MatchRoom extends Room {
 			p_num < MAX_PLAYERS &&
 			!(p_num % 1)
 		) {
-			if (this.getViewMeta().players) {
-				return p_num < this.getViewMeta().players;
-			}
-
 			return true;
 		}
 
