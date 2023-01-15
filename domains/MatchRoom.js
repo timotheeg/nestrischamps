@@ -231,7 +231,14 @@ class MatchRoom extends Room {
 	}
 
 	sendStateToAdmin() {
-		this.tellAdmin(['state', this.getState()]);
+		const state = this.getState();
+
+		state.round = {
+			started: !!this.round?.start,
+			ended: !!this.round?.end,
+		};
+
+		this.tellAdmin(['state', state]);
 	}
 
 	tellAdmin(message) {
@@ -261,6 +268,10 @@ class MatchRoom extends Room {
 		const [command, ...args] = message;
 		let forward_to_views = true;
 		let update_admin = true;
+
+		console.log(
+			`Room ${this.owner.login} (${this.owner.id}) - Received command: ${command}`
+		);
 
 		// TODO: Extract this encompassing try..catch to own method
 		try {
@@ -386,6 +397,36 @@ class MatchRoom extends Room {
 					this.sendToViews(['setCameraState', p_num, camera_state]);
 
 					break; // simple passthrough
+				}
+
+				case 'startRound': {
+					forward_to_views = false;
+
+					// lock room information in place
+					this.round = {
+						start: Object.assign(this.getState(), {
+							ts: Date.now(),
+							players: _.cloneDeep(this.state.players),
+						}),
+					};
+
+					break;
+				}
+
+				case 'endRound': {
+					forward_to_views = false;
+
+					// lock room information in place
+					if (this.round) {
+						Object.assign(this.round, {
+							end: Object.assign(this.getState(), {
+								ts: Date.now(),
+								players: _.cloneDeep(this.state.players),
+							}),
+						});
+					}
+
+					break;
 				}
 
 				case 'setDisplayName': {

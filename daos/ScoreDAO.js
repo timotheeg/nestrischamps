@@ -374,6 +374,50 @@ class ScoreDAO {
 
 		return result.rowCount === 1;
 	}
+
+	async getRoundScores(players, start_ts, end_ts) {
+		const player_ids = players.map(p => p.id);
+
+		const result = await dbPool.query(
+			`
+			SELECT
+				s.player_id, u.login,
+				s.id,
+				(s.datetime - (s.duration || ' milliseconds')::interval) as start_time,
+				s.datetime as end_time,
+				s.duration,
+				s.score, s.start_level, s.lines, s.end_level, s.tetris_rate
+			FROM scores s, twitch_users u
+			WHERE s.player_id=u.id
+				AND s.player_id in (${player_ids.join(',')})
+				AND (s.datetime - (s.duration || ' milliseconds')::interval) >= to_timestamp($1)
+				AND datetime < to_timestamp($2)
+			`,
+			[start_ts, end_ts]
+		);
+
+		// group results by player and return
+		const res_by_player = {};
+
+		result.rows.forEach(row => {
+			let player_data = res_by_player[row.login];
+
+			if (!player_data) {
+				player_data = res_by_player[row.login] = {
+					id: row.player_id,
+					login: row.login,
+					games: [],
+				};
+			}
+
+			delete row.player_id;
+			delete row.login;
+
+			player_data.games.push(row);
+		});
+
+		return res_by_player;
+	}
 }
 
 export default new ScoreDAO();
