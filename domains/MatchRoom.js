@@ -88,13 +88,13 @@ class MatchRoom extends Room {
 	}
 
 	addProducer(user) {
-		console.log('addProducer', user.id);
+		console.log('addProducer', user.id, typeof user.id);
 		const is_new_user = !this.hasProducer(user);
 
 		if (is_new_user) {
 			this.producers.add(user);
 
-			if (this.state.autjoin) {
+			if (this.state.autojoin) {
 				this.autoJoinUser(user);
 			}
 
