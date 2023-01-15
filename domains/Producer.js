@@ -23,7 +23,6 @@ class Producer extends EventEmitter {
 
 		connection.once('close', () => {
 			this.connection.removeAllListeners();
-			this.is_match_connection = false;
 
 			if (this.connection === connection) {
 				this.connection = null;

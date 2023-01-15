@@ -10,6 +10,7 @@ const dom = {
 	show_profile_cards_controls: document.querySelector(
 		'#show_profile_cards_controls'
 	),
+	allow_autojoin: document.querySelector('#allow_autojoin'),
 	add_player: document.querySelector('#add_player'),
 	curtain_logo_url: document.querySelector('#curtain_logo_url'),
 };
@@ -75,6 +76,9 @@ const remoteAPI = {
 	showProfileCard: function (visible, match_idx) {
 		connection.send(['showProfileCard', visible, match_idx]);
 	},
+	allowAutoJoin: function (allow) {
+		connection.send(['allowAutoJoin', allow]);
+	},
 };
 
 const players = [];
@@ -82,7 +86,7 @@ let room_data;
 let connection;
 
 function getProducer(pid) {
-	return room_data.producers.find(producer => producer.id == pid);
+	return room_data.producers.find(producer => producer.id === pid);
 }
 
 class Player {
@@ -120,7 +124,7 @@ class Player {
 		};
 
 		this.dom.producers.onchange = () =>
-			this._pickProducer(parseInt(this.dom.producers.value, 10));
+			this._pickProducer(this.dom.producers.value);
 
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
@@ -196,11 +200,11 @@ class Player {
 	}
 
 	_pickProducer(pid) {
-		remoteAPI.setPlayer(this.idx, parseInt(pid, 10));
+		remoteAPI.setPlayer(this.idx, pid);
 	}
 
 	setProducer(pid) {
-		const selected_pid = parseInt(this.dom.producers.value, 10);
+		const selected_pid = this.dom.producers.value;
 
 		if (selected_pid === pid) return;
 
@@ -306,6 +310,8 @@ function setState(_room_data) {
 
 	dom.show_profile_cards_controls.querySelector('.matches').style.display =
 		room_data.concurrent_2_matches ? null : 'none';
+
+	dom.allow_autojoin.checked = !!room_data.autojoin;
 }
 
 function addPlayer() {
@@ -377,9 +383,13 @@ function bootstrap() {
 			});
 		});
 
+	dom.allow_autojoin.addEventListener('click', function () {
+		remoteAPI.allowAutoJoin(this.checked);
+	});
+
 	// =====
 
-	connection = new Connection();
+	window.connection = connection = new Connection();
 
 	connection.onMessage = function (message) {
 		const [command, ...args] = message;

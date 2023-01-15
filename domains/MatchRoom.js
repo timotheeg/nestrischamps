@@ -38,6 +38,7 @@ class MatchRoom extends Room {
 			concurrent_2_matches: undefined, // undefined|true|false
 			selected_match: null, // 0|1|null
 			curtain_logo: null, // url to image or null
+			autojoin: false,
 			players: [
 				// flat user objects - starts with 2 players
 				getBasePlayerData(),
@@ -87,11 +88,16 @@ class MatchRoom extends Room {
 	}
 
 	addProducer(user) {
-		console.log('addProducer', user.id);
+		console.log('addProducer', user.id, typeof user.id);
 		const is_new_user = !this.hasProducer(user);
 
 		if (is_new_user) {
 			this.producers.add(user);
+
+			if (this.state.autojoin) {
+				this.autoJoinUser(user);
+			}
+
 			this.sendStateToAdmin();
 		}
 
@@ -136,15 +142,29 @@ class MatchRoom extends Room {
 		}
 	}
 
-	removeProducer(user, is_replace_flow = false) {
-		const was_present = this.hasProducer(user);
+	removeProducer(user) {
+		const was_present =
+			this.hasProducer(user) ||
+			this.state.players.some(player => player.id === user.id);
 
 		if (was_present) {
+			// drop the producer
 			this.producers.delete(user);
 
-			if (!is_replace_flow) {
-				this.sendStateToAdmin();
+			// remove all players associated to that producer
+			let removed_players = 0;
+			this.state.players.forEach((player, p_idx) => {
+				if (player.id === user.id) {
+					removed_players++;
+					this.setPlayer(p_idx, null);
+				}
+			});
+
+			if (removed_players && this.state.autojoin) {
+				this.doAutoJoin();
 			}
+
+			this.sendStateToAdmin();
 		}
 
 		// TODO: anything to send to the views?
@@ -257,6 +277,115 @@ class MatchRoom extends Room {
 		return this.state.players.find(player => player.id === player_id);
 	}
 
+	getMaxPossiblePlayers() {
+		return Math.min(this.getViewMeta().players || Infinity, MAX_PLAYERS);
+	}
+
+	doAutoJoin() {
+		// 1. sort all producers not currently assigned
+		const player_user_ids = new Set(
+			this.state.players.map(player => player.id)
+		);
+		const unassigned_producers = [...this.producers]
+			.filter(user => !player_user_ids.has(user.id))
+			.sort(
+				(u1, u2) => u1.match_room_join_ts - u2.match_room_join_ts // breaks encapsulation -_-
+			);
+
+		// 2. assign as many of the "dangling" producers as possible
+		// not the most computationally efficient way to do it, but nicely readable
+		let did_assign = false;
+		for (const user of unassigned_producers) {
+			did_assign ||= this.autoJoinUser(user);
+		}
+
+		return did_assign;
+	}
+
+	autoJoinUser(user) {
+		for (let idx = 0; idx < this.getMaxPossiblePlayers(); idx++) {
+			if (!this.state.players[idx]?.id) {
+				this.setPlayer(idx, user.id);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	setPlayer(p_num, p_id) {
+		console.log('setPlayer()', p_id, typeof p_id);
+
+		let player_data;
+		const player_id = `${p_id}`;
+
+		this.assertValidPlayer(p_num);
+
+		const old_player_id = this.state.players[p_num].id;
+
+		if (old_player_id && player_id != old_player_id) {
+			// player at p_num is being replaced
+			// check if old player was used in more than one slot
+			// if not, then user needs to be informed it is dropped as a player
+			const still_around =
+				this.state.players.filter(player => player.id === old_player_id)
+					.length > 1;
+
+			if (!still_around) {
+				const user = this.getProducer(this.state.players[p_num].id);
+
+				if (user) {
+					// hmm, is this necessary?
+					user.getProducer().send(['dropPlayer']);
+				}
+			}
+		}
+
+		const user = this.getProducer(player_id);
+
+		if (!p_id) {
+			// player is being erased, get a fresh data set
+			player_data = getBasePlayerData();
+		} else {
+			player_data = this.getPlayerData(player_id);
+
+			if (!player_data && user) {
+				player_data = this.getProducerFields(user);
+			}
+		}
+
+		if (!player_data) {
+			console.log(`Room ${this.roomid}: Player not found`);
+			return;
+		}
+
+		this.state.players[p_num] = _.cloneDeep({
+			...this.state.players[p_num],
+			...player_data,
+			victories: 0,
+		});
+
+		const peerid = user ? user.getProducer().getPeerId() : '';
+
+		// Send data to all views
+		this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
+		this.sendToViews(['setPeerId', p_num, peerid]);
+		this.sendToViews(['setLogin', p_num, player_data.login]);
+		this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
+		this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
+		this.sendToViews([
+			'setProfileImageURL',
+			p_num,
+			player_data.profile_image_url,
+		]);
+		this.sendToViews(['setCameraState', p_num, player_data.camera]);
+
+		// inform producer it is a now a player
+		if (user) {
+			user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]);
+		}
+	}
+
 	onAdminMessage(message) {
 		const [command, ...args] = message;
 		let forward_to_views = true;
@@ -271,79 +400,8 @@ class MatchRoom extends Room {
 				}
 
 				case 'setPlayer': {
-					const [p_num, p_id] = args;
-					console.log('setPlayer()', p_id, typeof p_id);
-
-					let player_data;
-					let player_id = `${p_id}`;
-
-					this.assertValidPlayer(p_num);
-
-					const old_player_id = this.state.players[p_num].id;
-
-					if (old_player_id && player_id != old_player_id) {
-						// player at p_num is being replaced
-						// check if old player was used in more than one slot
-						// if not, then user needs to be informed it is dropped as a player
-						const still_around =
-							this.state.players.filter(player => player.id === old_player_id)
-								.length > 1;
-
-						if (!still_around) {
-							const user = this.getProducer(this.state.players[p_num].id);
-
-							if (user) {
-								// hmm, is this necessary?
-								user.getProducer().send(['dropPlayer']);
-							}
-						}
-					}
-
-					const user = this.getProducer(player_id);
-
-					if (!p_id) {
-						// player is being erased, get a fresh data set
-						player_data = getBasePlayerData();
-					} else {
-						player_data = this.getPlayerData(player_id);
-
-						if (!player_data && user) {
-							player_data = this.getProducerFields(user);
-						}
-					}
-
-					if (!player_data) {
-						console.log(`Room ${this.roomid}: Player not found`);
-						return;
-					}
-
-					this.state.players[p_num] = _.cloneDeep({
-						...this.state.players[p_num],
-						...player_data,
-						victories: 0,
-					});
-
-					const peerid = user ? user.getProducer().getPeerId() : '';
-
-					// Send data to all views
-					this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
-					this.sendToViews(['setPeerId', p_num, peerid]);
-					this.sendToViews(['setLogin', p_num, player_data.login]);
-					this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
-					this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
-					this.sendToViews([
-						'setProfileImageURL',
-						p_num,
-						player_data.profile_image_url,
-					]);
-					this.sendToViews(['setCameraState', p_num, player_data.camera]);
-
-					// inform producer it is a now a player
-					if (user) {
-						user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]);
-					}
-
 					forward_to_views = false;
+					this.setPlayer(...args);
 					break;
 				}
 
@@ -543,6 +601,19 @@ class MatchRoom extends Room {
 					this.state.selected_match = args[0];
 					update_admin = false;
 					break; // simple passthrough
+				}
+
+				case 'allowAutoJoin': {
+					forward_to_views = false;
+					const new_autojoin = !!args[0];
+
+					if (new_autojoin && !this.state.autojoin) {
+						this.doAutoJoin();
+					}
+
+					this.state.autojoin = new_autojoin;
+
+					break;
 				}
 
 				default: {
