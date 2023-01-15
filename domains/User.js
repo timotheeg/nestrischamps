@@ -88,11 +88,9 @@ class User extends EventEmitter {
 	joinMatchRoom(host_user) {
 		const new_room = host_user.getHostRoom();
 
-		this.leave_room_to = clearTimeout(this.leave_room_to);
-
 		if (new_room === this.match_room) {
-			// this forces a redispatch of the peer ids
-			new_room.addProducer(this);
+			this.leave_room_to = clearTimeout(this.leave_room_to); // just in case
+			new_room.addProducer(this); // this forces a redispatch of the peer ids
 			return;
 		}
 
@@ -107,6 +105,8 @@ class User extends EventEmitter {
 	}
 
 	leaveMatchRoom() {
+		this.leave_room_to = clearTimeout(this.leave_room_to);
+
 		if (this.match_room) {
 			this.match_room.off('close', this._handleMatchRoomClose);
 			this.match_room.removeProducer(this);
@@ -116,8 +116,7 @@ class User extends EventEmitter {
 	}
 
 	_handleMatchRoomClose() {
-		this.leave_room_to = clearTimeout(this.leave_room_to);
-		this.match_room = null;
+		this.leaveMatchRoom();
 
 		if (this.producer.isMatchConnection()) {
 			this.match_room_join_ts = -1;
