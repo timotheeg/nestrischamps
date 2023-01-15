@@ -46,6 +46,7 @@ class MatchRoom extends Room {
 			],
 		};
 
+		this.autoJoinUser = this.autoJoinUser.bind(this);
 		this.onAdminMessage = this.onAdminMessage.bind(this);
 	}
 
@@ -275,26 +276,19 @@ class MatchRoom extends Room {
 	}
 
 	initAutoJoin() {
-		// 1. drop all players
-		for (let idx = this.state.players.length; idx--; ) {
-			if (this.state.players[idx].id) {
-				this.setPlayer(idx, null);
-			}
-		}
-
-		// 1. add players in order of arrival
-		const sorted_producers = [...this.producers].sort(
-			(u1, u2) => u1.match_room_join_ts - u2.match_room_join_ts // breaks encapsulation -_-
+		// 1. sort all producers not currently assigned
+		const player_user_ids = new Set(
+			this.state.players.map(player => player.id)
 		);
+		const unassigned_producers = [...this.producers]
+			.filter(user => !player_user_ids.has(user.id))
+			.sort(
+				(u1, u2) => u1.match_room_join_ts - u2.match_room_join_ts // breaks encapsulation -_-
+			);
 
-		// 3. fill as much players as the layout allows
-		for (
-			let idx = 0;
-			idx < Math.min(this.getMaxPossiblePlayers(), this.producers.size);
-			idx++
-		) {
-			this.setPlayer(idx, sorted_producers[idx].id);
-		}
+		// 2. assign as many of the "dangling" producers as possible
+		// not the most computationally efficient way to do it, but nicely readable
+		unassigned_producers.every(this.autoJoinUser);
 	}
 
 	autoJoinUser(user) {
@@ -302,9 +296,11 @@ class MatchRoom extends Room {
 			if (!this.state.players[idx]?.id) {
 				this.setPlayer(idx, user.id);
 				this.sendStateToAdmin();
-				break;
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	setPlayer(p_num, p_id) {
