@@ -46,7 +46,6 @@ class MatchRoom extends Room {
 			],
 		};
 
-		this.autoJoinUser = this.autoJoinUser.bind(this);
 		this.onAdminMessage = this.onAdminMessage.bind(this);
 	}
 
@@ -94,11 +93,12 @@ class MatchRoom extends Room {
 
 		if (is_new_user) {
 			this.producers.add(user);
-			this.sendStateToAdmin();
 
 			if (this.state.autjoin) {
 				this.autoJoinUser(user);
 			}
+
+			this.sendStateToAdmin();
 		}
 
 		// whether or not the user was new, its peer id changed
@@ -288,14 +288,20 @@ class MatchRoom extends Room {
 
 		// 2. assign as many of the "dangling" producers as possible
 		// not the most computationally efficient way to do it, but nicely readable
-		unassigned_producers.every(this.autoJoinUser);
+		let did_assign = false;
+		for (const user of unassigned_producers) {
+			did_assign ||= this.autoJoinUser(user);
+		}
+
+		if (did_assign) {
+			this.sendStateToAdmin();
+		}
 	}
 
 	autoJoinUser(user) {
 		for (let idx = 0; idx < this.getMaxPossiblePlayers(); idx++) {
 			if (!this.state.players[idx]?.id) {
 				this.setPlayer(idx, user.id);
-				this.sendStateToAdmin();
 				return true;
 			}
 		}
