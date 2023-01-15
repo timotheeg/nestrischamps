@@ -86,7 +86,7 @@ let room_data;
 let connection;
 
 function getProducer(pid) {
-	return room_data.producers.find(producer => producer.id == pid);
+	return room_data.producers.find(producer => producer.id === pid);
 }
 
 class Player {
@@ -124,7 +124,7 @@ class Player {
 		};
 
 		this.dom.producers.onchange = () =>
-			this._pickProducer(parseInt(this.dom.producers.value, 10));
+			this._pickProducer(this.dom.producers.value);
 
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
@@ -200,11 +200,11 @@ class Player {
 	}
 
 	_pickProducer(pid) {
-		remoteAPI.setPlayer(this.idx, parseInt(pid, 10));
+		remoteAPI.setPlayer(this.idx, pid);
 	}
 
 	setProducer(pid) {
-		const selected_pid = parseInt(this.dom.producers.value, 10);
+		const selected_pid = this.dom.producers.value;
 
 		if (selected_pid === pid) return;
 
