@@ -8,6 +8,7 @@ import { RefreshingAuthProvider } from '@twurple/auth';
 import { ChatClient } from '@twurple/chat';
 
 const USER_SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes before we destroy user! TODO: Make tunable
+const LEAVE_ROOM_TIMEOUT = 30 * 1000; // allow 30s to reconnect
 
 function is_spam(msg) {
 	if (/bigfollows\s*.\s*com/i.test(msg)) return true;
@@ -43,6 +44,7 @@ class User extends EventEmitter {
 		// match room links this user to the host room of another user
 		this.match_room = null;
 		this.match_room_join_ts = -1;
+		this.leave_room_to = null;
 
 		// keep track of all socket for the user
 		// dangerous, could lead to memory if not managed well
@@ -54,7 +56,7 @@ class User extends EventEmitter {
 		this._handleMatchRoomClose = this._handleMatchRoomClose.bind(this);
 
 		this.producer.on('message', this._handleProducerMessage);
-		this.producer.once('close', this._handleProducerClose);
+		this.producer.on('close', this._handleProducerClose);
 
 		this.checkScheduleDestroy();
 	}
@@ -86,9 +88,11 @@ class User extends EventEmitter {
 	joinMatchRoom(host_user) {
 		const new_room = host_user.getHostRoom();
 
+		this.leave_room_to = clearTimeout(this.leave_room_to);
+
 		if (new_room === this.match_room) {
 			// this forces a redispatch of the peer ids
-			this.match_room.addProducer(this);
+			new_room.addProducer(this);
 			return;
 		}
 
@@ -97,7 +101,7 @@ class User extends EventEmitter {
 		}
 
 		this.match_room_join_ts = Date.now();
-		this.match_room = host_user.getHostRoom();
+		this.match_room = new_room;
 		this.match_room.addProducer(this);
 		this.match_room.once('close', this._handleMatchRoomClose);
 	}
@@ -107,10 +111,12 @@ class User extends EventEmitter {
 			this.match_room.off('close', this._handleMatchRoomClose);
 			this.match_room.removeProducer(this);
 			this.match_room = null;
+			this.match_room_join_ts = -1;
 		}
 	}
 
 	_handleMatchRoomClose() {
+		this.leave_room_to = clearTimeout(this.leave_room_to);
 		this.match_room = null;
 
 		if (this.producer.isMatchConnection()) {
@@ -158,8 +164,6 @@ class User extends EventEmitter {
 			return;
 		}
 
-		console.log('isMatchConnection', this.getProducer().isMatchConnection());
-
 		if (!this.getProducer().isMatchConnection()) {
 			this.getProducer().send([
 				'setViewPeerId',
@@ -192,9 +196,21 @@ class User extends EventEmitter {
 
 	_handleProducerClose() {
 		if (this.match_room) {
-			this.match_room.removeProducer(this);
-			this.match_room = null;
+			this._scheduleLeaveRoom();
 		}
+	}
+
+	_scheduleLeaveRoom() {
+		this.leave_room_to = clearTimeout(this.leave_room_to);
+		this.leave_room_to = setTimeout(
+			() => this._doLeaveRoom(),
+			LEAVE_ROOM_TIMEOUT
+		);
+	}
+
+	_doLeaveRoom() {
+		this.leaveMatchRoom();
+		this.leave_room_to = null;
 	}
 
 	send(msg) {
