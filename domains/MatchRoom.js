@@ -142,19 +142,29 @@ class MatchRoom extends Room {
 		}
 	}
 
-	removeProducer(user, is_replace_flow = false) {
-		const was_present = this.hasProducer(user);
+	removeProducer(user) {
+		const was_present =
+			this.hasProducer(user) ||
+			this.state.players.some(player => player.id === user.id);
 
 		if (was_present) {
+			// drop the producer
 			this.producers.delete(user);
 
-			if (!is_replace_flow) {
-				this.sendStateToAdmin();
-			} else {
-				// TODO: if producer was assigned to user, shou;d we remove the user too?
-				// TODO: Question especially relevant for autojoin mode?
-				// NOTE: removing the player assignment, means that if the player has a connection blips, he might be kicked form the room and not have his game data resume as soon as he reconnects
+			// remove all players associated to that producer
+			let removed_players = 0;
+			this.state.players.forEach((player, p_idx) => {
+				if (player.id === user.id) {
+					removed_players++;
+					this.setPlayer(p_idx, null);
+				}
+			});
+
+			if (removed_players && this.state.autojoin) {
+				this.doAutoJoin();
 			}
+
+			this.sendStateToAdmin();
 		}
 
 		// TODO: anything to send to the views?
@@ -275,7 +285,7 @@ class MatchRoom extends Room {
 		return Math.min(this.getViewMeta().players || Infinity, MAX_PLAYERS);
 	}
 
-	initAutoJoin() {
+	doAutoJoin() {
 		// 1. sort all producers not currently assigned
 		const player_user_ids = new Set(
 			this.state.players.map(player => player.id)
@@ -293,9 +303,7 @@ class MatchRoom extends Room {
 			did_assign ||= this.autoJoinUser(user);
 		}
 
-		if (did_assign) {
-			this.sendStateToAdmin();
-		}
+		return did_assign;
 	}
 
 	autoJoinUser(user) {
@@ -603,11 +611,11 @@ class MatchRoom extends Room {
 					forward_to_views = false;
 					const new_autojoin = !!args[0];
 
-					if (new_autojoin && !this.state.autjoin) {
-						this.initAutoJoin();
+					if (new_autojoin && !this.state.autojoin) {
+						this.doAutoJoin();
 					}
 
-					this.state.autjoin = new_autojoin;
+					this.state.autojoin = new_autojoin;
 
 					break;
 				}
