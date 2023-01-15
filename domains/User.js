@@ -202,14 +202,9 @@ class User extends EventEmitter {
 	_scheduleLeaveRoom() {
 		this.leave_room_to = clearTimeout(this.leave_room_to);
 		this.leave_room_to = setTimeout(
-			() => this._doLeaveRoom(),
+			() => this.leaveMatchRoom(),
 			LEAVE_ROOM_TIMEOUT
 		);
-	}
-
-	_doLeaveRoom() {
-		this.leaveMatchRoom();
-		this.leave_room_to = null;
 	}
 
 	send(msg) {
