@@ -5,7 +5,8 @@ export const peerServerOptions = {
 	secure: true,
 };
 
-export const DOM_DEV_NULL = document.createElement('div');
+export const DOM_DEV_NULL =
+	(typeof document !== 'undefined' && document.createElement('div')) || {};
 
 export const PIECES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 

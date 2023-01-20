@@ -1,4 +1,7 @@
-if (!CanvasRenderingContext2D.prototype.clear) {
+if (
+	typeof CanvasRenderingContext2D !== 'undefined' &&
+	!CanvasRenderingContext2D.prototype.clear
+) {
 	CanvasRenderingContext2D.prototype.clear = function (preserveTransform) {
 		if (preserveTransform) {
 			this.save();

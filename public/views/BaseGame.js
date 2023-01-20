@@ -1,8 +1,8 @@
 // Minimum amount of game tracking to do server side to be able to report games
 import ArrayView from './ArrayView.js';
-import BinaryFrame from '/js/BinaryFrame.js';
-import Board from '/views/Board.js';
-import { peek } from '/views/utils.js';
+import BinaryFrame from '../js/BinaryFrame.js';
+import Board from './Board.js';
+import { peek } from './utils.js';
 import {
 	PIECES,
 	DROUGHT_PANIC_THRESHOLD,
@@ -13,7 +13,7 @@ import {
 	EFF_LINE_VALUES,
 	CLEAR_ANIMATION_NUM_FRAMES,
 	getRunway,
-} from '/views/constants.js';
+} from './constants.js';
 
 const ALL_POSSIBLE_NEGATIVE_DIFFS = [
 	-2, -4, -6, -8, -10, -12, -16, -18, -20, -24, -30, -32, -40,
@@ -153,9 +153,13 @@ export default class BaseGame {
 			this.duration = frame.ctime - this.frames[0].raw.ctime;
 		}
 
+		// Warning: Order of the 3 operation below matters!
 		const score_events = this._checkScore(frame);
 		const piece_events = this._checkPiece(frame);
-		const last_frame = this._addFrame(frame);
+		const last_frame = this._addFrame(frame, {
+			score_events,
+			piece_events,
+		});
 
 		// Check for das loss
 		if (last_frame.raw.instant_das === 0 && this.pieces.length >= 1) {
@@ -164,8 +168,12 @@ export default class BaseGame {
 
 		// Fire events as needed
 		if (score_events) {
+			peek(this.points).frame = last_frame;
 			this.onScore(last_frame);
-			if (score_events.lines) this.onLines(last_frame);
+			if (score_events.lines) {
+				peek(this.clears).frame = last_frame;
+				this.onLines(last_frame);
+			}
 			if (score_events.level) this.onLevel(last_frame);
 			if (score_events.transition) this.onTransition(last_frame);
 			if (score_events.transition_warning)
@@ -173,6 +181,7 @@ export default class BaseGame {
 		}
 
 		if (piece_events) {
+			peek(this.pieces).frame = last_frame;
 			this.onPiece(last_frame);
 			if (piece_events.drought_start) this.onDroughtStart(last_frame);
 			if (piece_events.drought_end) this.onDroughtEnd(last_frame);
@@ -296,7 +305,7 @@ export default class BaseGame {
 		});
 
 		this._recordPointEvent();
-		this._addFrame(frame);
+		peek(this.points).frame = this._addFrame(frame);
 
 		// custom "funny" logic to handle start of the game
 		if (this.options.usePieceStats) {
@@ -572,13 +581,14 @@ export default class BaseGame {
 		);
 
 		// record point event with snapshot of all data
-		this._recordPointEvent();
+		this._recordPointEvent(cleared);
 
 		return events;
 	}
 
-	_recordPointEvent() {
+	_recordPointEvent(cleared = 0) {
 		const evt = {
+			cleared,
 			score: { ...this.data.score },
 			points: POINT_TYPES.reduce((acc, type) => {
 				acc[type] = { ...this.data.points[type] };
