@@ -116,8 +116,10 @@ async function startReplay(_showFrame) {
 	refs.pause.onclick = pause;
 	refs.prevframe.onclick = prevFrame;
 	refs.nextframe.onclick = nextFrame;
-	refs.prevpiece.onclick = prevPiece;
-	refs.nextpiece.onclick = nextPiece;
+	refs.prevpiece.onclick = getPrevByType('pieces');
+	refs.nextpiece.onclick = getNextByType('pieces');
+	refs.prevclear.onclick = getPrevByType('clears');
+	refs.nextclear.onclick = getNextByType('clears');
 	refs.slower.onclick = slower;
 	refs.faster.onclick = faster;
 	refs.stackrabbit.onclick = askStackRabbit;
@@ -145,6 +147,7 @@ function addReplayControl() {
 	replay_timeline.className = 'timeline';
 
 	[
+		['prevclear', '<< Clear'],
 		['prevpiece', '<< Piece'],
 		['prevframe', '< Frame'],
 		['slower', 'Slower'],
@@ -153,6 +156,7 @@ function addReplayControl() {
 		['faster', 'Faster'],
 		['nextframe', 'Frame >'],
 		['nextpiece', 'Piece >>'],
+		['nextclear', 'Clear >>'],
 		['stackrabbit', 'Ask StackRabbit'],
 		['getlink', 'Get Link'],
 	].forEach(([id, text]) => {
@@ -193,6 +197,8 @@ function play() {
 	refs.nextframe.disabled = true;
 	refs.prevpiece.disabled = true;
 	refs.nextpiece.disabled = true;
+	refs.prevclear.disabled = true;
+	refs.nextclear.disabled = true;
 
 	// align playback to current time
 	const cur_ctime = reference_frame.raw.ctime;
@@ -226,40 +232,44 @@ function prevFrame() {
 	doFrame(getElapsedFromReference(prev_frame));
 }
 
-function nextPiece() {
-	if (reference_frame.pieces.length >= reference_game.pieces.length) return;
+function getNextByType(type) {
+	return function next() {
+		if (reference_frame[type].length >= reference_game[type].length) return;
 
-	let frame_idx = reference_frame.idx;
-	while (
-		reference_frame.pieces.length ===
-		reference_game.frames[++frame_idx].pieces.length
-	);
+		let frame_idx = reference_frame.idx;
+		while (
+			reference_frame[type].length ===
+			reference_game.frames[++frame_idx][type].length
+		);
 
-	const next_frame = reference_game.frames[frame_idx];
-	doFrame(getElapsedFromReference(next_frame));
+		const next_frame = reference_game.frames[frame_idx];
+		doFrame(getElapsedFromReference(next_frame));
+	};
 }
 
-function prevPiece() {
-	let prev_frame;
-	if (reference_frame.pieces.length <= 1) {
-		prev_frame = reference_game.frames[0];
-	} else {
-		let frame_idx = reference_frame.idx;
+function getPrevByType(type) {
+	return function prev() {
+		let prev_frame;
+		if (reference_frame[type].length <= 1) {
+			prev_frame = reference_game.frames[0];
+		} else {
+			let frame_idx = reference_frame.idx;
 
-		// first go to first frame of current piece count
-		while (
-			reference_frame.pieces.length ===
-			reference_game.frames[--frame_idx].pieces.length
-		);
-		while (
-			reference_frame.pieces.length - 1 ===
-			reference_game.frames[--frame_idx].pieces.length
-		);
+			// first go to first frame of current piece count
+			while (
+				reference_frame[type].length ===
+				reference_game.frames[--frame_idx][type].length
+			);
+			while (
+				reference_frame[type].length - 1 ===
+				reference_game.frames[--frame_idx][type].length
+			);
 
-		prev_frame = reference_game.frames[frame_idx + 1];
-	}
+			prev_frame = reference_game.frames[frame_idx + 1];
+		}
 
-	doFrame(getElapsedFromReference(prev_frame));
+		doFrame(getElapsedFromReference(prev_frame));
+	};
 }
 
 async function askStackRabbit() {
@@ -371,6 +381,9 @@ function doFrame(ms) {
 		refs.nextpiece.disabled =
 			reference_frame.pieces.length >= reference_game.pieces.length;
 		refs.prevpiece.disabled = reference_frame.pieces.length < 1;
+		refs.nextclear.disabled =
+			reference_frame.clears.length >= reference_game.clears.length;
+		refs.prevclear.disabled = reference_frame.clears.length < 1;
 		refs.stackrabbit.disabled =
 			reference_frame.in_clear_animation ||
 			(peek(reference_frame.pieces) &&
