@@ -68,6 +68,7 @@ router.get('/files/games/:id/:bucket/:filename', async (req, res) => {
 		!/^[0-9A-Z]+.ngf$/.test(req.params.filename)
 	) {
 		res.status(400).json({ error: 'Invalid Request' });
+		return;
 	}
 
 	fs.createReadStream(
@@ -80,12 +81,14 @@ router.get('/files/games/:id/:bucket/:filename', async (req, res) => {
 router.get('/games/:id', async (req, res) => {
 	if (!/^[1-9]\d+$/.test(req.params.id)) {
 		res.status(400).json({ error: 'Invalid Game id' });
+		return;
 	}
 
 	const game = await ScoreDAO.getAnonymousScore(req.params.id);
 
 	if (!game) {
 		res.status(404).json({ error: `Game id ${req.params.id} not found` });
+		return;
 	}
 
 	if (process.env.GAME_FRAMES_BUCKET) {
