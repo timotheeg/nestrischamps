@@ -120,7 +120,9 @@ function getTimestamp(elapsed) {
 				video_offset_ms + next.ts - 1
 			)}`,
 			`score: ${p.score} - lines: ${p.lines}`,
-			`cleared: ${p.cleared} - tetris rate: ${p.tetris_rate.toFixed(1)}`,
+			`cleared: ${p.cleared} - tetris rate: ${(p.tetris_rate * 100).toFixed(
+				1
+			)}`,
 		].join('\n');
 	});
 
@@ -137,7 +139,7 @@ function getTimestamp(elapsed) {
 			`END=${video_offset_ms + next.ts - 1}`,
 			`TITLE=score: ${p.score} - lines: ${p.lines} - cleared: ${
 				p.cleared
-			} - tetris rate: ${p.tetris_rate.toFixed(1)}`,
+			} - tetris rate: ${(p.tetris_rate * 100).toFixed(1)}`,
 		].join('\n');
 	});
 
