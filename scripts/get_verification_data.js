@@ -5,9 +5,16 @@ import { peek } from '../public/views/utils.js';
 
 export async function getReplayGame(gameid) {
 	const game_url = `https://nestrischamps.io/api/games/${gameid}`;
+	console.log(`Fetching game data for gameid ${gameid}`);
+
 	const gamedata_res = await fetch(game_url);
 	const gamedata = await gamedata_res.json();
 
+	if (!gamedata.frame_url) {
+		return { gamedata };
+	}
+
+	console.log(`Fetching game file at url ${gamedata.frame_url}`);
 	const response = await fetch(gamedata.frame_url);
 	const blob = await response.blob();
 	const buffer = new Uint8Array(await blob.arrayBuffer());
@@ -20,6 +27,7 @@ export async function getReplayGame(gameid) {
 	const then = Date.now();
 	let idx = 0;
 
+	console.log(`Populating game`);
 	// TODO: split this tight loop so each iteration takes no more than 50ms
 	// Guesstimates is that is takes ~100ms for one minute of gameplay at 60fps
 	while (idx < buffer.length) {
@@ -63,11 +71,12 @@ function getTimestamp(elapsed) {
 (async function () {
 	const gameid = process.argv[2] || 241366;
 	const video_offset_ms = parseInt(process.argv[3], 10) || 0; // offset in ms to align with video file
-
-	console.log(`Fetching game file ${gameid}`);
-
-	console.log(`Populating game`);
 	const { gamedata, game } = await getReplayGame(gameid);
+
+	if (!game) {
+		console.log('Unable to fetch game');
+		return;
+	}
 
 	const start_ctime = game.frames[0].raw.ctime;
 	const duration = game.duration;
