@@ -28,8 +28,6 @@ export async function getReplayGame(gameid) {
 	let idx = 0;
 
 	console.log(`Populating game`);
-	// TODO: split this tight loop so each iteration takes no more than 50ms
-	// Guesstimates is that is takes ~100ms for one minute of gameplay at 60fps
 	while (idx < buffer.length) {
 		const binary_frame = buffer.slice(idx, idx + frame_size);
 		const frame_data = BinaryFrame.parse(binary_frame);

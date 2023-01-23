@@ -153,7 +153,7 @@ export default class BaseGame {
 			this.duration = frame.ctime - this.frames[0].raw.ctime;
 		}
 
-		// Warning: Order of the 3 operation below matters!
+		// Warning: order of the 3 operations below matters!
 		const score_events = this._checkScore(frame);
 		const piece_events = this._checkPiece(frame);
 		const last_frame = this._addFrame(frame, {
@@ -505,7 +505,7 @@ export default class BaseGame {
 		this.data.points.drops.count += Math.max(0, score_increment - lines_score);
 		this.data.lines = data.lines;
 
-		// point evet to track snapshot of state
+		// point event to track snapshot of state
 		// when score changes, lines may have changed
 		if (cleared) {
 			events.lines = true;
@@ -519,7 +519,7 @@ export default class BaseGame {
 				// update points stats for clearing type (single, double, etc...)
 				this.data.points[cleared].count += lines_score;
 
-				// update percentages for everyone
+				// update percentages for all clear types
 				CLEAR_TYPES.forEach(clear_type => {
 					const clear_stats = this.data.clears[clear_type];
 					clear_stats.percent = clear_stats.lines / data.lines;
@@ -612,7 +612,7 @@ export default class BaseGame {
 		this.array_views.clears = new ArrayView(this.clears);
 
 		// record the fact that the last piece caused a clear event
-		// warning this assume order that score/clear events are ALWAYS processes becfore checking pieces
+		// warning: this assume order; score/clear events MUST ALWAYS BE processed before checking pieces
 		peek(this.pieces).clear = evt;
 	}
 
@@ -674,7 +674,7 @@ export default class BaseGame {
 			return;
 		}
 
-		// when we reach here block_diff is a *valid* negative diff
+		// when we reach here, block_diff is a *valid* negative diff
 		// we look for 2 valid consecutive negative diffs to detect a line clear animation
 
 		// We only use the full rows data for triple and tetris
@@ -806,7 +806,7 @@ export default class BaseGame {
 			}
 		}
 
-		// record piece event before calculating deviation, so the array fuly represent the sequence
+		// record piece event before calculating deviation, so the array fuly represents the sequence
 		// we will update piece event with the deviation reactively
 		this._recordPieceEvent(cur_piece, data);
 
