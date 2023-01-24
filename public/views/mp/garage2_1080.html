@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			#playing_fields {
+				position: absolute;
+				left: 960px;
+				top: 16px;
+			}
+
+			.box {
+				padding: 3px;
+				font-size: 24px;
+				line-height: 24px;
+				height: 51px;
+			}
+
+			.box .header {
+				padding-bottom: 6px;
+			}
+
+			.board,
+			.score,
+			.next_piece {
+				--offset: 0;
+				right: var(--offset);
+			}
+
+			.score,
+			.runway.game {
+				width: 350px;
+				height: 137px;
+			}
+
+			.aligner {
+				display: inline-block;
+				font-size: 36px;
+				line-height: 36px;
+				padding-bottom: 6px;
+			}
+
+			.aligner div {
+				text-align: right;
+			}
+
+			.aligner .main {
+				padding-bottom: 6px;
+			}
+
+			.lines,
+			.next_piece {
+				top: 164px;
+				width: 161px;
+				height: 56px;
+			}
+
+			.lines {
+				padding-top: 6px;
+				width: 162px;
+				--offset: 188px;
+				right: var(--offset);
+			}
+
+			.next_piece {
+				height: 59px;
+			}
+
+			.board {
+				--border-size: 12;
+				padding: 3px;
+				width: 356px;
+				height: 716px;
+				top: 250px;
+			}
+
+			.name,
+			.tetris_rate,
+			.drought,
+			.level,
+			.runway.transition {
+				width: 88px;
+				--offset: 377px;
+				right: var(--offset);
+			}
+
+			.name,
+			.flag {
+				top: -16px;
+			}
+
+			.name {
+				width: 445px;
+			}
+
+			.name .content {
+				color: #b0afb0;
+				letter-spacing: 5px;
+				text-indent: 5px;
+			}
+
+			.name .content .win {
+				color: #fb0204;
+			}
+
+			.level,
+			.tetris_rate,
+			.drought {
+				padding-top: 5px;
+				height: 52px;
+			}
+
+			.tetris_rate,
+			.drought {
+				top: 924px;
+				height: 56px;
+			}
+
+			.runway.game,
+			.level {
+				top: 843px;
+			}
+
+			.drought {
+				color: red;
+				display: none;
+			}
+
+			.drought.active {
+				display: block;
+			}
+
+			.runway {
+				--offset: 492px;
+				right: var(--offset);
+			}
+
+			.runway.transition {
+				width: 248px;
+				top: 765px;
+			}
+
+			.runway.game {
+				width: 432px;
+			}
+
+			.flag {
+				--offset: 849px;
+				right: var(--offset);
+				width: 75px;
+				height: 51px;
+			}
+
+			.p2 > * {
+				left: var(--offset);
+			}
+
+			.p2 .lines {
+				left: 0;
+			}
+			.p2 .next_piece {
+				left: 189px;
+			}
+
+			.player_vid {
+				position: absolute;
+				top: 66px;
+				width: 577px;
+				height: 783px;
+				padding: 0;
+				object-fit: cover;
+				/* background: yellow; /**/
+
+				--offset: 377px;
+				right: var(--offset);
+			}
+
+			.divider {
+				position: absolute;
+				left: -6px;
+				width: 12px;
+				height: 686px;
+				background-color: #000;
+				color: #f8e889;
+				font-size: 16px;
+
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			#ticker {
+				position: absolute;
+				width: 1920px;
+				height: 48px;
+				top: 1032px;
+				/* background: orange;
+				opacity: 0.5; /**/
+			}
+		</style>
+	</head>
+	<body>
+		<template id="player">
+			<div class="player">
+				<video class="player_vid"></video>
+
+				<div class="box name">
+					<div class="header">PLAYER 1</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box score">
+					<div class="header">SCORE</div>
+					<div class="aligner">
+						<div class="main">0&#x202F;000&#x202F;000</div>
+						<div class="diff winning">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div><span class="tetris_diff">0.00</span> TETRISES</div>
+				</div>
+
+				<div class="box lines">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box next_piece"></div>
+
+				<div class="box level">
+					<div class="header">LVL</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box tetris_rate">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box runway transition">
+					<div class="header">TR RUNWAY</div>
+					<div class="content">000,000</div>
+				</div>
+
+				<div class="box score runway game">
+					<div class="header">LV29 RUNWAY</div>
+					<div class="aligner">
+						<div class="main">0&#x202F;000&#x202F;000</div>
+						<div class="diff">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div><span class="tetris_diff">0.00</span> TETRISES</div>
+				</div>
+
+				<div class="box board"></div>
+
+				<div class="box flag"></div>
+			</div>
+		</template>
+
+		<div id="stream_bg">
+			<div id="ticker"></div>
+			<div id="playing_fields">
+				<!-- divider -->
+				<div class="divider"></div>
+
+				<!-- Player 1 -->
+				<!-- Player 2 -->
+			</div>
+			<!-- End Playing Fields -->
+			<div class="ticker"></div>
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '1280x720', // urgh, so big for so much space wasted :(
+			});
+		</script>
+		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+
+			const players_node = document.querySelector('#playing_fields');
+			const player_template = document.getElementById('player');
+			const players = [1, 2].map(num => {
+				const player_fragment = document.importNode(
+					player_template.content,
+					true
+				);
+				const player_node = player_fragment.querySelector('.player');
+
+				player_node.classList.add(`p${num}`);
+				players_node.appendChild(player_node);
+
+				const player = new CTMCompetitionPlayer(
+					{
+						name: player_node.querySelector(`.name .header`),
+						score: player_node.querySelector(`.score .main`),
+						level: player_node.querySelector(`.level .content`),
+						lines: player_node.querySelector(`.lines .content`),
+						trt: player_node.querySelector(`.tetris_rate .content`),
+						preview: player_node.querySelector(`.next_piece`),
+						field: player_node.querySelector(`.board`),
+						drought: player_node.querySelector(`.drought .value`),
+
+						diff: player_node.querySelector(`.score .diff`),
+						t_diff: player_node.querySelector(`.score .tetris_diff`),
+
+						runway_tr: player_node.querySelector(`.runway.transition .content`),
+						runway_game: player_node.querySelector(`.runway.game .main`),
+						runway_diff: player_node.querySelector(`.runway.game .diff`),
+						runway_t_diff: player_node.querySelector(
+							`.runway.game .tetris_diff`
+						),
+
+						hearts: player_node.querySelector(`.name .content`),
+						drought_box: player_node.querySelector(`.drought`),
+						runway_tr_box: player_node.querySelector(`.runway.transition`),
+						runway_box: player_node.querySelector(`.runway.game`),
+						video: player_node.querySelector(`.player_vid`),
+					},
+					{
+						field_pixel_size: 4.5,
+						running_trt_dot_size: 5,
+						preview_pixel_size: 3,
+						format_score: v => readableScoreFomatter(v),
+						stereo: translate([1, 2], [-1, 1], num),
+					}
+				);
+
+				// Undo the CTM logic of hiding the level and preview
+				delete player.onGameOver;
+
+				// Ugly custom logic for game start because we only have callbacks, no events
+				const super_onGameStart = player.onGameStart;
+
+				player.onTransition = () => {
+					player.dom.runway_tr_box.querySelector('.header').textContent =
+						'TRANSITION';
+				};
+
+				player.onGameStart = () => {
+					super_onGameStart.call(player);
+
+					player.dom.runway_tr_box.querySelector('.header').textContent =
+						'TR RUNWAY';
+				};
+
+				return player;
+			});
+
+			const competition = new Competition(players);
+		</script>
+	</body>
+</html>
