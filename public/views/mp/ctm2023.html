@@ -18,11 +18,11 @@
 			}
 
 			.score {
-				top: 100px;
+				top: 70px;
 			}
 
 			.board {
-				top: 196px;
+				top: 166px;
 			}
 
 			.tetris_rate,
@@ -32,15 +32,15 @@
 			}
 
 			.tetris_rate {
-				top: 845px;
+				top: 815px;
 			}
 
 			.eff {
-				top: 757px;
+				top: 727px;
 			}
 
 			.drought {
-				top: 669px;
+				top: 639px;
 			}
 
 			.player_vid {
@@ -52,7 +52,7 @@
 
 			.flag,
 			.name {
-				top: 970px;
+				top: 959px;
 				background: black;
 				border-style: solid;
 				border-color: white;
@@ -91,6 +91,33 @@
 				width: 366px;
 			}
 
+			.hearts {
+				position: absolute;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				--offset: 400px;
+				/* background: yellow; /**/
+				width: 30px;
+				height: 110px;
+				top: 938px;
+				right: var(--offset);
+			}
+
+			.hearts div {
+				width: 20px;
+				height: 20px;
+				background: black;
+				border: solid white 4px;
+				border-radius: 14px;
+				margin-bottom: 8px;
+			}
+
+			.hearts .win {
+				background: white;
+			}
+
 			.p2 .flag {
 				border-radius: 0 20px 20px 0;
 				border-width: var(--border-width) var(--border-width)
@@ -103,6 +130,14 @@
 				border-radius: 20px 0 0 20px;
 				border-width: var(--border-width) 0 var(--border-width)
 					var(--border-width);
+			}
+
+			.player_vid {
+				object-position: 90%;
+			}
+
+			.p2 .player_vid {
+				object-position: 10%;
 			}
 		</style>
 	</head>
@@ -131,6 +166,9 @@
 
 				<div class="name"></div>
 				<div class="flag"></div>
+				<div class="hearts">
+					<div class="heart"></div>
+				</div>
 
 				<div class="box drought">
 					<div class="header">DRT</div>
@@ -225,6 +263,32 @@
 			});
 
 			const competition = new Competition(players);
+
+			// yuk, encapsulation down the toilet T_T
+			competition.API._repaintVictories = function (player_idx) {
+				const player = players[player_idx]; // direct access... not great
+				const victories = this.victories[player_idx];
+				const hearts = player.dom.hearts;
+
+				if (!hearts || !hearts.childNodes) return;
+
+				// clear all the hearts
+				while (hearts.childNodes.length) {
+					hearts.removeChild(hearts.childNodes[0]);
+				}
+
+				// reset to specified value
+				for (let idx = 0; idx < this.first_to; idx++) {
+					const heart = document.createElement('div');
+					heart.innerHTML = '&nbsp;';
+
+					if (idx < victories) {
+						heart.classList.add('win');
+					}
+
+					hearts.prepend(heart);
+				}
+			};
 		</script>
 	</body>
 </html>
