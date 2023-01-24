@@ -27,8 +27,8 @@
 				left: 164px;
 			}
 
+			.right .pbs,
 			.right .score,
-			.right .runway,
 			.right .lines,
 			.right .level,
 			.right .efficiency,
@@ -53,8 +53,8 @@
 				right: 164px;
 			}
 
+			.left .pbs,
 			.left .score,
-			.left .runway,
 			.left .lines,
 			.left .level,
 			.left .efficiency,
@@ -86,10 +86,15 @@
 				padding: 0;
 			}
 
-			.score,
+			.pbs,
 			.next_piece,
 			.drought {
 				top: 0;
+			}
+
+			.score {
+				top: 189px;
+				height: 246px;
 			}
 
 			.board {
@@ -116,26 +121,31 @@
 				height: 114px;
 			}
 
-			.score,
-			.runway {
+			.pbs,
+			.score {
 				width: 284px;
 			}
 
-			.score {
-				top: 0px;
-				height: 158px;
+			.runway {
+				width: unset;
 			}
 
-			.score .content.top {
+			.pbs {
+				top: 0px;
+				height: 156px;
+			}
+
+			.pbs .content,
+			.score .content {
 				padding-bottom: 0.75em;
 			}
 
 			.runway.transition {
-				top: 191px;
+				top: 278px;
 			}
 
 			.runway.game {
-				top: 292px;
+				top: 379px;
 			}
 
 			.tetris_rate {
@@ -151,11 +161,11 @@
 			}
 
 			.lines {
-				top: 393px;
+				top: 468px;
 			}
 
 			.level {
-				top: 494px;
+				top: 569px;
 				width: 120px;
 			}
 
@@ -194,21 +204,26 @@
 					<div class="content">000</div>
 				</div>
 
-				<div class="box runway game">
-					<div class="header">LV29 RUNWAY</div>
-					<div class="content">0&#x202F;000&#x202F;000</div>
-				</div>
-
-				<div class="box runway transition">
-					<div class="header">TRANSITION RUNWAY</div>
-					<div class="content">0</div>
+				<div class="box pbs">
+					<div class="header">PERSONAL BEST</div>
+					<div class="content pb">0&#x202F;000&#x202F;000</div>
+					<div class="header">SESSION BEST</div>
+					<div class="content top">0&#x202F;000&#x202F;000</div>
 				</div>
 
 				<div class="box score">
-					<div class="header">TOP</div>
-					<div class="content top">0&#x202F;000&#x202F;000</div>
-					<div class="header">SCORE</div>
-					<div class="content score">0&#x202F;000&#x202F;000</div>
+					<div class="current">
+						<div class="header">SCORE</div>
+						<div class="content">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div class="runway transition">
+						<div class="header">TRANSITION RUNWAY</div>
+						<div class="content">0</div>
+					</div>
+					<div class="runway game">
+						<div class="header">LV29 RUNWAY</div>
+						<div class="content">0&#x202F;000&#x202F;000</div>
+					</div>
 				</div>
 
 				<div class="box tetris_rate">
@@ -258,12 +273,46 @@
 			}
 
 			window.onload = function () {
+				function getPB() {
+					let m;
+
+					if (
+						(m = location.pathname.match(
+							/^\/view\/[a-z0-9_-]+\/([a-zA-Z0-9]+)$/
+						))
+					) {
+						fetch(
+							`${location.protocol}//${location.host}/stats/get_stats/${m[1]}`,
+							{
+								cache: 'no-cache',
+								headers: {
+									'Cache-Control': 'no-cache',
+								},
+								// mode: 'no-cors'
+							}
+						)
+							.then(response => response.json())
+							.catch(err => 0)
+							.then(data => {
+								player.dom.pb.textContent = readableScoreFomatter(
+									data?.high_scores?.overall[0]?.score || 0
+								);
+								player.dom.top.textContent = readableScoreFomatter(
+									data?.high_scores?.session[0]?.score || 0
+								);
+							});
+					}
+				}
+
 				const player = new Player(
 					{
-						score: document.querySelector(`.score .content.score`),
-						top: document.querySelector(`.score .content.top`),
-						runway_tr: document.querySelector(`.runway.transition .content`),
-						runway_game: document.querySelector(`.runway.game .content`),
+						pb: document.querySelector(`.pbs .content.pb`),
+						top: document.querySelector(`.pbs .content.top`),
+						score: document.querySelector(`.score .current .content`),
+						runway_tr: document.querySelector(
+							`.score .runway.transition .content`
+						),
+						runway_game: document.querySelector(`.score .runway.game .content`),
 						level: document.querySelector(`.level .content`),
 						lines: document.querySelector(`.lines .content`),
 						trt: document.querySelector(`.tetris_rate .content`),
@@ -273,6 +322,12 @@
 						field: document.querySelector(`.board`),
 						drought: document.querySelector(`.drought .content`),
 						video: document.querySelector(`video`),
+
+						// extras
+						drought_box: document.querySelector(`.drought`),
+						runway_tr_header: document.querySelector(
+							`.runway.transition .header`
+						),
 					},
 					{
 						preview_pixel_size: 4,
@@ -286,22 +341,18 @@
 
 				let max_score = 0;
 
-				player.drought_box = document.querySelector(`.drought`);
-				player.runway_tr_box = document.querySelector(`.runway.transition`);
-
 				player.onDroughtStart = () => {
 					console.log('onDroughtStart');
-					player.drought_box.classList.add('active');
+					player.dom.drought_box.classList.add('active');
 				};
 
 				player.onDroughtEnd = count => {
 					console.log('onDroughtEnd', count);
-					player.drought_box.classList.remove('active');
+					player.dom.drought_box.classList.remove('active');
 				};
 
 				player.onTransition = () => {
-					player.runway_tr_box.querySelector('.header').textContent =
-						'TRANSITION';
+					player.dom.runway_tr_header.textContent = 'TRANSITION';
 				};
 
 				player.onScore = () => {
@@ -312,8 +363,14 @@
 				};
 
 				player.onGameStart = () => {
-					player.runway_tr_box.querySelector('.header').textContent =
+					player.dom.runway_tr_header.textContent = 'TRANSITION RUNWAY';
+				};
+
+				player.onGameEnd = () => {
+					player.dom.runway_tr_header.querySelector('.header').textContent =
 						'TRANSITION RUNWAY';
+
+					getPB();
 				};
 
 				const API = {
@@ -325,6 +382,8 @@
 					message() {}, // noop
 				};
 
+				getPB();
+
 				const connection = new Connection(null, view_meta);
 
 				connection.onMessage = function (frame) {
@@ -334,6 +393,7 @@
 						API[method].apply(API, args);
 					} catch (e) {
 						console.error(e);
+						console.error(frame);
 					}
 				};
 
