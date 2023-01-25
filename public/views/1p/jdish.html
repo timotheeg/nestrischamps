@@ -122,6 +122,11 @@
 			}
 
 			.pbs,
+			.runway {
+				color: #aaa;
+			}
+
+			.pbs,
 			.score {
 				width: 284px;
 			}
@@ -146,6 +151,10 @@
 
 			.runway.game {
 				top: 379px;
+			}
+
+			.box .runway .content {
+				font-size: 24px;
 			}
 
 			.tetris_rate {
@@ -205,10 +214,14 @@
 				</div>
 
 				<div class="box pbs">
-					<div class="header">PERSONAL BEST</div>
-					<div class="content pb">0&#x202F;000&#x202F;000</div>
-					<div class="header">SESSION BEST</div>
-					<div class="content top">0&#x202F;000&#x202F;000</div>
+					<div class="pb">
+						<div class="header">PERSONAL BEST</div>
+						<div class="content">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div class="top">
+						<div class="header">SESSION BEST</div>
+						<div class="content">0&#x202F;000&#x202F;000</div>
+					</div>
 				</div>
 
 				<div class="box score">
@@ -273,6 +286,9 @@
 			}
 
 			window.onload = function () {
+				let pb_score = 0;
+				let top_score = 0;
+
 				function getPB() {
 					let m;
 
@@ -294,20 +310,19 @@
 							.then(response => response.json())
 							.catch(err => 0)
 							.then(data => {
-								player.dom.pb.textContent = readableScoreFomatter(
-									data?.high_scores?.overall[0]?.score || 0
-								);
-								player.dom.top.textContent = readableScoreFomatter(
-									data?.high_scores?.session[0]?.score || 0
-								);
+								pb_score = data?.high_scores?.overall[0]?.score || 0;
+								top_score = data?.high_scores?.session[0]?.score || 0;
+
+								player.dom.pb.textContent = readableScoreFomatter(pb_score);
+								player.dom.top.textContent = readableScoreFomatter(top_score);
 							});
 					}
 				}
 
 				const player = new Player(
 					{
-						pb: document.querySelector(`.pbs .content.pb`),
-						top: document.querySelector(`.pbs .content.top`),
+						pb: document.querySelector(`.pbs .pb .content`),
+						top: document.querySelector(`.pbs .top .content`),
 						score: document.querySelector(`.score .current .content`),
 						runway_tr: document.querySelector(
 							`.score .runway.transition .content`
@@ -328,6 +343,8 @@
 						runway_tr_header: document.querySelector(
 							`.runway.transition .header`
 						),
+						pb_wrapper: document.querySelector(`.pbs .pb`),
+						top_wrapper: document.querySelector(`.pbs .top`),
 					},
 					{
 						preview_pixel_size: 4,
@@ -335,11 +352,9 @@
 						running_trt_dot_size: 5,
 						tetris_sound: 0,
 						reliable_field: 0,
-						format_score: readableScoreFomatter,
+						format_score: v => readableScoreFomatter(v), // need wrapper function to ignore the padding
 					}
 				);
-
-				let max_score = 0;
 
 				player.onDroughtStart = () => {
 					console.log('onDroughtStart');
@@ -356,14 +371,27 @@
 				};
 
 				player.onScore = () => {
-					if (player.getScore() > max_score) {
-						max_score = player.getScore();
-						player.dom.top.textContent = readableScoreFomatter(max_score);
+					if (player.getScore() > top_score) {
+						top_score = player.getScore();
+						player.dom.top.textContent = readableScoreFomatter(top_score);
+						player.dom.top_wrapper.style.color = 'white';
+					} else {
+						player.dom.top_wrapper.style.color = '';
+					}
+
+					if (player.getScore() > pb_score) {
+						pb_score = player.getScore();
+						player.dom.pb.textContent = readableScoreFomatter(pb_score);
+						player.dom.pb_wrapper.style.color = 'white';
+					} else {
+						player.dom.pb_wrapper.style.color = '';
 					}
 				};
 
 				player.onGameStart = () => {
 					player.dom.runway_tr_header.textContent = 'TRANSITION RUNWAY';
+					player.dom.pb_wrapper.style.color = '';
+					player.dom.top_wrapper.style.color = '';
 				};
 
 				player.onGameEnd = () => {
