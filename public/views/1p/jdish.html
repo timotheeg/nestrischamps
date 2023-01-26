@@ -394,11 +394,6 @@
 					player.dom.top_wrapper.style.color = '';
 				};
 
-				player.onGameEnd = () => {
-					player.dom.runway_tr_header.querySelector('.header').textContent =
-						'TRANSITION RUNWAY';
-				};
-
 				const API = {
 					frame(player_idx, data) {
 						player.setFrame(data);
