@@ -397,8 +397,6 @@
 				player.onGameEnd = () => {
 					player.dom.runway_tr_header.querySelector('.header').textContent =
 						'TRANSITION RUNWAY';
-
-					getPB();
 				};
 
 				const API = {
@@ -406,7 +404,7 @@
 						player.setFrame(data);
 					},
 
-					scoreRecorded() {}, // noop
+					scoreRecorded: getPB,
 					message() {}, // noop
 				};
 
