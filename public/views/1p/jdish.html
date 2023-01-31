@@ -371,7 +371,7 @@
 				};
 
 				player.onScore = () => {
-					if (player.getScore() > top_score) {
+					if (player.getScore() >= top_score) {
 						top_score = player.getScore();
 						player.dom.top.textContent = readableScoreFomatter(top_score);
 						player.dom.top_wrapper.style.color = 'white';
@@ -379,7 +379,7 @@
 						player.dom.top_wrapper.style.color = '';
 					}
 
-					if (player.getScore() > pb_score) {
+					if (player.getScore() >= pb_score) {
 						pb_score = player.getScore();
 						player.dom.pb.textContent = readableScoreFomatter(pb_score);
 						player.dom.pb_wrapper.style.color = 'white';
