@@ -141,3 +141,11 @@ video.box {
 .entry .diff {
 	width: 240px;
 }
+
+.brand {
+	position: absolute;
+	top: 1032px;
+	left: 0;
+	width: 1920px;
+	height: 48px;
+}
