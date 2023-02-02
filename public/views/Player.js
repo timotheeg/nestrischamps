@@ -191,7 +191,7 @@ const DEFAULT_OPTIONS = {
 	running_trt_rtl: 0,
 	wins_rtl: 0,
 	tetris_flash: QueryString.get('tetris_flash') !== '0',
-	tetris_sound: 1,
+	tetris_sound: QueryString.get('tetris_sound') !== '0',
 	stereo: 0, // [-1, 1] representing left:-1 to right:1
 	reliable_field: 1,
 	draw_field: 1,
