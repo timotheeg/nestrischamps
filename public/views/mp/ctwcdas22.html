@@ -24,6 +24,20 @@
 				width: 74px;
 				border-width: 1px 3px 3px;
 			}
+
+			.redbull_approves {
+				position: absolute;
+				top: 95px;
+				--offset: 180px;
+				right: var(--offset);
+
+				width: 500px;
+				height: 309px;
+				background-repeat: no-repeat;
+				background: url('/images/sponsors/redbull_logo.png');
+				transform-origin: 50% 50%;
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
@@ -93,6 +107,8 @@
 				</div>
 
 				<video class="box handcam"></video>
+
+				<div class="redbull_approves"></div>
 			</div>
 		</template>
 
@@ -131,6 +147,25 @@
 
 			const players_node = document.querySelector('#playing_fields');
 			const player_template = document.getElementById('player');
+
+			const hasAds = QueryString.get('ads') === '1';
+
+			let images;
+			let redbull_logo;
+
+			if (hasAds) {
+				images = [
+					'/images/sponsors/redbull_b_20.png',
+					'/images/sponsors/redbull_orange_can_20.png',
+				].map(url => {
+					const img = new Image();
+					img.src = url;
+					return img;
+				});
+
+				redbull_logo = new Image();
+				redbull_logo.src = '/images/sponsors/redbull_logo.png';
+			}
 
 			const players = [1, 2].map(num => {
 				const player_fragment = document.importNode(
@@ -189,6 +224,73 @@
 						format_score: readableScoreFomatter,
 					}
 				);
+
+				if (hasAds) {
+					// custom branding
+					player._renderField = player.renderField;
+
+					const draw_cycle = 60;
+
+					let show_tetris_ad = false;
+
+					let draw_cycle_remainder = draw_cycle;
+					let idx = 0;
+					let img;
+
+					player.renderField = function (level, field) {
+						this._renderField(level, field);
+
+						const pixels_per_block = this.field_pixel_size * (7 + 1);
+
+						const ctx = this.field_ctx;
+
+						ctx.fillStyle = 'rgba(0,0,0,0)';
+
+						if (draw_cycle_remainder-- === 0) {
+							idx = (idx + 1) % images.length;
+							img = images[idx];
+							draw_cycle_remainder = draw_cycle;
+						}
+
+						for (let x = 0; x < 10; x++) {
+							for (let y = 0; y < 20; y++) {
+								if (field[y * 10 + x] === 1) {
+									const pos_x = x * pixels_per_block;
+									const pos_y = y * pixels_per_block;
+
+									ctx.clearRect(
+										pos_x,
+										pos_y,
+										this.field_pixel_size * 8,
+										this.field_pixel_size * 8
+									);
+									ctx.drawImage(img, pos_x, pos_y);
+								}
+							}
+						}
+
+						if (show_tetris_ad) {
+							ctx.drawImage(redbull_logo, 30, 20, 157, 97);
+						}
+					};
+
+					player.onTetris = function () {
+						show_tetris_ad = true;
+
+						const redbull = player_node.querySelector('.redbull_approves');
+
+						const redbull_angle = Math.round(-6 + Math.random() * 12);
+						const redbull_scale = 0.4 + Math.random() * 0.2;
+
+						redbull.style.transform = `scale(${redbull_scale}) rotate(${redbull_angle}deg)`;
+						redbull.style.display = `block`;
+
+						setTimeout(() => {
+							redbull.style.display = 'none';
+							show_tetris_ad = false;
+						}, 850);
+					};
+				}
 
 				// custom logic for see-through
 				if (QueryString.get('name') === '0') {
