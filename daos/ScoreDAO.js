@@ -262,7 +262,7 @@ class ScoreDAO {
 		let filter_by_competition_mode = '';
 
 		if ([true, false].includes(options.competition)) {
-			args.push(!!options.competition);
+			args.push(options.competition);
 			filter_by_competition_mode = ` AND competition=$${args.length} `;
 		}
 
