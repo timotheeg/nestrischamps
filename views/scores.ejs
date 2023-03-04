@@ -215,12 +215,12 @@
 					function updateCompetitionMode() {
 						if (data.competition) {
 							span.textContent = 'YES - ';
-							a.href = `/stats/scores/${id}/competition/false`;
+							a.href = `/stats/scores/${id}/competition/0`;
 							a.textContent = 'set as regular game';
 						}
 						else {
 							span.textContent = 'NO - ';
-							a.href = `/stats/scores/${id}/competition/true`;
+							a.href = `/stats/scores/${id}/competition/1`;
 							a.textContent = 'set as competition game';
 						}
 					}

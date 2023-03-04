@@ -320,9 +320,7 @@ router.put(
 	async (req, res) => {
 		console.log(`Updating score ${req.params.id}`);
 
-		// only the competition mode is allowed to be udpated
-
-		if (!['true', 'false'].includes(req.params.mode)) {
+		if (!['0', '1'].includes(req.params.mode)) {
 			res.status(400).send('Invalid value for competition mode');
 			return;
 		}
