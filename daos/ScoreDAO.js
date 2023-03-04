@@ -250,6 +250,8 @@ class ScoreDAO {
 			...options,
 		};
 
+		const args = [user.id];
+
 		let null_handling = '';
 
 		if (options.sort_field === 'tetris_rate') {
@@ -260,7 +262,8 @@ class ScoreDAO {
 		let filter_by_competition_mode = '';
 
 		if ([true, false].includes(options.competition)) {
-			filter_by_competition_mode = ` AND competition=${options.competition}`;
+			args.push(!!options.competition);
+			filter_by_competition_mode = ` AND competition=$${args.length} `;
 		}
 
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
@@ -272,7 +275,7 @@ class ScoreDAO {
 				ORDER BY ${options.sort_field} ${options.sort_order} ${null_handling}
 				LIMIT ${options.page_size} OFFSET ${options.page_size * options.page_idx}
 			`,
-			[user.id]
+			args
 		);
 
 		return result.rows;
