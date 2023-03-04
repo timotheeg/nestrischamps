@@ -233,6 +233,10 @@ router.get(
 
 		options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages - 1));
 
+		if (['0', '1'].includes(req.query.competition)) {
+			options.competition = req.query.competition === '1';
+		}
+
 		// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
 		const scores = await ScoreDAO.getScorePage(req.session.user, options);
 
@@ -309,12 +313,44 @@ router.delete(
 	}
 );
 
+router.put(
+	'/scores/:id/competition/:mode',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log(`Updating score ${req.params.id}`);
+
+		// only the competition mode is allowed to be udpated
+
+		if (!['true', 'false'].includes(req.params.mode)) {
+			res.status(400).send('Invalid value for competition mode');
+			return;
+		}
+
+		try {
+			await ScoreDAO.updateScore(
+				req.session.user,
+				req.params.id,
+				req.params.mode === 'true'
+			);
+			res.json({ status: 'ok' });
+		} catch (err) {
+			console.error(err);
+			res.status(500).send('Unable to update Score');
+		}
+	}
+);
+
 router.get(
 	'/progress/data',
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
-		const progress = await ScoreDAO.getProgress(req.session.user);
+		const progress = await ScoreDAO.getProgress(req.session.user, {
+			competition: ['0', '1'].includes(req.query.competition)
+				? req.query.competition === '1'
+				: null,
+		});
 
 		progress.forEach(datapoint => {
 			datapoint.timestamp = datapoint.datetime.getTime();
@@ -332,15 +368,20 @@ router.get(
 	async (req, res) => {
 		const data = {};
 
-		for (const level of [18, 19, 29]) {
-			const progress = await ScoreDAO.getProgress(req.session.user, level);
+		for (const start_level of [18, 19, 29]) {
+			const progress = await ScoreDAO.getProgress(req.session.user, {
+				start_level,
+				competition: ['0', '1'].includes(req.query.competition)
+					? req.query.competition === '1'
+					: null,
+			});
 
 			progress.forEach(datapoint => {
 				datapoint.timestamp = datapoint.datetime.getTime();
 				delete datapoint.date;
 			});
 
-			data[level] = progress;
+			data[start_level] = progress;
 		}
 
 		res.json(data);

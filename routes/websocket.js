@@ -9,7 +9,7 @@ export default function init(server, wss) {
 		console.log(`WS: ${request.url}`);
 
 		// nestrischamps URL, parsed
-		request.nc_url = new URL(request.url, 'ws://nestrischamps');
+		request.nc_url = new URL(request.url, 'ws://nestrischamps.io');
 
 		let m = request.nc_url.pathname.match(
 			/^\/ws\/replay\/([a-z0-9_-]+)\/((\d+)(-(\d+)){0,7})/
@@ -101,62 +101,6 @@ export default function init(server, wss) {
 			return;
 		}
 
-		m = request.nc_url.pathname.match(
-			/^\/ws\/room\/(u\/([a-z0-9_-]+)\/)?producer\/([a-zA-Z0-9-]+)/
-		);
-
-		request.is_secret_producer = !!m;
-
-		if (request.is_secret_producer) {
-			if (!request.tetris) {
-				request.tetris = {};
-			}
-
-			request.tetris.producer = {
-				target_user_login: m[2],
-				connecting_user_secret: m[3],
-			};
-
-			const connecting_user = await UserDAO.getUserBySecret(
-				request.tetris.producer.connecting_user_secret
-			);
-
-			if (!connecting_user) {
-				socket.write('HTTP/1.1 404 Connecting User Not Found\r\n\r\n');
-				socket.destroy();
-				return;
-			}
-
-			if (request.tetris.producer.target_user_login) {
-				const target_user = await UserDAO.getUserByLogin(
-					request.tetris.producer.target_user_login
-				);
-
-				if (!target_user) {
-					socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
-					socket.destroy();
-					return;
-				}
-			}
-
-			if (!request.session) {
-				request.session = {};
-			}
-
-			request.session.user = {
-				id: connecting_user.id,
-				login: connecting_user.login,
-				secret: connecting_user.secret,
-				profile_image_url: connecting_user.profile_image_url,
-			};
-
-			wss.handleUpgrade(request, socket, head, function (ws) {
-				wss.emit('connection', ws, request);
-			});
-
-			return;
-		}
-
 		// all other connections must be within a session!
 		// i.e. producers and admin connections
 
@@ -236,25 +180,15 @@ export default function init(server, wss) {
 				? user.getPrivateRoom()
 				: user.getHostRoom();
 			room.addView(connection);
-		} else if (request.is_secret_producer) {
-			console.log(`Secret Producer for ${user.login}`);
-			if (request.tetris.producer.target_user_login) {
-				const target_user = await UserDAO.getUserByLogin(
-					request.tetris.producer.target_user_login
-				);
-				user.setProducerConnection(connection, {
-					match: true,
-					target_user,
-				});
-			} else {
-				user.setProducerConnection(connection, { match: false });
-			}
 		} else if (pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getHostRoom().setAdmin(connection);
 		} else if (pathname.startsWith('/ws/room/producer')) {
 			console.log(`PrivateRoom: ${user.login}: Producer connected`);
-			user.setProducerConnection(connection, { match: false });
+			user.setProducerConnection(connection, {
+				match: false,
+				competition: request.nc_url.searchParams.get('competition') === '1',
+			});
 		} else if ((m = pathname.match(/^\/ws\/room\/u\/([a-z0-9_-]+)\//))) {
 			const target_user = await UserDAO.getUserByLogin(m[1]);
 
@@ -263,44 +197,53 @@ export default function init(server, wss) {
 			);
 
 			if (!target_user) {
+				// Should not happen since we check for the target user at the upgtrade step
 				// TODO: do at Page or Upgrade level, not at websocket level
 				// Although websocket is closest to resolution
 				// Page level *could* cause race conditions...
 				// Both Page level and Upgrade level could check for target User and throw 404s
 				connection.kick('invalid_target');
-			} else {
-				const connection_type = pathname.split('/')[5];
+				return;
+			}
 
-				console.log(`Switching on ${connection_type}`);
+			const connection_type = pathname.split('/')[5];
 
-				switch (connection_type) {
-					case 'admin': {
-						console.log(`MatchRoom: ${target_user.login}: Admin connected`);
-						target_user.getHostRoom().setAdmin(connection);
-						break;
-					}
-					case 'producer': {
-						console.log(
-							`MatchRoom: ${target_user.login}: Producer ${user.login} connected`
-						);
-						user.setProducerConnection(connection, {
-							match: true,
-							target_user,
-						});
-						break;
-					}
-					case 'view': {
-						console.log(
-							`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`
-						);
-						// TODO: this view should not take over video feed!
-						target_user.getHostRoom().addView(connection, false);
-						break;
-					}
-					default: {
-						console.log(`WS: Invalid URL`);
-						connection.kick('invalid_url');
-					}
+			console.log(`Switching on ${connection_type}`);
+
+			switch (connection_type) {
+				/*
+				// Ony allow access to admin page of target user's room when a permission system is implemented
+				// The target user must have authorized the current user
+				case 'admin': {
+					console.log(`MatchRoom: ${target_user.login}: Admin connected`);
+					target_user.getHostRoom().setAdmin(connection);
+					break;
+				}
+				/** */
+
+				case 'producer': {
+					console.log(
+						`MatchRoom: ${target_user.login}: Producer ${user.login} connected`
+					);
+					user.setProducerConnection(connection, {
+						match: true,
+						target_user,
+					});
+					break;
+				}
+
+				case 'view': {
+					console.log(
+						`MatchRoom: ${target_user.login}: View connected, owned by ${user.login}`
+					);
+					// TODO: this view should not take over video feed!
+					target_user.getHostRoom().addView(connection, false);
+					break;
+				}
+
+				default: {
+					console.log(`WS: Invalid URL`);
+					connection.kick('invalid_url');
 				}
 			}
 		} else {

@@ -147,7 +147,12 @@ router.post('/set_pb', express.json(), async (req, res) => {
 		return;
 	}
 
-	const update = _.pick(req.body, ['score', 'start_level', 'end_level']);
+	const update = _.pick(req.body, [
+		'score',
+		'start_level',
+		'end_level',
+		'competition',
+	]);
 
 	do {
 		if (
@@ -170,6 +175,8 @@ router.post('/set_pb', express.json(), async (req, res) => {
 			update.end_level > 30
 		)
 			break;
+
+		if (typeof update.competition != 'boolean') break;
 
 		const user = await UserDAO.getUserById(req.session.user.id);
 

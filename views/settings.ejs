@@ -183,26 +183,36 @@
 
 				<fieldset class="fieldset content">
 					<legend>Personal Best</legend>
-					<p>Depending on when you started to use NestrisChamps, and how often you use it, your PB may not be in NestrisChamps' database. Here you have the ability to manually set <strong>one PB per start level</strong> in NestrisChamps database.</p>
+					<p>Depending on when you started to use NestrisChamps, and how often you use it, your PB may not be in NestrisChamps' database. Here you have the ability to manually set <strong>one PB per start level</strong> in NestrisChamps' database.</p>
 
 					<div class="field">
 						<label class="label">PB</label>
 						<div class="control">
-							<input id="pb_score" class="input" type="number" placeholder="Score" min="0" max="1600000">
+							<input id="pb_score" class="input" type="number" placeholder="Score" min="0" max="10000000" />
 						</div>
 					</div>
 
 					<div class="field">
 						<label class="label">Start Level</label>
 						<div class="control">
-							<input id="pb_start_level" class="input" type="number" placeholder="Start Level" min="0" max="99">
+							<input id="pb_start_level" class="input" type="number" placeholder="Start Level" min="0" max="99" />
 						</div>
 					</div>
 
 					<div class="field">
 						<label class="label">End Level</label>
 						<div class="control">
-							<input id="pb_end_level" class="input" type="number" placeholder="End Level" min="0" max="99">
+							<input id="pb_end_level" class="input" type="number" placeholder="End Level" min="0" max="99" />
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">While competing</label>
+						<div class="select">
+							<select id="pb_competition">
+								<option value="1">Yes</option>
+								<option value="0" selected>No</option>
+							</select>
 						</div>
 					</div>
 
@@ -302,6 +312,8 @@ document.getElementById('set_pb_btn').addEventListener('click', async () => {
 	for (const [key, node] of Object.entries(pb_nodes)) {
 		data[key] = parseInt(node.value, 10);
 	}
+
+	data.competition = document.getElementById('pb_competition').value === '1';
 
 	// fire and forget ... urgh -_-
 	try {

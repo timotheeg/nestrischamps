@@ -77,9 +77,9 @@
 
 <script>
 (async function showChart() {
-	const response = await fetch('/stats/progress/data')
+	const response = await fetch(`/stats/progress/data${document.location.search}`)
 	const progress = await response.json()
-	const response1819 = await fetch('/stats/progress/data-1819')
+	const response1819 = await fetch(`/stats/progress/data-1819${document.location.search}`)
 	const progress1819 = await response1819.json()
 
 	Highcharts.chart('container_overall', {

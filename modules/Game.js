@@ -17,9 +17,10 @@ const SCORE_BASES = [0, 40, 100, 300, 1200];
 const LINE_CLEAR_IGNORE_FRAMES = 7;
 
 class Game {
-	constructor(user) {
+	constructor(user, { competition = false }) {
 		this.frame_file = '';
 		this.user = user;
+		this.competition = !!competition;
 		this.frame_count = 0;
 		this.data = null;
 		this.over = false;
@@ -440,6 +441,8 @@ class Game {
 
 			num_frames: this.num_frames,
 			frame_file: this.frame_file,
+
+			competition: this.competition,
 		};
 	}
 
