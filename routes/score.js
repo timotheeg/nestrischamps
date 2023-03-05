@@ -213,6 +213,7 @@ router.get(
 			sort_field: 'datetime',
 			sort_order: 'desc',
 			page_idx: 0,
+			competition: null,
 		};
 
 		// validate and get args from query
@@ -228,14 +229,35 @@ router.get(
 			options.page_idx = parseInt(req.query.page_idx, 10);
 		}
 
-		const num_scores = await ScoreDAO.getNumberOfScores(req.session.user);
+		const filter = {};
+
+		if (/^[01]$/.test(req.query.competition)) {
+			options.competition = req.query.competition === '1';
+
+			filter.current = options.competition
+				? 'Competition scores'
+				: 'Non-Competition scores';
+			filter.links = [
+				options.competition
+					? { text: 'show non-competition scores', href: '#competition=0' }
+					: { text: 'show competition scores', href: '#competition=1' },
+				{ text: 'show all scores', href: '#' },
+			];
+		} else {
+			filter.current = 'All scores';
+			filter.links = [
+				{ text: 'show competition scores', href: '#competition=1' },
+				{ text: 'show non-competition scores', href: '#competition=0' },
+			];
+		}
+
+		const num_scores = await ScoreDAO.getNumberOfScores(
+			req.session.user,
+			options
+		);
 		const num_pages = Math.ceil(num_scores / PAGE_SIZE) || 1;
 
 		options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages - 1));
-
-		if (['0', '1'].includes(req.query.competition)) {
-			options.competition = req.query.competition === '1';
-		}
 
 		// WARNING: when we supply pagination parameters here, all field MUST be sanitized because inerpolates them in plain JS
 		const scores = await ScoreDAO.getScorePage(req.session.user, options);
@@ -244,6 +266,7 @@ router.get(
 			scores,
 			num_pages,
 			pagination: options,
+			filter,
 			pages: getPages(options.page_idx, num_pages),
 		});
 	}
@@ -329,12 +352,12 @@ router.put(
 			await ScoreDAO.updateScore(
 				req.session.user,
 				req.params.id,
-				req.params.mode === 'true'
+				req.params.mode === '1'
 			);
 			res.json({ status: 'ok' });
 		} catch (err) {
 			console.error(err);
-			res.status(500).send('Unable to update Score');
+			res.status(500).send('Unable to update score');
 		}
 	}
 );

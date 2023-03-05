@@ -227,14 +227,22 @@ class ScoreDAO {
 		return result.rows[0].id;
 	}
 
-	async getNumberOfScores(user) {
+	async getNumberOfScores(user, options = {}) {
+		const args = [user.id];
+		let additional_conditions = '';
+
+		if ([true, false].includes(options.competition)) {
+			args.push(options.competition);
+			additional_conditions += ` AND competition=$${args.length} `;
+		}
+
 		const result = await dbPool.query(
 			`
 				SELECT count(*)
 				FROM scores
-				WHERE player_id=$1
+				WHERE player_id=$1 ${additional_conditions}
 			`,
-			[user.id]
+			args
 		);
 
 		return parseInt(result.rows[0].count, 10);

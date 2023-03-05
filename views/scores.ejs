@@ -29,7 +29,14 @@
 
 <section class="section">
 	<div class="container content">
-		<h1 class="title is-1">Score Summary</h1>
+		<h1 class="title is-1">Score Summary <span class="title is-5"><%= filter.current %></span></h1>
+
+		<p class="is-size-7">
+		<% filter.links.forEach((a, idx) => { %>
+			<% if (idx > 0) { %> - <% } %>
+			<a href="<%= a.href %>" class="filter"><%= a.text %></a>
+		<% }) %>
+		</p>
 
 		<%- include('partials/pagination') %>
 
@@ -55,7 +62,7 @@
 			<% const datetime = score.datetime.toISOString(); %>
 			<tr class="<%= idx % 2 ? 'odd': 'even' %>">
 
-				<td title="<%=datetime%>"><%= score.datetime.toISOString().substr(0, 16).replace('T', ' ') %></td>
+				<td title="<%=datetime%>"><%= datetime.substr(0, 16).replace('T', ' ') %></td>
 				<td class="data-number" align="right"><%= score.start_level %></td>
 				<td class="data-number" align="right"><%= score.end_level %></td>
 				<td class="score data-number" align="right"><%= (score.score || 0).toString().padStart(6, '0') %></td>
@@ -116,6 +123,12 @@
 
 		return `${score}`;
 	}
+
+	document.querySelectorAll('a.filter').forEach(a => {
+		const m = (a.href || '').match(/#competition=(0|1)/);
+		const qs = m ? `?competition=${m[1]}` : '';
+		a.href = `${document.location.pathname}${qs}`;
+	});
 
 	document.querySelectorAll('a.delete_score').forEach(a => {
 		a.addEventListener('click', async (evt) => {
@@ -216,12 +229,12 @@
 						if (data.competition) {
 							span.textContent = 'YES - ';
 							a.href = `/stats/scores/${id}/competition/0`;
-							a.textContent = 'set as regular game';
+							a.textContent = 'set as regular score';
 						}
 						else {
 							span.textContent = 'NO - ';
 							a.href = `/stats/scores/${id}/competition/1`;
-							a.textContent = 'set as competition game';
+							a.textContent = 'set as competition score';
 						}
 					}
 
