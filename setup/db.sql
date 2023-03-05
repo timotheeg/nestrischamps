@@ -53,8 +53,11 @@ CREATE TABLE scores (
 );
 
 CREATE UNIQUE INDEX IDX_scores_manual_scores on scores (player_id, start_level, competition) where manual;
-CREATE INDEX IDX_scores_player_datetime ON scores (player_id, datetime);
+CREATE INDEX IDX_scores_player_level_competition ON scores (player_id, start_level, competition);
 CREATE INDEX IDX_scores_player_score ON scores (player_id, score);
+CREATE INDEX IDX_scores_player_session ON scores (player_id, session);
+CREATE INDEX IDX_scores_player_level ON scores (player_id, start_level);
+CREATE INDEX IDX_scores_player_datetime ON scores (player_id, datetime);
 CREATE INDEX IDX_scores_datetime ON scores (datetime);
 
 CREATE TABLE sessions (
