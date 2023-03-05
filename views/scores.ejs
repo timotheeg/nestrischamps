@@ -29,7 +29,14 @@
 
 <section class="section">
 	<div class="container content">
-		<h1 class="title is-1">Score Summary</h1>
+		<h1 class="title is-1">Score Summary <span class="title is-5"><%= filter.current %></span></h1>
+
+		<p class="is-size-7">
+		<% filter.links.forEach((a, idx) => { %>
+			<% if (idx > 0) { %> - <% } %>
+			<a href="<%= a.href %>" class="filter"><%= a.text %></a>
+		<% }) %>
+		</p>
 
 		<%- include('partials/pagination') %>
 
@@ -55,7 +62,7 @@
 			<% const datetime = score.datetime.toISOString(); %>
 			<tr class="<%= idx % 2 ? 'odd': 'even' %>">
 
-				<td title="<%=datetime%>"><%= score.datetime.toISOString().substr(0, 16).replace('T', ' ') %></td>
+				<td title="<%=datetime%>"><%= datetime.substr(0, 16).replace('T', ' ') %></td>
 				<td class="data-number" align="right"><%= score.start_level %></td>
 				<td class="data-number" align="right"><%= score.end_level %></td>
 				<td class="score data-number" align="right"><%= (score.score || 0).toString().padStart(6, '0') %></td>
@@ -116,6 +123,12 @@
 
 		return `${score}`;
 	}
+
+	document.querySelectorAll('a.filter').forEach(a => {
+		const m = (a.href || '').match(/#competition=(0|1)/);
+		const qs = m ? `?competition=${m[1]}` : '';
+		a.href = `${document.location.pathname}${qs}`;
+	});
 
 	document.querySelectorAll('a.delete_score').forEach(a => {
 		a.addEventListener('click', async (evt) => {
@@ -201,14 +214,62 @@
 				// TODO: derive stats again and show them
 				// TODO show pretty graphs
 
+				const dl = document.createElement('dl');
+
+				{
+					// Handle competition mode and score update
+					const dt = document.createElement('dt');
+					const dd = document.createElement('dd');
+					const span = document.createElement('span');
+					const a = document.createElement('a');
+
+					dt.textContent = 'Competition Score';
+
+					function updateCompetitionMode() {
+						if (data.competition) {
+							span.textContent = 'YES - ';
+							a.href = `/stats/scores/${id}/competition/0`;
+							a.textContent = 'set as regular score';
+						}
+						else {
+							span.textContent = 'NO - ';
+							a.href = `/stats/scores/${id}/competition/1`;
+							a.textContent = 'set as competition score';
+						}
+					}
+
+					updateCompetitionMode();
+
+					a.addEventListener('click', async (evt) => {
+						evt.preventDefault();
+
+						try {
+							const response = await fetch(a.href, {
+								method: 'PUT',
+								mode: 'cors',
+								credentials: 'same-origin'
+							});
+
+							data.competition = !data.competition;
+							updateCompetitionMode();
+						}
+						catch(err) {
+							alert('Unable to update score. You may already have a manual score for this start level.');
+						}
+					});
+
+					dd.appendChild(span);
+					dd.appendChild(a);
+					dl.appendChild(dt);
+					dl.appendChild(dd);
+				}
+
 				const details = {
 					Transition: data.transition ? data.transition.toString().padStart(6, '0') : '-',
 					Clears: data.clears || '-',
 					"Pseudo 29 Start Score": getLevel29StartScore(data.clears || '-'),
 					Pieces: data.pieces || '-',
 				};
-
-				const dl = document.createElement('dl');
 
 				for (const [key, value] of Object.entries(details)) {
 					const dt = document.createElement('dt');
@@ -237,12 +298,12 @@
 					dl.appendChild(dd);
 				}
 
-
 				td.innerHTML = ''; // clear the loading message
 				td.appendChild(dl);
 			}
 			catch(err) {
 				console.log('Unable to show details');
+				console.error(err);
 			}
 		});
 	});

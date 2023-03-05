@@ -65,7 +65,13 @@
 
 <section class="section">
 	<div class="container content">
-		<h1 class="title is-1">Progress</h1>
+		<h1 class="title is-1">Progress <span class="title is-5"><%= filter.current %></span></h1>
+		<p class="is-size-7">
+			<% filter.links.forEach((a, idx) => { %>
+				<% if (idx > 0) { %> - <% } %>
+				<a href="<%= a.href %>" class="filter"><%= a.text %></a>
+			<% }) %>
+		</p>
 		<figure class="highcharts-figure">
 			<div id="container_overall"></div>
 			<div id="container_18"></div>
@@ -76,10 +82,16 @@
 </section>
 
 <script>
+document.querySelectorAll('a.filter').forEach(a => {
+	const m = (a.href || '').match(/#competition=(0|1)/);
+	const qs = m ? `?competition=${m[1]}` : '';
+	a.href = `${document.location.pathname}${qs}`;
+});
+
 (async function showChart() {
-	const response = await fetch('/stats/progress/data')
+	const response = await fetch(`/stats/progress/data${document.location.search}`)
 	const progress = await response.json()
-	const response1819 = await fetch('/stats/progress/data-1819')
+	const response1819 = await fetch(`/stats/progress/data-1819${document.location.search}`)
 	const progress1819 = await response1819.json()
 
 	Highcharts.chart('container_overall', {

@@ -192,10 +192,39 @@ function getPages(page_idx, num_pages) {
 	return pages;
 }
 
+function getCompetitionFilter(req, res, next) {
+	const filter = {};
+
+	if (/^[01]$/.test(req.query.competition)) {
+		filter.competition = req.query.competition === '1';
+		filter.current = filter.competition
+			? 'Competition scores'
+			: 'Non-Competition scores';
+		filter.links = [
+			filter.competition
+				? { text: 'show non-competition scores', href: '#competition=0' }
+				: { text: 'show competition scores', href: '#competition=1' },
+			{ text: 'show all scores', href: '#' },
+		];
+	} else {
+		filter.competition = null;
+		filter.current = 'All scores';
+		filter.links = [
+			{ text: 'show competition scores', href: '#competition=1' },
+			{ text: 'show non-competition scores', href: '#competition=0' },
+		];
+	}
+
+	req.ntc = Object.assign(req.ntc || {}, { filter });
+
+	next();
+}
+
 router.get(
 	'/scores',
 	middlewares.assertSession,
 	middlewares.checkToken,
+	getCompetitionFilter,
 	async (req, res) => {
 		console.log(`Fetching user scores for ${req.session.user.id}`);
 
@@ -213,6 +242,7 @@ router.get(
 			sort_field: 'datetime',
 			sort_order: 'desc',
 			page_idx: 0,
+			competition: null,
 		};
 
 		// validate and get args from query
@@ -228,7 +258,12 @@ router.get(
 			options.page_idx = parseInt(req.query.page_idx, 10);
 		}
 
-		const num_scores = await ScoreDAO.getNumberOfScores(req.session.user);
+		options.competition = req.ntc.filter.competition;
+
+		const num_scores = await ScoreDAO.getNumberOfScores(
+			req.session.user,
+			options
+		);
 		const num_pages = Math.ceil(num_scores / PAGE_SIZE) || 1;
 
 		options.page_idx = Math.max(0, Math.min(options.page_idx, num_pages - 1));
@@ -240,6 +275,7 @@ router.get(
 			scores,
 			num_pages,
 			pagination: options,
+			filter: req.ntc.filter,
 			pages: getPages(options.page_idx, num_pages),
 		});
 	}
@@ -309,12 +345,41 @@ router.delete(
 	}
 );
 
+router.put(
+	'/scores/:id/competition/:mode',
+	middlewares.assertSession,
+	middlewares.checkToken,
+	async (req, res) => {
+		console.log(`Updating score ${req.params.id}`);
+
+		if (!['0', '1'].includes(req.params.mode)) {
+			res.status(400).send('Invalid value for competition mode');
+			return;
+		}
+
+		try {
+			await ScoreDAO.updateScore(
+				req.session.user,
+				req.params.id,
+				req.params.mode === '1'
+			);
+			res.json({ status: 'ok' });
+		} catch (err) {
+			console.error(err);
+			res.status(500).send('Unable to update score');
+		}
+	}
+);
+
 router.get(
 	'/progress/data',
 	middlewares.assertSession,
 	middlewares.checkToken,
+	getCompetitionFilter,
 	async (req, res) => {
-		const progress = await ScoreDAO.getProgress(req.session.user);
+		const progress = await ScoreDAO.getProgress(req.session.user, {
+			competition: req.ntc.filter.competition,
+		});
 
 		progress.forEach(datapoint => {
 			datapoint.timestamp = datapoint.datetime.getTime();
@@ -329,18 +394,22 @@ router.get(
 	'/progress/data-1819',
 	middlewares.assertSession,
 	middlewares.checkToken,
+	getCompetitionFilter,
 	async (req, res) => {
 		const data = {};
 
-		for (const level of [18, 19, 29]) {
-			const progress = await ScoreDAO.getProgress(req.session.user, level);
+		for (const start_level of [18, 19, 29]) {
+			const progress = await ScoreDAO.getProgress(req.session.user, {
+				start_level,
+				competition: req.ntc.filter.competition,
+			});
 
 			progress.forEach(datapoint => {
 				datapoint.timestamp = datapoint.datetime.getTime();
 				delete datapoint.date;
 			});
 
-			data[level] = progress;
+			data[start_level] = progress;
 		}
 
 		res.json(data);
@@ -351,8 +420,11 @@ router.get(
 	'/progress',
 	middlewares.assertSession,
 	middlewares.checkToken,
+	getCompetitionFilter,
 	async (req, res) => {
-		res.render('progress');
+		res.render('progress', {
+			filter: req.ntc.filter,
+		});
 	}
 );
 

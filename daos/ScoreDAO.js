@@ -193,11 +193,12 @@ class ScoreDAO {
 				transition,
 				num_frames,
 				frame_file,
-				manual
+				manual,
+				competition
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+				NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
 			)
 			RETURNING id
 			`,
@@ -219,20 +220,29 @@ class ScoreDAO {
 				game_data.num_frames,
 				game_data.frame_file,
 				!!game_data.manual,
+				!!game_data.competition,
 			]
 		);
 
 		return result.rows[0].id;
 	}
 
-	async getNumberOfScores(user) {
+	async getNumberOfScores(user, options = {}) {
+		const args = [user.id];
+		let additional_conditions = '';
+
+		if ([true, false].includes(options.competition)) {
+			args.push(options.competition);
+			additional_conditions += ` AND competition=$${args.length} `;
+		}
+
 		const result = await dbPool.query(
 			`
 				SELECT count(*)
 				FROM scores
-				WHERE player_id=$1
+				WHERE player_id=$1 ${additional_conditions}
 			`,
-			[user.id]
+			args
 		);
 
 		return parseInt(result.rows[0].count, 10);
@@ -248,6 +258,8 @@ class ScoreDAO {
 			...options,
 		};
 
+		const args = [user.id];
+
 		let null_handling = '';
 
 		if (options.sort_field === 'tetris_rate') {
@@ -255,16 +267,23 @@ class ScoreDAO {
 				options.sort_order === 'desc' ? 'NULLS last' : 'NULLS first';
 		}
 
+		let filter_by_competition_mode = '';
+
+		if ([true, false].includes(options.competition)) {
+			args.push(options.competition);
+			filter_by_competition_mode = ` AND competition=$${args.length} `;
+		}
+
 		// WARNING: this query uses plain JS variable interpolation, parameters MUST be sane
 		const result = await dbPool.query(
 			`
-				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration, frame_file
+				SELECT id, datetime, start_level, end_level, score, lines, tetris_rate, num_droughts, max_drought, das_avg, duration, frame_file, competition
 				FROM scores
-				WHERE player_id=$1
+				WHERE player_id=$1 ${filter_by_competition_mode}
 				ORDER BY ${options.sort_field} ${options.sort_order} ${null_handling}
 				LIMIT ${options.page_size} OFFSET ${options.page_size * options.page_idx}
 			`,
-			[user.id]
+			args
 		);
 
 		return result.rows;
@@ -292,13 +311,33 @@ class ScoreDAO {
 		return result.rows[0];
 	}
 
-	async getProgress(user, start_level = null) {
+	async updateScore(user, game_id, competition = false) {
+		// this query has the potential to create a conflict with the index IDX_scores_manual_scores
+		// and it could throw
+		const result = await dbPool.query(
+			`
+				UPDATE scores
+				SET competition=$3
+				WHERE player_id=$1 AND id=$2
+				`,
+			[user.id, game_id, !!competition]
+		);
+
+		return result.rowCount === 1;
+	}
+
+	async getProgress(user, { start_level = null, competition = null }) {
 		const args = [user.id];
-		let level_condition = '';
+		let optional_conditions = '';
 
 		if (start_level !== null && start_level >= 0 && start_level <= 29) {
 			args.push(start_level);
-			level_condition = `AND s.start_level=$2 `;
+			optional_conditions += ` AND s.start_level=$${args.length}`;
+		}
+
+		if (competition != null) {
+			args.push(!!competition);
+			optional_conditions += ` AND s.competition=$${args.length}`;
 		}
 
 		const result = await dbPool.query(
@@ -309,8 +348,8 @@ class ScoreDAO {
 				count(s.id) AS num_games,
 				max(s.score) AS max_score,
 				round(avg(s.score)) AS avg_score
-			FROM scores s, twitch_users u
-			WHERE s.player_id=$1 AND s.player_id=u.id ${level_condition}
+			FROM scores s
+			WHERE s.player_id=$1 ${optional_conditions}
 			GROUP BY session
 			ORDER BY session asc
 			`,
@@ -348,6 +387,7 @@ class ScoreDAO {
 				start_level,
 				end_level,
 				score,
+				competition,
 				manual,
 
 				lines,
@@ -364,12 +404,19 @@ class ScoreDAO {
 			)
 			VALUES
 			(
-				NOW(), $1, $2, $3, $4, $5, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
+				NOW(), $1, $2, $3, $4, $5, $6, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
 			)
-			ON CONFLICT (player_id, start_level) where manual
+			ON CONFLICT (player_id, start_level, competition) where manual
 			DO UPDATE SET datetime=NOW(), end_level=$4, score=$5
 			`,
-			[user.id, session, update.start_level, update.end_level, update.score]
+			[
+				user.id,
+				session,
+				update.start_level,
+				update.end_level,
+				update.score,
+				!!update.competition,
+			]
 		);
 
 		return result.rowCount === 1;

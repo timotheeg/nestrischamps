@@ -14,10 +14,11 @@ class Producer extends EventEmitter {
 		this._handleMessage = this._handleMessage.bind(this);
 	}
 
-	setConnection(connection, { match = false }) {
+	setConnection(connection, { match = false, competition = false }) {
 		this.kick('concurrency_limit');
 
 		this.is_match_connection = !!match;
+		this.is_competition = !!competition;
 
 		connection.on('message', this._handleMessage);
 
@@ -52,7 +53,9 @@ class Producer extends EventEmitter {
 			delete this.game.onNewGame;
 		}
 
-		this.game = new Game(this.user);
+		this.game = new Game(this.user, {
+			competition: this.is_match_connection || this.is_competition,
+		});
 
 		this.game.onNewGame = frame => {
 			console.log(

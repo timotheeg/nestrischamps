@@ -61,9 +61,12 @@ class User extends EventEmitter {
 		this.checkScheduleDestroy();
 	}
 
-	setProducerConnection(conn, { match = false, target_user = null }) {
+	setProducerConnection(
+		conn,
+		{ match = false, competition = false, target_user = null }
+	) {
 		this.addConnection(conn);
-		this.producer.setConnection(conn, { match });
+		this.producer.setConnection(conn, { match, competition });
 
 		if (match) {
 			this.joinMatchRoom(target_user);
