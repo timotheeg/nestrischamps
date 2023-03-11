@@ -24,35 +24,35 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.154.0",
-		"@aws-sdk/lib-storage": "^3.154.0",
-		"@twurple/api": "^5.2.2",
-		"@twurple/auth": "^5.2.2",
-		"@twurple/chat": "^5.2.2",
+		"@aws-sdk/client-s3": "^3.289.0",
+		"@aws-sdk/lib-storage": "^3.289.0",
+		"@twurple/api": "^6.0.7",
+		"@twurple/auth": "^6.0.7",
+		"@twurple/chat": "^6.0.7",
 		"celebrate": "^15.0.1",
-		"connect-pg-simple": "^7.0.0",
-		"country-list": "^2.2.0",
+		"connect-pg-simple": "^8.0.0",
+		"country-list": "^2.3.0",
 		"ejs": "^3.1.8",
 		"express": "^4.18.1",
 		"express-session": "^1.17.3",
-		"glob": "^8.0.3",
-		"got": "^12.3.1",
+		"glob": "^9.2.1",
+		"got": "^12.6.0",
 		"lodash": "^4.17.21",
 		"nocache": "^3.0.4",
-		"pg": "^8.7.3",
+		"pg": "^8.10.0",
 		"timezones.json": "^1.6.1",
 		"ulid": "^2.3.0",
 		"uuid": "^9.0.0",
-		"ws": "^8.8.1"
+		"ws": "^8.13.0"
 	},
 	"engines": {
 		"node": "18.x"
 	},
 	"devDependencies": {
-		"eslint": "^8.22.0",
-		"eslint-config-prettier": "^8.5.0",
-		"husky": "^8.0.1",
-		"prettier": "^2.7.1",
+		"eslint": "^8.36.0",
+		"eslint-config-prettier": "^8.7.0",
+		"husky": "^8.0.3",
+		"prettier": "^2.8.4",
 		"pretty-quick": "^3.1.3"
 	}
 }

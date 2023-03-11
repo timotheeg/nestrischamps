@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { EventEmitter } from 'node:events';
 import PrivateRoom from './PrivateRoom.js';
 import MatchRoom from './MatchRoom.js';
 import Producer from './Producer.js';
@@ -15,6 +15,17 @@ function is_spam(msg) {
 
 	return /become famous/i.test(msg) && /buy/i.test(msg);
 }
+
+// Singleton Auth Provider for Twitch chats
+class TwitchRefreshEmitter extends EventEmitter {}
+const twitchRefreshEmitter = new TwitchRefreshEmitter();
+const authProvider = new RefreshingAuthProvider({
+	clientId: process.env.TWITCH_CLIENT_ID,
+	clientSecret: process.env.TWITCH_CLIENT_SECRET,
+	onRefresh: (userId, args) => {
+		twitchRefreshEmitter.emit(userId, args);
+	},
+});
 
 class User extends EventEmitter {
 	constructor(user_object) {
@@ -54,6 +65,7 @@ class User extends EventEmitter {
 		this._handleProducerMessage = this._handleProducerMessage.bind(this);
 		this._handleProducerClose = this._handleProducerClose.bind(this);
 		this._handleMatchRoomClose = this._handleMatchRoomClose.bind(this);
+		this._onTwitchTokenRefreshed = this._onTwitchTokenRefreshed.bind(this);
 
 		this.producer.on('message', this._handleProducerMessage);
 		this.producer.on('close', this._handleProducerClose);
@@ -227,7 +239,19 @@ class User extends EventEmitter {
 
 		if (this.chat_client) {
 			this.chat_client.quit();
+			delete this.chat_client;
+			twitchRefreshEmitter.removeListener(
+				this.id,
+				this._onTwitchTokenRefreshed
+			);
 		}
+	}
+
+	_onTwitchTokenRefreshed({ accessToken, refreshToken, expiresIn }) {
+		// How to update the session object(s) directly?
+		this.token.access_token = accessToken;
+		this.token.refresh_token = refreshToken;
+		this.token.expires_in = expiresIn;
 	}
 
 	async _connectToTwitchChat() {
@@ -242,24 +266,12 @@ class User extends EventEmitter {
 			obtainmentTimestamp: 0,
 		};
 
-		const authProvider = new RefreshingAuthProvider(
-			{
-				clientId: process.env.TWITCH_CLIENT_ID,
-				clientSecret: process.env.TWITCH_CLIENT_SECRET,
-				onRefresh: args => {
-					const { accessToken, refreshToken, expiresIn } = args;
-
-					// How to update the session object(s) directly?
-					this.token.access_token = accessToken;
-					this.token.refresh_token = refreshToken;
-					this.token.expires_in = expiresIn;
-				},
-			},
-			twurpleToken
-		);
+		twitchRefreshEmitter.addListener(this.id, this._onTwitchTokenRefreshed);
+		authProvider.addUser(this.id, twurpleToken, ['chat:read']);
 
 		this.chat_client = new ChatClient({
 			authProvider,
+			authIntents: ['chat:read'],
 			channels: [this.login],
 			readOnly: true,
 			logger: {

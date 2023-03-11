@@ -1,5 +1,5 @@
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 
 const layouts = {
 	_types: {
@@ -23,7 +23,7 @@ const start = Date.now();
 // the structures should be inspected for cleanliness
 
 ['1p', 'mp'].forEach(type => {
-	glob.sync(`public/views/${type}/*.*`).forEach(filename => {
+	globSync(`public/views/${type}/*.*`).forEach(filename => {
 		const file = filename.split(/[\\/]/).pop().split('.')[0];
 
 		let layout_data = layouts[file];
