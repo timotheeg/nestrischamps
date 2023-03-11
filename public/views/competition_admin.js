@@ -99,22 +99,19 @@ class Player {
 		this.bestof = -1;
 
 		// link dom events
-		this.dom.name.onchange =
-			this.dom.name.onkeyup =
-			this.dom.name.onblur =
-				_.debounce(() => {
-					remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
-				}, 250);
+		this.dom.name.onchange = this.dom.name.onkeyup = _.debounce(() => {
+			remoteAPI.setDisplayName(this.idx, this.dom.name.value.trim());
+		}, 750);
 
-		this.dom.avatar_url.onchange =
-			this.dom.avatar_url.onkeyup =
-			this.dom.avatar_url.onblur =
-				_.debounce(() => {
-					const avatar_url = this.dom.avatar_url.value.trim();
+		this.dom.avatar_url.onchange = this.dom.avatar_url.onkeyup = _.debounce(
+			() => {
+				const avatar_url = this.dom.avatar_url.value.trim();
 
-					remoteAPI.setProfileImageURL(this.idx, avatar_url);
-					this.dom.avatar_img.src = avatar_url;
-				}, 250);
+				remoteAPI.setProfileImageURL(this.idx, avatar_url);
+				this.dom.avatar_img.src = avatar_url;
+			},
+			750
+		);
 
 		this.dom.country_code_select.onchange = () => {
 			const country_code = this.dom.country_code_select.value;
