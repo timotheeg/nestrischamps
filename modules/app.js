@@ -1,6 +1,15 @@
 import express from 'express';
 import middlewares from './middlewares.js';
 
+// crude way to prevent crashes
+// not recommended since application is now in an undefined state
+// still, with daily restarts, any unknown state is guaranteed to clear soon
+process.on('uncaughtException', (error, origin) => {
+	console.error('uncaughtException');
+	console.error(error);
+	console.error(origin);
+});
+
 const app = express();
 
 app.set('view engine', 'ejs');
