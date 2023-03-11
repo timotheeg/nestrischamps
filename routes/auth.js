@@ -48,26 +48,33 @@ router.get('/twitch/callback', async (req, res) => {
 	console.log(`Twitch callback received with code [${req.query.code}]`);
 
 	if (!req.query.code) {
-		res.send(
-			`Unable to authenticate [${req.query.error}]: ${req.query.error_description}`
-		);
+		res
+			.status(400)
+			.send(
+				`Unable to authenticate [${req.query.error}]: ${req.query.error_description}`
+			);
 		return;
 	}
 
-	const token_response = await got.post('https://id.twitch.tv/oauth2/token', {
-		searchParams: {
-			client_id: process.env.TWITCH_CLIENT_ID,
-			client_secret: process.env.TWITCH_CLIENT_SECRET,
-			code: req.query.code,
-			grant_type: 'authorization_code',
-			redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
-		},
-		responseType: 'json',
-	});
-
-	const token = token_response.body;
-
 	try {
+		const { body: token } = await got.post(
+			'https://id.twitch.tv/oauth2/token',
+			{
+				searchParams: {
+					client_id: process.env.TWITCH_CLIENT_ID,
+					client_secret: process.env.TWITCH_CLIENT_SECRET,
+					code: req.query.code,
+					grant_type: 'authorization_code',
+					redirect_uri: `${req.protocol}://${req.get(
+						'host'
+					)}/auth/twitch/callback`,
+				},
+				responseType: 'json',
+			}
+		);
+
+		console.log(`Retrieved oauth token`);
+
 		// must validate token to get user id
 		const user_response = await got.get(
 			'https://id.twitch.tv/oauth2/validate',
@@ -129,8 +136,13 @@ router.get('/twitch/callback', async (req, res) => {
 			res.redirect('/');
 		}
 	} catch (err) {
+		console.error(`Error when processing Twicth callback`);
 		console.error(err);
-		res.status(500).send(`meh T_T: ${err.message}`);
+		res
+			.status(500)
+			.send(
+				`An unexpected error occured with your Twich login: ${err.message}. Please try again later`
+			);
 	}
 });
 
