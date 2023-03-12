@@ -267,11 +267,11 @@ class User extends EventEmitter {
 		};
 
 		twitchRefreshEmitter.addListener(this.id, this._onTwitchTokenRefreshed);
-		authProvider.addUser(this.id, twurpleToken, ['chat:read']);
+		authProvider.addUser(this.id, twurpleToken, [`chat:${this.id}`]);
 
 		this.chat_client = new ChatClient({
 			authProvider,
-			authIntents: ['chat:read'],
+			authIntents: [`chat:${this.id}`],
 			channels: [this.login],
 			readOnly: true,
 			logger: {
