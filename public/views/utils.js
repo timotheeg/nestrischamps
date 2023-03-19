@@ -55,7 +55,9 @@ export function translate(iRange, oRange, value) {
 export function readableScoreFomatter(score, space_pad = 0, zero_pad = 0) {
 	if (isNaN(score)) score = 0;
 
-	score = `${score}`.padStart(zero_pad, '0').padStart(space_pad, '\u00A0');
+	const is_negative = score < 0;
+
+	score = `${Math.abs(score)}`.padStart(zero_pad, '0');
 
 	let len = score.length;
 	const parts = [];
@@ -66,5 +68,8 @@ export function readableScoreFomatter(score, space_pad = 0, zero_pad = 0) {
 		len = start;
 	}
 
-	return parts.join('\u202F'); // narrow non-breakable space
+	return `${is_negative ? '-' : ''}${parts.join('\u202F')}`.padStart(
+		space_pad,
+		'\u00A0'
+	); // narrow non-breakable space
 }
