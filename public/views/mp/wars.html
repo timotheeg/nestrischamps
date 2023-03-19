@@ -117,8 +117,6 @@
 			const topScores = {};
 
 			function sortTopScores() {
-				// super inefficient destroy-rebuild sorting, but I'll optimize later if needed
-				// considering scores areupdated one at a time, we could move the nodes without recreating everything
 				Object.values(topScores)
 					.sort((p1, p2) => {
 						return p2.score - p1.score;
