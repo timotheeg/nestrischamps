@@ -113,6 +113,11 @@
 			}
 
 			const spacer = (1920 - num_players * player_width) / (num_players + 1);
+			const rank_colors = Array(num_players)
+				.fill()
+				.map((_, idx) =>
+					color_gradient.getColorAt(idx / (num_players - 1)).toHexString()
+				);
 
 			function avg(arr) {
 				return arr.reduce((acc, v) => acc + v, 0) / arr.length;
@@ -128,11 +133,7 @@
 							: p2_score - p1_score;
 					})
 					.forEach((player, idx) => {
-						const color = color_gradient
-							.getColorAt(idx / (num_players - 1))
-							.toHexString();
-
-						player.rank_node.style.color = color;
+						player.rank_node.style.color = rank_colors[idx];
 						player.rank_node.querySelector('.rank').textContent = idx + 1;
 
 						leaderboard_values.appendChild(player.rank_node);
