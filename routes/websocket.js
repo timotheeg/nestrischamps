@@ -101,6 +101,62 @@ export default function init(server, wss) {
 			return;
 		}
 
+		m = request.nc_url.pathname.match(
+			/^\/ws\/room\/(u\/([a-z0-9_-]+)\/)?producer\/([a-zA-Z0-9-]+)/
+		);
+
+		request.is_secret_producer = !!m;
+
+		if (request.is_secret_producer) {
+			if (!request.tetris) {
+				request.tetris = {};
+			}
+
+			request.tetris.producer = {
+				target_user_login: m[2],
+				connecting_user_secret: m[3],
+			};
+
+			const connecting_user = await UserDAO.getUserBySecret(
+				request.tetris.producer.connecting_user_secret
+			);
+
+			if (!connecting_user) {
+				socket.write('HTTP/1.1 404 Connecting User Not Found\r\n\r\n');
+				socket.destroy();
+				return;
+			}
+
+			if (request.tetris.producer.target_user_login) {
+				const target_user = await UserDAO.getUserByLogin(
+					request.tetris.producer.target_user_login
+				);
+
+				if (!target_user) {
+					socket.write('HTTP/1.1 404 Target User Not Found\r\n\r\n');
+					socket.destroy();
+					return;
+				}
+			}
+
+			if (!request.session) {
+				request.session = {};
+			}
+
+			request.session.user = {
+				id: connecting_user.id,
+				login: connecting_user.login,
+				secret: connecting_user.secret,
+				profile_image_url: connecting_user.profile_image_url,
+			};
+
+			wss.handleUpgrade(request, socket, head, function (ws) {
+				wss.emit('connection', ws, request);
+			});
+
+			return;
+		}
+
 		// all other connections must be within a session!
 		// i.e. producers and admin connections
 
@@ -180,6 +236,22 @@ export default function init(server, wss) {
 				? user.getPrivateRoom()
 				: user.getHostRoom();
 			room.addView(connection);
+		} else if (request.is_secret_producer) {
+			console.log(`Secret Producer for ${user.login}`);
+			if (request.tetris.producer.target_user_login) {
+				const target_user = await UserDAO.getUserByLogin(
+					request.tetris.producer.target_user_login
+				);
+				user.setProducerConnection(connection, {
+					match: true,
+					target_user,
+				});
+			} else {
+				user.setProducerConnection(connection, {
+					match: false,
+					competition: request.nc_url.searchParams.get('competition') === '1',
+				});
+			}
 		} else if (pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getHostRoom().setAdmin(connection);
