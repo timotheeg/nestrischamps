@@ -32,10 +32,24 @@
 				right: var(--offset);
 			}
 
-			.score,
-			.runway.game {
+			.score.main {
 				width: 350px;
+				height: 173px;
+				top: -16px;
+			}
+
+			.runway.game {
 				height: 137px;
+			}
+
+			.score.main .header {
+				padding-top: 6px;
+				padding-bottom: 18px;
+			}
+
+			.score.main .aligner {
+				padding-top: 0px;
+				padding-bottom: 18px;
 			}
 
 			.aligner {
@@ -55,7 +69,7 @@
 
 			.lines,
 			.next_piece {
-				top: 164px;
+				top: 184px;
 				width: 161px;
 				height: 56px;
 			}
@@ -76,7 +90,7 @@
 				padding: 3px;
 				width: 356px;
 				height: 716px;
-				top: 250px;
+				top: 270px;
 			}
 
 			.name,
@@ -215,7 +229,7 @@
 					<div class="content">&#338;&#338;&#338;</div>
 				</div>
 
-				<div class="box score">
+				<div class="box score main">
 					<div class="header">SCORE</div>
 					<div class="aligner">
 						<div class="main">0&#x202F;000&#x202F;000</div>
@@ -335,6 +349,7 @@
 						runway_tr_box: player_node.querySelector(`.runway.transition`),
 						runway_box: player_node.querySelector(`.runway.game`),
 						video: player_node.querySelector(`.player_vid`),
+						flag: player_node.querySelector(`.flag`),
 					},
 					{
 						field_pixel_size: 4.5,
