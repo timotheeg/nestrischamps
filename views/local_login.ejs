@@ -1,22 +1,40 @@
 <html>
 <head>
+	<style>
+		p {
+			text-align: center;
+		}
+	</style>
 </head>
 <body>
 
-<center>
-	<button id="player1" class="player" data-player_id="1">Login as Player1</button>
-	<button id="player2" class="player" data-player_id="2">Login as Player2</button>
-	<button id="player3" class="player" data-player_id="3">Login as Player3</button>
-	<button id="player4" class="player" data-player_id="4">Login as Player4</button>
-</center>
+<p>
+	Login as
+	<select id="player">
+		<option value="">Select a player</option>
+	</select>
+	<button id="go">-- GO! --</button>
+</p>
 
 <script>
-document.querySelectorAll('button.player').forEach(elmt => {
-	elmt.addEventListener('click', (evt) => {
-		evt.preventDefault();
 
-		document.location.href = `/auth/set_session_player/${elmt.dataset.player_id}`;
-	});
+const player_select = document.querySelector('select#player');
+
+for (let player_num=1; player_num<=16; player_num++) {
+	const option = document.createElement('option');
+	option.text = `Player ${player_num}`;
+	option.value = player_num;
+	player_select.appendChild(option);
+}
+
+document.querySelector('button#go').addEventListener('click', (evt) => {
+	evt.preventDefault();
+
+	const player_num = player_select.value
+
+	if (player_num) {
+		document.location.href = `/auth/set_session_player/${player_num}`;
+	}
 });
 
 </script>
