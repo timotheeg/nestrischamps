@@ -258,6 +258,18 @@ export default class Player {
 
 		this.bg_height = bg_height; // store value for curtain animation
 
+		// Field Flash
+		this.field_bg = document.createElement('div');
+		this.field_bg.classList.add('background');
+		Object.assign(this.field_bg.style, {
+			position: 'absolute',
+			top: `${bg_offset}px`,
+			left: `${bg_offset}px`,
+			width: `${bg_width}px`,
+			height: `${bg_height}px`,
+		});
+		this.dom.field.prepend(this.field_bg);
+
 		// Avatar Block
 		this.avatar = document.createElement('div');
 		this.avatar.classList.add('avatar');
@@ -272,19 +284,7 @@ export default class Player {
 			backgroundPosition: '50% 50%',
 			filter: 'brightness(0.20)',
 		});
-		this.dom.field.appendChild(this.avatar);
-
-		// Field Flash
-		this.field_bg = document.createElement('div');
-		this.field_bg.classList.add('background');
-		Object.assign(this.field_bg.style, {
-			position: 'absolute',
-			top: `${bg_offset}px`,
-			left: `${bg_offset}px`,
-			width: `${bg_width}px`,
-			height: `${bg_height}px`,
-		});
-		this.dom.field.appendChild(this.field_bg);
+		this.dom.field.prepend(this.avatar);
 
 		// set up field and preview canvas
 		['field', 'preview', 'running_trt'].forEach(name => {

@@ -143,7 +143,6 @@
 .board .level {
 	position: absolute;
 	line-height: 16px;
-	z-index: 100;
 }
 
 .board .next_piece {
@@ -152,7 +151,6 @@
 	height: 32px;
 	right: 0;
 	top: 0;
-	z-index: 1;
 }
 
 .eff,

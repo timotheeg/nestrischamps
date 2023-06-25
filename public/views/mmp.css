@@ -60,7 +60,6 @@
 	text-align: left;
 	width: 48px;
 	line-height: 16px;
-	z-index: 1;
 }
 
 .board .next_piece {
@@ -69,7 +68,6 @@
 	right: 0;
 	width: 64px;
 	height: 32px;
-	z-index: 2;
 }
 
 .running_trt {
