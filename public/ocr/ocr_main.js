@@ -744,7 +744,26 @@ function updatePaletteList() {
 
 // Updates the select element with the provided set of cameras
 function updateDeviceList(devices) {
-	// first populate for OCR
+	// Make sure we show devices with their IDs
+	const mappedDevices = devices.map(camera => {
+		const device = { label: camera.label, deviceId: camera.deviceId };
+
+		// Drop the manufacturer:make identifier because it's (typically) not useful
+		device.label = device.label.replace(
+			/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)\s*$/,
+			''
+		);
+
+		// Add a short form for the device id
+		if (camera.deviceId?.slice) {
+			const id = camera.deviceId;
+			const shortId = `${id.slice(0, 4)}..${id.slice(-4)}`;
+			device.label += ` [${shortId}]`;
+		}
+
+		return device;
+	});
+
 	device_selector.innerHTML = '';
 	[
 		{
@@ -755,7 +774,7 @@ function updateDeviceList(devices) {
 			label: 'Window Capture',
 			deviceId: 'window',
 		},
-		...devices,
+		...mappedDevices,
 	].forEach(camera => {
 		const camera_option = document.createElement('option');
 		camera_option.text = camera.label;
@@ -776,7 +795,7 @@ function updateDeviceList(devices) {
 			label: 'Default',
 			deviceId: 'default',
 		},
-		...devices,
+		...mappedDevices,
 	].forEach(camera => {
 		const camera_option = document.createElement('option');
 		camera_option.text = camera.label;
