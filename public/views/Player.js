@@ -426,6 +426,7 @@ export default class Player {
 
 	showProfileCard(visible) {
 		this.profile_card.hidden = !visible;
+		// if (visible) this._refreshProfileCard(); // will this cause a flicker? -> yes :(
 	}
 
 	setCurtainLogo(url) {
@@ -644,11 +645,20 @@ export default class Player {
 		}
 	}
 
-	setLogin(login) {
-		if (login === this.login) return;
+	_refreshProfileCard() {
+		if (this.login) {
+			const rand = `${Math.random()}`.slice(2);
+			this.profile_card.src = `/view/profile_card/${
+				this.login
+			}?r=${Date.now()}-${rand}`; // always refresh with cachebuster
+		} else {
+			this.profile_card.src = `/view/profile_card/NONE`; // allows caching
+		}
+	}
 
+	setLogin(login) {
 		this.login = login;
-		this.profile_card.src = `/view/profile_card/${login}`;
+		this._refreshProfileCard();
 	}
 
 	createGame() {
