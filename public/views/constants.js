@@ -109,10 +109,10 @@ export const PIECE_COLORS = {
 };
 
 export const RUNWAY = {
-	TRANSITION: 0,
-	LV19: 1,
-	LV29: 2,
-	LV39: 3,
+	TRANSITION: 'TRANSITION',
+	LV19: 'LV19',
+	LV29: 'LV29',
+	LV39: 'LV39',
 };
 
 export const RUNWAYS = _getRunways();
