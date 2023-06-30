@@ -641,8 +641,12 @@ export default class BaseGame {
 		}
 
 		// compatibility with old layouts
-		this.data.score.runway = this.data.score.runways.LV29;
-		this.data.score.projection = this.data.score.projections.LV29;
+		if (this.data.level < 29) {
+			this.data.score.runway = this.data.score.runways.LV29;
+			this.data.score.projection = this.data.score.projections.LV29;
+		} else {
+			this.data.score.runway = this.data.score.projection = real_score;
+		}
 
 		// record point event with snapshot of all data
 		this._recordPointEvent(cleared);
