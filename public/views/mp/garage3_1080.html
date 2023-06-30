@@ -16,7 +16,7 @@
 
 			.box {
 				padding: 3px;
-				font-size: 24px;
+				font-size: 24.01px;
 				line-height: 24px;
 				height: 51px;
 			}
@@ -54,7 +54,7 @@
 
 			.aligner {
 				display: inline-block;
-				font-size: 36px;
+				font-size: 36.01px;
 				line-height: 36px;
 				padding-bottom: 6px;
 			}
@@ -116,7 +116,7 @@
 			}
 
 			.name .header {
-				font-size: 23.99999999px; /* seriously -_- */
+				font-size: 24.01px; /* seriously -_- */
 				padding-top: 6px;
 				padding-bottom: 9px;
 			}
@@ -189,8 +189,8 @@
 			.runways {
 				display: flex;
 				justify-content: space-between;
-				color: #aaa;
-				font-size: 15.99999999px;
+				color: #888;
+				font-size: 16.01px;
 				top: 916px;
 				padding: 0 3px;
 				--offset: 578px;
@@ -207,7 +207,7 @@
 				text-align: right;
 			}
 
-			.runways .reached {
+			.runways .active {
 				color: #fff;
 			}
 
@@ -224,14 +224,14 @@
 
 			.player_vid {
 				position: absolute;
-				top: 66px;
-				width: 577px;
-				height: 783px;
+				top: -16px;
+				width: 620px;
+				height: 938px;
 				padding: 0;
 				object-fit: cover;
 				/* background: yellow; /**/
 
-				--offset: 377px;
+				--offset: 340px;
 				right: var(--offset);
 			}
 
@@ -242,7 +242,7 @@
 				height: 686px;
 				background-color: #000;
 				color: #f8e889;
-				font-size: 16px;
+				font-size: 16.01px;
 
 				display: flex;
 				align-items: center;
@@ -418,24 +418,27 @@
 				const super_onGameStart = player.onGameStart;
 
 				player.onLevel = frame => {
-					switch (frame.raw.level) {
-						case 19:
-						case 29:
-						case 39:
+					[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+						elmt => {
+							elmt.classList.remove('active');
+						}
+					);
+
+					for (const threshold_level of [19, 29, 39]) {
+						if (frame.raw.level < threshold_level) {
 							[
 								...player.dom.runways_box.querySelectorAll(
-									`.lv${frame.raw.level}`
+									`.lv${threshold_level}`
 								),
 							].forEach(elmt => {
-								elmt.classList.add('reached');
+								elmt.classList.add('active');
 							});
-							[
-								...player.dom.runways_box.querySelectorAll(
-									`.label .lv${frame.raw.level}`
-								),
-							].forEach(elmt => {
-								elmt.textContent = `LV${frame.raw.level} SCORE:`;
-							});
+							break;
+						} else if (frame.raw.level === threshold_level) {
+							player.dom.runways_box.querySelector(
+								`.label .lv${threshold_level}`
+							).textContent = `LV${frame.raw.level} SCORE:`;
+						}
 					}
 				};
 
@@ -449,18 +452,21 @@
 				player.onGameStart = () => {
 					super_onGameStart.call(player);
 
-					[...player.dom.runways_box.querySelectorAll('.reached')]
-						.forEach(elmt => {
-							elmt.classList.remove('reached');
-						})
-						[(19, 29, 39)].forEach(level => {
-							player.dom.runways_box.querySelector(
-								`.label .lv${level}`
-							).textContent = `LV${frame.raw.level} RUNWAY:`;
-							player.dom.runways_box.querySelector(
-								`.value .lv${level}`
-							).textContent = `0`;
-						});
+					[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+						elmt => {
+							elmt.classList.remove('active');
+						}
+					);
+
+					[(19, 29, 39)].forEach(level => {
+						player.dom.runways_box.querySelector(
+							`.label .lv${level}`
+						).textContent = `LV${level} RUNWAY:`;
+
+						player.dom.runways_box.querySelector(
+							`.value .lv${level}`
+						).textContent = `0`;
+					});
 
 					/*
 					player.dom.runway_tr_box.querySelector('.header').textContent =
