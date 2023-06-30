@@ -241,11 +241,24 @@ export default class BaseGame {
 				current: frame.score,
 				tr_runway:
 					frame.score + getRunway(frame.level, RUNWAY.TRANSITION, frame.lines),
-				runway: frame.score + getRunway(frame.level, RUNWAY.GAME, frame.lines),
-				projection:
-					frame.score + getRunway(frame.level, RUNWAY.GAME, frame.lines),
 				normalized: 0,
 				transition: null,
+
+				runways: {
+					LV19: frame.score + getRunway(frame.level, RUNWAY.LV19, frame.lines),
+					LV29: frame.score + getRunway(frame.level, RUNWAY.LV29, frame.lines),
+					LV39: frame.score + getRunway(frame.level, RUNWAY.LV39, frame.lines),
+				},
+				projections: {
+					LV19: frame.score + getRunway(frame.level, RUNWAY.LV19, frame.lines),
+					LV29: frame.score + getRunway(frame.level, RUNWAY.LV29, frame.lines),
+					LV39: frame.score + getRunway(frame.level, RUNWAY.LV39, frame.lines),
+				},
+
+				// for comaptibility with old layouts
+				runway: frame.score + getRunway(frame.level, RUNWAY.LV29, frame.lines),
+				projection:
+					frame.score + getRunway(frame.level, RUNWAY.LV29, frame.lines),
 			},
 
 			i_droughts: {
@@ -340,11 +353,23 @@ export default class BaseGame {
 
 		const death_score = this.data.score.current;
 
-		this.data.score.runway = death_score;
-		this.data.score.projection = death_score;
+		this.data.score.runway = this.data.score.projection = death_score;
 
 		if (!this.data.score.transition) {
 			this.data.score.tr_runway = death_score;
+		}
+
+		// we cannot just assign to all thresholds, because the thresholds may have been passed and are already locked
+		// same behaviour as for the transition
+		this.data.score.runways = { ...this.data.score.runways };
+		this.data.score.projections = { ...this.data.score.projections };
+
+		// pin the runway to whatever the final score is
+		for (const threshold_level of [39, 29, 19]) {
+			if (this.data.level >= threshold_level) break;
+
+			this.data.score.projections[`LV${threshold_level}`] =
+				this.data.score.runways[`LV${threshold_level}`] = death_score;
 		}
 
 		const last_point_evt = peek(last_frame?.points || []);
@@ -552,10 +577,27 @@ export default class BaseGame {
 				events.level = true;
 				this.data.level = data.level;
 
+				// pin transition runway to actual transition value
 				if (this.data.score.transition === null) {
 					events.transition = true;
 					this.data.score.transition = real_score;
 					this.data.score.tr_runway = real_score;
+				}
+
+				// pin crossing threshold runways to actual values when they got there
+				for (const threshold_level of [19, 29, 39]) {
+					if (data.level != threshold_level) continue;
+
+					// make a copy of the objects to avoid polluting the previous data points
+					this.data.score.runways = { ...this.data.score.runways };
+					this.data.score.projections = { ...this.data.score.projections };
+
+					// warning: encapsulation is broken here, we know the format of the threshold types
+					this.data.score.runways[`LV${threshold_level}`] = real_score;
+					this.data.score.projections[`LV${threshold_level}`] = real_score;
+
+					// only one level can match, no need to iterate further
+					break;
 				}
 			} else if (this.data.score.transition === null) {
 				this.data.score.tr_runway =
@@ -574,11 +616,37 @@ export default class BaseGame {
 
 		// update score
 		this.data.score.current = real_score;
-		this.data.score.runway =
-			real_score + getRunway(this.data.start_level, RUNWAY.GAME, data.lines);
-		this.data.score.projection = Math.round(
-			(this.data.score.runway * this.data.running_stats.efficiency) / 300
-		);
+
+		const efficiency_ratio = this.data.running_stats.efficiency / 300;
+
+		// make copies of all the runways and projections
+		this.data.score.runways = { ...this.data.score.runways };
+		this.data.score.projections = { ...this.data.score.projections };
+
+		for (const threshold_level of [19, 29, 39]) {
+			if (this.data.level >= threshold_level) continue;
+
+			// current level is below the threshold
+			const runway =
+				real_score +
+				getRunway(
+					this.data.start_level,
+					RUNWAY[`LV${threshold_level}`],
+					data.lines
+				);
+			this.data.score.runways[`LV${threshold_level}`] = runway;
+			this.data.score.projections[`LV${threshold_level}`] = Math.round(
+				runway * efficiency_ratio
+			);
+		}
+
+		// compatibility with old layouts
+		if (this.data.level < 29) {
+			this.data.score.runway = this.data.score.runways.LV29;
+			this.data.score.projection = this.data.score.projections.LV29;
+		} else {
+			this.data.score.runway = this.data.score.projection = real_score;
+		}
 
 		// record point event with snapshot of all data
 		this._recordPointEvent(cleared);

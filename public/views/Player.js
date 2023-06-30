@@ -168,6 +168,9 @@ const DEFAULT_DOM_REFS = {
 	score: DOM_DEV_NULL,
 	runway_tr: DOM_DEV_NULL,
 	runway_game: DOM_DEV_NULL,
+	runway_lv19: DOM_DEV_NULL,
+	runway_lv29: DOM_DEV_NULL,
+	runway_lv39: DOM_DEV_NULL,
 	projection: DOM_DEV_NULL,
 	level: DOM_DEV_NULL,
 	lines: DOM_DEV_NULL,
@@ -466,7 +469,7 @@ export default class Player {
 			const big_nestrischamps_logo = document.createElement('img');
 			big_nestrischamps_logo.classList.add('logo');
 			big_nestrischamps_logo.src =
-				this.options.field_pixel_size <= 4
+				this.options.field_pixel_size < 4
 					? '/brand/logo.v3.white.2x.png'
 					: '/brand/logo.v3.white.3x.png';
 
@@ -791,6 +794,19 @@ export default class Player {
 
 		this.dom.runway_game.textContent = this.options.format_score(
 			point_evt.score.runway,
+			7
+		);
+
+		this.dom.runway_lv19.textContent = this.options.format_score(
+			point_evt.score.runways.LV19,
+			6
+		);
+		this.dom.runway_lv29.textContent = this.options.format_score(
+			point_evt.score.runways.LV29,
+			7
+		);
+		this.dom.runway_lv39.textContent = this.options.format_score(
+			point_evt.score.runways.LV39,
 			7
 		);
 		this.dom.projection.textContent = this.options.format_score(

@@ -109,8 +109,10 @@ export const PIECE_COLORS = {
 };
 
 export const RUNWAY = {
-	GAME: 0,
-	TRANSITION: 1,
+	TRANSITION: 'TRANSITION',
+	LV19: 'LV19',
+	LV29: 'LV29',
+	LV39: 'LV39',
 };
 
 export const RUNWAYS = _getRunways();
@@ -123,19 +125,32 @@ function _getRunways() {
 	for (let [start_level, transition_lines] of Object.entries(TRANSITIONS)) {
 		start_level = parseInt(start_level, 10);
 
-		const kill_screen_lines = 290 - ((start_level + 1) * 10 - transition_lines);
+		const thresholds_lines = {
+			[RUNWAY.TRANSITION]: transition_lines,
+		};
 
-		runways[start_level] = _getRunwayForLevel(
-			start_level,
-			transition_lines,
-			kill_screen_lines
-		);
+		if (start_level < 19) {
+			thresholds_lines[RUNWAY.LV19] =
+				190 - ((start_level + 1) * 10 - transition_lines);
+		}
+		if (start_level < 29) {
+			thresholds_lines[RUNWAY.LV29] =
+				290 - ((start_level + 1) * 10 - transition_lines);
+		}
+		if (start_level < 39) {
+			thresholds_lines[RUNWAY.LV39] =
+				390 - ((start_level + 1) * 10 - transition_lines);
+		}
+
+		runways[start_level] = _getRunwayForLevel(start_level, thresholds_lines);
 	}
 
 	return runways;
 }
 
-function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
+function _getRunwayForLevel(start_level, thresholds_lines) {
+	const transition_lines = thresholds_lines[RUNWAY.TRANSITION];
+
 	// one time generation of score runways by line and best line clear strategy
 
 	function clearScore(current_lines, clear) {
@@ -153,59 +168,41 @@ function _getRunwayForLevel(start_level, transition_lines, kill_screen_lines) {
 		return (level + 1) * SCORE_BASES[clear];
 	}
 
-	const game_runway = {
-		[kill_screen_lines + 0]: 0,
-		[kill_screen_lines + 1]: 0,
-		[kill_screen_lines + 2]: 0,
-		[kill_screen_lines + 3]: 0,
-	};
+	const runways = {};
 
-	for (let lines = kill_screen_lines; lines--; ) {
-		let best_score = 0;
+	for (let [threshold_type, target_lines] of Object.entries(thresholds_lines)) {
+		const runway = {
+			[target_lines + 0]: 0,
+			[target_lines + 1]: 0,
+			[target_lines + 2]: 0,
+			[target_lines + 3]: 0,
+		};
 
-		for (let clear = 4; clear > 0; clear--) {
-			const new_score = clearScore(lines, clear) + game_runway[clear + lines];
+		for (let lines = target_lines; lines--; ) {
+			let best_score = 0;
 
-			if (new_score > best_score) {
-				best_score = new_score;
+			for (let clear = 4; clear > 0; clear--) {
+				const new_score = clearScore(lines, clear) + runway[clear + lines];
+
+				if (new_score > best_score) {
+					best_score = new_score;
+				}
 			}
+
+			runway[lines] = best_score;
 		}
 
-		game_runway[lines] = best_score;
+		runways[threshold_type] = runway;
 	}
 
-	const transition_runway = {
-		[transition_lines + 0]: 0,
-		[transition_lines + 1]: 0,
-		[transition_lines + 2]: 0,
-		[transition_lines + 3]: 0,
-	};
-
-	for (let lines = transition_lines; lines--; ) {
-		let best_score = 0;
-
-		for (let clear = 4; clear > 0; clear--) {
-			const new_score =
-				clearScore(lines, clear) + transition_runway[clear + lines];
-
-			if (new_score > best_score) {
-				best_score = new_score;
-			}
-		}
-
-		transition_runway[lines] = best_score;
-	}
-
-	return {
-		[RUNWAY.GAME]: game_runway,
-		[RUNWAY.TRANSITION]: transition_runway,
-	};
+	return runways;
 }
 
 export function getRunway(start_level, type, lines) {
 	try {
 		return RUNWAYS[start_level][type][lines] || 0;
 	} catch (err) {
+		console.warn(`Runway unavailable ${[start_level, type, lines]}`);
 		return 0;
 	}
 }
