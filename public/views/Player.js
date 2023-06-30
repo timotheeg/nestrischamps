@@ -631,7 +631,7 @@ export default class Player {
 		if (!this.dom.flag) return;
 
 		this.dom.flag.innerHTML = code
-			? `<img id="country_flag" src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg">`
+			? `<img id="country_flag" src="https://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg">`
 			: '';
 	}
 
