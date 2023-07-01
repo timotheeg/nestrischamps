@@ -8,10 +8,10 @@
 				height: 1080px;
 			}
 
-			#playing_fields {
+			.match {
 				position: absolute;
 				left: 960px;
-				top: 16px;
+				top: 0;
 			}
 
 			.box {
@@ -35,11 +35,7 @@
 			.score.main {
 				width: 310px;
 				height: 162px;
-				top: -16px;
-			}
-
-			.runway.game {
-				height: 137px;
+				top: 0;
 			}
 
 			.score.main .header {
@@ -69,7 +65,7 @@
 
 			.lines,
 			.next_piece {
-				top: 173px;
+				top: 189px;
 				width: 141px;
 				height: 56px;
 			}
@@ -90,33 +86,32 @@
 				padding: 3px;
 				width: 316px;
 				height: 636px;
-				top: 259px;
+				top: 275px;
 			}
 
 			.name,
 			.tetris_rate,
 			.drought,
-			.level,
-			.runway.transition {
+			.level {
 				width: 88px;
 				--offset: 377px;
 				right: var(--offset);
 			}
 
 			.name,
-			.flag {
-				top: -16px;
+			.flag,
+			.runways {
+				top: 932px;
 			}
 
 			.name {
 				--offset: 0;
-				top: 916px;
 				width: 425px;
 				height: 64px;
 			}
 
 			.name .header {
-				font-size: 24.01px; /* seriously -_- */
+				font-size: 24.01px; /* sad -_- */
 				padding-top: 6px;
 				padding-bottom: 9px;
 			}
@@ -141,16 +136,12 @@
 
 			.tetris_rate,
 			.drought {
-				top: 833px;
+				top: 849px;
 				height: 54px;
 			}
 
 			.level {
-				top: 752px;
-			}
-
-			.runway.game {
-				top: 843px;
+				top: 768px;
 			}
 
 			.drought {
@@ -162,23 +153,7 @@
 				display: block;
 			}
 
-			.runway {
-				display: none;
-				--offset: 492px;
-				right: var(--offset);
-			}
-
-			.runway.transition {
-				width: 248px;
-				top: 765px;
-			}
-
-			.runway.game {
-				width: 432px;
-			}
-
 			.flag {
-				top: 916px;
 				padding: 0;
 				--offset: 452px;
 				right: var(--offset);
@@ -191,7 +166,6 @@
 				justify-content: space-between;
 				color: #888;
 				font-size: 16.01px;
-				top: 916px;
 				padding: 0 3px;
 				--offset: 578px;
 				right: var(--offset);
@@ -235,21 +209,6 @@
 				right: var(--offset);
 			}
 
-			.divider {
-				position: absolute;
-				left: -6px;
-				width: 12px;
-				height: 686px;
-				background-color: #000;
-				color: #f8e889;
-				font-size: 16.01px;
-
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				text-align: center;
-			}
-
 			#ticker {
 				position: absolute;
 				width: 1920px;
@@ -257,6 +216,95 @@
 				top: 1032px;
 				/* background: orange;
 				opacity: 0.5; /**/
+			}
+
+			.match.small {
+				transform: scale(0.7747747747747747); /* (1080-48)/666/2 */
+			}
+			#match2.small {
+				top: 516px;
+			}
+
+			.match.small .runways {
+				display: none;
+			}
+
+			.match.small .score,
+			.match.small .name,
+			.match.small .level,
+			.match.small .lines,
+			.match.small .next_piece {
+				--offset: 337px;
+			}
+
+			.match.small .next_piece {
+				z-index: 4;
+				top: 135px;
+			}
+
+			.match.small .lines {
+				z-index: 3;
+				width: 141px;
+				top: 221px;
+			}
+
+			.match.small .level {
+				z-index: 2;
+				top: 307px;
+			}
+
+			.match.small .tetris_rate,
+			.match.small .drought {
+				top: 388px;
+				z-index: 1;
+			}
+
+			.match.small .score {
+				width: 268px;
+				height: 108px;
+			}
+
+			.match.small .score .tetris_diff {
+				visibility: hidden;
+			}
+
+			.match.small .score .header {
+				padding-bottom: 12px;
+			}
+
+			.match.small .score .aligner {
+				font-size: 30.01px;
+				line-height: 30px;
+			}
+
+			.match.small .board {
+				top: 0;
+				z-index: 8;
+			}
+			.match.small .score {
+				z-index: 7;
+			}
+			.match.small .flag,
+			.match.small .name {
+				z-index: 6;
+				top: 0;
+			}
+			.match.small .name {
+				width: 446px;
+				--offset: 632px;
+			}
+			.match.small .flag {
+				--offset: 1105px;
+			}
+			.match.small .player_vid {
+				top: 94px;
+				width: 900px;
+				height: 572px;
+				--offset: 339px;
+			}
+
+			.match.small .p2 > * {
+				left: var(--offset);
 			}
 		</style>
 	</head>
@@ -276,7 +324,9 @@
 						<div class="main">0&#x202F;000&#x202F;000</div>
 						<div class="diff winning">0&#x202F;000&#x202F;000</div>
 					</div>
-					<div><span class="tetris_diff">0.00</span>&#x202F;TETRISES</div>
+					<div class="tetris_diff">
+						<span class="value">0.00</span>&#x202F;TETRISES
+					</div>
 				</div>
 
 				<div class="box lines">
@@ -301,11 +351,6 @@
 					<div class="value">99</div>
 				</div>
 
-				<div class="box runway transition">
-					<div class="header">TR RUNWAY</div>
-					<div class="content">000&#x202F;000</div>
-				</div>
-
 				<div class="box runways">
 					<div class="label">
 						<div class="lv19">LV19 RUNWAY:</div>
@@ -319,15 +364,6 @@
 					</div>
 				</div>
 
-				<div class="box score runway game">
-					<div class="header">LV29 RUNWAY</div>
-					<div class="aligner">
-						<div class="main">0&#x202F;000&#x202F;000</div>
-						<div class="diff">0&#x202F;000&#x202F;000</div>
-					</div>
-					<div><span class="tetris_diff">0.00</span>&#x202F;TETRISES</div>
-				</div>
-
 				<div class="box board"></div>
 
 				<div class="box flag"></div>
@@ -335,16 +371,18 @@
 		</template>
 
 		<div id="stream_bg">
+			<div id="match1" class="match small"></div>
+			<div id="match2" class="match small"></div>
+
 			<div id="ticker"></div>
+
 			<div id="playing_fields">
 				<!-- divider -->
-				<div class="divider"></div>
 
 				<!-- Player 1 -->
 				<!-- Player 2 -->
 			</div>
 			<!-- End Playing Fields -->
-			<div class="ticker"></div>
 		</div>
 		<!-- End Stream BG -->
 
@@ -353,7 +391,9 @@
 		<script>
 			// custom view parameters which will be passed in the websocket URI
 			const view_meta = new URLSearchParams({
-				video: '1280x720', // urgh, so big for so much space wasted :(
+				video: '1920x1080', // urgh, so big for so much space wasted :(
+				concurrent_2_matches: true,
+				players: 4,
 			});
 		</script>
 		<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
@@ -365,119 +405,183 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
-			const players_node = document.querySelector('#playing_fields');
 			const player_template = document.getElementById('player');
-			const players = [1, 2].map(num => {
-				const player_fragment = document.importNode(
-					player_template.content,
-					true
-				);
-				const player_node = player_fragment.querySelector('.player');
+			const players = [];
 
-				player_node.classList.add(`p${num}`);
-				players_node.appendChild(player_node);
+			[1, 2].forEach(match_num => {
+				const match_node = document.getElementById(`match${match_num}`);
 
-				const player = new CTMCompetitionPlayer(
-					{
-						name: player_node.querySelector(`.name .header`),
-						score: player_node.querySelector(`.score .main`),
-						level: player_node.querySelector(`.level .content`),
-						lines: player_node.querySelector(`.lines .content`),
-						trt: player_node.querySelector(`.tetris_rate .content`),
-						preview: player_node.querySelector(`.next_piece`),
-						field: player_node.querySelector(`.board`),
-						drought: player_node.querySelector(`.drought .value`),
+				[1, 2].forEach((player_num, player_idx) => {
+					const player_fragment = document.importNode(
+						player_template.content,
+						true
+					);
+					const player_node = player_fragment.querySelector('.player');
 
-						runway_lv19: player_node.querySelector(`.runways .value .lv19`),
-						runway_lv29: player_node.querySelector(`.runways .value .lv29`),
-						runway_lv39: player_node.querySelector(`.runways .value .lv39`),
+					player_node.classList.add(`p${player_num}`);
+					match_node.appendChild(player_node);
 
-						diff: player_node.querySelector(`.score .diff`),
-						t_diff: player_node.querySelector(`.score .tetris_diff`),
+					const player = new CTMCompetitionPlayer(
+						{
+							name: player_node.querySelector(`.name .header`),
+							score: player_node.querySelector(`.score .main`),
+							level: player_node.querySelector(`.level .content`),
+							lines: player_node.querySelector(`.lines .content`),
+							trt: player_node.querySelector(`.tetris_rate .content`),
+							preview: player_node.querySelector(`.next_piece`),
+							field: player_node.querySelector(`.board`),
+							drought: player_node.querySelector(`.drought .value`),
 
-						runways_box: player_node.querySelector(`.runways`),
+							runway_lv19: player_node.querySelector(`.runways .value .lv19`),
+							runway_lv29: player_node.querySelector(`.runways .value .lv29`),
+							runway_lv39: player_node.querySelector(`.runways .value .lv39`),
 
-						hearts: player_node.querySelector(`.name .content`),
-						drought_box: player_node.querySelector(`.drought`),
-						video: player_node.querySelector(`.player_vid`),
-						flag: player_node.querySelector(`.flag`),
-					},
-					{
-						field_pixel_size: 4,
-						running_trt_dot_size: 5,
-						preview_pixel_size: 3.5,
-						format_score: v => readableScoreFomatter(v),
-						stereo: translate([1, 2], [-1, 1], num),
-					}
-				);
+							diff: player_node.querySelector(`.score .diff`),
+							t_diff: player_node.querySelector(`.score .tetris_diff .value`),
 
-				// Undo the CTM logic of hiding the level and preview
-				delete player.onGameOver;
+							runways_box: player_node.querySelector(`.runways`),
 
-				// Ugly custom logic for game start because we only have callbacks, no events
-				const super_onGameStart = player.onGameStart;
-
-				player.onLevel = frame => {
-					[...player.dom.runways_box.querySelectorAll('.active')].forEach(
-						elmt => {
-							elmt.classList.remove('active');
+							hearts: player_node.querySelector(`.name .content`),
+							drought_box: player_node.querySelector(`.drought`),
+							video: player_node.querySelector(`.player_vid`),
+							flag: player_node.querySelector(`.flag`),
+						},
+						{
+							field_pixel_size: 4,
+							running_trt_dot_size: 5,
+							preview_pixel_size: 3.5,
+							format_score: v => readableScoreFomatter(v),
+							stereo: translate([1, 2], [-1, 1], player_num),
 						}
 					);
 
-					for (const threshold_level of [19, 29, 39]) {
-						if (frame.raw.level < threshold_level) {
-							[
-								...player.dom.runways_box.querySelectorAll(
-									`.lv${threshold_level}`
-								),
-							].forEach(elmt => {
-								elmt.classList.add('active');
-							});
-							break;
-						} else if (frame.raw.level === threshold_level) {
+					// Undo the CTM logic of hiding the level and preview
+					delete player.onGameOver;
+
+					// Ugly custom logic for game start because we only have callbacks, no events
+					const super_onGameStart = player.onGameStart;
+
+					player.onLevel = frame => {
+						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+							elmt => {
+								elmt.classList.remove('active');
+							}
+						);
+
+						for (const threshold_level of [19, 29, 39]) {
+							if (frame.raw.level < threshold_level) {
+								[
+									...player.dom.runways_box.querySelectorAll(
+										`.lv${threshold_level}`
+									),
+								].forEach(elmt => {
+									elmt.classList.add('active');
+								});
+								break;
+							} else if (frame.raw.level === threshold_level) {
+								player.dom.runways_box.querySelector(
+									`.label .lv${threshold_level}`
+								).textContent = `LV${frame.raw.level} SCORE:`;
+							}
+						}
+					};
+
+					player.onTransition = () => {
+						/*
+                        player.dom.runway_tr_box.querySelector('.header').textContent =
+                            'TRANSITION';
+                        /**/
+					};
+
+					player.onGameStart = () => {
+						super_onGameStart.call(player);
+
+						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+							elmt => {
+								elmt.classList.remove('active');
+							}
+						);
+
+						[(19, 29, 39)].forEach(level => {
 							player.dom.runways_box.querySelector(
-								`.label .lv${threshold_level}`
-							).textContent = `LV${frame.raw.level} SCORE:`;
-						}
-					}
-				};
+								`.label .lv${level}`
+							).textContent = `LV${level} RUNWAY:`;
 
-				player.onTransition = () => {
-					/*
-					player.dom.runway_tr_box.querySelector('.header').textContent =
-						'TRANSITION';
-                    /**/
-				};
+							player.dom.runways_box.querySelector(
+								`.value .lv${level}`
+							).textContent = `0`;
+						});
 
-				player.onGameStart = () => {
-					super_onGameStart.call(player);
+						/*
+                        player.dom.runway_tr_box.querySelector('.header').textContent =
+                            'TR RUNWAY';
+                        /**/
+					};
 
-					[...player.dom.runways_box.querySelectorAll('.active')].forEach(
-						elmt => {
-							elmt.classList.remove('active');
-						}
-					);
-
-					[(19, 29, 39)].forEach(level => {
-						player.dom.runways_box.querySelector(
-							`.label .lv${level}`
-						).textContent = `LV${level} RUNWAY:`;
-
-						player.dom.runways_box.querySelector(
-							`.value .lv${level}`
-						).textContent = `0`;
-					});
-
-					/*
-					player.dom.runway_tr_box.querySelector('.header').textContent =
-						'TR RUNWAY';
-                    /**/
-				};
-
-				return player;
+					players.push(player);
+				});
 			});
 
 			const competition = new Competition(players);
+
+			competition.API.setMatch = function (match_idx) {
+				if (match_idx !== 0 && match_idx !== 1) {
+					document.querySelectorAll('.match').forEach(match_node => {
+						match_node.classList.add('small');
+						match_node.hidden = false;
+					});
+
+					return;
+				}
+
+				let show_match, hide_match;
+
+				if (match_idx === 0) {
+					show_match = document.querySelector('#match1');
+					hide_match = document.querySelector('#match2');
+				} else {
+					show_match = document.querySelector('#match2');
+					hide_match = document.querySelector('#match1');
+				}
+
+				show_match.classList.remove('small');
+				hide_match.hidden = true;
+				show_match.hidden = false;
+			};
+
+			competition.API.showProfileCard = function (visible, match_idx) {
+				players
+					.slice(2 * match_idx, 2 * match_idx + 2)
+					.forEach(player => player.showProfileCard(visible));
+			};
+
+			competition.API.setWinner = function (player_idx) {
+				const match_index = player_idx < 2 ? 0 : 1;
+
+				players
+					.slice(2 * match_index, 2 * match_index + 2)
+					.forEach(player => player.showLoserFrame());
+
+				players[player_idx].playWinnerAnimation();
+			};
+
+			players.forEach((player, player_idx) => {
+				player.onScore = () => {
+					const match_index = player_idx < 2 ? 0 : 1;
+					const match_players = players.slice(
+						2 * match_index,
+						2 * match_index + 2
+					);
+
+					competition.computeScoreDifferentials(match_players);
+				};
+			});
+
+			// Layout starts 1 match view
+			competition.API.setMatch(0);
+
+			// expose API into window for debugging
+			window._NTC_API = competition.API;
 		</script>
 	</body>
 </html>
