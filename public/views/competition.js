@@ -256,7 +256,7 @@ export default class Competition {
 			this.view_meta = new URLSearchParams({});
 		}
 
-		players.forEach(player => {
+		_players.forEach(player => {
 			player.onScore = this._onPlayerScoreChanged;
 		});
 
@@ -278,6 +278,26 @@ export default class Competition {
 			}
 		};
 
+		// in competitions layout, we typically show score diff, tetris diff, but also runway and projection diffs
+		// to save processing time, we check what the layout supports
+		// i.e. if there's no projection or no runway, no need to sort players on those and display their content
+		this.diffSetters = [{ getter: 'getScore', setter: 'setDiff' }];
+
+		if (_players[0]?.dom.runway_diff !== DOM_DEV_NULL) {
+			this.diffSetters.push({
+				getter: 'getGameRunwayScore',
+				setter: 'setGameRunwayDiff',
+			});
+		}
+
+		if (_players[0]?.dom.projection_diff !== DOM_DEV_NULL) {
+			this.diffSetters.push({
+				getter: 'getProjection',
+				setter: 'setProjectionDiff',
+			});
+		}
+
+		// if video is enabled for the layout, we need to set up the layput to do the handshake
 		if (
 			this.has_video &&
 			Peer &&
@@ -347,11 +367,7 @@ export default class Competition {
 		const winner_slice_ratio = 1 / (_players.length - 1);
 
 		// score change, we need to update all the diffs
-		[
-			{ getter: 'getScore', setter: 'setDiff' },
-			{ getter: 'getGameRunwayScore', setter: 'setGameRunwayDiff' },
-			{ getter: 'getProjection', setter: 'setProjectionDiff' },
-		].forEach(({ getter, setter }) => {
+		this.diffSetters.forEach(({ getter, setter }) => {
 			const sorted_players = getSortedPlayers(_players, getter);
 
 			// handle score diff between player 0 and 1
