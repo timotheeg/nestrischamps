@@ -21,6 +21,8 @@ export async function getReplayGame(gameid) {
 	const version = buffer[0] >> 5 || 1;
 	const frame_size = BinaryFrame.FRAME_SIZE_BY_VERSION[version];
 
+	console.log(buffer[0].toString(2).padStart(8, '0'), version, frame_size);
+
 	const game = new BaseGame({});
 	game._gameid = gameid; // game has a client id, this records the server id too, can be used later on
 

@@ -38,7 +38,7 @@ function runDriver() {
 		console.log(`import.meta: ${import.meta.url}`);
 	}
 
-	const workers = [1 /* 2, 3, 4 */].map(host_num => {
+	const workers = [1, 2, 3, 4].map(host_num => {
 		return new Worker(new URL(import.meta.url), {
 			workerData: {
 				host_num,
@@ -184,19 +184,59 @@ async function runWorker() {
 
 	const { host_num, server_domain } = workerData;
 
+	// add 6 players to make 8 in the room
+	const admin_commands = [
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['removePlayer', 0],
+		['addPlayer'],
+		['addPlayer'],
+		['addPlayer'],
+		['addPlayer'],
+		['addPlayer'],
+		['addPlayer'],
+		['addPlayer'],
+		['addPlayer'],
+	];
+
 	// all player connects
 	console.log([host_num, server_domain]);
 
-	for (let player_idx = host_num * 8; player_idx-- > (host_num - 1) * 8; ) {
-		new Player(server_domain, host_num, player_idx + 1);
+	for (let player_idx = 8; player_idx--; ) {
+		const player_id = (host_num - 1) * 8 + player_idx + 1;
+		new Player(server_domain, host_num, player_id);
+
+		admin_commands.push(['setPlayer', player_idx, `${player_id}`]);
+
 		await new Promise(resolve => setTimeout(resolve, 16.6666666666 * 4));
 	}
 
-	// Admin sets up the player mapping
-	// TODO:
-	// 1. connect admin to ws by secret
-	// 2. add 6 players to make 8
-	// 3. set player 1 to 8 to map worker setting
+	await new Promise(resolve => setTimeout(resolve, 5000));
+
+	const admin_secret = `PLAYER${host_num}`;
+	const admin_ws_url = `ws://${server_domain}/ws/room/admin/${admin_secret}`;
+
+	const admin_ws = new WebSocket(admin_ws_url, { perMessageDeflate: false });
+
+	admin_ws.on('open', () => {
+		console.log(`Admin WS OPEN`);
+		// we blast the room setup like pigs! with no regards for work time
+		setInterval(() => {
+			const command = admin_commands.shift();
+			if (command) {
+				admin_ws.send(JSON.stringify(command));
+			}
+		}, 100);
+	});
+	admin_ws.on('error', console.error);
+	admin_ws.on('message', data => {
+		// console.log(`${this.identifier} MESSAGE ${data}`);
+	});
 }
 
 if (isMainThread) {
