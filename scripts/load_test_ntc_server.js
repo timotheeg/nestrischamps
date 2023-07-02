@@ -3,7 +3,8 @@ import { WebSocket } from 'ws';
 import BinaryFrame from '../public/js/BinaryFrame.js';
 import BaseGame from '../public/views/BaseGame.js';
 import { peek, shuffle } from '../public/views/utils.js';
-import { Worker, isMainThread, workerData } from 'worker_threads';
+// import { Worker, isMainThread, workerData } from 'worker_threads';
+import cluster from 'node:cluster';
 import zlib from 'zlib';
 
 // Behaviour:
@@ -40,12 +41,18 @@ function runDriver() {
 	}
 
 	const workers = [1, 2, 3, 4].map(host_num => {
+		cluster.fork({
+			host_num,
+			server_domain,
+		});
+		/*
 		return new Worker(new URL(import.meta.url), {
 			workerData: {
 				host_num,
 				server_domain,
 			},
 		});
+        /**/
 	});
 }
 
@@ -159,8 +166,6 @@ class Player {
 }
 
 async function runWorker() {
-	console.log(workerData);
-
 	// load the game files to be reused by all the players
 	for (const filename of localGameFiles) {
 		// super heavy cost at the start to do everything synchronously... but who cares... -_-
@@ -183,7 +188,9 @@ async function runWorker() {
 		console.log(filename, buffer.length, buffer.length / frame_size);
 	}
 
-	const { host_num, server_domain } = workerData;
+	const server_domain = process.env.server_domain;
+	const host_num = parseInt(process.env.host_num, 10);
+	// const { host_num, server_domain } = workerData;
 
 	// add 6 players to make 8 in the room
 	const admin_commands = [
@@ -240,7 +247,8 @@ async function runWorker() {
 	});
 }
 
-if (isMainThread) {
+// if (isMainThread) {
+if (cluster.isPrimary) {
 	runDriver();
 } else {
 	runWorker();
