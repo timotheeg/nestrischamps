@@ -24,6 +24,7 @@ const localGameFiles = [
 	'ericicx_3M.ngf',
 	'gamescout_941k.ngf',
 	'jounce_1.6M.ngf',
+	'yobi_777k.ngf',
 ];
 
 let localGames = [];
