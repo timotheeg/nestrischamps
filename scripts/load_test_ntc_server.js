@@ -1,8 +1,7 @@
 import fs from 'fs';
 import { WebSocket } from 'ws';
 import BinaryFrame from '../public/js/BinaryFrame.js';
-import BaseGame from '../public/views/BaseGame.js';
-import { peek, shuffle } from '../public/views/utils.js';
+import { shuffle } from '../public/views/utils.js';
 // import { Worker, isMainThread, workerData } from 'worker_threads';
 import cluster from 'node:cluster';
 import zlib from 'zlib';
@@ -40,12 +39,13 @@ function runDriver() {
 		console.log(`import.meta: ${import.meta.url}`);
 	}
 
-	const workers = [1, 2, 3, 4].map(host_num => {
+	[1, 2, 3, 4].map(host_num => {
 		cluster.fork({
 			host_num,
 			server_domain,
 		});
 		/*
+	const workers = [1, 2, 3, 4].map(host_num => {
 		return new Worker(new URL(import.meta.url), {
 			workerData: {
 				host_num,
@@ -81,7 +81,7 @@ class Player {
 		});
 		ws.on('error', console.error);
 		ws.on('message', data => {
-			// console.log(`${this.identifier} MESSAGE ${data}`);
+			console.log(`${this.identifier} MESSAGE ${data}`);
 		});
 
 		this.global_local_ctime_start = Date.now();
@@ -243,7 +243,7 @@ async function runWorker() {
 	});
 	admin_ws.on('error', console.error);
 	admin_ws.on('message', data => {
-		// console.log(`${this.identifier} MESSAGE ${data}`);
+		console.log(`ADMIN${host_num} MESSAGE ${data}`);
 	});
 }
 
