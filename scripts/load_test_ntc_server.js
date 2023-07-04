@@ -2,23 +2,12 @@ import fs from 'fs';
 import { WebSocket } from 'ws';
 import BinaryFrame from '../public/js/BinaryFrame.js';
 import { shuffle } from '../public/views/utils.js';
-// import { Worker, isMainThread, workerData } from 'worker_threads';
 import cluster from 'node:cluster';
 import zlib from 'zlib';
 
 // Behaviour:
 // 1 driver process
-// multiple worker process to send d=the data stream
-// because it's io load, actually, subprocesses may not be needed, but good opportunity to learn to use them
-
-// start 4 independent node processes, 8 player per process
-// OR 8 independent processes, 4 player per process?
-
-/*
-input args:
-server domain: e.g. 'nestrischamps.io', '192.168.6.102:5000'
-send games continuously with 10s pause in betwen each game...
-/**/
+// 4 worker processes sending 8x data streams to a room
 
 const localGameFiles = [
 	'ericicx_3M.ngf',
@@ -44,15 +33,6 @@ function runDriver() {
 			host_num,
 			server_domain,
 		});
-		/*
-	const workers = [1, 2, 3, 4].map(host_num => {
-		return new Worker(new URL(import.meta.url), {
-			workerData: {
-				host_num,
-				server_domain,
-			},
-		});
-        /**/
 	});
 }
 
@@ -101,12 +81,6 @@ class Player {
 			this.idx,
 			this.idx + this.game.frame_size
 		);
-		/*
-        console.log(binary_frame);
-        console.log(this.idx);
-        console.log(binary_frame[0].toString(2));
-        console.log(binary_frame[0] >> 5);
-        /**/
 
 		const frame_pojo = BinaryFrame.parse(binary_frame);
 
@@ -175,9 +149,6 @@ async function runWorker() {
 		const version = buffer[0] >> 5;
 		const frame_size = BinaryFrame.FRAME_SIZE_BY_VERSION[version];
 
-		// console.log(buffer[0].toString(2).padStart(8, '0'));
-		// console.log((buffer[0] >> 5));
-
 		localGames.push({
 			frames: buffer,
 			filename,
@@ -192,7 +163,7 @@ async function runWorker() {
 	const host_num = parseInt(process.env.host_num, 10);
 	// const { host_num, server_domain } = workerData;
 
-	// add 6 players to make 8 in the room
+	// reset the room state by dropping all players and adding 8 new players
 	const admin_commands = [
 		['removePlayer', 0],
 		['removePlayer', 0],
@@ -233,13 +204,12 @@ async function runWorker() {
 
 	admin_ws.on('open', () => {
 		console.log(`Admin WS OPEN`);
-		// we blast the room setup like pigs! with no regards for work time
 		setInterval(() => {
 			const command = admin_commands.shift();
 			if (command) {
 				admin_ws.send(JSON.stringify(command));
 			}
-		}, 100);
+		}, 50);
 	});
 	admin_ws.on('error', console.error);
 	admin_ws.on('message', data => {
@@ -247,7 +217,6 @@ async function runWorker() {
 	});
 }
 
-// if (isMainThread) {
 if (cluster.isPrimary) {
 	runDriver();
 } else {
