@@ -157,39 +157,41 @@ export default function init(server, wss) {
 			return;
 		}
 
-		m = request.nc_url.pathname.match(/^\/ws\/room\/admin\/([a-zA-Z0-9-]+)/);
+		if (!process.env.IS_PUBLIC_SERVER) {
+			m = request.nc_url.pathname.match(/^\/ws\/room\/admin\/([a-zA-Z0-9-]+)/);
 
-		request.is_secret_admin = !!m;
+			request.is_secret_admin = !!m;
 
-		if (request.is_secret_admin) {
-			const connecting_user_secret = m[1];
+			if (request.is_secret_admin) {
+				const connecting_user_secret = m[1];
 
-			const connecting_user = await UserDAO.getUserBySecret(
-				connecting_user_secret
-			);
+				const connecting_user = await UserDAO.getUserBySecret(
+					connecting_user_secret
+				);
 
-			if (!connecting_user) {
-				socket.write('HTTP/1.1 404 Connecting User Not Found\r\n\r\n');
-				socket.destroy();
+				if (!connecting_user) {
+					socket.write('HTTP/1.1 404 Connecting User Not Found\r\n\r\n');
+					socket.destroy();
+					return;
+				}
+
+				if (!request.session) {
+					request.session = {};
+				}
+
+				request.session.user = {
+					id: connecting_user.id,
+					login: connecting_user.login,
+					secret: connecting_user.secret,
+					profile_image_url: connecting_user.profile_image_url,
+				};
+
+				wss.handleUpgrade(request, socket, head, function (ws) {
+					wss.emit('connection', ws, request);
+				});
+
 				return;
 			}
-
-			if (!request.session) {
-				request.session = {};
-			}
-
-			request.session.user = {
-				id: connecting_user.id,
-				login: connecting_user.login,
-				secret: connecting_user.secret,
-				profile_image_url: connecting_user.profile_image_url,
-			};
-
-			wss.handleUpgrade(request, socket, head, function (ws) {
-				wss.emit('connection', ws, request);
-			});
-
-			return;
 		}
 
 		// all other connections must be within a session!
