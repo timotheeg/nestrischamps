@@ -289,10 +289,7 @@ export default function init(server, wss) {
 					competition: request.nc_url.searchParams.get('competition') === '1',
 				});
 			}
-		} else if (
-			request.is_secret_admin ||
-			pathname.startsWith('/ws/room/admin')
-		) {
+		} else if (pathname.startsWith('/ws/room/admin')) {
 			console.log(`MatchRoom: ${user.login}: Admin connected`);
 			user.getHostRoom().setAdmin(connection);
 		} else if (pathname.startsWith('/ws/room/producer')) {
