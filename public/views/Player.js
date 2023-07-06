@@ -176,7 +176,7 @@ const DEFAULT_DOM_REFS = {
 	lines: DOM_DEV_NULL,
 	trt: DOM_DEV_NULL,
 	eff: DOM_DEV_NULL,
-	running_trt: DOM_DEV_NULL,
+	// running_trt: DOM_DEV_NULL, // don't default to a node, so we can identify it is not present, and save on processing
 	preview: document.createElement('div'),
 	field: document.createElement('div'),
 	drought: DOM_DEV_NULL,
@@ -291,7 +291,7 @@ export default class Player {
 
 		// set up field and preview canvas
 		['field', 'preview', 'running_trt'].forEach(name => {
-			console.log(name);
+			if (!this.dom[name]) return;
 
 			const styles = getComputedStyle(this.dom[name]);
 			const canvas = document.createElement('canvas');
@@ -363,7 +363,7 @@ export default class Player {
 		this.field_ctx.canvas.style.left = `${field_canva_offset}px`;
 		this.field_bg.appendChild(this.field_ctx.canvas);
 
-		if (this.render_running_trt_rtl) {
+		if (this.render_running_trt_rtl && this.running_trt_ctx) {
 			this.running_trt_ctx.canvas.style.transform = 'scale(-1, 1)';
 		}
 
@@ -570,7 +570,7 @@ export default class Player {
 
 		this.preview_ctx.clear();
 		this.field_ctx.clear();
-		this.running_trt_ctx.clear();
+		this.running_trt_ctx?.clear();
 
 		this.clearTetrisAnimation();
 		this.clearWinnerAnimation();
@@ -1027,6 +1027,8 @@ export default class Player {
 	}
 
 	renderRunningTRT(clear_events) {
+		if (!this.running_trt_ctx) return;
+
 		const ctx = this.running_trt_ctx,
 			current_trt = peek(clear_events).tetris_rate,
 			pixel_size_line_clear = this.options.running_trt_dot_size,

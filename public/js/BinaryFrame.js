@@ -306,7 +306,7 @@ export default class BinaryFrame {
 		const version = f[0] >> 5; // 3 bits with mask 0b11100000
 
 		if (!FRAME_SIZE_BY_VERSION[version]) {
-			throw new Error('Invalid Frame: Version not supported');
+			throw new Error(`Invalid Frame: Version not supported: ${version}`);
 		}
 
 		const normal_size = FRAME_SIZE_BY_VERSION[version];

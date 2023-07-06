@@ -63,7 +63,7 @@ router.get('/recommendation', async (req, res) => {
 
 router.get('/files/games/:id/:bucket/:filename', async (req, res) => {
 	if (
-		!/^[1-9]\d+$/.test(req.params.id) ||
+		!/^[1-9]\d*$/.test(req.params.id) ||
 		!/^[0-9A-Z]+$/.test(req.params.bucket) ||
 		!/^[0-9A-Z]+.ngf$/.test(req.params.filename)
 	) {
@@ -79,7 +79,7 @@ router.get('/files/games/:id/:bucket/:filename', async (req, res) => {
 });
 
 router.get('/games/:id', async (req, res) => {
-	if (!/^[1-9]\d+$/.test(req.params.id)) {
+	if (!/^[1-9]\d*$/.test(req.params.id)) {
 		res.status(400).json({ error: 'Invalid Game id' });
 		return;
 	}
