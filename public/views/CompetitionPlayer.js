@@ -89,10 +89,12 @@ export default class CompetitionPlayer extends Player {
 
 		// quick hack for garage3_diff layout only
 		if (this.dom.diff_box) {
-			this.dom.diff_box.classList[rank_ratio >= 1 ? 'remove' : 'add']('leader');
-			this.dom.diff_box.classList[rank_ratio <= 0 ? 'remove' : 'add'](
-				'laggard'
-			);
+			this.dom.diff_box.classList[
+				diff === 0 || rank_ratio >= 1 ? 'remove' : 'add'
+			]('leader');
+			this.dom.diff_box.classList[
+				diff === 0 || rank_ratio <= 0 ? 'remove' : 'add'
+			]('laggard');
 		}
 	}
 
