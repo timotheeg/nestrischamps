@@ -98,7 +98,7 @@
 								</select>
 							</div>
 								<span class="icon is-medium is-left">
-									<img id="country_flag" src="https://purecatamphetamine.github.io/country-flag-icons/3x2/<%=code%>.svg">
+									<img id="country_flag" src="/vendor/country-flag-icons/3x2/<%=code%>.svg">
 								</span>
 						</div>
 					</div>
@@ -251,7 +251,7 @@ const pb_nodes = {
 profile_nodes.country_code.addEventListener('change', setCountryFlag);
 
 function setCountryFlag() {
-	document.getElementById('country_flag').src = `https://purecatamphetamine.github.io/country-flag-icons/3x2/${profile_nodes.country_code.value}.svg`;
+	document.getElementById('country_flag').src = `/vendor/country-flag-icons/3x2/${profile_nodes.country_code.value}.svg`;
 }
 
 document.getElementById('update_profile_btn').addEventListener('click', async () => {
