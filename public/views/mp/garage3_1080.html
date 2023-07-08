@@ -582,8 +582,15 @@
 				});
 			}
 
-			// Layout starts 1 match view
-			competition.API.setMatch(0);
+			const match_value = QueryString.get('match');
+			if (/^[01]|both$/.test(match_value)) {
+				competition.API.setMatch(
+					match_value == 'both' ? null : parseInt(match_value, 10)
+				);
+			} else {
+				// Layout starts 1 match view
+				competition.API.setMatch(0);
+			}
 
 			// expose API into window for debugging
 			window._NTC_API = competition.API;
