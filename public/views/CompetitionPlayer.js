@@ -6,6 +6,7 @@ import { DOM_DEV_NULL } from '/views/constants.js';
 const DEFAULT_DOM_REFS = {
 	diff: DOM_DEV_NULL,
 	t_diff: DOM_DEV_NULL,
+	diff_box: null,
 	runway_diff: DOM_DEV_NULL,
 	runway_t_diff: DOM_DEV_NULL,
 	projection_diff: DOM_DEV_NULL,
@@ -68,36 +69,54 @@ export default class CompetitionPlayer extends Player {
 	}
 
 	setDiff(diff, t_diff, rank_ratio = 0) {
-		const absDiff = Math.abs(diff);
+		const absolute_diff = Math.abs(diff);
+		const formatted_diff = this.options.format_score(absolute_diff);
+
 		const color = this.getRankColor(rank_ratio);
 
-		this.dom.diff.style.color = color;
-		this.dom.t_diff.style.color = color;
+		if (Array.isArray(this.dom.diff)) {
+			this.dom.diff.forEach(node => {
+				node.style.color = color;
+				node.textContent = formatted_diff;
+			});
+		} else {
+			this.dom.diff.style.color = color;
+			this.dom.diff.textContent = formatted_diff;
+		}
 
-		this.dom.diff.textContent = this.options.format_score(absDiff);
+		this.dom.t_diff.style.color = color;
 		this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
+
+		// quick hack for garage3_diff layout only
+		if (this.dom.diff_box) {
+			this.dom.diff_box.classList[rank_ratio >= 1 ? 'remove' : 'add']('leader');
+			this.dom.diff_box.classList[rank_ratio <= 0 ? 'remove' : 'add'](
+				'laggard'
+			);
+		}
 	}
 
 	setGameRunwayDiff(diff, t_diff, rank_ratio = 0) {
-		const absDiff = Math.abs(diff);
+		const absolute_diff = Math.abs(diff);
 		const color = this.getRankColor(rank_ratio);
 
 		this.dom.runway_diff.style.color = color;
 		this.dom.runway_t_diff.style.color = color;
 
-		this.dom.runway_diff.textContent = this.options.format_score(absDiff);
+		this.dom.runway_diff.textContent = this.options.format_score(absolute_diff);
 		this.dom.runway_t_diff.textContent =
 			this.options.format_tetris_diff(t_diff);
 	}
 
 	setProjectionDiff(diff, t_diff, rank_ratio = 0) {
-		const absDiff = Math.abs(diff);
+		const absolute_diff = Math.abs(diff);
 		const color = this.getRankColor(rank_ratio);
 
 		this.dom.projection_diff.style.color = color;
 		this.dom.projection_t_diff.style.color = color;
 
-		this.dom.projection_diff.textContent = this.options.format_score(absDiff);
+		this.dom.projection_diff.textContent =
+			this.options.format_score(absolute_diff);
 		this.dom.projection_t_diff.textContent =
 			this.options.format_tetris_diff(t_diff);
 	}
