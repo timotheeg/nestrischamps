@@ -32,34 +32,31 @@
 				right: var(--offset);
 			}
 
-			.score.main {
+			.score {
 				width: 310px;
 				height: 162px;
 				top: 0;
 			}
 
-			.score.main .header {
+			.score .header {
 				padding-top: 0px;
 				padding-bottom: 18px;
 			}
 
-			.score.main .aligner {
+			.score .aligner {
 				padding-top: 0px;
 				padding-bottom: 18px;
-			}
 
-			.aligner {
 				display: inline-block;
 				font-size: 36.01px;
 				line-height: 36px;
-				padding-bottom: 6px;
 			}
 
 			.aligner div {
 				text-align: right;
 			}
 
-			.aligner .main {
+			.aligner .value {
 				padding-bottom: 6px;
 			}
 
@@ -318,23 +315,23 @@
 					<div class="content">&#338;&#338;&#338;</div>
 				</div>
 
-				<div class="box score main">
-					<div class="header">SCORE</div>
-					<div class="aligner">
-						<div class="main">0&#x202F;000&#x202F;000</div>
-						<div class="diff winning">0&#x202F;000&#x202F;000</div>
-					</div>
-					<div class="tetris_diff">
-						<span class="value">0.00</span>&#x202F;TETRISES
-					</div>
-				</div>
-
 				<div class="box lines">
 					<div class="header">LINES</div>
 					<div class="content">000</div>
 				</div>
 
 				<div class="box next_piece"></div>
+
+				<div class="box score">
+					<div class="header">SCORE</div>
+					<div class="aligner">
+						<div class="value">0&#x202F;000&#x202F;000</div>
+						<div class="diff winning">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div class="tetris_diff">
+						<span class="value">0.00</span>&#x202F;TETRISES
+					</div>
+				</div>
 
 				<div class="box level">
 					<div class="header">LVL</div>
@@ -424,7 +421,7 @@
 					const player = new CTMCompetitionPlayer(
 						{
 							name: player_node.querySelector(`.name .header`),
-							score: player_node.querySelector(`.score .main`),
+							score: player_node.querySelector(`.score .value`),
 							level: player_node.querySelector(`.level .content`),
 							lines: player_node.querySelector(`.lines .content`),
 							trt: player_node.querySelector(`.tetris_rate .content`),
@@ -528,7 +525,7 @@
 				if (match_idx !== 0 && match_idx !== 1) {
 					document.querySelectorAll('.match').forEach(match_node => {
 						match_node.classList.add('small');
-						match_node.hidden = false;
+						match_node.style.display = null;
 					});
 
 					return;
@@ -545,37 +542,45 @@
 				}
 
 				show_match.classList.remove('small');
-				hide_match.hidden = true;
-				show_match.hidden = false;
+
+				hide_match.style.display = 'none';
+				show_match.style.display = null;
 			};
 
 			competition.API.showProfileCard = function (visible, match_idx) {
-				players
-					.slice(2 * match_idx, 2 * match_idx + 2)
-					.forEach(player => player.showProfileCard(visible));
+				const match_players = players.slice(
+					2 * match_idx,
+					2 * match_idx + 2
+				);
+
+				match_players.forEach(player => player.showProfileCard(visible));
 			};
 
 			competition.API.setWinner = function (player_idx) {
-				const match_index = player_idx < 2 ? 0 : 1;
+				const match_idx = player_idx < 2 ? 0 : 1;
+				const match_players = players.slice(
+					2 * match_idx,
+					2 * match_idx + 2
+				);
 
-				players
-					.slice(2 * match_index, 2 * match_index + 2)
-					.forEach(player => player.showLoserFrame());
+				const winner = players[player_idx];
+				const loser = match_players.find(player => player !== winner);
 
-				players[player_idx].playWinnerAnimation();
+				loser.showLoserFrame();
+				winner.playWinnerAnimation();
 			};
 
-			players.forEach((player, player_idx) => {
-				player.onScore = () => {
-					const match_index = player_idx < 2 ? 0 : 1;
-					const match_players = players.slice(
-						2 * match_index,
-						2 * match_index + 2
-					);
+			for (let player_idx = 0; player_idx < players.length; player_idx += 2) {
+				const match_players = players.slice(player_idx, player_idx + 2);
 
+				const updateMatchStats = () => {
 					competition.computeScoreDifferentials(match_players);
 				};
-			});
+
+				match_players.forEach(player => {
+					player.onScore = updateMatchStats;
+				});
+			}
 
 			// Layout starts 1 match view
 			competition.API.setMatch(0);
