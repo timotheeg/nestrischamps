@@ -39,13 +39,13 @@
 			}
 
 			.score .header {
-				padding-top: 0px;
-				padding-bottom: 18px;
+				padding-top: 2px;
+				padding-bottom: 17px;
 			}
 
 			.score .aligner {
 				padding-top: 0px;
-				padding-bottom: 18px;
+				padding-bottom: 17px;
 
 				display: inline-block;
 				font-size: 36.01px;
@@ -548,20 +548,14 @@
 			};
 
 			competition.API.showProfileCard = function (visible, match_idx) {
-				const match_players = players.slice(
-					2 * match_idx,
-					2 * match_idx + 2
-				);
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
 
 				match_players.forEach(player => player.showProfileCard(visible));
 			};
 
 			competition.API.setWinner = function (player_idx) {
 				const match_idx = player_idx < 2 ? 0 : 1;
-				const match_players = players.slice(
-					2 * match_idx,
-					2 * match_idx + 2
-				);
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
 
 				const winner = players[player_idx];
 				const loser = match_players.find(player => player !== winner);
