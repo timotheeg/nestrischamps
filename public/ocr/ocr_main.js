@@ -321,8 +321,8 @@ function connect() {
 		});
 
 		peer.on('error', err => {
-			console.log('peer error');
-			console.error(err);
+			console.log(`Peer error: ${err.message}`);
+			setTimeout(startSharingVideoFeed, 1500); // we assume this will succeed at some point?? 😰😅
 		});
 	};
 }
@@ -340,7 +340,7 @@ async function startSharingVideoFeed() {
 		return;
 
 	const video_constraints = {
-		// width: { ideal: 320 },
+		width: { ideal: 320 },
 		height: { ideal: 240 },
 		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
 	};
@@ -348,7 +348,7 @@ async function startSharingVideoFeed() {
 	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
 
 	if (m) {
-		// video_constraints.width.ideal = parseInt(m[1], 10);
+		video_constraints.width.ideal = parseInt(m[1], 10);
 		video_constraints.height.ideal = parseInt(m[2], 10);
 	}
 
