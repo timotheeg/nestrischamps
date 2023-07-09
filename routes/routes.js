@@ -21,11 +21,26 @@ router.get(
 	'/room/admin',
 	middlewares.assertSession,
 	middlewares.checkToken,
-	(req, res) => {
-		res.render('admin', { countries });
+	async (req, res) => {
+		const data = { countries };
+
+		if (process.env.IS_PUBLIC_SERVER) {
+			data.users = null;
+		} else {
+			data.users = await UserDAO.getAssignableUsers();
+
+			data.users.sort((u1, u2) => {
+				return u1.display_name.toLowerCase() < u2.display_name.toLowerCase()
+					? -1
+					: 1;
+			});
+		}
+
+		res.render('admin', data);
 	}
 );
 
+/*
 router.get(
 	'/room/u/:login/admin',
 	middlewares.assertSession,

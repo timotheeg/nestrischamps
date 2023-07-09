@@ -90,7 +90,7 @@ class UserDAO {
 		return user;
 	}
 
-	async getUserById(id, force_fetch = false) {
+	async getUserById(id, force_fetch = false, set_cache = true) {
 		let user = this.users_by_id.get(id);
 
 		if (!user || force_fetch) {
@@ -100,7 +100,13 @@ class UserDAO {
 			);
 
 			if (result.rows.length) {
-				user = this.addUserFromData(result.rows[0]);
+				if (set_cache) {
+					user = this.addUserFromData(result.rows[0]);
+				} else {
+					// WARNING: inconsistent return type? 😰
+					// Trying to save memory by not creating user objects...
+					return result.rows[0];
+				}
 			}
 		}
 
@@ -170,6 +176,16 @@ class UserDAO {
 		Object.assign(user, update);
 
 		return user;
+	}
+
+	async getAssignableUsers() {
+		const results = await dbPool.query(`
+			SELECT id, login, display_name
+			FROM twitch_users
+			WHERE id > 32
+		`);
+
+		return results.rows;
 	}
 }
 

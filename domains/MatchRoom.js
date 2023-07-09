@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import UserDAO from '../daos/UserDAO.js';
 import Room from './Room.js';
 
 const PRODUCER_FIELDS = [
@@ -386,7 +387,34 @@ class MatchRoom extends Room {
 		}
 	}
 
-	onAdminMessage(message) {
+	async setPlayerOnBehalfOfUser(p_num, p_id) {
+		console.log('setPlayerOnBehalfOfUser()', p_num, p_id, typeof p_id);
+
+		this.assertValidPlayer(p_num);
+
+		const player_id = `${p_id}`;
+		const player_data = await UserDAO.getUserById(player_id, true, false);
+
+		this.state.players[p_num] = Object.assign(this.state.players[p_num], {
+			login: player_data.login,
+			display_name: player_data.display_name,
+			country_code: player_data.country_code,
+			profile_image_url: player_data.profile_image_url,
+		});
+
+		this.sendToViews(['setLogin', p_num, player_data.login]);
+		this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
+		this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
+		this.sendToViews([
+			'setProfileImageURL',
+			p_num,
+			player_data.profile_image_url,
+		]);
+
+		this.sendStateToAdmin();
+	}
+
+	async onAdminMessage(message) {
 		const [command, ...args] = message;
 		let forward_to_views = true;
 		let update_admin = true;
@@ -402,6 +430,12 @@ class MatchRoom extends Room {
 				case 'setPlayer': {
 					forward_to_views = false;
 					this.setPlayer(...args);
+					break;
+				}
+
+				case 'setPlayerOnBehalfOfUser': {
+					forward_to_views = false;
+					await this.setPlayerOnBehalfOfUser(...args);
 					break;
 				}
 

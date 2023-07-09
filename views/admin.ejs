@@ -196,6 +196,16 @@
 				</div>
 				<div class="inputs">
 					<div class="producers"><select></select></div>
+
+					<% if (users) { %>
+						<div class="users"><select>
+							<option value="">Select user</option>
+							<% users.forEach(user => { %>
+								<option value="<%= user.id %>"><%= user.display_name %> (<%= user.login %>)</option>
+							<% }) %>
+						</select></div>
+					<% } %>
+
 					<div><input type="text" class="name" placeholder="name" /></div>
 					<div>
 						<input type="text" class="avatar" placeholder="avatar url" />
@@ -203,9 +213,8 @@
 					<div>
 						<select class="country_code">
 							<option value="">Country</option>
-							<%
-								countries.forEach(country => { %>
-								<option value="<%= country.code %>"><%= country.name %></option>
+							<% countries.forEach(country => { %>
+								<option value="<%= country.code %>"><%= country.display_name %></option>
 							<% }) %>
 						</select>	
 					</div>

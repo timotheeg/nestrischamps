@@ -31,6 +31,9 @@ const remoteAPI = {
 	setPlayer: function (player_idx, user_id) {
 		connection.send(['setPlayer', player_idx, user_id]);
 	},
+	setPlayerOnBehalfOfUser: function (player_idx, user_id) {
+		connection.send(['setPlayerOnBehalfOfUser', player_idx, user_id]);
+	},
 	setVictories: function (player_idx, num_wins) {
 		connection.send(['setVictories', player_idx, num_wins]);
 	},
@@ -123,6 +126,11 @@ class Player {
 		this.dom.producers.onchange = () =>
 			this._pickProducer(this.dom.producers.value);
 
+		if (this.dom.users) {
+			this.dom.users.onchange = () =>
+				this._setPlayerOnBehalfOfUser(this.dom.users.value);
+		}
+
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
 		};
@@ -198,6 +206,10 @@ class Player {
 
 	_pickProducer(pid) {
 		remoteAPI.setPlayer(this.idx, pid);
+	}
+
+	_setPlayerOnBehalfOfUser(pid) {
+		remoteAPI.setPlayerOnBehalfOfUser(this.idx, pid);
 	}
 
 	setProducer(pid) {
@@ -322,6 +334,7 @@ function addPlayer() {
 		root: player_node,
 		num: player_node.querySelector('.num'),
 		producers: player_node.querySelector('.producers select'),
+		users: player_node.querySelector('.users select'),
 		name: player_node.querySelector('.name'),
 		avatar_url: player_node.querySelector('input.avatar'),
 		avatar_img: player_node.querySelector('img.avatar'),
