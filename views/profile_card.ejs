@@ -151,13 +151,15 @@ p {
 		</section>
 	</div>
 
-	<div id="twitch">
-		<div class="envelop">&nbsp;</div>
-		<img class="twitch" src="/images/twitch_small.png" />
-		<div class="login">
-			<%= user.login %>
+	<% if (!user.login.startsWith('__')) { %>
+		<div id="twitch">
+			<div class="envelop">&nbsp;</div>
+			<img class="twitch" src="/images/twitch_small.png" />
+			<div class="login">
+				<%= user.login %>
+			</div>
 		</div>
-	</div>
+	<% } %>
 </div>
 
 <script>
