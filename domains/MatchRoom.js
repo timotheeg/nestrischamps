@@ -413,8 +413,6 @@ class MatchRoom extends Room {
 			p_num,
 			player_data.profile_image_url,
 		]);
-
-		this.sendStateToAdmin();
 	}
 
 	async onAdminMessage(message) {
