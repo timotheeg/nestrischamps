@@ -90,7 +90,7 @@ class UserDAO {
 		return user;
 	}
 
-	async getUserById(id, force_fetch = false, set_cache = true) {
+	async getUserById(id, force_fetch = false) {
 		let user = this.users_by_id.get(id);
 
 		if (!user || force_fetch) {
@@ -100,13 +100,7 @@ class UserDAO {
 			);
 
 			if (result.rows.length) {
-				if (set_cache) {
-					user = this.addUserFromData(result.rows[0]);
-				} else {
-					// WARNING: inconsistent return type? 😰
-					// Trying to save memory by not creating user objects...
-					return result.rows[0];
-				}
+				user = this.addUserFromData(result.rows[0]);
 			}
 		}
 

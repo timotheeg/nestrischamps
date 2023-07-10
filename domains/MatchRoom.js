@@ -396,7 +396,7 @@ class MatchRoom extends Room {
 
 		if (!/^[1-9]\d*$/.test(player_id)) return;
 
-		const player_data = await UserDAO.getUserById(player_id, true, false);
+		const player_data = await UserDAO.getUserById(player_id, true);
 
 		this.state.players[p_num] = Object.assign(this.state.players[p_num], {
 			login: player_data.login,
