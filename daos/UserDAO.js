@@ -171,6 +171,16 @@ class UserDAO {
 
 		return user;
 	}
+
+	async getAssignableUsers() {
+		const results = await dbPool.query(`
+			SELECT id, login, display_name
+			FROM twitch_users
+			WHERE id > 32
+		`);
+
+		return results.rows;
+	}
 }
 
 export default new UserDAO();

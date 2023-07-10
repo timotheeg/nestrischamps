@@ -115,7 +115,7 @@ p {
 <div class="frame">
 	<div class="container">
 		<section id="name">
-			<h1><%= user.display_name %></h1>
+			<h1><%= (user.display_name || '').replace(/^\d+\.\s+/, '') %></h1>
 		</section>
 
 		<section id="flag">
@@ -151,13 +151,15 @@ p {
 		</section>
 	</div>
 
-	<div id="twitch">
-		<div class="envelop">&nbsp;</div>
-		<img class="twitch" src="/images/twitch_small.png" />
-		<div class="login">
-			<%= user.login %>
+	<% if (!user.login.startsWith('__user')) { %>
+		<div id="twitch">
+			<div class="envelop">&nbsp;</div>
+			<img class="twitch" src="/images/twitch_small.png" />
+			<div class="login">
+				<%= user.login %>
+			</div>
 		</div>
-	</div>
+	<% } %>
 </div>
 
 <script>
