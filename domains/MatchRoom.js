@@ -393,6 +393,9 @@ class MatchRoom extends Room {
 		this.assertValidPlayer(p_num);
 
 		const player_id = `${p_id}`;
+
+		if (!/^[1-9]\d*$/.test(player_id)) return;
+
 		const player_data = await UserDAO.getUserById(player_id, true, false);
 
 		this.state.players[p_num] = Object.assign(this.state.players[p_num], {

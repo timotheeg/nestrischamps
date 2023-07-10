@@ -56,6 +56,7 @@ router.get(
 		res.render('admin', { countries });
 	}
 );
+/**/
 
 router.get(
 	'/room/producer',

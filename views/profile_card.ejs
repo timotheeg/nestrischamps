@@ -115,7 +115,7 @@ p {
 <div class="frame">
 	<div class="container">
 		<section id="name">
-			<h1><%= user.display_name %></h1>
+			<h1><%= (user.display_name || '').replace(/^\d+\.\s+/, '') %></h1>
 		</section>
 
 		<section id="flag">

@@ -127,8 +127,11 @@ class Player {
 			this._pickProducer(this.dom.producers.value);
 
 		if (this.dom.users) {
-			this.dom.users.onchange = () =>
+			this.dom.users.onchange = () => {
+				if (!this.dom.users.value) return;
+
 				this._setPlayerOnBehalfOfUser(this.dom.users.value);
+			};
 		}
 
 		this.dom.win_btn.onclick = () => {
