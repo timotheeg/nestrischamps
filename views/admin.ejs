@@ -197,7 +197,7 @@
 				<div class="inputs">
 					<div class="producers"><select></select></div>
 
-					<% if (users) { %>
+					<% if (users && users.length) { %>
 						<div class="users"><select>
 							<option value="">Select user</option>
 							<% users.forEach(user => { %>
