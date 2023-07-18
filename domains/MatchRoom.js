@@ -538,6 +538,8 @@ class MatchRoom extends Room {
 					break;
 				}
 
+				case 'showRunways':
+				case 'hideRunways':
 				case 'showProfileCard':
 				case 'setWinner':
 				case 'setGameOver':

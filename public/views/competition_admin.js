@@ -5,6 +5,8 @@ const dom = {
 	producer_count: document.querySelector('#producer_count'),
 	bestof: document.querySelector('#bestof'),
 	clear_victories: document.querySelector('#clear_victories'),
+	show_runways: document.querySelector('#show_runways'),
+	hide_runways: document.querySelector('#hide_runways'),
 	player_link: document.querySelector('#player_link'),
 	show_match_controls: document.querySelector('#show_match_controls'),
 	show_profile_cards_controls: document.querySelector(
@@ -66,6 +68,12 @@ const remoteAPI = {
 	},
 	resetVictories: function () {
 		connection.send(['resetVictories']);
+	},
+	showRunways: function () {
+		connection.send(['showRunways']);
+	},
+	hideRunways: function () {
+		connection.send(['hideRunways']);
 	},
 	playVictoryAnimation: function (player_idx) {
 		connection.send(['playVictoryAnimation', player_idx]);
@@ -374,6 +382,14 @@ function bootstrap() {
 
 	dom.clear_victories.addEventListener('click', () => {
 		remoteAPI.resetVictories();
+	});
+
+	dom.show_runways.addEventListener('click', () => {
+		remoteAPI.showRunways();
+	});
+
+	dom.hide_runways.addEventListener('click', () => {
+		remoteAPI.hideRunways();
 	});
 
 	dom.add_player.addEventListener('click', () => {
