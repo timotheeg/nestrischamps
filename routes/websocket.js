@@ -4,6 +4,10 @@ import UserDAO from '../daos/UserDAO.js';
 import Replay from '../domains/Replay.js';
 import Connection from '../modules/Connection.js';
 
+function passThrough(cb) {
+	cb();
+}
+
 export default function init(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log(`WS: ${request.url}`);
@@ -84,7 +88,7 @@ export default function init(server, wss) {
 			);
 
 			if (!request.session) {
-				request.session = {};
+				request.session = { save: passThrough }; // should never enter here
 			}
 
 			request.session.user = {
@@ -94,8 +98,10 @@ export default function init(server, wss) {
 				profile_image_url: user.profile_image_url,
 			};
 
-			wss.handleUpgrade(request, socket, head, function (ws) {
-				wss.emit('connection', ws, request);
+			request.session.save(() => {
+				wss.handleUpgrade(request, socket, head, function (ws) {
+					wss.emit('connection', ws, request);
+				});
 			});
 
 			return;
@@ -140,7 +146,7 @@ export default function init(server, wss) {
 			}
 
 			if (!request.session) {
-				request.session = {};
+				request.session = { save: passThrough }; // should never happen
 			}
 
 			request.session.user = {
@@ -150,8 +156,10 @@ export default function init(server, wss) {
 				profile_image_url: connecting_user.profile_image_url,
 			};
 
-			wss.handleUpgrade(request, socket, head, function (ws) {
-				wss.emit('connection', ws, request);
+			request.session.save(() => {
+				wss.handleUpgrade(request, socket, head, function (ws) {
+					wss.emit('connection', ws, request);
+				});
 			});
 
 			return;
@@ -176,7 +184,7 @@ export default function init(server, wss) {
 				}
 
 				if (!request.session) {
-					request.session = {};
+					request.session = { save: passThrough }; // should never happen
 				}
 
 				request.session.user = {
@@ -186,8 +194,10 @@ export default function init(server, wss) {
 					profile_image_url: connecting_user.profile_image_url,
 				};
 
-				wss.handleUpgrade(request, socket, head, function (ws) {
-					wss.emit('connection', ws, request);
+				request.session.save(() => {
+					wss.handleUpgrade(request, socket, head, function (ws) {
+						wss.emit('connection', ws, request);
+					});
 				});
 
 				return;

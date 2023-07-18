@@ -40,14 +40,11 @@ router.get('/revoke_secret', async (req, res) => {
 
 	await UserDAO.updateSecret(user, ULID.ulid());
 
-	req.session.user = {
-		id: user.id,
-		login: user.login,
-		secret: user.secret,
-		profile_image_url: user.profile_i1mage_url,
-	};
+	req.session.user.secret = user.secret;
 
-	res.redirect('/settings');
+	req.session.save(() => {
+		res.redirect('/settings');
+	});
 });
 
 router.get('/clear_session', async (req, res) => {

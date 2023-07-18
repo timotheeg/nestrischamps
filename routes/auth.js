@@ -34,13 +34,15 @@ if (process.env.IS_PUBLIC_SERVER) {
 			country_code: user.country_code,
 		};
 
-		console.log('Stored session user as', req.session.user);
+		req.session.save(() => {
+			console.log('Stored session user as', req.session.user);
 
-		if (req.session.auth_success_redirect) {
-			res.redirect(req.session.auth_success_redirect);
-		} else {
-			res.render('intro');
-		}
+			if (req.session.auth_success_redirect) {
+				res.redirect(req.session.auth_success_redirect);
+			} else {
+				res.render('intro');
+			}
+		});
 	});
 }
 
@@ -128,13 +130,15 @@ router.get('/twitch/callback', async (req, res) => {
 			profile_image_url: user.profile_image_url,
 		};
 
-		console.log('Stored session user as', req.session.user);
+		req.session.save(() => {
+			console.log('Stored session user as', req.session.user);
 
-		if (req.session.auth_success_redirect) {
-			res.redirect(req.session.auth_success_redirect);
-		} else {
-			res.redirect('/');
-		}
+			if (req.session.auth_success_redirect) {
+				res.redirect(req.session.auth_success_redirect);
+			} else {
+				res.redirect('/');
+			}
+		});
 	} catch (err) {
 		console.error(`Error when processing Twicth callback`);
 		console.error(err);
