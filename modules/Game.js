@@ -26,7 +26,9 @@ class Game {
 		this.over = false;
 		this.num_frames = 0;
 
-		if (process.env.FF_SAVE_GAME_FRAMES === '1') {
+		this.save_frame = process.env.FF_SAVE_GAME_FRAMES === '1';
+
+		if (this.save_frame) {
 			// We use ulid ids for games, and games get binned into part of the 10 bits timestamp
 			// this means each folder represents about ~9h, which should be about one siting
 			// the extension ngf stands for "Nestrischamps Game Frames"
@@ -284,7 +286,7 @@ class Game {
 		this.over = true;
 		this.end_ts = Date.now();
 
-		if (process.env.FF_SAVE_GAME_FRAMES) {
+		if (this.save_frame) {
 			this.frame_stream?.end();
 		}
 
@@ -449,7 +451,7 @@ class Game {
 	saveFrame(frame) {
 		this.last_frame_ts = Date.now();
 
-		if (process.env.FF_SAVE_GAME_FRAMES) {
+		if (this.save_frame) {
 			this.num_frames++;
 			this.frame_stream.write(frame);
 		}
