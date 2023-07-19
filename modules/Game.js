@@ -285,7 +285,7 @@ class Game {
 		this.end_ts = Date.now();
 
 		if (process.env.FF_SAVE_GAME_FRAMES) {
-			this.frame_stream.end();
+			this.frame_stream?.end();
 		}
 
 		if (this.frame_count <= 2 || this.num_frames <= 2) {
