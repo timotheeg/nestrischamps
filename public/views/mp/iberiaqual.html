@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script
+			src="https://www.datadoghq-browser-agent.com/us1/v4/datadog-rum.js"
+			type="text/javascript"
+		></script>
+		<script>
+			window.DD_RUM &&
+				window.DD_RUM.init({
+					clientToken: 'pubc59962a6065abb8b530083bf912fa444',
+					applicationId: '5835e801-4ec9-45d0-94cb-d3d9f30f97fd',
+					site: 'datadoghq.com',
+					service: 'nestrischamps-view',
+					env: 'production',
+					version: '1.0.0',
+					sessionSampleRate: 100,
+					sessionReplaySampleRate: 0,
+					trackUserInteractions: /\/replay\//.test(document.location.pathname),
+					trackResources: true,
+					trackLongTasks: true,
+					defaultPrivacyLevel: 'allow',
+				});
+
+			window.DD_RUM && window.DD_RUM.startSessionReplayRecording();
+		</script>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
+		<style>
+			.player {
+				width: 338px;
+				top: 12px;
+			}
+
+			.no-video .player {
+				top: 410px;
+			}
+
+			.box {
+				width: 338px;
+				border-image-source: url(/views/border_3px.png);
+			}
+			.transp .box {
+				border-image-source: url(/views/border_3px_iberia.png);
+			}
+			.thin .box {
+				border-image-source: url(/views/border_3px_iberia2.png);
+			}
+			video.box {
+				height: 181px;
+				width: 338px;
+			}
+			.board {
+				top: 301px;
+				height: 680px;
+			}
+			.info {
+				position: absolute;
+				top: 240px;
+				height: 56px;
+			}
+			.score {
+				position: absolute;
+				top: 0px;
+				width: 194px;
+				height: 34px;
+			}
+			.score .header {
+				position: absolute;
+				color: white;
+				top: 2px;
+				padding-bottom: 0px;
+				line-height: 16px;
+			}
+			.score .value {
+				position: absolute;
+				top: 22px;
+				font-size: 20px;
+				line-height: 20px;
+			}
+			.next {
+				position: absolute;
+				top: 0px;
+				left: 286px;
+				width: 52px;
+			}
+			.lns {
+				position: absolute;
+				left: 214px;
+				width: 52px;
+			}
+			.lines {
+				position: absolute;
+				font-size: 16px;
+				color: white;
+				top: 23px;
+				left: 3px;
+			}
+			.level {
+				position: absolute;
+				font-size: 20px;
+				color: white;
+				top: 3px;
+				left: 7px;
+			}
+			.name {
+				position: absolute;
+				height: 18px;
+				top: 201px;
+				color: yellow;
+			}
+			.next_piece {
+				position: absolute;
+				height: 40px;
+				width: 53px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<template id="player">
+				<div class="player">
+					<video class="box"></video>
+
+					<div class="box board"></div>
+
+					<div class="box name">
+						<div class="header">PLAYER</div>
+					</div>
+
+					<div class="info">
+						<div class="box score">
+							<div class="header">SCORE</div>
+							<div class="value">0000000</div>
+						</div>
+						<div class="box lns">
+							<div class="level">00</div>
+							<div class="lines">000</div>
+						</div>
+						<div class="box next">
+							<div class="next_piece"></div>
+						</div>
+					</div>
+				</div>
+			</template>
+
+			<!-- End Stream BG -->
+
+			<!-- Audio -->
+			<script>
+				// custom view parameters which will be passed in the websocket URI
+				const view_meta = new URLSearchParams({
+					video: '352x240',
+					players: 3,
+				});
+			</script>
+			<script src="/vendor/peerjs.1.4.7.min.js"></script>
+			<script type="module">
+				import '/views/bg.js';
+				import QueryString from '/js/QueryString.js';
+				import { peerServerOptions } from '/views/constants.js';
+				import { translate, readableScoreFomatter } from '/views/utils.js';
+				import Player from '/views/Player.js';
+				import Competition from '/views/competition.js';
+
+				const stream_bg = document.getElementById('stream_bg');
+				const player_template = document.getElementById('player');
+
+				const players_re = /^[2345]$/;
+				const player_width = 367;
+				const players = [];
+
+				if (QueryString.get('border') === '1') {
+					document.getElementById('stream_bg').classList.add('transp');
+				} else if (QueryString.get('border') === '2') {
+					document.getElementById('stream_bg').classList.add('thin');
+				}
+
+				let num_players = 4;
+
+				if (players_re.test(QueryString.get('players'))) {
+					num_players = parseInt(QueryString.get('players'), 10);
+				}
+
+				const spacer = (1920 - num_players * player_width) / (num_players + 1);
+
+				window.onload = () => {
+					// wait for css
+					const base_offset_y = 20;
+
+					Array(num_players)
+						.fill()
+						.forEach((_, player_idx) => {
+							const player_fragment = document.importNode(
+								player_template.content,
+								true
+							);
+							const player_node = player_fragment.querySelector('.player');
+
+							player_node.classList.add(`p${player_idx + 1}`);
+							stream_bg.appendChild(player_node);
+
+							const player = new Player(
+								{
+									name: player_node.querySelector(`.name .header`),
+									score: player_node.querySelector(`.score .value`),
+									level: player_node.querySelector(`.lns .level`),
+									lines: player_node.querySelector(`.lns .lines`),
+									preview: player_node.querySelector(`.next .next_piece`),
+									field: player_node.querySelector(`.board`),
+									video: player_node.querySelector(`video`),
+								},
+								{
+									field_pixel_size: 4.27,
+									preview_pixel_size: 1.5,
+									stereo: translate([0, num_players - 1], [-1, 1], player_idx),
+									format_score: readableScoreFomatter,
+								}
+							);
+
+							// adding extra properties to track
+							player.idx = player_idx; // For stable sort -_-
+
+							player.__setName = player.setName;
+							player.setName = function (name) {
+								this.__setName(name);
+							};
+
+							player.onGameStart = function () {
+								this.dom.lines.hidden = false;
+								this.dom.preview.hidden = false;
+							};
+
+							player.onGameOver = function () {
+								this.dom.preview.hidden = true;
+							};
+
+							player.onGameOver();
+
+							players.push(player);
+
+							Object.assign(player_node.style, {
+								left: `${Math.round(
+									spacer + player_idx * (player_width + spacer)
+								)}px`,
+							});
+						});
+
+					const competition = new Competition(players);
+
+					if (!competition.has_video) {
+						stream_bg.classList.add('no-video');
+					}
+				};
+			</script>
+		</div>
+	</body>
+</html>
