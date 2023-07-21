@@ -55,13 +55,14 @@ import ULID from 'ulid';
 
 		await pool.query(
 			`INSERT INTO twitch_users
-			(id, login, secret, description, display_name, profile_image_url, dob, country_code, city, interests, style, created_on, last_login)
+			(id, login, email, secret, description, display_name, profile_image_url, dob, country_code, city, interests, style, created_on, last_login)
 			VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
 			`,
 			[
 				id,
 				/^\s*$/.test(login) ? `__user${id}` : login,
+				`__user${id}@nestrischamps.io`,
 				ULID.ulid(),
 				description,
 				`${seed}. ${display_name}`,
