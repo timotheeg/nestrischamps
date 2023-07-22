@@ -1,0 +1,3 @@
+{
+	"description": "This is a 1080p layout (1920x1080). Multiplayer simple layout to be used during CTWC Iberia qualification stage. Use players=X to set the number of players (defaults to 4). Use border=1 to use transparent borders or border=2 to set thin borders (only the blue inner part)"
+}
