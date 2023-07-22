@@ -48,7 +48,6 @@
 }
 
 .board {
-	--borders-size: 12;
 	width: 198px;
 	height: 398px;
 	top: 210px;
