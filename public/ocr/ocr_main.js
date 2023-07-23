@@ -1598,7 +1598,10 @@ function trackAndSendFrames() {
 		);
 
 		performance.mark('process_over');
-		performance.measure('total', 'capture_start', 'process_over');
+
+		try {
+			performance.measure('total', 'capture_start', 'process_over');
+		} catch (err) {}
 
 		performance.getEntriesByType('measure').forEach(m => {
 			perf[m.name] = m.duration.toFixed(3);
