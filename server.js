@@ -12,8 +12,6 @@ const wss = new WebSocketServer({
 	noServer: true,
 });
 
-const server = http.createServer(app);
-
 const sslServer = https.createServer(
 	{
 		key: fs.readFileSync('key.pem'),
@@ -22,10 +20,11 @@ const sslServer = https.createServer(
 	app.handle.bind(app)
 );
 
-websocketInitializer(server, wss);
 websocketInitializer(sslServer, wss);
-
-server.listen(process.env.PORT || 5080);
 sslServer.listen(process.env.SSL_PORT || 5443);
+
+// const server = http.createServer(app);
+// websocketInitializer(server, wss);
+// server.listen(process.env.PORT || 5080);
 
 console.log([process.env.PORT || 5080, process.env.SSL_PORT || 5443]);
