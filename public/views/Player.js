@@ -252,10 +252,10 @@ export default class Player {
 			field_canva_offset = field_padding;
 		} else {
 			// when padding is zero, we assume the padding is embedded in the border itself,
-			// and thepadding has the size of this.field_pixel_size
+			// and the padding has the size of this.field_pixel_size
 			bg_width = css_size(styles.width) + this.field_pixel_size * 2;
 			bg_height = css_size(styles.height) + this.field_pixel_size * 2;
-			bg_offset = field_padding - this.field_pixel_size;
+			bg_offset = this.field_pixel_size * -1;
 			field_canva_offset = this.field_pixel_size;
 		}
 
