@@ -53,6 +53,13 @@ td {
 		calc(var(--border-size) * 1px);
 }
 
+.flag > img {
+	border: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;
