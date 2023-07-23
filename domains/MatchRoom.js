@@ -675,9 +675,18 @@ class MatchRoom extends Room {
 
 	handleProducerMessage(user, message) {
 		// system where you can have one user being multiple players
+		let send_count = 0;
+
 		this.state.players.forEach((player, p_num) => {
 			if (player.id === user.id) {
 				if (message instanceof Uint8Array) {
+					if (send_count++ > 0) {
+						// sendToViews() ultimately relies on socket.write(), which is not synchronous
+						// if the same user is assigned to multiple players in the room, then mutating message will
+						// cause duplicate frames when player_num overwrites the value.
+						// we make a copy to ensure each player gets its own message
+						message = new Uint8Array(message);
+					}
 					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
 					this.sendToViews(message);
 				} else {
