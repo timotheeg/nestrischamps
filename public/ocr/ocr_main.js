@@ -1577,12 +1577,16 @@ function trackAndSendFrames() {
 			performance.mark('show_parts_start');
 			await showParts(data);
 			performance.mark('show_parts_end');
-			performance.measure('show_parts', 'show_parts_start', 'show_parts_end');
+			try {
+				performance.measure('show_parts', 'show_parts_start', 'show_parts_end');
+			} catch (err) {}
 		}
 
 		const perf = {};
 
-		performance.measure('capture', 'capture_start', 'capture_end');
+		try {
+			performance.measure('capture', 'capture_start', 'capture_end');
+		} catch (err) {}
 
 		performance.mark('show_frame_data_start');
 		showFrameData(data);
