@@ -8,7 +8,7 @@ function passThrough(cb) {
 	cb();
 }
 
-export default function init(server, wss) {
+export function addUpgradeHandler(server, wss) {
 	server.on('upgrade', async function (request, socket, head) {
 		console.log(`WS: ${request.url}`);
 
@@ -240,7 +240,9 @@ export default function init(server, wss) {
 			});
 		});
 	});
+}
 
+export function addConnectionHandler(wss) {
 	wss.on('connection', async (ws, request) => {
 		if (request.is_replay) {
 			const user = (request.session && request.session.user) || { id: 1 };
