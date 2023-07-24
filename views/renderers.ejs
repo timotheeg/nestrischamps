@@ -91,8 +91,9 @@
 
 <script>
 document.querySelectorAll('dd a').forEach(a => {
-	// Views are identified by their secrets and only get game frame data, we can supply the links over http and save SSL processing cost.
-	const http_link = a.href.replace(/^https:/, 'http:');
+	// Users are identified in views by having their secrets in the URL
+	// To protect users, we always use https
+	const http_link = a.href.replace(/^http:/, 'https:');
 
 	a.href = http_link;
 	a.textContent = http_link; // make the link show the fully qualified url
