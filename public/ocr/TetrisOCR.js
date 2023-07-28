@@ -215,6 +215,7 @@ export default class TetrisOCR extends EventTarget {
 
 		this.capture_canvas_ctx = this.capture_canvas.getContext('2d', {
 			alpha: false,
+			willReadFrequently: true,
 		});
 		this.capture_canvas_ctx.imageSmoothingEnabled = false;
 
@@ -229,6 +230,7 @@ export default class TetrisOCR extends EventTarget {
 
 		this.scaled_field_canvas_ctx = this.scaled_field_canvas.getContext('2d', {
 			alpha: false,
+			willReadFrequently: true,
 		});
 		this.scaled_field_canvas_ctx.imageSmoothingEnabled = true;
 		this.scaled_field_canvas_ctx.imageSmoothingQuality = 'medium';
