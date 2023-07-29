@@ -15,7 +15,7 @@ import ULID from 'ulid';
 	const db_conn_str = process.env.DATABASE_URL;
 	const db_url = new URL(db_conn_str);
 
-	if (!/^192\.168(\.\d{1,3}){2}|localhost$/.test(db_url.hostname)) {
+	if (!/^(192\.168(\.\d{1,3}){2}|localhost)$/.test(db_url.hostname)) {
 		console.log('DB is not localhost or LAN IP, not proceeding');
 		process.exit(1);
 	}
@@ -32,7 +32,7 @@ import ULID from 'ulid';
 	await pool.query('DELETE FROM scores WHERE player_id>32');
 	await pool.query('DELETE FROM twitch_users WHERE id>32');
 
-	records.shift();
+	records.shift(); // drop header row from csv
 
 	let id = 33;
 
