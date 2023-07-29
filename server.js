@@ -13,6 +13,7 @@ const wss = new WebSocketServer({
 });
 addConnectionHandler(wss);
 
+/**/
 const sslServer = https.createServer(
 	{
 		key: fs.readFileSync('key.pem'),
@@ -23,8 +24,9 @@ const sslServer = https.createServer(
 
 addUpgradeHandler(sslServer, wss);
 sslServer.listen(process.env.SSL_PORT || 5443);
+/**/
 
-/*
+/**/
 const server = http.createServer(app);
 addUpgradeHandler(server, wss);
 server.listen(process.env.PORT || 5080);
