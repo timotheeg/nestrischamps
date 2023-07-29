@@ -402,17 +402,23 @@ class MatchRoom extends Room {
 			login: player_data.login,
 			display_name: player_data.display_name,
 			country_code: player_data.country_code,
-			profile_image_url: player_data.profile_image_url,
 		});
 
 		this.sendToViews(['setLogin', p_num, player_data.login]);
 		this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
 		this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
-		this.sendToViews([
-			'setProfileImageURL',
-			p_num,
-			player_data.profile_image_url,
-		]);
+
+		// only update the avatar if supplied
+		if (!/^\s*$/.test(player_data.profile_image_url)) {
+			this.state.players[p_num].profile_image_url =
+				player_data.profile_image_url;
+
+			this.sendToViews([
+				'setProfileImageURL',
+				p_num,
+				player_data.profile_image_url,
+			]);
+		}
 	}
 
 	async onAdminMessage(message) {
