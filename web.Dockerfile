@@ -1,5 +1,5 @@
 #Use the latest and greatest image
-FROM node:latest
+FROM node:18
 
 
 # Use built in user 'node' but change the Group ID & User ID to what was defined

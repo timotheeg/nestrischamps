@@ -23,7 +23,7 @@ services:
       args:
         UID: ${NTC_UID}
         GID: ${NTC_GID}
-    command: npm run start-linux
+    command: npm run start
     container_name: nestrischamps-web
     depends_on:
       - db
