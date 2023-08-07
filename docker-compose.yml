@@ -1,0 +1,39 @@
+---
+version: '3.1'
+services:
+  db:
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+      args:
+        UID: ${NTC_UID}
+        GID: ${NTC_GID}
+    container_name: nestrischamps-db
+    environment:
+      - POSTGRES_PASSWORD=${NTC_POSTGRES_PASSWORD}
+      - POSTGRES_USER=${NTC_POSTGRES_USER}
+      - POSTGRES_DB=${NTC_POSTGRES_DB}
+    restart: unless-stopped
+    volumes:
+      - nestrischamps-db-volume:/var/lib/postgresql/data
+  web:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+      args:
+        UID: ${NTC_UID}
+        GID: ${NTC_GID}
+    command: npm run start-linux
+    container_name: nestrischamps-web
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://${NTC_POSTGRES_USER}:${NTC_POSTGRES_PASSWORD}@${NTC_POSTGRES_HOST:-db}:5432/${NTC_POSTGRES_DB}
+      - FF_SAVE_GAME_FRAMES=${NTC_FF_SAVE_GAME_FRAMES}
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+    volumes:
+      - ${NTC_GAMES_PATH}:/code/games
+volumes:
+  nestrischamps-db-volume:

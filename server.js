@@ -1,9 +1,19 @@
+import './tracer.js'; // first thing to import for instrumentation!
+
 import { WebSocketServer } from 'ws';
-import { Server } from 'http';
+import { createServer } from 'https';
+import { readFileSync } from 'fs';
 
 import app from './modules/app.js';
 
-const server = Server(app);
+
+const options = {
+	key: readFileSync('key.pem'),
+	cert: readFileSync('cert.pem')
+  };
+
+const server = createServer(options, app);
+
 const wss = new WebSocketServer({
 	clientTracking: false,
 	noServer: true,
