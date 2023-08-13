@@ -31,20 +31,7 @@ class User extends EventEmitter {
 	constructor(user_object) {
 		super();
 
-		this.id = user_object.id;
-		this.login = user_object.login;
-		this.secret = user_object.secret;
-		this.email = user_object.email;
-		this.display_name = user_object.display_name;
-		this.description = user_object.description;
-		this.profile_image_url = user_object.profile_image_url;
-
-		this.dob = user_object.dob;
-		this.country_code = user_object.country_code || 'US';
-		this.city = user_object.city || '';
-		this.timezone = user_object.timezone || 'UTC';
-		this.style = user_object.style || 'das';
-		this.interests = user_object.interests || '';
+		this.updateUserFields(user_object);
 
 		this.producer = new Producer(this);
 
@@ -71,6 +58,23 @@ class User extends EventEmitter {
 		this.producer.on('close', this._handleProducerClose);
 
 		this.checkScheduleDestroy();
+	}
+
+	updateUserFields(user_object) {
+		this.id = user_object.id;
+		this.login = user_object.login;
+		this.secret = user_object.secret;
+		this.email = user_object.email;
+		this.display_name = user_object.display_name;
+		this.description = user_object.description;
+		this.profile_image_url = user_object.profile_image_url;
+		this.dob = user_object.dob;
+
+		this.country_code = user_object.country_code || this.country_code || 'US';
+		this.city = user_object.city || this.city || '';
+		this.timezone = user_object.timezone || this.timezone || 'UTC';
+		this.style = user_object.style || this.style || 'das';
+		this.interests = user_object.interests || this.interests || '';
 	}
 
 	setProducerConnection(

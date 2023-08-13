@@ -100,7 +100,16 @@ class UserDAO {
 			);
 
 			if (result.rows.length) {
-				user = this.addUserFromData(result.rows[0]);
+				// we have the latest data, but another process may have
+				// created the user object since we last checked
+				// async double-check for sanity
+				user = this.users_by_id.get(id);
+
+				if (!user) {
+					user = this.addUserFromData(result.rows[0]);
+				} else {
+					user.updateUserFields(result.rows[0]);
+				}
 			}
 		}
 
