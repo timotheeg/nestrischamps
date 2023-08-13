@@ -64,6 +64,7 @@ class User extends EventEmitter {
 		this.id = user_object.id;
 		this.login = user_object.login;
 		this.secret = user_object.secret;
+
 		this.email = user_object.email;
 		this.display_name = user_object.display_name;
 		this.description = user_object.description;
@@ -196,6 +197,10 @@ class User extends EventEmitter {
 	}
 
 	checkScheduleDestroy() {
+		console.log(
+			`checkScheduleDestroy() for user ${this.id}. Connections: ${this.connections.size}`
+		);
+
 		this.destroy_to = clearTimeout(this.destroy_to);
 
 		if (this.connections.size > 0) return; // TODO: also check activity on the connections

@@ -126,7 +126,12 @@ class UserDAO {
 			);
 
 			if (result.rows.length) {
-				user = this.addUserFromData(result.rows[0]);
+				// async double-check for sanity
+				user = this.users_by_login.get(login);
+
+				if (!user) {
+					user = this.addUserFromData(result.rows[0]);
+				}
 			}
 		}
 
@@ -143,7 +148,12 @@ class UserDAO {
 			);
 
 			if (result.rows.length) {
-				user = this.addUserFromData(result.rows[0]);
+				// async double-check for sanity
+				user = this.users_by_secret.get(secret);
+
+				if (!user) {
+					user = this.addUserFromData(result.rows[0]);
+				}
 			}
 		}
 
