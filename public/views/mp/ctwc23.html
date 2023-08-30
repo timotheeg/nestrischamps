@@ -428,7 +428,18 @@
 				images = [
 					{ url: '/images/sponsors/ctwcdas_28.png', full_block: true },
 					{ url: '/images/sponsors/ctwcdas_inner_20.png', full_block: false },
-				].map(entry => {
+				];
+
+				const img_index = QueryString.get('sponsorimg');
+
+				if (/^\d+$/.test(img_index)) {
+					const index = parseInt(img_index, 10);
+					if (index < images.length) {
+						images = images.splice(index, 1);
+					}
+				}
+
+				images = images.map(entry => {
 					const img = new Image();
 					img.src = entry.url;
 					img.full_block = entry.full_block;
