@@ -430,13 +430,17 @@
 
 			if (hasAds) {
 				images = [
-					{ url: '/images/sponsors/ctwcdas_28.png', full_block: true },
+					{
+						url: '/images/sponsors/ctwcdas_transparent_28.png',
+						full_block: true,
+					},
 					{ url: '/images/sponsors/ctwcdas_inner_20.png', full_block: false },
 					{
 						url: '/images/sponsors/ctwcdas_inner_white_20.png',
 						full_block: false,
 					},
 					{ url: '/images/sponsors/ctwcdas_inner_20.png', full_block: false },
+					{ url: '/images/sponsors/ctwcdas_28.png', full_block: true },
 				].map(entry => {
 					const img = new Image();
 					img.src = entry.url;
@@ -585,10 +589,12 @@
 
 								ctx.fillStyle = 'rgba(0,0,0,0)';
 
-								if (sponsor_img_index === 0) {
+								if (sponsor_img_index === 0 || sponsor_img_index === 4) {
 									for (let x = 0; x < 10; x++) {
 										for (let y = 0; y < 20; y++) {
-											if (field[y * 10 + x] === 1) {
+											if (
+												field[y * 10 + x] === (sponsor_img_index === 0 ? 1 : 2)
+											) {
 												const pos_x = x * pixels_per_block;
 												const pos_y = y * pixels_per_block;
 
