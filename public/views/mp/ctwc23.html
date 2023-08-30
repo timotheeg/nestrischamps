@@ -417,11 +417,29 @@
 			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
+			const hasAds = QueryString.get('ads') === '1';
+			const SIMUL_TETRIS_DELAY = /^[1-9]\d*$/.test(QueryString.get('simultris'))
+				? parseInt(QueryString.get('simultris'), 10)
+				: 120;
+
+			let images;
+
+			if (hasAds) {
+				images = ['/images/sponsors/ctwcdas_28.png'].map(url => {
+					const img = new Image();
+					img.src = url;
+					return img;
+				});
+			}
+
 			const player_template = document.getElementById('player');
 			const players = [];
 
 			[1, 2].forEach(match_num => {
 				const match_node = document.getElementById(`match${match_num}`);
+
+				const match_players = [];
+				const sync_timers = [];
 
 				[1, 2].forEach((player_num, player_idx) => {
 					const player_fragment = document.importNode(
@@ -536,7 +554,80 @@
                         /**/
 					};
 
-					players.push(player);
+					if (hasAds) {
+						// custom branding
+						player._renderField = player.renderField;
+
+						const draw_cycle = 60;
+
+						let draw_cycle_remainder = draw_cycle;
+						let idx = 0;
+						let img = images[idx];
+
+						player.renderField = function (level, field) {
+							this._renderField(level, field);
+
+							if (this.show_sponsor_block) {
+								const pixels_per_block = this.field_pixel_size * (7 + 1);
+
+								const ctx = this.field_ctx;
+
+								ctx.fillStyle = 'rgba(0,0,0,0)';
+
+								if (draw_cycle_remainder-- === 0) {
+									idx = (idx + 1) % images.length;
+									img = images[idx];
+									draw_cycle_remainder = draw_cycle;
+								}
+
+								for (let x = 0; x < 10; x++) {
+									for (let y = 0; y < 20; y++) {
+										if (field[y * 10 + x] === 1) {
+											const pos_x = x * pixels_per_block;
+											const pos_y = y * pixels_per_block;
+
+											ctx.clearRect(
+												pos_x,
+												pos_y,
+												this.field_pixel_size * 8,
+												this.field_pixel_size * 8
+											);
+											ctx.drawImage(img, pos_x, pos_y);
+										}
+									}
+								}
+							}
+						};
+
+						player.onTetris = function () {
+							const now = Date.now();
+
+							player.last_tetris_time = now;
+
+							if (
+								match_players.every(
+									player => player.last_tetris_time >= now - SIMUL_TETRIS_DELAY
+								)
+							) {
+								match_players.forEach(player => {
+									player.show_sponsor_block = true;
+								});
+
+								while (sync_timers.length) clearTimeout(sync_timers.pop());
+
+								sync_timers.push(
+									setTimeout(() => {
+										players.forEach(player => {
+											player.show_sponsor_block = false;
+										});
+									}, 6000)
+								);
+							}
+						};
+					}
+
+					match_players.push(player);
+					players.push(players);
 				});
 			});
 
@@ -598,6 +689,7 @@
 			}
 
 			const match_value = QueryString.get('match');
+
 			if (/^([01]|both)$/.test(match_value)) {
 				competition.API.setMatch(
 					match_value == 'both' ? null : parseInt(match_value, 10)

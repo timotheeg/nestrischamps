@@ -150,7 +150,7 @@
 
 			const hasAds = QueryString.get('ads') === '1';
 
-			const SIMUL_TETRIS_DELAY = /[1-9]\d*/.test(QueryString.get('simultris'))
+			const SIMUL_TETRIS_DELAY = /^[1-9]\d*$/.test(QueryString.get('simultris'))
 				? parseInt(QueryString.get('simultris'), 10)
 				: 120;
 
