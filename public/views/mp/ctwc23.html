@@ -442,6 +442,7 @@
 					{ url: '/images/sponsors/ctwcdas_inner_20.png', full_block: false },
 					{ url: '/images/sponsors/ctwcdas_28.png', full_block: true },
 					{ url: '/images/sponsors/ctwcdas_28_2.png', full_block: true },
+					{ url: '/images/sponsors/gfuel_30.png', full_block: true },
 				].map(entry => {
 					const img = new Image();
 					img.src = entry.url;
@@ -590,7 +591,24 @@
 
 								ctx.fillStyle = 'rgba(0,0,0,0)';
 
-								if (
+								if (sponsor_img_index === 6) {
+									for (let x = 0; x < 10; x++) {
+										for (let y = 0; y < 20; y++) {
+											if (field[y * 10 + x] === 1) {
+												const pos_x = x * pixels_per_block - 1;
+												const pos_y = y * pixels_per_block - 1;
+
+												ctx.clearRect(
+													pos_x,
+													pos_y,
+													this.field_pixel_size * 8,
+													this.field_pixel_size * 8
+												);
+												ctx.drawImage(img, pos_x, pos_y);
+											}
+										}
+									}
+								} else if (
 									sponsor_img_index === 0 ||
 									sponsor_img_index === 4 ||
 									sponsor_img_index === 5
