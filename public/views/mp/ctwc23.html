@@ -321,6 +321,41 @@
 		</style>
 	</head>
 	<body>
+		<template id="curtain_0">
+			<div class="custom_curtain">
+				<br />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 220px" />
+				<br />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img src="/images/sponsors/GFuel.avif" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.png" />
+			</div>
+		</template>
+		<template id="curtain_1">
+			<div class="custom_curtain">
+				<br />
+				<img src="/images/ctwc_das.png" style="max-width: 320px" />
+				<br />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img src="/images/sponsors/GFuel.avif" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.2x.png" />
+			</div>
+		</template>
 		<template id="player">
 			<div class="player">
 				<video class="player_vid"></video>
@@ -426,6 +461,10 @@
 				? parseInt(QueryString.get('sponsorimg'), 10)
 				: 0;
 
+			const curtain_num = /^[01]$/.test(QueryString.get('curtain'))
+				? parseInt(QueryString.get('curtain'), 10)
+				: 0;
+
 			let images;
 
 			if (hasAds) {
@@ -451,6 +490,9 @@
 				});
 			}
 
+			const curtain_template = document.getElementById(
+				`curtain_${curtain_num}`
+			);
 			const player_template = document.getElementById('player');
 			const players = [];
 
@@ -469,6 +511,12 @@
 
 					player_node.classList.add(`p${player_num}`);
 					match_node.appendChild(player_node);
+
+					const curtain_fragment = document.importNode(
+						curtain_template.content,
+						true
+					);
+					const curtain = curtain_fragment.querySelector('.custom_curtain');
 
 					const player = new CTMCompetitionPlayer(
 						{
@@ -494,6 +542,8 @@
 							drought_box: player_node.querySelector(`.drought`),
 							video: player_node.querySelector(`.player_vid`),
 							flag: player_node.querySelector(`.flag`),
+
+							curtain,
 						},
 						{
 							field_pixel_size: 4,
