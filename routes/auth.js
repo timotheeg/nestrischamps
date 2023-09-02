@@ -11,7 +11,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 		res.render('login', {
 			client_id: process.env.TWITCH_CLIENT_ID,
 			redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
-			twitch_scope: 'chat:read', // 'user:read:email'
+			twitch_scope: 'user:read:email',
 		});
 	});
 } else {

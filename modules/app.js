@@ -21,7 +21,7 @@ app.use(middlewares.sessionMiddleware);
 const TWITCH_LOGIN_BASE_URI = 'https://id.twitch.tv/oauth2/authorize?';
 const TWITCH_LOGIN_QS = new URLSearchParams({
 	client_id: process.env.TWITCH_CLIENT_ID,
-	scope: 'chat:read',
+	scope: 'user:read:email chat:read',
 	response_type: 'code',
 	force_verify: true,
 });
