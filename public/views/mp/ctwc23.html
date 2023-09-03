@@ -168,16 +168,15 @@
 				--offset: 463px;
 				right: var(--offset);
 				width: 461px;
-				height: 93px;
-				top: 900px;
+				height: unset;
+				top: unset;
+				bottom: -1023px;
+				--border-size: 12;
+				padding: 3px 3px 0 6px;
 			}
 
-			.runways.hide19 {
-				top: 932px;
-				height: 61px;
-			}
-
-			.runways.hide19 .lv19 {
+			.runways.hide19 .lv19,
+			.runways.hide39 .lv39 {
 				display: none;
 			}
 
@@ -330,14 +329,14 @@
 				<br />
 				<br />
 				<p style="font-size: 12px">Presented by</p>
-				<img src="/images/sponsors/GFuel.avif" />
-				<br />
+				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" />
 				<br />
 				<br />
 				<br />
 				<br />
 				<br />
 				<img src="/brand/logo.v3.white.png" />
+				<br />
 			</div>
 		</template>
 		<template id="curtain_1">
@@ -348,10 +347,7 @@
 				<br />
 				<br />
 				<p style="font-size: 12px">Presented by</p>
-				<img
-					src="/images/sponsors/logo-experion.svg"
-					style="width: 300px; margin-top: -12px"
-				/>
+				<img src="/images/sponsors/logo-experion.svg" style="width: 280px" />
 				<br />
 				<br />
 				<br />
@@ -454,9 +450,10 @@
 			import { peerServerOptions } from '/views/constants.js';
 			import { translate, readableScoreFomatter } from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
-			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import CompetitionPlayer from '/views/CompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
+			const isDAS = QueryString.get('style') === 'das';
 			const hasAds = QueryString.get('ads') === '1';
 			const SIMUL_TETRIS_DELAY = /^[1-9]\d*$/.test(QueryString.get('simultris'))
 				? parseInt(QueryString.get('simultris'), 10)
@@ -523,7 +520,7 @@
 					);
 					const curtain = curtain_fragment.querySelector('.custom_curtain');
 
-					const player = new CTMCompetitionPlayer(
+					const player = new CompetitionPlayer(
 						{
 							name: player_node.querySelector(`.name .header`),
 							score: player_node.querySelector(`.score .value`),
@@ -559,11 +556,9 @@
 						}
 					);
 
-					// Undo the CTM logic of hiding the level and preview
-					delete player.onGameOver;
-
-					// Ugly custom logic for game start because we only have callbacks, no events
-					const super_onGameStart = player.onGameStart;
+					if (isDAS) {
+						player_node.querySelector(`.runways`).classList.add('hide39');
+					}
 
 					player.onLevel = frame => {
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
@@ -597,8 +592,16 @@
                         /**/
 					};
 
+					player.onDroughtStart = () => {
+						this.dom.drought_box.classList.add('active');
+					};
+
+					player.onDroughtEnd = () => {
+						this.dom.drought_box.classList.remove('active');
+					};
+
 					player.onGameStart = () => {
-						super_onGameStart.call(player);
+						this.dom.drought_box.classList.remove('active');
 
 						const level = player.game.data.start_level;
 
@@ -621,11 +624,6 @@
 						player.dom.runways_box.classList[level >= 19 ? 'add' : 'remove'](
 							'hide19'
 						);
-
-						/*
-                        player.dom.runway_tr_box.querySelector('.header').textContent =
-                            'TR RUNWAY';
-                        /**/
 					};
 
 					if (hasAds) {
