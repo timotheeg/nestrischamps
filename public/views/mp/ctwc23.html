@@ -195,6 +195,15 @@
 				color: #fff;
 			}
 
+			.simul-tetris {
+				display: none;
+				position: absolute;
+				transform-origin: 50% 50%;
+				top: 150px;
+				--offset: 341px;
+				right: var(--offset);
+			}
+
 			.p2 > * {
 				left: var(--offset);
 			}
@@ -313,6 +322,11 @@
 				--offset: 341px;
 			}
 
+			.match.small .simul-tetris {
+				top: 250px;
+				--offset: 574px;
+			}
+
 			.match.small .p2 > * {
 				left: var(--offset);
 			}
@@ -414,6 +428,8 @@
 				<div class="box board"></div>
 
 				<div class="box flag"></div>
+
+				<img class="simul-tetris" src="/images/simul-tetris.png" />
 			</div>
 		</template>
 
@@ -452,11 +468,34 @@
 			import CompetitionPlayer from '/views/CompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 
+			// Penner easing
+			// http://robertpenner.com/easing/
+			function easeOutElastic(t, b, c, d) {
+				var s = 1.70158;
+				var p = 0;
+				var a = c;
+				if (t == 0) return b;
+				if ((t /= d) >= 1) return b + c;
+				if (!p) p = d * 0.3;
+				if (a < Math.abs(c)) {
+					a = c;
+					var s = p / 4;
+				} else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+				return (
+					a *
+						Math.pow(2, -10 * t) *
+						Math.sin(((t * d - s) * (2 * Math.PI)) / p) +
+					c +
+					b
+				);
+			}
+
 			const isDAS = QueryString.get('style') === 'das';
 			const hasAds = QueryString.get('ads') === '1';
+
 			const SIMUL_TETRIS_DELAY = /^[1-9]\d*$/.test(QueryString.get('simultris'))
 				? parseInt(QueryString.get('simultris'), 10)
-				: 120;
+				: 200;
 
 			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
 				? parseInt(QueryString.get('sponsorimg'), 10)
@@ -470,23 +509,11 @@
 
 			if (hasAds) {
 				images = [
-					{
-						url: '/images/sponsors/ctwcdas_transparent_28.png',
-						full_block: true,
-					},
-					{ url: '/images/sponsors/ctwcdas_inner_20.png', full_block: false },
-					{
-						url: '/images/sponsors/ctwcdas_inner_white_20.png',
-						full_block: false,
-					},
-					{ url: '/images/sponsors/ctwcdas_inner_20.png', full_block: false },
-					{ url: '/images/sponsors/ctwcdas_28.png', full_block: true },
-					{ url: '/images/sponsors/ctwcdas_28_2.png', full_block: true },
-					{ url: '/images/sponsors/gfuel_30.png', full_block: true },
-				].map(entry => {
+					'/images/sponsors/ctwcdas_inner_20.png',
+					'/images/sponsors/gfuel_30.png',
+				].map(url => {
 					const img = new Image();
-					img.src = entry.url;
-					img.full_block = entry.full_block;
+					img.src = url;
 					return img;
 				});
 			}
@@ -545,6 +572,7 @@
 							flag: player_node.querySelector(`.flag`),
 
 							curtain,
+							simul_tetris: player_node.querySelector(`.simul-tetris`),
 						},
 						{
 							field_pixel_size: 4,
@@ -643,7 +671,8 @@
 
 								ctx.fillStyle = 'rgba(0,0,0,0)';
 
-								if (sponsor_img_index === 6) {
+								if (sponsor_img_index === 1) {
+									// gfuel
 									for (let x = 0; x < 10; x++) {
 										for (let y = 0; y < 20; y++) {
 											if (field[y * 10 + x] === 1) {
@@ -660,37 +689,12 @@
 											}
 										}
 									}
-								} else if (
-									sponsor_img_index === 0 ||
-									sponsor_img_index === 4 ||
-									sponsor_img_index === 5
-								) {
+								} else if (sponsor_img_index === 0) {
+									// xperion inner
 									for (let x = 0; x < 10; x++) {
 										for (let y = 0; y < 20; y++) {
-											if (
-												field[y * 10 + x] === (sponsor_img_index === 0 ? 1 : 2)
-											) {
-												const pos_x = x * pixels_per_block;
-												const pos_y = y * pixels_per_block;
-
-												ctx.clearRect(
-													pos_x,
-													pos_y,
-													this.field_pixel_size * 8,
-													this.field_pixel_size * 8
-												);
-												ctx.drawImage(img, pos_x, pos_y);
-											}
-										}
-									}
-								} else {
-									for (let x = 0; x < 10; x++) {
-										for (let y = 0; y < 20; y++) {
-											if (
-												((sponsor_img_index === 1 || sponsor_img_index === 2) &&
-													field[y * 10 + x] === 1) ||
-												(sponsor_img_index === 3 && field[y * 10 + x] === 2)
-											) {
+											if (field[y * 10 + x] === 2) {
+												// replace blue blocks
 												// we clear the inside of the block, but keep the border
 												const pos_x =
 													x * pixels_per_block + this.field_pixel_size;
@@ -718,14 +722,56 @@
 
 							if (
 								match_players.every(
-									player => player.last_tetris_time >= now - SIMUL_TETRIS_DELAY
+									player =>
+										player.last_tetris_time >= now - SIMUL_TETRIS_DELAY &&
+										(sponsor_img_index === 1 || player.game.data.level === 18)
 								)
 							) {
-								match_players.forEach(player => {
-									player.show_sponsor_block = true;
-								});
-
+								// clear all ongoing simul-tetris timers for this match
 								while (sync_timers.length) clearTimeout(sync_timers.pop());
+
+								match_players.forEach(player => {
+									// show sponsor block
+									player.show_sponsor_block = true;
+
+									window.cancelAnimationFrame(player.animationId);
+
+									// show the simul-tetris sign
+									const scale_start = 0;
+									const scale_end = 0.85 + Math.random() * 0.1;
+									const scale_change = scale_end - scale_start;
+									const angle = -10 + Math.random() * 20;
+									const duration = 750;
+
+									player.dom.simul_tetris.style.display = 'inline';
+									player.dom.simul_tetris.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
+
+									const start_time = Date.now();
+
+									function step() {
+										const elapsed = Date.now() - start_time;
+										const scale = easeOutElastic(
+											elapsed,
+											scale_start,
+											scale_change,
+											duration
+										);
+
+										player.dom.simul_tetris.style.transform = `scale(${scale}) rotate(${angle}deg)`;
+
+										if (elapsed < duration) {
+											player.animationId = window.requestAnimationFrame(step);
+										} else {
+											sync_timers.push(
+												setTimeout(() => {
+													player.dom.simul_tetris.style.display = 'none';
+												}, 500)
+											);
+										}
+									}
+
+									player.animationId = window.requestAnimationFrame(step);
+								});
 
 								sync_timers.push(
 									setTimeout(() => {
