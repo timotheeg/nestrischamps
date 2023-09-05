@@ -19,6 +19,9 @@ CREATE TABLE twitch_users (
 	style play_style default 'das',
 	timezone TEXT NOT NULL CHECK (now() AT TIME ZONE timezone IS NOT NULL) DEFAULT 'UTC',
 
+	elo_rank INTEGER NOT NULL DEFAULT 0,
+	elo_rating DOUBLE PRECISION NOT NULL DEFAULT 0,
+
 	created_on timestamptz NOT NULL,
 	last_login timestamptz NOT NULL
 );

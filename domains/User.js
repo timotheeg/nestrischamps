@@ -71,6 +71,9 @@ class User extends EventEmitter {
 		this.profile_image_url = user_object.profile_image_url;
 		this.dob = user_object.dob;
 
+		this.elo_rank = user_object.elo_rank || 0;
+		this.elo_rating = user_object.elo_rating || 0;
+
 		this.country_code = user_object.country_code || this.country_code || 'US';
 		this.city = user_object.city || this.city || '';
 		this.timezone = user_object.timezone || this.timezone || 'UTC';

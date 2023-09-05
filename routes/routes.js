@@ -7,6 +7,8 @@ import layouts from '../modules/layouts.js';
 import UserDAO from '../daos/UserDAO.js';
 import ScoreDAO from '../daos/ScoreDAO.js';
 
+import { readableScoreFomatter } from '../public/views/utils.js';
+
 const router = express.Router();
 
 router.get('/debug/session', (req, res) => {
@@ -140,7 +142,7 @@ function getAge(dob) {
 }
 
 router.get('/view/profile_card/:login', async (req, res) => {
-	const user = await UserDAO.getUserByLogin(req.params.login);
+	const user = await UserDAO.getUserByLogin(req.params.login, true);
 
 	if (!user) {
 		res.status(404).send('Not found');
@@ -149,8 +151,9 @@ router.get('/view/profile_card/:login', async (req, res) => {
 
 	res.render('profile_card', {
 		user,
-		age: user.dob ? getAge(user.dob) : 9,
-		pb: await ScoreDAO.getPB(user),
+		age: user.dob ? getAge(user.dob) : 9, // 😅
+		pb: readableScoreFomatter(await ScoreDAO.getPB(user)),
+		elo_rating: readableScoreFomatter(Math.floor(user.elo_rating)),
 	});
 });
 

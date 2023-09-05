@@ -116,10 +116,10 @@ class UserDAO {
 		return user;
 	}
 
-	async getUserByLogin(login) {
+	async getUserByLogin(login, force_fetch = false) {
 		let user = this.users_by_login.get(login);
 
-		if (!user) {
+		if (!user || force_fetch) {
 			const result = await dbPool.query(
 				'SELECT * FROM twitch_users WHERE login=$1',
 				[login]
@@ -131,6 +131,8 @@ class UserDAO {
 
 				if (!user) {
 					user = this.addUserFromData(result.rows[0]);
+				} else {
+					user.updateUserFields(result.rows[0]);
 				}
 			}
 		}

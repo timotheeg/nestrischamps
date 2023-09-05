@@ -19,21 +19,26 @@ html, body {
 	line-height: 24px;
 	font-size: var(--fsize);
 	color: var(--beige);
+	height: 100%;
 }
 
 .frame {
-	background: black;
+	height: 100%;
+    min-height: 100%;
+  	background: black;
 	overflow: hidden;
 	text-align: center;
-}
-
-.container {
-	padding: 6px 3px;
+	padding: 0 3px;
+	display: flex;
+	flex-direction: column;
 }
 
 #name {
 	border-bottom: 3px solid var(--beige);
 	margin-bottom: 0.5em;
+	padding-top: 6px;
+	flex-shrink: 0;
+	flex-grow: 0;
 }
 
 h1 {
@@ -50,7 +55,14 @@ h1 {
 	line-height: 48px;
 }
 
+.container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
 section {
+	flex: 1;
 	margin-top: 0.65em;
 }
 
@@ -65,9 +77,11 @@ p {
 }
 
 #twitch {
-	position: absolute;
+	flex-grow: 0;
+	flex-shrink: 0;
+	position: relative;
 	bottom: 0;
-	margin-bottom: 20px;
+	margin: 20px 0;
 	color: white;
 	width: 100%;
 }
@@ -100,49 +114,36 @@ p {
 	vertical-align: middle;
 }
 
-#play_style span {
-	margin-right: 0.2em;
-}
-
-#play_style span:last-of-type {
-	margin-right: 0;
-}
-
 </style>
 </head>
 <body>
 
 <div class="frame">
-	<div class="container">
-		<section id="name">
-			<h1><%= (user.display_name || '').replace(/^\d+\.\s+/, '') %></h1>
-		</section>
+	<section id="name">
+		<h1><%= (user.display_name || '').replace(/^\d+\.\s+/, '') %></h1>
+	</section>
 
+	<div class="container">
 		<section id="flag">
 			<h1><%= [age, user.city].filter(v => v).join(' - ') %></h1>
 			<img src="/vendor/country-flag-icons/3x2/<%= user.country_code %>.svg" width="64">
 		</section>
 
+		<section id="bio">
+			<h1>Player bio</h1>
+			<p><%= user.description %></p>
+		</section>
+
 		<section id="play_style">
 			<h1>Play info</h1>
-			<p>Style: <%= user.style %></p>
-			<p>PB: <%
+			<p class="play_style">Style: <%= (user.style || '').toUpperCase() %></p>
+			<p class="pb">PB: <%= pb %></p>
+		</section>
 
-				let remainder = pb || 0;
-				let parts = [];
-
-				while (remainder) {
-					parts.unshift(remainder % 1000);
-					remainder = Math.floor(remainder / 1000);
-				}
-
-				if (!parts.length) parts.push(0);
-
-				parts = parts
-					.map((part, idx) => idx > 0 ? `${part}`.padStart(3, '0') : part)
-					.map(part => `<span>${part}</span>`);
-
-			%><%- parts.join('') %></p>
+		<section id="elo">
+			<h1>ELO</h1>
+			<p>Rank: <%= user.elo_rank %></p>
+			<p>Rating: <%= elo_rating %></p>
 		</section>
 
 		<section id="interests">
