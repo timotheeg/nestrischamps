@@ -42,6 +42,8 @@ import ULID from 'ulid';
 			login,
 			display_name,
 			personal_best,
+			elo_rank,
+			elo_rating,
 			description,
 			profile_image_url,
 			dob,
@@ -55,9 +57,9 @@ import ULID from 'ulid';
 
 		await pool.query(
 			`INSERT INTO twitch_users
-			(id, login, email, secret, description, display_name, profile_image_url, dob, country_code, city, interests, style, created_on, last_login)
+			(id, login, email, secret, description, display_name, profile_image_url, dob, country_code, city, interests, style, elo_rank, elo_rating, created_on, last_login)
 			VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
 			`,
 			[
 				id,
@@ -72,6 +74,8 @@ import ULID from 'ulid';
 				city,
 				interests,
 				style,
+				elo_rank,
+				elo_rating,
 			]
 		);
 
