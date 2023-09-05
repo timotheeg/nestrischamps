@@ -138,12 +138,7 @@ p {
 			<h1>Play info</h1>
 			<p class="play_style">Style: <%= (user.style || '').toUpperCase() %></p>
 			<p class="pb">PB: <%= pb %></p>
-		</section>
-
-		<section id="elo">
-			<h1>ELO</h1>
-			<p>Rank: <%= user.elo_rank %></p>
-			<p>Rating: <%= elo_rating %></p>
+			<p class="pb">Elo: <%= elo_rating %> (<%= elo_rank %>)</p>
 		</section>
 
 		<section id="interests">
