@@ -150,6 +150,8 @@
 
 			.drought.active {
 				display: block;
+				animation: fadeIn ease 1s;
+				animation-fill-mode: forwards;
 			}
 
 			.flag {
@@ -166,10 +168,9 @@
 				color: #888;
 				font-size: 24.01px;
 				line-height: 32px;
-				padding: 0 3px;
 				--offset: 463px;
 				right: var(--offset);
-				width: 461px;
+				width: 464px;
 				height: unset;
 				top: unset;
 				bottom: -1023px;
@@ -184,6 +185,8 @@
 
 			.runways.visible {
 				display: flex;
+				animation: fadeIn ease 1s;
+				animation-fill-mode: forwards;
 			}
 
 			.runways .label {
@@ -466,7 +469,7 @@
 		<script type="module">
 			import '/views/bg.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import { noop, translate, readableScoreFomatter } from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
 			import CompetitionPlayer from '/views/CompetitionPlayer.js';
 			import Competition from '/views/competition.js';
@@ -508,6 +511,20 @@
 				? parseInt(QueryString.get('curtain'), 10)
 				: 0;
 
+			let hasRunways = null;
+			if (QueryString.get('runways') === '1') {
+				hasRunways = [10, 60]; // show 10 seconds every 60 seconds
+			} else {
+				const m = (QueryString.get('runways') || '').match(
+					/^([1-9]\d*),([1-9]\d*)$/
+				);
+				if (m) {
+					const show_for = parseInt(m[1], 10);
+					const repeat_in = parseInt(m[2], 10);
+					if (show_for < repeat_in) hasRunways = [show_for, repeat_in];
+				}
+			}
+
 			let images;
 
 			if (hasAds) {
@@ -532,6 +549,35 @@
 
 				const match_players = [];
 				const sync_timers = [];
+
+				let runways_interval = null;
+				let runways_timeout = null;
+
+				const showRunways = () => {
+					runways_timeout = clearTimeout(runways_timeout);
+
+					match_players.forEach(player => {
+						player.dom.runways_box.classList.add('visible');
+					});
+
+					runways_timeout = setTimeout(hideRunways, hasRunways[0] * 1000);
+				};
+
+				const hideRunways = () => {
+					match_players.forEach(player => {
+						player.dom.runways_box.classList.remove('visible');
+					});
+				};
+
+				const resetRunways = hasRunways
+					? (hide = true) => {
+							runways_interval = clearInterval(runways_interval);
+
+							if (hide) hideRunways();
+
+							runways_interval = setInterval(showRunways, hasRunways[1] * 1000);
+					  }
+					: noop;
 
 				[1, 2].forEach((player_num, player_idx) => {
 					const player_fragment = document.importNode(
@@ -616,10 +662,8 @@
 					};
 
 					player.onTransition = () => {
-						/*
-                        player.dom.runway_tr_box.querySelector('.header').textContent =
-                            'TRANSITION';
-                        /**/
+						resetRunways(false);
+						showRunways();
 					};
 
 					player.onDroughtStart = () => {
@@ -633,7 +677,7 @@
 					player.onGameStart = () => {
 						player.dom.drought_box.classList.remove('active');
 
-						const level = player.game.data.start_level;
+						const start_level = player.game.data.start_level;
 
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
 							elmt => {
@@ -651,9 +695,11 @@
 							).textContent = `0`;
 						});
 
-						player.dom.runways_box.classList[level >= 19 ? 'add' : 'remove'](
-							'hide19'
-						);
+						player.dom.runways_box.classList[
+							start_level >= 19 ? 'add' : 'remove'
+						]('hide19');
+
+						resetRunways();
 					};
 
 					if (hasAds) {
@@ -861,6 +907,7 @@
 			}
 
 			// expose API into window for debugging
+			window._players = players;
 			window._NTC_API = competition.API;
 
 			window._NTC_API.showRunways = () => {

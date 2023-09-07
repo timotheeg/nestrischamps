@@ -16,6 +16,8 @@ if (
 	};
 }
 
+export function noop() {}
+
 export function getPercent(ratio) {
 	const percent = Math.round(ratio * 100);
 
