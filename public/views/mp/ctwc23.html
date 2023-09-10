@@ -677,15 +677,13 @@
 					player.onGameStart = () => {
 						player.dom.drought_box.classList.remove('active');
 
-						const start_level = player.game.data.start_level;
-
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
 							elmt => {
 								elmt.classList.remove('active');
 							}
 						);
 
-						[(19, 29, 39)].forEach(level => {
+						[19, 29, 39].forEach(level => {
 							player.dom.runways_box.querySelector(
 								`.label .lv${level}`
 							).textContent = `L${level} RUNWAY`;
@@ -694,6 +692,8 @@
 								`.value .lv${level}`
 							).textContent = `0`;
 						});
+
+						const start_level = player.game?.data?.start_level || 18;
 
 						player.dom.runways_box.classList[
 							start_level >= 19 ? 'add' : 'remove'
