@@ -300,7 +300,7 @@ export default class TetrisOCR extends EventTarget {
 		const colors = [res.color1, res.color2, res.color3];
 
 		if (level_units != 6 && level_units != 7) {
-			// INFO: rolor for level X6 and X7 are terrible on Retron, so we don't add black to ensure they don't get mixed up
+			// INFO: colors for level X6 and X7 are terrible on Retron, so we don't add black to ensure they don't get mixed up
 			// When we use a palette
 			// TOCHECK: is this still needed now that we work in lab color space?
 			colors.unshift(DEFAULT_COLOR_0); // add black
