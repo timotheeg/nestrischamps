@@ -511,9 +511,9 @@
 				? parseInt(QueryString.get('curtain'), 10)
 				: 0;
 
-			let hasRunways = null;
+			let show_runways = false;
 			if (QueryString.get('runways') === '1') {
-				hasRunways = [10, 60]; // show 10 seconds every 60 seconds
+				show_runways = true;
 			} else {
 				const m = (QueryString.get('runways') || '').match(
 					/^([1-9]\d*),([1-9]\d*)$/
@@ -521,7 +521,7 @@
 				if (m) {
 					const show_for = parseInt(m[1], 10);
 					const repeat_in = parseInt(m[2], 10);
-					if (show_for < repeat_in) hasRunways = [show_for, repeat_in];
+					if (show_for < repeat_in) show_runways = [show_for, repeat_in];
 				}
 			}
 
@@ -560,7 +560,7 @@
 						player.dom.runways_box.classList.add('visible');
 					});
 
-					runways_timeout = setTimeout(hideRunways, hasRunways[0] * 1000);
+					runways_timeout = setTimeout(hideRunways, show_runways[0] * 1000);
 				};
 
 				const hideRunways = () => {
@@ -569,13 +569,16 @@
 					});
 				};
 
-				const resetRunways = hasRunways
+				const resetRunways = Array.isArray(show_runways)
 					? (hide = true) => {
 							runways_interval = clearInterval(runways_interval);
 
 							if (hide) hideRunways();
 
-							runways_interval = setInterval(showRunways, hasRunways[1] * 1000);
+							runways_interval = setInterval(
+								showRunways,
+								show_runways[1] * 1000
+							);
 					  }
 					: noop;
 
@@ -632,6 +635,17 @@
 						}
 					);
 
+					if (show_runways === true) {
+						// permanently visible
+						player_node.querySelector(`.runways`).classList.add('visible');
+					} else if (Array.isArray(show_runways)) {
+						// visible on interval and on transition
+						player.onTransition = () => {
+							resetRunways(false);
+							showRunways();
+						};
+					}
+
 					if (isDAS) {
 						player_node.querySelector(`.runways`).classList.add('hide39');
 					}
@@ -659,11 +673,6 @@
 								).textContent = `L${frame.raw.level} SCORE`;
 							}
 						}
-					};
-
-					player.onTransition = () => {
-						resetRunways(false);
-						showRunways();
 					};
 
 					player.onDroughtStart = () => {
