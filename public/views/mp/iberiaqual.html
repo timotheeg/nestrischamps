@@ -9,10 +9,6 @@
 				top: 12px;
 			}
 
-			.no-video .player {
-				top: 410px;
-			}
-
 			.box {
 				width: 338px;
 				border-image-source: url(/views/border_3px.png);
@@ -24,9 +20,11 @@
 				border-image-source: url(/views/border_3px_iberia2.png);
 			}
 			video.box {
+				/* background: yellow; */
 				height: 181px;
 				width: 338px;
 			}
+
 			.board {
 				width: 338px;
 				--border-size: 12;
@@ -90,6 +88,21 @@
 				height: 40px;
 				width: 53px;
 			}
+
+			.player.focus {
+				top: -80px;
+				left: 50px;
+			}
+
+			.player.focus video.box {
+				border: 0;
+				border-image-slice: unset;
+				border-image-source: unset;
+				width: 1920px;
+				height: 1080px;
+				left: -50px;
+				top: 80px;
+			}
 		</style>
 	</head>
 	<body>
@@ -126,8 +139,8 @@
 			<script>
 				// custom view parameters which will be passed in the websocket URI
 				const view_meta = new URLSearchParams({
-					video: '352x240',
-					players: 3,
+					video: '1920x1080',
+					players: 5,
 				});
 			</script>
 			<script src="/vendor/peerjs.1.4.7.min.js"></script>
@@ -162,11 +175,9 @@
 
 				window.onload = () => {
 					// wait for css
-					const base_offset_y = 20;
-
-					Array(num_players)
+					const players = Array(num_players)
 						.fill()
-						.forEach((_, player_idx) => {
+						.map((_, player_idx) => {
 							const player_fragment = document.importNode(
 								player_template.content,
 								true
@@ -185,6 +196,8 @@
 									preview: player_node.querySelector(`.next .next_piece`),
 									field: player_node.querySelector(`.board`),
 									video: player_node.querySelector(`video`),
+
+									node: player_node,
 								},
 								{
 									field_pixel_size: 4.27,
@@ -208,20 +221,110 @@
 
 							player.onGameOver();
 
-							players.push(player);
-
 							Object.assign(player_node.style, {
 								left: `${Math.round(
 									spacer + player_idx * (player_width + spacer)
 								)}px`,
 							});
+
+							player._layout_data = {
+								left: player_node.style.left,
+							};
+
+							return player;
 						});
 
 					const competition = new Competition(players);
 
-					if (!competition.has_video) {
-						stream_bg.classList.add('no-video');
-					}
+					competition.API.focusPlayer = player_idx => {
+						if (player_idx === null) {
+							players.forEach(player => {
+								player.dom.node.classList.remove('focus');
+								player.dom.node.style.transform = null;
+								player.dom.node.style.zIndex = null;
+								player.dom.node.style.top = null;
+								player.dom.node.style.right = null;
+								player.dom.node.style.left = player._layout_data.left;
+							});
+							return;
+						}
+
+						const players_copy = [...players];
+						const focus_player = players_copy.splice(player_idx, 1)[0];
+
+						// position focus player
+						if (focus_player) {
+							focus_player.dom.node.classList.add('focus');
+							Object.assign(focus_player.dom.node.style, {
+								left: null,
+								right: null,
+								top: null,
+								zIndex: 0,
+								transform: 'scale(1)',
+							});
+						}
+
+						const baseStyles = {
+							left: 'unset',
+							zIndex: 1,
+							transform: 'scale(0.5)',
+							right: '-36px',
+							top: '37px',
+						};
+
+						players_copy.forEach(player => {
+							player.dom.node.classList.remove('focus');
+						});
+
+						// position remainding players
+						if (players_copy.length == 4) {
+							Object.assign(players_copy[0].dom.node.style, {
+								...baseStyles,
+								right: `${-36 + player_width / 2}px`,
+								top: '37px',
+							});
+							Object.assign(players_copy[1].dom.node.style, {
+								...baseStyles,
+							});
+							Object.assign(players_copy[2].dom.node.style, {
+								...baseStyles,
+								right: `${-36 + player_width / 2}px`,
+								top: '538px',
+							});
+							Object.assign(players_copy[3].dom.node.style, {
+								...baseStyles,
+								top: '538px',
+							});
+						} else if (players_copy.length == 3) {
+							Object.assign(players_copy[0].dom.node.style, {
+								...baseStyles,
+								right: `${-36 + player_width / 2}px`,
+								top: '37px',
+							});
+							Object.assign(players_copy[1].dom.node.style, {
+								...baseStyles,
+								top: '37px',
+							});
+							Object.assign(players_copy[2].dom.node.style, {
+								...baseStyles,
+								top: '538px',
+							});
+						} else if (players_copy.length == 2) {
+							Object.assign(players_copy[0].dom.node.style, {
+								...baseStyles,
+							});
+							Object.assign(players_copy[1].dom.node.style, {
+								...baseStyles,
+								top: '538px',
+							});
+						} else if (players_copy.length == 1) {
+							Object.assign(players_copy[0].dom.node.style, {
+								...baseStyles,
+							});
+						}
+					};
+
+					window._NTC_API = competition.API;
 				};
 			</script>
 		</div>

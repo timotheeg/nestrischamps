@@ -487,6 +487,11 @@ class MatchRoom extends Room {
 					break; // simple passthrough
 				}
 
+				case 'focusPlayer': {
+					update_admin = false;
+					break; // simple passthrough
+				}
+
 				case 'setDisplayName': {
 					const [p_num, name] = args;
 

@@ -7,6 +7,7 @@ const dom = {
 	clear_victories: document.querySelector('#clear_victories'),
 	show_runways: document.querySelector('#show_runways'),
 	hide_runways: document.querySelector('#hide_runways'),
+	focus_none: document.querySelector('#focus_none'),
 	player_link: document.querySelector('#player_link'),
 	show_match_controls: document.querySelector('#show_match_controls'),
 	show_profile_cards_controls: document.querySelector(
@@ -90,6 +91,9 @@ const remoteAPI = {
 	allowAutoJoin: function (allow) {
 		connection.send(['allowAutoJoin', allow]);
 	},
+	focusPlayer: function (player_idx) {
+		connection.send(['focusPlayer', player_idx]);
+	},
 };
 
 const players = [];
@@ -164,6 +168,10 @@ class Player {
 
 		this.dom.camera_mirror_btn.onclick = () => {
 			remoteAPI.mirrorCamera(this.idx);
+		};
+
+		this.dom.focus_player_btn.onclick = () => {
+			remoteAPI.focusPlayer(this.idx);
 		};
 	}
 
@@ -358,6 +366,7 @@ function addPlayer() {
 		remove_btn: player_node.querySelector('.remove_player'),
 		camera_restart_btn: player_node.querySelector('.camera_restart'),
 		camera_mirror_btn: player_node.querySelector('.camera_mirror'),
+		focus_player_btn: player_node.querySelector('.focus_player'),
 	});
 
 	players_node.appendChild(player_node);
@@ -390,6 +399,10 @@ function bootstrap() {
 
 	dom.hide_runways.addEventListener('click', () => {
 		remoteAPI.hideRunways();
+	});
+
+	dom.focus_none.addEventListener('click', () => {
+		remoteAPI.focusPlayer(null);
 	});
 
 	dom.add_player.addEventListener('click', () => {
