@@ -157,7 +157,6 @@
 
 				const players_re = /^[2345]$/;
 				const player_width = 367;
-				const players = [];
 
 				if (QueryString.get('border') === '1') {
 					stream_bg.classList.add('transp');
@@ -241,6 +240,7 @@
 							players.forEach(player => {
 								player.dom.node.classList.remove('focus');
 								player.dom.node.style.transform = null;
+								player.dom.node.style.transformOrigin = null;
 								player.dom.node.style.zIndex = null;
 								player.dom.node.style.top = null;
 								player.dom.node.style.right = null;
@@ -259,8 +259,9 @@
 								left: null,
 								right: null,
 								top: null,
+								transform: null,
+								transformOrigin: null,
 								zIndex: 0,
-								transform: 'scale(1)',
 							});
 						}
 
@@ -268,7 +269,8 @@
 							left: 'unset',
 							zIndex: 1,
 							transform: 'scale(0.5)',
-							right: '-36px',
+							transformOrigin: 'top right',
+							right: '50px',
 							top: '37px',
 						};
 
@@ -280,15 +282,14 @@
 						if (players_copy.length == 4) {
 							Object.assign(players_copy[0].dom.node.style, {
 								...baseStyles,
-								right: `${-36 + player_width / 2}px`,
-								top: '37px',
+								right: `${50 + player_width / 2}px`,
 							});
 							Object.assign(players_copy[1].dom.node.style, {
 								...baseStyles,
 							});
 							Object.assign(players_copy[2].dom.node.style, {
 								...baseStyles,
-								right: `${-36 + player_width / 2}px`,
+								right: `${50 + player_width / 2}px`,
 								top: '538px',
 							});
 							Object.assign(players_copy[3].dom.node.style, {
@@ -298,12 +299,10 @@
 						} else if (players_copy.length == 3) {
 							Object.assign(players_copy[0].dom.node.style, {
 								...baseStyles,
-								right: `${-36 + player_width / 2}px`,
-								top: '37px',
+								right: `${50 + player_width / 2}px`,
 							});
 							Object.assign(players_copy[1].dom.node.style, {
 								...baseStyles,
-								top: '37px',
 							});
 							Object.assign(players_copy[2].dom.node.style, {
 								...baseStyles,
