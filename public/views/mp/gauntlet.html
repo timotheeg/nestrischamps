@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.match {
+				position: absolute;
+				left: 960px;
+				top: 0;
+			}
+
+			.box {
+				padding: 3px;
+				font-size: 24.01px;
+				line-height: 24px;
+				height: 51px;
+			}
+
+			.box .header {
+				padding-bottom: 10px;
+			}
+
+			.board,
+			.score,
+			.next_piece {
+				--offset: 0;
+				right: var(--offset);
+			}
+
+			.score {
+				width: 313px;
+				padding-right: 0;
+				height: 100px;
+				top: 59px;
+			}
+
+			.score .header {
+				padding-bottom: 10px;
+			}
+
+			.score .aligner {
+				padding-top: 0px;
+				padding-bottom: 13px;
+
+				display: inline-block;
+				font-size: 36.01px;
+				line-height: 32px;
+			}
+
+			.aligner div {
+				text-align: right;
+			}
+
+			.aligner .value {
+				padding-bottom: 6px;
+			}
+
+			.lines,
+			.next_piece {
+				top: 194px;
+				width: 137px;
+				height: 61px;
+			}
+
+			.lines {
+				padding-top: 8px;
+				width: 140px;
+				padding-right: 0;
+				--offset: 173px;
+				right: var(--offset);
+			}
+
+			.lines .header {
+				padding-bottom: 10px;
+			}
+
+			.next_piece {
+				height: 66px;
+			}
+
+			.board {
+				--offset: -1px;
+				--border-size: 12;
+				padding: 3px;
+				width: 316px;
+				height: 636px;
+				top: 296px;
+			}
+
+			.name,
+			.tetris_rate,
+			.drought,
+			.level {
+				width: 90px;
+				padding-right: 0;
+				--offset: 377px;
+				right: var(--offset);
+			}
+
+			.name,
+			.flag,
+			.runways {
+				top: 952px;
+			}
+
+			.name,
+			.flag {
+				display: none;
+			}
+
+			.name {
+				--offset: 0;
+				width: 313px;
+				height: 64px;
+			}
+
+			.name .header {
+				font-size: 24.01px; /* sad -_- */
+				padding-top: 6px;
+				padding-bottom: 9px;
+			}
+
+			.name .content {
+				color: #b0afb0;
+				letter-spacing: 5px;
+				text-indent: 5px;
+			}
+
+			.name .content .win {
+				color: #fb0204;
+			}
+
+			.level,
+			.tetris_rate,
+			.drought {
+				--offset: 345px;
+				padding-top: 5px;
+				height: 61px;
+			}
+
+			.tetris_rate,
+			.drought {
+				top: 865px;
+			}
+
+			.level {
+				top: 766px;
+				width: 63px;
+			}
+
+			.drought {
+				color: red;
+				display: none;
+			}
+
+			.drought.active {
+				display: block;
+				animation: fadeIn ease 1s;
+				animation-fill-mode: forwards;
+			}
+
+			.flag {
+				padding: 0;
+				--offset: 337px;
+				right: var(--offset);
+				width: 105px;
+				height: 70px;
+			}
+
+			.runways {
+				display: none;
+				justify-content: space-between;
+				color: #888;
+				font-size: 24.01px;
+				line-height: 32px;
+				--offset: 463px;
+				right: var(--offset);
+				width: 464px;
+				height: unset;
+				top: unset;
+				bottom: -1023px;
+				--border-size: 12;
+				padding: 3px 3px 0 6px;
+			}
+
+			.runways.hide19 .lv19,
+			.runways.hide39 .lv39 {
+				display: none;
+			}
+
+			.runways.visible {
+				display: flex;
+				animation: fadeIn ease 1s;
+				animation-fill-mode: forwards;
+			}
+
+			.runways .label {
+				text-align: left;
+			}
+
+			.runways .value {
+				text-align: right;
+			}
+
+			.runways .active {
+				color: #fff;
+			}
+
+			.simul-tetris {
+				display: none;
+				position: absolute;
+				transform-origin: 50% 50%;
+				top: 150px;
+				--offset: 341px;
+				right: var(--offset);
+			}
+
+			.top-banner,
+			.bottom-banner {
+				position: absolute;
+				/* background: orange; */
+				width: 100%;
+			}
+
+			.top-banner {
+				top: 0;
+				height: 110px;
+			}
+
+			.bottom-banner {
+				bottom: 0;
+				height: 120px;
+			}
+
+			#gauntlet-overlay {
+				position: absolute;
+				z-index: 1000;
+				top: 0;
+				left: 0;
+				width: 1920px;
+				height: 1080px;
+				background: url(/images/gauntlet.png);
+				display: none;
+			}
+
+			.p2 > * {
+				left: var(--offset);
+			}
+
+			.p2 .lines {
+				left: 0;
+			}
+			.p2 .next_piece {
+				left: 172px;
+			}
+			.p2 .board {
+				--offset: 0;
+			}
+
+			.player_vid {
+				position: absolute;
+				top: 110px;
+				width: 618px;
+				height: 850px;
+				padding: 0;
+				object-fit: cover;
+				/* background: yellow; /**/
+
+				--offset: 342px;
+				right: var(--offset);
+			}
+
+			#ticker {
+				position: absolute;
+				width: 1920px;
+				height: 57px;
+				top: 1023px;
+				/* background: orange;
+				opacity: 0.5; /**/
+			}
+
+			.match.small {
+				transform: scale(0.7680180180180181); /* (1080-57)/666/2 */
+			}
+			#match2.small {
+				top: 511px;
+			}
+
+			.match.small .runways {
+				display: none;
+			}
+
+			.match.small .score,
+			.match.small .name,
+			.match.small .level,
+			.match.small .lines,
+			.match.small .next_piece {
+				--offset: 337px;
+			}
+
+			.match.small .next_piece {
+				z-index: 4;
+				top: 135px;
+			}
+
+			.match.small .lines {
+				z-index: 3;
+				width: 144px;
+				top: 221px;
+			}
+
+			.match.small .level {
+				z-index: 2;
+				top: 307px;
+			}
+
+			.match.small .tetris_rate,
+			.match.small .drought {
+				top: 390px;
+				z-index: 1;
+			}
+
+			.match.small .score {
+				width: 271px;
+				height: 108px;
+			}
+
+			.match.small .score .tetris_diff {
+				visibility: hidden;
+			}
+
+			.match.small .score .header {
+				padding-bottom: 12px;
+			}
+
+			.match.small .score .aligner {
+				font-size: 30.01px;
+				line-height: 30px;
+			}
+
+			.match.small .board {
+				top: 0;
+				z-index: 8;
+			}
+			.match.small .score {
+				z-index: 7;
+			}
+			.match.small .flag,
+			.match.small .name {
+				z-index: 6;
+				top: 0;
+			}
+			.match.small .name {
+				width: 459px;
+				--offset: 632px;
+			}
+			.match.small .flag {
+				--offset: 1115px;
+			}
+			.match.small .player_vid {
+				top: 94px;
+				width: 909px;
+				height: 572px;
+				--offset: 341px;
+			}
+
+			.match.small .simul-tetris {
+				top: 250px;
+				--offset: 574px;
+			}
+
+			.match.small .p2 > * {
+				left: var(--offset);
+			}
+		</style>
+	</head>
+	<body>
+		<template id="curtain_0">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<img src="/images/ctwc_das_400.png" style="max-width: 220px" />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img src="/images/sponsors/logo-experion.svg" style="width: 280px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.png" />
+			</div>
+		</template>
+		<template id="curtain_1">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 220px" />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.png" />
+				<br />
+			</div>
+		</template>
+		<template id="player">
+			<div class="player">
+				<video class="player_vid"></video>
+
+				<div class="box name">
+					<div class="header">PLAYER 1</div>
+					<div class="content">&#338;&#338;&#338;</div>
+				</div>
+
+				<div class="box lines">
+					<div class="header">LINES</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box next_piece"></div>
+
+				<div class="box score">
+					<div class="header">SCORE</div>
+					<div class="aligner">
+						<div class="value">0&#x202F;000&#x202F;000</div>
+						<div class="diff winning">0&#x202F;000&#x202F;000</div>
+					</div>
+				</div>
+
+				<div class="box runways">
+					<div class="label">
+						<div class="lv19">L19&#x202F;RUNWAY</div>
+						<div class="lv29">L29&#x202F;RUNWAY</div>
+						<div class="lv39">L39&#x202F;RUNWAY</div>
+					</div>
+					<div class="value">
+						<div class="lv19">000&#x202F;000</div>
+						<div class="lv29">0&#x202F;000&#x202F;000</div>
+						<div class="lv39">0&#x202F;000&#x202F;000</div>
+					</div>
+				</div>
+
+				<div class="box level">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box tetris_rate">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box board"></div>
+
+				<div class="box flag"></div>
+
+				<img class="simul-tetris" src="/images/simul-tetris.png" />
+			</div>
+		</template>
+
+		<div id="stream_bg">
+			<div class="top-banner"></div>
+			<div class="bottom-banner"></div>
+			<div id="gauntlet-overlay"></div>
+			<div id="match1" class="match small"></div>
+			<div id="match2" class="match small"></div>
+
+			<div id="ticker"></div>
+
+			<div id="playing_fields">
+				<!-- divider -->
+
+				<!-- Player 1 -->
+				<!-- Player 2 -->
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '1920x1080', // urgh, so big for so much space wasted :(
+				concurrent_2_matches: false,
+				players: ,
+			});
+		</script>
+		<script src="/vendor/peerjs.1.4.7.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { noop, translate, readableScoreFomatter } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CompetitionPlayer from '/views/CompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+
+			// Penner easing
+			// http://robertpenner.com/easing/
+			function easeOutElastic(t, b, c, d) {
+				var s = 1.70158;
+				var p = 0;
+				var a = c;
+				if (t == 0) return b;
+				if ((t /= d) >= 1) return b + c;
+				if (!p) p = d * 0.3;
+				if (a < Math.abs(c)) {
+					a = c;
+					var s = p / 4;
+				} else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+				return (
+					a *
+						Math.pow(2, -10 * t) *
+						Math.sin(((t * d - s) * (2 * Math.PI)) / p) +
+					c +
+					b
+				);
+			}
+
+			const isDAS = false && QueryString.get('style') === 'das';
+			const hasAds = false && QueryString.get('ads') === '1';
+
+			const SIMUL_TETRIS_DELAY = /^[1-9]\d*$/.test(QueryString.get('simultris'))
+				? parseInt(QueryString.get('simultris'), 10)
+				: 200;
+
+			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
+				? parseInt(QueryString.get('sponsorimg'), 10)
+				: 0;
+
+			const curtain_num = /^[01]$/.test(QueryString.get('curtain'))
+				? parseInt(QueryString.get('curtain'), 10)
+				: 0;
+
+			let show_runways = false;
+			if (QueryString.get('runways') === '1') {
+				show_runways = true;
+			} else {
+				const m = (QueryString.get('runways') || '').match(
+					/^([1-9]\d*),([1-9]\d*)$/
+				);
+				if (m) {
+					const show_for = parseInt(m[1], 10);
+					const repeat_in = parseInt(m[2], 10);
+					if (show_for < repeat_in) show_runways = [show_for, repeat_in];
+				}
+			}
+
+			if (QueryString.get('overlay') === '1') {
+				document.getElementById('gauntlet-overlay').style.display = 'block';
+			}
+
+			let images;
+
+			if (hasAds) {
+				images = [
+					'/images/sponsors/ctwcdas_inner_20.png',
+					'/images/sponsors/gfuel_30.png',
+				].map(url => {
+					const img = new Image();
+					img.src = url;
+					return img;
+				});
+			}
+
+			const curtain_template = document.getElementById(
+				`curtain_${curtain_num}`
+			);
+			const player_template = document.getElementById('player');
+			const players = [];
+
+			[1].forEach(match_num => {
+				const match_node = document.getElementById(`match${match_num}`);
+
+				const match_players = [];
+				const sync_timers = [];
+
+				let runways_interval = null;
+				let runways_timeout = null;
+
+				const showRunways = () => {
+					runways_timeout = clearTimeout(runways_timeout);
+
+					match_players.forEach(player => {
+						player.dom.runways_box.classList.add('visible');
+					});
+
+					runways_timeout = setTimeout(hideRunways, show_runways[0] * 1000);
+				};
+
+				const hideRunways = () => {
+					match_players.forEach(player => {
+						player.dom.runways_box.classList.remove('visible');
+					});
+				};
+
+				const resetRunways = Array.isArray(show_runways)
+					? (hide = true) => {
+							runways_interval = clearInterval(runways_interval);
+
+							if (hide) hideRunways();
+
+							runways_interval = setInterval(
+								showRunways,
+								show_runways[1] * 1000
+							);
+					  }
+					: noop;
+
+				[1, 2].forEach((player_num, player_idx) => {
+					const player_fragment = document.importNode(
+						player_template.content,
+						true
+					);
+					const player_node = player_fragment.querySelector('.player');
+
+					player_node.classList.add(`p${player_num}`);
+					match_node.appendChild(player_node);
+
+					const curtain_fragment = document.importNode(
+						curtain_template.content,
+						true
+					);
+					const curtain = curtain_fragment.querySelector('.custom_curtain');
+
+					const player = new CompetitionPlayer(
+						{
+							name: player_node.querySelector(`.name .header`),
+							score: player_node.querySelector(`.score .value`),
+							level: player_node.querySelector(`.level .content`),
+							lines: player_node.querySelector(`.lines .content`),
+							trt: player_node.querySelector(`.tetris_rate .content`),
+							preview: player_node.querySelector(`.next_piece`),
+							field: player_node.querySelector(`.board`),
+							drought: player_node.querySelector(`.drought .value`),
+
+							runway_lv19: player_node.querySelector(`.runways .value .lv19`),
+							runway_lv29: player_node.querySelector(`.runways .value .lv29`),
+							runway_lv39: player_node.querySelector(`.runways .value .lv39`),
+
+							diff: player_node.querySelector(`.score .diff`),
+
+							runways_box: player_node.querySelector(`.runways`),
+
+							hearts: player_node.querySelector(`.name .content`),
+							drought_box: player_node.querySelector(`.drought`),
+							video: player_node.querySelector(`.player_vid`),
+							flag: player_node.querySelector(`.flag`),
+
+							// curtain,
+							simul_tetris: player_node.querySelector(`.simul-tetris`),
+						},
+						{
+							field_pixel_size: 4,
+							running_trt_dot_size: 5,
+							preview_pixel_size: 3.5,
+							format_score: v => readableScoreFomatter(v),
+							stereo: translate([1, 2], [-1, 1], player_num),
+						}
+					);
+
+					if (show_runways === true) {
+						// permanently visible
+						player_node.querySelector(`.runways`).classList.add('visible');
+					} else if (Array.isArray(show_runways)) {
+						// visible on interval and on transition
+						player.onTransition = () => {
+							resetRunways(false);
+							showRunways();
+						};
+					}
+
+					if (isDAS) {
+						player_node.querySelector(`.runways`).classList.add('hide39');
+					}
+
+					player.onLevel = frame => {
+						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+							elmt => {
+								elmt.classList.remove('active');
+							}
+						);
+
+						for (const threshold_level of [19, 29, 39]) {
+							if (frame.raw.level < threshold_level) {
+								[
+									...player.dom.runways_box.querySelectorAll(
+										`.lv${threshold_level}`
+									),
+								].forEach(elmt => {
+									elmt.classList.add('active');
+								});
+								break;
+							} else if (frame.raw.level === threshold_level) {
+								player.dom.runways_box.querySelector(
+									`.label .lv${threshold_level}`
+								).textContent = `L${frame.raw.level} SCORE`;
+							}
+						}
+					};
+
+					player.onDroughtStart = () => {
+						player.dom.drought_box.classList.add('active');
+					};
+
+					player.onDroughtEnd = () => {
+						player.dom.drought_box.classList.remove('active');
+					};
+
+					player.onGameStart = () => {
+						player.dom.drought_box.classList.remove('active');
+
+						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+							elmt => {
+								elmt.classList.remove('active');
+							}
+						);
+
+						[19, 29, 39].forEach(level => {
+							player.dom.runways_box.querySelector(
+								`.label .lv${level}`
+							).textContent = `L${level} RUNWAY`;
+
+							player.dom.runways_box.querySelector(
+								`.value .lv${level}`
+							).textContent = `0`;
+						});
+
+						const start_level = player.game?.data?.start_level || 18;
+
+						player.dom.runways_box.classList[
+							start_level >= 19 ? 'add' : 'remove'
+						]('hide19');
+
+						resetRunways();
+					};
+
+					if (hasAds) {
+						// custom branding
+						player._renderField = player.renderField;
+
+						const draw_cycle = 60;
+
+						const img = images[sponsor_img_index];
+
+						player.renderField = function (level, field) {
+							this._renderField(level, field);
+
+							if (this.show_sponsor_block) {
+								const pixels_per_block = this.field_pixel_size * (7 + 1);
+
+								const ctx = this.field_ctx;
+
+								ctx.fillStyle = 'rgba(0,0,0,0)';
+
+								if (sponsor_img_index === 1) {
+									// gfuel
+									for (let x = 0; x < 10; x++) {
+										for (let y = 0; y < 20; y++) {
+											if (field[y * 10 + x] === 1) {
+												const pos_x = x * pixels_per_block - 1;
+												const pos_y = y * pixels_per_block - 1;
+
+												ctx.clearRect(
+													pos_x,
+													pos_y,
+													this.field_pixel_size * 8,
+													this.field_pixel_size * 8
+												);
+												ctx.drawImage(img, pos_x, pos_y);
+											}
+										}
+									}
+								} else if (sponsor_img_index === 0) {
+									// xperion inner
+									for (let x = 0; x < 10; x++) {
+										for (let y = 0; y < 20; y++) {
+											if (field[y * 10 + x] === 2) {
+												// replace blue blocks
+												// we clear the inside of the block, but keep the border
+												const pos_x =
+													x * pixels_per_block + this.field_pixel_size;
+												const pos_y =
+													y * pixels_per_block + this.field_pixel_size;
+
+												ctx.clearRect(
+													pos_x,
+													pos_y,
+													this.field_pixel_size * 5,
+													this.field_pixel_size * 5
+												);
+												ctx.drawImage(img, pos_x, pos_y);
+											}
+										}
+									}
+								}
+							}
+						};
+
+						player.onTetris = function () {
+							const now = Date.now();
+
+							player.last_tetris_time = now;
+
+							if (
+								match_players.every(
+									player =>
+										player.last_tetris_time >= now - SIMUL_TETRIS_DELAY &&
+										(sponsor_img_index === 1 || player.game.data.level === 18)
+								)
+							) {
+								// clear all ongoing simul-tetris timers for this match
+								while (sync_timers.length) clearTimeout(sync_timers.pop());
+
+								match_players.forEach(player => {
+									// show sponsor block
+									player.show_sponsor_block = true;
+
+									window.cancelAnimationFrame(player.animationId);
+
+									// show the simul-tetris sign
+									const scale_start = 0;
+									const scale_end = 0.85 + Math.random() * 0.1;
+									const scale_change = scale_end - scale_start;
+									const angle = -10 + Math.random() * 20;
+									const duration = 750;
+
+									player.dom.simul_tetris.style.display = 'inline';
+									player.dom.simul_tetris.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
+
+									const start_time = Date.now();
+
+									function step() {
+										const elapsed = Date.now() - start_time;
+										const scale = easeOutElastic(
+											elapsed,
+											scale_start,
+											scale_change,
+											duration
+										);
+
+										player.dom.simul_tetris.style.transform = `scale(${scale}) rotate(${angle}deg)`;
+
+										if (elapsed < duration) {
+											player.animationId = window.requestAnimationFrame(step);
+										} else {
+											sync_timers.push(
+												setTimeout(() => {
+													player.dom.simul_tetris.style.display = 'none';
+												}, 500)
+											);
+										}
+									}
+
+									player.animationId = window.requestAnimationFrame(step);
+								});
+
+								sync_timers.push(
+									setTimeout(() => {
+										players.forEach(player => {
+											player.show_sponsor_block = false;
+										});
+									}, 6000)
+								);
+							}
+						};
+					}
+
+					match_players.push(player);
+					players.push(player);
+				});
+			});
+
+			const competition = new Competition(players);
+
+			competition.API.setMatch = function (match_idx) {
+				if (match_idx !== 0 && match_idx !== 1) {
+					document.querySelectorAll('.match').forEach(match_node => {
+						match_node.classList.add('small');
+						match_node.style.display = null;
+					});
+
+					return;
+				}
+
+				let show_match, hide_match;
+
+				if (match_idx === 0) {
+					show_match = document.querySelector('#match1');
+					hide_match = document.querySelector('#match2');
+				} else {
+					show_match = document.querySelector('#match2');
+					hide_match = document.querySelector('#match1');
+				}
+
+				show_match.classList.remove('small');
+
+				hide_match.style.display = 'none';
+				show_match.style.display = null;
+			};
+
+			competition.API.showProfileCard = function (visible, match_idx) {
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
+
+				match_players.forEach(player => player.showProfileCard(visible));
+			};
+
+			competition.API.setWinner = function (player_idx) {
+				const match_idx = player_idx < 2 ? 0 : 1;
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
+
+				const winner = players[player_idx];
+				const loser = match_players.find(player => player !== winner);
+
+				loser.showLoserFrame();
+				winner.playWinnerAnimation();
+			};
+
+			for (let player_idx = 0; player_idx < players.length; player_idx += 2) {
+				const match_players = players.slice(player_idx, player_idx + 2);
+
+				const updateMatchStats = () => {
+					competition.computeScoreDifferentials(match_players);
+				};
+
+				match_players.forEach(player => {
+					player.onScore = updateMatchStats;
+				});
+			}
+
+			competition.API.setMatch(0);
+
+			// expose API into window for debugging
+			window._players = players;
+			window._NTC_API = competition.API;
+
+			window._NTC_API.showRunways = () => {
+				[...document.querySelectorAll('.runways')].forEach(elmt =>
+					elmt.classList.add('visible')
+				);
+			};
+			window._NTC_API.hideRunways = () => {
+				[...document.querySelectorAll('.runways')].forEach(elmt =>
+					elmt.classList.remove('visible')
+				);
+			};
+		</script>
+	</body>
+</html>
