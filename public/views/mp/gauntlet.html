@@ -429,7 +429,7 @@
 
 			const TEAMS = {
 				auxcord: {},
-				rogue: {},
+				rogues: {},
 				sam: {},
 				ss: {},
 				topdown: {},
@@ -559,6 +559,8 @@
 					  }
 					: noop;
 
+				const sheet = new CSSStyleSheet();
+
 				[1, 2].forEach((player_num, player_idx) => {
 					const player_fragment = document.importNode(
 						player_template.content,
@@ -620,6 +622,10 @@
 					if (teams[player_idx]) {
 						player.setCurtainLogo(
 							`/images/gauntlet/logos/${teams[player_idx]}.png`
+						);
+
+						sheet.insertRule(
+							`.p${player_num} .box { border-image-source: url('/images/gauntlet/borders/${teams[player_idx]}.png'); }`
 						);
 					}
 
@@ -833,6 +839,9 @@
 					match_players.push(player);
 					players.push(player);
 				});
+
+				// Combine the existing sheets and new one
+				document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 			});
 
 			const competition = new Competition(players);
