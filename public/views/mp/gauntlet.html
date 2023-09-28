@@ -15,6 +15,8 @@
 			}
 
 			.box {
+				--border-size: 17;
+				border-image-source: url('/images/gauntlet/borders/topdown.png');
 				padding: 3px;
 				font-size: 24.01px;
 				line-height: 24px;
@@ -32,11 +34,18 @@
 				right: var(--offset);
 			}
 
+			.score,
+			.board,
+			.lines,
+			.name {
+				--offset: -1px;
+			}
+
 			.score {
-				width: 313px;
+				width: 311px;
 				padding-right: 0;
 				height: 100px;
-				top: 59px;
+				top: 53px;
 			}
 
 			.score .header {
@@ -62,14 +71,14 @@
 
 			.lines,
 			.next_piece {
-				top: 194px;
-				width: 137px;
+				top: 191px;
+				width: 136px;
 				height: 61px;
 			}
 
 			.lines {
 				padding-top: 8px;
-				width: 140px;
+				width: 137px;
 				padding-right: 0;
 				--offset: 173px;
 				right: var(--offset);
@@ -80,42 +89,36 @@
 			}
 
 			.next_piece {
+				--offset: -1px;
 				height: 66px;
 			}
 
 			.board {
-				--offset: -1px;
-				--border-size: 12;
-				padding: 3px;
+				--border-size: 13;
+				padding: 4px 3px;
 				width: 316px;
 				height: 636px;
-				top: 296px;
+				top: 295px;
 			}
 
 			.name,
 			.tetris_rate,
 			.drought,
 			.level {
-				width: 90px;
+				width: 86px;
 				padding-right: 0;
-				--offset: 377px;
 				right: var(--offset);
 			}
 
 			.name,
 			.flag,
 			.runways {
-				top: 952px;
-			}
-
-			.name,
-			.flag {
-				display: none;
+				top: 963px;
 			}
 
 			.name {
-				--offset: 0;
-				width: 313px;
+				--offset: -1px;
+				width: 311px;
 				height: 64px;
 			}
 
@@ -137,20 +140,26 @@
 
 			.level,
 			.tetris_rate,
-			.drought {
+			.drought,
+			.flag {
 				--offset: 345px;
+			}
+
+			.level,
+			.tetris_rate,
+			.drought {
 				padding-top: 5px;
-				height: 61px;
+				height: 59px;
 			}
 
 			.tetris_rate,
 			.drought {
-				top: 865px;
+				top: 864px;
 			}
 
 			.level {
-				top: 766px;
-				width: 63px;
+				top: 765px;
+				width: 59px;
 			}
 
 			.drought {
@@ -166,7 +175,6 @@
 
 			.flag {
 				padding: 0;
-				--offset: 337px;
 				right: var(--offset);
 				width: 105px;
 				height: 70px;
@@ -246,6 +254,7 @@
 				height: 1080px;
 				background: url(/images/gauntlet.png);
 				display: none;
+				/* opacity: 0.3; /**/
 			}
 
 			.p2 > * {
@@ -253,13 +262,10 @@
 			}
 
 			.p2 .lines {
-				left: 0;
+				left: -1px;
 			}
 			.p2 .next_piece {
-				left: 172px;
-			}
-			.p2 .board {
-				--offset: 0;
+				left: 171px;
 			}
 
 			.player_vid {
@@ -282,100 +288,6 @@
 				top: 1023px;
 				/* background: orange;
 				opacity: 0.5; /**/
-			}
-
-			.match.small {
-				transform: scale(0.7680180180180181); /* (1080-57)/666/2 */
-			}
-			#match2.small {
-				top: 511px;
-			}
-
-			.match.small .runways {
-				display: none;
-			}
-
-			.match.small .score,
-			.match.small .name,
-			.match.small .level,
-			.match.small .lines,
-			.match.small .next_piece {
-				--offset: 337px;
-			}
-
-			.match.small .next_piece {
-				z-index: 4;
-				top: 135px;
-			}
-
-			.match.small .lines {
-				z-index: 3;
-				width: 144px;
-				top: 221px;
-			}
-
-			.match.small .level {
-				z-index: 2;
-				top: 307px;
-			}
-
-			.match.small .tetris_rate,
-			.match.small .drought {
-				top: 390px;
-				z-index: 1;
-			}
-
-			.match.small .score {
-				width: 271px;
-				height: 108px;
-			}
-
-			.match.small .score .tetris_diff {
-				visibility: hidden;
-			}
-
-			.match.small .score .header {
-				padding-bottom: 12px;
-			}
-
-			.match.small .score .aligner {
-				font-size: 30.01px;
-				line-height: 30px;
-			}
-
-			.match.small .board {
-				top: 0;
-				z-index: 8;
-			}
-			.match.small .score {
-				z-index: 7;
-			}
-			.match.small .flag,
-			.match.small .name {
-				z-index: 6;
-				top: 0;
-			}
-			.match.small .name {
-				width: 459px;
-				--offset: 632px;
-			}
-			.match.small .flag {
-				--offset: 1115px;
-			}
-			.match.small .player_vid {
-				top: 94px;
-				width: 909px;
-				height: 572px;
-				--offset: 341px;
-			}
-
-			.match.small .simul-tetris {
-				top: 250px;
-				--offset: 574px;
-			}
-
-			.match.small .p2 > * {
-				left: var(--offset);
 			}
 		</style>
 	</head>
@@ -503,7 +415,7 @@
 			const view_meta = new URLSearchParams({
 				video: '1920x1080', // urgh, so big for so much space wasted :(
 				concurrent_2_matches: false,
-				players: ,
+				players: 2,
 			});
 		</script>
 		<script src="/vendor/peerjs.1.4.7.min.js"></script>
@@ -514,6 +426,19 @@
 			import QueryString from '/js/QueryString.js';
 			import CompetitionPlayer from '/views/CompetitionPlayer.js';
 			import Competition from '/views/competition.js';
+
+			const TEAMS = {
+				auxcord: {},
+				rogue: {},
+				sam: {},
+				ss: {},
+				topdown: {},
+				waveyones: {},
+				eternal: {},
+				millionaires: {},
+				gm: {},
+				drywellers: {},
+			};
 
 			// Penner easing
 			// http://robertpenner.com/easing/
@@ -551,6 +476,13 @@
 			const curtain_num = /^[01]$/.test(QueryString.get('curtain'))
 				? parseInt(QueryString.get('curtain'), 10)
 				: 0;
+
+			let teams = [];
+			if (/^[a-z]+-[a-z]+$/.test(QueryString.get('teams'))) {
+				teams = QueryString.get('teams')
+					.split('-')
+					.map(team => (team in TEAMS ? team : null));
+			}
 
 			let show_runways = false;
 			if (QueryString.get('runways') === '1') {
@@ -676,8 +608,20 @@
 							preview_pixel_size: 3.5,
 							format_score: v => readableScoreFomatter(v),
 							stereo: translate([1, 2], [-1, 1], player_num),
+							biglogo: true,
 						}
 					);
+
+					if (QueryString.get('name') !== '1') {
+						player_node.querySelector(`.name`).remove();
+						player_node.querySelector(`.flag`).remove();
+					}
+
+					if (teams[player_idx]) {
+						player.setCurtainLogo(
+							`/images/gauntlet/logos/${teams[player_idx]}.png`
+						);
+					}
 
 					if (show_runways === true) {
 						// permanently visible
@@ -954,11 +898,14 @@
 			window._players = players;
 			window._NTC_API = competition.API;
 
+			window._NTC_API.setCurtainLogo = () => {};
+
 			window._NTC_API.showRunways = () => {
 				[...document.querySelectorAll('.runways')].forEach(elmt =>
 					elmt.classList.add('visible')
 				);
 			};
+
 			window._NTC_API.hideRunways = () => {
 				[...document.querySelectorAll('.runways')].forEach(elmt =>
 					elmt.classList.remove('visible')

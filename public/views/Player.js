@@ -241,22 +241,29 @@ export default class Player {
 		// getComputedStyle returns padding in Chrome,
 		// but Firefox returns 4 individual properties paddingTop, paddingLeft, etc...
 
-		const field_padding = css_size(styles.paddingLeft); // we assume padding is the same on all sides!!!!
+		const field_padding_lr = css_size(styles.paddingLeft);
+		const field_padding_tb = css_size(styles.paddingTop);
 
-		let bg_width, bg_height, bg_offset, field_canva_offset;
+		let bg_width,
+			bg_height,
+			bg_offset,
+			field_canva_offset_t,
+			field_canva_offset_l;
 
-		if (field_padding) {
-			bg_width = css_size(styles.width) + 2 * field_padding;
-			bg_height = css_size(styles.height) + 2 * field_padding;
+		if (field_padding_lr || field_padding_tb) {
+			bg_width = css_size(styles.width) + 2 * field_padding_lr;
+			bg_height = css_size(styles.height) + 2 * field_padding_tb;
 			bg_offset = 0;
-			field_canva_offset = field_padding;
+			field_canva_offset_t = field_padding_tb;
+			field_canva_offset_l = field_padding_lr;
 		} else {
-			// when padding is zero, we assume the padding is embedded in the border itself,
+			// when padding is zero, we assume the padding is embedded in the border itself and equal on all sides
 			// and the padding has the size of this.field_pixel_size
 			bg_width = css_size(styles.width) + this.field_pixel_size * 2;
 			bg_height = css_size(styles.height) + this.field_pixel_size * 2;
 			bg_offset = this.field_pixel_size * -1;
-			field_canva_offset = this.field_pixel_size;
+			field_canva_offset_t = this.field_pixel_size;
+			field_canva_offset_l = this.field_pixel_size;
 		}
 
 		this.bg_height = bg_height; // store value for curtain animation
@@ -278,7 +285,7 @@ export default class Player {
 		this.avatar.classList.add('avatar');
 		Object.assign(this.avatar.style, {
 			position: 'absolute',
-			top: `${field_padding + this.field_pixel_size * 8}px`,
+			top: `${field_padding_tb + this.field_pixel_size * 8}px`,
 			left: `${bg_offset}px`,
 			width: `${bg_width}px`,
 			height: `${bg_width}px`,
@@ -359,8 +366,8 @@ export default class Player {
 		this.profile_card.hidden = true;
 		this.dom.field.appendChild(this.profile_card);
 
-		this.field_ctx.canvas.style.top = `${field_canva_offset}px`;
-		this.field_ctx.canvas.style.left = `${field_canva_offset}px`;
+		this.field_ctx.canvas.style.top = `${field_canva_offset_t}px`;
+		this.field_ctx.canvas.style.left = `${field_canva_offset_l}px`;
 		this.field_bg.appendChild(this.field_ctx.canvas);
 
 		if (this.render_running_trt_rtl && this.running_trt_ctx) {
@@ -448,8 +455,14 @@ export default class Player {
 			custom_logo.classList.add('logo');
 			custom_logo.src = url;
 			Object.assign(custom_logo.style, {
-				maxWidth: this.options.field_pixel_size <= 4 ? '180px' : '240px',
-				marginTop: this.options.field_pixel_size <= 4 ? '-100px' : '-70px',
+				maxWidth:
+					this.options.field_pixel_size <= 4 && !this.options.biglogo
+						? '180px'
+						: '240px',
+				marginTop:
+					this.options.field_pixel_size <= 4 && !this.options.biglogo
+						? '-100px'
+						: '-70px',
 			});
 
 			const small_nestrischamps_logo = document.createElement('img');
