@@ -230,14 +230,33 @@
 
 			.top-banner,
 			.bottom-banner {
-				position: absolute;
-				/* background: orange; */
-				width: 100%;
+				display: none;
 			}
 
-			.top-banner {
-				top: 0;
+			.top-banner .bg {
+				position: absolute;
+				background: black;
+				width: 1920px;
+				padding-top: 3px;
+				height: 107px;
+				left: -960px;
+				text-align: center;
+			}
+
+			.top-banner .highlight {
+				position: absolute;
+				background-position: top right;
+				background-repeat: no-repeat;
+				width: 597px;
 				height: 110px;
+
+				--offset: 363px;
+				right: var(--offset);
+			}
+
+			.top-banner .highlight.p2 {
+				left: var(--offset);
+				transform: scale(-1, 1);
 			}
 
 			.bottom-banner {
@@ -390,21 +409,20 @@
 		</template>
 
 		<div id="stream_bg">
-			<div class="top-banner"></div>
-			<div class="bottom-banner"></div>
 			<div id="gauntlet-overlay"></div>
-			<div id="match1" class="match small"></div>
-			<div id="match2" class="match small"></div>
+			<div id="match1" class="match">
+				<div class="top-banner">
+					<div class="bg"><img src="/images/gauntlet/ascension.jpg" /></div>
+					<div class="highlight p1"></div>
+					<div class="highlight p2"></div>
+				</div>
+				<div class="bottom-banner">
+					<div class="highlight p1"></div>
+					<div class="highlight p2"></div>
+				</div>
+			</div>
 
 			<div id="ticker"></div>
-
-			<div id="playing_fields">
-				<!-- divider -->
-
-				<!-- Player 1 -->
-				<!-- Player 2 -->
-			</div>
-			<!-- End Playing Fields -->
 		</div>
 		<!-- End Stream BG -->
 
@@ -428,7 +446,7 @@
 			import Competition from '/views/competition.js';
 
 			const TEAMS = {
-				auxcord: {},
+				auxcords: {},
 				rogues: {},
 				sam: {},
 				ss: {},
@@ -482,6 +500,10 @@
 				teams = QueryString.get('teams')
 					.split('-')
 					.map(team => (team in TEAMS ? team : null));
+			}
+
+			if (QueryString.get('header') === '1') {
+				document.querySelector('.top-banner').style.display = 'block';
 			}
 
 			let show_runways = false;
@@ -614,7 +636,7 @@
 						}
 					);
 
-					if (QueryString.get('name') !== '1') {
+					if (QueryString.get('name') === '0') {
 						player_node.querySelector(`.name`).remove();
 						player_node.querySelector(`.flag`).remove();
 					}
@@ -627,6 +649,10 @@
 						sheet.insertRule(
 							`.p${player_num} .box { border-image-source: url('/images/gauntlet/borders/${teams[player_idx]}.png'); }`
 						);
+
+						document.querySelector(
+							`.top-banner .highlight.p${player_num}`
+						).style.backgroundImage = `url(/images/gauntlet/banners/top/${teams[player_idx]}.jpg)`;
 					}
 
 					if (show_runways === true) {
