@@ -49,7 +49,7 @@
 			}
 
 			.score .header {
-				padding-bottom: 10px;
+				padding-bottom: 9px;
 			}
 
 			.score .aligner {
@@ -845,63 +845,6 @@
 			});
 
 			const competition = new Competition(players);
-
-			competition.API.setMatch = function (match_idx) {
-				if (match_idx !== 0 && match_idx !== 1) {
-					document.querySelectorAll('.match').forEach(match_node => {
-						match_node.classList.add('small');
-						match_node.style.display = null;
-					});
-
-					return;
-				}
-
-				let show_match, hide_match;
-
-				if (match_idx === 0) {
-					show_match = document.querySelector('#match1');
-					hide_match = document.querySelector('#match2');
-				} else {
-					show_match = document.querySelector('#match2');
-					hide_match = document.querySelector('#match1');
-				}
-
-				show_match.classList.remove('small');
-
-				hide_match.style.display = 'none';
-				show_match.style.display = null;
-			};
-
-			competition.API.showProfileCard = function (visible, match_idx) {
-				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
-
-				match_players.forEach(player => player.showProfileCard(visible));
-			};
-
-			competition.API.setWinner = function (player_idx) {
-				const match_idx = player_idx < 2 ? 0 : 1;
-				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
-
-				const winner = players[player_idx];
-				const loser = match_players.find(player => player !== winner);
-
-				loser.showLoserFrame();
-				winner.playWinnerAnimation();
-			};
-
-			for (let player_idx = 0; player_idx < players.length; player_idx += 2) {
-				const match_players = players.slice(player_idx, player_idx + 2);
-
-				const updateMatchStats = () => {
-					competition.computeScoreDifferentials(match_players);
-				};
-
-				match_players.forEach(player => {
-					player.onScore = updateMatchStats;
-				});
-			}
-
-			competition.API.setMatch(0);
 
 			// expose API into window for debugging
 			window._players = players;
