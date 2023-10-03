@@ -498,9 +498,10 @@
 			const isDAS = QueryString.get('style') === 'das';
 			const hasAds = QueryString.get('ads') === '1';
 
-			const SIMUL_TETRIS_DELAY = /^[1-9]\d*$/.test(QueryString.get('simultris'))
+			const SHOW_SIMUL_TETRIS = /^[1-9]\d*$/.test(QueryString.get('simultris'));
+			const SIMUL_TETRIS_DELAY = SHOW_SIMUL_TETRIS
 				? parseInt(QueryString.get('simultris'), 10)
-				: 200;
+				: 120;
 
 			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
 				? parseInt(QueryString.get('sponsorimg'), 10)
@@ -714,8 +715,6 @@
 						// custom branding
 						player._renderField = player.renderField;
 
-						const draw_cycle = 60;
-
 						const img = images[sponsor_img_index];
 
 						player.renderField = function (level, field) {
@@ -771,75 +770,76 @@
 								}
 							}
 						};
-
-						player.onTetris = function () {
-							const now = Date.now();
-
-							player.last_tetris_time = now;
-
-							if (
-								match_players.every(
-									player =>
-										player.last_tetris_time >= now - SIMUL_TETRIS_DELAY &&
-										(sponsor_img_index === 1 || player.game.data.level === 18)
-								)
-							) {
-								// clear all ongoing simul-tetris timers for this match
-								while (sync_timers.length) clearTimeout(sync_timers.pop());
-
-								match_players.forEach(player => {
-									// show sponsor block
-									player.show_sponsor_block = true;
-
-									window.cancelAnimationFrame(player.animationId);
-
-									// show the simul-tetris sign
-									const scale_start = 0;
-									const scale_end = 0.85 + Math.random() * 0.1;
-									const scale_change = scale_end - scale_start;
-									const angle = -10 + Math.random() * 20;
-									const duration = 750;
-
-									player.dom.simul_tetris.style.display = 'inline';
-									player.dom.simul_tetris.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
-
-									const start_time = Date.now();
-
-									function step() {
-										const elapsed = Date.now() - start_time;
-										const scale = easeOutElastic(
-											elapsed,
-											scale_start,
-											scale_change,
-											duration
-										);
-
-										player.dom.simul_tetris.style.transform = `scale(${scale}) rotate(${angle}deg)`;
-
-										if (elapsed < duration) {
-											player.animationId = window.requestAnimationFrame(step);
-										} else {
-											sync_timers.push(
-												setTimeout(() => {
-													player.dom.simul_tetris.style.display = 'none';
-												}, 500)
-											);
-										}
-									}
-
-									player.animationId = window.requestAnimationFrame(step);
-								});
-
-								sync_timers.push(
-									setTimeout(() => {
-										players.forEach(player => {
-											player.show_sponsor_block = false;
-										});
-									}, 6000)
-								);
-							}
-						};
 					}
+
+					player.onTetris = function () {
+						const now = Date.now();
+
+						player.last_tetris_time = now;
+
+						if (
+							match_players.every(
+								player => player.last_tetris_time >= now - SIMUL_TETRIS_DELAY
+							)
+						) {
+							// clear all ongoing simul-tetris timers for this match
+							while (sync_timers.length) clearTimeout(sync_timers.pop());
+
+							match_players.forEach(player => {
+								// show sponsor block
+								player.show_sponsor_block =
+									sponsor_img_index === 1 || player.game.data.level === 18;
+
+								if (!SHOW_SIMUL_TETRIS) return;
+
+								window.cancelAnimationFrame(player.animationId);
+
+								// show the simul-tetris sign
+								const scale_start = 0;
+								const scale_end = 0.85 + Math.random() * 0.1;
+								const scale_change = scale_end - scale_start;
+								const angle = -10 + Math.random() * 20;
+								const duration = 750;
+
+								player.dom.simul_tetris.style.display = 'inline';
+								player.dom.simul_tetris.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
+
+								const start_time = Date.now();
+
+								function step() {
+									const elapsed = Date.now() - start_time;
+									const scale = easeOutElastic(
+										elapsed,
+										scale_start,
+										scale_change,
+										duration
+									);
+
+									player.dom.simul_tetris.style.transform = `scale(${scale}) rotate(${angle}deg)`;
+
+									if (elapsed < duration) {
+										player.animationId = window.requestAnimationFrame(step);
+									} else {
+										sync_timers.push(
+											setTimeout(() => {
+												player.dom.simul_tetris.style.display = 'none';
+											}, 500)
+										);
+									}
+								}
+
+								player.animationId = window.requestAnimationFrame(step);
+							});
+
+							sync_timers.push(
+								setTimeout(() => {
+									players.forEach(player => {
+										player.show_sponsor_block = false;
+									});
+								}, 6000)
+							);
+						}
+					};
 
 					match_players.push(player);
 					players.push(player);
