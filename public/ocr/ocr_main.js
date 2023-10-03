@@ -322,7 +322,8 @@ function connect() {
 
 		peer.on('error', err => {
 			console.log(`Peer error: ${err.message}`);
-			setTimeout(startSharingVideoFeed, 1500); // we assume this will succeed at some point?? 😰😅
+			peer.retryTO = clearTimeout(peer.retryTO); // there should only be one retry scheduled
+			peer.retryTO = setTimeout(startSharingVideoFeed, 1500); // we assume this will succeed at some point?? 😰😅
 		});
 	};
 }
@@ -397,6 +398,7 @@ async function startSharingVideoFeed() {
 	}
 
 	if (!peer_opened) {
+		peer.removeAllListeners('open');
 		peer.on('open', startSharing, { once: true });
 	} else {
 		startSharing();
