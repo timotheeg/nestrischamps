@@ -19,6 +19,7 @@
 				font-size: 24.01px;
 				line-height: 24px;
 				height: 51px;
+				right: var(--offset);
 			}
 
 			.box .header {
@@ -29,7 +30,6 @@
 			.score,
 			.next_piece {
 				--offset: 0;
-				right: var(--offset);
 			}
 
 			.score {
@@ -73,7 +73,6 @@
 				width: 145px;
 				padding-right: 0;
 				--offset: 168px;
-				right: var(--offset);
 			}
 
 			.next_piece {
@@ -94,13 +93,10 @@
 			.level {
 				width: 102px;
 				padding-right: 0;
-				--offset: 377px;
-				right: var(--offset);
 			}
 
 			.name,
-			.flag,
-			.runways {
+			.flag {
 				top: 923px;
 			}
 
@@ -128,8 +124,14 @@
 
 			.level,
 			.tetris_rate,
-			.drought {
+			.drought,
+			.flag {
 				--offset: 337px;
+			}
+
+			.level,
+			.tetris_rate,
+			.drought {
 				padding-top: 5px;
 				height: 54px;
 			}
@@ -156,8 +158,6 @@
 
 			.flag {
 				padding: 0;
-				--offset: 337px;
-				right: var(--offset);
 				width: 105px;
 				height: 70px;
 			}
@@ -172,7 +172,6 @@
 				right: var(--offset);
 				width: 464px;
 				height: unset;
-				top: unset;
 				bottom: -1023px;
 				--border-size: 12;
 				padding: 3px 3px 0 6px;
