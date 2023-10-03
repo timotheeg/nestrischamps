@@ -366,7 +366,9 @@ async function startSharingVideoFeed() {
 
 	function startSharing() {
 		// 1. player cam
-		ongoing_call = peer.call(view_peer_id, stream);
+		ongoing_call = peer.call(view_peer_id, stream, {
+			sdpTransform: sdpData => sdpSetVideoBandwidth(sdpData, 4000), // TODO: get bandwidth from query string param?
+		});
 
 		if (view_meta.raw) {
 			// 2. raw capture
@@ -1671,6 +1673,29 @@ function trackAndSendFrames() {
 
 	startCapture();
 	resetShowPartsTimer();
+}
+
+function sdpSetVideoBandwidth(sdp, bandwidthInKbps) {
+	const lines = sdp.split(/\r\n/);
+
+	let idx = lines.findIndex(line => /^m=video/.test(line));
+	if (idx === -1) return sdp;
+
+	const bandwidthLine = `b=AS:${bandwidthInKbps}`;
+
+	idx++;
+
+	// skip c and i lines
+	while (/^[ci]=/.test(lines[idx])) idx++;
+
+	if (/^b=/.test(lines[idx])) {
+		// replace value
+		lines[idx] = bandwidthLine;
+	} else {
+		lines.splice(idx, 0, bandwidthLine);
+	}
+
+	return lines.join('\r\n');
 }
 
 (async function init() {
