@@ -91,7 +91,6 @@
 			.tetris_rate,
 			.drought,
 			.level {
-				width: 102px;
 				padding-right: 0;
 			}
 
@@ -102,13 +101,14 @@
 
 			.name {
 				--offset: 0;
-				width: 313px;
+				width: 316px;
+				padding: 3px 0;
 				height: 64px;
 			}
 
 			.name .header {
-				font-size: 24.01px; /* sad -_- */
-				padding-top: 6px;
+				font-size: 32.01px; /* sad -_- */
+				padding-top: 21px;
 				padding-bottom: 9px;
 			}
 
@@ -122,6 +122,7 @@
 				color: #fb0204;
 			}
 
+			.hearts,
 			.level,
 			.tetris_rate,
 			.drought,
@@ -129,10 +130,34 @@
 				--offset: 337px;
 			}
 
+			.hearts {
+				bottom: -766px;
+				width: 24px;
+				padding-right: 0;
+				height: unset;
+				font-size: 0px;
+				line-height: 32px;
+			}
+
+			.hearts span {
+				width: 24px;
+				height: 30px;
+				overflow: hidden;
+				background: url(/views/heart_grey.png);
+				background-repeat: no-repeat;
+				background-position: center left;
+				display: block;
+			}
+
+			.hearts span.win {
+				background-image: url(/views/heart_red.png);
+			}
+
 			.level,
 			.tetris_rate,
 			.drought {
 				padding-top: 5px;
+				width: 78px;
 				height: 54px;
 			}
 
@@ -143,6 +168,7 @@
 
 			.level {
 				top: 757px;
+				width: 56px;
 			}
 
 			.drought {
@@ -154,6 +180,13 @@
 				display: block;
 				animation: fadeIn ease 1s;
 				animation-fill-mode: forwards;
+			}
+
+			.drought .header img {
+				padding-top: 3px;
+				margin-left: -2px;
+				vertical-align: top;
+				animation: fadeOut linear 1s infinite;
 			}
 
 			.flag {
@@ -275,6 +308,7 @@
 			.match.small .level {
 				z-index: 2;
 				top: 307px;
+				width: 78px;
 			}
 
 			.match.small .tetris_rate,
@@ -308,13 +342,17 @@
 			.match.small .score {
 				z-index: 7;
 			}
+			.match.small .hearts {
+				bottom: unset;
+				top:473px;
+			}
 			.match.small .flag,
 			.match.small .name {
 				z-index: 6;
 				top: 0;
 			}
 			.match.small .name {
-				width: 459px;
+				width: 462px;
 				--offset: 632px;
 			}
 			.match.small .flag {
@@ -379,9 +417,11 @@
 			<div class="player">
 				<video class="player_vid"></video>
 
+				<div class="box hearts">&nbsp;</div>
+
 				<div class="box name">
 					<div class="header">PLAYER 1</div>
-					<div class="content">&#338;&#338;&#338;</div>
+					<div class="content"></div>
 				</div>
 
 				<div class="box lines">
@@ -416,7 +456,7 @@
 				</div>
 
 				<div class="box level">
-					<div class="header">LVL</div>
+					<div class="header">LV</div>
 					<div class="content">00</div>
 				</div>
 
@@ -426,7 +466,7 @@
 				</div>
 
 				<div class="box drought">
-					<div class="header">DRT</div>
+					<div class="header"><img src="/views/red_bar.png" /></div>
 					<div class="value">99</div>
 				</div>
 
@@ -618,15 +658,16 @@
 
 							runways_box: player_node.querySelector(`.runways`),
 
-							hearts: player_node.querySelector(`.name .content`),
+							hearts: player_node.querySelector(`.hearts.box`),
 							drought_box: player_node.querySelector(`.drought`),
 							video: player_node.querySelector(`.player_vid`),
 							flag: player_node.querySelector(`.flag`),
 
-							curtain,
+							// curtain,
 							simul_tetris: player_node.querySelector(`.simul-tetris`),
 						},
 						{
+							biglogo: true,
 							field_pixel_size: 4,
 							running_trt_dot_size: 5,
 							preview_pixel_size: 3.5,
@@ -649,6 +690,12 @@
 					if (isDAS) {
 						player_node.querySelector(`.runways`).classList.add('hide39');
 					}
+
+					player._setCurtainLogo = player.setCurtainLogo;
+					player.setCurtainLogo = function(url) {
+						if (url) this._setCurtainLogo(url);
+					}
+					player.setCurtainLogo('/images/ctwc_logo.jpeg');
 
 					player.onLevel = frame => {
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(

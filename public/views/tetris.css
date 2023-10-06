@@ -69,6 +69,15 @@ td {
 	}
 }
 
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
 @keyframes darkens_n_hides {
 	from {
 		visibility: visible;
