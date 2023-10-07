@@ -114,6 +114,7 @@
 			}
 
 			.name .content {
+				display: none;
 				color: #b0afb0;
 				letter-spacing: 5px;
 				text-indent: 5px;
@@ -121,6 +122,16 @@
 
 			.name .content .win {
 				color: #fb0204;
+			}
+
+			.name.seed .header {
+				padding-top: 14px;
+				padding-bottom: 0;
+			}
+
+			.name.seed .content {
+				display: unset;
+				font-size: 16.01px;
 			}
 
 			.hearts,
@@ -666,6 +677,8 @@
 							drought_box: player_node.querySelector(`.drought`),
 							video: player_node.querySelector(`.player_vid`),
 							flag: player_node.querySelector(`.flag`),
+							name_box: player_node.querySelector(`.name`),
+							seed: player_node.querySelector(`.name .content`),
 
 							// curtain,
 							simul_tetris: player_node.querySelector(`.simul-tetris`),
@@ -696,10 +709,28 @@
 					}
 
 					player._setCurtainLogo = player.setCurtainLogo;
-					player.setCurtainLogo = function(url) {
+					player.setCurtainLogo = function (url) {
 						if (url) this._setCurtainLogo(url);
-					}
+					};
 					player.setCurtainLogo('/images/ctwc_logo.jpeg');
+
+					player._setName = player.setName;
+					player.setName = function (name) {
+						this.dom.seed.textContent = '';
+						this.dom.name_box.classList.remove('seed');
+
+						const m = (name || '').match(/^(\d+)\. (.+)$/);
+
+						if (m) {
+							if (QueryString.get('seed') === '1') {
+								this.dom.name_box.classList.add('seed');
+							}
+							this._setName(m[2]);
+							this.dom.seed.textContent = `(seed ${m[1]})`;
+						} else {
+							this._setName(name);
+						}
+					};
 
 					player.onLevel = frame => {
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
