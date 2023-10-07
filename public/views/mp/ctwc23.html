@@ -527,6 +527,7 @@
 			import QueryString from '/js/QueryString.js';
 			import CompetitionPlayer from '/views/CompetitionPlayer.js';
 			import Competition from '/views/competition.js';
+			import InvisibleMixin from '/views/InvisibleMixin.js';
 
 			// Penner easing
 			// http://robertpenner.com/easing/
@@ -692,6 +693,10 @@
 							stereo: translate([1, 2], [-1, 1], player_num),
 						}
 					);
+
+					if (QueryString.get('invisible') === '1') {
+						InvisibleMixin(player);
+					}
 
 					if (show_runways === true) {
 						// permanently visible
