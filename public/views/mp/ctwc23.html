@@ -179,15 +179,18 @@
 
 			.drought.active {
 				display: block;
-				animation: fadeIn ease 1s;
-				animation-fill-mode: forwards;
+				animation: 1s ease fadeIn;
+			}
+
+			.drought .header {
+				padding-bottom: 4px; /* because the bar is thinner than text */
 			}
 
 			.drought .header img {
 				padding-top: 3px;
 				margin-left: -2px;
 				vertical-align: top;
-				animation: fadeOut linear 1s infinite;
+				animation: 1s linear infinite fadeOut;
 			}
 
 			.flag {
