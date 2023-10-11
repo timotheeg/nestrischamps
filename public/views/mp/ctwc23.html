@@ -232,8 +232,7 @@
 
 			.runways.visible {
 				display: flex;
-				animation: fadeIn ease 1s;
-				animation-fill-mode: forwards;
+				animation: fadeIn ease-in 1s;
 			}
 
 			.runways .label {
@@ -699,10 +698,10 @@
 						player_node.querySelector(`.runways`).classList.add('visible');
 					} else if (Array.isArray(show_runways)) {
 						// visible on interval and on transition
-						player.onTransition = () => {
-							resetRunways(false);
-							showRunways();
-						};
+						// player.onTransition = () => {
+						// 	resetRunways(false);
+						// 	showRunways();
+						// };
 					}
 
 					if (isDAS) {
@@ -730,6 +729,19 @@
 							this.dom.seed.textContent = `seed ${m[1]}`;
 						} else {
 							this._setName(name);
+						}
+					};
+
+					player.onLines = frame => {
+						if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
+						if (player.is_chase_down) return;
+						if (
+							(frame.raw.lines >= 125 && frame.raw.lines < 135) ||
+							(frame.raw.lines >= 225 && frame.raw.lines < 235)
+						) {
+							player.dom.runways_box.classList.add('visible');
+						} else {
+							player.dom.runways_box.classList.remove('visible');
 						}
 					};
 
@@ -767,7 +779,9 @@
 					};
 
 					player.onGameStart = () => {
+						player.is_chase_down = false;
 						player.dom.drought_box.classList.remove('active');
+						player.dom.runways_box.classList.remove('visible');
 
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
 							elmt => {
@@ -791,7 +805,23 @@
 							start_level >= 19 ? 'add' : 'remove'
 						]('hide19');
 
-						resetRunways();
+						// resetRunways();
+					};
+
+					player.onGameOver = () => {
+						const score = player.game.data.score.current;
+						const other_player = match_players.find(
+							_player => _player !== player
+						);
+						if (other_player.game && !other_player.game.over) {
+							const other_player_score =
+								other_player_score.game.data.score.current;
+							if (other_player_score < score) {
+								other_player.is_chase_down = true;
+								other_player.dom.runways_box.classList.add('visible');
+							}
+						}
+						player.dom.runways_box.classList.remove('visible');
 					};
 
 					if (hasAds) {
@@ -1002,14 +1032,14 @@
 			window._NTC_API = competition.API;
 
 			window._NTC_API.showRunways = () => {
-				[...document.querySelectorAll('.runways')].forEach(elmt =>
-					elmt.classList.add('visible')
-				);
+				players.forEach(player => {
+					player.dom.runways_box.classList.add('visible');
+				});
 			};
 			window._NTC_API.hideRunways = () => {
-				[...document.querySelectorAll('.runways')].forEach(elmt =>
-					elmt.classList.remove('visible')
-				);
+				players.forEach(player => {
+					player.dom.runways_box.classList.remove('visible');
+				});
 			};
 		</script>
 	</body>
