@@ -33,15 +33,15 @@
 			}
 
 			.score {
-				width: 313px;
+				width: 333px;
 				padding-right: 0;
-				height: 153px;
+				height: 113px;
 				top: 0;
 			}
 
 			.score .header {
 				padding-top: 2px;
-				padding-bottom: 14px;
+				padding-bottom: 8px;
 			}
 
 			.score .aligner {
@@ -63,16 +63,16 @@
 
 			.lines,
 			.next_piece {
-				top: 180px;
-				width: 141px;
+				top: 140px;
+				width: 151px;
 				height: 56px;
 			}
 
 			.lines {
 				padding-top: 6px;
-				width: 145px;
+				width: 155px;
 				padding-right: 0;
-				--offset: 168px;
+				--offset: 178px;
 			}
 
 			.next_piece {
@@ -82,9 +82,9 @@
 			.board {
 				--border-size: 12;
 				padding: 3px;
-				width: 316px;
-				height: 636px;
-				top: 266px;
+				width: 336px;
+				height: 675px;
+				top: 226px;
 			}
 
 			.name,
@@ -101,7 +101,7 @@
 
 			.name {
 				--offset: 0;
-				width: 316px;
+				width: 336px;
 				padding: 3px 0;
 				height: 64px;
 				text-transform: uppercase;
@@ -139,7 +139,7 @@
 			.tetris_rate,
 			.drought,
 			.flag {
-				--offset: 337px;
+				--offset: 357px;
 			}
 
 			.hearts {
@@ -216,9 +216,9 @@
 				color: #888;
 				font-size: 24.01px;
 				line-height: 24px;
-				--offset: 463px;
+				--offset: 483px;
 				right: var(--offset);
-				width: 464px;
+				width: 444px;
 				height: unset;
 				bottom: -1023px;
 				--border-size: 12;
@@ -265,7 +265,7 @@
 				left: 0;
 			}
 			.p2 .next_piece {
-				left: 169px;
+				left: 179px;
 			}
 
 			.player_vid {
@@ -451,9 +451,6 @@
 					<div class="aligner">
 						<div class="value">0&#x202F;000&#x202F;000</div>
 						<div class="diff winning">0&#x202F;000&#x202F;000</div>
-					</div>
-					<div class="tetris_diff">
-						<span class="value">0.00</span>&#x202F;TETRISES
 					</div>
 				</div>
 
@@ -670,7 +667,7 @@
 							runway_lv39: player_node.querySelector(`.runways .value .lv39`),
 
 							diff: player_node.querySelector(`.score .diff`),
-							t_diff: player_node.querySelector(`.score .tetris_diff .value`),
+							// t_diff: player_node.querySelector(`.score .tetris_diff .value`),
 
 							runways_box: player_node.querySelector(`.runways`),
 
@@ -687,7 +684,7 @@
 						{
 							biglogo: true,
 							bigntc: true,
-							field_pixel_size: 4,
+							field_pixel_size: 4.25,
 							running_trt_dot_size: 5,
 							preview_pixel_size: 3.75,
 							format_score: v => readableScoreFomatter(v),
