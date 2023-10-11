@@ -467,7 +467,7 @@ export default class Player {
 
 			const small_nestrischamps_logo = document.createElement('img');
 			small_nestrischamps_logo.src =
-				this.options.field_pixel_size <= 4 && !this.options.biglogo
+				this.options.field_pixel_size <= 4
 					? '/brand/logo.v3.white.png'
 					: '/brand/logo.v3.white.2x.png';
 
