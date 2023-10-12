@@ -67,7 +67,7 @@ import ULID from 'ulid';
 				`__user${id}@nestrischamps.io`,
 				ULID.ulid(),
 				description,
-				`${seed}. ${display_name}`,
+				`${/^[1-9]\d*$/.test(seed) ? `${seed}. ` : ''}${display_name}`,
 				profile_image_url,
 				dob,
 				country_code,
