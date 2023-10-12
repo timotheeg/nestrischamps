@@ -740,8 +740,9 @@
 						if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
 						if (player.is_chase_down) return;
 						if (
-							(frame.raw.lines >= 125 && frame.raw.lines < 135) ||
-							(frame.raw.lines >= 225 && frame.raw.lines < 235)
+							(frame.raw.lines >= 120 && frame.raw.lines < 135) ||
+							(frame.raw.lines >= 220 && frame.raw.lines < 235) ||
+							(frame.raw.lines >= 320 && frame.raw.lines < 335)
 						) {
 							player.dom.runways_box.classList.add('visible');
 						} else {
