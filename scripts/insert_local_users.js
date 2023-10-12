@@ -95,9 +95,9 @@ import ULID from 'ulid';
 		const birth_date = new Date();
 		birth_date.setFullYear(birth_date.getFullYear() - parseInt(age, 10) || 10);
 
-		const dob = `${birth_date.getFullYear()}-${(
-			birth_date.getMonth() + 1
-		).padStart(2, '0')}-${birth_date.getDate().padStart(2, '0')}`;
+		const dob = `${birth_date.getFullYear()}-${(birth_date.getMonth() + 1)
+			.toString()
+			.padStart(2, '0')}-${birth_date.getDate().toString().padStart(2, '0')}`;
 
 		const personal_best = Math.max(
 			parseInt((pb18 || '0').replace(/\D+/, ''), 10) || 0,
