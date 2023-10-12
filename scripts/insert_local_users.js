@@ -89,10 +89,16 @@ import ULID from 'ulid';
 
 		const description = '';
 		const profile_image_url = '';
-		const dob = '';
+		const elo_rank = 0;
+		const dob = '1989-01-01';
+
+		const personal_best = Math.max(
+			parseInt(pb18, 10),
+			parseInt(pb19, 10),
+			parseInt(pb29, 10)
+		);
 
 		console.log(record);
-		process.exit(1);
 
 		await pool.query(
 			`INSERT INTO twitch_users
@@ -112,7 +118,7 @@ import ULID from 'ulid';
 				country_code,
 				city,
 				interests,
-				style,
+				style.toLowerCase(),
 				elo_rank,
 				elo_rating,
 			]
