@@ -157,7 +157,7 @@ import ULID from 'ulid';
                 false, true, 0, 0, 0, 0, -1, 0, '', '', 0, 0, ''
 			)
 			`,
-			[id, 18, 18, parseInt(personal_best, 10)]
+			[id, 18, 18, personal_best]
 		);
 
 		id++;
