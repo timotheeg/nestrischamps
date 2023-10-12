@@ -113,7 +113,7 @@ import ULID from 'ulid';
 			country_code,
 			city,
 			interests,
-			style.toLowerCase(),
+			style.trim().toLowerCase() || 'das',
 			elo_rank,
 			elo_rating || 1000,
 		];
