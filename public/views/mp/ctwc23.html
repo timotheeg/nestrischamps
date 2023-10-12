@@ -738,7 +738,7 @@
 
 					player.onLines = frame => {
 						if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
-						if (player.is_chase_down) return;
+						if (player.is_chasing_down) return;
 						if (
 							(frame.raw.lines >= 120 && frame.raw.lines < 135) ||
 							(frame.raw.lines >= 220 && frame.raw.lines < 235) ||
@@ -784,7 +784,7 @@
 					};
 
 					player.onGameStart = () => {
-						player.is_chase_down = false;
+						player.is_chasing_down = false;
 						player.dom.drought_box.classList.remove('active');
 						player.dom.runways_box.classList.remove('visible');
 
@@ -819,10 +819,9 @@
 							_player => _player !== player
 						);
 						if (other_player.game && !other_player.game.over) {
-							const other_player_score =
-								other_player_score.game.data.score.current;
+							const other_player_score = other_player.game.data.score.current;
 							if (other_player_score < score) {
-								other_player.is_chase_down = true;
+								other_player.is_chasing_down = true;
 								other_player.dom.runways_box.classList.add('visible');
 							}
 						}
