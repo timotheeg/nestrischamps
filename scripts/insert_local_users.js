@@ -69,6 +69,7 @@ import ULID from 'ulid';
 			pb29lines,
 			pb29,
 			levelpb,
+			highest_level,
 			num_maxouts,
 			age,
 			profession,
