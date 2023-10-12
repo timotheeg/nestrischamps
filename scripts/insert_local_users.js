@@ -37,6 +37,7 @@ import ULID from 'ulid';
 	let id = 33;
 
 	for (const record of records) {
+		/*
 		const [
 			seed,
 			login,
@@ -52,8 +53,46 @@ import ULID from 'ulid';
 			interests,
 			style,
 		] = record;
+		/**/
+
+		const [
+			seed,
+			nickname,
+			pronouns,
+			display_name,
+			login,
+			elo_rating,
+			discord,
+			controller,
+			pb18,
+			pb19,
+			pb29lines,
+			pb29,
+			levelpb,
+			num_maxouts,
+			age,
+			profession,
+			country_name,
+			country_code,
+			city,
+			timezone,
+			style,
+			rival,
+			favourite_game,
+			favourite_sport,
+			years_at_ctwc,
+			highest_rank,
+			other_wins,
+			achivements,
+			interests,
+		] = record;
+
+		const description = '';
+		const profile_image_url = '';
+		const dob = '';
 
 		console.log(record);
+		process.exit(1);
 
 		await pool.query(
 			`INSERT INTO twitch_users
