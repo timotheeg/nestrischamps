@@ -115,7 +115,7 @@ import ULID from 'ulid';
 			interests,
 			style.toLowerCase(),
 			elo_rank,
-			elo_rating,
+			elo_rating || 1000,
 		];
 
 		console.log(params);
