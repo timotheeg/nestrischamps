@@ -93,7 +93,9 @@ import ULID from 'ulid';
 		const elo_rank = 0;
 
 		const birth_date = new Date();
-		birth_date.setFullYear(birth_date.getFullYear() - parseInt(age, 10) || 10);
+		birth_date.setFullYear(
+			birth_date.getFullYear() - (parseInt(age, 10) || 10)
+		);
 
 		const dob = `${birth_date.getFullYear()}-${(birth_date.getMonth() + 1)
 			.toString()
