@@ -101,28 +101,32 @@ import ULID from 'ulid';
 
 		console.log(record);
 
+		const params = [
+			id,
+			/^\s*$/.test(login) ? `__user${id}` : login,
+			`__user${id}@nestrischamps.io`,
+			ULID.ulid(),
+			description,
+			`${/^[1-9]\d*$/.test(seed) ? `${seed}. ` : ''}${display_name}`,
+			profile_image_url,
+			dob,
+			country_code,
+			city,
+			interests,
+			style.toLowerCase(),
+			elo_rank,
+			elo_rating,
+		];
+
+		console.log(params);
+
 		await pool.query(
 			`INSERT INTO twitch_users
 			(id, login, email, secret, description, display_name, profile_image_url, dob, country_code, city, interests, style, elo_rank, elo_rating, created_on, last_login)
 			VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
 			`,
-			[
-				id,
-				/^\s*$/.test(login) ? `__user${id}` : login,
-				`__user${id}@nestrischamps.io`,
-				ULID.ulid(),
-				description,
-				`${/^[1-9]\d*$/.test(seed) ? `${seed}. ` : ''}${display_name}`,
-				profile_image_url,
-				dob,
-				country_code,
-				city,
-				interests,
-				style.toLowerCase(),
-				elo_rank,
-				elo_rating,
-			]
+			params
 		);
 
 		await pool.query(
