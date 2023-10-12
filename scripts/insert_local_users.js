@@ -94,9 +94,9 @@ import ULID from 'ulid';
 		const dob = '1989-01-01';
 
 		const personal_best = Math.max(
-			parseInt(pb18, 10),
-			parseInt(pb19, 10),
-			parseInt(pb29, 10)
+			parseInt(pb18 || '0', 10),
+			parseInt(pb19 || '0', 10),
+			parseInt(pb29 || '0', 10)
 		);
 
 		console.log(record);
