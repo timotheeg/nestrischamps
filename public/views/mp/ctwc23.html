@@ -45,20 +45,26 @@
 			}
 
 			.score .aligner {
-				padding-top: 0px;
-				padding-bottom: 13px;
-
 				display: inline-block;
 				font-size: 36.01px;
-				line-height: 36px;
+				line-height: 40px;
+			}
+
+			.score .tetris_diff {
+				line-height: 40px;
+				display: none;
+			}
+
+			.score.with_tdiff .tetris_diff {
+				display: block;
+			}
+
+			.score.with_tdiff .aligner .diff {
+				display: none;
 			}
 
 			.aligner div {
 				text-align: right;
-			}
-
-			.aligner .value {
-				padding-bottom: 6px;
 			}
 
 			.lines,
@@ -448,6 +454,9 @@
 						<div class="value">0&#x202F;000&#x202F;000</div>
 						<div class="diff winning">0&#x202F;000&#x202F;000</div>
 					</div>
+					<div class="tetris_diff">
+						<span class="value">0.00</span>&#x202F;TETRISES
+					</div>
 				</div>
 
 				<div class="box level">
@@ -551,6 +560,10 @@
 			const SIMUL_TETRIS_DELAY = SHOW_SIMUL_TETRIS
 				? parseInt(QueryString.get('simultris'), 10)
 				: 120;
+
+			const CYCLE_TDIFF = /^[1-9]\d*$/.test(QueryString.get('cycle_tdiff'))
+				? parseInt(QueryString.get('cycle_tdiff'), 10)
+				: 0;
 
 			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
 				? parseInt(QueryString.get('sponsorimg'), 10)
@@ -671,6 +684,7 @@
 							drought_box: player_node.querySelector(`.drought`),
 							video: player_node.querySelector(`.player_vid`),
 							flag: player_node.querySelector(`.flag`),
+							score_box: player_node.querySelector(`.score`),
 							name_box: player_node.querySelector(`.name`),
 							seed: player_node.querySelector(`.name .content`),
 
@@ -957,6 +971,14 @@
 					players.push(player);
 				});
 			});
+
+			if (CYCLE_TDIFF) {
+				setInterval(() => {
+					players.forEach(player => {
+						player.dom.score_box.classList.toggle('with_tdiff');
+					});
+				}, CYCLE_TDIFF * 1000);
+			}
 
 			const competition = new Competition(players);
 
