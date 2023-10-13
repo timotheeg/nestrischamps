@@ -697,6 +697,13 @@
 						InvisibleMixin(player);
 					}
 
+					if (QueryString.get('qual') === '1') {
+						player.dom.hearts.remove();
+						player_node.querySelector(`.runways`).remove();
+						player_node.querySelector(`.score .tetris_diff`).remove();
+						player_node.querySelector(`.score .diff`).remove();
+					}
+
 					if (show_runways === true) {
 						// permanently visible
 						player_node.querySelector(`.runways`).classList.add('visible');
