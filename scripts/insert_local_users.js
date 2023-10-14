@@ -84,7 +84,7 @@ import ULID from 'ulid';
 			years_at_ctwc,
 			highest_rank,
 			other_wins,
-			achivements,
+			achievements,
 			interests,
 		] = record;
 
