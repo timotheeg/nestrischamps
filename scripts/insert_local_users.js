@@ -120,7 +120,7 @@ import ULID from 'ulid';
 			dob,
 			country_code,
 			city,
-			interests,
+			(interests || '').slice(0, 300),
 			style.trim().toLowerCase() || 'das',
 			elo_rank,
 			elo_rating || 1000,
