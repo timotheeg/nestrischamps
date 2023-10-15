@@ -62,6 +62,7 @@ import ULID from 'ulid';
 			display_name,
 			login,
 			elo_rating,
+			elo_rank,
 			discord,
 			controller,
 			pb18,
@@ -90,7 +91,6 @@ import ULID from 'ulid';
 
 		const description = '';
 		const profile_image_url = '';
-		const elo_rank = 0;
 
 		const birth_date = new Date();
 		birth_date.setFullYear(
@@ -114,6 +114,7 @@ import ULID from 'ulid';
 			display_name,
 			login,
 			elo_rating,
+			elo_rank,
 			discord,
 			controller,
 			pb18,
