@@ -154,7 +154,7 @@ import ULID from 'ulid';
 			city,
 			(interests || '').slice(0, 300),
 			style.trim().toLowerCase() || 'das',
-			elo_rank,
+			elo_rank || 0,
 			elo_rating || 1000,
 		];
 
