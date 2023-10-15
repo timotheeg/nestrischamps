@@ -69,11 +69,11 @@ import ULID from 'ulid';
 			pb29lines,
 			pb29,
 			levelpb,
-			highest_level,
 			num_maxouts,
 			age,
 			profession,
 			country_name,
+			country_represented,
 			country_code,
 			city,
 			timezone,
@@ -102,12 +102,43 @@ import ULID from 'ulid';
 			.padStart(2, '0')}-${birth_date.getDate().toString().padStart(2, '0')}`;
 
 		const personal_best = Math.max(
-			parseInt((pb18 || '0').replace(/\D+/, ''), 10) || 0,
-			parseInt((pb19 || '0').replace(/\D+/, ''), 10) || 0,
-			parseInt((pb29 || '0').replace(/\D+/, ''), 10) || 0
+			parseInt((pb18 || '0').replace(/\D+/g, ''), 10) || 0,
+			parseInt((pb19 || '0').replace(/\D+/g, ''), 10) || 0,
+			parseInt((pb29 || '0').replace(/\D+/g, ''), 10) || 0
 		);
 
-		console.log(record);
+		console.log({
+			seed,
+			nickname,
+			pronouns,
+			display_name,
+			login,
+			elo_rating,
+			discord,
+			controller,
+			pb18,
+			pb19,
+			pb29lines,
+			pb29,
+			levelpb,
+			num_maxouts,
+			age,
+			profession,
+			country_name,
+			country_represented,
+			country_code,
+			city,
+			timezone,
+			style,
+			rival,
+			favourite_game,
+			favourite_sport,
+			years_at_ctwc,
+			highest_rank,
+			other_wins,
+			achievements,
+			interests,
+		});
 
 		const params = [
 			id,
