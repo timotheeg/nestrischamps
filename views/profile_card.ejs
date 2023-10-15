@@ -143,7 +143,7 @@ p {
 
 		<section id="interests">
 			<h1>Interests</h1>
-			<p><%= user.interests %></p>
+			<p><%= user.interests.replace(/\n+/g, ', ') %></p>
 		</section>
 	</div>
 
