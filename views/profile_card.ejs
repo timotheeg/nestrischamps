@@ -130,7 +130,7 @@ p {
 		<% if (user.description) { %>
 		<section id="bio">
 			<h1>Player bio</h1>
-			<p><%= user.description %></p>
+			<p><%= user.description.replace(/\n+/g, ', ') %></p>
 		</section>
 		<% } %>
 
