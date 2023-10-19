@@ -35,7 +35,7 @@ class MatchRoom extends Room {
 		this.roomid = roomid || '_default';
 		this.last_view = null;
 		this.state = {
-			bestof: 3,
+			bestof: 5,
 			concurrent_2_matches: undefined, // undefined|true|false
 			selected_match: null, // 0|1|null
 			curtain_logo: null, // url to image or null
