@@ -1,0 +1,3 @@
+{
+	"description": "1080p layout used for CTWC23 DAS and CTWC23. There are some query string options: cycle_tdiff=X cycles the score lead and tetris lead for X seconds each; runways=1 show runways all the time; runways=transitions shows runways 10 lines before transitions for l19, l29, and l39; runways=x,y show runways for x seconds every y seconds; style=das hide level 39 runways; qual=1 hides hearts, runways, and score diff; invisible=1 shows ghost blocks for invisible tetris; curtain=0 shows CTWC23 DAS curtain; curtain=1 shows CTWC23 curtain."
+}
