@@ -57,6 +57,7 @@ h1 {
 
 .container {
 	flex: 1;
+	padding: 0 6px;
 }
 
 section {
@@ -126,21 +127,23 @@ p {
 			<img src="/vendor/country-flag-icons/3x2/<%= user.country_code %>.svg" width="64">
 		</section>
 
+		<% if (user.description) { %>
 		<section id="bio">
 			<h1>Player bio</h1>
-			<p><%= user.description %></p>
+			<p><%= user.description.replace(/\n+/g, ', ') %></p>
 		</section>
+		<% } %>
 
 		<section id="play_style">
 			<h1>Play info</h1>
 			<p class="play_style">Style: <%= (user.style || '').toUpperCase() %></p>
 			<p class="pb">PB: <%= pb %></p>
-			<p class="pb">Elo: <%= elo_rating %> (<%= user.elo_rank %>)</p>
+			<p class="pb">Elo: <%= elo_rating %><% if (user.elo_rank) { %> ( <%= user.elo_rank %> )<% } %></p>
 		</section>
 
 		<section id="interests">
 			<h1>Interests</h1>
-			<p><%= user.interests %></p>
+			<p><%= user.interests.replace(/\n+/g, ', ') %></p>
 		</section>
 	</div>
 

@@ -33,46 +33,61 @@
 			}
 
 			.score {
-				width: 313px;
+				width: 333px;
 				padding-right: 0;
-				height: 153px;
+				height: 112px;
 				top: 0;
 			}
 
 			.score .header {
 				padding-top: 2px;
-				padding-bottom: 14px;
+				padding-bottom: 8px;
+			}
+
+			.qual .score .header {
+				padding-bottom: 28px;
 			}
 
 			.score .aligner {
-				padding-top: 0px;
-				padding-bottom: 13px;
-
 				display: inline-block;
 				font-size: 36.01px;
-				line-height: 36px;
+				line-height: 40px;
+			}
+
+			.score .aligner .diff {
+				animation: 0.5s ease-out fadeIn;
+			}
+
+			.score .tetris_diff {
+				line-height: 40px;
+				display: none;
+			}
+
+			.score.with_tdiff .tetris_diff {
+				display: block;
+				animation: 0.5s ease-out fadeIn;
+			}
+
+			.score.with_tdiff .aligner .diff {
+				display: none;
 			}
 
 			.aligner div {
 				text-align: right;
 			}
 
-			.aligner .value {
-				padding-bottom: 6px;
-			}
-
 			.lines,
 			.next_piece {
-				top: 180px;
-				width: 141px;
+				top: 139px;
+				width: 151px;
 				height: 56px;
 			}
 
 			.lines {
 				padding-top: 6px;
-				width: 145px;
+				width: 155px;
 				padding-right: 0;
-				--offset: 168px;
+				--offset: 178px;
 			}
 
 			.next_piece {
@@ -82,9 +97,9 @@
 			.board {
 				--border-size: 12;
 				padding: 3px;
-				width: 316px;
-				height: 636px;
-				top: 266px;
+				width: 336px;
+				height: 676px;
+				top: 225px;
 			}
 
 			.name,
@@ -101,7 +116,7 @@
 
 			.name {
 				--offset: 0;
-				width: 316px;
+				width: 336px;
 				padding: 3px 0;
 				height: 64px;
 				text-transform: uppercase;
@@ -139,7 +154,7 @@
 			.tetris_rate,
 			.drought,
 			.flag {
-				--offset: 337px;
+				--offset: 357px;
 			}
 
 			.hearts {
@@ -190,7 +205,7 @@
 
 			.drought.active {
 				display: block;
-				animation: 1s ease fadeIn;
+				animation: 0.5s ease-out fadeIn;
 			}
 
 			.drought .header {
@@ -216,9 +231,9 @@
 				color: #888;
 				font-size: 24.01px;
 				line-height: 24px;
-				--offset: 463px;
+				--offset: 483px;
 				right: var(--offset);
-				width: 464px;
+				width: 444px;
 				height: unset;
 				bottom: -1023px;
 				--border-size: 12;
@@ -232,8 +247,7 @@
 
 			.runways.visible {
 				display: flex;
-				animation: fadeIn ease 1s;
-				animation-fill-mode: forwards;
+				animation: 0.5s ease-out fadeIn;
 			}
 
 			.runways .label {
@@ -265,19 +279,19 @@
 				left: 0;
 			}
 			.p2 .next_piece {
-				left: 169px;
+				left: 179px;
 			}
 
 			.player_vid {
 				position: absolute;
 				top: 0;
-				width: 620px;
+				width: 600px;
 				height: 1023px;
 				padding: 0;
 				object-fit: cover;
 				/* background: yellow; /**/
 
-				--offset: 340px;
+				--offset: 360px;
 				right: var(--offset);
 			}
 
@@ -291,7 +305,7 @@
 			}
 
 			.match.small {
-				transform: scale(0.7680180180180181); /* (1080-57)/666/2 */
+				transform: scale(0.7245042492917847); /* (1080-57)/706/2 */
 			}
 			#match2.small {
 				top: 511px;
@@ -302,52 +316,36 @@
 			}
 
 			.match.small .score,
-			.match.small .name,
-			.match.small .level,
 			.match.small .lines,
 			.match.small .next_piece {
-				--offset: 337px;
+				--offset: 357px;
 			}
 
 			.match.small .next_piece {
 				z-index: 4;
-				top: 135px;
+				top: 139px;
 			}
 
 			.match.small .lines {
 				z-index: 3;
-				width: 144px;
-				top: 221px;
+				width: 154px;
+				top: 225px;
 			}
 
 			.match.small .level {
 				z-index: 2;
-				top: 307px;
+				top: 311px;
 				width: 78px;
 			}
 
 			.match.small .tetris_rate,
 			.match.small .drought {
-				top: 390px;
+				top: 394px;
 				z-index: 1;
 			}
 
 			.match.small .score {
-				width: 271px;
-				height: 108px;
-			}
-
-			.match.small .score .tetris_diff {
-				visibility: hidden;
-			}
-
-			.match.small .score .header {
-				padding-bottom: 12px;
-			}
-
-			.match.small .score .aligner {
-				font-size: 30.01px;
-				line-height: 30px;
+				width: 302px;
 			}
 
 			.match.small .board {
@@ -359,7 +357,7 @@
 			}
 			.match.small .hearts {
 				bottom: unset;
-				top: 473px;
+				top: 477px;
 			}
 			.match.small .flag,
 			.match.small .name {
@@ -367,17 +365,16 @@
 				top: 0;
 			}
 			.match.small .name {
-				width: 462px;
-				--offset: 632px;
+				width: 486px;
+				--offset: 683px;
 			}
 			.match.small .flag {
-				--offset: 1115px;
+				--offset: 1190px;
 			}
 			.match.small .player_vid {
-				top: 94px;
-				width: 909px;
-				height: 572px;
-				--offset: 341px;
+				top: 96px;
+				width: 965px;
+				height: 609px;
 			}
 
 			.match.small .simul-tetris {
@@ -414,18 +411,17 @@
 				<br />
 				<br />
 				<br />
-				<img src="/images/ctwc_logo.jpeg" style="max-width: 220px" />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
 				<br />
 				<br />
-				<p style="font-size: 12px">Presented by</p>
-				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" />
+				<!-- p style="font-size: 12px">Presented by</p>
+				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" / -->
 				<br />
 				<br />
 				<br />
 				<br />
 				<br />
-				<img src="/brand/logo.v3.white.png" />
-				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 110px" />
 			</div>
 		</template>
 		<template id="player">
@@ -559,17 +555,31 @@
 				? parseInt(QueryString.get('simultris'), 10)
 				: 120;
 
+			const CYCLE_TDIFF = /^[1-9]\d*$/.test(QueryString.get('cycle_tdiff'))
+				? parseInt(QueryString.get('cycle_tdiff'), 10)
+				: 0;
+
 			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
 				? parseInt(QueryString.get('sponsorimg'), 10)
 				: 0;
 
-			const curtain_num = /^[01]$/.test(QueryString.get('curtain'))
-				? parseInt(QueryString.get('curtain'), 10)
-				: 0;
+			let curtain_template;
+			if (/^[01]$/.test(QueryString.get('curtain'))) {
+				curtain_template = document.getElementById(
+					`curtain_${QueryString.get('curtain')}`
+				);
+			}
 
+			// triple-typed variable... that is disgusting -_-
+			// false: never show runways (default)
+			// 1 -> true: always show runways
+			// 'transitions' -> 'transitions': show slightly before transitions
+			// x,y -> [x, y]: show runways for x seconds every y seconds
 			let show_runways = false;
 			if (QueryString.get('runways') === '1') {
 				show_runways = true;
+			} else if (QueryString.get('runways') === 'transitions') {
+				show_runways = 'transitions';
 			} else {
 				const m = (QueryString.get('runways') || '').match(
 					/^([1-9]\d*),([1-9]\d*)$/
@@ -594,9 +604,6 @@
 				});
 			}
 
-			const curtain_template = document.getElementById(
-				`curtain_${curtain_num}`
-			);
 			const player_template = document.getElementById('player');
 			const players = [];
 
@@ -609,6 +616,7 @@
 				let runways_interval = null;
 				let runways_timeout = null;
 
+				// function is only used when show_runways is an array
 				const showRunways = () => {
 					runways_timeout = clearTimeout(runways_timeout);
 
@@ -648,11 +656,14 @@
 					player_node.classList.add(`p${player_num}`);
 					match_node.appendChild(player_node);
 
-					const curtain_fragment = document.importNode(
-						curtain_template.content,
-						true
-					);
-					const curtain = curtain_fragment.querySelector('.custom_curtain');
+					let curtain;
+					if (curtain_template) {
+						const curtain_fragment = document.importNode(
+							curtain_template.content,
+							true
+						);
+						curtain = curtain_fragment.querySelector('.custom_curtain');
+					}
 
 					const player = new CompetitionPlayer(
 						{
@@ -678,15 +689,17 @@
 							drought_box: player_node.querySelector(`.drought`),
 							video: player_node.querySelector(`.player_vid`),
 							flag: player_node.querySelector(`.flag`),
+							score_box: player_node.querySelector(`.score`),
 							name_box: player_node.querySelector(`.name`),
 							seed: player_node.querySelector(`.name .content`),
 
-							// curtain,
+							curtain,
 							simul_tetris: player_node.querySelector(`.simul-tetris`),
 						},
 						{
 							biglogo: true,
-							field_pixel_size: 4,
+							bigntc: true,
+							field_pixel_size: 4.25,
 							running_trt_dot_size: 5,
 							preview_pixel_size: 3.75,
 							format_score: v => readableScoreFomatter(v),
@@ -696,6 +709,14 @@
 
 					if (QueryString.get('invisible') === '1') {
 						InvisibleMixin(player);
+					}
+
+					if (QueryString.get('qual') === '1') {
+						player.dom.hearts.remove();
+						player_node.querySelector(`.runways`).remove();
+						player_node.querySelector(`.score .tetris_diff`).remove();
+						player_node.querySelector(`.score .diff`).remove();
+						player_node.classList.add('qual');
 					}
 
 					if (show_runways === true) {
@@ -713,12 +734,6 @@
 						player_node.querySelector(`.runways`).classList.add('hide39');
 					}
 
-					player._setCurtainLogo = player.setCurtainLogo;
-					player.setCurtainLogo = function (url) {
-						if (url) this._setCurtainLogo(url);
-					};
-					player.setCurtainLogo('/images/ctwc_logo.jpeg');
-
 					player._setName = player.setName;
 					player.setName = function (name) {
 						this.dom.seed.textContent = '';
@@ -731,36 +746,54 @@
 								this.dom.name_box.classList.add('seed');
 							}
 							this._setName(m[2]);
-							this.dom.seed.textContent = `(seed ${m[1]})`;
+							this.dom.seed.textContent = `seed ${m[1]}`;
 						} else {
 							this._setName(name);
 						}
 					};
 
-					player.onLevel = frame => {
-						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
-							elmt => {
-								elmt.classList.remove('active');
+					if (show_runways === 'transitions') {
+						player.onLines = frame => {
+							if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
+							if (player.is_chasing_down) return;
+							if (
+								(frame.raw.lines >= 120 && frame.raw.lines < 135) ||
+								(frame.raw.lines >= 220 && frame.raw.lines < 235) ||
+								(frame.raw.lines >= 320 && frame.raw.lines < 335)
+							) {
+								player.dom.runways_box.classList.add('visible');
+							} else {
+								player.dom.runways_box.classList.remove('visible');
 							}
-						);
+						};
+					}
 
-						for (const threshold_level of [19, 29, 39]) {
-							if (frame.raw.level < threshold_level) {
-								[
-									...player.dom.runways_box.querySelectorAll(
-										`.lv${threshold_level}`
-									),
-								].forEach(elmt => {
-									elmt.classList.add('active');
-								});
-								break;
-							} else if (frame.raw.level === threshold_level) {
-								player.dom.runways_box.querySelector(
-									`.label .lv${threshold_level}`
-								).textContent = `L${frame.raw.level} SCORE`;
+					if (show_runways) {
+						player.onLevel = frame => {
+							[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+								elmt => {
+									elmt.classList.remove('active');
+								}
+							);
+
+							for (const threshold_level of [19, 29, 39]) {
+								if (frame.raw.level < threshold_level) {
+									[
+										...player.dom.runways_box.querySelectorAll(
+											`.lv${threshold_level}`
+										),
+									].forEach(elmt => {
+										elmt.classList.add('active');
+									});
+									break;
+								} else if (frame.raw.level === threshold_level) {
+									player.dom.runways_box.querySelector(
+										`.label .lv${threshold_level}`
+									).textContent = `L${frame.raw.level} SCORE`;
+								}
 							}
-						}
-					};
+						};
+					}
 
 					player.onDroughtStart = () => {
 						player.dom.drought_box.classList.add('active');
@@ -771,7 +804,10 @@
 					};
 
 					player.onGameStart = () => {
+						player.is_chasing_down = false;
 						player.dom.drought_box.classList.remove('active');
+
+						if (!show_runways) return;
 
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
 							elmt => {
@@ -795,7 +831,28 @@
 							start_level >= 19 ? 'add' : 'remove'
 						]('hide19');
 
-						resetRunways();
+						if (show_runways === 'transitions') {
+							player.dom.runways_box.classList.remove('visible');
+						} else {
+							resetRunways();
+						}
+					};
+
+					player.onGameOver = () => {
+						if (show_runways) {
+							const score = player.game.data.score.current;
+							const other_player = match_players.find(
+								_player => _player !== player
+							);
+							if (other_player.game && !other_player.game.over) {
+								const other_player_score = other_player.game.data.score.current;
+								if (other_player_score < score) {
+									other_player.is_chasing_down = true;
+									other_player.dom.runways_box.classList.add('visible');
+								}
+							}
+						}
+						player.dom.runways_box.classList.remove('visible');
 					};
 
 					if (hasAds) {
@@ -933,6 +990,14 @@
 				});
 			});
 
+			if (CYCLE_TDIFF) {
+				setInterval(() => {
+					players.forEach(player => {
+						player.dom.score_box.classList.toggle('with_tdiff');
+					});
+				}, CYCLE_TDIFF * 1000);
+			}
+
 			const competition = new Competition(players);
 
 			competition.API.setMatch = function (match_idx) {
@@ -1006,14 +1071,14 @@
 			window._NTC_API = competition.API;
 
 			window._NTC_API.showRunways = () => {
-				[...document.querySelectorAll('.runways')].forEach(elmt =>
-					elmt.classList.add('visible')
-				);
+				players.forEach(player => {
+					player.dom.runways_box.classList.add('visible');
+				});
 			};
 			window._NTC_API.hideRunways = () => {
-				[...document.querySelectorAll('.runways')].forEach(elmt =>
-					elmt.classList.remove('visible')
-				);
+				players.forEach(player => {
+					player.dom.runways_box.classList.remove('visible');
+				});
 			};
 		</script>
 	</body>
