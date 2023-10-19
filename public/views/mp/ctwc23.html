@@ -563,13 +563,23 @@
 				? parseInt(QueryString.get('sponsorimg'), 10)
 				: 0;
 
-			const curtain_num = /^[01]$/.test(QueryString.get('curtain'))
-				? parseInt(QueryString.get('curtain'), 10)
-				: 0;
+			let curtain_template;
+			if (/^[01]$/.test(QueryString.get('curtain'))) {
+				curtain_template = document.getElementById(
+					`curtain_${QueryString.get('curtain')}`
+				);
+			}
 
+			// triple-typed variable... that is disgusting -_-
+			// false: never show runways (default)
+			// 1 -> true: always show runways
+			// 'transitions' -> 'transitions': show slightly before transitions
+			// x,y -> [x, y]: show runways for x seconds every y seconds
 			let show_runways = false;
 			if (QueryString.get('runways') === '1') {
 				show_runways = true;
+			} else if (QueryString.get('runways') === 'transitions') {
+				show_runways = 'transitions';
 			} else {
 				const m = (QueryString.get('runways') || '').match(
 					/^([1-9]\d*),([1-9]\d*)$/
@@ -594,9 +604,6 @@
 				});
 			}
 
-			const curtain_template = document.getElementById(
-				`curtain_${curtain_num}`
-			);
 			const player_template = document.getElementById('player');
 			const players = [];
 
@@ -609,6 +616,7 @@
 				let runways_interval = null;
 				let runways_timeout = null;
 
+				// function is only used when show_runways is an array
 				const showRunways = () => {
 					runways_timeout = clearTimeout(runways_timeout);
 
@@ -648,11 +656,14 @@
 					player_node.classList.add(`p${player_num}`);
 					match_node.appendChild(player_node);
 
-					const curtain_fragment = document.importNode(
-						curtain_template.content,
-						true
-					);
-					const curtain = curtain_fragment.querySelector('.custom_curtain');
+					let curtain;
+					if (curtain_template) {
+						const curtain_fragment = document.importNode(
+							curtain_template.content,
+							true
+						);
+						curtain = curtain_fragment.querySelector('.custom_curtain');
+					}
 
 					const player = new CompetitionPlayer(
 						{
@@ -713,21 +724,15 @@
 						player_node.querySelector(`.runways`).classList.add('visible');
 					} else if (Array.isArray(show_runways)) {
 						// visible on interval and on transition
-						// player.onTransition = () => {
-						// 	resetRunways(false);
-						// 	showRunways();
-						// };
+						player.onTransition = () => {
+							resetRunways(false);
+							showRunways();
+						};
 					}
 
 					if (isDAS) {
 						player_node.querySelector(`.runways`).classList.add('hide39');
 					}
-
-					player._setCurtainLogo = player.setCurtainLogo;
-					player.setCurtainLogo = function (url) {
-						if (url) this._setCurtainLogo(url);
-					};
-					player.setCurtainLogo('/images/ctwc_logo.jpeg');
 
 					player._setName = player.setName;
 					player.setName = function (name) {
@@ -747,44 +752,48 @@
 						}
 					};
 
-					player.onLines = frame => {
-						if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
-						if (player.is_chasing_down) return;
-						if (
-							(frame.raw.lines >= 120 && frame.raw.lines < 135) ||
-							(frame.raw.lines >= 220 && frame.raw.lines < 235) ||
-							(frame.raw.lines >= 320 && frame.raw.lines < 335)
-						) {
-							player.dom.runways_box.classList.add('visible');
-						} else {
-							player.dom.runways_box.classList.remove('visible');
-						}
-					};
-
-					player.onLevel = frame => {
-						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
-							elmt => {
-								elmt.classList.remove('active');
+					if (show_runways === 'transitions') {
+						player.onLines = frame => {
+							if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
+							if (player.is_chasing_down) return;
+							if (
+								(frame.raw.lines >= 120 && frame.raw.lines < 135) ||
+								(frame.raw.lines >= 220 && frame.raw.lines < 235) ||
+								(frame.raw.lines >= 320 && frame.raw.lines < 335)
+							) {
+								player.dom.runways_box.classList.add('visible');
+							} else {
+								player.dom.runways_box.classList.remove('visible');
 							}
-						);
+						};
+					}
 
-						for (const threshold_level of [19, 29, 39]) {
-							if (frame.raw.level < threshold_level) {
-								[
-									...player.dom.runways_box.querySelectorAll(
-										`.lv${threshold_level}`
-									),
-								].forEach(elmt => {
-									elmt.classList.add('active');
-								});
-								break;
-							} else if (frame.raw.level === threshold_level) {
-								player.dom.runways_box.querySelector(
-									`.label .lv${threshold_level}`
-								).textContent = `L${frame.raw.level} SCORE`;
+					if (show_runways) {
+						player.onLevel = frame => {
+							[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+								elmt => {
+									elmt.classList.remove('active');
+								}
+							);
+
+							for (const threshold_level of [19, 29, 39]) {
+								if (frame.raw.level < threshold_level) {
+									[
+										...player.dom.runways_box.querySelectorAll(
+											`.lv${threshold_level}`
+										),
+									].forEach(elmt => {
+										elmt.classList.add('active');
+									});
+									break;
+								} else if (frame.raw.level === threshold_level) {
+									player.dom.runways_box.querySelector(
+										`.label .lv${threshold_level}`
+									).textContent = `L${frame.raw.level} SCORE`;
+								}
 							}
-						}
-					};
+						};
+					}
 
 					player.onDroughtStart = () => {
 						player.dom.drought_box.classList.add('active');
@@ -797,7 +806,8 @@
 					player.onGameStart = () => {
 						player.is_chasing_down = false;
 						player.dom.drought_box.classList.remove('active');
-						player.dom.runways_box.classList.remove('visible');
+
+						if (!show_runways) return;
 
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
 							elmt => {
@@ -821,19 +831,25 @@
 							start_level >= 19 ? 'add' : 'remove'
 						]('hide19');
 
-						// resetRunways();
+						if (show_runways === 'transitions') {
+							player.dom.runways_box.classList.remove('visible');
+						} else {
+							resetRunways();
+						}
 					};
 
 					player.onGameOver = () => {
-						const score = player.game.data.score.current;
-						const other_player = match_players.find(
-							_player => _player !== player
-						);
-						if (other_player.game && !other_player.game.over) {
-							const other_player_score = other_player.game.data.score.current;
-							if (other_player_score < score) {
-								other_player.is_chasing_down = true;
-								other_player.dom.runways_box.classList.add('visible');
+						if (show_runways) {
+							const score = player.game.data.score.current;
+							const other_player = match_players.find(
+								_player => _player !== player
+							);
+							if (other_player.game && !other_player.game.over) {
+								const other_player_score = other_player.game.data.score.current;
+								if (other_player_score < score) {
+									other_player.is_chasing_down = true;
+									other_player.dom.runways_box.classList.add('visible');
+								}
 							}
 						}
 						player.dom.runways_box.classList.remove('visible');
