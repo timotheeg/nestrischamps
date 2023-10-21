@@ -381,7 +381,7 @@ export default class Competition {
 				);
 
 				sorted_players[0][setter](diff, t_diff, 0);
-				sorted_players[1][setter](diff, t_diff, winner_slice_ratio);
+				sorted_players[1][setter](-diff, -t_diff, winner_slice_ratio);
 			}
 
 			for (let pidx = 2; pidx < sorted_players.length; pidx++) {
@@ -394,7 +394,7 @@ export default class Competition {
 
 				const t_diff = getTetrisDiff(leader, laggard, getter);
 
-				laggard[setter](diff, t_diff, pidx * winner_slice_ratio);
+				laggard[setter](-diff, -t_diff, pidx * winner_slice_ratio);
 			}
 		});
 	}

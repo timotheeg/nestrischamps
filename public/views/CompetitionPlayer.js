@@ -29,6 +29,7 @@ const DEFAULT_OPTIONS = {
 			return v.toFixed(2);
 		}
 	},
+	plus_minus_lead_indicator: true,
 };
 
 export default class CompetitionPlayer extends Player {
@@ -70,22 +71,38 @@ export default class CompetitionPlayer extends Player {
 
 	setDiff(diff, t_diff, rank_ratio = 0) {
 		const absolute_diff = Math.abs(diff);
+		const absolute_t_diff = Math.abs(t_diff);
 		const formatted_diff = this.options.format_score(absolute_diff);
-
+		const lead_indicator =
+			!this.options.plus_minus_lead_indicator || diff === 0
+				? ''
+				: diff > 0
+				? '+'
+				: '-';
 		const color = this.getRankColor(rank_ratio);
 
 		if (Array.isArray(this.dom.diff)) {
+			// array hack should not be needed 🤷‍♂️
 			this.dom.diff.forEach(node => {
 				node.style.color = color;
 				node.textContent = formatted_diff;
 			});
 		} else {
 			this.dom.diff.style.color = color;
-			this.dom.diff.textContent = formatted_diff;
+			if (this.options.plus_minus_lead_indicator && absolute_diff < 1000000) {
+				this.dom.diff.textContent = formatted_diff.replace(
+					/(^| )(?=\d)/,
+					lead_indicator
+				);
+			} else {
+				this.dom.diff.textContent = formatted_diff;
+			}
 		}
 
 		this.dom.t_diff.style.color = color;
-		this.dom.t_diff.textContent = this.options.format_tetris_diff(t_diff);
+		this.dom.t_diff.textContent = `${lead_indicator}${this.options.format_tetris_diff(
+			absolute_t_diff
+		)}`;
 
 		// quick hack for garage3_diff layout only
 		if (this.dom.diff_box) {
@@ -100,6 +117,7 @@ export default class CompetitionPlayer extends Player {
 
 	setGameRunwayDiff(diff, t_diff, rank_ratio = 0) {
 		const absolute_diff = Math.abs(diff);
+		const absolute_t_diff = Math.abs(t_diff);
 		const color = this.getRankColor(rank_ratio);
 
 		this.dom.runway_diff.style.color = color;
@@ -107,11 +125,12 @@ export default class CompetitionPlayer extends Player {
 
 		this.dom.runway_diff.textContent = this.options.format_score(absolute_diff);
 		this.dom.runway_t_diff.textContent =
-			this.options.format_tetris_diff(t_diff);
+			this.options.format_tetris_diff(absolute_t_diff);
 	}
 
 	setProjectionDiff(diff, t_diff, rank_ratio = 0) {
 		const absolute_diff = Math.abs(diff);
+		const absolute_t_diff = Math.abs(t_diff);
 		const color = this.getRankColor(rank_ratio);
 
 		this.dom.projection_diff.style.color = color;
@@ -120,6 +139,6 @@ export default class CompetitionPlayer extends Player {
 		this.dom.projection_diff.textContent =
 			this.options.format_score(absolute_diff);
 		this.dom.projection_t_diff.textContent =
-			this.options.format_tetris_diff(t_diff);
+			this.options.format_tetris_diff(absolute_t_diff);
 	}
 }
