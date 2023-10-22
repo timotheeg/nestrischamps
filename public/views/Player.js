@@ -412,12 +412,6 @@ export default class Player {
 		this._renderGameOver = this._renderGameOver.bind(this);
 		this._doTetris = this._doTetris.bind(this);
 
-		PASSTHROUGH_HANDLERS.forEach(on_name => {
-			this[`_${on_name}`] = (...args) => {
-				this[on_name](...args);
-			};
-		});
-
 		this._playerReset();
 	}
 
@@ -695,7 +689,9 @@ export default class Player {
 
 		// Pass-throughs handlers
 		PASSTHROUGH_HANDLERS.forEach(on_name => {
-			this.game[on_name] = this[`_${on_name}`];
+			this.game[on_name] = (...args) => {
+				this[on_name](...args);
+			};
 		});
 	}
 
