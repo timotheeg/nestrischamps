@@ -89,7 +89,11 @@ export default class CompetitionPlayer extends Player {
 			});
 		} else {
 			this.dom.diff.style.color = color;
-			if (this.options.plus_minus_lead_indicator && absolute_diff < 1000000) {
+			if (
+				this.options.plus_minus_lead_indicator &&
+				lead_indicator &&
+				absolute_diff < 1000000
+			) {
 				this.dom.diff.textContent = formatted_diff.replace(
 					/(^| )(?=\d)/,
 					lead_indicator
