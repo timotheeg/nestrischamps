@@ -56,20 +56,24 @@
 
 			.score .aligner .diff {
 				animation: 0.5s ease-out fadeIn;
+				opacity: 1;
 			}
 
 			.score .tetris_diff {
+				margin-top: -40px;
 				line-height: 40px;
-				display: none;
+				animation: 0.5s ease-out fadeOut;
+				opacity: 0;
 			}
 
 			.score.with_tdiff .tetris_diff {
-				display: block;
 				animation: 0.5s ease-out fadeIn;
+				opacity: 1;
 			}
 
 			.score.with_tdiff .aligner .diff {
-				display: none;
+				animation: 0.5s ease-out fadeOut;
+				opacity: 0;
 			}
 
 			.aligner div {
@@ -717,6 +721,10 @@
 						player_node.querySelector(`.score .tetris_diff`).remove();
 						player_node.querySelector(`.score .diff`).remove();
 						player_node.classList.add('qual');
+					}
+
+					if (!CYCLE_TDIFF) {
+						player.dom.score_box.querySelector('.tetris_diff').remove();
 					}
 
 					if (show_runways === true) {
