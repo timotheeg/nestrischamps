@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/ctm.css" />
+		<link rel="stylesheet" type="text/css" href="/views/ctm1080.css" />
+	</head>
+	<body>
+		<template id="player">
+			<div class="player">
+				<video class="player_vid"></video>
+
+				<div class="box score">
+					<div>
+						<div class="value">0000000</div>
+						<div class="lines">000</div>
+					</div>
+					<div>
+						<div class="diff">0000000</div>
+						<div class="tetris_diff">0.00</div>
+					</div>
+				</div>
+
+				<div class="box runway">
+					<div class="header">RUNWAY</div>
+					<div class="content">
+						<div class="value">0000000</div>
+						<div class="diff">0000000</div>
+						<div class="tetris_diff">0.00</div>
+					</div>
+				</div>
+
+				<div class="box projection">
+					<div class="header">PROJECTION</div>
+					<div class="content">
+						<div class="value">0000000</div>
+						<div class="diff">0000000</div>
+						<div class="tetris_diff">0.00</div>
+					</div>
+				</div>
+
+				<div class="box tetris_rate">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box running_trt"></div>
+
+				<div class="box name">
+					<div class="header">PLAYER</div>
+					<div class="content"></div>
+				</div>
+
+				<div class="box drought">
+					<div class="header">DRT</div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box eff">
+					<div class="header">EFF</div>
+					<div class="value">---</div>
+				</div>
+
+				<div class="box board">
+					<div class="level"></div>
+					<div class="next_piece"></div>
+				</div>
+
+				<div class="box flag"></div>
+
+				<div class="box hearts"></div>
+			</div>
+		</template>
+
+		<div id="stream_bg">
+			<div id="playing_fields"></div>
+
+			<div id="branding"></div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '1280x720',
+			});
+		</script>
+		<script src="/vendor/peerjs.1.5.1.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import QueryString from '/js/QueryString.js';
+			import { peek, translate } from '/views/utils.js';
+			import CTMCompetitionPlayer from '/views/CTMCompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+			import BinaryFrame from '/js/BinaryFrame.js';
+			import BaseGame from '/views/BaseGame.js';
+			import { getReplayGame } from '/views/replay.js';
+
+			const players_node = document.querySelector('#playing_fields');
+			const player_template = document.getElementById('player');
+
+			const players = [1, 2].map(num => {
+				const player_fragment = document.importNode(
+					player_template.content,
+					true
+				);
+				const player_node = player_fragment.querySelector('.player');
+
+				player_node.classList.add(`p${num}`);
+				players_node.appendChild(player_node);
+
+				const player = new CTMCompetitionPlayer(
+					{
+						name: player_node.querySelector(`.name .header`),
+						score: player_node.querySelector(`.score .value`),
+						level: player_node.querySelector(`.board .level`),
+						lines: player_node.querySelector(`.score .lines`),
+						trt: player_node.querySelector(`.tetris_rate .content`),
+						running_trt: player_node.querySelector(`.running_trt`),
+						preview: player_node.querySelector(`.board .next_piece`),
+						field: player_node.querySelector(`.board`),
+						hearts: player_node.querySelector(`.hearts`),
+						drought: player_node.querySelector(`.drought .value`),
+						runway_game: player_node.querySelector(`.runway .value`),
+						eff: player_node.querySelector(`.eff .value`),
+
+						projection: player_node.querySelector(`.projection .value`),
+
+						diff: player_node.querySelector(`.score .diff`),
+						t_diff: player_node.querySelector(`.score .tetris_diff`),
+
+						runway_diff: player_node.querySelector(`.runway .diff`),
+						runway_t_diff: player_node.querySelector(`.runway .tetris_diff`),
+
+						projection_diff: player_node.querySelector(`.projection .diff`),
+						projection_t_diff: player_node.querySelector(
+							`.projection .tetris_diff`
+						),
+
+						drought_box: player_node.querySelector(`.drought`),
+						runway_box: player_node.querySelector(`.runway`),
+						projection_box: player_node.querySelector(`.projection`),
+						video: player_node.querySelector(`.player_vid`),
+						flag: player_node.querySelector(`.flag`),
+					},
+					{
+						field_pixel_size: 4.5,
+						running_trt_dot_size: 5,
+						preview_pixel_size: 3,
+						preview_align: 'tr',
+						stereo: translate([1, 2], [-1, 1], num),
+					}
+				);
+
+				if (QueryString.get('runway') === '0') {
+					player.dom.runway_box.remove();
+					player.dom.projection_box.remove();
+				}
+
+				return player;
+			});
+
+			const competition = new Competition(players);
+
+			if (/^[1-9]\d*$/.test(QueryString.get('gameid'))) {
+				const player = players[0];
+				const replay_opponent = players[1];
+
+				let opponent_game;
+
+				getReplayGame(QueryString.get('gameid')).then(({ gamedata, game }) => {
+					console.log(`Opponent game ${QueryString.get('gameid')} is loaded`);
+					opponent_game = game;
+
+					replay_opponent.setName(gamedata.display_name);
+					replay_opponent.setCountryCode(gamedata.country_code);
+					replay_opponent.setAvatar(gamedata.profile_image_url);
+				});
+
+				let start_ts;
+				let start_ts_client;
+				let frame_idx;
+				let gameid = 0;
+				let replay_to;
+
+				function startOpponentReplay() {
+					replay_to = clearTimeout(replay_to);
+
+					if (!opponent_game) return;
+
+					start_ts = Date.now();
+					start_ts_client = opponent_game.frames[0].raw.ctime;
+
+					frame_idx = 0;
+					gameid += 1;
+
+					showFrame();
+				}
+
+				function showFrame() {
+					if (!opponent_game) return;
+
+					const frame = opponent_game.frames[frame_idx++];
+
+					replay_opponent.setFrame(frame.raw);
+
+					const next_frame_target_ts =
+						start_ts +
+						opponent_game.frames[frame_idx].raw.ctime -
+						start_ts_client;
+
+					replay_to = setTimeout(showFrame, next_frame_target_ts - Date.now());
+				}
+
+				function stopOpponentReplay() {
+					replay_to = clearTimeout(replay_to);
+				}
+
+				player._onGameStart = player.onGameStart;
+				player._onGameOver = player.onGameOver;
+
+				player.onGameStart = function (...args) {
+					this._onGameStart(...args);
+
+					replay_opponent._hideCurtain();
+					startOpponentReplay();
+				};
+
+				player.onGameOver = function (...args) {
+					this._onGameOver(...args);
+
+					stopOpponentReplay();
+					replay_opponent._showCurtain(); // private method, urgh 😓
+				};
+			}
+		</script>
+	</body>
+</html>
