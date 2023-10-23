@@ -205,6 +205,8 @@
 
 					const frame = opponent_game.frames[frame_idx++];
 
+					frame.raw.gameid = gameid;
+
 					replay_opponent.setFrame(frame.raw);
 
 					const next_frame_target_ts =
@@ -224,8 +226,6 @@
 
 				player.onGameStart = function (...args) {
 					this._onGameStart(...args);
-
-					replay_opponent._hideCurtain();
 					startOpponentReplay();
 				};
 
@@ -233,7 +233,7 @@
 					this._onGameOver(...args);
 
 					stopOpponentReplay();
-					replay_opponent._showCurtain(); // private method, urgh 😓
+					replay_opponent.setGameOver();
 				};
 			}
 		</script>
