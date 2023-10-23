@@ -11,6 +11,13 @@ class PrivateRoom extends Room {
 	addView(connection) {
 		super.addView(connection);
 
+		// send some standard info
+		connection.send(['setId', 0, this.owner.id]);
+		connection.send(['setLogin', 0, this.owner.login]);
+		connection.send(['setDisplayName', 0, this.owner.display_name]);
+		connection.send(['setCountryCode', 0, this.owner.country_code]);
+		connection.send(['setProfileImageURL', 0, this.owner.profile_image_url]);
+
 		// last video-enabled view always wins the video feed
 		if (connection.meta.video) {
 			this.last_view_peer_id = connection.id;

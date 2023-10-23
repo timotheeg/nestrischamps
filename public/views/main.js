@@ -960,6 +960,7 @@ if (!manageReplay(showFrame)) {
 
 			API[method](...args);
 		} catch (e) {
+			console.log(frame);
 			console.error(e);
 		}
 	};

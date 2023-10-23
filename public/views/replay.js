@@ -39,26 +39,37 @@ if (/^[1-9]\d+$/.test(QueryString.get('ts'))) {
 
 const use_piece_stats = QueryString.get('use_piece_stats') === '1';
 
-async function getReplayGame(gameid) {
-	const gamedata_res = await fetch(`/api/games/${gameid}`);
+export async function getReplayGame(gameid) {
+	const game_url = `/api/games/${gameid}`;
+	console.log(`Fetching game data for gameid ${gameid}`);
+
+	const gamedata_res = await fetch(game_url);
 	const gamedata = await gamedata_res.json();
 
+	if (!gamedata.frame_url) {
+		return { gamedata };
+	}
+
+	console.log(`Fetching game file at url ${gamedata.frame_url}`);
 	const response = await fetch(gamedata.frame_url);
 	const blob = await response.blob();
 	const buffer = new Uint8Array(await blob.arrayBuffer());
 	const version = buffer[0] >> 5 || 1;
 	const frame_size = BinaryFrame.FRAME_SIZE_BY_VERSION[version];
 
-	const game = new BaseGame({
-		usePieceStats: use_piece_stats,
+	console.log({
+		header: buffer[0].toString(2).padStart(8, '0'),
+		version,
+		frame_size,
 	});
+
+	const game = new BaseGame({});
 	game._gameid = gameid; // game has a client id, this records the server id too, can be used later on
 
 	const then = Date.now();
 	let idx = 0;
 
-	// TODO: split this tight loop so each iteration takes no more than 50ms
-	// Guesstimates is that is takes ~100ms for one minute of gameplay at 60fps
+	console.log(`Populating game`);
 	while (idx < buffer.length) {
 		const binary_frame = buffer.slice(idx, idx + frame_size);
 		const frame_data = BinaryFrame.parse(binary_frame);
@@ -72,7 +83,10 @@ async function getReplayGame(gameid) {
 		}ms.`
 	);
 
-	return game;
+	return {
+		gamedata,
+		game,
+	};
 }
 
 async function startReplay(_showFrame) {
@@ -80,7 +94,7 @@ async function startReplay(_showFrame) {
 
 	const gameids = match[2].split('-');
 
-	games = await Promise.all(gameids.map(getReplayGame));
+	games = await Promise.all(gameids.map(getReplayGame).map(res => res.game));
 
 	// sort by duration descending to find the longest game
 	reference_game = [...games].sort((a, b) =>

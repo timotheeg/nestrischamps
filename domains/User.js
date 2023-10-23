@@ -187,6 +187,11 @@ class User extends EventEmitter {
 		}
 
 		if (!this.getProducer().isMatchConnection()) {
+			Array.from(this.private_room.views)
+				.find(
+					connection => connection.id === this.private_room.last_view_peer_id
+				)
+				?.send(['setPeerId', 0, this.getProducer().getPeerId()]);
 			this.getProducer().send([
 				'setViewPeerId',
 				this.private_room.last_view_peer_id,
