@@ -205,6 +205,8 @@
 
 					const frame = opponent_game.frames[frame_idx++];
 
+					if (!frame) return;
+
 					frame.raw.gameid = gameid;
 
 					replay_opponent.setFrame(frame.raw);
