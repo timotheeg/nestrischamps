@@ -63,7 +63,9 @@ export async function getReplayGame(gameid) {
 		frame_size,
 	});
 
-	const game = new BaseGame({});
+	const game = new BaseGame({
+		usePieceStats: use_piece_stats,
+	});
 	game._gameid = gameid; // game has a client id, this records the server id too, can be used later on
 
 	const then = Date.now();
