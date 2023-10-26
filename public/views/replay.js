@@ -94,7 +94,7 @@ async function startReplay(_showFrame) {
 
 	const gameids = match[2].split('-');
 
-	games = await Promise.all(gameids.map(getReplayGame).map(res => res.game));
+	games = (await Promise.all(gameids.map(getReplayGame))).map(res => res.game);
 
 	// sort by duration descending to find the longest game
 	reference_game = [...games].sort((a, b) =>
