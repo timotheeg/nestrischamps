@@ -10,22 +10,9 @@ import {
 } from '/ocr/calibration.js';
 import { peerServerOptions } from '/views/constants.js';
 import speak from '/views/tts.js';
-import { PIECES } from '/views/constants.js';
+import { LEVEL_COLORS, PIECES } from '/views/constants.js';
 
 // NTSC NES resolution: 256x224 -> 512x448
-const LEVEL_COLORS = [
-	['#4A32FF', '#4AAFFE'],
-	['#009600', '#6ADC00'],
-	['#B000D4', '#FF56FF'],
-	['#4A32FF', '#00E900'],
-	['#C8007F', '#00E678'],
-	['#00E678', '#968DFF'],
-	['#C41E0E', '#666666'],
-	['#8200FF', '#780041'],
-	['#4A32FF', '#C41E0E'],
-	['#C41E0E', '#F69B00'],
-];
-
 const reference_size = [512, 448];
 const reference_locations = {
 	score: { crop: [384, 112, 94, 14], pattern: 'ADDDDD' },
@@ -240,6 +227,7 @@ function resetNotice() {
 
 let peer = null;
 let peer_opened = false;
+const view_peers = new Map();
 let view_peer_id = null;
 let is_player = false;
 let view_meta = null;
@@ -251,8 +239,17 @@ const API = {
 		}
 	},
 
-	setViewPeerId(_view_peer_id) {
-		view_peer_id = _view_peer_id;
+	addViewPeer(view_peer_id, view_meta) {
+		if (view_peers.has(view_peer_id)) {
+			// should not happen
+			// TODO: call closeView, drop ongoing call if any
+		}
+		view_peers.set(view_peer_id, { id: view_peer_id, view_meta });
+		callView(view_peers.get(view_peer_id));
+	},
+
+	removeViewPeer() {
+		// TODO... view management should be driven from server
 	},
 
 	makePlayer(player_index, _view_meta) {
@@ -260,7 +257,7 @@ const API = {
 		is_player = true;
 		view_meta = _view_meta;
 
-		startSharingVideoFeed();
+		restartSharingVideoFeed();
 	},
 
 	dropPlayer() {
@@ -317,36 +314,52 @@ function connect() {
 
 		peer.on('open', err => {
 			peer_opened = true;
-			startSharingVideoFeed();
+			restartSharingVideoFeed();
 		});
 
 		peer.on('error', err => {
 			console.log(`Peer error: ${err.message}`);
 			peer.retryTO = clearTimeout(peer.retryTO); // there should only be one retry scheduled
-			peer.retryTO = setTimeout(startSharingVideoFeed, 1500); // we assume this will succeed at some point?? 😰😅
+			peer.retryTO = setTimeout(restartSharingVideoFeed, 1500); // we assume this will succeed at some point?? 😰😅
 		});
 	};
 }
 
-let ongoing_call = null;
+function getRawVideoFeedData() {
+	const xywh = [...config.tasks.field.crop];
 
-async function startSharingVideoFeed() {
-	console.log('startSharingVideoFeed', view_meta);
+	if (do_half_height) {
+		xywh[1] *= 2;
+		xywh[3] *= 2;
+	}
 
-	stopSharingVideoFeed();
+	const r_xywh = getCaptureCoordinates(
+		reference_size,
+		reference_locations.field.crop,
+		xywh
+	);
 
-	if (!allow_video_feed.checked) return;
-	if (!video_feed_selector.value) return;
-	if (!is_player || !peer || !view_peer_id || !view_meta || !view_meta.video)
-		return;
+	r_xywh[0] /= video.videoWidth;
+	r_xywh[1] /= video.videoHeight;
+	r_xywh[2] /= video.videoWidth;
+	r_xywh[3] /= video.videoHeight;
+
+	return {
+		raw: true,
+		r_xywh,
+	};
+}
+
+async function callView(view_data) {
+	if (!is_player || !peer || !peer_opened) return;
 
 	const video_constraints = {
 		width: { ideal: 320 },
 		height: { ideal: 240 },
-		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
+		frameRate: { ideal: 15 }, // players hardly move... no need high fps? -- not true anymore with rolling!!
 	};
 
-	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+	const m = view_data.view_meta.video?.match(/^(\d+)x(\d+)$/);
 
 	if (m) {
 		video_constraints.width.ideal = parseInt(m[1], 10);
@@ -359,41 +372,39 @@ async function startSharingVideoFeed() {
 		video_constraints.deviceId = { exact: video_feed_selector.value };
 	}
 
+	// Hmmm... do we get multiple input streams or just for all the views at the highest res requested?
 	const stream = await navigator.mediaDevices.getUserMedia({
-		audio: QueryString.get('webcam_audio') === '1',
+		audio: QueryString.get('webcam_audio') === '1', // should this be a param from the view?
 		video: video_constraints,
 	});
 
-	function startSharing() {
-		// 1. player cam
-		ongoing_call = peer.call(view_peer_id, stream);
+	// 1. player cam
+	view_data.ongoing_call = peer.call(view_data.id, stream);
 
-		if (view_meta.raw) {
-			// 2. raw capture
-			const xywh = [...config.tasks.field.crop];
+	// 2. game feed
+	if (view_data.view_meta.raw) {
+		peer.call(view_data.id, video.srcObject, {
+			metadata: getRawVideoFeedData(),
+		});
+	}
+}
 
-			if (do_half_height) {
-				xywh[1] *= 2;
-				xywh[3] *= 2;
-			}
+async function startSharingVideoFeed() {
+	console.log('startSharingVideoFeed', view_meta);
 
-			const r_xywh = getCaptureCoordinates(
-				reference_size,
-				reference_locations.field.crop,
-				xywh
-			);
+	if (!allow_video_feed.checked) return;
+	if (!video_feed_selector.value) return;
+	if (
+		!is_player ||
+		!peer ||
+		!view_peers.size <= 0 ||
+		![...view_peers].some(({ view_meta }) => view_meta.video)
+	)
+		return;
 
-			r_xywh[0] /= video.videoWidth;
-			r_xywh[1] /= video.videoHeight;
-			r_xywh[2] /= video.videoWidth;
-			r_xywh[3] /= video.videoHeight;
-
-			peer.call(view_peer_id, video.srcObject, {
-				metadata: {
-					raw: true,
-					r_xywh,
-				},
-			});
+	async function startSharing() {
+		for (const [view_peer_id, view_data] of view_peers.entries()) {
+			await callView(view_data);
 		}
 	}
 
@@ -406,15 +417,17 @@ async function startSharingVideoFeed() {
 }
 
 function stopSharingVideoFeed() {
-	try {
-		ongoing_call.close();
-	} catch (err) {}
+	for (const [view_peer_id, view_data] of view_peers.entries()) {
+		try {
+			view_data.ongoing_call.close();
+		} catch (err) {}
 
-	ongoing_call = null;
+		view_data.ongoing_call = null;
+	}
 }
 
 function restartSharingVideoFeed() {
-	if (!ongoing_call) return;
+	stopSharingVideoFeed();
 	startSharingVideoFeed();
 }
 
