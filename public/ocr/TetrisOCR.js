@@ -98,8 +98,8 @@ export default class TetrisOCR extends EventTarget {
 		};
 
 		// This create a lot of imageData objects of similar sizes
-		// Somecould be shared because they are the same dimensions (e.g. 3 digits for lines, and piece stats)
-		// but if we share them, we wouldnotbe able to display them individually in the debug UI
+		// Some could be shared because they are the same dimensions (e.g. 3 digits for lines, and piece stats)
+		// but if we share them, we would not be able to display them individually in the debug UI
 		for (const [name, task] of Object.entries(this.config.tasks)) {
 			if (this.palette && name.startsWith('color')) continue;
 
