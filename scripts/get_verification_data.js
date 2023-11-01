@@ -55,21 +55,22 @@ export async function getReplayGame(gameid) {
 
 function noop() {}
 
-function getTimestamp(elapsed) {
+function getSrtTimestamp(elapsed) {
 	let remainder = elapsed;
 
-	const ms = remainder % 1000;
+	const ms = `${remainder % 1000}`;
 	remainder = (remainder / 1000) | 0;
 
-	const sec = remainder % 60;
+	const sec = `${remainder % 60}`;
 	remainder = (remainder / 60) | 0;
 
-	const mins = remainder % 60;
-	const hours = (remainder / 60) | 0;
+	const mins = `${remainder % 60}`;
+	const hours = `${(remainder / 60) | 0}`;
 
-	return `${hours < 10 ? 0 : ''}${hours}:${mins < 10 ? 0 : ''}${mins}:${
-		sec < 10 ? 0 : ''
-	}${sec},${ms < 100 ? 0 : ''}${ms < 10 ? 0 : ''}${ms}`;
+	return `${hours.padStart(2, '0')}:${mins.padStart(2, '0')}:${sec.padStart(
+		2,
+		'0'
+	)},${ms.padStart(3, '0')}`;
 }
 
 (async function () {
@@ -120,7 +121,7 @@ function getTimestamp(elapsed) {
 		const next = report.points[idx + 1] || { ts: duration };
 		return [
 			idx + 1,
-			`${getTimestamp(video_offset_ms + p.ts)} --> ${getTimestamp(
+			`${getSrtTimestamp(video_offset_ms + p.ts)} --> ${getSrtTimestamp(
 				video_offset_ms + next.ts - 1
 			)}`,
 			`score: ${p.score} - lines: ${p.lines}`,
