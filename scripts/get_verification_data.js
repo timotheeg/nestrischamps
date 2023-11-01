@@ -90,14 +90,17 @@ function getSrtTimestamp(elapsed) {
 
 	console.log(`Computing report`);
 
+	// JSON export
 	const report = {
 		id: gamedata.id,
 		login: gamedata.login,
 		start_level: gamedata.start_level,
 		points: game.points.map(p => {
 			const clear = peek(p.frame.clears) || {};
+			const ts = p.frame.raw.ctime - start_ctime;
 			return {
-				ts: p.frame.raw.ctime - start_ctime,
+				ts,
+				time: getSrtTimestamp(ts),
 				lines: p.frame.raw.lines,
 				cleared: p.cleared,
 				burn: clear.burn || 0,
@@ -111,6 +114,16 @@ function getSrtTimestamp(elapsed) {
 
 	console.log(`Writing report into file ${file_name}.json`);
 	fs.writeFile(`${file_name}.json`, JSON.stringify(report, null, 2), noop);
+
+	// CSV export - Note: it's not a proper csv encoder, but it works because we know the data is csv-safe
+	console.log(`Writing report into file ${file_name}.csv`);
+	const csv_data = report.points.map(data => {
+		const row = Object.values(data);
+		row[1] = `"${row[1]}"`; // SRT timestamps contain a comma, so we wrap the entry for CSV safety
+		return row;
+	});
+	csv_data.unshift(Object.keys(report.points[0])); // prepend headers
+	fs.writeFile(`${file_name}.csv`, csv_data.join('\n'), noop);
 
 	if (video_offset_ms) {
 		console.log(`SRT and Chapters written with ${video_offset_ms}ms offset.`);
