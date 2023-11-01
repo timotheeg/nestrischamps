@@ -102,6 +102,7 @@ function getSrtTimestamp(elapsed) {
 				ts,
 				time: getSrtTimestamp(ts),
 				lines: p.frame.raw.lines,
+				level: p.frame.raw.level,
 				cleared: p.cleared,
 				burn: clear.burn || 0,
 				tetris_rate: clear.tetris_rate || 0,
