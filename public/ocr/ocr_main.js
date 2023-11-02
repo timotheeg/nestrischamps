@@ -48,6 +48,7 @@ const reference_locations = {
 	S: { crop: [96, 304, 46, 14], pattern: 'BDD', red: true },
 	L: { crop: [96, 336, 46, 14], pattern: 'BDD', red: true },
 	I: { crop: [96, 368, 46, 14], pattern: 'BDD', red: true },
+	gym_pause: { crop: [266, 174, 44, 2] },
 };
 
 const configs = {
@@ -70,6 +71,7 @@ const configs = {
 			'S',
 			'L',
 			'I',
+			'gym_pause',
 		],
 	},
 	das_trainer: {
@@ -91,7 +93,7 @@ const configs = {
 		game_type: BinaryFrame.GAME_TYPE.MINIMAL,
 		reference: '/ocr/reference_ui_classic.png',
 		palette: 'easiercap',
-		fields: ['score', 'level', 'lines', 'field', 'preview'],
+		fields: ['score', 'level', 'lines', 'field', 'preview', 'gym_pause'],
 	},
 };
 

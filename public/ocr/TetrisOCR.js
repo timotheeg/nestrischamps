@@ -26,6 +26,7 @@ const PERF_METHODS = [
 	'scanInstantDas',
 	'scanCurPieceDas',
 	'scanCurPiece',
+	'scanGymPause',
 ];
 
 const DEFAULT_COLOR_0 = [0x00, 0x00, 0x00];
@@ -54,9 +55,11 @@ const TASK_RESIZE = {
 	color3: [5, 5],
 	stats: [getDigitsWidth(3), 14 * 7 + 14 * 7], // height captures all the individual stats...
 	piece_count: [getDigitsWidth(3), 14],
+	gym_pause: [22, 1],
 };
 
 const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this threshold be higher?
+const GYM_PAUSE_LUMA_THRESHOLD = 75;
 
 export default class TetrisOCR extends EventTarget {
 	constructor(templates, palettes, config) {
@@ -273,6 +276,10 @@ export default class TetrisOCR extends EventTarget {
 
 		if (this.config.tasks.T) {
 			Object.assign(res, this.scanPieceStats(source_img));
+		}
+
+		if (this.config.tasks.gym_pause) {
+			res.gym_pause = this.scanGymPause(source_img);
 		}
 
 		return res;
@@ -667,6 +674,43 @@ export default class TetrisOCR extends EventTarget {
 				[0, 0, 0]
 			)
 			.map(v => Math.sqrt(v / pix_refs.length));
+	}
+
+	scanGymPause(source_img) {
+		const task = this.config.tasks.gym_pause;
+		const xywh_coordinates = this.getCropCoordinates(task);
+
+		crop(source_img, ...xywh_coordinates, task.crop_img);
+		bicubic(task.crop_img, task.scale_img);
+
+		const pix_refs = [
+			// 3 pixels for U
+			[1, 0],
+			[2, 0],
+			[3, 0],
+
+			// 3 pixels for S
+			[9, 0],
+			[10, 0],
+			[11, 0],
+
+			// 4 pixels for E
+			[16, 0],
+			[17, 0],
+			[18, 0],
+			[19, 0],
+		];
+
+		const total_luma = pix_refs
+			.map(([x, y]) => {
+				const col_idx = x << 2;
+				return luma(...task.scale_img.data.subarray(col_idx, col_idx + 3));
+			})
+			.reduce((acc, luma) => acc + luma, 0);
+
+		const avg_luma = total_luma / pix_refs.length;
+
+		return [Math.round(avg_luma), avg_luma > GYM_PAUSE_LUMA_THRESHOLD];
 	}
 
 	async scanField(source_img, _colors) {

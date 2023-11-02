@@ -297,6 +297,10 @@ export default class GameTracker {
 			pojo.cur_piece = dispatch_frame.cur_piece;
 		}
 
+		if (this.config.tasks.gym_pause) {
+			pojo.gym_pause = dispatch_frame.gym_pause;
+		}
+
 		this.onMessage(pojo);
 	}
 }
