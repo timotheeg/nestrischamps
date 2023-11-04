@@ -708,6 +708,11 @@ export default class TetrisOCR extends EventTarget {
 	}
 
 	scanPauseText(source_img) {
+		// Scanning the pause text scans the bottom of the letter 'U', "S", and "E" of the text "PAUSE"
+		// that's because the bottom of the letters overlaps with block margins, which are black
+		// When the pause text is not visible, luma on these overlap is expected to be very low
+		// When pause text is visible, luma is expected to be high.
+
 		const task = this.pause_text_task;
 		const xywh_coordinates = this.getCropCoordinates(task);
 
