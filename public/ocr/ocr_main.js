@@ -1616,16 +1616,17 @@ function trackAndSendFrames() {
 		performance.clearMarks();
 		performance.clearMeasures();
 
+		// delete data fields which are never meant to be sent over the wire
 		delete data.color1;
 		delete data.color2;
 		delete data.color3;
+		delete data.gym_pause_active;
+		delete data.raw;
 
 		// only send frame if changed
 		check_equal: do {
 			for (let key in data) {
 				if (key == 'ctime') continue;
-				if (key == 'raw') continue;
-				if (key == 'gym_pause_active') continue;
 				if (key == 'field') {
 					if (!data.field.every((v, i) => last_frame.field[i] === v)) {
 						break check_equal;
