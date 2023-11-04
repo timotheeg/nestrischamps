@@ -48,7 +48,6 @@ const reference_locations = {
 	S: { crop: [96, 304, 46, 14], pattern: 'BDD', red: true },
 	L: { crop: [96, 336, 46, 14], pattern: 'BDD', red: true },
 	I: { crop: [96, 368, 46, 14], pattern: 'BDD', red: true },
-	gym_pause: { crop: [266, 174, 44, 2] },
 };
 
 const configs = {
@@ -71,7 +70,6 @@ const configs = {
 			'S',
 			'L',
 			'I',
-			'gym_pause',
 		],
 	},
 	das_trainer: {
@@ -93,7 +91,7 @@ const configs = {
 		game_type: BinaryFrame.GAME_TYPE.MINIMAL,
 		reference: '/ocr/reference_ui_classic.png',
 		palette: 'easiercap',
-		fields: ['score', 'level', 'lines', 'field', 'preview', 'gym_pause'],
+		fields: ['score', 'level', 'lines', 'field', 'preview'],
 	},
 };
 
@@ -505,13 +503,14 @@ video.addEventListener('click', async evt => {
 		video.videoHeight
 	);
 
-	const field_xywh = getFieldCoordinates(img_data, floodStartPoint);
-	console.log('field coordinates', field_xywh);
+	// get field coordinates via flood-fill (includes borders on all sides)
+	const field_w_borders_xywh = getFieldCoordinates(img_data, floodStartPoint);
+	console.log('field coordinates', field_w_borders_xywh);
 
 	let [ox, oy, ow, oh] = getCaptureCoordinates(
 		reference_size,
 		reference_locations.field_w_borders.crop,
-		field_xywh
+		field_w_borders_xywh
 	);
 
 	if (ow <= 0 || oh <= 0) {
@@ -1625,6 +1624,8 @@ function trackAndSendFrames() {
 		check_equal: do {
 			for (let key in data) {
 				if (key == 'ctime') continue;
+				if (key == 'raw') continue;
+				if (key == 'gym_pause') continue;
 				if (key == 'field') {
 					if (!data.field.every((v, i) => last_frame.field[i] === v)) {
 						break check_equal;

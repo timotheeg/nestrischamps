@@ -60,7 +60,7 @@ export default class GameTracker {
 	onPalette() {}
 
 	_getLevelFromLines(lines, ocr_level_digits) {
-		if (lines === null) return null;
+		if (lines === null || ocr_level_digits === null) return null;
 		if (!this.transition) return GameTracker.digitsToValue(ocr_level_digits);
 		if (lines < this.transition) return this.start_level;
 		return this.start_level + 1 + Math.floor((lines - this.transition) / 10);
@@ -75,6 +75,15 @@ export default class GameTracker {
 			return null;
 		}
 
+		// TODO(?): Do we need to consider the frame buffer to detect the pause text "properly"
+		// TODO(?): check luma on level for better reliability (wity grey Gym rom)
+		last_frame.gym_pause = !!(
+			last_frame.pause_text?.[1] &&
+			last_frame.score &&
+			last_frame.lines &&
+			last_frame.level
+		);
+
 		if (--this.score_frame_delay > 0) {
 			// just wait
 		} else if (this.score_frame_delay === 0) {
@@ -84,12 +93,13 @@ export default class GameTracker {
 				frame.level = last_frame.level;
 			});
 		} else if (
+			!last_frame.gym_pause &&
 			!GameTracker.arrEqual(last_frame.score, peek(this.frame_buffer).score)
 		) {
 			this.score_frame_delay = this.frame_buffer.length;
 		}
 
-		// mutually exclusive check for piece checks based on selected rom
+		// mutually exclusive checks for piece checks based on selected rom (classic, das trainer, minimal)
 		if (this.config.tasks.T) {
 			// In classic rom, we have several way of determining the cur_piece
 			// 1. on piece change, cur_piece is the previous preview
@@ -111,11 +121,13 @@ export default class GameTracker {
 					frame.I = last_frame.I;
 				});
 			} else if (
+				!last_frame.gym_pause &&
 				!GameTracker.pieceCountersEqual(last_frame, peek(this.frame_buffer))
 			) {
 				this.piece_frame_delay = this.frame_buffer.length;
 			}
 		} else if (this.config.tasks.instant_das) {
+			// das trainer rom
 			if (--this.piece_frame_delay > 0) {
 				// just wait
 			} else if (this.piece_frame_delay === 0) {
@@ -125,18 +137,20 @@ export default class GameTracker {
 					frame.cur_piece_das = last_frame.cur_piece_das;
 				});
 			} else {
+				// note: no need to test for gym_pause in das trainer rom
 				if (
-					last_frame.preview != last_frame.preview ||
-					last_frame.cur_piece != last_frame.cur_piece ||
+					last_frame.preview != peek(this.frame_buffer).preview ||
+					last_frame.cur_piece != peek(this.frame_buffer).cur_piece ||
 					!GameTracker.arrEqual(
 						last_frame.cur_piece_das,
-						last_frame.cur_piece_das
+						peek(this.frame_buffer).cur_piece_das
 					)
 				) {
 					this.piece_frame_delay = this.frame_buffer.length;
 				}
 			}
 		} else {
+			// minimal trainer rom
 			if (--this.piece_frame_delay > 0) {
 				// just wait
 			} else if (this.piece_frame_delay === 0) {
@@ -144,7 +158,10 @@ export default class GameTracker {
 					frame.preview = last_frame.preview;
 				});
 			} else {
-				if (last_frame.preview != peek(this.frame_buffer).preview) {
+				if (
+					!last_frame.gym_pause &&
+					last_frame.preview != peek(this.frame_buffer).preview
+				) {
 					this.piece_frame_delay = this.frame_buffer.length;
 				}
 			}
@@ -152,13 +169,28 @@ export default class GameTracker {
 
 		this.frame_buffer.push(last_frame);
 
-		// ======= Now do OCR step 2
+		// ======= Now do OCR step 2: scan colors and field
+		// Note: we need the level to read the field, so that's why we do after sanitize
 
-		const dispatch_frame = this.frame_buffer.shift();
+		const raw_ocr_frame = this.frame_buffer.shift();
+		const dispatch_frame = { ...raw_ocr_frame };
+
+		if (dispatch_frame.gym_pause) {
+			// On gym pause, we generate a fake vanilla-pause frame were everything is black
+			dispatch_frame.score = null;
+			dispatch_frame.lines = null;
+			dispatch_frame.level = null;
+			dispatch_frame.preview = null;
+
+			if (this.config.tasks.T) {
+				PIECES.forEach(p => (dispatch_frame[p] = null));
+			}
+		}
 
 		// replicate NESTrisOCR's gameid logic
 		// also check if the fixers must be reset
 		if (
+			dispatch_frame.gym_pause ||
 			dispatch_frame.lines === null ||
 			dispatch_frame.score === null ||
 			dispatch_frame.level === null
@@ -229,19 +261,26 @@ export default class GameTracker {
 		}
 
 		const level = this._getLevelFromLines(lines, dispatch_frame.level); // this is no longer OCR!
-		const level_unit = level % 10;
 
 		const { field, color1, color2, color3 } =
 			await this.tetris_ocr.processsFrameStep2(dispatch_frame, level);
 
-		if (this.palette[level_unit] === undefined) {
-			this.palette[level_unit] = BUFFER_MAXSIZE;
-		} else if (!Array.isArray(this.palette[level_unit])) {
-			if (--this.palette[level_unit] < 0) {
-				this.palette[level_unit] = [color1, color2, color3];
+		if (level !== null) {
+			// We compute a palette for the setup that can be saved later
+			const level_unit = level % 10;
 
-				if (this.palette.every(Array.isArray)) {
-					this.onPalette();
+			// Note: gross code below which works by switching the type of the variable this.palette[level_unit]
+			if (this.palette[level_unit] === undefined) {
+				this.palette[level_unit] = BUFFER_MAXSIZE;
+			} else if (!Array.isArray(this.palette[level_unit])) {
+				if (--this.palette[level_unit] === 0) {
+					// TODO: Run averages of the color data read from the field instead, over multiple frames
+					// would be more accurate but more complex
+					this.palette[level_unit] = [color1, color2, color3];
+
+					if (this.palette.every(Array.isArray)) {
+						this.onPalette();
+					}
 				}
 			}
 		}
@@ -250,8 +289,8 @@ export default class GameTracker {
 			gameid: this.gameid,
 			lines,
 			level,
-			field,
 			preview: dispatch_frame.preview,
+			field,
 			color1,
 			color2,
 			color3,
@@ -261,13 +300,21 @@ export default class GameTracker {
 			), // note: nulls are passthrough
 
 			raw: {
-				...dispatch_frame,
+				...raw_ocr_frame,
 				field,
 				color1,
 				color2,
 				color3,
 			},
 		};
+
+		if (this.config.tasks.cur_piece_das) {
+			pojo.instant_das = GameTracker.digitsToValue(dispatch_frame.instant_das);
+			pojo.cur_piece_das = GameTracker.digitsToValue(
+				dispatch_frame.cur_piece_das
+			);
+			pojo.cur_piece = dispatch_frame.cur_piece;
+		}
 
 		if (this.config.tasks.T) {
 			PIECES.forEach(p => {
@@ -297,15 +344,10 @@ export default class GameTracker {
 			});
 		}
 
-		if (this.config.tasks.cur_piece_das) {
-			pojo.instant_das = GameTracker.digitsToValue(dispatch_frame.instant_das);
-			pojo.cur_piece_das = GameTracker.digitsToValue(
-				dispatch_frame.cur_piece_das
-			);
-			pojo.cur_piece = dispatch_frame.cur_piece;
-		}
-
-		if (this.config.tasks.gym_pause) {
+		if ('gym_pause' in dispatch_frame) {
+			// it's not necessary to push gym_pause in the frame pojo data
+			// but we do it anyway because the caller will display the data
+			// breaks encapsulation a litte
 			pojo.gym_pause = dispatch_frame.gym_pause;
 		}
 
@@ -314,7 +356,7 @@ export default class GameTracker {
 }
 
 GameTracker.digitsToValue = function digitsToValue(digits) {
-	if (digits === null) return null;
+	if (!digits) return null;
 
 	return digits.reduce(
 		(acc, v, idx) => acc + v * Math.pow(10, digits.length - idx - 1),
