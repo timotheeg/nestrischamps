@@ -290,6 +290,7 @@ export default class GameTracker {
 			lines,
 			level,
 			preview: dispatch_frame.preview,
+			gym_pause: dispatch_frame.gym_pause,
 			field,
 			color1,
 			color2,
@@ -342,13 +343,6 @@ export default class GameTracker {
 
 				pojo[p] = value;
 			});
-		}
-
-		if ('gym_pause' in dispatch_frame) {
-			// it's not necessary to push gym_pause in the frame pojo data
-			// but we do it anyway because the caller will display the data
-			// breaks encapsulation a litte
-			pojo.gym_pause = dispatch_frame.gym_pause;
 		}
 
 		this.onMessage(pojo);
