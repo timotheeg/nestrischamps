@@ -1,0 +1,602 @@
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<script
+			language="JavaScript"
+			src="https://code.jquery.com/jquery-1.8.2.min.js"
+		></script>
+		<script>
+			var query = {};
+			(function parseQuery() {
+				var q = location.search.substr(1); // drop '?' (if any);
+
+				var pairs = q.split('&');
+				for (var p in pairs) {
+					var pair = pairs[p];
+					var idx = pair.indexOf('=');
+					if (idx <= -1) query[pair] = true;
+					else {
+						var name = unescape(pair.substr(0, idx));
+						var value = unescape(pair.substr(idx + 1));
+						if (query[name]) {
+							if (typeof query[name] == 'string') {
+								query[name] = [query[name], value];
+							} else {
+								query[name].push(value);
+							}
+						} else {
+							query[name] = value;
+						}
+					}
+				}
+			})();
+
+			function getParam(name) {
+				return query[name];
+			}
+
+			var data = { chars: {}, animations: {}, transitions: {} };
+
+			function getMatrix() {
+				var m = [];
+				$('#matrix tr').each(function () {
+					var val_on = 0;
+					var val_frame1 = 0;
+					var val_frame2 = 0;
+					$(this)
+						.find('td')
+						.each(function (idx, el) {
+							if ($(el).hasClass('on')) val_on = val_on | (1 << idx);
+							else if ($(el).hasClass('frame1'))
+								val_frame1 = val_frame1 | (1 << idx);
+							else if ($(el).hasClass('frame2'))
+								val_frame2 = val_frame2 | (1 << idx);
+						});
+					m.push(val_on | (val_frame1 << 8) | (val_frame2 << 16));
+				});
+				console.log(m);
+				return m;
+			}
+
+			function setMatrix(matrix) {
+				clear();
+
+				var trs = $('#matrix tr');
+				jQuery.each(matrix, function (row_idx, val) {
+					trs
+						.eq(row_idx)
+						.find('td')
+						.each(function (col_idx, el) {
+							if (val & (1 << col_idx)) $(el).addClass('on');
+							else if (val & (1 << (col_idx + 8))) $(el).addClass('frame1');
+							else if (val & (1 << (col_idx + 16))) $(el).addClass('frame2');
+						});
+				});
+			}
+
+			function setSymbol(evt) {
+				evt.preventDefault();
+				var symbol = $('#symbol').val();
+				var matrix_type = $('#matrix_type').val();
+				var matrix = getMatrix();
+
+				data[matrix_type][symbol] = matrix;
+
+				var link = $('#symbols ul#' + matrix_type).find(
+					'#symbol_' + matrix_type + '_' + symbol
+				);
+				if (!link.length) {
+					link = $(document.createElement('a'))
+						.attr({ href: '#', id: 'symbol_' + matrix_type + '_' + symbol })
+						.data({ symbol: symbol, matrix_type: matrix_type })
+						.text(symbol)
+						.appendTo(
+							$(document.createElement('li')).appendTo(
+								'#symbols ul#' + matrix_type
+							)
+						)
+						.click(showSymbol);
+				}
+			}
+
+			function addToSymbol(evt) {
+				evt.preventDefault();
+				var symbol = $('#symbol').val();
+				var matrix_type = $('#matrix_type').val();
+
+				if (matrix_type == 'chars')
+					return alert('add frames to animations and transitions ony!');
+
+				var matrix = getMatrix();
+				if (!data[matrix_type][symbol]) setSymbol(evt);
+				else if (typeof data[matrix_type][symbol][0] == 'number')
+					data[matrix_type][symbol] = [data[matrix_type][symbol], matrix];
+				else if (typeof data[matrix_type][symbol][0] == 'object')
+					data[matrix_type][symbol].push(matrix);
+			}
+
+			function clear(evt) {
+				if (evt) evt.preventDefault();
+				tds.removeClass(led_all_types);
+			}
+
+			function mror(n) {
+				var n1 = n & 0xff;
+				var n2 = (n >> 8) & 0xff;
+				var n3 = (n >> 16) & 0xff;
+
+				n1 = (n1 >> 1) | ((n1 & 1) << 7);
+				n2 = (n2 >> 1) | ((n2 & 1) << 7);
+				n3 = (n3 >> 1) | ((n3 & 1) << 7);
+
+				return n1 | (n2 << 8) | (n3 << 16);
+			}
+
+			function mrol(n) {
+				var n1 = n & 0xff;
+				var n2 = (n >> 8) & 0xff;
+				var n3 = (n >> 16) & 0xff;
+
+				n1 = ((n1 << 1) & 0xfe) | ((n1 & 0x80) >> 7);
+				n2 = ((n2 << 1) & 0xfe) | ((n2 & 0x80) >> 7);
+				n3 = ((n3 << 1) & 0xfe) | ((n3 & 0x80) >> 7);
+
+				return n1 | (n2 << 8) | (n3 << 16);
+			}
+
+			function doExport(evt) {
+				if (evt) evt.preventDefault();
+
+				// the 8x8 matrix has some funky way of representing the columns, on export, we need to iterate and convert each entry to a matrix raw format
+				var exdata = $.extend(true, {}, data);
+
+				function updateMatrix(m) {
+					for (var idx in m) {
+						m[idx] = mror(m[idx]);
+					}
+				}
+
+				for (var idx in matrix_types) {
+					var matrix_type = matrix_types[idx];
+
+					for (var symbol in exdata[matrix_type]) {
+						var m = exdata[matrix_type][symbol];
+						if (typeof m[0] == 'object') {
+							$.each(m, function (idx, m) {
+								updateMatrix(m);
+							});
+						} else {
+							updateMatrix(m);
+						}
+					}
+				}
+
+				$('#exported_data').val(JSON.stringify(exdata));
+			}
+
+			var draw_animation_array = null;
+			var draw_animation_interval_id = 0;
+			var draw_animation_cur_idx = -1;
+			function animate() {
+				draw_animation_cur_idx =
+					(draw_animation_cur_idx + 1) % draw_animation_array.length;
+				matrix = draw_animation_array[draw_animation_cur_idx];
+				setMatrix(matrix);
+			}
+
+			function stopanimation() {
+				clearInterval(draw_animation_interval_id);
+				clear();
+			}
+
+			function showSymbol(evt) {
+				evt.preventDefault();
+				stopanimation();
+
+				var symbol = $(this).data('symbol');
+				var matrix_type = $(this).data('matrix_type');
+
+				$('#symbol').val(symbol);
+				$('#matrix_type').val(matrix_type);
+
+				var block = data[matrix_type][symbol];
+				if (typeof block[0] == 'object') {
+					// animation or transition ... animate :)
+					draw_animation_array = block;
+					draw_animation_cur_idx = -1;
+					draw_animation_interval_id = setInterval(animate, 150);
+				} else setMatrix(block);
+			}
+
+			var matrix_types = ['chars', 'animations', 'transitions'];
+
+			function reset(evt) {
+				stopanimation();
+				clear();
+
+				$('#matrix_type').val('chars');
+				$('#symbol').val('');
+
+				$('#exported_data').val(
+					'{"chars":{},"animations":{},"transitions":{}}'
+				);
+				doImport(evt);
+			}
+
+			function doImport(evt) {
+				if (evt) evt.preventDefault();
+				tmp = JSON.parse($('#exported_data').val());
+
+				// convert the tmp structure to the correct js format setup...
+				function updateMatrix(m) {
+					for (var idx in m) {
+						m[idx] = mrol(m[idx]);
+					}
+				}
+
+				for (var idx in matrix_types) {
+					var matrix_type = matrix_types[idx];
+
+					for (var symbol in tmp[matrix_type]) {
+						var m = tmp[matrix_type][symbol];
+						if (typeof m[0] == 'object') {
+							$.each(m, function (idx, m) {
+								updateMatrix(m);
+							});
+						} else {
+							updateMatrix(m);
+						}
+					}
+				}
+
+				// set links
+
+				for (var idx in matrix_types) {
+					var matrix_type = matrix_types[idx];
+					var ul = $('#symbols ul#' + matrix_type).empty();
+
+					for (var symbol in tmp[matrix_type]) {
+						link = $(document.createElement('a'))
+							.attr({ href: '#', id: 'symbol_' + matrix_type + '_' + symbol })
+							.data({ symbol: symbol, matrix_type: matrix_type })
+							.text(symbol)
+							.appendTo($(document.createElement('li')).appendTo(ul))
+							.click(showSymbol);
+					}
+				}
+
+				$('#exported_data').val('');
+				data = tmp;
+			}
+
+			var draw_starttime = null;
+			var draw_startcell = null;
+			var draw_interval_id = null;
+			var draw_single_click_delay = 200;
+			function noop() {}
+
+			var _dodraw = noop;
+
+			var led_types = ['on', 'frame1', 'frame2'];
+			var led_type_cur = -1;
+			var led_all_types = led_types.join(' ');
+			var led_other_types = '';
+
+			// initialize NOW!
+			cycle_led_type();
+
+			function cycle_led_type(evt) {
+				if (evt) {
+					evt.preventDefault();
+					evt.stopPropagation();
+				}
+
+				led_type_cur = (led_type_cur + 1) % led_types.length;
+
+				led_other_types = led_types.concat();
+				led_other_types.splice(led_type_cur, 1);
+				led_other_types = led_other_types.join(' ');
+			}
+
+			function begindraw(evt) {
+				draw_starttime = new Date().getTime();
+				draw_startcell = this;
+				_dodraw = __dodraw;
+				draw_interval_id = setTimeout(function () {
+					$(draw_startcell).mouseenter();
+				}, draw_single_click_delay);
+			}
+
+			function dodraw(evt) {
+				console.log('dodraw', this);
+				_dodraw.apply(this, [evt]);
+			}
+
+			function __dodraw() {
+				$(this).removeClass(led_all_types).addClass(led_types[led_type_cur]);
+			}
+
+			function enddraw(evt) {
+				evt.stopPropagation();
+
+				var now = new Date().getTime();
+				if (
+					now - draw_starttime <= draw_single_click_delay &&
+					draw_startcell == this
+				) {
+					// single click in current cell
+					clearTimeout(draw_interval_id);
+					// remove all classes not of current type
+					$(this)
+						.removeClass(led_other_types)
+						.toggleClass(led_types[led_type_cur]);
+				}
+				_dodraw = noop;
+			}
+
+			var play_char_duration = 750;
+			var play_char_transition = 30;
+			var play_str = '';
+			var play_trans = '';
+			var play_cur_char_idx = -1;
+			var play_cur_trans_idx = -1;
+			var play_cur_char_matrix = null;
+			var play_next_char_matrix = null;
+
+			function play(str, trans) {
+				play_str = str.charAt(0) == '0' ? str : ' ' + str;
+				if (trans) {
+					play_trans = data.transitions[trans];
+				} else {
+					// pick a random transition
+					var ts = [];
+					for (var t in data.transitions) {
+						ts.push(t);
+					}
+
+					var idx = Math.floor(Math.random() * ts.length);
+
+					play_trans = data.transitions[ts[idx]];
+				}
+
+				play_cur_char_idx = -1;
+				play_char();
+			}
+
+			function play_char() {
+				play_cur_char_idx = (play_cur_char_idx + 1) % play_str.length;
+				play_cur_char_matrix = data.chars[play_str.charAt(play_cur_char_idx)];
+				play_next_char_matrix =
+					data.chars[
+						play_str.charAt((play_cur_char_idx + 1) % play_str.length)
+					];
+
+				setMatrix(play_cur_char_matrix);
+
+				play_cur_trans_idx = -1;
+
+				draw_animation_interval_id = setTimeout(
+					play_trans_step,
+					play_char_duration
+				);
+			}
+
+			function play_trans_step() {
+				if (++play_cur_trans_idx >= play_trans.length) {
+					play_char(); // display next char in full
+					return;
+				}
+
+				var trans_matrix = play_trans[play_cur_trans_idx];
+
+				// compute the actual matrix to display...
+				var m = [];
+				for (var idx = 0; idx < trans_matrix.length; idx++) {
+					m[idx] =
+						(trans_matrix[idx] & 0xff) |
+						((trans_matrix[idx] >> 8) & 0xff & play_cur_char_matrix[idx]) |
+						((trans_matrix[idx] >> 16) & 0xff & play_next_char_matrix[idx]);
+				}
+
+				setMatrix(m);
+				draw_animation_interval_id = setTimeout(
+					play_trans_step,
+					play_char_transition
+				);
+			}
+
+			$(function () {
+				tds = $('#matrix td')
+					.bind('contextmenu', cycle_led_type)
+					.mousedown(begindraw)
+					.mouseup(enddraw)
+					.mouseenter(dodraw);
+				$(document).mouseup(enddraw);
+
+				$('#clear').click(stopanimation);
+				$('#set').click(setSymbol);
+				$('#add').click(addToSymbol);
+				$('#export').click(doExport);
+				$('#import').click(doImport);
+				$('#exported_data').val($('#sample').text());
+				$('#symbol').val('');
+				$('#sample').remove();
+				$('#reset').click(reset);
+
+				doImport();
+
+				// play a message
+				var msg = getParam('msg') || 'NESTRISCHAMPS';
+				msg = msg.toUpperCase();
+				var transition =
+					getParam('trans') && data.transitions[getParam('trans')]
+						? getParam('trans')
+						: 't5';
+
+				play(msg, transition);
+			});
+		</script>
+		<style>
+			#matrix {
+				padding: 25px;
+				float: left;
+				width: 426px;
+			}
+			#matrix table,
+			#matrix table tr {
+				background-color: yellow;
+				border: 2px transparent solid;
+			}
+			#matrix table td {
+				background-color: #999;
+				border: 2px transparent solid;
+			}
+			#matrix table td {
+				width: 45px;
+				height: 50px;
+			}
+			#matrix table td.on {
+				background-color: #000;
+			}
+			#matrix table td.frame1 {
+				background-color: #900;
+			}
+			#matrix table td.frame2 {
+				background-color: #090;
+			}
+			#exported_data {
+				width: 500px;
+				height: 250px;
+			}
+			#symbols {
+				margin-left: 476px;
+			}
+			#symbols ul,
+			#symbols li {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			#symbols li {
+				display: inline;
+				margin-right: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="matrix">
+			<table>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+			<a href="#" id="clear">clear</a>
+			<select id="matrix_type">
+				<option value="chars">char</option>
+				<option value="animations">animation</option>
+				<option value="transitions">transition</option>
+			</select>
+			<input type="text" id="symbol" size="8" />
+			<a href="#" id="set">set</a>
+			<a href="#" id="add">add</a><br />
+		</div>
+
+		<div id="symbols">
+			<a href="#" id="import">import</a>
+			-
+			<a href="#" id="export">export</a>
+			-
+			<a href="#" id="reset">reset</a><br />
+			<textarea id="exported_data"></textarea>
+			<p>chars</p>
+			<ul id="chars"></ul>
+			<p>animations</p>
+			<ul id="animations"></ul>
+			<p>transitions</p>
+			<ul id="transitions"></ul>
+		</div>
+
+		<div id="example" style="clear: both">
+			<pre id="sample">
+{"chars":{"0":[0,30,49,41,37,35,30,0],"1":[0,8,12,8,8,8,28,0],"2":[0,31,32,16,12,2,63,0],"3":[0,63,32,60,32,32,63,0],"4":[0,33,33,33,63,32,32,0],"5":[0,63,1,31,32,32,31,0],"6":[0,62,1,31,33,33,30,0],"7":[0,62,32,16,16,8,8,0],"8":[0,30,33,30,33,33,30,0],"9":[0,30,33,33,62,32,31,0]," ":[0,0,0,0,0,0,0,0],"A":[0,12,18,33,63,33,33,0],"B":[0,31,33,31,33,33,31,0],"C":[0,30,33,1,1,33,30,0],"D":[0,15,17,33,33,17,15,0],"E":[0,63,1,15,1,1,63,0],"F":[0,63,1,15,1,1,1,0],"G":[0,30,33,1,49,33,30,0],"H":[0,33,33,63,33,33,33,0],"I":[0,14,4,4,4,4,14,0],"J":[0,16,16,16,17,17,14,0],"K":[0,33,17,15,17,33,33,0],"L":[0,1,1,1,1,1,63,0],"M":[0,33,51,45,33,33,33,0],"N":[0,33,35,37,41,49,33,0],"O":[0,30,33,33,33,33,30,0],"P":[0,31,33,33,31,1,1,0],"Q":[0,62,33,33,62,32,32,0],"R":[0,31,33,31,33,33,33,0],"S":[0,62,1,30,32,32,31,0],"T":[0,31,4,4,4,4,4,0],"U":[0,33,33,33,33,33,30,0],"V":[0,33,33,33,18,18,12,0],"W":[0,33,33,33,45,51,33,0],"X":[0,33,18,12,12,18,33,0],"Y":[0,17,17,10,4,4,4,0],"Z":[0,63,16,8,4,2,63,0],"heart":[0,51,204,192,192,33,18,12],"happy":[30,33,210,192,210,204,33,30],"sad":[30,33,210,192,204,210,33,30],"snow":[0,164,21,14,191,14,21,164],"penis":[12,18,18,18,51,210,204,51]},"animations":{"working":[[64,32,16,8,4,2,1,128],[0,0,96,24,6,129,0,0],[0,0,0,120,135,0,0,0],[0,0,0,135,120,0,0,0],[0,0,129,6,24,96,0,0],[128,1,2,4,8,16,32,64],[2,2,4,4,8,8,16,16],[4,4,4,4,8,8,8,8],[8,8,8,8,4,4,4,4],[16,16,8,8,4,4,2,2]],"transition1":[[0,0,0,12,12,0,0,0],[0,0,30,18,18,30,0,0],[0,63,33,33,33,33,63,0],[255,192,192,192,192,192,192,255]],"transition2":[[255,0,0,0,0,0,0,0],[0,255,0,0,0,0,0,0],[0,0,255,0,0,0,0,0],[0,0,0,255,0,0,0,0],[0,0,0,0,255,0,0,0],[0,0,0,0,0,255,0,0],[0,0,0,0,0,0,255,0],[0,0,0,0,0,0,0,255]],"transition3":[[128,128,128,128,128,128,128,128],[1,1,1,1,1,1,1,1],[2,2,2,2,2,2,2,2],[4,4,4,4,4,4,4,4],[8,8,8,8,8,8,8,8],[16,16,16,16,16,16,16,16],[32,32,32,32,32,32,32,32],[64,64,64,64,64,64,64,64]],"transition4":[[128,0,0,0,0,0,0,0],[1,128,0,0,0,0,0,0],[2,1,128,0,0,0,0,0],[4,2,1,128,0,0,0,0],[8,4,2,1,128,0,0,0],[16,8,4,2,1,128,0,0],[32,16,8,4,2,1,128,0],[64,32,16,8,4,2,1,128],[0,64,32,16,8,4,2,1],[0,0,64,32,16,8,4,2],[0,0,0,64,32,16,8,4],[0,0,0,0,64,32,16,8],[0,0,0,0,0,64,32,16],[0,0,0,0,0,0,64,32],[0,0,0,0,0,0,0,64]],"transition5":[[0,0,0,12,12,0,0,0],[0,0,12,18,18,12,0,0],[0,12,18,33,33,18,12,0],[12,18,33,192,192,33,18,12],[18,33,192,0,0,192,33,18],[33,192,0,0,0,0,192,33],[192,0,0,0,0,0,0,192]],"penis":[[0,0,12,18,51,210,204,51],[0,12,18,18,51,210,204,51],[12,18,18,18,51,210,204,51],[0,12,18,18,51,210,204,51],[0,0,12,18,51,210,204,51]]},"transitions":{"t1":[[65280,65280,65280,62220,62220,65280,65280,65280],[65280,65280,57630,844050,844050,57630,65280,65280],[65280,49215,2015265,2015265,2015265,2015265,49215,65280],[255,4128960,4128960,4128960,4128960,4128960,4128960,255]],"t2":[[255,65280,65280,65280,65280,65280,65280,65280],[16711680,255,65280,65280,65280,65280,65280,65280],[16711680,16711680,255,65280,65280,65280,65280,65280],[16711680,16711680,16711680,255,65280,65280,65280,65280],[16711680,16711680,16711680,16711680,255,65280,65280,65280],[16711680,16711680,16711680,16711680,16711680,255,65280,65280],[16711680,16711680,16711680,16711680,16711680,16711680,255,65280],[16711680,16711680,16711680,16711680,16711680,16711680,16711680,255]],"t3":[[32640,32640,32640,32640,32640,32640,32640,32640],[8420865,8420865,8420865,8420865,8420865,8420865,8420865,8420865],[8485890,8485890,8485890,8485890,8485890,8485890,8485890,8485890],[8615940,8615940,8615940,8615940,8615940,8615940,8615940,8615940],[8876040,8876040,8876040,8876040,8876040,8876040,8876040,8876040],[9396240,9396240,9396240,9396240,9396240,9396240,9396240,9396240],[10436640,10436640,10436640,10436640,10436640,10436640,10436640,10436640],[12517440,12517440,12517440,12517440,12517440,12517440,12517440,12517440]],"t4":[[64260,64260,64260,64260,63240,63240,63240,63240],[324360,324360,324360,324360,586500,586500,586500,586500],[844560,844560,324360,324360,586500,586500,848130,848130],[3965760,1884960,844560,324360,586500,848130,978945,1011840],[8160000,8160000,1868640,320280,585990,946305,9400320,9400320],[8160000,8160000,8160000,295800,553095,9400320,9400320,9400320],[8160000,8160000,8160000,7864455,8847480,9400320,9400320,9400320],[8160000,8160000,8127105,16318470,15138840,9375840,9400320,9400320],[8127360,16515585,16580610,16449540,16187400,15663120,13570080,9384000],[16580610,16580610,16449540,16449540,16187400,16187400,15663120,15663120]],"t5":[[32640,65280,65280,65280,65280,65280,65280,65280],[8420865,32640,65280,65280,65280,65280,65280,65280],[8485890,8420865,32640,65280,65280,65280,65280,65280],[8615940,8485890,8420865,32640,65280,65280,65280,65280],[8876040,8615940,8485890,8420865,32640,65280,65280,65280],[9396240,8876040,8615940,8485890,8420865,32640,65280,65280],[10436640,9396240,8876040,8615940,8485890,8420865,32640,65280],[12517440,10436640,9396240,8876040,8615940,8485890,8420865,32640],[16711680,12517440,10436640,9396240,8876040,8615940,8485890,8420865],[16711680,16711680,12517440,10436640,9396240,8876040,8615940,8485890],[16711680,16711680,16711680,12517440,10436640,9396240,8876040,8615940],[16711680,16711680,16711680,16711680,12517440,10436640,9396240,8876040],[16711680,16711680,16711680,16711680,16711680,12517440,10436640,9396240],[16711680,16711680,16711680,16711680,16711680,16711680,12517440,10436640],[16711680,16711680,16711680,16711680,16711680,16711680,16711680,12517440]],"t6":[[63240,63240,63240,63240,65280,65280,65280,65280],[583440,583440,63240,63240,65280,65280,65280,65280],[3704640,1623840,583440,63240,65280,65280,65280,65280],[7898880,7898880,1607520,59160,65280,65280,65280,65280],[7898880,7898880,7898880,34680,65280,65280,65280,65280],[7898880,7898880,7898880,7898880,34680,65280,65280,65280],[7898880,7898880,7898880,7898880,6326040,40800,65280,65280],[7898880,7898880,7898880,7898880,7374600,6328080,4235040,48960],[7898880,7898880,7898880,7898880,7374600,7374600,6328080,6328080],[7898880,7898880,7898880,7898880,7374600,7374600,7374600,7374600],[7898880,7898880,7898880,7898880,7897860,7897860,7897860,7897860],[7898880,7898880,7898880,7898880,7897860,7897860,8159490,8159490],[7898880,7898880,7898880,7898880,7897860,8159490,8290305,8323200],[7898880,7898880,7898880,7898880,7897350,8257665,16711680,16711680],[7898880,7898880,7898880,7898880,7864455,16711680,16711680,16711680],[7898880,7898880,7898880,7864455,16711680,16711680,16711680,16711680],[7898880,7898880,7865985,16318470,16711680,16711680,16711680,16711680],[7866240,16254465,16319490,16449540,16711680,16711680,16711680,16711680],[16319490,16319490,16449540,16449540,16711680,16711680,16711680,16711680],[16449540,16449540,16449540,16449540,16711680,16711680,16711680,16711680]]}}</pre
+			>
+		</div>
+	</body>
+</html>
