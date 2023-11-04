@@ -720,21 +720,15 @@ export default class TetrisOCR extends EventTarget {
 		bicubic(task.crop_img, task.scale_img);
 
 		const pix_refs = [
-			// 3 pixels for U
-			[1, 0],
+			// 1 pixel for U
 			[2, 0],
-			[3, 0],
 
-			// 3 pixels for S
-			[9, 0],
+			// 1 pixel for S
 			[10, 0],
-			[11, 0],
 
-			// 4 pixels for E
-			[16, 0],
+			// 2 pixels for E
 			[17, 0],
 			[18, 0],
-			[19, 0],
 		];
 
 		const total_luma = pix_refs
