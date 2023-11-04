@@ -26,7 +26,7 @@ const PERF_METHODS = [
 	'scanInstantDas',
 	'scanCurPieceDas',
 	'scanCurPiece',
-	'scanPauseText',
+	'scanGymPause',
 ];
 
 const DEFAULT_COLOR_0 = [0x00, 0x00, 0x00];
@@ -55,14 +55,14 @@ const TASK_RESIZE = {
 	color3: [5, 5],
 	stats: [getDigitsWidth(3), 14 * 7 + 14 * 7], // height captures all the individual stats...
 	piece_count: [getDigitsWidth(3), 14],
-	pause_text: [22, 1],
+	gym_pause: [22, 1],
 };
 
 // Not supplied as user control, because Gym Pause is 100% connected to the calibration of the field
 // then again... We coud argue everything *should* be 100% connected to the calibration of the field,
 // so... is it really wise to not allow user-controlled fine-tuning? That plus being an internal process, we
 // are not able to show what we are capturing for the gym pause
-const PAUSE_TEXT_CROP_RELATIVE_TO_FIELD = [37, 47, 22, 1];
+const GYM_PAUSE_CROP_RELATIVE_TO_FIELD = [37, 47, 22, 1];
 
 const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this threshold be higher?
 const GYM_PAUSE_LUMA_THRESHOLD = 75;
@@ -114,21 +114,21 @@ export default class TetrisOCR extends EventTarget {
 			const scaleX = field_crop[2] / TASK_RESIZE.field[0];
 			const scaleY = field_crop[3] / TASK_RESIZE.field[1];
 
-			// we compute the pause_text crop in relation to the field
-			const pause_text_crop_coordinates = [
+			// we compute the gym_pause crop in relation to the field
+			const gym_pause_crop_coordinates = [
 				Math.round(
-					field_crop[0] + PAUSE_TEXT_CROP_RELATIVE_TO_FIELD[0] * scaleX
+					field_crop[0] + GYM_PAUSE_CROP_RELATIVE_TO_FIELD[0] * scaleX
 				),
 				Math.round(
-					field_crop[1] + PAUSE_TEXT_CROP_RELATIVE_TO_FIELD[1] * scaleY
+					field_crop[1] + GYM_PAUSE_CROP_RELATIVE_TO_FIELD[1] * scaleY
 				),
-				Math.round(PAUSE_TEXT_CROP_RELATIVE_TO_FIELD[2] * scaleX),
-				Math.round(PAUSE_TEXT_CROP_RELATIVE_TO_FIELD[3] * scaleY),
+				Math.round(GYM_PAUSE_CROP_RELATIVE_TO_FIELD[2] * scaleX),
+				Math.round(GYM_PAUSE_CROP_RELATIVE_TO_FIELD[3] * scaleY),
 			];
 
-			this.pause_text_task = { crop: pause_text_crop_coordinates };
+			this.gym_pause_task = { crop: gym_pause_crop_coordinates };
 
-			all_tasks.pause_text = this.pause_text_task;
+			all_tasks.gym_pause = this.gym_pause_task;
 		}
 
 		// Note: This create a lot of imageData objects of similar sizes
@@ -309,8 +309,8 @@ export default class TetrisOCR extends EventTarget {
 			Object.assign(res, this.scanPieceStats(source_img));
 		}
 
-		if (this.pause_text_task) {
-			res.pause_text = this.scanPauseText(source_img);
+		if (this.gym_pause_task) {
+			res.gym_pause = this.scanGymPause(source_img);
 		}
 
 		return res;
@@ -707,13 +707,13 @@ export default class TetrisOCR extends EventTarget {
 			.map(v => Math.sqrt(v / pix_refs.length));
 	}
 
-	scanPauseText(source_img) {
+	scanGymPause(source_img) {
 		// Scanning the pause text scans the bottom of the letter 'U', "S", and "E" of the text "PAUSE"
 		// that's because the bottom of the letters overlaps with block margins, which are black
 		// When the pause text is not visible, luma on these overlap is expected to be very low
 		// When pause text is visible, luma is expected to be high.
 
-		const task = this.pause_text_task;
+		const task = this.gym_pause_task;
 		const xywh_coordinates = this.getCropCoordinates(task);
 
 		crop(source_img, ...xywh_coordinates, task.crop_img);

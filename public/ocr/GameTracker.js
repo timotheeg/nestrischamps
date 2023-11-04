@@ -77,8 +77,8 @@ export default class GameTracker {
 
 		// TODO(?): Do we need to consider the frame buffer to detect the pause text "properly"
 		// TODO(?): check luma on level for better reliability (wity grey Gym rom)
-		last_frame.gym_pause = !!(
-			last_frame.pause_text?.[1] &&
+		last_frame.gym_pause_active = !!(
+			last_frame.gym_pause?.[1] &&
 			last_frame.score &&
 			last_frame.lines &&
 			last_frame.level
@@ -93,7 +93,7 @@ export default class GameTracker {
 				frame.level = last_frame.level;
 			});
 		} else if (
-			!last_frame.gym_pause &&
+			!last_frame.gym_pause_active &&
 			!GameTracker.arrEqual(last_frame.score, peek(this.frame_buffer).score)
 		) {
 			this.score_frame_delay = this.frame_buffer.length;
@@ -121,7 +121,7 @@ export default class GameTracker {
 					frame.I = last_frame.I;
 				});
 			} else if (
-				!last_frame.gym_pause &&
+				!last_frame.gym_pause_active &&
 				!GameTracker.pieceCountersEqual(last_frame, peek(this.frame_buffer))
 			) {
 				this.piece_frame_delay = this.frame_buffer.length;
@@ -137,7 +137,7 @@ export default class GameTracker {
 					frame.cur_piece_das = last_frame.cur_piece_das;
 				});
 			} else {
-				// note: no need to test for gym_pause in das trainer rom
+				// note: no need to test for gym_pause_active in das trainer rom
 				if (
 					last_frame.preview != peek(this.frame_buffer).preview ||
 					last_frame.cur_piece != peek(this.frame_buffer).cur_piece ||
@@ -159,7 +159,7 @@ export default class GameTracker {
 				});
 			} else {
 				if (
-					!last_frame.gym_pause &&
+					!last_frame.gym_pause_active &&
 					last_frame.preview != peek(this.frame_buffer).preview
 				) {
 					this.piece_frame_delay = this.frame_buffer.length;
@@ -175,7 +175,7 @@ export default class GameTracker {
 		const raw_ocr_frame = this.frame_buffer.shift();
 		const dispatch_frame = { ...raw_ocr_frame };
 
-		if (dispatch_frame.gym_pause) {
+		if (dispatch_frame.gym_pause_active) {
 			// On gym pause, we generate a fake vanilla-pause frame were everything is black
 			dispatch_frame.score = null;
 			dispatch_frame.lines = null;
@@ -190,7 +190,7 @@ export default class GameTracker {
 		// replicate NESTrisOCR's gameid logic
 		// also check if the fixers must be reset
 		if (
-			dispatch_frame.gym_pause ||
+			dispatch_frame.gym_pause_active ||
 			dispatch_frame.lines === null ||
 			dispatch_frame.score === null ||
 			dispatch_frame.level === null
@@ -290,7 +290,7 @@ export default class GameTracker {
 			lines,
 			level,
 			preview: dispatch_frame.preview,
-			gym_pause: dispatch_frame.gym_pause,
+			gym_pause_active: dispatch_frame.gym_pause_active,
 			field,
 			color1,
 			color2,

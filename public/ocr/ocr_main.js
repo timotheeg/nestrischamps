@@ -1625,7 +1625,7 @@ function trackAndSendFrames() {
 			for (let key in data) {
 				if (key == 'ctime') continue;
 				if (key == 'raw') continue;
-				if (key == 'gym_pause') continue;
+				if (key == 'gym_pause_active') continue;
 				if (key == 'field') {
 					if (!data.field.every((v, i) => last_frame.field[i] === v)) {
 						break check_equal;
