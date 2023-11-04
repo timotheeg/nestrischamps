@@ -26,6 +26,7 @@ const PERF_METHODS = [
 	'scanInstantDas',
 	'scanCurPieceDas',
 	'scanCurPiece',
+	'scanGymPause',
 ];
 
 const DEFAULT_COLOR_0 = [0x00, 0x00, 0x00];
@@ -54,9 +55,17 @@ const TASK_RESIZE = {
 	color3: [5, 5],
 	stats: [getDigitsWidth(3), 14 * 7 + 14 * 7], // height captures all the individual stats...
 	piece_count: [getDigitsWidth(3), 14],
+	gym_pause: [22, 1],
 };
 
+// Not supplied as user control, because Gym Pause is 100% connected to the calibration of the field
+// then again... We coud argue everything *should* be 100% connected to the calibration of the field,
+// so... is it really wise to not allow user-controlled fine-tuning? That plus being an internal process, we
+// are not able to show what we are capturing for the gym pause
+const GYM_PAUSE_CROP_RELATIVE_TO_FIELD = [37, 47, 22, 1];
+
 const SHINE_LUMA_THRESHOLD = 75; // Since shine is white, should this threshold be higher?
+const GYM_PAUSE_LUMA_THRESHOLD = 75;
 
 export default class TetrisOCR extends EventTarget {
 	constructor(templates, palettes, config) {
@@ -97,10 +106,35 @@ export default class TetrisOCR extends EventTarget {
 			right: -1,
 		};
 
-		// This create a lot of imageData objects of similar sizes
-		// Somecould be shared because they are the same dimensions (e.g. 3 digits for lines, and piece stats)
-		// but if we share them, we wouldnotbe able to display them individually in the debug UI
-		for (const [name, task] of Object.entries(this.config.tasks)) {
+		const all_tasks = { ...this.config.tasks };
+
+		if (!this.config.tasks.instant_das) {
+			const field_crop = this.config.tasks.field.crop;
+
+			const scaleX = field_crop[2] / TASK_RESIZE.field[0];
+			const scaleY = field_crop[3] / TASK_RESIZE.field[1];
+
+			// we compute the gym_pause crop in relation to the field
+			const gym_pause_crop_coordinates = [
+				Math.round(
+					field_crop[0] + GYM_PAUSE_CROP_RELATIVE_TO_FIELD[0] * scaleX
+				),
+				Math.round(
+					field_crop[1] + GYM_PAUSE_CROP_RELATIVE_TO_FIELD[1] * scaleY
+				),
+				Math.round(GYM_PAUSE_CROP_RELATIVE_TO_FIELD[2] * scaleX),
+				Math.round(GYM_PAUSE_CROP_RELATIVE_TO_FIELD[3] * scaleY),
+			];
+
+			this.gym_pause_task = { crop: gym_pause_crop_coordinates };
+
+			all_tasks.gym_pause = this.gym_pause_task;
+		}
+
+		// Note: This create a lot of imageData objects of similar sizes
+		// Some could be shared because they are the same dimensions (e.g. 3 digits for lines, and piece stats)
+		// but if we share them, we would not be able to display them individually in the debug UI
+		for (const [name, task] of Object.entries(all_tasks)) {
 			if (this.palette && name.startsWith('color')) continue;
 
 			const {
@@ -265,7 +299,7 @@ export default class TetrisOCR extends EventTarget {
 		};
 
 		if (this.config.tasks.instant_das) {
-			// assumes all 3 das tasks are a unit
+			// assumes all 3 das tasks are a unit for the das trainer rom
 			res.instant_das = this.scanInstantDas(source_img);
 			res.cur_piece_das = this.scanCurPieceDas(source_img);
 			res.cur_piece = this.scanCurPiece(source_img);
@@ -273,6 +307,10 @@ export default class TetrisOCR extends EventTarget {
 
 		if (this.config.tasks.T) {
 			Object.assign(res, this.scanPieceStats(source_img));
+		}
+
+		if (this.gym_pause_task) {
+			res.gym_pause = this.scanGymPause(source_img);
 		}
 
 		return res;
@@ -667,6 +705,42 @@ export default class TetrisOCR extends EventTarget {
 				[0, 0, 0]
 			)
 			.map(v => Math.sqrt(v / pix_refs.length));
+	}
+
+	scanGymPause(source_img) {
+		// Scanning the pause text scans the bottom of the letter 'U', "S", and "E" of the text "PAUSE"
+		// that's because the bottom of the letters overlaps with block margins, which are black
+		// When the pause text is not visible, luma on these overlap is expected to be very low
+		// When pause text is visible, luma is expected to be high.
+
+		const task = this.gym_pause_task;
+		const xywh_coordinates = this.getCropCoordinates(task);
+
+		crop(source_img, ...xywh_coordinates, task.crop_img);
+		bicubic(task.crop_img, task.scale_img);
+
+		const pix_refs = [
+			// 1 pixel for U
+			[2, 0],
+
+			// 1 pixel for S
+			[10, 0],
+
+			// 2 pixels for E
+			[17, 0],
+			[18, 0],
+		];
+
+		const total_luma = pix_refs
+			.map(([x, y]) => {
+				const col_idx = x << 2;
+				return luma(...task.scale_img.data.subarray(col_idx, col_idx + 3));
+			})
+			.reduce((acc, luma) => acc + luma, 0);
+
+		const avg_luma = total_luma / pix_refs.length;
+
+		return [Math.round(avg_luma), avg_luma > GYM_PAUSE_LUMA_THRESHOLD];
 	}
 
 	async scanField(source_img, _colors) {

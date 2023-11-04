@@ -503,13 +503,14 @@ video.addEventListener('click', async evt => {
 		video.videoHeight
 	);
 
-	const field_xywh = getFieldCoordinates(img_data, floodStartPoint);
-	console.log('field coordinates', field_xywh);
+	// get field coordinates via flood-fill (includes borders on all sides)
+	const field_w_borders_xywh = getFieldCoordinates(img_data, floodStartPoint);
+	console.log('field coordinates', field_w_borders_xywh);
 
 	let [ox, oy, ow, oh] = getCaptureCoordinates(
 		reference_size,
 		reference_locations.field_w_borders.crop,
-		field_xywh
+		field_w_borders_xywh
 	);
 
 	if (ow <= 0 || oh <= 0) {
@@ -1519,6 +1520,8 @@ function showFrameData(data) {
 	frame_data.innerHTML = '';
 
 	for (const [name, value] of Object.entries(data)) {
+		if (name === 'raw') continue;
+
 		const dt = document.createElement('dt');
 		const dd = document.createElement('dd');
 
@@ -1577,7 +1580,7 @@ function trackAndSendFrames() {
 
 		if (show_parts.checked) {
 			performance.mark('show_parts_start');
-			await showParts(data);
+			await showParts(data.raw); // show OCR values with no processing
 			performance.mark('show_parts_end');
 			try {
 				performance.measure('show_parts', 'show_parts_start', 'show_parts_end');
@@ -1613,9 +1616,12 @@ function trackAndSendFrames() {
 		performance.clearMarks();
 		performance.clearMeasures();
 
+		// delete data fields which are never meant to be sent over the wire
 		delete data.color1;
 		delete data.color2;
 		delete data.color3;
+		delete data.gym_pause_active;
+		delete data.raw;
 
 		// only send frame if changed
 		check_equal: do {
@@ -1631,7 +1637,7 @@ function trackAndSendFrames() {
 			}
 
 			// all fields equal, do a sanity check on time
-			if (data.ctime - last_frame.ctime >= 200) break; // max 1 in 12 frames
+			if (data.ctime - last_frame.ctime >= 250) break; // max 1 in 15 frames (4fps)
 
 			// no need to send frame
 			return;
