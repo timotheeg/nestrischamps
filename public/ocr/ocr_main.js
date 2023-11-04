@@ -1521,6 +1521,8 @@ function showFrameData(data) {
 	frame_data.innerHTML = '';
 
 	for (const [name, value] of Object.entries(data)) {
+		if (name === 'raw') continue;
+
 		const dt = document.createElement('dt');
 		const dd = document.createElement('dd');
 
@@ -1579,7 +1581,7 @@ function trackAndSendFrames() {
 
 		if (show_parts.checked) {
 			performance.mark('show_parts_start');
-			await showParts(data);
+			await showParts(data.raw); // show OCR values with no processing
 			performance.mark('show_parts_end');
 			try {
 				performance.measure('show_parts', 'show_parts_start', 'show_parts_end');

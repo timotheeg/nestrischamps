@@ -259,6 +259,14 @@ export default class GameTracker {
 			score: GameTracker.digitsToValue(
 				this.score_fixer.fix(dispatch_frame.score)
 			), // note: nulls are passthrough
+
+			raw: {
+				...dispatch_frame,
+				field,
+				color1,
+				color2,
+				color3,
+			},
 		};
 
 		if (this.config.tasks.T) {
