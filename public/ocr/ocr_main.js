@@ -1740,4 +1740,10 @@ function trackAndSendFrames() {
 		};
 		wizard.style.display = 'block';
 	}
+
+	try {
+		window.__usb_devices = await navigator.usb.getDevices();
+	} catch (err) {
+		console.error(err);
+	}
 })();
