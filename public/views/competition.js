@@ -194,6 +194,10 @@ class TetrisCompetitionAPI {
 		players.forEach(player => player.setCurtainLogo(url));
 	}
 
+	setReady(isReady) {
+		players.forEach(player => player.setReady(isReady));
+	}
+
 	_repaintVictories(player_idx) {
 		const player = players[player_idx]; // direct access... not great
 		const victories = this.victories[player_idx];

@@ -487,11 +487,6 @@ class MatchRoom extends Room {
 					break; // simple passthrough
 				}
 
-				case 'focusPlayer': {
-					update_admin = false;
-					break; // simple passthrough
-				}
-
 				case 'setDisplayName': {
 					const [p_num, name] = args;
 
@@ -554,7 +549,9 @@ class MatchRoom extends Room {
 				case 'showProfileCard':
 				case 'setWinner':
 				case 'setGameOver':
-				case 'cancelGameOver': {
+				case 'cancelGameOver':
+				case 'focusPlayer':
+				case 'setReady': {
 					update_admin = false;
 					break; // simple passthrough
 				}

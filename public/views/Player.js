@@ -229,6 +229,8 @@ export default class Player {
 			...options,
 		};
 
+		this.ready = false;
+
 		this.field_pixel_size =
 			this.options.field_pixel_size || this.options.pixel_size;
 		this.preview_pixel_size =
@@ -427,6 +429,10 @@ export default class Player {
 	onGameOver() {}
 	onCurtainDown() {}
 	onTetris() {}
+
+	setReady(isReady) {
+		this.ready = !!isReady;
+	}
 
 	showProfileCard(visible) {
 		this.profile_card.hidden = !visible;
@@ -778,6 +784,12 @@ export default class Player {
 		this._renderLevel(last_frame);
 		this._renderLines(last_frame);
 		this._renderPiece(last_frame);
+
+		if (this.ready) {
+			this.showProfileCard(false);
+		}
+
+		this.ready = false;
 	}
 
 	_renderValidFrame(frame) {
