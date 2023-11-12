@@ -452,11 +452,11 @@ export default class Player {
 				maxWidth:
 					this.options.field_pixel_size <= 4 && !this.options.biglogo
 						? '180px'
-						: '240px',
+						: '260px',
 				marginTop:
 					this.options.field_pixel_size <= 4 && !this.options.biglogo
 						? '-100px'
-						: '-70px',
+						: '-200px',
 			});
 
 			const small_nestrischamps_logo = document.createElement('img');
