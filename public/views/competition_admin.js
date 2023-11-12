@@ -4,6 +4,7 @@ const dom = {
 	roomid: document.querySelector('#roomid'),
 	producer_count: document.querySelector('#producer_count'),
 	bestof: document.querySelector('#bestof'),
+	set_ready: document.querySelector('#set_ready'),
 	clear_victories: document.querySelector('#clear_victories'),
 	show_runways: document.querySelector('#show_runways'),
 	hide_runways: document.querySelector('#hide_runways'),
@@ -20,7 +21,7 @@ const dom = {
 
 const MAX_BEST_OF = 13;
 
-// TODO: refactor into dynamic getter
+// TODO: refactor into dynamic forwarder -_-
 const remoteAPI = {
 	setBestOf: function (n) {
 		connection.send(['setBestOf', n]);
@@ -93,6 +94,9 @@ const remoteAPI = {
 	},
 	focusPlayer: function (player_idx) {
 		connection.send(['focusPlayer', player_idx]);
+	},
+	setReady: function (ready) {
+		connection.send(['setReady', ready]);
 	},
 };
 
@@ -388,6 +392,10 @@ function bootstrap() {
 
 	dom.curtain_logo_url.onchange = () =>
 		remoteAPI.setCurtainLogo(dom.curtain_logo_url.value);
+
+	dom.set_ready.addEventListener('click', () => {
+		remoteAPI.setReady(true);
+	});
 
 	dom.clear_victories.addEventListener('click', () => {
 		remoteAPI.resetVictories();
