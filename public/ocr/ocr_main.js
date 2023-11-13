@@ -165,6 +165,7 @@ device_selector.addEventListener('change', evt => {
 		wizard.style.display = 'none';
 		privacy.style.display = 'block';
 		controls.style.display = 'block';
+		ocr_results.style.display = 'flex';
 	} else {
 		playVideoFromConfig();
 		checkReadyToCalibrate();
@@ -911,7 +912,12 @@ async function initCaptureFromEverdrive() {
 }
 
 async function captureFromEverdrive() {
-	await everdrive.open({ baudRate: 57600 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
+	try {
+		await everdrive.open({ baudRate: 57600 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
+	} catch (err) {
+		// assume port is already open for now
+		// TODO: better error checking
+	}
 
 	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
 	everdrive_writer = everdrive.writable.getWriter();
