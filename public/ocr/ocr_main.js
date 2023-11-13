@@ -1142,8 +1142,8 @@ async function requestFrameFromEverDrive() {
 	// 7. schedule next poll, assume no lag; TODO: check for dropped frame
 	const now = Date.now();
 	const elapsed = now - start_time;
-	const frames_elapsed = Math.floor(elapsed / frame_duration);
-	const next_frame_time = Math.ceil((frames_elapsed + 1) * frame_duration);
+	const next_frame_num = Math.ceil(elapsed / frame_duration);
+	const next_frame_time = start_time + next_frame_num * frame_duration;
 
 	setTimeout(requestFrameFromEverDrive, next_frame_time - Date.now());
 }
