@@ -876,16 +876,15 @@ const GAME_FRAME_SIZE = 232; // 0xe8
 const PIECE_ORIENTATION_TO_PIECE_ID = [
 	0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 6, 6,
 ];
-const TILE_ID_TO_NTC_BLOCK_ID = {
-	0xef: 0,
-	0x7b: 0,
-	0x7d: 0,
-	0x7c: 0,
-};
+const TILE_ID_TO_NTC_BLOCK_ID = new Map();
+TILE_ID_TO_NTC_BLOCK_ID.set(0xef, 0);
+TILE_ID_TO_NTC_BLOCK_ID.set(0x7b, 1);
+TILE_ID_TO_NTC_BLOCK_ID.set(0x7d, 2);
+TILE_ID_TO_NTC_BLOCK_ID.set(0x7c, 3);
+
 let data_frame_buffer = new ArrayBuffer(GAME_FRAME_SIZE);
 
 async function initCaptureFromEverdrive() {
-	start_time = Date.now();
 	frame_duration = 1000 / config.frame_rate;
 	const ports = await navigator.serial.getPorts();
 	if (ports.length) {
@@ -922,21 +921,28 @@ async function captureFromEverdrive() {
 		// TODO: better error checking
 	}
 
-	window.everdrive = everdrive;
-
-	// try { await everdrive.readable.releaseLock(); } catch (err) {
-	// 	console.warn(err)
-	// }
-	// try { await everdrive.writable.releaseLock(); } catch (err) {
-	// 	console.warn(err)
-	// }
-	// try { await everdrive.close(); } catch (err) {
-	// 	console.error(err);
-	// }
-	// await everdrive.open({ baudRate: 57600 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
-
 	everdrive_reader = everdrive.readable.getReader();
 	everdrive_writer = everdrive.writable.getWriter();
+
+	// verify we have a real everdrive by sending a GET_STATUS command (expecting [0x00, 0xA5] as response)
+	const bytes = [
+		'+'.charCodeAt(0),
+		'+'.charCodeAt(0) ^ 0xff,
+		0x10, // getStatus
+		0x10 ^ 0xff,
+	];
+
+	await everdrive_writer.write(new Uint8Array(bytes));
+	const { value, done } = await everdrive_reader.read();
+
+	if (value[0] !== 0 || value[1] !== 0xa5) {
+		console.error('Selected device is not an everdrive');
+		return; // How to recover?
+	}
+
+	console.log('Everdrive verified!');
+
+	start_time = Date.now();
 
 	requestFrameFromEverDrive();
 }
@@ -974,14 +980,16 @@ async function requestFrameFromEverDrive() {
 		0,
 		0,
 
-		// terminator
+		// exec
 		0,
 
 		EVERDRIVE_CMD_SEND_STATS,
 	];
 
 	// 1. send request
-	await everdrive_writer.write(new Uint8Array(bytes));
+	const res = await everdrive_writer.write(new Uint8Array(bytes));
+
+	console.log(res);
 
 	performance.mark('edlink_write_end');
 	console.log('sent stats command');
@@ -1113,7 +1121,7 @@ async function requestFrameFromEverDrive() {
 		L: convertTwoBytesToDecimal(statsL0, statsL1),
 		I: convertTwoBytesToDecimal(statsI0, statsI1),
 		preview: PIECE_ORIENTATION_TO_PIECE_ID[nextPieceOrientation] ?? 3,
-		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID[tile_id] ?? 0),
+		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0),
 	};
 
 	showFrameData(data);
