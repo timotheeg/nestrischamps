@@ -882,7 +882,7 @@ TILE_ID_TO_NTC_BLOCK_ID.set(0x7b, 1);
 TILE_ID_TO_NTC_BLOCK_ID.set(0x7d, 2);
 TILE_ID_TO_NTC_BLOCK_ID.set(0x7c, 3);
 
-let data_frame_buffer = new ArrayBuffer(GAME_FRAME_SIZE);
+let data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
 
 async function initCaptureFromEverdrive() {
 	frame_duration = 1000 / config.frame_rate;
@@ -913,15 +913,14 @@ async function initCaptureFromEverdrive() {
 
 async function captureFromEverdrive() {
 	try {
-		// await everdrive.open({ baudRate: 57600, bufferSize: GAME_FRAME_SIZE }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
-		await everdrive.open({ baudRate: 115200 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
+		await everdrive.open({ baudRate: 115200, bufferSize: GAME_FRAME_SIZE }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
 	} catch (err) {
 		console.warn(err);
 		// assume port is already open for now
 		// TODO: better error checking
 	}
 
-	everdrive_reader = everdrive.readable.getReader();
+	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
 	everdrive_writer = everdrive.writable.getWriter();
 
 	// verify we have a real everdrive by sending a GET_STATUS command (expecting [0x00, 0xA5] as response)
@@ -933,7 +932,7 @@ async function captureFromEverdrive() {
 	];
 
 	await everdrive_writer.write(new Uint8Array(bytes));
-	const { value, done } = await everdrive_reader.read();
+	const { value, done } = await everdrive_reader.read(data_frame_buffer); // we just need 2 bytes here, will the byob mode be in the way?
 
 	if (value[0] !== 0 || value[1] !== 0xa5) {
 		console.error('Selected device is not an everdrive');
@@ -996,7 +995,7 @@ async function requestFrameFromEverDrive() {
 	console.log('sent stats command');
 
 	// 2. read response
-	const { value, done } = await everdrive_reader.read();
+	const { value, done } = await everdrive_reader.read(data_frame_buffer);
 
 	console.log('received:', value.length);
 
