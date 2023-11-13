@@ -2032,6 +2032,7 @@ function trackAndSendFrames() {
 
 		if (config.device_id === 'everdrive') {
 			initCaptureFromEverdrive(config.frame_rate);
+			ocr_results.style.display = 'flex';
 		} else {
 			await playVideoFromConfig();
 			trackAndSendFrames();
