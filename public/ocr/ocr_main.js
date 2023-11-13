@@ -961,6 +961,7 @@ async function requestFrameFromEverDrive() {
 	performance.mark('edlink_comm_start');
 
 	// 0. prep request
+	// ref: https://github.com/zohassadar/EDN8-PRO/blob/nestrischamps/edlink-n8/edlink-n8/Edio.cs#L622
 	const bytes = [
 		// command header
 		'+'.charCodeAt(0),
@@ -1112,7 +1113,7 @@ async function requestFrameFromEverDrive() {
 		game_type: BinaryFrame.GAME_TYPE.CLASSIC,
 		lines: convertTwoBytesToDecimal(lines0, lines1),
 		level,
-		score: ((score3 << (24 + score2)) << (16 + score1)) << (8 + score0),
+		score: (score3 << 24) | (score2 << 16) | (score1 << 8) | score0,
 		T: convertTwoBytesToDecimal(statsT0, statsT1),
 		J: convertTwoBytesToDecimal(statsJ0, statsJ1),
 		Z: convertTwoBytesToDecimal(statsZ0, statsZ1),
