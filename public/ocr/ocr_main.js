@@ -157,8 +157,18 @@ let in_calibration = false;
 
 device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
-	playVideoFromConfig();
-	checkReadyToCalibrate();
+
+	if (config.device_id === 'everdrive') {
+		initCaptureFromEverdrive(config.frame_rate);
+		saveConfig(config);
+
+		wizard.style.display = 'none';
+		privacy.style.display = 'block';
+		controls.style.display = 'block';
+	} else {
+		playVideoFromConfig();
+		checkReadyToCalibrate();
+	}
 });
 
 video_feed_selector.addEventListener('change', evt => {
@@ -948,12 +958,14 @@ async function requestFrameFromEverDrive() {
 	];
 
 	// 1. send request
-	await writer.write(new Uint8Array(bytes));
+	await everdrive_writer.write(new Uint8Array(bytes));
 
 	performance.mark('edlink_write_end');
 
 	// 2. read response
-	const { value, done } = await reader.read(new Uint8Array(data_frame_buffer));
+	const { value, done } = await everdrive_reader.read(
+		new Uint8Array(data_frame_buffer)
+	);
 
 	performance.mark('edlink_read_end');
 
@@ -1154,9 +1166,7 @@ async function playVideoFromConfig() {
 		return;
 	}
 
-	if (config.device_id === 'everdrive') {
-		await initCaptureFromEverdrive(config.frame_rate);
-	} else if (config.device_id === 'window') {
+	if (config.device_id === 'window') {
 		do_half_height = false;
 		await playVideoFromScreenCap(config.frame_rate);
 	} else {
@@ -1982,8 +1992,12 @@ function trackAndSendFrames() {
 
 		updateImageCorrection();
 
-		await playVideoFromConfig();
-		trackAndSendFrames();
+		if (config.device_id === 'everdrive') {
+			initCaptureFromEverdrive(config.frame_rate);
+		} else {
+			await playVideoFromConfig();
+			trackAndSendFrames();
+		}
 	} else {
 		await resetDevices();
 
@@ -1995,11 +2009,5 @@ function trackAndSendFrames() {
 			tasks: {},
 		};
 		wizard.style.display = 'block';
-	}
-
-	try {
-		window.__usb_devices = await navigator.usb.getDevices();
-	} catch (err) {
-		console.error(err);
 	}
 })();
