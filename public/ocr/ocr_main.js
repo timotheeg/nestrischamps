@@ -899,6 +899,7 @@ async function initCaptureFromEverdrive() {
 
 		if (everdrive) {
 			captureFromEverdrive();
+			return;
 		}
 	}
 
@@ -913,13 +914,28 @@ async function initCaptureFromEverdrive() {
 
 async function captureFromEverdrive() {
 	try {
+		// await everdrive.open({ baudRate: 57600, bufferSize: GAME_FRAME_SIZE }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
 		await everdrive.open({ baudRate: 57600 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
 	} catch (err) {
+		console.warn(err);
 		// assume port is already open for now
 		// TODO: better error checking
 	}
 
-	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
+	window.everdrive = everdrive;
+
+	// try { await everdrive.readable.releaseLock(); } catch (err) {
+	// 	console.warn(err)
+	// }
+	// try { await everdrive.writable.releaseLock(); } catch (err) {
+	// 	console.warn(err)
+	// }
+	// try { await everdrive.close(); } catch (err) {
+	// 	console.error(err);
+	// }
+	// await everdrive.open({ baudRate: 57600 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
+
+	everdrive_reader = everdrive.readable.getReader();
 	everdrive_writer = everdrive.writable.getWriter();
 
 	requestFrameFromEverDrive();
@@ -951,6 +967,7 @@ async function requestFrameFromEverDrive() {
 		(EVERDRIVE_ADDR_FIFO >> 8) & 0xff,
 		(EVERDRIVE_ADDR_FIFO >> 16) & 0xff,
 		(EVERDRIVE_ADDR_FIFO >> 24) & 0xff,
+
 		// len
 		1,
 		0,
@@ -967,11 +984,12 @@ async function requestFrameFromEverDrive() {
 	await everdrive_writer.write(new Uint8Array(bytes));
 
 	performance.mark('edlink_write_end');
+	console.log('sent stats command');
 
 	// 2. read response
-	const { value, done } = await everdrive_reader.read(
-		new Uint8Array(data_frame_buffer)
-	);
+	const { value, done } = await everdrive_reader.read();
+
+	console.log('received:', value.length);
 
 	performance.mark('edlink_read_end');
 
@@ -1038,7 +1056,7 @@ async function requestFrameFromEverDrive() {
 		statsI1,
 		// 32
 		...field
-	] = value;
+	] = new Uint8Array(value.buffer);
 
 	console.log({
 		gameMode,
