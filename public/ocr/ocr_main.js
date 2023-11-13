@@ -767,8 +767,7 @@ function updateDeviceList(devices) {
 		return device;
 	});
 
-	device_selector.innerHTML = '';
-	[
+	const default_devices = [
 		{
 			label: '-',
 			deviceId: '',
@@ -777,8 +776,17 @@ function updateDeviceList(devices) {
 			label: 'Window Capture',
 			deviceId: 'window',
 		},
-		...mappedDevices,
-	].forEach(camera => {
+	];
+
+	if ('serial' in navigator && QueryString.get('ed') === '1') {
+		default_devices.splice(1, 0, {
+			label: 'Direct Everdrive N8 Pro Capture',
+			deviceId: 'everdrive',
+		});
+	}
+
+	device_selector.innerHTML = '';
+	[...default_devices, ...mappedDevices].forEach(camera => {
 		const camera_option = document.createElement('option');
 		camera_option.text = camera.label;
 		camera_option.value = camera.deviceId;
@@ -844,6 +852,252 @@ async function resetDevices() {
 
 navigator.mediaDevices.addEventListener('devicechange', resetDevices);
 
+let start_time;
+let frame_duration;
+const EVERDRIVE_N8_PRO = { usbVendorId: 0x483, usbProductId: 0x5740 };
+let everdrive;
+let everdrive_reader;
+let everdrive_writer;
+const EVERDRIVE_CMD_SEND_STATS = 0x42;
+const EVERDRIVE_CMD_MEM_WR = 0x1a;
+const EVERDRIVE_ADDR_FIFO = 0x1810000;
+const GAME_FRAME_SIZE = 232; // 0xe8
+const PIECE_ORIENTATION_TO_PIECE_ID = [
+	0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 6, 6,
+];
+const TILE_ID_TO_NTC_BLOCK_ID = {
+	0xef: 0,
+	0x7b: 0,
+	0x7d: 0,
+	0x7c: 0,
+};
+let data_frame_buffer = new ArrayBuffer(GAME_FRAME_SIZE);
+
+async function initCaptureFromEverdrive() {
+	start_time = Date.now();
+	frame_duration = 1000 / config.frame_rate;
+	const ports = await navigator.serial.getPorts();
+	if (ports.length) {
+		everdrive = ports.find(port => {
+			const { usbProductId, usbVendorId } = port.getInfo();
+			return (
+				usbVendorId === EVERDRIVE_N8_PRO.usbVendorId &&
+				usbProductId === EVERDRIVE_N8_PRO.usbProductId
+			);
+		});
+
+		if (everdrive) {
+			captureFromEverdrive();
+		}
+	}
+
+	everdrive = await navigator.serial.requestPort({
+		filters: [EVERDRIVE_N8_PRO],
+	});
+
+	if (everdrive) {
+		captureFromEverdrive();
+	}
+}
+
+async function captureFromEverdrive() {
+	await everdrive.open({ baudRate: 57600 }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
+
+	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
+	everdrive_writer = everdrive.writable.getWriter();
+
+	requestFrameFromEverDrive();
+}
+
+function convertTwoBytesToDecimal(byte1, byte2) {
+	return byte2 * 100 + (byte1 >> 4) * 10 + (byte1 & 0xf);
+}
+
+/*
+function updateField(field, tetriminoX, tetriminoY, currentPieceOrientation) {
+
+}
+/**/
+
+async function requestFrameFromEverDrive() {
+	performance.mark('edlink_comm_start');
+
+	// 0. prep request
+	const bytes = [
+		// command header
+		'+'.charCodeAt(0),
+		'+'.charCodeAt(0) ^ 0xff,
+		EVERDRIVE_CMD_MEM_WR,
+		EVERDRIVE_CMD_MEM_WR ^ 0xff,
+
+		// addr
+		EVERDRIVE_ADDR_FIFO & 0xff,
+		(EVERDRIVE_ADDR_FIFO >> 8) & 0xff,
+		(EVERDRIVE_ADDR_FIFO >> 16) & 0xff,
+		(EVERDRIVE_ADDR_FIFO >> 24) & 0xff,
+		// len
+		1,
+		0,
+		0,
+		0,
+
+		// terminator
+		0,
+
+		EVERDRIVE_CMD_SEND_STATS,
+	];
+
+	// 1. send request
+	await writer.write(new Uint8Array(bytes));
+
+	performance.mark('edlink_write_end');
+
+	// 2. read response
+	const { value, done } = await reader.read(new Uint8Array(data_frame_buffer));
+
+	performance.mark('edlink_read_end');
+
+	performance.measure('edlink_write', 'edlink_comm_start', 'edlink_write_end');
+	performance.measure('edlink_read', 'edlink_write_end', 'edlink_read_end');
+	performance.measure(
+		'edlink_comm_total',
+		'edlink_comm_start',
+		'edlink_read_end'
+	);
+
+	const perf = {};
+
+	performance.getEntriesByType('measure').forEach(m => {
+		perf[m.name] = m.duration.toFixed(3);
+	});
+
+	showPerfData(perf);
+
+	performance.clearMarks();
+	performance.clearMeasures();
+
+	if (done) {
+		reader.releaseLock();
+		return;
+	}
+
+	const [
+		// 0
+		gameMode,
+		playState,
+		completedRowYClear,
+		completedRow0,
+		completedRow1,
+		completedRow2,
+		completedRow3,
+		lines0,
+		lines1,
+		level,
+		// 10
+		score0,
+		score1,
+		score2,
+		score3,
+		nextPieceOrientation,
+		currentPieceOrientation,
+		tetriminoX,
+		tetriminoY,
+		statsT0,
+		statsT1,
+		// 20
+		statsJ0,
+		statsJ1,
+		statsZ0,
+		statsZ1,
+		statsO0,
+		statsO1,
+		statsS0,
+		statsS1,
+		statsL0,
+		statsL1,
+		// 30
+		statsI0,
+		statsI1,
+		// 32
+		...field
+	] = value;
+
+	console.log({
+		gameMode,
+		playState,
+		completedRowYClear,
+		completedRow0,
+		completedRow1,
+		completedRow2,
+		completedRow3,
+		lines0,
+		lines1,
+		level,
+		score0,
+		score1,
+		score2,
+		score3,
+		nextPieceOrientation,
+		currentPieceOrientation,
+		tetriminoX,
+		tetriminoY,
+		statsT0,
+		statsT1,
+		statsJ0,
+		statsJ1,
+		statsZ0,
+		statsZ1,
+		statsO0,
+		statsO1,
+		statsS0,
+		statsS1,
+		statsL0,
+		statsL1,
+		statsI0,
+		statsI1,
+		field,
+	});
+
+	// 4. update field as needed (draw piece + clear animation)
+	// TODO
+
+	// 5. get the frame payload
+	const data = {
+		gameid: 0, // TODO: derive game id properly
+		ctime: Date.now() - start_time,
+		game_type: BinaryFrame.GAME_TYPE.CLASSIC,
+		lines: convertTwoBytesToDecimal(lines0, lines1),
+		level,
+		score: ((score3 << (24 + score2)) << (16 + score1)) << (8 + score0),
+		T: convertTwoBytesToDecimal(statsT0, statsT1),
+		J: convertTwoBytesToDecimal(statsJ0, statsJ1),
+		Z: convertTwoBytesToDecimal(statsZ0, statsZ1),
+		O: convertTwoBytesToDecimal(statsO0, statsO1),
+		S: convertTwoBytesToDecimal(statsS0, statsS1),
+		L: convertTwoBytesToDecimal(statsL0, statsL1),
+		I: convertTwoBytesToDecimal(statsI0, statsI1),
+		preview: PIECE_ORIENTATION_TO_PIECE_ID[nextPieceOrientation] ?? 3,
+		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID[tile_id] ?? 0),
+	};
+
+	showFrameData(data);
+
+	// TODO: implement frame dedupping like for OCR capture...
+
+	// 6. transmit frame to NTC server
+	if (QueryString.get('edtx') === '1') {
+		connection.send(BinaryFrame.encode(data));
+	}
+
+	// 7. schedule next poll, assume no lag; TODO: check for dropped frame
+	const now = Date.now();
+	const elapsed = now - start_time;
+	const frames_elapsed = Math.floor(elapsed / frame_duration);
+	const next_frame_time = Math.ceil((frames_elapsed + 1) * frame_duration);
+
+	setTimeout(requestFrameFromEverDrive, next_frame_time - Date.now());
+}
+
 async function playVideoFromDevice(device_id, fps) {
 	try {
 		const constraints = {
@@ -900,7 +1154,9 @@ async function playVideoFromConfig() {
 		return;
 	}
 
-	if (config.device_id === 'window') {
+	if (config.device_id === 'everdrive') {
+		await initCaptureFromEverdrive(config.frame_rate);
+	} else if (config.device_id === 'window') {
 		do_half_height = false;
 		await playVideoFromScreenCap(config.frame_rate);
 	} else {
