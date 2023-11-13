@@ -932,12 +932,15 @@ async function captureFromEverdrive() {
 	];
 
 	await everdrive_writer.write(new Uint8Array(bytes));
-	const { value, done } = await everdrive_reader.read(data_frame_buffer); // we just need 2 bytes here, will the byob mode be in the way?
+	const { value, done } = await everdrive_reader.read(data_frame_buffer);
 
 	if (value[0] !== 0 || value[1] !== 0xa5) {
 		console.error('Selected device is not an everdrive');
 		return; // How to recover?
 	}
+
+	// restore the buffer for next use
+	data_frame_buffer = new Uint8Array(value.buffer);
 
 	console.log('Everdrive verified!');
 
@@ -996,6 +999,9 @@ async function requestFrameFromEverDrive() {
 
 	// 2. read response
 	const { value, done } = await everdrive_reader.read(data_frame_buffer);
+
+	// restore the buffer for next cycle
+	data_frame_buffer = new Uint8Array(value.buffer);
 
 	console.log('received:', value.length);
 
