@@ -843,7 +843,7 @@ async function getConnectedDevices(type) {
 	} catch (err) {
 		// We log a warning but we do nothing
 		console.log(
-			`Warning: could not open default capture device: $(err.message)`
+			`Warning: could not open default capture device: ${err.message}`
 		);
 	}
 
@@ -920,7 +920,7 @@ async function captureFromEverdrive() {
 		// TODO: better error checking
 	}
 
-	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
+	everdrive_reader = everdrive.readable.getReader();
 	everdrive_writer = everdrive.writable.getWriter();
 
 	// verify we have a real everdrive by sending a GET_STATUS command (expecting [0x00, 0xA5] as response)
@@ -932,7 +932,7 @@ async function captureFromEverdrive() {
 	];
 
 	await everdrive_writer.write(new Uint8Array(bytes));
-	const { value, done } = await everdrive_reader.read(data_frame_buffer);
+	const { value, done } = await everdrive_reader.read();
 
 	if (value[0] !== 0 || value[1] !== 0xa5) {
 		console.error('Selected device is not an everdrive');
@@ -997,13 +997,36 @@ async function requestFrameFromEverDrive() {
 	performance.mark('edlink_write_end');
 	console.log('sent stats command');
 
+
+	data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
+
 	// 2. read response
-	const { value, done } = await everdrive_reader.read(data_frame_buffer);
+	let offset = 0
+	while (true){
+		let { value, done } = await everdrive_reader.read();
+		console.log('received:', value.length);
 
-	// restore the buffer for next cycle
-	data_frame_buffer = new Uint8Array(value.buffer);
+		if (value.length + offset > GAME_FRAME_SIZE){
+			console.log(`Too much data received.  Expected: ${GAME_FRAME_SIZE}.  Received: ${value.length + offset}`)
+			}
+		else {
+			for (let idx = offset; idx < offset + value.length; idx++) {
+				data_frame_buffer[idx] = value[idx-offset]
+			}
+		}
+		offset = offset + value.length;
+		if (offset >= GAME_FRAME_SIZE) {
+			console.log('Received full frame');
+			break;
+		}
+		if (done) {
+			reader.releaseLock();
+			return;
+		}
+	}
 
-	console.log('received:', value.length);
+
+
 
 	performance.mark('edlink_read_end');
 
@@ -1026,10 +1049,6 @@ async function requestFrameFromEverDrive() {
 	performance.clearMarks();
 	performance.clearMeasures();
 
-	if (done) {
-		reader.releaseLock();
-		return;
-	}
 
 	const [
 		// 0
@@ -1070,7 +1089,7 @@ async function requestFrameFromEverDrive() {
 		statsI1,
 		// 32
 		...field
-	] = new Uint8Array(value.buffer);
+	] = new Uint8Array(data_frame_buffer);
 
 	console.log({
 		gameMode,
