@@ -926,7 +926,7 @@ async function readInto(reader, buffer) {
 		buffer = value.buffer;
 		offset += value.byteLength;
 	}
-	return buffer;
+	return new Uint8Array(buffer);
 }
 
 async function readUntilPattern(reader, length, compare) {
@@ -943,7 +943,7 @@ async function readUntilPattern(reader, length, compare) {
 	while (true) {
 		try {
 			let { value, done } = await Promise.race([
-				reader.read(new ArrayBuffer(GAME_FRAME_SIZE)),
+				reader.read(new Uint8Array(GAME_FRAME_SIZE)),
 				new Promise((_, reject) =>
 					setTimeout(reject, 10, new Error('timeout'))
 				),
@@ -954,7 +954,7 @@ async function readUntilPattern(reader, length, compare) {
 				break;
 			}
 		} catch (e) {
-			new Error('Flushed Buffer');
+			console.error('Flushed Buffer');
 		}
 	}
 }
@@ -983,7 +983,7 @@ async function captureFromEverdrive() {
 	for (let attempt = ED_MAX_READ_ATTEMPTS; attempt--; ) {
 		await everdrive_writer.write(new Uint8Array(bytes));
 		try {
-			buffer = await readUntilPattern(everdrive_reader, 2, EVERDRIVE_TAIL);
+			await readUntilPattern(everdrive_reader, 2, EVERDRIVE_TAIL);
 			success = true;
 			break;
 		} catch (e) {
