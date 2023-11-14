@@ -931,16 +931,34 @@ async function captureFromEverdrive() {
 		0x10 ^ 0xff,
 	];
 
-	await everdrive_writer.write(new Uint8Array(bytes));
-	const { value, done } = await everdrive_reader.read();
+	const MAX_ATTEMPTS = 10;
+	let failed = true;
+	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+		await everdrive_writer.write(new Uint8Array(bytes));
+		const { value, done } = await everdrive_reader.read();
 
-	if (value[0] !== 0 || value[1] !== 0xa5) {
-		console.error('Selected device is not an everdrive');
+		if (value.length < 2) {
+			console.error(`Attempt ${attempt}. At least 2 bytes expected.  Received ${value.length}`);
+			console.error(value);
+		}
+		else if (value[value.length - 2] !== 0 || value[value.length - 1] !== 0xa5) {
+			console.error('Attempt ${attempt}.  Selected device is not an everdrive');
+			console.error(value);
+		}
+		else {
+			failed = false;
+			break;
+		}
+
+	}
+
+	if (failed){
+		console.error("Max attempts ${MAX_ATTEMPTS} reached")
 		return; // How to recover?
 	}
 
 	// restore the buffer for next use
-	data_frame_buffer = new Uint8Array(value.buffer);
+	// data_frame_buffer = new Uint8Array(value.buffer);
 
 	console.log('Everdrive verified!');
 
@@ -1003,26 +1021,38 @@ async function requestFrameFromEverDrive() {
 	// 2. read response
 	let offset = 0
 	while (true){
-		let { value, done } = await everdrive_reader.read();
-		console.log('received:', value.length);
-
-		if (value.length + offset > GAME_FRAME_SIZE){
-			console.log(`Too much data received.  Expected: ${GAME_FRAME_SIZE}.  Received: ${value.length + offset}`)
+		// let { value, done } = await everdrive_reader.read();
+		try {
+			let { value, done } = await Promise.race([
+				everdrive_reader.read(),
+				new Promise((_, reject) => setTimeout(reject, 500, new Error("timeout")))
+			]);
+			
+			console.log('received:', value.length);
+			
+			if (value.length + offset > GAME_FRAME_SIZE){
+				console.log(`Too much data received.  Expected: ${GAME_FRAME_SIZE}.  Received: ${value.length + offset}`)
 			}
-		else {
-			for (let idx = offset; idx < offset + value.length; idx++) {
-				data_frame_buffer[idx] = value[idx-offset]
+			else {
+				for (let idx = offset; idx < offset + value.length; idx++) {
+					data_frame_buffer[idx] = value[idx-offset]
+				}
 			}
-		}
-		offset = offset + value.length;
-		if (offset >= GAME_FRAME_SIZE) {
-			console.log('Received full frame');
+			offset = offset + value.length;
+			if (offset == GAME_FRAME_SIZE) {
+				console.log('Received full frame');
+				break;
+			}
+			if (offset > GAME_FRAME_SIZE) {
+				offset = offset - GAME_FRAME_SIZE;
+			}
+			if (done) {
+				return;
+			}
+		} catch(e) {
+			console.error('Timeout reading from everdrive');
 			break;
-		}
-		if (done) {
-			reader.releaseLock();
-			return;
-		}
+			}
 	}
 
 
