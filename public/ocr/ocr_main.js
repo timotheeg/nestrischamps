@@ -1049,10 +1049,7 @@ async function requestFrameFromEverDrive() {
 	// 1. send request
 	const res = await everdrive_writer.write(new Uint8Array(bytes));
 
-	console.log(res);
-
 	performance.mark('edlink_write_end');
-	console.log('sent stats command');
 
 	data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
 
@@ -1136,44 +1133,6 @@ async function requestFrameFromEverDrive() {
 		// 32
 		...field
 	] = new Uint8Array(data_frame_buffer);
-
-	console.log({
-		gameMode,
-		playState,
-		completedRowYClear,
-		completedRow0,
-		completedRow1,
-		completedRow2,
-		completedRow3,
-		lines0,
-		lines1,
-		level,
-		score0,
-		score1,
-		score2,
-		score3,
-		nextPieceOrientation,
-		currentPieceOrientation,
-		tetriminoX,
-		tetriminoY,
-		frameCounter,
-		autoRepeatX,
-		statsT0,
-		statsT1,
-		statsJ0,
-		statsJ1,
-		statsZ0,
-		statsZ1,
-		statsO0,
-		statsO1,
-		statsS0,
-		statsS1,
-		statsL0,
-		statsL1,
-		statsI0,
-		statsI1,
-		field,
-	});
 
 	// 4. update field as needed (draw piece + clear animation)
 	// TODO
