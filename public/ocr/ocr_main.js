@@ -961,7 +961,7 @@ async function readUntilPattern(reader, length, compare) {
 
 async function captureFromEverdrive() {
 	try {
-		await everdrive.open({ baudRate: 115200, bufferSize: GAME_FRAME_SIZE }); // plenty of speed for 60fps data frame from gym are 132 bytes: 132x60=7920
+		await everdrive.open({ baudRate: 115200, bufferSize: GAME_FRAME_SIZE }); // plenty of speed for 60fps data frame from gym are 240 bytes: 240x60=14400
 	} catch (err) {
 		console.warn(err);
 		// assume port is already open for now
