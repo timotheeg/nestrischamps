@@ -283,20 +283,22 @@ export default class Player {
 		this.dom.field.prepend(this.field_bg);
 
 		// Avatar Block
-		this.avatar = document.createElement('div');
-		this.avatar.classList.add('avatar');
-		Object.assign(this.avatar.style, {
-			position: 'absolute',
-			top: `${field_padding_tb + this.field_pixel_size * 8}px`,
-			left: `${bg_offset}px`,
-			width: `${bg_width}px`,
-			height: `${bg_width}px`,
-			backgroundRepeat: 'no-repeat',
-			backgroundSize: 'cover',
-			backgroundPosition: '50% 50%',
-			filter: 'brightness(0.20)',
-		});
-		this.dom.field.prepend(this.avatar);
+		if (QueryString.get('avatar') !== '0') {
+			this.avatar = document.createElement('div');
+			this.avatar.classList.add('avatar');
+			Object.assign(this.avatar.style, {
+				position: 'absolute',
+				top: `${field_padding_tb + this.field_pixel_size * 8}px`,
+				left: `${bg_offset}px`,
+				width: `${bg_width}px`,
+				height: `${bg_width}px`,
+				backgroundRepeat: 'no-repeat',
+				backgroundSize: 'cover',
+				backgroundPosition: '50% 50%',
+				filter: 'brightness(0.20)',
+			});
+			this.dom.field.prepend(this.avatar);
+		}
 
 		// set up field and preview canvas
 		['field', 'preview', 'running_trt'].forEach(name => {
@@ -616,6 +618,7 @@ export default class Player {
 	}
 
 	setAvatar(url) {
+		if (!this.avatar) return;
 		this.avatar_url = url;
 		this.avatar.style.backgroundImage = `url('${encodeURI(url)}')`;
 	}
