@@ -1154,6 +1154,8 @@ async function requestFrameFromEverDrive() {
 		I: convertTwoBytesToDecimal(statsI0, statsI1),
 		preview: PIECE_ORIENTATION_TO_PIECE_ID[nextPieceOrientation] ?? 3,
 		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0),
+		frameCounter,
+		das: autoRepeatX,
 	};
 
 	showFrameData(data);
