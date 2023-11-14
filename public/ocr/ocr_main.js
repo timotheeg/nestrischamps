@@ -876,14 +876,15 @@ const GAME_FRAME_SIZE = 240; // 0xf0
 const PIECE_ORIENTATION_TO_PIECE_ID = [
 	0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 6, 6,
 ];
-const TILE_ID_TO_NTC_BLOCK_ID = new Map();
-TILE_ID_TO_NTC_BLOCK_ID.set(0xef, 0);
-TILE_ID_TO_NTC_BLOCK_ID.set(0x7b, 1);
-TILE_ID_TO_NTC_BLOCK_ID.set(0x7d, 2);
-TILE_ID_TO_NTC_BLOCK_ID.set(0x7c, 3);
+const TILE_ID_TO_NTC_BLOCK_ID = new Map([
+	[0xef, 0],
+	[0x7b, 1],
+	[0x7d, 2],
+	[0x7c, 3],
+]);
 
-const EVERDRIVE_TAIL = [0x00, 0xa5]
-const GAME_FRAME_TAIL = [0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa]
+const EVERDRIVE_TAIL = [0x00, 0xa5];
+const GAME_FRAME_TAIL = [0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa];
 const ED_MAX_READ_ATTEMPTS = 10;
 
 let data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
@@ -918,41 +919,38 @@ async function initCaptureFromEverdrive() {
 async function readInto(reader, buffer) {
 	let offset = 0;
 	while (offset < buffer.byteLength) {
-	  const { value, done } = await reader.read(
-		new Uint8Array(buffer, offset)
-	  );
-	  if (done) {
-		break;
-	  }
-	  buffer = value.buffer;
-	  offset += value.byteLength;
+		const { value, done } = await reader.read(new Uint8Array(buffer, offset));
+		if (done) {
+			break;
+		}
+		buffer = value.buffer;
+		offset += value.byteLength;
 	}
 	return buffer;
-  }
-
+}
 
 async function readUntilPattern(reader, length, compare) {
 	let buffer = new ArrayBuffer(length);
 	buffer = await readInto(reader, buffer);
 
-	if (compare.every((e, i) => e === buffer[buffer.length - compare.length + i])){
+	if (
+		compare.every((e, i) => e === buffer[buffer.length - compare.length + i])
+	) {
 		return buffer;
-		}
+	}
+
 	// flush the buffer, return an empty result
-	while (true){
+	while (true) {
 		try {
 			let { value, done } = await Promise.race([
 				reader.read(),
-				new Promise((_, reject) => setTimeout(reject, 500, new Error("timeout")))
+				new Promise((_, reject) => setTimeout(reject, 5, new Error('timeout'))),
 			]);
-		
-			}
-		catch (e) {
-			new Error ("Flushed Buffer")
+		} catch (e) {
+			new Error('Flushed Buffer');
 		}
 	}
-  }
-
+}
 
 async function captureFromEverdrive() {
 	try {
@@ -963,7 +961,7 @@ async function captureFromEverdrive() {
 		// TODO: better error checking
 	}
 
-	everdrive_reader = everdrive.readable.getReader();
+	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
 	everdrive_writer = everdrive.writable.getWriter();
 
 	// verify we have a real everdrive by sending a GET_STATUS command (expecting [0x00, 0xA5] as response)
@@ -981,16 +979,13 @@ async function captureFromEverdrive() {
 			buffer = await readUntilPattern(everdrive_reader, 2, EVERDRIVE_TAIL);
 			success = true;
 			break;
-
-		}catch (e){
-
+		} catch (e) {
 			console.error(`Attempt ${attempt} failed to read everdrive: ${e}`);
 		}
-
 	}
 
-	if (!success){
-		console.error(`Max attempts ${ED_MAX_READ_ATTEMPTS} reached`)
+	if (!success) {
+		console.error(`Max attempts ${ED_MAX_READ_ATTEMPTS} reached`);
 		return; // How to recover?
 	}
 
@@ -1052,20 +1047,24 @@ async function requestFrameFromEverDrive() {
 	performance.mark('edlink_write_end');
 	console.log('sent stats command');
 
-
 	data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
 
 	// 2. read response
 
-
 	try {
-		data_frame_buffer = await readUntilPattern(everdrive_reader, GAME_FRAME_SIZE, GAME_FRAME_TAIL);
-	} catch(e) {
+		data_frame_buffer = await readUntilPattern(
+			everdrive_reader,
+			GAME_FRAME_SIZE,
+			GAME_FRAME_TAIL
+		);
+	} catch (e) {
 		console.error(`Error reading from everdrive: ${e}`);
 	}
-	
-	data_frame_buffer = data_frame_buffer.slice(0,data_frame_buffer.length-GAME_FRAME_TAIL.length);
-	
+
+	data_frame_buffer = data_frame_buffer.slice(
+		0,
+		data_frame_buffer.length - GAME_FRAME_TAIL.length
+	);
 
 	performance.mark('edlink_read_end');
 
@@ -1087,7 +1086,6 @@ async function requestFrameFromEverDrive() {
 
 	performance.clearMarks();
 	performance.clearMeasures();
-
 
 	const [
 		// 0
