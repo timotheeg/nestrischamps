@@ -1092,24 +1092,7 @@ async function requestFrameFromEverDrive() {
 
 	performance.mark('edlink_read_end');
 
-	performance.measure('edlink_write', 'edlink_comm_start', 'edlink_write_end');
-	performance.measure('edlink_read', 'edlink_write_end', 'edlink_read_end');
-	performance.measure(
-		'edlink_comm_total',
-		'edlink_comm_start',
-		'edlink_read_end'
-	);
-
-	const perf = {};
-
-	performance.getEntriesByType('measure').forEach(m => {
-		perf[m.name] = m.duration.toFixed(3);
-	});
-
-	showPerfData(perf);
-
-	performance.clearMarks();
-	performance.clearMeasures();
+	performance.mark('extract_data_start');
 
 	const [
 		// 0
@@ -1193,7 +1176,32 @@ async function requestFrameFromEverDrive() {
 		completedRow3,
 	};
 
+	performance.mark('extract_data_end');
+
 	showFrameData(data);
+	performance.mark('show_data_end');
+
+	performance.measure('edlink_write', 'edlink_comm_start', 'edlink_write_end');
+	performance.measure('edlink_read', 'edlink_write_end', 'edlink_read_end');
+	performance.measure(
+		'edlink_comm_total',
+		'edlink_comm_start',
+		'edlink_read_end'
+	);
+
+	performance.measure('extract_data', 'extract_data_start', 'extract_data_end');
+	performance.measure('show_frame_data', 'extract_data_end', 'show_data_end');
+
+	const perf = {};
+
+	performance.getEntriesByType('measure').forEach(m => {
+		perf[m.name] = m.duration.toFixed(3);
+	});
+
+	showPerfData(perf);
+
+	performance.clearMarks();
+	performance.clearMeasures();
 
 	// TODO: implement frame dedupping like for OCR capture...
 
