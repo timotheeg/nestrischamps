@@ -1906,7 +1906,7 @@ function showFrameData(data) {
 				const rows = Array(20)
 					.fill()
 					.map((_, idx) => data.field.slice(idx * 10, (idx + 1) * 10).join(''));
-				dd.innerHTML = `<pre>${rows.join('\n')}</pre>`;
+				dd.innerHTML = `${rows.join('<br/>')}`;
 			}
 		} else {
 			dd.textContent = value;
