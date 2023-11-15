@@ -873,8 +873,26 @@ const EVERDRIVE_CMD_SEND_STATS = 0x42;
 const EVERDRIVE_CMD_MEM_WR = 0x1a;
 const EVERDRIVE_ADDR_FIFO = 0x1810000;
 const GAME_FRAME_SIZE = 240; // 0xf0
-const PIECE_ORIENTATION_TO_PIECE_ID = [
-	0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 6, 6,
+const PIECE_ORIENTATION_TO_PIECE = [
+	'T',
+	'T',
+	'T',
+	'T',
+	'J',
+	'J',
+	'J',
+	'J',
+	'Z',
+	'Z',
+	'O',
+	'S',
+	'S',
+	'L',
+	'L',
+	'L',
+	'L',
+	'I',
+	'I',
 ];
 const TILE_ID_TO_NTC_BLOCK_ID = new Map([
 	[0xef, 0],
@@ -1152,7 +1170,10 @@ async function requestFrameFromEverDrive() {
 		S: convertTwoBytesToDecimal(statsS0, statsS1),
 		L: convertTwoBytesToDecimal(statsL0, statsL1),
 		I: convertTwoBytesToDecimal(statsI0, statsI1),
-		preview: PIECE_ORIENTATION_TO_PIECE_ID[nextPieceOrientation] ?? 3,
+		nextPieceOrientation,
+		preview: PIECE_ORIENTATION_TO_PIECE[nextPieceOrientation],
+		currentPieceOrientation,
+		currentPiece: PIECE_ORIENTATION_TO_PIECE[currentPieceOrientation],
 		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0),
 		frameCounter,
 		das: autoRepeatX,
