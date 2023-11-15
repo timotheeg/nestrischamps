@@ -872,7 +872,7 @@ let everdrive_writer;
 const EVERDRIVE_CMD_SEND_STATS = 0x42;
 const EVERDRIVE_CMD_MEM_WR = 0x1a;
 const EVERDRIVE_ADDR_FIFO = 0x1810000;
-const GAME_FRAME_SIZE = 240; // 0xf0
+const GAME_FRAME_SIZE = 241;
 const PIECE_ORIENTATION_TO_PIECE = [
 	'T',
 	'T',
