@@ -1130,7 +1130,8 @@ async function requestFrameFromEverDrive() {
 		currentPieceOrientation,
 		tetriminoX,
 		tetriminoY,
-		frameCounter,
+		frameCounter0,
+		frameCounter1,
 		autoRepeatX,
 		statsT0,
 		statsT1,
@@ -1175,7 +1176,7 @@ async function requestFrameFromEverDrive() {
 		currentPieceOrientation,
 		currentPiece: PIECE_ORIENTATION_TO_PIECE[currentPieceOrientation],
 		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0),
-		frameCounter,
+		frameCounter: (frameCounter1 << 8) | frameCounter0,
 		das: autoRepeatX,
 	};
 
