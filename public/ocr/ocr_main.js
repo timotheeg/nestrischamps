@@ -945,6 +945,12 @@ async function readInto(reader, dataArray) {
 		}
 		buffer = value.buffer;
 		offset += value.byteLength;
+		if (offset >= 240) {
+			const a = new Uint8Array(buffer, 240);
+			a[0] = 0xaa;
+			offset = 241;
+			buffer = a.buffer;
+		}
 	}
 	return new Uint8Array(buffer);
 }
