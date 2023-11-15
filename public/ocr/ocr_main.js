@@ -934,8 +934,10 @@ async function initCaptureFromEverdrive() {
 	}
 }
 
-async function readInto(reader, buffer) {
+async function readInto(reader, dataArray) {
+	let buffer = dataArray.buffer;
 	let offset = 0;
+
 	while (offset < buffer.byteLength) {
 		const { value, done } = await reader.read(new Uint8Array(buffer, offset));
 		if (done) {
@@ -947,14 +949,15 @@ async function readInto(reader, buffer) {
 	return new Uint8Array(buffer);
 }
 
-async function readUntilPattern(reader, length, compare) {
-	let buffer = new ArrayBuffer(length);
-	buffer = await readInto(reader, buffer);
+async function readUntilPattern(reader, dataArray, compare) {
+	dataArray = await readInto(reader, dataArray);
 
 	if (
-		compare.every((e, i) => e === buffer[buffer.length - compare.length + i])
+		compare.every(
+			(e, i) => e === dataArray[dataArray.length - compare.length + i]
+		)
 	) {
-		return buffer;
+		return dataArray;
 	}
 
 	// flush the buffer, return an empty result
@@ -1001,7 +1004,11 @@ async function captureFromEverdrive() {
 	for (let attempt = ED_MAX_READ_ATTEMPTS; attempt--; ) {
 		await everdrive_writer.write(new Uint8Array(bytes));
 		try {
-			await readUntilPattern(everdrive_reader, 2, EVERDRIVE_TAIL);
+			await readUntilPattern(
+				everdrive_reader,
+				new Uint8Array(2),
+				EVERDRIVE_TAIL
+			);
 			success = true;
 			break;
 		} catch (e) {
@@ -1076,17 +1083,12 @@ async function requestFrameFromEverDrive() {
 	try {
 		data_frame_buffer = await readUntilPattern(
 			everdrive_reader,
-			GAME_FRAME_SIZE,
+			data_frame_buffer,
 			GAME_FRAME_TAIL
 		);
 	} catch (e) {
 		console.error(`Error reading from everdrive: ${e}`);
 	}
-
-	data_frame_buffer = data_frame_buffer.slice(
-		0,
-		data_frame_buffer.length - GAME_FRAME_TAIL.length
-	);
 
 	performance.mark('edlink_read_end');
 
@@ -1150,8 +1152,10 @@ async function requestFrameFromEverDrive() {
 		statsI0,
 		statsI1,
 		// 32
-		...field
-	] = new Uint8Array(data_frame_buffer);
+		...field // reads the tail as well
+	] = data_frame_buffer;
+
+	field.length = 200; // drop the tail
 
 	// 4. update field as needed (draw piece + clear animation)
 	// TODO
