@@ -1894,7 +1894,14 @@ function showFrameData(data) {
 
 		dt.textContent = name;
 		if (name === 'field') {
-			dd.textContent = data.field.slice(0, 30).join('');
+			if (QueryString.get('ed') != '1') {
+				dd.textContent = data.field.slice(0, 30).join('');
+			} else {
+				const rows = Array(20)
+					.fill()
+					.map((_, idx) => data.field.slice(idx * 10, (idx + 1) * 10).join(''));
+				dd.innerHTML = `<pre>${rows.join('\n')}</pre>`;
+			}
 		} else {
 			dd.textContent = value;
 		}
