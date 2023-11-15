@@ -1178,6 +1178,15 @@ async function requestFrameFromEverDrive() {
 		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0),
 		frameCounter: (frameCounter1 << 8) | frameCounter0,
 		das: autoRepeatX,
+		tetriminoX,
+		tetriminoY,
+		gameMode,
+		playState,
+		completedRowYClear,
+		completedRow0,
+		completedRow1,
+		completedRow2,
+		completedRow3,
 	};
 
 	showFrameData(data);
