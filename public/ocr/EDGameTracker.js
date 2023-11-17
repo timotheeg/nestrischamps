@@ -69,7 +69,7 @@ export default class EDGameTracker {
 		this.gameid = 0;
 		this.startTime = Date.now();
 		this.pieceSpawnDas = 16;
-		this.previousFieldData = null;
+		this.previousFrameFieldData = null;
 
 		this.maxFrameTimeDiff = 0;
 
@@ -123,16 +123,16 @@ export default class EDGameTracker {
 		// 8 - spawn next tetrimino
 
 		// always make a copy
-		const newField = fieldData.field
-			.slice()
-			.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
-
 		switch (fieldData.playState) {
 			case 1: // process piece movements
 			case 2: // lock tetrimino
 			case 3: // check for rows
 			case 8: // spawn next tetrimino
-			case 10: // ??
+			case 10: {
+				// ??
+				const newField = fieldData.field
+					.slice()
+					.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
 				this._embedCurrentPiece(
 					newField,
 					fieldData.tetriminoX,
@@ -140,8 +140,12 @@ export default class EDGameTracker {
 					fieldData.tetriminoOrientation
 				);
 				break;
+			}
 
 			case 4: // line clear animation
+				const newField = this.previousLineCheckFieldData.field
+					.slice()
+					.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
 				this._setClearAnimation(
 					newField,
 					fieldData.completedRowXClear,
@@ -218,29 +222,36 @@ export default class EDGameTracker {
 			field,
 		};
 
+		if (playState === 3) {
+			this.previousLineCheckFieldData = fieldUpdateData;
+		} else if (playState === 8) {
+			// piece spawn, record das value
+			this.pieceSpawnDas = autoRepeatX;
+		}
+
 		const ntcField = this._updateField(fieldUpdateData);
 
-		if (!this.previousFieldData || this.previousFieldData.gameMode != 4) {
+		if (
+			!this.previousFrameFieldData ||
+			this.previousFrameFieldData.gameMode != 4
+		) {
 			// is wrong!
 			// need better understanding of game starting!
 			this.gameid += 1;
 		}
 
-		if (playState === 8) {
-			// piece spawn, record das value
-			this.pieceSpawnDas = autoRepeatX;
-		}
-
-		if (this.previousFieldData) {
-			if (frameCounter - this.previousFieldData.frameCounter !== 1) {
+		if (this.previousFrameFieldData) {
+			if (frameCounter - this.previousFrameFieldData.frameCounter !== 1) {
 				console.warn(
 					`Dropped ${
-						frameCounter - this.previousFieldData.frameCounter - 1
-					} frame(s): ${this.previousFieldData.frameCounter} -> ${frameCounter}`
+						frameCounter - this.previousFrameFieldData.frameCounter - 1
+					} frame(s): ${
+						this.previousFrameFieldData.frameCounter
+					} -> ${frameCounter}`
 				);
 			}
 
-			const timeDiff = ctime - this.previousFieldData.ctime;
+			const timeDiff = ctime - this.previousFrameFieldData.ctime;
 			if (timeDiff > this.maxFrameTimeDiff) {
 				this.maxFrameTimeDiff = timeDiff;
 			}
@@ -299,7 +310,7 @@ export default class EDGameTracker {
 			});
 		}
 
-		this.previousFieldData = fieldUpdateData;
+		this.previousFrameFieldData = fieldUpdateData;
 
 		performance.mark('extract_data_end');
 
