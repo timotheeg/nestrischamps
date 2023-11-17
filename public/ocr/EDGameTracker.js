@@ -145,9 +145,7 @@ export default class EDGameTracker {
 			}
 
 			case 4: // line clear animation
-				newField = this.previousLineCheckFieldData.field
-					.slice()
-					.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
+				newField = this.previousPieceLockField.slice();
 				this._setClearAnimation(
 					newField,
 					fieldData.completedRowXClear,
@@ -224,14 +222,14 @@ export default class EDGameTracker {
 			field,
 		};
 
-		if (playState === 3) {
-			this.previousLineCheckFieldData = fieldUpdateData;
+		const ntcField = this._updateField(fieldUpdateData);
+
+		if (playState === 2) {
+			this.previousPieceLockField = ntcField;
 		} else if (playState === 8) {
 			// piece spawn, record das value
 			this.pieceSpawnDas = autoRepeatX;
 		}
-
-		const ntcField = this._updateField(fieldUpdateData);
 
 		if (
 			!this.previousFrameFieldData ||
