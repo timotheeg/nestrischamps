@@ -128,7 +128,6 @@ export default class EDGameTracker {
 		switch (fieldData.playState) {
 			case 1: // process piece movements
 			case 2: // lock tetrimino
-			case 3: // check for rows
 			case 8: // spawn next tetrimino
 			case 10: {
 				// ??
@@ -142,6 +141,11 @@ export default class EDGameTracker {
 					fieldData.tetriminoOrientation
 				);
 				break;
+			}
+
+			case 3: {
+				// check for rows
+				return this.previousPieceLockField.slice();
 			}
 
 			case 4: // line clear animation
