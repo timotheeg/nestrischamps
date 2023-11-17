@@ -1620,7 +1620,7 @@ function showFrameData(data) {
 
 		dt.textContent = name;
 		if (name === 'field') {
-			if (config.device_id === 'everdrive') {
+			if (config.device_id != 'everdrive') {
 				dd.textContent = data.field.slice(0, 30).join('');
 			} else {
 				const rows = Array(20)
