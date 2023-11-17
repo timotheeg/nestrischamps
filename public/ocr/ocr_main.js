@@ -791,9 +791,9 @@ function updateDeviceList(devices) {
 		},
 	];
 
-	if ('serial' in navigator && QueryString.get('ed') === '1') {
+	if ('serial' in navigator) {
 		default_devices.splice(1, 0, {
-			label: 'Direct Everdrive N8 Pro Capture',
+			label: 'Everdrive N8 Pro - Direct USB Capture',
 			deviceId: 'everdrive',
 		});
 	}
@@ -912,30 +912,28 @@ async function initCaptureFromEverdrive() {
 		performance.clearMeasures();
 
 		// 6. transmit frame to NTC server if necessary
-		if (QueryString.get('edtx') === '1') {
-			check_equal: do {
-				for (let key in data) {
-					if (key[0] === '_') continue;
-					if (key === 'ctime') continue;
-					if (key === 'field') {
-						if (!data.field.every((v, i) => last_frame.field[i] === v)) {
-							break check_equal;
-						}
-					} else if (data[key] != last_frame[key]) {
+		check_equal: do {
+			for (let key in data) {
+				if (key[0] === '_') continue;
+				if (key === 'ctime') continue;
+				if (key === 'field') {
+					if (!data.field.every((v, i) => last_frame.field[i] === v)) {
 						break check_equal;
 					}
+				} else if (data[key] != last_frame[key]) {
+					break check_equal;
 				}
+			}
 
-				// all fields equal, do a sanity check on time
-				if (data.ctime - last_frame.ctime >= 250) break; // max 1 in 15 frames (4fps)
+			// all fields equal, do a sanity check on time
+			if (data.ctime - last_frame.ctime >= 250) break; // max 1 in 15 frames (4fps)
 
-				// no need to send frame
-				return;
-			} while (false);
+			// no need to send frame
+			return;
+		} while (false);
 
-			last_frame = data;
-			connection.send(BinaryFrame.encode(data));
-		}
+		last_frame = data;
+		connection.send(BinaryFrame.encode(data));
 	};
 }
 
@@ -1622,7 +1620,7 @@ function showFrameData(data) {
 
 		dt.textContent = name;
 		if (name === 'field') {
-			if (QueryString.get('ed') != '1') {
+			if (config.device_id === 'everdrive') {
 				dd.textContent = data.field.slice(0, 30).join('');
 			} else {
 				const rows = Array(20)
