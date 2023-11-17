@@ -158,6 +158,12 @@ export default class EDGameTracker {
 				);
 				break;
 			}
+
+			default: {
+				newField = fieldData.field
+					.slice()
+					.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
+			}
 		}
 
 		return newField;
