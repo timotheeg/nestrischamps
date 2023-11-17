@@ -70,13 +70,16 @@ async function readUntilPattern(reader, dataArray, compare) {
 
 export default class EDClient {
 	constructor(frameRate) {
-		// bound methods
+		this.frameDuration = 1000 / frameRate;
 		this.requestFrameFromEverDrive = this.requestFrameFromEverDrive.bind(this);
 
-		this.everdrive = this.getEverdrive();
+		this.init();
+	}
+
+	async init() {
+		this.everdrive = await this.getEverDrive();
 
 		if (this.everdrive) {
-			this.frameDuration = 1000 / frameRate;
 			this.dataFrameBuffer = new Uint8Array(GAME_FRAME_SIZE);
 			this.startTime = Date.now();
 			this.requestFrameFromEverDrive();
@@ -86,7 +89,7 @@ export default class EDClient {
 	}
 
 	async getEverDrive() {
-		const port = this.getEDSerialPort();
+		const port = await this.getEDSerialPort();
 
 		if (!port) {
 			console.error('No ever drive not found');
@@ -212,17 +215,13 @@ export default class EDClient {
 
 		try {
 			this.onData(this.dataFrameBuffer);
-		} catch (err) {}
-
-		const now = Date.now();
-		const elapsed = now - this.startTime;
-		const next_frame_num = Math.ceil(elapsed / this.frameDuration);
-		const next_frame_time =
-			this.startTime + next_frame_num * this.frameDuration;
+		} catch (err) {
+			console.error(err);
+		}
 
 		// can anything be done to be more precise?
 		// shall we issue the next read immediatey and just wait till the game has processed the data?
-		setTimeout(this.requestFrameFromEverDrive, next_frame_time - Date.now());
+		setTimeout(this.requestFrameFromEverDrive, 0);
 	}
 
 	onData() {}

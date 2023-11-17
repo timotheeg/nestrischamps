@@ -1,3 +1,5 @@
+import BinaryFrame from '/js/BinaryFrame.js';
+
 // Transform raw game data into NTC frame format
 const TILE_ID_TO_NTC_BLOCK_ID = new Map([
 	[0xef, 0],
@@ -125,20 +127,27 @@ export default class EDGameTracker {
 			.slice()
 			.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
 
-		if (fieldData.playState === 1 || fieldData.playState === 8) {
-			this._embedCurrentPiece(
-				newField,
-				fieldData.tetriminoX,
-				fieldData.tetriminoY,
-				fieldData.tetriminoOrientation
-			);
-		} else if (fieldData.playState === 4) {
-			// can potentially ignore this if (frameCounter & 3), but very little cost in repeating the operation
-			this._setClearAnimation(
-				newField,
-				fieldData.completedRowXClear,
-				fieldData.completedRows
-			);
+		switch (fieldData.playState) {
+			case 1: // process piece movements
+			case 2: // lock tetrimino
+			case 3: // check for rows
+			case 8: // spawn next tetrimino
+			case 10: // ??
+				this._embedCurrentPiece(
+					newField,
+					fieldData.tetriminoX,
+					fieldData.tetriminoY,
+					fieldData.tetriminoOrientation
+				);
+				break;
+
+			case 4: // line clear animation
+				this._setClearAnimation(
+					newField,
+					fieldData.completedRowXClear,
+					fieldData.completedRows
+				);
+				break;
 		}
 
 		return newField;
@@ -225,7 +234,9 @@ export default class EDGameTracker {
 		if (this.previousFieldData) {
 			if (frameCounter - this.previousFieldData.frameCounter !== 1) {
 				console.warn(
-					`Dropped frames: ${this.previousFieldData.frameCounter} -> frameCounter`
+					`Dropped ${
+						frameCounter - this.previousFieldData.frameCounter - 1
+					} frame(s): ${this.previousFieldData.frameCounter} -> ${frameCounter}`
 				);
 			}
 
