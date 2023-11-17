@@ -148,7 +148,8 @@ export default class EDGameTracker {
 				return this.previousPieceLockField.slice();
 			}
 
-			case 4: // line clear animation
+			case 4: {
+				// line clear animation
 				newField = this.previousPieceLockField.slice();
 				this._setClearAnimation(
 					newField,
@@ -156,6 +157,7 @@ export default class EDGameTracker {
 					fieldData.completedRows
 				);
 				break;
+			}
 		}
 
 		return newField;
