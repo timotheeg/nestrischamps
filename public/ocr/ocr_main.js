@@ -869,6 +869,8 @@ let edClient;
 let edGameTracker;
 
 async function initCaptureFromEverdrive() {
+	let last_frame = { field: [] };
+
 	edGameTracker = new EDGameTracker();
 	edClient = new EDClient(config.frame_rate);
 
@@ -909,10 +911,29 @@ async function initCaptureFromEverdrive() {
 		performance.clearMarks();
 		performance.clearMeasures();
 
-		// TODO: implement frame dedupping like for OCR capture...
-
-		// 6. transmit frame to NTC server
+		// 6. transmit frame to NTC server if necessary
 		if (QueryString.get('edtx') === '1') {
+			check_equal: do {
+				for (let key in data) {
+					if (key[0] === '_') continue;
+					if (key === 'ctime') continue;
+					if (key === 'field') {
+						if (!data.field.every((v, i) => last_frame.field[i] === v)) {
+							break check_equal;
+						}
+					} else if (data[key] != last_frame[key]) {
+						break check_equal;
+					}
+				}
+
+				// all fields equal, do a sanity check on time
+				if (data.ctime - last_frame.ctime >= 250) break; // max 1 in 15 frames (4fps)
+
+				// no need to send frame
+				return;
+			} while (false);
+
+			last_frame = data;
 			connection.send(BinaryFrame.encode(data));
 		}
 	};

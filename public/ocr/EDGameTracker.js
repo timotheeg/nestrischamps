@@ -287,19 +287,19 @@ export default class EDGameTracker {
 			instant_das: autoRepeatX,
 
 			// non NTC frame fields, but returned for informational display
-			gameMode,
-			playState,
-			frameCounter,
-			completedRowXClear,
-			completedRow0,
-			completedRow1,
-			completedRow2,
-			completedRow3,
-			tetriminoX,
-			tetriminoY,
-			tetriminoOrientation,
-			nextPieceOrientation,
-			maxFrameTimeDiff: this.maxFrameTimeDiff,
+			_gameMode: gameMode,
+			_playState: playState,
+			_frameCounter: frameCounter,
+			_completedRowXClear: completedRowXClear,
+			_completedRow0: completedRow0,
+			_completedRow1: completedRow1,
+			_completedRow2: completedRow2,
+			_completedRow3: completedRow3,
+			_tetriminoX: tetriminoX,
+			_tetriminoY: tetriminoY,
+			_tetriminoOrientation: tetriminoOrientation,
+			_nextPieceOrientation: nextPieceOrientation,
+			_maxFrameTimeDiff: this.maxFrameTimeDiff,
 		};
 
 		// Adjust the frame data if needed to accout for pause, menu, etc...
