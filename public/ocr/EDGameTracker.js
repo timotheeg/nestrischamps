@@ -123,6 +123,8 @@ export default class EDGameTracker {
 		// 8 - spawn next tetrimino
 
 		// always make a copy
+		let newField;
+
 		switch (fieldData.playState) {
 			case 1: // process piece movements
 			case 2: // lock tetrimino
@@ -130,7 +132,7 @@ export default class EDGameTracker {
 			case 8: // spawn next tetrimino
 			case 10: {
 				// ??
-				const newField = fieldData.field
+				newField = fieldData.field
 					.slice()
 					.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
 				this._embedCurrentPiece(
@@ -143,7 +145,7 @@ export default class EDGameTracker {
 			}
 
 			case 4: // line clear animation
-				const newField = this.previousLineCheckFieldData.field
+				newField = this.previousLineCheckFieldData.field
 					.slice()
 					.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0);
 				this._setClearAnimation(
