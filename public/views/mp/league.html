@@ -120,27 +120,13 @@
 
 			.name {
 				top: 938px;
-			}
-
-			.name {
-				width: 332px;
-				font-size: 36.01px; /* sad -_- */
+				width: 334px;
+				font-size: 28.01px; /* sad -_- */
 				line-height: 36px;
-				padding-top: 8px;
-				padding-bottom: 4px;
-
+				padding: 8px 0 4px 2px;
+				white-space: nowrap;
+				overflow: hidden;
 				height: unset;
-				text-transform: uppercase;
-			}
-
-			.name.seed .header {
-				padding-top: 14px;
-				padding-bottom: 0;
-			}
-
-			.name.seed .content {
-				display: unset;
-				font-size: 16.01px;
 			}
 
 			.hearts,
@@ -310,8 +296,6 @@
 			.match.small .name {
 				z-index: 6;
 				top: 0;
-			}
-			.match.small .name {
 				width: 608px;
 				--offset: 683px;
 			}
@@ -486,7 +470,6 @@
 							video: player_node.querySelector(`.player_vid`),
 							score_box: player_node.querySelector(`.score`),
 							name_box: player_node.querySelector(`.name`),
-							seed: player_node.querySelector(`.name .content`),
 
 							simul_tetris: player_node.querySelector(`.simul-tetris`),
 						},
@@ -516,17 +499,10 @@
 
 					player._setName = player.setName;
 					player.setName = function (name) {
-						this.dom.seed.textContent = '';
-						this.dom.name_box.classList.remove('seed');
-
 						const m = (name || '').match(/^(\d+)\. (.+)$/);
 
 						if (m) {
-							if (QueryString.get('seed') === '1') {
-								this.dom.name_box.classList.add('seed');
-							}
 							this._setName(m[2]);
-							this.dom.seed.textContent = `seed ${m[1]}`;
 						} else {
 							this._setName(name);
 						}
