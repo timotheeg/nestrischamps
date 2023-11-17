@@ -4,6 +4,8 @@ import BinaryFrame from '/js/BinaryFrame.js';
 import loadDigitTemplates from '/ocr/templates.js';
 import loadPalettes from '/ocr/palettes.js';
 import GameTracker from '/ocr/GameTracker.js';
+import EDClient from '/ocr/EDClient.js';
+import EDGameTracker from '/ocr/EDGameTracker.js';
 import {
 	getFieldCoordinates,
 	getCaptureCoordinates,
@@ -863,360 +865,57 @@ async function resetDevices() {
 
 navigator.mediaDevices.addEventListener('devicechange', resetDevices);
 
-let start_time;
-let frame_duration;
-const EVERDRIVE_N8_PRO = { usbVendorId: 0x483, usbProductId: 0x5740 };
-let everdrive;
-let everdrive_reader;
-let everdrive_writer;
-const EVERDRIVE_CMD_SEND_STATS = 0x42;
-const EVERDRIVE_CMD_MEM_WR = 0x1a;
-const EVERDRIVE_ADDR_FIFO = 0x1810000;
-const GAME_FRAME_SIZE = 241;
-const PIECE_ORIENTATION_TO_PIECE = [
-	'T',
-	'T',
-	'T',
-	'T',
-	'J',
-	'J',
-	'J',
-	'J',
-	'Z',
-	'Z',
-	'O',
-	'S',
-	'S',
-	'L',
-	'L',
-	'L',
-	'L',
-	'I',
-	'I',
-];
-const TILE_ID_TO_NTC_BLOCK_ID = new Map([
-	[0xef, 0],
-	[0x7b, 1],
-	[0x7d, 2],
-	[0x7c, 3],
-]);
-
-const EVERDRIVE_TAIL = [0x00, 0xa5];
-const GAME_FRAME_TAIL = [0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa];
-const ED_MAX_READ_ATTEMPTS = 10;
-
-let data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
+let edClient;
+let edGameTracker;
 
 async function initCaptureFromEverdrive() {
-	frame_duration = 1000 / config.frame_rate;
-	const ports = await navigator.serial.getPorts();
-	if (ports.length) {
-		everdrive = ports.find(port => {
-			const { usbProductId, usbVendorId } = port.getInfo();
-			return (
-				usbVendorId === EVERDRIVE_N8_PRO.usbVendorId &&
-				usbProductId === EVERDRIVE_N8_PRO.usbProductId
-			);
+	edGameTracker = new EDGameTracker();
+	edClient = new EDClient(config.frame_rate);
+
+	// piping callbacks -_- ... a stream interface would be nicer
+	edClient.onData = edGameTracker.setData;
+	edGameTracker.onFrame = data => {
+		performance.mark('show_data_start');
+		showFrameData(data);
+		performance.mark('show_data_end');
+
+		performance.measure(
+			'edlink_write',
+			'edlink_comm_start',
+			'edlink_write_end'
+		);
+		performance.measure('edlink_read', 'edlink_write_end', 'edlink_read_end');
+		performance.measure(
+			'edlink_comm_total',
+			'edlink_comm_start',
+			'edlink_read_end'
+		);
+
+		performance.measure(
+			'extract_data',
+			'extract_data_start',
+			'extract_data_end'
+		);
+		performance.measure('show_frame_data', 'show_data_start', 'show_data_end');
+
+		const perf = {};
+
+		performance.getEntriesByType('measure').forEach(m => {
+			perf[m.name] = m.duration.toFixed(3);
 		});
 
-		if (everdrive) {
-			captureFromEverdrive();
-			return;
+		showPerfData(perf);
+
+		performance.clearMarks();
+		performance.clearMeasures();
+
+		// TODO: implement frame dedupping like for OCR capture...
+
+		// 6. transmit frame to NTC server
+		if (QueryString.get('edtx') === '1') {
+			connection.send(BinaryFrame.encode(data));
 		}
-	}
-
-	everdrive = await navigator.serial.requestPort({
-		filters: [EVERDRIVE_N8_PRO],
-	});
-
-	if (everdrive) {
-		captureFromEverdrive();
-	}
-}
-
-async function readInto(reader, dataArray) {
-	let buffer = dataArray.buffer;
-	let offset = 0;
-
-	while (offset < buffer.byteLength) {
-		const { value, done } = await reader.read(new Uint8Array(buffer, offset));
-		if (done) {
-			break;
-		}
-		buffer = value.buffer;
-		offset += value.byteLength;
-	}
-	return new Uint8Array(buffer);
-}
-
-async function readUntilPattern(reader, dataArray, compare) {
-	dataArray = await readInto(reader, dataArray);
-
-	if (
-		compare.every(
-			(e, i) => e === dataArray[dataArray.length - compare.length + i]
-		)
-	) {
-		return dataArray;
-	}
-
-	// flush the buffer, return an empty result
-	while (true) {
-		try {
-			let { value, done } = await Promise.race([
-				reader.read(new Uint8Array(GAME_FRAME_SIZE)),
-				new Promise((_, reject) =>
-					setTimeout(reject, 10, new Error('timeout'))
-				),
-			]);
-
-			if (done) {
-				console.log('Flushed value', value);
-				break;
-			}
-		} catch (e) {
-			console.error('Flushed Buffer');
-		}
-	}
-}
-
-async function captureFromEverdrive() {
-	try {
-		await everdrive.open({ baudRate: 115200, bufferSize: GAME_FRAME_SIZE }); // plenty of speed for 60fps data frame from gym are 240 bytes: 240x60=14400
-	} catch (err) {
-		console.warn(err);
-		// assume port is already open for now
-		// TODO: better error checking
-	}
-
-	everdrive_reader = everdrive.readable.getReader({ mode: 'byob' });
-	everdrive_writer = everdrive.writable.getWriter();
-
-	// verify we have a real everdrive by sending a GET_STATUS command (expecting [0x00, 0xA5] as response)
-	const bytes = [
-		'+'.charCodeAt(0),
-		'+'.charCodeAt(0) ^ 0xff,
-		0x10, // getStatus
-		0x10 ^ 0xff,
-	];
-
-	let success = false;
-	for (let attempt = ED_MAX_READ_ATTEMPTS; attempt--; ) {
-		await everdrive_writer.write(new Uint8Array(bytes));
-		try {
-			await readUntilPattern(
-				everdrive_reader,
-				new Uint8Array(2),
-				EVERDRIVE_TAIL
-			);
-			success = true;
-			break;
-		} catch (e) {
-			console.error(`Attempt ${attempt} failed to read everdrive: ${e}`);
-		}
-	}
-
-	if (!success) {
-		console.error(`Max attempts ${ED_MAX_READ_ATTEMPTS} reached`);
-		return; // How to recover?
-	}
-
-	// restore the buffer for next use
-	// data_frame_buffer = new Uint8Array(value.buffer);
-
-	console.log('Everdrive verified!');
-
-	start_time = Date.now();
-
-	requestFrameFromEverDrive();
-}
-
-function convertTwoBytesToDecimal(byte1, byte2) {
-	return byte2 * 100 + (byte1 >> 4) * 10 + (byte1 & 0xf);
-}
-
-/*
-function updateField(field, tetriminoX, tetriminoY, currentPieceOrientation) {
-
-}
-/**/
-
-async function requestFrameFromEverDrive() {
-	performance.mark('edlink_comm_start');
-
-	// 0. prep request
-	// ref: https://github.com/zohassadar/EDN8-PRO/blob/nestrischamps/edlink-n8/edlink-n8/Edio.cs#L622
-	const bytes = [
-		// command header
-		'+'.charCodeAt(0),
-		'+'.charCodeAt(0) ^ 0xff,
-		EVERDRIVE_CMD_MEM_WR,
-		EVERDRIVE_CMD_MEM_WR ^ 0xff,
-
-		// addr
-		EVERDRIVE_ADDR_FIFO & 0xff,
-		(EVERDRIVE_ADDR_FIFO >> 8) & 0xff,
-		(EVERDRIVE_ADDR_FIFO >> 16) & 0xff,
-		(EVERDRIVE_ADDR_FIFO >> 24) & 0xff,
-
-		// len
-		1,
-		0,
-		0,
-		0,
-
-		// exec
-		0,
-
-		EVERDRIVE_CMD_SEND_STATS,
-	];
-
-	// 1. send request
-	const res = await everdrive_writer.write(new Uint8Array(bytes));
-
-	performance.mark('edlink_write_end');
-
-	data_frame_buffer = new Uint8Array(GAME_FRAME_SIZE);
-
-	// 2. read response
-
-	try {
-		data_frame_buffer = await readUntilPattern(
-			everdrive_reader,
-			data_frame_buffer,
-			GAME_FRAME_TAIL
-		);
-	} catch (e) {
-		console.error(`Error reading from everdrive: ${e}`);
-	}
-
-	performance.mark('edlink_read_end');
-
-	performance.mark('extract_data_start');
-
-	const [
-		// 0
-		gameMode,
-		playState,
-		completedRowYClear,
-		completedRow0,
-		completedRow1,
-		completedRow2,
-		completedRow3,
-		lines0,
-		lines1,
-		level,
-		// 10
-		score0,
-		score1,
-		score2,
-		score3,
-		nextPieceOrientation,
-		currentPieceOrientation,
-		tetriminoX,
-		tetriminoY,
-		frameCounter0,
-		frameCounter1,
-		autoRepeatX,
-		statsT0,
-		statsT1,
-		// 20
-		statsJ0,
-		statsJ1,
-		statsZ0,
-		statsZ1,
-		statsO0,
-		statsO1,
-		statsS0,
-		statsS1,
-		statsL0,
-		statsL1,
-		// 30
-		statsI0,
-		statsI1,
-		// 32
-		...field // reads the tail as well
-	] = data_frame_buffer;
-
-	field.length = 200; // drop the tail
-
-	// 4. update field as needed (draw piece + clear animation)
-	// TODO
-
-	// 5. get the frame payload
-	const data = {
-		gameid: 0, // TODO: derive game id properly
-		ctime: Date.now() - start_time,
-		game_type: BinaryFrame.GAME_TYPE.CLASSIC,
-		lines: convertTwoBytesToDecimal(lines0, lines1),
-		level,
-		score: (score3 << 24) | (score2 << 16) | (score1 << 8) | score0,
-		T: convertTwoBytesToDecimal(statsT0, statsT1),
-		J: convertTwoBytesToDecimal(statsJ0, statsJ1),
-		Z: convertTwoBytesToDecimal(statsZ0, statsZ1),
-		O: convertTwoBytesToDecimal(statsO0, statsO1),
-		S: convertTwoBytesToDecimal(statsS0, statsS1),
-		L: convertTwoBytesToDecimal(statsL0, statsL1),
-		I: convertTwoBytesToDecimal(statsI0, statsI1),
-		nextPieceOrientation,
-		preview: PIECE_ORIENTATION_TO_PIECE[nextPieceOrientation],
-		currentPieceOrientation,
-		currentPiece: PIECE_ORIENTATION_TO_PIECE[currentPieceOrientation],
-		field: field.map(tile_id => TILE_ID_TO_NTC_BLOCK_ID.get(tile_id) ?? 0),
-		frameCounter: (frameCounter1 << 8) | frameCounter0,
-		das: autoRepeatX,
-		tetriminoX,
-		tetriminoY,
-		gameMode,
-		playState,
-		completedRowYClear,
-		completedRow0,
-		completedRow1,
-		completedRow2,
-		completedRow3,
 	};
-
-	performance.mark('extract_data_end');
-
-	showFrameData(data);
-	performance.mark('show_data_end');
-
-	performance.measure('edlink_write', 'edlink_comm_start', 'edlink_write_end');
-	performance.measure('edlink_read', 'edlink_write_end', 'edlink_read_end');
-	performance.measure(
-		'edlink_comm_total',
-		'edlink_comm_start',
-		'edlink_read_end'
-	);
-
-	performance.measure('extract_data', 'extract_data_start', 'extract_data_end');
-	performance.measure('show_frame_data', 'extract_data_end', 'show_data_end');
-
-	const perf = {};
-
-	performance.getEntriesByType('measure').forEach(m => {
-		perf[m.name] = m.duration.toFixed(3);
-	});
-
-	showPerfData(perf);
-
-	performance.clearMarks();
-	performance.clearMeasures();
-
-	// TODO: implement frame dedupping like for OCR capture...
-
-	// 6. transmit frame to NTC server
-	if (QueryString.get('edtx') === '1') {
-		connection.send(BinaryFrame.encode(data));
-	}
-
-	// 7. schedule next poll, assume no lag; TODO: check for dropped frame
-	const now = Date.now();
-	const elapsed = now - start_time;
-	const next_frame_num = Math.ceil(elapsed / frame_duration);
-	const next_frame_time = start_time + next_frame_num * frame_duration;
-
-	setTimeout(requestFrameFromEverDrive, next_frame_time - Date.now());
 }
 
 async function playVideoFromDevice(device_id, fps) {
