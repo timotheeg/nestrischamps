@@ -1538,24 +1538,18 @@ function showFrameData(data) {
 }
 
 function showPerfData(perf) {
-	// This reuses the dd/dt elements because we assume constant perf items at every call
+	// TODO: fix markup on config change, rather than destroy-rebuild at every frame
+	perf_data.innerHTML = '';
+
 	for (const [name, value] of Object.entries(perf)) {
-		let dt = perf_data.querySelector(`dd.${name}`);
+		const dt = document.createElement('dt');
+		const dd = document.createElement('dd');
 
-		if (dt) {
-			const dd = dt.nextSibling;
-			dd.textContent = value;
-		} else {
-			const dt = document.createElement('dt');
-			const dd = document.createElement('dd');
+		dt.textContent = name;
+		dd.textContent = value;
 
-			dt.classList.add(name);
-			dt.textContent = name;
-			dd.textContent = value;
-
-			perf_data.appendChild(dt);
-			perf_data.appendChild(dd);
-		}
+		perf_data.appendChild(dt);
+		perf_data.appendChild(dd);
 	}
 }
 
