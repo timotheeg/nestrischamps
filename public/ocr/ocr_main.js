@@ -1640,18 +1640,29 @@ function showFrameData(data) {
 }
 
 function showPerfData(perf) {
-	// TODO: fix markup on config change, rather than destroy-rebuild at every frame
-	perf_data.innerHTML = '';
-
+	// This reuses the dd/dt elements because we assume constant perf items at every call
 	for (const [name, value] of Object.entries(perf)) {
-		const dt = document.createElement('dt');
-		const dd = document.createElement('dd');
+		let dt = perf_data.querySelector(`dt.${name}`);
 
-		dt.textContent = name;
-		dd.textContent = value;
+		if (dt) {
+			const dd = dt.nextSibling;
+			if (value === null) {
+				dd.remove();
+				dt.remove();
+			} else {
+				dd.textContent = value;
+			}
+		} else if (value !== null) {
+			const dt = document.createElement('dt');
+			const dd = document.createElement('dd');
 
-		perf_data.appendChild(dt);
-		perf_data.appendChild(dd);
+			dt.classList.add(name);
+			dt.textContent = name;
+			dd.textContent = value;
+
+			perf_data.appendChild(dt);
+			perf_data.appendChild(dd);
+		}
 	}
 }
 
@@ -1714,7 +1725,25 @@ function trackAndSendFrames() {
 			perf[m.name] = m.duration.toFixed(3);
 		});
 
+		if (!show_parts.checked) {
+			perf.show_parts = null;
+		}
+
+		performance.mark('show_perf_data_start');
 		showPerfData(perf);
+		performance.mark('show_perf_data_end');
+		performance.measure(
+			'show_perf_data',
+			'show_perf_data_start',
+			'show_perf_data_end'
+		);
+
+		showPerfData({
+			show_perf_data: performance
+				.getEntriesByName('show_perf_data')[0]
+				.duration.toFixed(3),
+		});
+
 		performance.clearMarks();
 		performance.clearMeasures();
 
