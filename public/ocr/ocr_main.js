@@ -796,6 +796,8 @@ function updateDeviceList(devices) {
 			label: 'Everdrive N8 Pro - Direct USB Capture',
 			deviceId: 'everdrive',
 		});
+	} else {
+		device_selector.after('(For EverDrive Capture, use Chrome)');
 	}
 
 	device_selector.innerHTML = '';
