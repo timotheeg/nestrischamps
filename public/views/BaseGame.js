@@ -384,7 +384,13 @@ export default class BaseGame {
 	}
 
 	_isSameField(data) {
-		return data.field.every((cell, idx) => cell === this.data.field[idx]);
+		if (this.animation_data) {
+			return data.field.every(
+				(cell, idx) => cell === this.animation_data.field[idx]
+			);
+		} else {
+			return data.field.every((cell, idx) => cell === this.data.field[idx]);
+		}
 	}
 
 	_isCurtainFalling(data) {
@@ -706,7 +712,17 @@ export default class BaseGame {
 		// Works for Das Trainer where there is no piece stats
 
 		if (this._isSameField(data)) return;
-		if (this.clear_animation_remaining_frames-- > 0) return;
+		if (this.clear_animation_remaining_frames-- > 0) {
+			// this is not the same field but it still an animation frame that we must ignore
+			// we need to record the animation frame, so the next isSameField() comparison can be done on the animation frame
+			// If we do not do this, and there are duplicate frames of animation, they will consume the animation counter incorrectly
+			// and the next "clean" field state will be recorded too early.
+			this.animation_data = data;
+			return;
+		}
+
+		// we are no longer in animation, so we clear the animation data reference
+		this.animation_data = null;
 
 		const cur_num_blocks = this._getNumBlocks(data);
 		const block_diff = cur_num_blocks - this.data.num_blocks;
