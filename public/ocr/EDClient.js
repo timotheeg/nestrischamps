@@ -219,8 +219,7 @@ export default class EDClient {
 			console.error(err);
 		}
 
-		// can anything be done to be more precise?
-		// shall we issue the next read immediatey and just wait till the game has processed the data?
+		// We trigger the next read immediately, the read will wait till the data is ready
 		setTimeout(this.requestFrameFromEverDrive, 0);
 	}
 
