@@ -307,8 +307,6 @@ export default class EDGameTracker {
 			_tetriminoY: tetriminoY,
 			_tetriminoOrientation: tetriminoOrientation,
 			_nextPieceOrientation: nextPieceOrientation,
-			_maxFrameTimeDiff: this.maxFrameTimeDiff,
-			_totalFramesDropped: this.totalFrameDropped,
 		};
 
 		// Adjust the frame data if needed to accout for pause, menu, etc...
@@ -324,6 +322,12 @@ export default class EDGameTracker {
 				_preview: ntcFrameData.score,
 			});
 		}
+
+		// add perf stats last
+		Object.assign(ntcFrameData, {
+			_maxFrameTimeDiff: this.maxFrameTimeDiff,
+			_totalFramesDropped: this.totalFrameDropped,
+		});
 
 		this.previousFrameFieldData = fieldUpdateData;
 
