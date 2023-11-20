@@ -72,6 +72,7 @@ export default class EDGameTracker {
 		this.previousFrameFieldData = null;
 
 		this.maxFrameTimeDiff = 0;
+		this.totalFrameDropped = 0;
 
 		// bound methods
 		this.setData = this.setData.bind(this);
@@ -253,13 +254,14 @@ export default class EDGameTracker {
 		}
 
 		if (this.previousFrameFieldData) {
-			if (frameCounter - this.previousFrameFieldData.frameCounter !== 1) {
+			let frameCounterDiff =
+				frameCounter - this.previousFrameFieldData.frameCounter;
+			if (frameCounterDiff < 0) frameCounterDiff += 1 << 16; // accounts for 16 bit rollover
+			if (frameCounterDiff !== 1) {
+				const framesDropped = frameCounterDiff - 1;
+				this.totalFrameDropped += framesDropped;
 				console.warn(
-					`Dropped ${
-						frameCounter - this.previousFrameFieldData.frameCounter - 1
-					} frame(s): ${
-						this.previousFrameFieldData.frameCounter
-					} -> ${frameCounter}`
+					`Dropped ${framesDropped} frame(s): ${this.previousFrameFieldData.frameCounter} -> ${frameCounter}`
 				);
 			}
 
@@ -306,6 +308,7 @@ export default class EDGameTracker {
 			_tetriminoOrientation: tetriminoOrientation,
 			_nextPieceOrientation: nextPieceOrientation,
 			_maxFrameTimeDiff: this.maxFrameTimeDiff,
+			_totalFramesDropped: this.totalFrameDropped,
 		};
 
 		// Adjust the frame data if needed to accout for pause, menu, etc...
