@@ -6,9 +6,9 @@ const EVERDRIVE_CMD_GET_STATUS = 0x10;
 const EVERDRIVE_CMD_MEM_WR = 0x1a;
 const EVERDRIVE_CMD_SEND_STATS = 0x42;
 const EVERDRIVE_ADDR_FIFO = 0x1810000;
-const GAME_FRAME_SIZE = 241;
+const GAME_FRAME_SIZE = 237;
 const EVERDRIVE_TAIL = [0x00, 0xa5];
-const GAME_FRAME_TAIL = [0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa];
+const GAME_FRAME_TAIL = [0xaa, 0xaa];
 const ED_MAX_READ_ATTEMPTS = 10;
 
 function getEDCommandHeader(command) {
