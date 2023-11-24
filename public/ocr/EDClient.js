@@ -52,9 +52,9 @@ async function readUntilPattern(reader, dataArray, compare) {
 	while (true) {
 		try {
 			let { value, done } = await Promise.race([
-				reader.read(new Uint8Array(GAME_FRAME_SIZE)),
+				reader.read(new Uint8Array(GAME_FRAME_SIZE * 2)),
 				new Promise((_, reject) =>
-					setTimeout(reject, 10, new Error('timeout'))
+					setTimeout(reject, 150, new Error('timeout'))
 				),
 			]);
 
