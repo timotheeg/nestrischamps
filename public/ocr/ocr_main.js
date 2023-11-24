@@ -4,6 +4,8 @@ import BinaryFrame from '/js/BinaryFrame.js';
 import loadDigitTemplates from '/ocr/templates.js';
 import loadPalettes from '/ocr/palettes.js';
 import GameTracker from '/ocr/GameTracker.js';
+import EDClient from '/ocr/EDClient.js';
+import EDGameTracker from '/ocr/EDGameTracker.js';
 import {
 	getFieldCoordinates,
 	getCaptureCoordinates,
@@ -157,8 +159,19 @@ let in_calibration = false;
 
 device_selector.addEventListener('change', evt => {
 	config.device_id = device_selector.value;
-	playVideoFromConfig();
-	checkReadyToCalibrate();
+
+	if (config.device_id === 'everdrive') {
+		initCaptureFromEverdrive(config.frame_rate);
+		saveConfig(config);
+
+		wizard.style.display = 'none';
+		privacy.style.display = 'block';
+		controls.style.display = 'block';
+		ocr_results.style.display = 'flex';
+	} else {
+		playVideoFromConfig();
+		checkReadyToCalibrate();
+	}
 });
 
 video_feed_selector.addEventListener('change', evt => {
@@ -767,8 +780,7 @@ function updateDeviceList(devices) {
 		return device;
 	});
 
-	device_selector.innerHTML = '';
-	[
+	const default_devices = [
 		{
 			label: '-',
 			deviceId: '',
@@ -777,8 +789,19 @@ function updateDeviceList(devices) {
 			label: 'Window Capture',
 			deviceId: 'window',
 		},
-		...mappedDevices,
-	].forEach(camera => {
+	];
+
+	if ('serial' in navigator) {
+		default_devices.splice(1, 0, {
+			label: 'Everdrive N8 Pro - Direct USB Capture',
+			deviceId: 'everdrive',
+		});
+	} else {
+		device_selector.after('(For EverDrive Capture, use Chrome)');
+	}
+
+	device_selector.innerHTML = '';
+	[...default_devices, ...mappedDevices].forEach(camera => {
 		const camera_option = document.createElement('option');
 		camera_option.text = camera.label;
 		camera_option.value = camera.deviceId;
@@ -824,7 +847,7 @@ async function getConnectedDevices(type) {
 	} catch (err) {
 		// We log a warning but we do nothing
 		console.log(
-			`Warning: could not open default capture device: $(err.message)`
+			`Warning: could not open default capture device: ${err.message}`
 		);
 	}
 
@@ -843,6 +866,78 @@ async function resetDevices() {
 }
 
 navigator.mediaDevices.addEventListener('devicechange', resetDevices);
+
+let edClient;
+let edGameTracker;
+
+async function initCaptureFromEverdrive() {
+	let last_frame = { field: [] };
+
+	edGameTracker = new EDGameTracker();
+	edClient = new EDClient(config.frame_rate);
+
+	// piping callbacks -_- ... a stream interface would be nicer
+	edClient.onData = edGameTracker.setData;
+	edGameTracker.onFrame = data => {
+		performance.mark('show_data_start');
+		showFrameData(data);
+		performance.mark('show_data_end');
+
+		performance.measure(
+			'edlink_write',
+			'edlink_comm_start',
+			'edlink_write_end'
+		);
+		performance.measure('edlink_read', 'edlink_write_end', 'edlink_read_end');
+		performance.measure(
+			'edlink_comm_total',
+			'edlink_comm_start',
+			'edlink_read_end'
+		);
+
+		performance.measure(
+			'extract_data',
+			'extract_data_start',
+			'extract_data_end'
+		);
+		performance.measure('show_frame_data', 'show_data_start', 'show_data_end');
+
+		const perf = {};
+
+		performance.getEntriesByType('measure').forEach(m => {
+			perf[m.name] = m.duration.toFixed(3);
+		});
+
+		showPerfData(perf);
+
+		performance.clearMarks();
+		performance.clearMeasures();
+
+		// 6. transmit frame to NTC server if necessary
+		check_equal: do {
+			for (let key in data) {
+				if (key[0] === '_') continue;
+				if (key === 'ctime') continue;
+				if (key === 'field') {
+					if (!data.field.every((v, i) => last_frame.field[i] === v)) {
+						break check_equal;
+					}
+				} else if (data[key] != last_frame[key]) {
+					break check_equal;
+				}
+			}
+
+			// all fields equal, do a sanity check on time
+			if (data.ctime - last_frame.ctime >= 250) break; // max 1 in 15 frames (4fps)
+
+			// no need to send frame
+			return;
+		} while (false);
+
+		last_frame = data;
+		connection.send(BinaryFrame.encode(data));
+	};
+}
 
 async function playVideoFromDevice(device_id, fps) {
 	try {
@@ -1527,7 +1622,14 @@ function showFrameData(data) {
 
 		dt.textContent = name;
 		if (name === 'field') {
-			dd.textContent = data.field.slice(0, 30).join('');
+			if (config.device_id != 'everdrive') {
+				dd.textContent = data.field.slice(0, 30).join('');
+			} else {
+				const rows = Array(20)
+					.fill()
+					.map((_, idx) => data.field.slice(idx * 10, (idx + 1) * 10).join(''));
+				dd.innerHTML = `${rows.join('<br/>')}`;
+			}
 		} else {
 			dd.textContent = value;
 		}
@@ -1755,8 +1857,13 @@ function trackAndSendFrames() {
 
 		updateImageCorrection();
 
-		await playVideoFromConfig();
-		trackAndSendFrames();
+		if (config.device_id === 'everdrive') {
+			initCaptureFromEverdrive(config.frame_rate);
+			ocr_results.style.display = 'flex';
+		} else {
+			await playVideoFromConfig();
+			trackAndSendFrames();
+		}
 	} else {
 		await resetDevices();
 
@@ -1768,11 +1875,5 @@ function trackAndSendFrames() {
 			tasks: {},
 		};
 		wizard.style.display = 'block';
-	}
-
-	try {
-		window.__usb_devices = await navigator.usb.getDevices();
-	} catch (err) {
-		console.error(err);
 	}
 })();
