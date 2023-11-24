@@ -10,23 +10,10 @@ import {
 	getFieldCoordinates,
 	getCaptureCoordinates,
 } from '/ocr/calibration.js';
-import { peerServerOptions } from '/views/constants.js';
+import { peerServerOptions, PIECES, LEVEL_COLORS } from '/views/constants.js';
 import speak from '/views/tts.js';
-import { PIECES } from '/views/constants.js';
 
 // NTSC NES resolution: 256x224 -> 512x448
-const LEVEL_COLORS = [
-	['#4A32FF', '#4AAFFE'],
-	['#009600', '#6ADC00'],
-	['#B000D4', '#FF56FF'],
-	['#4A32FF', '#00E900'],
-	['#C8007F', '#00E678'],
-	['#00E678', '#968DFF'],
-	['#C41E0E', '#666666'],
-	['#8200FF', '#780041'],
-	['#4A32FF', '#C41E0E'],
-	['#C41E0E', '#F69B00'],
-];
 
 const reference_size = [512, 448];
 const reference_locations = {
