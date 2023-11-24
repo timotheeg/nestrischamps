@@ -996,11 +996,11 @@ if (!manageReplay(showFrame)) {
 					);
 				});
 				call.on('error', () => {
-					video.stop();
+					video.pause();
 					video.srcObject = null;
 				});
 				call.on('close', () => {
-					video.stop();
+					video.pause();
 					video.srcObject = null;
 				});
 			});

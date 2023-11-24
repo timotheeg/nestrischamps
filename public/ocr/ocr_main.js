@@ -379,6 +379,7 @@ async function startSharingVideoFeed() {
 	});
 
 	video_feed.srcObject = stream;
+	video_feed.play();
 
 	function startSharing() {
 		// 1. player cam
@@ -422,6 +423,7 @@ async function startSharingVideoFeed() {
 }
 
 function stopSharingVideoFeed() {
+	video_feed.pause();
 	video_feed.srcObject = null;
 
 	try {
