@@ -116,6 +116,7 @@ const reference_ui = document.querySelector('#reference_ui'),
 	privacy = document.querySelector('#privacy'),
 	allow_video_feed = document.querySelector('#allow_video_feed'),
 	video_feed_selector = document.querySelector('#video_feed_device'),
+	video_feed = document.querySelector('#video_feed'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
@@ -377,6 +378,8 @@ async function startSharingVideoFeed() {
 		video: video_constraints,
 	});
 
+	video_feed.srcObject = stream;
+
 	function startSharing() {
 		// 1. player cam
 		ongoing_call = peer.call(view_peer_id, stream);
@@ -419,6 +422,8 @@ async function startSharingVideoFeed() {
 }
 
 function stopSharingVideoFeed() {
+	video_feed.srcObject = null;
+
 	try {
 		ongoing_call.close();
 	} catch (err) {}
