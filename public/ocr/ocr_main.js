@@ -907,6 +907,8 @@ async function initCaptureFromEverdrive() {
 		performance.clearMarks();
 		performance.clearMeasures();
 
+		if (!data) return;
+
 		// 6. transmit frame to NTC server if necessary
 		check_equal: do {
 			for (let key in data) {
@@ -1605,6 +1607,8 @@ function loadConfig() {
 }
 
 function showFrameData(data) {
+	if (!data) return;
+
 	// TODO: fix markup on config change, rather than destroy-rebuild at every frame
 	frame_data.innerHTML = '';
 

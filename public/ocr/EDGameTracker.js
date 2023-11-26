@@ -217,6 +217,15 @@ export default class EDGameTracker {
 		field.length = 200; // drops the tail
 
 		const frameCounter = (frameCounter1 << 8) | frameCounter0;
+		const lines = this._bcdToDecimal(lines0, lines1);
+		const score = (score3 << 24) | (score2 << 16) | (score1 << 8) | score0;
+		const T = this._bcdToDecimal(statsT0, statsT1);
+		const J = this._bcdToDecimal(statsJ0, statsJ1);
+		const Z = this._bcdToDecimal(statsZ0, statsZ1);
+		const O = this._bcdToDecimal(statsO0, statsO1);
+		const S = this._bcdToDecimal(statsS0, statsS1);
+		const L = this._bcdToDecimal(statsL0, statsL1);
+		const I = this._bcdToDecimal(statsI0, statsI1);
 		const fieldUpdateData = {
 			gameMode,
 			ctime,
@@ -233,6 +242,8 @@ export default class EDGameTracker {
 			tetriminoY,
 			tetriminoOrientation,
 			field,
+			lines,
+			score,
 		};
 
 		const ntcField = this._updateField(fieldUpdateData);
@@ -242,15 +253,6 @@ export default class EDGameTracker {
 		} else if (playState === 8) {
 			// piece spawn, record das value
 			this.pieceSpawnDas = autoRepeatX;
-		}
-
-		if (
-			!this.previousFrameFieldData ||
-			this.previousFrameFieldData.gameMode != 4
-		) {
-			// is wrong!
-			// need better understanding of game starting!
-			this.gameid += 1;
 		}
 
 		if (this.previousFrameFieldData) {
@@ -271,21 +273,42 @@ export default class EDGameTracker {
 			}
 		}
 
+		if (
+			gameMode === 4 &&
+			(!this.previousFrameFieldData ||
+				this.previousFrameFieldData.gameMode != 4)
+		) {
+			if (T + J + Z + O + S + L + I !== 1) {
+				// new game detected BUT previous game data still in system, ignore frame
+				// we adjust some local state just a little to record things properly
+				if (this.previousFrameFieldData) {
+					// Adjust frame counter to carry on reporting dropped frames correctly
+					this.previousFrameFieldData.frameCounter = frameCounter;
+				}
+				performance.mark('extract_data_end');
+				this.onFrame(null); // bit gross to send a null event... we do it to have the perf metric still work...
+				return;
+			} else {
+				// new game starts!
+				this.gameid += 1;
+			}
+		}
+
 		const ntcFrameData = {
 			// classic data
 			game_type: BinaryFrame.GAME_TYPE.CLASSIC,
 			gameid: this.gameid,
 			ctime,
-			lines: this._bcdToDecimal(lines0, lines1),
+			lines,
 			level,
-			score: (score3 << 24) | (score2 << 16) | (score1 << 8) | score0,
-			T: this._bcdToDecimal(statsT0, statsT1),
-			J: this._bcdToDecimal(statsJ0, statsJ1),
-			Z: this._bcdToDecimal(statsZ0, statsZ1),
-			O: this._bcdToDecimal(statsO0, statsO1),
-			S: this._bcdToDecimal(statsS0, statsS1),
-			L: this._bcdToDecimal(statsL0, statsL1),
-			I: this._bcdToDecimal(statsI0, statsI1),
+			score,
+			T,
+			J,
+			Z,
+			O,
+			S,
+			L,
+			I,
 			preview: PIECE_ORIENTATION_TO_PIECE[nextPieceOrientation],
 			field: ntcField,
 
@@ -309,7 +332,7 @@ export default class EDGameTracker {
 			_nextPieceOrientation: nextPieceOrientation,
 		};
 
-		// Adjust the frame data if needed to accout for pause, menu, etc...
+		// Adjust the frame data if needed to account for pause, menu, etc...
 		if (gameMode != 4) {
 			Object.assign(ntcFrameData, {
 				lines: null,
