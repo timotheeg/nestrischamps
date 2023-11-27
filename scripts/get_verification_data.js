@@ -164,4 +164,14 @@ function getSrtTimestamp(elapsed) {
 
 	console.log(`Writing chapters into file ${file_name}.txt`);
 	fs.writeFile(`${file_name}.txt`, chapters.join('\n\n'), noop);
+
+	// generate all-frames report
+	console.log(`Writing frame report into file ${file_name}_frames.csv`);
+	const frames_csv = game.frames.map(f => {
+		const data = { ...f.raw };
+		data.field = data.field.join('');
+		return Object.values(data);
+	});
+	frames_csv.unshift(Object.keys(game.frames[0].raw));
+	fs.writeFile(`${file_name}_frames.csv`, frames_csv.join('\n'), noop);
 })();
