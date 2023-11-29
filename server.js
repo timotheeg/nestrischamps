@@ -1,9 +1,23 @@
 import { WebSocketServer } from 'ws';
 import { Server } from 'http';
+import { createServer } from 'https';
+import { readFileSync } from 'fs';
 
 import app from './modules/app.js';
 
-const server = Server(app);
+var server
+if (process.env.TLS_KEY && process.env.TLS_CERT) {
+	const options = {
+		key: readFileSync(process.env.TLS_KEY),
+		cert: readFileSync(process.env.TLS_CERT)
+	};
+
+	server = createServer(options, app);
+}
+else {
+	server = Server(app);
+}
+
 const wss = new WebSocketServer({
 	clientTracking: false,
 	noServer: true,
