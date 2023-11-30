@@ -176,8 +176,8 @@ export default class EDGameTracker {
 		const ctime = Date.now() - this.startTime; // record ctime as early as possible
 
 		const [
-			gameMode, // 0
-			playState,
+			gameStartGameMode, // 0
+			gameModeStatePlayState,
 			completedRowXClear,
 			completedRow0,
 			completedRow1,
@@ -215,6 +215,11 @@ export default class EDGameTracker {
 		] = frameBuffer;
 
 		field.length = 200; // drops the tail
+
+		const gameModeState = gameModeStatePlayState >> 4;
+		const playState = gameModeStatePlayState & 0xF;
+		const gameStart = gameStartGameMode >> 4;
+		const gameMode = gameStartGameMode & 0xF;
 
 		const frameCounter = (frameCounter1 << 8) | frameCounter0;
 		const lines = this._bcdToDecimal(lines0, lines1);
