@@ -96,7 +96,7 @@ router.get('/games/:id', async (req, res) => {
 
 		game.frame_url = `${base_url}${game.frame_file}`;
 	} else {
-		game.frame_url = `http://${req.headers.host}/api/files/${game.frame_file}`;
+		game.frame_url = `${req.protocol}://${req.headers.host}/api/files/${game.frame_file}`;
 	}
 
 	res.json(game);
