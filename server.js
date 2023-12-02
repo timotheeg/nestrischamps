@@ -5,19 +5,17 @@ import { readFileSync } from 'fs';
 
 import app from './modules/app.js';
 
-var server;
+let server;
 
 if (process.env.TLS_KEY && process.env.TLS_CERT) {
 	const options = {
 		key: readFileSync(process.env.TLS_KEY),
-		cert: readFileSync(process.env.TLS_CERT)
+		cert: readFileSync(process.env.TLS_CERT),
 	};
 	server = createServer(options, app);
-}
-else if (process.env.TLS_KEY || process.env.TLS_CERT) {
+} else if (process.env.TLS_KEY || process.env.TLS_CERT) {
 	throw new Error('HTTPS requires both TLS_KEY and TLS_CERT');
-}
-else {
+} else {
 	server = Server(app);
 }
 
