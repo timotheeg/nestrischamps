@@ -3,6 +3,12 @@ export const peerServerOptions = {
 	path: '/',
 	port: 443,
 	secure: true,
+	config: {
+		iceServers: [
+			{ url: 'stun:freeturn.net:5349' },
+			{ url: 'turn:free@freeturn.net:5349', credential: 'free' },
+		],
+	},
 };
 
 export const DOM_DEV_NULL =
