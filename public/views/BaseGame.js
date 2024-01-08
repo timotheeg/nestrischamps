@@ -691,6 +691,13 @@ export default class BaseGame {
 	}
 
 	_checkPiece(data) {
+		if (this.pending_prior_preview) {
+			if (data.preview) {
+				this.prior_preview = data.preview;
+			}
+			this.pending_prior_preview = false;
+		}
+
 		if (this.pending_piece) {
 			if (!(this.is_classic_rom && this.options.usePieceStats) && !data.preview)
 				return;
@@ -839,6 +846,7 @@ export default class BaseGame {
 		}
 
 		this.prior_preview = data.preview;
+		this.pending_prior_preview = true;
 
 		if (this.is_classic_rom) {
 			// fake das stats
