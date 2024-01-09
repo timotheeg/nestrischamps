@@ -6,7 +6,7 @@ export const peerServerOptions = {
 	config: {
 		iceServers: [
 			{ url: 'stun:freeturn.net:5349' },
-			{ url: 'turn:free@freeturn.net:5349', credential: 'free' },
+			{ url: 'turns:freeturn.net:5349', username: 'free', credential: 'free' },
 		],
 	},
 };
