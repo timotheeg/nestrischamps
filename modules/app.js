@@ -1,5 +1,6 @@
 import express from 'express';
 import middlewares from './middlewares.js';
+import cors from 'cors';
 
 // crude way to prevent crashes
 // not recommended since application is now in an undefined state
@@ -15,6 +16,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('trust proxy', 1); // trust first proxy (i.e. heroku) -- needed to get req.protocol correctly
 
+app.use(cors());
 app.use(express.static('public'));
 app.use(middlewares.sessionMiddleware);
 

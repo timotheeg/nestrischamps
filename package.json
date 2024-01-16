@@ -27,6 +27,7 @@
 		"@twurple/chat": "6.2.1",
 		"celebrate": "15.0.1",
 		"connect-pg-simple": "9.0.0",
+		"cors": "2.8.5",
 		"country-list": "2.3.0",
 		"dotenv": "16.3.1",
 		"ejs": "3.1.9",
