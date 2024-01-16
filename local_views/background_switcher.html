@@ -1,0 +1,71 @@
+<html>
+	<head>
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			div.bg {
+				width: 1920px;
+				height: 1080px;
+				overflow: hidden;
+				background: black;
+				background-repeat: no-repeat;
+			}
+			p {
+				color: white;
+				position: absolute;
+				z-index: 1;
+				top: 0;
+				left: 0;
+			}
+			p a {
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<p>
+			Images by
+			<a href="https://www.nexusmods.com/cyberpunk2077/users/173208187"
+				>K00B68</a
+			>
+		</p>
+		<div class="bg"></div>
+		<script type="module">
+			import Connection from 'https://nestrischamps.io/js/connection.js';
+
+			const secret = 'YOUR_SECRET';
+			const ws_url = `wss://nestrischamps.io/ws/view/jdish/${secret}`;
+
+			const bg = document.querySelector('div.bg');
+			const level_backgrounds = [
+				'./bg0.webp',
+				'./bg1.webp',
+				'./bg2.webp',
+				'./bg3.webp',
+				'./bg4.webp',
+				'./bg5.webp',
+				'./bg6.webp',
+				'./bg7.webp',
+				'./bg8.webp',
+				'./bg9.webp',
+			];
+
+			let bg_level = null;
+
+			const connection = new Connection(ws_url);
+			connection.onMessage = ([cmd, ...args]) => {
+				if (cmd != 'frame') return;
+				const [_, { level }] = args;
+				if (level === null) return;
+				const new_bg_level = level % 10;
+				if (bg_level === new_bg_level) return;
+
+				bg_level = new_bg_level;
+				bg.style.backgroundImage = `url(${level_backgrounds[bg_level]})`;
+			};
+		</script>
+	</body>
+</html>
