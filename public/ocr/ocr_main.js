@@ -425,9 +425,6 @@ function restartSharingVideoFeed() {
 	startSharingVideoFeed();
 }
 
-conn_host.addEventListener('change', connect);
-conn_port.addEventListener('change', connect);
-
 clear_config.addEventListener('click', evt => {
 	if (
 		confirm(

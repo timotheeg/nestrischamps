@@ -2,7 +2,12 @@
 <html lang="en">
 	<head>
 		<title>NestrisChamps OCR Producer</title>
+		<link rel="stylesheet" href="/vendor/bulma.0.9.4.min.css" />
 		<style type="text/css">
+			body {
+				margin: 1em;
+				line-height: 1.25em;
+			}
 			video#device_video {
 				/* display: none; */
 				width: 360px;
@@ -13,23 +18,20 @@
 			}
 
 			fieldset {
-				margin-bottom: 0.65em;
+				background-color: #fff;
+				border-radius: 6px;
+				box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+					0 0 0 1px rgba(10, 10, 10, 0.02);
+				color: #4a4a4a;
+				display: block;
+				padding: 1.25rem;
+				border: 1px solid #ccc;
+				margin: 1em;
 			}
 
 			legend {
 				text-transform: uppercase;
 				font-weight: bold;
-			}
-
-			#inputs,
-			#ocr_results {
-				display: flex;
-				flex-direction: row;
-			}
-
-			#inputs fieldset,
-			#ocr_results fieldset {
-				flex-grow: 1;
 			}
 
 			dl {
@@ -88,10 +90,6 @@
 				width: 4em;
 			}
 
-			#conn_port {
-				width: 5em;
-			}
-
 			pre {
 				display: inline;
 				font-size: 2em;
@@ -102,7 +100,6 @@
 				font-size: 1em;
 			}
 
-			#connection,
 			#wizard,
 			#controls,
 			#calibration,
@@ -153,55 +150,64 @@
 			<canvas id="video_capture" />
 		</div>
 
-		<div id="inputs">
-			<fieldset id="wizard">
-				<legend>Wizard</legend>
-				<div>
-					<label for="device">Capture card</label>
-					<select id="device"></select>
-				</div>
+		<fieldset id="wizard" class="box">
+			<legend>Wizard</legend>
+			<div>
+				<label for="device">Capture card</label>
+				<select id="device"></select>
+			</div>
 
-				<div>
-					<label for="rom">ROM</label>
-					<select id="rom">
-						<option value="">-</option>
-						<option value="classic" title="Minimal + Colors and Piece stats">
-							Classic
-						</option>
-						<option value="das_trainer" title="Minimal + DAS stats">
-							Das Trainer
-						</option>
-						<option
-							value="minimal"
-							title="Capture score, level, lines, preview and field"
-						>
-							Minimal
-						</option>
-					</select>
-				</div>
+			<div>
+				<label for="rom">ROM</label>
+				<select id="rom">
+					<option value="">-</option>
+					<option value="classic" title="Minimal + Colors and Piece stats">
+						Classic
+					</option>
+					<option value="das_trainer" title="Minimal + DAS stats">
+						Das Trainer
+					</option>
+					<option
+						value="minimal"
+						title="Capture score, level, lines, preview and field"
+					>
+						Minimal
+					</option>
+				</select>
+			</div>
 
-				<div id="color_matching">
-					<label for="palette">Color matching</label>
-					<select id="palette"></select>
-				</div>
+			<div id="color_matching">
+				<label for="palette">Color matching</label>
+				<select id="palette"></select>
+			</div>
 
-				<div id="instructions">
-					<p><strong>Next steps:</strong></p>
-					<ol start="0">
-						<li>
-							With your selection above, your tetris capture should now be
-							visible in the video below
-						</li>
-						<li>
-							Start a game at level 0, and in the video below, click somewhere
-							BLACK in the central Tetris field.
-						</li>
-						<li>Fine-tune all the fields (location and size)</li>
-					</ol>
-				</div>
-			</fieldset>
+			<div id="instructions">
+				<p><strong>Next steps:</strong></p>
+				<ol start="0">
+					<li>
+						With your selection above, your tetris capture should now be visible
+						in the video below
+					</li>
+					<li>
+						Start a game at level 0, and in the video below, click somewhere
+						BLACK in the central Tetris field.
+					</li>
+					<li>Fine-tune all the fields (location and size)</li>
+				</ol>
+			</div>
+		</fieldset>
 
-			<fieldset id="controls">
+		<div class="tabs is-boxed is-fullwidth is-toggle">
+			<ul>
+				<li class="is-active"><a>Settings</a></li>
+				<li><a>Data</a></li>
+				<li><a>Calibration</a></li>
+				<li><a>Room View</a></li>
+			</ul>
+		</div>
+
+		<div id="inputs" class="columns">
+			<fieldset id="controls" class="column">
 				<legend>Controls - THIS WINDOW AND TAB MUST BE FOCUSED!</legend>
 
 				<div>
@@ -259,13 +265,7 @@
 				</div>
 			</fieldset>
 
-			<fieldset id="connection">
-				<legend>Server Connection</legend>
-				<div>Host <input type="text" id="conn_host" value="localhost" /></div>
-				<div>Port <input type="number" id="conn_port" value="3337" /></div>
-			</fieldset>
-
-			<fieldset id="privacy">
+			<fieldset id="privacy" class="column">
 				<legend>Privacy</legend>
 				<div>
 					<label for="allow_video_feed">Allow Sending Webcam Feed</label>
@@ -280,12 +280,12 @@
 			</fieldset>
 		</div>
 
-		<div id="ocr_results">
-			<fieldset>
+		<div id="ocr_results" class="columns">
+			<fieldset class="column">
 				<legend>Frame Data</legend>
 				<dl id="frame_data"></dl>
 			</fieldset>
-			<fieldset>
+			<fieldset class="column">
 				<legend>OCR Performance (in ms)</legend>
 				<dl id="perf_data"></dl>
 			</fieldset>
