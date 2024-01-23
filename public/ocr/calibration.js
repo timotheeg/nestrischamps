@@ -1,5 +1,12 @@
-export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
+export function flood(
+	img_data,
+	[startX, startY],
+	color = [0, 0, 0],
+	tolerance = 25
+) {
 	console.log(startX, startY);
+	tolerance *= tolerance;
+
 	const seen = new Array(img_data.width)
 		.fill()
 		.map(_ => new Array(img_data.height).fill());
@@ -8,9 +15,9 @@ export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
 		const start_index = 4 * (y * img_data.width + x);
 		const data = img_data.data;
 		return (
-			data[start_index] === color[0] &&
-			data[start_index + 1] === color[1] &&
-			data[start_index + 2] === color[2]
+			Math.pow(data[start_index + 0] - color[0], 2) < tolerance &&
+			Math.pow(data[start_index + 1] - color[1], 2) < tolerance &&
+			Math.pow(data[start_index + 2] - color[2], 2) < tolerance
 		);
 	}
 
@@ -50,8 +57,13 @@ export function flood(img_data, [startX, startY], color = [0, 0, 0]) {
 	return seen;
 }
 
-export function getFieldCoordinates(img_data, startPoint, color = [0, 0, 0]) {
-	const result = flood(img_data, startPoint, color);
+export function getFieldCoordinates(
+	img_data,
+	startPoint,
+	color = [0, 0, 0],
+	tolerance = 25
+) {
+	const result = flood(img_data, startPoint, color, tolerance);
 
 	const [top, left, bottom, right] = result.reduce(
 		([t, l, b, r], column, x) => {
