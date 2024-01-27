@@ -2,11 +2,14 @@
 <html lang="en">
 	<head>
 		<title>NestrisChamps OCR Producer</title>
-		<link rel="stylesheet" href="/vendor/bulma.0.9.4.min.css" />
 		<style type="text/css">
+			.is-hidden {
+				display: none !important;
+			}
+
 			body {
 				margin: 1em;
-				line-height: 1.25em;
+				line-height: 1.5em;
 			}
 			video#device_video {
 				/* display: none; */
@@ -27,6 +30,7 @@
 				padding: 1.25rem;
 				border: 1px solid #ccc;
 				margin: 1em;
+				flex-grow: 1;
 			}
 
 			legend {
@@ -52,15 +56,6 @@
 				margin: 0.5em 0;
 			}
 
-			#ui {
-				display: flex;
-				flex-direction: row;
-			}
-
-			#ui > div {
-				flex-grow: 1;
-			}
-
 			#adjustments canvas,
 			#adjustments span {
 				margin: 0.25em;
@@ -78,12 +73,24 @@
 				margin: 1em 0;
 			}
 
+			#inputs,
+			#extraction {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: nowrap;
+				justify-content: center;
+				position: relative;
+			}
+
 			#capture {
+				margin-right: 1em;
 				display: flex;
 				flex-direction: column;
+				row-gap: 1em;
 				align-items: center;
-				justify-content: center;
-				margin-right: 1em;
+				position: sticky;
+				top: 0;
+				padding-top: 1.5em;
 			}
 
 			.coordinate_input {
@@ -100,14 +107,14 @@
 				font-size: 1em;
 			}
 
-			#wizard,
-			#controls,
-			#calibration,
-			#color_matching,
-			#timer_control,
-			#privacy,
 			#ocr_results {
-				display: none;
+				display: flex;
+				flex-direction: row;
+				flex-wrap: nowrap;
+			}
+
+			#ocr_results fieldset {
+				flex-grow: 1;
 			}
 
 			#ocr_results dd {
@@ -137,20 +144,17 @@
 				color: #ff8c00;
 			}
 
-			#instructions {
+			#video_capture {
 				display: none;
 			}
 		</style>
 	</head>
 
 	<body>
-		<div class="notice"></div>
+		<canvas id="video_capture"></canvas>
+		<div class="notice is-hidden"></div>
 
-		<div id="calibration">
-			<canvas id="video_capture" />
-		</div>
-
-		<fieldset id="wizard" class="box">
+		<fieldset id="wizard" class="box is-hidden">
 			<legend>Wizard</legend>
 			<div>
 				<label for="device">Capture card</label>
@@ -176,12 +180,12 @@
 				</select>
 			</div>
 
-			<div id="color_matching">
+			<div id="color_matching" class="is-hidden">
 				<label for="palette">Color matching</label>
 				<select id="palette"></select>
 			</div>
 
-			<div id="instructions">
+			<div id="instructions" class="is-hidden">
 				<p><strong>Next steps:</strong></p>
 				<ol start="0">
 					<li>
@@ -197,109 +201,118 @@
 			</div>
 		</fieldset>
 
-		<div class="tabs is-boxed is-fullwidth is-toggle">
+		<div id="tabs" class="tabs is-boxed is-fullwidth is-toggle is-hidden">
 			<ul>
-				<li class="is-active"><a>Settings</a></li>
-				<li><a>Data</a></li>
-				<li><a>Calibration</a></li>
-				<li><a>Room View</a></li>
+				<li data-target="inputs"><a>Settings</a></li>
+				<li data-target="ocr_results"><a>Data</a></li>
+				<li data-target="calibration"><a>Calibration</a></li>
+				<li data-target="room"><a>Room View</a></li>
 			</ul>
 		</div>
 
-		<div id="inputs" class="columns">
-			<fieldset id="controls" class="column">
-				<legend>Controls - THIS WINDOW AND TAB MUST BE FOCUSED!</legend>
+		<div id="tab-content" class="is-hidden">
+			<div id="inputs">
+				<fieldset id="controls">
+					<legend>Controls</legend>
 
-				<div>
-					<label for="show_parts">Show Parts</label>
-					<input type="checkbox" id="show_parts" checked />
-				</div>
-
-				<div>
-					<label for="score7">7 digits score</label>
-					<input type="checkbox" id="score7" />
-				</div>
-
-				<div>
-					<label for="focus_alarm">Enable Focus Alarm</label>
-					<input type="checkbox" id="focus_alarm" checked />
-				</div>
-
-				<div>
-					<label for="show_parts">Capture Rate</label>
-					<select id="capture_rate">
-						<option value="25">24 fps</option>
-						<option value="25">25 fps</option>
-						<option value="30">30 fps</option>
-						<option value="50">50 fps</option>
-						<option value="60">60 fps</option>
-					</select>
-				</div>
-
-				<div id="image_corrections">
-					<div class="brightness">
-						Brightness:
-						<input type="range" min="1" max="3" step="0.05" value="1" />
-						<span>1</span> <a href="#">Reset</a>
+					<div>
+						<label for="focus_alarm">Enable Focus Alarm</label>
+						<input type="checkbox" id="focus_alarm" checked />
 					</div>
-					<div class="contrast">
-						Contrast:
-						<input type="range" min="0" max="2" step="0.05" value="1" />
-						<span>1</span> <a href="#">Reset</a>
+
+					<div>
+						<button id="clear_config">Clear config and Restart</button>
 					</div>
-				</div>
+					<div>
+						<button id="save_game_palette" disabled>
+							Save Last Game's Palette
+						</button>
+					</div>
+					<div id="timer_control" class="is-hidden">
+						<button id="start_timer">Start Timer</button>
+						for
+						<input type="number" id="minutes" value="120" min="5" max="5949" />
+						minutes
+					</div>
+				</fieldset>
 
-				<div>
-					<button id="clear_config">Clear config and Restart</button>
-				</div>
-				<div>
-					<button id="save_game_palette" disabled>
-						Save Last Game's Palette
-					</button>
-				</div>
-				<div id="timer_control">
-					<button id="start_timer">Start Timer</button>
-					for
-					<input type="number" id="minutes" value="120" min="5" max="5949" />
-					minutes
-				</div>
-			</fieldset>
+				<fieldset id="privacy">
+					<legend>Privacy</legend>
+					<div>
+						<label for="allow_video_feed">Allow Sending Webcam Feed</label>
+						<input type="checkbox" id="allow_video_feed" checked /><br />
 
-			<fieldset id="privacy" class="column">
-				<legend>Privacy</legend>
-				<div>
-					<label for="allow_video_feed">Allow Sending Webcam Feed</label>
-					<input type="checkbox" id="allow_video_feed" checked /><br />
+						<label for="video_feed_device">Webcam</label>
+						<select id="video_feed_device"></select
+						><br />
 
-					<label for="video_feed_device">Webcam</label>
-					<select id="video_feed_device"></select
-					><br />
-
-					<video width="160" height="120" id="video_feed"></video>
-				</div>
-			</fieldset>
-		</div>
-
-		<div id="ocr_results" class="columns">
-			<fieldset class="column">
-				<legend>Frame Data</legend>
-				<dl id="frame_data"></dl>
-			</fieldset>
-			<fieldset class="column">
-				<legend>OCR Performance (in ms)</legend>
-				<dl id="perf_data"></dl>
-			</fieldset>
-		</div>
-
-		<div id="ui">
-			<div id="capture">
-				<video id="device_video" playsinline controls="false"></video>
-				<br />
-				<br />
+						<video width="160" height="120" id="video_feed"></video>
+					</div>
+				</fieldset>
 			</div>
-			<div id="adjustments"></div>
+
+			<div id="ocr_results">
+				<fieldset>
+					<legend>Frame Data</legend>
+					<dl id="frame_data"></dl>
+				</fieldset>
+				<fieldset>
+					<legend>OCR Performance (in ms)</legend>
+					<dl id="perf_data"></dl>
+				</fieldset>
+			</div>
+
+			<div id="calibration">
+				<fieldset class="inputs">
+					<legend>Controls</legend>
+
+					<div>
+						<label for="show_parts">Show Parts</label>
+						<input type="checkbox" id="show_parts" checked />
+					</div>
+
+					<div>
+						<label for="score7">7 digits score</label>
+						<input type="checkbox" id="score7" />
+					</div>
+
+					<div>
+						<label for="show_parts">Capture Rate</label>
+						<select id="capture_rate">
+							<option value="25">24 fps</option>
+							<option value="25">25 fps</option>
+							<option value="30">30 fps</option>
+							<option value="50">50 fps</option>
+							<option value="60">60 fps</option>
+						</select>
+					</div>
+
+					<div id="image_corrections">
+						<div class="brightness">
+							Brightness:
+							<input type="range" min="1" max="3" step="0.05" value="1" />
+							<span>1</span> <a href="#">Reset</a>
+						</div>
+						<div class="contrast">
+							Contrast:
+							<input type="range" min="0" max="2" step="0.05" value="1" />
+							<span>1</span> <a href="#">Reset</a>
+						</div>
+					</div>
+				</fieldset>
+
+				<div id="extraction">
+					<div id="capture-container">
+						<div id="capture">
+							<video id="device_video" playsinline controls="false"></video>
+						</div>
+					</div>
+					<div id="adjustments"></div>
+				</div>
+			</div>
+
+			<div id="room"></div>
 		</div>
-		<div id="templates"></div>
 
 		<script src="/vendor/peerjs.1.5.1.min.js"></script>
 		<script type="module" src="/ocr/ocr_main.js"></script>
