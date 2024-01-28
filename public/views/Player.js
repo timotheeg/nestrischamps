@@ -355,6 +355,27 @@ export default class Player {
 			this._hideCurtain();
 		}
 
+		this.comp_messages = document.createElement('div');
+		Object.assign(this.comp_messages.style, {
+			position: 'absolute',
+			top: `${bg_offset}px`,
+			left: `${bg_offset}px`,
+			width: `${bg_width}px`,
+			height: `${bg_height}px`,
+			border: 0,
+			margin: 0,
+			padding: 0,
+			background: 'rgba(0, 0, 0, 0.95)',
+			overflow: 'hidden',
+			display: 'none',
+			justifyContent: 'center',
+			alignItems: 'center',
+			fontSize: '1.5em',
+			lineHeight: '1.5em',
+		});
+		this.comp_messages.hidden = true;
+		this.dom.field.appendChild(this.comp_messages);
+
 		this.profile_card = document.createElement('iframe');
 		Object.assign(this.profile_card.style, {
 			position: 'absolute',
@@ -530,6 +551,22 @@ export default class Player {
 
 		this.curtain_viewport.hidden = true;
 		this.curtain_container.style.top = `-${this.bg_height}px`;
+	}
+
+	showCompMessage(message, double_size = false) {
+		this.comp_messages.innerHTML = '';
+		const msg_container = document.createElement('div');
+		msg_container.innerText = message;
+		this.comp_messages.style.display = 'flex';
+		if (double_size) {
+			this.comp_messages.style.fontSize = '2em';
+		}
+		this.comp_messages.append(msg_container);
+	}
+
+	hideCompMessage() {
+		this.comp_messages.style.display = 'none';
+		this.comp_messages.style.fontSize = '1.5em';
 	}
 
 	_doTetris() {
