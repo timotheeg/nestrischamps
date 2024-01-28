@@ -560,19 +560,16 @@ video.addEventListener('click', async evt => {
 	saveConfig(config);
 	trackAndSendFrames();
 
-	wizard.style.display = 'none';
-
 	if (video.ntcType === 'device') {
 		brightness_slider.value = 1.75;
 		onBrightnessChange();
 	}
 
-	capture.prepend(video);
-	tabsContainer.classList.remove('is-hidden');
-	tabContentsContainer.classList.remove('is-hidden');
-	tabs[2].click();
-
 	video.style.cursor = null;
+	capture.prepend(video);
+	tabs[2].click(); // calibration
+	showProducerUI();
+
 	setTimeout(() => {
 		alert(
 			'Rough calibration has been completed 🎉!\n\nYou now MUST inspect and fine tune all the fields (location and size) to make them pixel perfect!'
@@ -586,7 +583,8 @@ function onShowPartsChanged() {
 	try {
 		adjustments.style.display = display;
 		config.source_canvas.style.display = display;
-	} catch (err) {
+	}
+	catch(err) {
 		// nothing to do here
 	}
 
