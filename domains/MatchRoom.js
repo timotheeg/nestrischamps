@@ -688,7 +688,7 @@ class MatchRoom extends Room {
 		// system where you can have one user being multiple players
 		let send_count = 0;
 
-		this.state.players.forEach((player, p_num) => {
+		this.state.players.forEach((player, p_idx) => {
 			if (player.id === user.id) {
 				if (message instanceof Uint8Array) {
 					if (send_count++ > 0) {
@@ -698,10 +698,14 @@ class MatchRoom extends Room {
 						// we make a copy to ensure each player gets its own message
 						message = new Uint8Array(message);
 					}
-					message[0] = (message[0] & 0b11111000) | p_num; // sets player number in header byte of binary message
+					message[0] = (message[0] & 0b11111000) | p_idx; // sets player number in header byte of binary message
 					this.sendToViews(message);
+				} else if (Array.isArray(message)) {
+					this.sendToViews([message[0], p_idx, ...message.slice(1)]);
+					// TODO: send message to admin page as well?
 				} else {
-					this.sendToViews(['frame', p_num, message]);
+					// assume frame
+					this.sendToViews(['frame', p_idx, message]);
 				}
 			}
 		});
