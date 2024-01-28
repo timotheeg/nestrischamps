@@ -96,7 +96,11 @@ export function css_size(css_pixel_width) {
 	return parseFloat(css_pixel_width.replace(/px$/, ''));
 }
 
-const reference_ui = document.querySelector('#reference_ui'),
+const tabsContainer = document.querySelector('#tabs'),
+	tabs = document.querySelectorAll('#tabs li'),
+	tabContentsContainer = document.querySelector('#tab-content'),
+	tabContents = document.querySelectorAll('#tab-content > div'),
+	room = document.querySelector('#room'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
 	device_selector = document.querySelector('#device'),
@@ -117,8 +121,6 @@ const reference_ui = document.querySelector('#reference_ui'),
 	save_game_palette = document.querySelector('#save_game_palette'),
 	timer_control = document.querySelector('#timer_control'),
 	start_timer = document.querySelector('#start_timer'),
-	conn_host = document.querySelector('#conn_host'),
-	conn_port = document.querySelector('#conn_port'),
 	video = document.querySelector('#device_video'),
 	ocr_results = document.querySelector('#ocr_results'),
 	frame_data = document.querySelector('#frame_data'),
@@ -152,10 +154,9 @@ device_selector.addEventListener('change', evt => {
 		initCaptureFromEverdrive(config.frame_rate);
 		saveConfig(config);
 
-		wizard.style.display = 'none';
-		privacy.style.display = 'block';
-		controls.style.display = 'block';
-		ocr_results.style.display = 'flex';
+		removeCalibrationTab();
+		showProducerUI();
+		tabs[1].click(); // data
 	} else {
 		playVideoFromConfig();
 		checkReadyToCalibrate();
@@ -178,7 +179,7 @@ rom_selector.addEventListener('change', evt => {
 	const first_option = palette_selector.querySelector('option:first-child');
 
 	function hideAndResetColorMatching() {
-		color_matching.style.display = 'none';
+		color_matching.classList.add('is-hidden');
 		palette_selector.disabled = true;
 	}
 
@@ -189,7 +190,7 @@ rom_selector.addEventListener('change', evt => {
 	} else {
 		config.game_type = configs[rom_selector.value].game_type;
 
-		color_matching.style.display = 'block';
+		color_matching.classList.remove('is-hidden');
 		palette_selector.disabled = false;
 
 		if (rom_selector.value === 'classic') {
@@ -227,16 +228,15 @@ function checkReadyToCalibrate() {
 
 	pending_calibration = !!all_ready;
 
-	instructions.style.display = pending_calibration ? 'block' : 'none';
+	instructions.classList[pending_calibration ? 'remove' : 'add']('is-hidden');
 }
 
 const notice = document.querySelector('div.notice');
 
 function resetNotice() {
-	notice.classList.remove('error');
-	notice.classList.remove('warning');
+	notice.classList.remove('error', 'warning');
+	notice.classList.add('is-hidden');
 	notice.textContent = '';
-	notice.style.display = 'none';
 }
 
 let peer = null;
@@ -294,14 +294,14 @@ function connect() {
 		resetNotice();
 		notice.classList.add('error');
 		notice.textContent = `WARNING! The connection has been kicked because [${reason}]. The page will NOT attempt to reconnect.`;
-		notice.style.display = 'block';
+		notice.classList.remove('is-hidden');
 	};
 
 	connection.onBreak = function () {
 		resetNotice();
 		notice.classList.add('warning');
 		notice.textContent = `WARNING! The page is disconnected. It will try to reconnect automatically.`;
-		notice.style.display = 'block';
+		notice.classList.remove('is-hidden');
 	};
 
 	connection.onResume = resetNotice;
@@ -425,9 +425,6 @@ function restartSharingVideoFeed() {
 	startSharingVideoFeed();
 }
 
-conn_host.addEventListener('change', connect);
-conn_port.addEventListener('change', connect);
-
 clear_config.addEventListener('click', evt => {
 	if (
 		confirm(
@@ -459,6 +456,7 @@ start_timer.addEventListener('click', evt => {
 });
 
 video.controls = false;
+video.style.cursor = 'crosshair';
 video.addEventListener('click', async evt => {
 	evt.preventDefault();
 	if (!pending_calibration || in_calibration) return;
@@ -563,14 +561,18 @@ video.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
-	privacy.style.display = 'block';
-	controls.style.display = 'block';
 
 	if (video.ntcType === 'device') {
 		brightness_slider.value = 1.75;
 		onBrightnessChange();
 	}
 
+	capture.prepend(video);
+	tabsContainer.classList.remove('is-hidden');
+	tabContentsContainer.classList.remove('is-hidden');
+	tabs[2].click();
+
+	video.style.cursor = null;
 	setTimeout(() => {
 		alert(
 			'Rough calibration has been completed 🎉!\n\nYou now MUST inspect and fine tune all the fields (location and size) to make them pixel perfect!'
@@ -581,9 +583,12 @@ video.addEventListener('click', async evt => {
 function onShowPartsChanged() {
 	const display = show_parts.checked ? 'block' : 'none';
 
-	adjustments.style.display = display;
-	// image_corrections.style.display = display;
-	config.source_canvas.style.display = display;
+	try {
+		adjustments.style.display = display;
+		config.source_canvas.style.display = display;
+	} catch (err) {
+		// nothing to do here
+	}
 
 	if (show_parts.checked) {
 		resetShowPartsTimer();
@@ -991,6 +996,8 @@ async function playVideoFromConfig() {
 		return;
 	}
 
+	video.classList.remove('is-hidden');
+
 	if (config.device_id === 'window') {
 		do_half_height = false;
 		await playVideoFromScreenCap(config.frame_rate);
@@ -1056,7 +1063,7 @@ async function startCapture(stream) {
 	if (show_parts.checked) {
 		adjustments.style.display = 'block';
 		// image_corrections.style.display = 'block';
-		ocr_results.style.display = 'flex';
+		ocr_results.classList.remove('is-hidden');
 	}
 
 	const frame_ms = 1000 / settings.frameRate;
@@ -1171,28 +1178,6 @@ async function captureFrame() {
 		game_tracker.processFrame(bitmap, do_half_height || force_half_height);
 	} catch (err) {
 		console.error(err);
-	}
-}
-
-function showTemplates(templates) {
-	const tpl = document.querySelector('#templates');
-
-	for (let template of templates) {
-		const canvas = document.createElement('canvas');
-		canvas.width = 14;
-		canvas.height = 14;
-		const ctx = canvas.getContext('2d', { alpha: false });
-		const img = new ImageData(14, 14);
-		for (let p_idx = template.length; p_idx--; ) {
-			const luma = template[p_idx];
-			const offset_idx = p_idx << 2;
-			img.data[offset_idx] = luma;
-			img.data[offset_idx + 1] = luma;
-			img.data[offset_idx + 2] = luma;
-			img.data[offset_idx + 3] = 255;
-		}
-		ctx.putImageData(img, 0, 0);
-		tpl.appendChild(canvas);
 	}
 }
 
@@ -1783,35 +1768,114 @@ function trackAndSendFrames() {
 		}
 	};
 
-	/*
-	const fake_stream = {
-		asset: './full3.png',
-		addEventListener: function() {},
-		getVideoTracks() {
-			return [{
-				getSettings() {
-					return {
-						width: 720,
-						height: 480,
-						frameRate: 12
-					}
-				}
-			}]
-		}
-	};
-
-	startCapture(fake_stream);
-	return;
-	/**/
-
 	startCapture();
 	resetShowPartsTimer();
 }
 
+let destroyRoomViewTO;
+let roomIFrame;
+
+function destroyRoomView() {
+	roomIFrame.remove();
+	window.removeEventListener('resize', resizeRoomIFrame);
+	roomIFrame = null;
+}
+
+function loadRoomView() {
+	if (!is_match_room) {
+		console.warn('View in private room is not supported');
+		return;
+	}
+
+	const url = new URL(document.location);
+	url.pathname = url.pathname.replace(/\/producer$/, '/view/ctwc23'); // is a 1080p layout
+	url.search = new URLSearchParams({
+		video: 0,
+		bg: 0,
+		in_producer: 1,
+	});
+
+	const iFrameStyles = {
+		border: 0,
+		margin: 'auto',
+		transformOrigin: `0 0`,
+	};
+
+	roomIFrame = document.createElement('iframe');
+	Object.assign(roomIFrame.style, iFrameStyles);
+	resizeRoomIFrame();
+	roomIFrame.setAttribute('width', 1920);
+	roomIFrame.setAttribute('height', 1080);
+	roomIFrame.setAttribute('src', url);
+
+	room.appendChild(roomIFrame);
+
+	window.addEventListener('resize', resizeRoomIFrame);
+}
+
+function resizeRoomIFrame() {
+	if (!roomIFrame) return;
+
+	if (room.clientWidth >= 1920) {
+		if (!roomIFrame.style.transform) return;
+		roomIFrame.style.transform = null;
+	} else {
+		const scale = room.clientWidth / 1920;
+		roomIFrame.style.transform = `scale(${scale})`;
+	}
+}
+
+function removeCalibrationTab() {
+	[...tabs].find(tab => tab.dataset.target === 'calibration').remove();
+	document.getElementById('calibration').remove();
+}
+
+function initTabControls() {
+	if (!is_match_room) {
+		// remove the room tab
+		[...tabs].find(tab => tab.dataset.target === 'room').remove();
+		room.remove();
+	}
+
+	tabContents.forEach(box => box.classList.add('is-hidden'));
+
+	tabs.forEach(tab => {
+		tab.addEventListener('click', () => {
+			tabs.forEach(tab => tab.classList.remove('is-active'));
+			tab.classList.add('is-active');
+
+			const target = tab.dataset.target;
+			tabContents.forEach(box => {
+				if (box.getAttribute('id') === target) {
+					box.classList.remove('is-hidden');
+				} else {
+					box.classList.add('is-hidden');
+				}
+			});
+
+			if (target === 'room') {
+				destroyRoomViewTO = clearTimeout(destroyRoomViewTO);
+				if (roomIFrame) return;
+				loadRoomView();
+			} else if (roomIFrame) {
+				destroyRoomViewTO = setTimeout(destroyRoomView, 15000); // 15 seconds to allow users to click around
+			}
+		});
+	});
+}
+
+function showProducerUI() {
+	wizard.classList.add('is-hidden');
+	tabsContainer.classList.remove('is-hidden');
+	tabContentsContainer.classList.remove('is-hidden');
+}
+
 (async function init() {
+	initTabControls();
+
 	// check if timer should be made visible
 	if (QueryString.get('timer') === '1') {
-		timer_control.style.display = 'block';
+		timer_control.classList.remove('is_hidden');
 	}
 
 	// load external assets - could parrallelize
@@ -1838,12 +1902,10 @@ function trackAndSendFrames() {
 		await resetDevices();
 
 		capture_rate.value = config.frame_rate || default_frame_rate;
-		controls.style.display = 'block';
 
 		score7.checked = config.score7 === true;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
-		privacy.style.display = 'block';
 
 		const brightness = config.brightness === undefined ? 1 : config.brightness;
 		brightness_slider.value = config.brightness = brightness;
@@ -1856,12 +1918,15 @@ function trackAndSendFrames() {
 		updateImageCorrection();
 
 		if (config.device_id === 'everdrive') {
+			removeCalibrationTab();
 			initCaptureFromEverdrive(config.frame_rate);
-			ocr_results.style.display = 'flex';
 		} else {
 			await playVideoFromConfig();
 			trackAndSendFrames();
 		}
+
+		tabs[1].click(); // data tab
+		showProducerUI();
 	} else {
 		await resetDevices();
 
@@ -1872,6 +1937,9 @@ function trackAndSendFrames() {
 			frame_rate: default_frame_rate,
 			tasks: {},
 		};
-		wizard.style.display = 'block';
+
+		video.classList.add('is-hidden');
+		wizard.append(video);
+		wizard.classList.remove('is-hidden');
 	}
 })();

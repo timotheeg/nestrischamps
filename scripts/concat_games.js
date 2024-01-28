@@ -1,4 +1,3 @@
-import fs from 'fs';
 import BinaryFrame from '../public/js/BinaryFrame.js';
 import { peek } from '../public/views/utils.js';
 import { Upload } from '@aws-sdk/lib-storage';
@@ -53,13 +52,11 @@ export async function getGameFrames(gameid) {
 	};
 }
 
-function noop() {}
-
 (async function () {
 	const gameids = process.argv.slice(2);
 	const games = await Promise.all(gameids.map(gameid => getGameFrames(gameid)));
 	const frame_file = peek(games)
-		.gamedata.frame_url.replace(/^https:\/\/[^\/]+\//, '')
+		.gamedata.frame_url.replace(/^https:\/\/[^/]+\//, '')
 		.replace(/ngf$/, 'concat.ngf');
 
 	const frame_stream = zlib.createGzip();
