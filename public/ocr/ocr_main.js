@@ -101,17 +101,16 @@ const tabsContainer = document.querySelector('#tabs'),
 	tabContentsContainer = document.querySelector('#tab-content'),
 	tabContents = document.querySelectorAll('#tab-content > div'),
 	room = document.querySelector('#room'),
+	set_ready = room.querySelector('button'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
 	device_selector = document.querySelector('#device'),
-	privacy = document.querySelector('#privacy'),
 	allow_video_feed = document.querySelector('#allow_video_feed'),
 	video_feed_selector = document.querySelector('#video_feed_device'),
 	video_feed = document.querySelector('#video_feed'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
-	controls = document.querySelector('#controls'),
 	instructions = document.querySelector('#instructions'),
 	capture_rate = document.querySelector('#capture_rate'),
 	show_parts = document.querySelector('#show_parts'),
@@ -583,8 +582,7 @@ function onShowPartsChanged() {
 	try {
 		adjustments.style.display = display;
 		config.source_canvas.style.display = display;
-	}
-	catch(err) {
+	} catch (err) {
 		// nothing to do here
 	}
 
@@ -647,6 +645,10 @@ function onFocusAlarmChanged() {
 }
 
 focus_alarm.addEventListener('change', onFocusAlarmChanged);
+
+set_ready.addEventListener('click', () => {
+	connection?.send(['setReady']);
+});
 
 // ====================
 // START: Image corrections
@@ -1807,7 +1809,7 @@ function loadRoomView() {
 	roomIFrame.setAttribute('height', 1080);
 	roomIFrame.setAttribute('src', url);
 
-	room.appendChild(roomIFrame);
+	room.querySelector('.view').appendChild(roomIFrame);
 
 	window.addEventListener('resize', resizeRoomIFrame);
 }
