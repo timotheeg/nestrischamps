@@ -154,7 +154,8 @@ device_selector.addEventListener('change', evt => {
 		initCaptureFromEverdrive(config.frame_rate);
 		saveConfig(config);
 
-		wizard.classList.add('is-hidden');
+		removeCalibrationTab();
+		showProducerUI();
 		tabs[1].click(); // data
 	} else {
 		playVideoFromConfig();
@@ -455,6 +456,7 @@ start_timer.addEventListener('click', evt => {
 });
 
 video.controls = false;
+video.style.cursor = 'crosshair';
 video.addEventListener('click', async evt => {
 	evt.preventDefault();
 	if (!pending_calibration || in_calibration) return;
@@ -559,8 +561,6 @@ video.addEventListener('click', async evt => {
 	trackAndSendFrames();
 
 	wizard.style.display = 'none';
-	privacy.style.display = 'block';
-	controls.style.display = 'block';
 
 	if (video.ntcType === 'device') {
 		brightness_slider.value = 1.75;
@@ -572,6 +572,7 @@ video.addEventListener('click', async evt => {
 	tabContentsContainer.classList.remove('is-hidden');
 	tabs[2].click();
 
+	video.style.cursor = null;
 	setTimeout(() => {
 		alert(
 			'Rough calibration has been completed 🎉!\n\nYou now MUST inspect and fine tune all the fields (location and size) to make them pixel perfect!'
@@ -582,8 +583,12 @@ video.addEventListener('click', async evt => {
 function onShowPartsChanged() {
 	const display = show_parts.checked ? 'block' : 'none';
 
-	adjustments.style.display = display;
-	config.source_canvas.style.display = display;
+	try {
+		adjustments.style.display = display;
+		config.source_canvas.style.display = display;
+	} catch (err) {
+		// nothing to do here
+	}
 
 	if (show_parts.checked) {
 		resetShowPartsTimer();
@@ -1792,6 +1797,7 @@ function loadRoomView() {
 
 	const iFrameStyles = {
 		border: 0,
+		margin: 'auto',
 		transformOrigin: `0 0`,
 	};
 
@@ -1817,6 +1823,11 @@ function resizeRoomIFrame() {
 		const scale = room.clientWidth / 1920;
 		roomIFrame.style.transform = `scale(${scale})`;
 	}
+}
+
+function removeCalibrationTab() {
+	[...tabs].find(tab => tab.dataset.target === 'calibration').remove();
+	document.getElementById('calibration').remove();
 }
 
 function initTabControls() {
@@ -1851,6 +1862,12 @@ function initTabControls() {
 			}
 		});
 	});
+}
+
+function showProducerUI() {
+	wizard.classList.add('is-hidden');
+	tabsContainer.classList.remove('is-hidden');
+	tabContentsContainer.classList.remove('is-hidden');
 }
 
 (async function init() {
@@ -1901,16 +1918,15 @@ function initTabControls() {
 		updateImageCorrection();
 
 		if (config.device_id === 'everdrive') {
+			removeCalibrationTab();
 			initCaptureFromEverdrive(config.frame_rate);
 		} else {
 			await playVideoFromConfig();
 			trackAndSendFrames();
 		}
 
-		tabs[1].click(); // data
-
-		tabsContainer.classList.remove('is-hidden');
-		tabContentsContainer.classList.remove('is-hidden');
+		tabs[1].click(); // data tab
+		showProducerUI();
 	} else {
 		await resetDevices();
 

@@ -11,6 +11,54 @@
 				margin: 1em;
 				line-height: 1.5em;
 			}
+
+			ul {
+				list-style: none;
+				padding: 0;
+			}
+
+			.tabs ul {
+				display: flex;
+				width: 100%;
+				border-radius: 1em;
+				flex-wrap: nowrap;
+				justify-content: space-evenly;
+			}
+
+			.tabs ul li {
+				flex-grow: 1;
+				text-align: center;
+				padding: 0.3em;
+				text-transform: uppercase;
+				cursor: pointer;
+			}
+
+			.tabs ul li:first-child {
+				border-radius: 1em 0 0 1em;
+			}
+
+			.tabs ul li:last-child {
+				border-radius: 0 1em 1em 0;
+			}
+
+			.tabs ul,
+			.tabs ul > li {
+				border-style: solid;
+				border-color: rgba(0, 0, 0, 0.3);
+			}
+			.tabs ul {
+				border-width: 2px 0 0 2px;
+			}
+			.tabs ul > li {
+				border-width: 0 2px 2px 0;
+			}
+
+			.tabs ul li.is-active {
+				color: white;
+				background-color: hsl(229deg, 53%, 53%);
+				border-color: hsl(229deg, 53%, 53%);
+			}
+
 			video#device_video {
 				/* display: none; */
 				width: 360px;
@@ -74,7 +122,8 @@
 			}
 
 			#inputs,
-			#extraction {
+			#extraction,
+			#room {
 				display: flex;
 				flex-direction: row;
 				flex-wrap: nowrap;
@@ -201,14 +250,14 @@
 			</div>
 		</fieldset>
 
-		<div id="tabs" class="tabs is-boxed is-fullwidth is-toggle is-hidden">
+		<nav id="tabs" class="tabs is-hidden">
 			<ul>
 				<li data-target="inputs"><a>Settings</a></li>
 				<li data-target="ocr_results"><a>Data</a></li>
 				<li data-target="calibration"><a>Calibration</a></li>
 				<li data-target="room"><a>Room View</a></li>
 			</ul>
-		</div>
+		</nav>
 
 		<div id="tab-content" class="is-hidden">
 			<div id="inputs">
