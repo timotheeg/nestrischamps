@@ -1161,8 +1161,7 @@ async function captureFrame() {
 			force_half_height = true;
 			// images are known to be 720x480
 			bitmap = await createImageBitmap(blob, 0, 0, 720, 480);
-		} else {
-			// we do cheap deinterlacing with pixelated resize...
+		} else if (video.videoWidth && video.videoHeight) {
 			bitmap = await createImageBitmap(
 				video,
 				0,
@@ -1173,7 +1172,9 @@ async function captureFrame() {
 		}
 		performance.mark('capture_end');
 
-		game_tracker.processFrame(bitmap, do_half_height || force_half_height);
+		if (bitmap) {
+			game_tracker.processFrame(bitmap, do_half_height || force_half_height);
+		}
 	} catch (err) {
 		console.error(err);
 	}
