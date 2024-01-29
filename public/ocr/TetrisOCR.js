@@ -126,9 +126,21 @@ export default class TetrisOCR extends EventTarget {
 				Math.round(GYM_PAUSE_CROP_RELATIVE_TO_FIELD[3] * scaleY),
 			];
 
-			this.gym_pause_task = { crop: gym_pause_crop_coordinates };
-
-			all_tasks.gym_pause = this.gym_pause_task;
+			// Safety check on capture area size (zero size is not acceptable)
+			if (
+				gym_pause_crop_coordinates[2] <= 0 ||
+				gym_pause_crop_coordinates[3] <= 0
+			) {
+				this.gym_pause_task = null;
+				console.warn(
+					`Unexpected zero-size gym crop coordinates [${gym_pause_crop_coordinates}] ` +
+						`(in relation to field crop coordinates [${field_crop}] - with scale factors ${scaleX}x${scaleY}). ` +
+						`Gym Pause scanning is disabled.`
+				);
+			} else {
+				this.gym_pause_task = { crop: gym_pause_crop_coordinates };
+				all_tasks.gym_pause = this.gym_pause_task;
+			}
 		}
 
 		// Note: This create a lot of imageData objects of similar sizes
