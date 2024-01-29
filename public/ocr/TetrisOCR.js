@@ -150,13 +150,10 @@ export default class TetrisOCR extends EventTarget {
 
 			if (name.length === 1) {
 				resize_tuple = TASK_RESIZE.piece_count;
+			} else if (name === 'score' && config.score7) {
+				resize_tuple = TASK_RESIZE.score7;
 			} else {
-				// special handling for score 6 vs 7 digits
-				if (name === 'score') {
-					resize_tuple = config.score7 ? TASK_RESIZE.score7 : TASK_RESIZE.score;
-				} else {
-					resize_tuple = TASK_RESIZE[name];
-				}
+				resize_tuple = TASK_RESIZE[name];
 			}
 
 			task.crop_img = new ImageData(w, h);
