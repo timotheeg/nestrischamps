@@ -554,7 +554,8 @@ class MatchRoom extends Room {
 				case 'setGameOver':
 				case 'cancelGameOver':
 				case 'focusPlayer':
-				case 'setReady': {
+				case 'setHideProfileCardOnNextGame':
+				case 'startCountDown': {
 					update_admin = false;
 					break; // simple passthrough
 				}

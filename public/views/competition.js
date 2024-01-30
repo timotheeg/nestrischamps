@@ -194,16 +194,20 @@ class TetrisCompetitionAPI {
 		players.forEach(player => player.setCurtainLogo(url));
 	}
 
-	setReady(isReady_or_player_Idx, ready = true) {
-		if (typeof isReady_or_player_Idx === 'number') {
-			if (ready) {
-				getPlayer(isReady_or_player_Idx).showCompMessage('READY');
-			} else {
-				getPlayer(isReady_or_player_Idx).hideCompMessage();
-			}
+	setReady(player_idx, ready = true) {
+		if (ready) {
+			getPlayer(player_idx).showCompMessage('READY');
 		} else {
-			players.forEach(player => player.setReady(isReady));
+			getPlayer(player_idx).hideCompMessage();
 		}
+	}
+
+	setHideProfileCardOnNextGame(do_hide) {
+		players.forEach(player => player.setHideProfileCardOnNextGame(do_hide));
+	}
+
+	startCountDown(seconds) {
+		players.forEach(player => player.startCountDown(seconds));
 	}
 
 	_repaintVictories(player_idx) {

@@ -101,7 +101,8 @@ const tabsContainer = document.querySelector('#tabs'),
 	tabContentsContainer = document.querySelector('#tab-content'),
 	tabContents = document.querySelectorAll('#tab-content > div'),
 	room = document.querySelector('#room'),
-	set_ready = room.querySelector('button'),
+	set_ready = room.querySelector('button#set-ready'),
+	not_ready = room.querySelector('button#not-ready'),
 	video_capture = document.querySelector('#video_capture'),
 	wizard = document.querySelector('#wizard'),
 	device_selector = document.querySelector('#device'),
@@ -648,6 +649,10 @@ focus_alarm.addEventListener('change', onFocusAlarmChanged);
 
 set_ready.addEventListener('click', () => {
 	connection?.send(['setReady']);
+});
+
+not_ready.addEventListener('click', () => {
+	connection?.send(['setReady', false]);
 });
 
 // ====================
