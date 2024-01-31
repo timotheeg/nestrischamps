@@ -4,7 +4,11 @@ const dom = {
 	roomid: document.querySelector('#roomid'),
 	producer_count: document.querySelector('#producer_count'),
 	bestof: document.querySelector('#bestof'),
-	set_ready: document.querySelector('#set_ready'),
+	setHideProfileCardOnNextGame: document.querySelector(
+		'#setHideProfileCardOnNextGame'
+	),
+	count_down: document.querySelector('#count_down'),
+	remove_count_down: document.querySelector('#remove_count_down'),
 	clear_victories: document.querySelector('#clear_victories'),
 	show_runways: document.querySelector('#show_runways'),
 	hide_runways: document.querySelector('#hide_runways'),
@@ -95,8 +99,14 @@ const remoteAPI = {
 	focusPlayer: function (player_idx) {
 		connection.send(['focusPlayer', player_idx]);
 	},
-	setReady: function (ready) {
-		connection.send(['setReady', ready]);
+	setHideProfileCardOnNextGame: function (do_hide) {
+		connection.send(['setHideProfileCardOnNextGame', do_hide]);
+	},
+	startCountDown: function (seconds) {
+		connection.send(['startCountDown', seconds]);
+	},
+	removeCompMessage: function () {
+		connection.send(['removeCompMessage']);
 	},
 };
 
@@ -393,8 +403,16 @@ function bootstrap() {
 	dom.curtain_logo_url.onchange = () =>
 		remoteAPI.setCurtainLogo(dom.curtain_logo_url.value);
 
-	dom.set_ready.addEventListener('click', () => {
-		remoteAPI.setReady(true);
+	dom.setHideProfileCardOnNextGame.addEventListener('click', () => {
+		remoteAPI.setHideProfileCardOnNextGame(true);
+	});
+
+	dom.count_down.addEventListener('click', () => {
+		remoteAPI.startCountDown(5);
+	});
+
+	dom.remove_count_down.addEventListener('click', () => {
+		remoteAPI.removeCompMessage();
 	});
 
 	dom.clear_victories.addEventListener('click', () => {

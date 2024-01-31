@@ -230,6 +230,89 @@
 				/* background: orange;
 				opacity: 0.5; /**/
 			}
+
+			.match.small {
+				transform: scale(0.7245042492917847); /* (1080-57)/706/2 */
+			}
+			#match2.small {
+				top: 511px;
+			}
+
+			.match.small .board {
+				--offset: 0;
+			}
+
+			.match.small .score,
+			.match.small .lines,
+			.match.small .next_piece,
+			.match.small .level,
+			.match.small .tetris_rate,
+			.match.small .drought {
+				--offset: 357px;
+			}
+
+			.match.small .score {
+				top: 0;
+			}
+
+			.match.small .next_piece {
+				z-index: 4;
+				top: 93px;
+			}
+
+			.match.small .lines {
+				z-index: 3;
+				width: 153px;
+				top: 186px;
+			}
+
+			.match.small .level {
+				z-index: 2;
+				top: 279px;
+				width: 97px;
+			}
+
+			.match.small .tetris_rate,
+			.match.small .drought {
+				top: 372px;
+				z-index: 1;
+			}
+
+			.match.small .score {
+				width: 302px;
+			}
+
+			.match.small .board {
+				top: 0;
+				z-index: 8;
+			}
+			.match.small .score {
+				z-index: 7;
+			}
+			.match.small .hearts {
+				bottom: unset;
+				top: 465px;
+			}
+			.match.small .name {
+				z-index: 6;
+				top: 0;
+				width: 608px;
+				--offset: 683px;
+			}
+			.match.small .player_vid {
+				top: 75px;
+				width: 965px;
+				height: 631px;
+			}
+
+			.match.small .simul-tetris {
+				top: 250px;
+				--offset: 574px;
+			}
+
+			.match.small .p2 > * {
+				left: var(--offset);
+			}
 		</style>
 	</head>
 	<body>
@@ -282,7 +365,8 @@
 		</template>
 
 		<div id="stream_bg">
-			<div id="match1" class="match"></div>
+			<div id="match1" class="match small"></div>
+			<div id="match2" class="match small"></div>
 
 			<div id="ticker"></div>
 
@@ -302,8 +386,8 @@
 			// custom view parameters which will be passed in the websocket URI
 			const view_meta = new URLSearchParams({
 				video: '1920x1080', // urgh, so big for so much space wasted :(
-				concurrent_2_matches: false,
-				players: 2,
+				concurrent_2_matches: true,
+				players: 4,
 			});
 		</script>
 		<script src="/vendor/peerjs.1.5.1.min.js"></script>
@@ -351,7 +435,7 @@
 			const player_template = document.getElementById('player');
 			const players = [];
 
-			[1].forEach(match_num => {
+			[1, 2].forEach(match_num => {
 				const match_node = document.getElementById(`match${match_num}`);
 
 				const match_players = [];
@@ -507,6 +591,72 @@
 			}
 
 			const competition = new Competition(players);
+
+			competition.API.setMatch = function (match_idx) {
+				if (match_idx !== 0 && match_idx !== 1) {
+					document.querySelectorAll('.match').forEach(match_node => {
+						match_node.classList.add('small');
+						match_node.style.display = null;
+					});
+
+					return;
+				}
+
+				let show_match, hide_match;
+
+				if (match_idx === 0) {
+					show_match = document.querySelector('#match1');
+					hide_match = document.querySelector('#match2');
+				} else {
+					show_match = document.querySelector('#match2');
+					hide_match = document.querySelector('#match1');
+				}
+
+				show_match.classList.remove('small');
+
+				hide_match.style.display = 'none';
+				show_match.style.display = null;
+			};
+
+			competition.API.showProfileCard = function (visible, match_idx) {
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
+
+				match_players.forEach(player => player.showProfileCard(visible));
+			};
+
+			competition.API.setWinner = function (player_idx) {
+				const match_idx = player_idx < 2 ? 0 : 1;
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
+
+				const winner = players[player_idx];
+				const loser = match_players.find(player => player !== winner);
+
+				loser.showLoserFrame();
+				winner.playWinnerAnimation();
+			};
+
+			for (let player_idx = 0; player_idx < players.length; player_idx += 2) {
+				const match_players = players.slice(player_idx, player_idx + 2);
+
+				const updateMatchStats = () => {
+					competition.computeScoreDifferentials(match_players);
+				};
+
+				match_players.forEach(player => {
+					player.onScore = updateMatchStats;
+				});
+			}
+
+			const match_value = QueryString.get('match');
+
+			if (/^([01]|both)$/.test(match_value)) {
+				competition.API.setMatch(
+					match_value == 'both' ? null : parseInt(match_value, 10)
+				);
+			} else {
+				// Layout starts 1 match view
+				competition.API.setMatch(0);
+			}
 
 			// expose API into window for debugging
 			window._players = players;

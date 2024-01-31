@@ -229,7 +229,7 @@ export default class Player {
 			...options,
 		};
 
-		this.ready = false;
+		this.hide_profile_card_on_next_game = false;
 
 		this.field_pixel_size =
 			this.options.field_pixel_size || this.options.pixel_size;
@@ -370,8 +370,8 @@ export default class Player {
 			display: 'none',
 			justifyContent: 'center',
 			alignItems: 'center',
-			fontSize: '1.5em',
-			lineHeight: '1.5em',
+			fontSize: '36px', // hardcoded is bad :'(
+			lineHeight: '36px',
 		});
 		this.comp_messages.hidden = true;
 		this.dom.field.appendChild(this.comp_messages);
@@ -453,8 +453,8 @@ export default class Player {
 	onCurtainDown() {}
 	onTetris() {}
 
-	setReady(isReady) {
-		this.ready = !!isReady;
+	setHideProfileCardOnNextGame(do_hide) {
+		this.hide_profile_card_on_next_game = !!do_hide;
 	}
 
 	showProfileCard(visible) {
@@ -553,20 +553,58 @@ export default class Player {
 		this.curtain_container.style.top = `-${this.bg_height}px`;
 	}
 
-	showCompMessage(message, double_size = false) {
-		this.comp_messages.innerHTML = '';
-		const msg_container = document.createElement('div');
-		msg_container.innerText = message;
-		this.comp_messages.style.display = 'flex';
-		if (double_size) {
-			this.comp_messages.style.fontSize = '2em';
+	showCompMessage(message, large = false, fade = 0) {
+		Object.assign(this.comp_messages.style, {
+			transition: null,
+			color: 'white',
+			display: 'flex',
+			fontSize: large ? '48px' : '36px',
+		});
+		this.comp_messages.innerText = message;
+
+		if (message && fade) {
+			setTimeout(
+				() =>
+					Object.assign(this.comp_messages.style, {
+						transition: `color ${fade}ms linear`,
+						color: 'black',
+					}),
+				20
+			); // urgh, this delay sucks T_T !!
 		}
-		this.comp_messages.append(msg_container);
 	}
 
 	hideCompMessage() {
+		if (this.count_down_timer) {
+			this.count_down_timer = clearTimeout(this.count_down_timer);
+		}
 		this.comp_messages.style.display = 'none';
-		this.comp_messages.style.fontSize = '1.5em';
+	}
+
+	setReady(ready) {
+		if (this.count_down_timer) return; // player ready state has less priority than count down
+
+		if (ready) {
+			this.showCompMessage('READY');
+		} else {
+			this.hideCompMessage();
+		}
+	}
+
+	startCountDown(seconds = 5) {
+		this.count_down_timer = clearTimeout(this.count_down_timer);
+
+		const showRemainingTime = () => {
+			this.showCompMessage(seconds || '', true, 1000);
+
+			if (seconds--) {
+				this.count_down_timer = setTimeout(showRemainingTime, 1000);
+			} else {
+				this.count_down_timer = null;
+			}
+		};
+
+		showRemainingTime();
 	}
 
 	_doTetris() {
@@ -825,11 +863,12 @@ export default class Player {
 		this._renderLines(last_frame);
 		this._renderPiece(last_frame);
 
-		if (this.ready) {
+		if (this.hide_profile_card_on_next_game) {
 			this.showProfileCard(false);
 		}
+		this.hide_profile_card_on_next_game = false;
 
-		this.ready = false;
+		this.hideCompMessage();
 	}
 
 	_renderValidFrame(frame) {

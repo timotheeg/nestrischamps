@@ -194,8 +194,20 @@ class TetrisCompetitionAPI {
 		players.forEach(player => player.setCurtainLogo(url));
 	}
 
-	setReady(isReady) {
-		players.forEach(player => player.setReady(isReady));
+	setReady(player_idx, ready = true) {
+		getPlayer(player_idx).setReady(ready);
+	}
+
+	setHideProfileCardOnNextGame(do_hide) {
+		players.forEach(player => player.setHideProfileCardOnNextGame(do_hide));
+	}
+
+	startCountDown(seconds) {
+		players.forEach(player => player.startCountDown(seconds));
+	}
+
+	removeCompMessage() {
+		players.forEach(player => player.hideCompMessage());
 	}
 
 	_repaintVictories(player_idx) {
