@@ -566,10 +566,10 @@ export default class Player {
 			setTimeout(
 				() =>
 					Object.assign(this.comp_messages.style, {
-						transition: `color ${fade}ms ease-in`,
+						transition: `color ${fade}ms linear`,
 						color: 'black',
 					}),
-				25
+				20
 			); // urgh, this delay sucks T_T !!
 		}
 	}
