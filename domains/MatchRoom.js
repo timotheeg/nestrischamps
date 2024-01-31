@@ -187,6 +187,15 @@ class MatchRoom extends Room {
 
 			const view_meta = this.getViewMeta();
 
+			// type cast known view meta data
+			if ('concurrent_2_matches' in view_meta) {
+				view_meta.concurrent_2_matches =
+					view_meta.concurrent_2_matches === 'true';
+			}
+			if ('players' in view_meta) {
+				view_meta.players = parseInt(view_meta.players, 10);
+			}
+
 			if (this.state.concurrent_2_matches !== view_meta.concurrent_2_matches) {
 				this.state.concurrent_2_matches = view_meta.concurrent_2_matches;
 				this.state.selected_match = null;
