@@ -648,7 +648,7 @@ function onFocusAlarmChanged() {
 focus_alarm.addEventListener('change', onFocusAlarmChanged);
 
 set_ready.addEventListener('click', () => {
-	connection?.send(['setReady']);
+	connection?.send(['setReady', true]);
 });
 
 not_ready.addEventListener('click', () => {

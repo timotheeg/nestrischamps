@@ -195,11 +195,7 @@ class TetrisCompetitionAPI {
 	}
 
 	setReady(player_idx, ready = true) {
-		if (ready) {
-			getPlayer(player_idx).showCompMessage('READY');
-		} else {
-			getPlayer(player_idx).hideCompMessage();
-		}
+		getPlayer(player_idx).setReady(ready);
 	}
 
 	setHideProfileCardOnNextGame(do_hide) {

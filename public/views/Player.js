@@ -566,6 +566,16 @@ export default class Player {
 		this.comp_messages.style.display = 'none';
 	}
 
+	setReady(ready) {
+		if (this.count_down_timer) return; // player ready state has less priority than count down
+
+		if (ready) {
+			this.showCompMessage('READY');
+		} else {
+			this.hideCompMessage();
+		}
+	}
+
 	startCountDown(seconds = 5) {
 		this.count_down_timer = clearTimeout(this.count_down_timer);
 
