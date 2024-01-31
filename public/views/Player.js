@@ -553,13 +553,25 @@ export default class Player {
 		this.curtain_container.style.top = `-${this.bg_height}px`;
 	}
 
-	showCompMessage(message, large = false) {
-		this.comp_messages.innerHTML = '';
-		const msg_container = document.createElement('div');
-		msg_container.innerText = message;
-		this.comp_messages.style.display = 'flex';
-		this.comp_messages.style.fontSize = large ? '48px' : '36px';
-		this.comp_messages.append(msg_container);
+	showCompMessage(message, large = false, fade = 0) {
+		Object.assign(this.comp_messages.style, {
+			transition: null,
+			color: 'white',
+			display: 'flex',
+			fontSize: large ? '48px' : '36px',
+		});
+		this.comp_messages.innerText = message;
+
+		if (message && fade) {
+			setTimeout(
+				() =>
+					Object.assign(this.comp_messages.style, {
+						transition: `color ${fade}ms ease-in`,
+						color: 'black',
+					}),
+				25
+			); // urgh, this delay sucks T_T !!
+		}
 	}
 
 	hideCompMessage() {
@@ -580,9 +592,9 @@ export default class Player {
 		this.count_down_timer = clearTimeout(this.count_down_timer);
 
 		const showRemainingTime = () => {
-			this.showCompMessage(seconds--, true);
+			this.showCompMessage(seconds || '', true, 1000);
 
-			if (seconds >= 0) {
+			if (seconds--) {
 				this.count_down_timer = setTimeout(showRemainingTime, 1000);
 			} else {
 				this.count_down_timer = null;
