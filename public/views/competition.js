@@ -206,6 +206,10 @@ class TetrisCompetitionAPI {
 		players.forEach(player => player.startCountDown(seconds));
 	}
 
+	removeCompMessage() {
+		players.forEach(player => player.hideCompMessage());
+	}
+
 	_repaintVictories(player_idx) {
 		const player = players[player_idx]; // direct access... not great
 		const victories = this.victories[player_idx];

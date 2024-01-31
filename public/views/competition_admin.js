@@ -8,6 +8,7 @@ const dom = {
 		'#setHideProfileCardOnNextGame'
 	),
 	count_down: document.querySelector('#count_down'),
+	remove_count_down: document.querySelector('#remove_count_down'),
 	clear_victories: document.querySelector('#clear_victories'),
 	show_runways: document.querySelector('#show_runways'),
 	hide_runways: document.querySelector('#hide_runways'),
@@ -103,6 +104,9 @@ const remoteAPI = {
 	},
 	startCountDown: function (seconds) {
 		connection.send(['startCountDown', seconds]);
+	},
+	removeCompMessage: function () {
+		connection.send(['removeCompMessage']);
 	},
 };
 
@@ -405,6 +409,10 @@ function bootstrap() {
 
 	dom.count_down.addEventListener('click', () => {
 		remoteAPI.startCountDown(5);
+	});
+
+	dom.remove_count_down.addEventListener('click', () => {
+		remoteAPI.removeCompMessage();
 	});
 
 	dom.clear_victories.addEventListener('click', () => {

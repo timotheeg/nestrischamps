@@ -575,6 +575,9 @@ export default class Player {
 	}
 
 	hideCompMessage() {
+		if (this.count_down_timer) {
+			this.count_down_timer = clearTimeout(this.count_down_timer);
+		}
 		this.comp_messages.style.display = 'none';
 	}
 
@@ -865,9 +868,6 @@ export default class Player {
 		}
 		this.hide_profile_card_on_next_game = false;
 
-		if (this.count_down_timer) {
-			this.count_down_timer = clearTimeout(this.count_down_timer);
-		}
 		this.hideCompMessage();
 	}
 
