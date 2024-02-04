@@ -25,90 +25,15 @@ const dom = {
 
 const MAX_BEST_OF = 13;
 
-// TODO: refactor into dynamic forwarder -_-
-const remoteAPI = {
-	setBestOf: function (n) {
-		connection.send(['setBestOf', n]);
-	},
-	setCurtainLogo: function (url) {
-		connection.send(['setCurtainLogo', url]);
-	},
-	addPlayer: function () {
-		connection.send(['addPlayer']);
-	},
-	setPlayer: function (player_idx, user_id) {
-		connection.send(['setPlayer', player_idx, user_id]);
-	},
-	setPlayerOnBehalfOfUser: function (player_idx, user_id) {
-		connection.send(['setPlayerOnBehalfOfUser', player_idx, user_id]);
-	},
-	setVictories: function (player_idx, num_wins) {
-		connection.send(['setVictories', player_idx, num_wins]);
-	},
-	setWinner: function (player_idx) {
-		connection.send(['setWinner', player_idx]);
-	},
-	setGameOver: function (player_idx) {
-		connection.send(['setGameOver', player_idx]);
-	},
-	cancelGameOver: function (player_idx) {
-		connection.send(['cancelGameOver', player_idx]);
-	},
-	removePlayer: function (player_idx) {
-		connection.send(['removePlayer', player_idx]);
-	},
-	setDisplayName: function (player_idx, name) {
-		connection.send(['setDisplayName', player_idx, name]);
-	},
-	setProfileImageURL: function (player_idx, url) {
-		connection.send(['setProfileImageURL', player_idx, url]);
-	},
-	setCountryCode: function (player_idx, country_code) {
-		connection.send(['setCountryCode', player_idx, country_code]);
-	},
-	restartCamera: function (player_idx) {
-		connection.send(['restartCamera', player_idx]);
-	},
-	mirrorCamera: function (player_idx) {
-		connection.send(['mirrorCamera', player_idx]);
-	},
-	resetVictories: function () {
-		connection.send(['resetVictories']);
-	},
-	showRunways: function () {
-		connection.send(['showRunways']);
-	},
-	hideRunways: function () {
-		connection.send(['hideRunways']);
-	},
-	playVictoryAnimation: function (player_idx) {
-		connection.send(['playVictoryAnimation', player_idx]);
-	},
-	clearVictoryAnimation: function (player_idx) {
-		connection.send(['clearVictoryAnimation', player_idx]);
-	},
-	setMatch: function (match_idx) {
-		connection.send(['setMatch', match_idx]);
-	},
-	showProfileCard: function (visible, match_idx) {
-		connection.send(['showProfileCard', visible, match_idx]);
-	},
-	allowAutoJoin: function (allow) {
-		connection.send(['allowAutoJoin', allow]);
-	},
-	focusPlayer: function (player_idx) {
-		connection.send(['focusPlayer', player_idx]);
-	},
-	setHideProfileCardOnNextGame: function (do_hide) {
-		connection.send(['setHideProfileCardOnNextGame', do_hide]);
-	},
-	startCountDown: function (seconds) {
-		connection.send(['startCountDown', seconds]);
-	},
-	removeCompMessage: function () {
-		connection.send(['removeCompMessage']);
+const apiHandler = {
+	get(target, prop, receiver) {
+		return function (...args) {
+			connection && connection.send([prop, ...args]);
+		};
 	},
 };
+
+const remoteAPI = new Proxy({}, apiHandler);
 
 const players = [];
 let room_data;
