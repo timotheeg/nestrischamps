@@ -1796,6 +1796,7 @@ function loadRoomView() {
 	const url = new URL(document.location);
 	url.pathname = url.pathname.replace(/\/producer$/, '/view/ctwc23'); // is a 1080p layout
 	url.search = new URLSearchParams({
+		tetris_sound: 0,
 		video: 0,
 		bg: 0,
 		in_producer: 1,
