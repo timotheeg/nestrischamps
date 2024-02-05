@@ -206,8 +206,8 @@ class TetrisCompetitionAPI {
 		players.forEach(player => player.startCountDown(seconds));
 	}
 
-	removeCompMessage() {
-		players.forEach(player => player.hideCompMessage());
+	clearFieldOverlays() {
+		players.forEach(player => player.clearFieldOverlays());
 	}
 
 	_repaintVictories(player_idx) {

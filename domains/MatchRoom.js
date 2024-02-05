@@ -565,7 +565,7 @@ class MatchRoom extends Room {
 				case 'focusPlayer':
 				case 'setHideProfileCardOnNextGame':
 				case 'startCountDown':
-				case 'removeCompMessage': {
+				case 'clearFieldOverlays': {
 					update_admin = false;
 					break; // simple passthrough
 				}

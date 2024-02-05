@@ -574,11 +574,17 @@ export default class Player {
 		}
 	}
 
-	hideCompMessage() {
+	_hideCompMessage() {
 		if (this.count_down_timer) {
 			this.count_down_timer = clearTimeout(this.count_down_timer);
 		}
 		this.comp_messages.style.display = 'none';
+	}
+
+	clearFieldOverlays() {
+		this._hideCompMessage();
+		this._hideCurtain();
+		this.showProfileCard(false);
 	}
 
 	setReady(ready) {
@@ -587,12 +593,14 @@ export default class Player {
 		if (ready) {
 			this.showCompMessage('READY');
 		} else {
-			this.hideCompMessage();
+			this._hideCompMessage();
 		}
 	}
 
 	startCountDown(seconds = 5) {
 		this.count_down_timer = clearTimeout(this.count_down_timer);
+		this.only_show_admin_started_game = true;
+		this.admin_only_pending_game = true;
 
 		const showRemainingTime = () => {
 			this.showCompMessage(seconds || '', true, 1000);
@@ -868,7 +876,7 @@ export default class Player {
 		}
 		this.hide_profile_card_on_next_game = false;
 
-		this.hideCompMessage();
+		this._hideCompMessage();
 	}
 
 	_renderValidFrame(frame) {
