@@ -235,6 +235,23 @@
 	<body>
 		<template id="player">
 			<div class="player">
+				<div class="custom_curtain">
+					<br />
+					<br />
+					<br />
+					<img src="/images/league/CTL_logo.png" style="max-width: 260px" />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<img src="/brand/logo.v3.white.3x.png" style="max-width: 95px" />
+					<br />
+					<br />
+					<br />
+				</div>
+
 				<video class="player_vid"></video>
 
 				<div class="box hearts">&nbsp;</div>
@@ -365,6 +382,10 @@
 					const player_node = player_fragment.querySelector('.player');
 
 					player_node.classList.add(`p${player_num}`);
+
+					const curtain = player_node.querySelector('.custom_curtain');
+					curtain.remove();
+
 					match_node.appendChild(player_node);
 
 					const player = new CompetitionPlayer(
@@ -388,6 +409,8 @@
 							name_box: player_node.querySelector(`.name`),
 
 							simul_tetris: player_node.querySelector(`.simul-tetris`),
+
+							curtain,
 						},
 						{
 							field_pixel_size: 4.25,
