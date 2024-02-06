@@ -226,7 +226,7 @@ class MatchRoom extends Room {
 
 				connection.send(['setPeerId', pidx, user.getProducer().getPeerId()]);
 
-				if (is_secret_view) return;
+				if (!is_secret_view) return;
 
 				user.getProducer().send(['makePlayer', pidx, this.getViewMeta()]); // could be too fast for call to work ??
 			}
