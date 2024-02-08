@@ -101,6 +101,15 @@ export const TRANSITIONS = {
 	17: 120,
 	18: 130,
 	19: 140,
+	20: 150,
+	21: 160,
+	22: 170,
+	23: 180,
+	24: 190,
+	25: 200,
+	26: 200,
+	27: 200,
+	28: 200,
 	29: 200,
 };
 
@@ -121,37 +130,33 @@ export const RUNWAY = {
 	LV39: 'LV39',
 };
 
-export const RUNWAYS = _getRunways();
-
 DAS_THRESHOLDS[-1] = 'absent';
 
-function _getRunways() {
-	const runways = {};
+function _computeAndGetRunway(start_level) {
+	const transition_lines = TRANSITIONS[start_level];
 
-	for (let [start_level, transition_lines] of Object.entries(TRANSITIONS)) {
-		start_level = parseInt(start_level, 10);
-
-		const thresholds_lines = {
-			[RUNWAY.TRANSITION]: transition_lines,
-		};
-
-		if (start_level < 19) {
-			thresholds_lines[RUNWAY.LV19] =
-				190 - ((start_level + 1) * 10 - transition_lines);
-		}
-		if (start_level < 29) {
-			thresholds_lines[RUNWAY.LV29] =
-				290 - ((start_level + 1) * 10 - transition_lines);
-		}
-		if (start_level < 39) {
-			thresholds_lines[RUNWAY.LV39] =
-				390 - ((start_level + 1) * 10 - transition_lines);
-		}
-
-		runways[start_level] = _getRunwayForLevel(start_level, thresholds_lines);
+	if (!transition_lines) {
+		return null;
 	}
 
-	return runways;
+	const thresholds_lines = {
+		[RUNWAY.TRANSITION]: transition_lines,
+	};
+
+	if (start_level < 19) {
+		thresholds_lines[RUNWAY.LV19] =
+			190 - ((start_level + 1) * 10 - transition_lines);
+	}
+	if (start_level < 29) {
+		thresholds_lines[RUNWAY.LV29] =
+			290 - ((start_level + 1) * 10 - transition_lines);
+	}
+	if (start_level < 39) {
+		thresholds_lines[RUNWAY.LV39] =
+			390 - ((start_level + 1) * 10 - transition_lines);
+	}
+
+	return _getRunwayForLevel(start_level, thresholds_lines);
 }
 
 function _getRunwayForLevel(start_level, thresholds_lines) {
@@ -204,9 +209,17 @@ function _getRunwayForLevel(start_level, thresholds_lines) {
 	return runways;
 }
 
+const RUNWAYS = {};
+
 export function getRunway(start_level, type, lines) {
+	let targetRunways = RUNWAYS[start_level];
+
+	if (targetRunways === undefined) {
+		targetRunways = RUNWAYS[start_level] = _computeAndGetRunway(start_level);
+	}
+
 	try {
-		return RUNWAYS[start_level][type][lines] || 0;
+		return targetRunways[type][lines] || 0;
 	} catch (err) {
 		console.warn(`Runway unavailable ${[start_level, type, lines]}`);
 		return 0;
