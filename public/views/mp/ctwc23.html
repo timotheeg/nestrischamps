@@ -844,6 +844,10 @@
 						} else {
 							resetRunways();
 						}
+
+						if (show_runways === true) {
+							player.dom.runways_box.classList.add('visible');
+						}
 					};
 
 					player.onGameOver = () => {
@@ -860,7 +864,9 @@
 								}
 							}
 						}
-						player.dom.runways_box.classList.remove('visible');
+						if (show_runways !== true) {
+							player.dom.runways_box.classList.remove('visible');
+						}
 					};
 
 					if (hasAds) {
