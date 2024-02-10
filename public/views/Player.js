@@ -408,6 +408,8 @@ export default class Player extends EventTarget {
 			tetris: new Audio('/views/Tetris_Clear.mp3'),
 		};
 
+		this.sounds.tetris.volume = 0.5;
+
 		this.options.stereo = clamp(this.options.stereo, -1, 1);
 
 		Object.entries(this.sounds).forEach(([sound, audio]) => {
