@@ -7,7 +7,7 @@ const voiceNameRe =
 	QueryString.get('botvoice') && /^[a-z]+$/i.test(QueryString.get('botvoice'))
 		? new RegExp(`^${QueryString.get('botvoice')}`, 'i')
 		: /^daniel/i;
-const botInterval = /^$\d+/.test(QueryString.get('botinterval'))
+const botInterval = /^\d+$/.test(QueryString.get('botinterval'))
 	? parseInt(QueryString.get('botinterval'), 10) * 1000
 	: 30 * 1000;
 const botRate = 1.25;
