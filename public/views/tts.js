@@ -13,13 +13,18 @@ const lang = QueryString.get('lang') || 'en';
 const voice_map = {};
 const speak_queue = []; // TODO can we just use SpeechSynthesis built-in queue instead of our own queue?
 
+const pending_voice_assignements = [];
+
+let all_voices = [];
 let acquire_voices_tries = 20;
 let cur_voice_index = 0;
 let speaking = false;
 let voices = [];
 
 function getVoices() {
-	const all_voices = window.speechSynthesis.getVoices();
+	if (all_voices.length) return; // run only once!
+
+	all_voices.push(...window.speechSynthesis.getVoices());
 
 	if (all_voices.length <= 0) {
 		if (acquire_voices_tries--) {
@@ -29,6 +34,22 @@ function getVoices() {
 		}
 
 		return;
+	}
+
+	while (pending_voice_assignements.length) {
+		const { username, voiceNameRe } = pending_voice_assignements.shift();
+		let voice = all_voices.find(
+			v => voiceNameRe.test(v.name) && v.lang.split('-')[0] === lang
+		);
+		if (!voice) {
+			voice = all_voices.find(v => v.default && v.lang.split('-')[0] === lang);
+		}
+		console.log(
+			`delayed voice assignment for ${username}:`,
+			voice,
+			voiceNameRe
+		);
+		voice_map[username] = voice;
 	}
 
 	voices = shuffle(all_voices.filter(v => v.lang.split('-')[0] === lang));
@@ -43,6 +64,22 @@ function hasVoice(username) {
 	return !!voice_map[username];
 }
 
+export function assignUserVoice(username, { voice, voiceNameRe }) {
+	if (voice) {
+		voice_map[username] = voice;
+	} else if (voiceNameRe) {
+		if (all_voices.length <= 0) {
+			pending_voice_assignements.push({ username, voiceNameRe });
+		} else {
+			voice_map[username] = all_voices.find(v => voiceNameRe.test(v.name));
+		}
+	} else {
+		console.warn(
+			`assignUserVoice(): called with invalid parameters for user (${username})`
+		);
+	}
+}
+
 function getUserVoice(username) {
 	let voice = voice_map[username];
 
@@ -50,7 +87,7 @@ function getUserVoice(username) {
 		voice = voices[cur_voice_index];
 		cur_voice_index = ++cur_voice_index % voices.length;
 
-		voice_map[username] = voice;
+		assignUserVoice(username, { voice });
 	}
 
 	return voice;
@@ -61,6 +98,8 @@ function speakNow(chatter) {
 	const utterance = new SpeechSynthesisUtterance(
 		(chatter.message || '').replace(URL_RE, 'link')
 	);
+
+	utterance.rate = chatter.rate ?? 1;
 
 	if (voice) {
 		utterance.voice = voice;
@@ -110,7 +149,7 @@ getVoices();
 
 function noop() {}
 
-export default function speak(chatter, { now = false, callback = noop } = {}) {
+export function speak(chatter, { now = false, callback = noop } = {}) {
 	if (voices.length <= 0) return;
 	if (chatter.username == 'classictetrisbot') return;
 
@@ -134,3 +173,5 @@ export default function speak(chatter, { now = false, callback = noop } = {}) {
 		speakNext();
 	}
 }
+
+export default speak;

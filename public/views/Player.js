@@ -91,7 +91,6 @@ const BORDER_BLOCKS = [
 ];
 
 const PASSTHROUGH_HANDLERS = [
-	'onGameStart',
 	'onDroughtStart',
 	'onDroughtEnd',
 	'onKillScreen',
@@ -218,8 +217,12 @@ const DEFAULT_OPTIONS = {
 	format_drought: v => v,
 };
 
-export default class Player {
+export default class Player extends EventTarget {
 	constructor(dom, options) {
+		super();
+		// add an alias
+		this.on = this.addEventListener;
+
 		this.dom = {
 			...DEFAULT_DOM_REFS,
 			...dom,
@@ -434,6 +437,7 @@ export default class Player {
 		this._renderTransition = this._renderTransition.bind(this);
 		this._renderPiece = this._renderPiece.bind(this);
 		this._renderNewGame = this._renderNewGame.bind(this);
+		this._onGameStart = this._onGameStart.bind(this);
 		this._renderGameOver = this._renderGameOver.bind(this);
 		this._doTetris = this._doTetris.bind(this);
 
@@ -768,7 +772,7 @@ export default class Player {
 
 		this.game = new BaseGame();
 
-		// Handlers with local rendering actions
+		// Handlers with local rendering actions or custom behaviours
 		this.game.onScore = this._renderScore;
 		this.game.onPiece = this._renderPiece;
 		this.game.onLines = this._renderLines;
@@ -777,6 +781,7 @@ export default class Player {
 		this.game.onNewGame = this._renderNewGame;
 		this.game.onValidFrame = this._renderValidFrame;
 		this.game.onTetris = this._doTetris;
+		this.game.onGameStart = this._onGameStart;
 		this.game.onGameOver = this._renderGameOver;
 
 		// Pass-throughs handlers
@@ -792,7 +797,7 @@ export default class Player {
 
 		// Stop listening to any game events to prevent accidental rendering
 
-		// Handlers with local rendering actions
+		// Handlers with local rendering actions or custom behaviours
 		delete this.game.onScore;
 		delete this.game.onPiece;
 		delete this.game.onLines;
@@ -800,6 +805,7 @@ export default class Player {
 		delete this.game.onNewGame;
 		delete this.game.onValidFrame;
 		delete this.game.onTetris;
+		delete this.game.onGameStart;
 		delete this.game.onGameOver;
 
 		// Pass-throughs handlers
@@ -976,6 +982,11 @@ export default class Player {
 		this.onPiece(frame);
 	}
 
+	_onGameStart(frame) {
+		this.onGameStart();
+		this.dispatchEvent(new Event('gamestart'));
+	}
+
 	_renderGameOver(frame) {
 		if (frame) {
 			this._renderScore(frame); // locks the runway and projection scores
@@ -983,6 +994,7 @@ export default class Player {
 
 		this._showCurtain();
 		this.onGameOver();
+		this.dispatchEvent(new Event('gameover'));
 	}
 
 	renderPreview(level, preview) {
