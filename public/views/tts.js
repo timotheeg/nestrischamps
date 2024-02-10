@@ -6,14 +6,14 @@ import { shuffle } from '/views/utils.js';
 
 const URL_RE = /\bhttps?:\/\/[^\s]+\b/g;
 const SPEECH_PAUSE = 1000;
-const VOICES_DELAY = 25;
+const VOICES_DELAY = 50;
 
 const synth = window.speechSynthesis;
 const lang = QueryString.get('lang') || 'en';
 const voice_map = {};
 const speak_queue = []; // TODO can we just use SpeechSynthesis built-in queue instead of our own queue?
 
-let acquire_voices_tries = 5;
+let acquire_voices_tries = 20;
 let cur_voice_index = 0;
 let speaking = false;
 let voices = [];
@@ -25,7 +25,7 @@ function getVoices() {
 		if (acquire_voices_tries--) {
 			setTimeout(getVoices, VOICES_DELAY);
 		} else {
-			console.log('Unable to get voices');
+			console.warn('Unable to get voices');
 		}
 
 		return;
@@ -93,13 +93,14 @@ function speakNext() {
 	const callback = chatter.callback;
 
 	chatter.callback = () => {
-		speaking = false;
-
 		try {
 			callback();
 		} catch (err) {}
 
-		setTimeout(speakNext, SPEECH_PAUSE);
+		setTimeout(() => {
+			speaking = false;
+			speakNext();
+		}, SPEECH_PAUSE);
 	};
 
 	const utterance = speakNow(chatter);
