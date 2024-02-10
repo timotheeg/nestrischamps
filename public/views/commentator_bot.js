@@ -2,15 +2,17 @@ import QueryString from '/js/QueryString.js';
 import { assignUserVoice, speak } from '/views/tts.js';
 
 const botName = '_ntc_commentator_bot';
-const lang = QueryString.get('lang') || 'en';
+const lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
+	? QueryString.get('lang')
+	: 'en';
 const voiceNameRe =
 	QueryString.get('botvoice') && /^[a-z]+$/i.test(QueryString.get('botvoice'))
 		? new RegExp(`^${QueryString.get('botvoice')}`, 'i')
-		: /^daniel/i;
+		: /^(daniel|thomas)/i;
 const botInterval = /^\d+$/.test(QueryString.get('botinterval'))
 	? parseInt(QueryString.get('botinterval'), 10) * 1000
 	: 30 * 1000;
-const botRate = 1.25;
+const botRate = lang.startsWith('en') ? 1.15 : 1; // speed up is not the same in all browsers :'(
 
 export class MatchCommentatorBot {
 	constructor(players) {
@@ -53,16 +55,15 @@ export class MatchCommentatorBot {
 					{
 						username: botName,
 						rate: botRate,
-						message:
-							lang === 'fr'
-								? `Player ${
-										playerIdx + 1
-								  } takes the game with ${this.#getEnglishScore(
-										player.getScore()
-								  )}.`
-								: `Joueur ${playerIdx + 1} gagne avec ${this.#getFrenchScore(
-										player.getScore()
-								  )}.`,
+						message: lang.startsWith('fr')
+							? `Player ${
+									playerIdx + 1
+							  } takes the game with ${this.#getEnglishScore(
+									player.getScore()
+							  )}.`
+							: `Joueur ${playerIdx + 1} gagne avec ${this.#getFrenchScore(
+									player.getScore()
+							  )}.`,
 					},
 					{
 						now: true,
@@ -75,14 +76,13 @@ export class MatchCommentatorBot {
 				{
 					username: botName,
 					rate: botRate,
-					message:
-						lang === 'fr'
-							? `CHASE DOWN! Player ${
-									otherPlayerIdx + 1
-							  } needs ${this.#getEnglishScore(upperThousand * 1000)}.`
-							: `COURSE! Joueur ${
-									otherPlayerIdx + 1
-							  } a besoin de ${this.#getFrenchScore(upperThousand * 1000)}.`,
+					message: lang.startsWith('fr')
+						? `CHASE DOWN! Player ${
+								otherPlayerIdx + 1
+						  } needs ${this.#getEnglishScore(upperThousand * 1000)}.`
+						: `COURSE! Joueur ${
+								otherPlayerIdx + 1
+						  } a besoin de ${this.#getFrenchScore(upperThousand * 1000)}.`,
 				},
 				{
 					now: true,
@@ -118,7 +118,7 @@ export class MatchCommentatorBot {
 
 	#getPlayerScoreUpdate(playerIdx) {
 		const score = this.players[playerIdx].getScore();
-		if (lang === 'fr') {
+		if (lang.startsWith('fr')) {
 			const frScore = this.#getFrenchScore(score);
 			return `joueur ${playerIdx + 1}: ${frScore}`;
 		}
@@ -132,7 +132,7 @@ export class MatchCommentatorBot {
 			{
 				username: botName,
 				rate: botRate,
-				message: lang === 'fr' ? 'Les scores' : 'Score update',
+				message: lang.startsWith('fr') ? 'Les scores' : 'Score update',
 			},
 			{
 				now: true,

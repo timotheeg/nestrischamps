@@ -9,7 +9,9 @@ const SPEECH_PAUSE = 1000;
 const VOICES_DELAY = 50;
 
 const synth = window.speechSynthesis;
-const lang = QueryString.get('lang') || 'en';
+const lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
+	? QueryString.get('lang')
+	: 'en-GB';
 const voice_map = {};
 const speak_queue = []; // TODO can we just use SpeechSynthesis built-in queue instead of our own queue?
 
@@ -20,6 +22,23 @@ let acquire_voices_tries = 20;
 let cur_voice_index = 0;
 let speaking = false;
 let voices = [];
+
+function langMatch(l) {
+	return lang.includes('-') ? l === lang : l.startsWith(lang);
+}
+
+function getVoice(nameRe, lang) {
+	const voices = window.speechSynthesis.getVoices();
+	let voice = voices.find(v => nameRe.test(v.name) && langMatch(v.lang));
+
+	if (!voice) {
+		const filteredVoices = voices.filter(v => v.default && langMatch(v.lang));
+		voice = shuffle(filteredVoices)[0];
+	}
+
+	console.log(`Voice Selected`, voice);
+	return voice;
+}
 
 function getVoices() {
 	if (all_voices.length) return; // run only once!
@@ -38,12 +57,7 @@ function getVoices() {
 
 	while (pending_voice_assignements.length) {
 		const { username, voiceNameRe } = pending_voice_assignements.shift();
-		let voice = all_voices.find(
-			v => voiceNameRe.test(v.name) && v.lang.split('-')[0] === lang
-		);
-		if (!voice) {
-			voice = all_voices.find(v => v.default && v.lang.split('-')[0] === lang);
-		}
+		const voice = getVoice(voiceNameRe, lang);
 		console.log(
 			`delayed voice assignment for ${username}:`,
 			voice,
@@ -52,12 +66,10 @@ function getVoices() {
 		voice_map[username] = voice;
 	}
 
-	voices = shuffle(all_voices.filter(v => v.lang.split('-')[0] === lang));
+	voices = shuffle(all_voices.filter(v => langMatch(v.lang)));
 
 	// Assign Daniel UK as system voice
-	voice_map._system = all_voices.find(
-		v => v.lang === 'en-GB' && v.name.toLowerCase().startsWith('daniel')
-	);
+	voice_map._system = getVoice(/^daniel/i, lang);
 }
 
 function hasVoice(username) {
@@ -71,7 +83,7 @@ export function assignUserVoice(username, { voice, voiceNameRe }) {
 		if (all_voices.length <= 0) {
 			pending_voice_assignements.push({ username, voiceNameRe });
 		} else {
-			voice_map[username] = all_voices.find(v => voiceNameRe.test(v.name));
+			voice_map[username] = getVoice(voiceNameRe, lang);
 		}
 	} else {
 		console.warn(
