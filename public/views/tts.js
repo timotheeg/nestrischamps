@@ -34,7 +34,9 @@ function getVoices() {
 	voices = shuffle(all_voices.filter(v => v.lang.split('-')[0] === lang));
 
 	// Assign Daniel UK as system voice
-	voice_map._system = all_voices.find(v => v.name === 'Daniel');
+	voice_map._system = all_voices.find(
+		v => v.lang === 'en-GB' && v.name.toLowerCase().startsWith('daniel')
+	);
 }
 
 function hasVoice(username) {
