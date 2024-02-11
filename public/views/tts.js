@@ -11,7 +11,7 @@ const VOICES_DELAY = 50;
 const synth = window.speechSynthesis;
 const lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
 	? QueryString.get('lang')
-	: 'en-GB';
+	: navigator.languages?.[0] || 'en-GB';
 const voice_map = {};
 const speak_queue = []; // TODO can we just use SpeechSynthesis built-in queue instead of our own queue?
 

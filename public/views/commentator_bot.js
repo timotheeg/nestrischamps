@@ -4,7 +4,7 @@ import { assignUserVoice, speak } from '/views/tts.js';
 const botName = '_ntc_commentator_bot';
 const lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
 	? QueryString.get('lang')
-	: 'en';
+	: navigator.languages?.[0] || 'en';
 const voiceNameRe =
 	QueryString.get('botvoice') && /^[a-z]+$/i.test(QueryString.get('botvoice'))
 		? new RegExp(`^${QueryString.get('botvoice')}`, 'i')
