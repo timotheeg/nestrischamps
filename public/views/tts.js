@@ -23,16 +23,27 @@ let cur_voice_index = 0;
 let speaking = false;
 let voices = [];
 
-function langMatch(l) {
-	return lang.includes('-') ? l === lang : l.startsWith(lang);
+function langMatch(targetLang, checkLang) {
+	return targetLang.includes('-')
+		? checkLang === targetLang || checkLang === targetLang.replace('-', '_') // omg v.lang on mobile is en_US, while on desktop en-US 🤦
+		: checkLang.startsWith(targetLang);
 }
 
 function getVoice(nameRe, lang) {
 	const voices = window.speechSynthesis.getVoices();
-	let voice = voices.find(v => nameRe.test(v.name) && langMatch(v.lang));
+	let voice = voices.find(v => nameRe.test(v.name) && langMatch(lang, v.lang));
 
 	if (!voice) {
-		const filteredVoices = voices.filter(v => v.default && langMatch(v.lang));
+		const filteredVoices = voices.filter(
+			v => v.default && langMatch(lang, v.lang)
+		);
+		voice = shuffle(filteredVoices)[0];
+	}
+
+	if (!voice && lang.includes('-')) {
+		const filteredVoices = voices.filter(
+			v => v.default && langMatch(lang.split('-')[0], v.lang)
+		);
 		voice = shuffle(filteredVoices)[0];
 	}
 
@@ -66,7 +77,13 @@ function getVoices() {
 		voice_map[username] = voice;
 	}
 
-	voices = shuffle(all_voices.filter(v => langMatch(v.lang)));
+	voices = shuffle(all_voices.filter(v => langMatch(lang, v.lang)));
+
+	if (voices.length <= 0 && lang.includes('-')) {
+		voices = shuffle(
+			all_voices.filter(v => langMatch(lang.split('-')[0], v.lang))
+		);
+	}
 
 	// Assign Daniel UK as system voice
 	voice_map._system = getVoice(/^daniel/i, lang);
