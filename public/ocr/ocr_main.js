@@ -272,6 +272,10 @@ const API = {
 		// producer is no longer player
 		stopSharingVideoFeed();
 	},
+
+	setVdoNinjaURL(url) {
+		vdo_ninja_url.value = url;
+	},
 };
 
 function connect() {
