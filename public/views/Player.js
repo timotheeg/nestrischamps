@@ -721,6 +721,8 @@ export default class Player extends EventTarget {
 	}
 
 	setVideoSrcObject(remoteStream) {
+		if (QueryString.get('video') === '0') return;
+
 		this._clearVdoNinjaIframe();
 
 		if (this.dom.video) {
@@ -731,6 +733,8 @@ export default class Player extends EventTarget {
 	}
 
 	setVdoNinjaURL(url) {
+		if (QueryString.get('video') === '0') return;
+
 		if (!this.dom.video) return;
 
 		if (!url) {
