@@ -109,6 +109,8 @@ const tabsContainer = document.querySelector('#tabs'),
 	allow_video_feed = document.querySelector('#allow_video_feed'),
 	video_feed_selector = document.querySelector('#video_feed_device'),
 	video_feed = document.querySelector('#video_feed'),
+	vdo_ninja_url = document.querySelector('#vdo_ninja_url'),
+	clear_vdo_ninja_url = document.querySelector('#clear_vdo_ninja_url'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
@@ -634,6 +636,24 @@ function onPrivacyChanged() {
 }
 
 allow_video_feed.addEventListener('change', onPrivacyChanged);
+
+function onUseVdoNinja() {
+	const url = vdo_ninja_url.value;
+
+	if (/^https:\/\/vdo.ninja\/\?view=[a-zA-Z0-9]+/.test(url)) {
+		connection.send(['setVdoNinjaURL', url]);
+	} else if (/^\s*$/.test(url)) {
+		connection.send(['setVdoNinjaURL', '']); // clear
+	}
+}
+
+function onClearVdoNinja() {
+	vdo_ninja_url.value = '';
+	connection.send(['setVdoNinjaURL', '']); // clear
+}
+
+vdo_ninja_url.addEventListener('change', onUseVdoNinja);
+clear_vdo_ninja_url.addEventListener('click', onClearVdoNinja);
 
 function onFocusAlarmChanged() {
 	config.focus_alarm = !!focus_alarm.checked;

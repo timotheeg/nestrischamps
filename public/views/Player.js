@@ -712,12 +712,16 @@ export default class Player extends EventTarget {
 		this.avatar.style.backgroundImage = `url('${encodeURI(url)}')`;
 	}
 
-	setVideoSrcObject(remoteStream) {
+	_clearVdoNinjaIframe() {
 		if (this.dom._video_iframe) {
 			this.dom._video_iframe.remove();
 			this.dom._video_iframe = null;
 			delete this.dom._video_iframe;
 		}
+	}
+
+	setVideoSrcObject(remoteStream) {
+		this._clearVdoNinjaIframe();
 
 		if (this.dom.video) {
 			this.dom.video.autoplay = true;
@@ -726,8 +730,14 @@ export default class Player extends EventTarget {
 		}
 	}
 
-	setVdoNinja(url) {
+	setVdoNinjaURL(url) {
 		if (!this.dom.video) return;
+
+		if (!url) {
+			this._clearVdoNinjaIframe();
+			this.dom.video.style.display = null;
+			return;
+		}
 
 		let iframe;
 

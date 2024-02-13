@@ -8,6 +8,7 @@ const PRODUCER_FIELDS = [
 	'display_name',
 	'profile_image_url',
 	'country_code',
+	'vdo_ninja_url',
 ];
 const MAX_PLAYERS = 8;
 
@@ -18,6 +19,7 @@ function getBasePlayerData() {
 		display_name: '',
 		country_code: '',
 		profile_image_url: '',
+		vdo_ninja_url: '',
 		victories: 0,
 		camera: {
 			mirror: 0, // horizontal mirror only (for now)
@@ -218,6 +220,7 @@ class MatchRoom extends Room {
 			connection.send(['setCountryCode', pidx, player.country_code]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);
 			connection.send(['setVictories', pidx, player.victories]);
+			connection.send(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
 
 			if (player.id) {
 				const user = this.getProducer(player.id);
@@ -392,6 +395,7 @@ class MatchRoom extends Room {
 			player_data.profile_image_url,
 		]);
 		this.sendToViews(['setCameraState', p_num, player_data.camera]);
+		this.sendToViews(['setVdoNinjaURL', p_num, player_data.vdo_ninja_url]);
 
 		// inform producer it is a now a player
 		if (user) {
@@ -587,6 +591,7 @@ class MatchRoom extends Room {
 							player.profile_image_url,
 						]);
 						this.sendToViews(['setVictories', pidx, player.victories]);
+						this.sendToViews(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
 					}
 					forward_to_views = false;
 					break;
@@ -620,6 +625,7 @@ class MatchRoom extends Room {
 							player.profile_image_url,
 						]);
 						this.sendToViews(['setVictories', pidx, player.victories]);
+						this.sendToViews(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
 
 						if (this.last_view) {
 							const user = player.id ? this.getProducer(player.id) : null;
@@ -698,6 +704,15 @@ class MatchRoom extends Room {
 	handleProducerMessage(user, message) {
 		// system where you can have one user being multiple players
 		let send_count = 0;
+
+		if (Array.isArray(message) && message[0] === 'setVdoNinjaURL') {
+			user.vdo_ninja_url = message[1];
+			this.state.players
+				.filter(p => p.id === user.id)
+				.forEach(p => {
+					p.vdo_ninja_url = message[1];
+				});
+		}
 
 		this.state.players.forEach((player, p_idx) => {
 			if (player.id !== user.id) return;
