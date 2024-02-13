@@ -445,26 +445,17 @@
 					peer = new Peer(connection.id, peerServerOptions);
 
 					peer.on('call', call => {
-						const video = document.querySelector('.player_vid');
-
 						call.answer(); // assume correct!
 						call.on('stream', remoteStream => {
-							video.srcObject = remoteStream;
-							video.addEventListener(
-								'loadedmetadata',
-								() => {
-									video.play();
-								},
-								{ once: true }
-							);
+							player.setVideoSrcObject(remoteStream);
 						});
 						call.on('error', () => {
-							video.pause();
-							video.srcObject = null;
+							player.dom.video.pause();
+							player.dom.video.srcObject = null;
 						});
 						call.on('close', () => {
-							video.pause();
-							video.srcObject = null;
+							player.dom.video.pause();
+							player.dom.video.srcObject = null;
 						});
 					});
 				};

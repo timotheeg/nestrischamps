@@ -42,7 +42,7 @@
 			</div>
 
 			<div id="playing_fields">
-				<video></video>
+				<video class="player_vid"></video>
 
 				<div class="box timer">
 					<div class="content">02:00:00</div>
@@ -130,6 +130,7 @@
 
 					eff: document.querySelector(`label.eff`),
 					projection: document.querySelector(`label.projection`),
+					video: document.querySelector(`.player_vid`),
 				},
 				{
 					field_pixel_size: 3,
@@ -239,6 +240,10 @@
 					startTimer(allowed_time);
 				},
 
+				setVdoNinjaURL(idx, url) {
+					player.setVdoNinjaURL(url);
+				},
+
 				scoreRecorded: getPB,
 
 				message() {}, // noop
@@ -271,26 +276,17 @@
 				peer = new Peer(connection.id, peerServerOptions);
 
 				peer.on('call', call => {
-					const video = document.querySelector('video');
-
 					call.answer(); // assume correct!
 					call.on('stream', remoteStream => {
-						video.srcObject = remoteStream;
-						video.addEventListener(
-							'loadedmetadata',
-							() => {
-								video.play();
-							},
-							{ once: true }
-						);
+						player.setVideoSrcObject(remoteStream);
 					});
 					call.on('error', () => {
-						video.pause();
-						video.srcObject = null;
+						player.dom.video.pause();
+						player.dom.video.srcObject = null;
 					});
 					call.on('close', () => {
-						video.pause();
-						video.srcObject = null;
+						player.dom.video.pause();
+						player.dom.video.srcObject = null;
 					});
 				});
 			};
