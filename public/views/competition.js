@@ -352,18 +352,7 @@ export default class Competition {
 					call.on('stream', remoteStream => {
 						this.getPlayersByPeerId(call.peer) // rechecking because async!
 							.forEach(player => {
-								const video = player.dom.video;
-
-								video.srcObject = remoteStream;
-								video.addEventListener(
-									'loadedmetadata',
-									() => {
-										video.play();
-									},
-									{
-										once: true,
-									}
-								);
+								player.setVideoSrcObject(remoteStream);
 							});
 					});
 

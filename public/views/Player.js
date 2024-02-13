@@ -712,6 +712,54 @@ export default class Player extends EventTarget {
 		this.avatar.style.backgroundImage = `url('${encodeURI(url)}')`;
 	}
 
+	setVideoSrcObject(remoteStream) {
+		if (this.dom._video_iframe) {
+			this.dom._video_iframe.remove();
+			this.dom._video_iframe = null;
+			delete this.dom._video_iframe;
+		}
+
+		if (this.dom.video) {
+			this.dom.video.autoplay = true;
+			this.dom.video.srcObject = remoteStream;
+			this.dom.video.style.display = null;
+		}
+	}
+
+	setVdoNinja(url) {
+		if (!this.dom.video) return;
+
+		let iframe;
+
+		if (!this.dom._video_iframe) {
+			this.dom._video_iframe = iframe = document.createElement('iframe');
+			iframe.setAttribute(
+				'allow',
+				'autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;'
+			);
+			iframe.classList.add('player_vid');
+			iframe.style.border = 0;
+		}
+
+		const u = new URL(url);
+
+		const vId = u.searchParams.get('view') || u.searchParams.get('push'); // just in case someone passed the push url
+
+		u.searchParams.delete('view');
+		u.searchParams.delete('push');
+
+		u.searchParams.set('view', vId);
+		u.searchParams.set('cover', 1);
+		u.searchParams.set('cleanviewer', 1);
+		u.searchParams.set('cleanoutput', 1);
+		u.searchParams.set('transparent', 1);
+
+		iframe.src = u.toString();
+
+		this.dom.video.parentNode.insertBefore(iframe, this.dom.video);
+		this.dom.video.style.display = 'none';
+	}
+
 	setName(name) {
 		this.player_name = name;
 

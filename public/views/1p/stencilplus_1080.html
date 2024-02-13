@@ -26,7 +26,7 @@
 				height: 1080px;
 			}
 
-			video.player_cam {
+			.player_vid {
 				width: 686px;
 				height: 579px;
 			}
@@ -109,7 +109,7 @@
 			</div>
 
 			<div id="playing_fields">
-				<video class="player_cam"></video>
+				<video class="player_vid"></video>
 
 				<div class="box timer">
 					<div class="content">02:00:00</div>
@@ -420,7 +420,7 @@
 							video.addEventListener('resize', setSize);
 						};
 					} else {
-						video = document.querySelector('video.player_cam');
+						video = document.querySelector('.player_vid');
 					}
 
 					call.answer(); // assume correct!
