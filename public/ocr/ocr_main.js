@@ -109,8 +109,7 @@ const tabsContainer = document.querySelector('#tabs'),
 	allow_video_feed = document.querySelector('#allow_video_feed'),
 	video_feed_selector = document.querySelector('#video_feed_device'),
 	video_feed = document.querySelector('#video_feed'),
-	vdo_ninja_url = document.querySelector('#vdo_ninja_url'),
-	clear_vdo_ninja_url = document.querySelector('#clear_vdo_ninja_url'),
+	vdo_ninja = document.querySelector('#vdo_ninja'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
@@ -274,7 +273,10 @@ const API = {
 	},
 
 	setVdoNinjaURL(url) {
-		vdo_ninja_url.value = url;
+		if (url) {
+			vdo_ninja.checked = true;
+			document.querySelector('#vdoninja').src = url;
+		}
 	},
 };
 
@@ -641,23 +643,29 @@ function onPrivacyChanged() {
 
 allow_video_feed.addEventListener('change', onPrivacyChanged);
 
-function onUseVdoNinja() {
-	const url = vdo_ninja_url.value;
+function onVdoNinjaChange() {
+	const iframe = document.querySelector('#vdoninja');
 
-	if (/^https:\/\/vdo.ninja\/\?view=[a-zA-Z0-9]+/.test(url)) {
-		connection.send(['setVdoNinjaURL', url]);
-	} else if (/^\s*$/.test(url)) {
-		connection.send(['setVdoNinjaURL', '']); // clear
+	if (vdo_ninja.checked) {
+		const chars =
+			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split(
+				''
+			);
+		const id = `NTC_${Array(8)
+			.fill()
+			.map(() => chars[Math.floor(Math.random() * chars.length)])
+			.join('')}_NTC`;
+		const pushURL = `https://vdo.ninja/?push=${id}&webcam&audiodevice=0&transparent`;
+		const viewURL = pushURL.replace('push=', 'view=');
+		iframe.src = pushURL;
+		connection.send(['setVdoNinjaURL', viewURL]);
+	} else {
+		iframe.src = '';
+		connection.send(['setVdoNinjaURL', '']);
 	}
 }
 
-function onClearVdoNinja() {
-	vdo_ninja_url.value = '';
-	connection.send(['setVdoNinjaURL', '']); // clear
-}
-
-vdo_ninja_url.addEventListener('change', onUseVdoNinja);
-clear_vdo_ninja_url.addEventListener('click', onClearVdoNinja);
+vdo_ninja.addEventListener('change', onVdoNinjaChange);
 
 function onFocusAlarmChanged() {
 	config.focus_alarm = !!focus_alarm.checked;

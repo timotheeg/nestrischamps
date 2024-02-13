@@ -200,6 +200,7 @@
 
 					eff: document.querySelector(`label.eff`),
 					projection: document.querySelector(`label.projection`),
+					video: document.querySelector('.player_vid'),
 				},
 				{
 					field_pixel_size: 5,
@@ -310,6 +311,10 @@
 
 				startTimer(allowed_time) {
 					startTimer(allowed_time);
+				},
+
+				setVdoNinjaURL(idx, url) {
+					player.setVdoNinjaURL(url);
 				},
 
 				scoreRecorded: getPB,
@@ -425,23 +430,15 @@
 
 					call.answer(); // assume correct!
 					call.on('stream', remoteStream => {
-						video.srcObject = remoteStream;
-						video.addEventListener(
-							'loadedmetadata',
-							evt => {
-								video.play();
-								if (postProcess) postProcess();
-							},
-							{ once: true }
-						);
+						player.setVideoSrcObject(remoteStream);
 					});
 					call.on('error', () => {
-						video.pause();
-						video.srcObject = null;
+						player.dom.video.pause();
+						player.dom.video.srcObject = null;
 					});
 					call.on('close', () => {
-						video.pause();
-						video.srcObject = null;
+						player.dom.video.pause();
+						player.dom.video.srcObject = null;
 					});
 				});
 			};

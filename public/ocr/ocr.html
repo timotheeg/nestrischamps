@@ -203,6 +203,11 @@
 			#video_capture {
 				display: none;
 			}
+
+			#vdoninja {
+				width: 100%;
+				height: 35em;
+			}
 		</style>
 	</head>
 
@@ -305,9 +310,12 @@
 						<video width="160" height="120" id="video_feed"></video>
 					</p>
 					<p>
-						<label for="vdo_ninja_url">OR use vdo.ninja</label>
-						<input type="text" size="35" id="vdo_ninja_url" />
-						<button id="clear_vdo_ninja_url">X</button>
+						<label for="vdo_ninja">OR use vdo.ninja</label>
+						<input type="checkbox" id="vdo_ninja" /><br />
+						<iframe
+							allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;"
+							id="vdoninja"
+						></iframe>
 					</p>
 				</fieldset>
 			</div>

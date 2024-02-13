@@ -17,6 +17,7 @@ class PrivateRoom extends Room {
 		connection.send(['setDisplayName', 0, this.owner.display_name]);
 		connection.send(['setCountryCode', 0, this.owner.country_code]);
 		connection.send(['setProfileImageURL', 0, this.owner.profile_image_url]);
+		connection.send(['setVdoNinjaURL', 0, this.owner.vdo_ninja_url]);
 
 		// last video-enabled view always wins the video feed
 		if (connection.meta.video) {
