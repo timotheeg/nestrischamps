@@ -125,6 +125,10 @@ class TetrisCompetitionAPI {
 		getPlayer(player_idx).setAvatar(avatar_url);
 	}
 
+	setVdoNinjaURL(player_idx, url) {
+		getPlayer(player_idx).setVdoNinjaURL(url);
+	}
+
 	// Twitch like command aliases
 	setProfileImageURL(player_idx, avatar_url) {
 		this.setAvatar(player_idx, avatar_url);
