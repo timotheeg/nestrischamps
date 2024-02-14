@@ -300,7 +300,7 @@
 				<fieldset id="privacy">
 					<legend>Privacy / Camera</legend>
 					<p>
-						<label for="allow_video_feed">Allow Sending Webcam Feed</label>
+						<label for="allow_video_feed">Share webcam feed with peerjs</label>
 						<input type="checkbox" id="allow_video_feed" checked /><br />
 
 						<label for="video_feed_device">Webcam</label>
@@ -311,7 +311,8 @@
 					</p>
 					<p>
 						<label for="vdo_ninja">OR use vdo.ninja</label>
-						<input type="checkbox" id="vdo_ninja" /><br />
+						<input type="checkbox" id="vdo_ninja" />
+						<span id="vdo_ninja_url"></span><br />
 						<iframe
 							allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;"
 							id="vdoninja"

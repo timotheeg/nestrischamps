@@ -765,6 +765,7 @@ export default class Player extends EventTarget {
 		u.searchParams.set('cleanviewer', 1);
 		u.searchParams.set('cleanoutput', 1);
 		u.searchParams.set('transparent', 1);
+		u.searchParams.set('autostart', 1);
 
 		iframe.src = u.toString();
 
