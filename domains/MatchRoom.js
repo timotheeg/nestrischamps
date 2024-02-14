@@ -384,18 +384,8 @@ class MatchRoom extends Room {
 		const peerid = user ? user.getProducer().getPeerId() : '';
 
 		// Send data to all views
-		this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
 		this.sendToViews(['setPeerId', p_num, peerid]);
-		this.sendToViews(['setLogin', p_num, player_data.login]);
-		this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
-		this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
-		this.sendToViews([
-			'setProfileImageURL',
-			p_num,
-			player_data.profile_image_url,
-		]);
-		this.sendToViews(['setCameraState', p_num, player_data.camera]);
-		this.sendToViews(['setVdoNinjaURL', p_num, player_data.vdo_ninja_url]);
+		this.sendPlayerInfoToViews(p_num);
 
 		// inform producer it is a now a player
 		if (user) {
@@ -435,6 +425,18 @@ class MatchRoom extends Room {
 				player_data.profile_image_url,
 			]);
 		}
+	}
+
+	sendPlayerInfoToViews(pidx) {
+		const player = this.state.players[pidx];
+
+		this.sendToViews(['setId', pidx, player.id]); // resets the player and game in frontend
+		this.sendToViews(['setLogin', pidx, player.login]);
+		this.sendToViews(['setDisplayName', pidx, player.display_name]);
+		this.sendToViews(['setCountryCode', pidx, player.country_code]);
+		this.sendToViews(['setProfileImageURL', pidx, player.profile_image_url]);
+		this.sendToViews(['setVictories', pidx, player.victories]);
+		this.sendToViews(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
 	}
 
 	async onAdminMessage(message) {
@@ -578,20 +580,8 @@ class MatchRoom extends Room {
 					if (this.state.players.length < MAX_PLAYERS) {
 						const player = getBasePlayerData();
 						const pidx = this.state.players.length;
-
 						this.state.players.push(player);
-
-						this.sendToViews(['setId', pidx, player.id]);
-						this.sendToViews(['setLogin', pidx, player.login]);
-						this.sendToViews(['setDisplayName', pidx, player.display_name]);
-						this.sendToViews(['setCountryCode', pidx, player.country_code]);
-						this.sendToViews([
-							'setProfileImageURL',
-							pidx,
-							player.profile_image_url,
-						]);
-						this.sendToViews(['setVictories', pidx, player.victories]);
-						this.sendToViews(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
+						this.sendPlayerInfoToViews(pidx);
 					}
 					forward_to_views = false;
 					break;
@@ -613,20 +603,12 @@ class MatchRoom extends Room {
 						// ignore errors
 					}
 
-					const updatePlayer = (player, pidx) => {
-						// TODO: this should also also set the player idx
-						this.sendToViews(['setId', pidx, player.id]);
-						this.sendToViews(['setLogin', pidx, player.login]);
-						this.sendToViews(['setDisplayName', pidx, player.display_name]);
-						this.sendToViews(['setCountryCode', pidx, player.country_code]);
-						this.sendToViews([
-							'setProfileImageURL',
-							pidx,
-							player.profile_image_url,
-						]);
-						this.sendToViews(['setVictories', pidx, player.victories]);
-						this.sendToViews(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
+					const updatePlayer = pidx => {
+						const player = this.state.players[pidx];
 
+						this.sendPlayerInfoToViews(pidx);
+
+						// TODO: this should also also set the player idx
 						if (this.last_view) {
 							const user = player.id ? this.getProducer(player.id) : null;
 
@@ -648,9 +630,7 @@ class MatchRoom extends Room {
 
 					// update all shifted players
 					for (let pidx = p_num; pidx < this.state.players.length; pidx++) {
-						const player = this.state.players[pidx];
-
-						updatePlayer(player, pidx);
+						updatePlayer(pidx);
 					}
 
 					// finally send dummy data to clear last player
