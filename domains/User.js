@@ -35,7 +35,7 @@ class User extends EventEmitter {
 
 		this.producer = new Producer(this);
 
-		// TODO: can room be setup lazily?
+		// TODO: can rooms be setup lazily?
 		this.private_room = new PrivateRoom(this);
 		this.host_room = new MatchRoom(this);
 

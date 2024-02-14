@@ -38,6 +38,8 @@ class Producer extends EventEmitter {
 		});
 
 		this.connection = connection;
+
+		this.connection.send(['setVdoNinjaURL', this.user.vdo_ninja_url]);
 	}
 
 	hasConnection() {

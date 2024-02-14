@@ -8,6 +8,7 @@ const PRODUCER_FIELDS = [
 	'display_name',
 	'profile_image_url',
 	'country_code',
+	'vdo_ninja_url',
 ];
 const MAX_PLAYERS = 8;
 
@@ -18,6 +19,7 @@ function getBasePlayerData() {
 		display_name: '',
 		country_code: '',
 		profile_image_url: '',
+		vdo_ninja_url: '',
 		victories: 0,
 		camera: {
 			mirror: 0, // horizontal mirror only (for now)
@@ -218,6 +220,7 @@ class MatchRoom extends Room {
 			connection.send(['setCountryCode', pidx, player.country_code]);
 			connection.send(['setProfileImageURL', pidx, player.profile_image_url]);
 			connection.send(['setVictories', pidx, player.victories]);
+			connection.send(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
 
 			if (player.id) {
 				const user = this.getProducer(player.id);
@@ -381,17 +384,8 @@ class MatchRoom extends Room {
 		const peerid = user ? user.getProducer().getPeerId() : '';
 
 		// Send data to all views
-		this.sendToViews(['setId', p_num, player_data.id]); // resets the player and game in frontend
 		this.sendToViews(['setPeerId', p_num, peerid]);
-		this.sendToViews(['setLogin', p_num, player_data.login]);
-		this.sendToViews(['setDisplayName', p_num, player_data.display_name]);
-		this.sendToViews(['setCountryCode', p_num, player_data.country_code]);
-		this.sendToViews([
-			'setProfileImageURL',
-			p_num,
-			player_data.profile_image_url,
-		]);
-		this.sendToViews(['setCameraState', p_num, player_data.camera]);
+		this.sendPlayerInfoToViews(p_num);
 
 		// inform producer it is a now a player
 		if (user) {
@@ -431,6 +425,18 @@ class MatchRoom extends Room {
 				player_data.profile_image_url,
 			]);
 		}
+	}
+
+	sendPlayerInfoToViews(pidx) {
+		const player = this.state.players[pidx];
+
+		this.sendToViews(['setId', pidx, player.id]); // resets the player and game in frontend
+		this.sendToViews(['setLogin', pidx, player.login]);
+		this.sendToViews(['setDisplayName', pidx, player.display_name]);
+		this.sendToViews(['setCountryCode', pidx, player.country_code]);
+		this.sendToViews(['setProfileImageURL', pidx, player.profile_image_url]);
+		this.sendToViews(['setVictories', pidx, player.victories]);
+		this.sendToViews(['setVdoNinjaURL', pidx, player.vdo_ninja_url]);
 	}
 
 	async onAdminMessage(message) {
@@ -574,19 +580,8 @@ class MatchRoom extends Room {
 					if (this.state.players.length < MAX_PLAYERS) {
 						const player = getBasePlayerData();
 						const pidx = this.state.players.length;
-
 						this.state.players.push(player);
-
-						this.sendToViews(['setId', pidx, player.id]);
-						this.sendToViews(['setLogin', pidx, player.login]);
-						this.sendToViews(['setDisplayName', pidx, player.display_name]);
-						this.sendToViews(['setCountryCode', pidx, player.country_code]);
-						this.sendToViews([
-							'setProfileImageURL',
-							pidx,
-							player.profile_image_url,
-						]);
-						this.sendToViews(['setVictories', pidx, player.victories]);
+						this.sendPlayerInfoToViews(pidx);
 					}
 					forward_to_views = false;
 					break;
@@ -608,19 +603,12 @@ class MatchRoom extends Room {
 						// ignore errors
 					}
 
-					const updatePlayer = (player, pidx) => {
-						// TODO: this should also also set the player idx
-						this.sendToViews(['setId', pidx, player.id]);
-						this.sendToViews(['setLogin', pidx, player.login]);
-						this.sendToViews(['setDisplayName', pidx, player.display_name]);
-						this.sendToViews(['setCountryCode', pidx, player.country_code]);
-						this.sendToViews([
-							'setProfileImageURL',
-							pidx,
-							player.profile_image_url,
-						]);
-						this.sendToViews(['setVictories', pidx, player.victories]);
+					const updatePlayer = pidx => {
+						const player = this.state.players[pidx];
 
+						this.sendPlayerInfoToViews(pidx);
+
+						// TODO: this should also also set the player idx
 						if (this.last_view) {
 							const user = player.id ? this.getProducer(player.id) : null;
 
@@ -642,9 +630,7 @@ class MatchRoom extends Room {
 
 					// update all shifted players
 					for (let pidx = p_num; pidx < this.state.players.length; pidx++) {
-						const player = this.state.players[pidx];
-
-						updatePlayer(player, pidx);
+						updatePlayer(pidx);
 					}
 
 					// finally send dummy data to clear last player
@@ -698,6 +684,15 @@ class MatchRoom extends Room {
 	handleProducerMessage(user, message) {
 		// system where you can have one user being multiple players
 		let send_count = 0;
+
+		if (Array.isArray(message) && message[0] === 'setVdoNinjaURL') {
+			user.vdo_ninja_url = message[1];
+			this.state.players
+				.filter(p => p.id === user.id)
+				.forEach(p => {
+					p.vdo_ninja_url = message[1];
+				});
+		}
 
 		this.state.players.forEach((player, p_idx) => {
 			if (player.id !== user.id) return;

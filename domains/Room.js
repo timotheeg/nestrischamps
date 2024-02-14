@@ -38,7 +38,10 @@ class Room extends EventEmitter {
 		if (message instanceof Uint8Array) {
 			this.sendToViews(message);
 		} else if (Array.isArray(message)) {
-			this.sendToViews(message);
+			if (message[0] === 'setVdoNinjaURL') {
+				user.vdo_ninja_url = message[1];
+			}
+			this.sendToViews([message[0], 0, ...message.slice(1)]);
 		} else {
 			this.sendToViews(['frame', 0, message]);
 		}

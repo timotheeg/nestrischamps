@@ -986,14 +986,8 @@ if (!manageReplay(showFrame)) {
 			peer.on('call', call => {
 				call.answer(); // assume correct!
 				call.on('stream', remoteStream => {
+					video.autoplay = true;
 					video.srcObject = remoteStream;
-					video.addEventListener(
-						'loadedmetadata',
-						() => {
-							video.play();
-						},
-						{ once: true }
-					);
 				});
 				call.on('error', () => {
 					video.pause();

@@ -203,6 +203,11 @@
 			#video_capture {
 				display: none;
 			}
+
+			#vdoninja {
+				width: 100%;
+				height: 35em;
+			}
 		</style>
 	</head>
 
@@ -293,9 +298,9 @@
 				</fieldset>
 
 				<fieldset id="privacy">
-					<legend>Privacy</legend>
-					<div>
-						<label for="allow_video_feed">Allow Sending Webcam Feed</label>
+					<legend>Privacy / Camera</legend>
+					<p>
+						<label for="allow_video_feed">Share webcam feed with peerjs</label>
 						<input type="checkbox" id="allow_video_feed" checked /><br />
 
 						<label for="video_feed_device">Webcam</label>
@@ -303,7 +308,16 @@
 						><br />
 
 						<video width="160" height="120" id="video_feed"></video>
-					</div>
+					</p>
+					<p>
+						<label for="vdo_ninja">OR use vdo.ninja</label>
+						<input type="checkbox" id="vdo_ninja" />
+						<span id="vdo_ninja_url"></span><br />
+						<iframe
+							allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;"
+							id="vdoninja"
+						></iframe>
+					</p>
 				</fieldset>
 			</div>
 

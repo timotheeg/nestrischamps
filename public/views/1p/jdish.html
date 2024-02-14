@@ -189,7 +189,7 @@
 				padding-bottom: 0.5em;
 			}
 
-			video {
+			.player_vid {
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -201,7 +201,7 @@
 	</head>
 	<body>
 		<div id="stream_bg">
-			<video></video>
+			<video class="player_vid"></video>
 			<div id="playing_fields">
 				<div class="box level">
 					<div class="header">LEVEL</div>
@@ -336,7 +336,7 @@
 						preview: document.querySelector(`.next_piece`),
 						field: document.querySelector(`.board`),
 						drought: document.querySelector(`.drought .content`),
-						video: document.querySelector(`video`),
+						video: document.querySelector(`.player_vid`),
 
 						// extras
 						drought_box: document.querySelector(`.drought`),
@@ -399,6 +399,10 @@
 						player.setFrame(data);
 					},
 
+					setVdoNinjaURL(idx, url) {
+						player.setVdoNinjaURL(url);
+					},
+
 					scoreRecorded: getPB,
 					message() {}, // noop
 				};
@@ -441,26 +445,17 @@
 					peer = new Peer(connection.id, peerServerOptions);
 
 					peer.on('call', call => {
-						const video = document.querySelector('video');
-
 						call.answer(); // assume correct!
 						call.on('stream', remoteStream => {
-							video.srcObject = remoteStream;
-							video.addEventListener(
-								'loadedmetadata',
-								() => {
-									video.play();
-								},
-								{ once: true }
-							);
+							player.setVideoSrcObject(remoteStream);
 						});
 						call.on('error', () => {
-							video.pause();
-							video.srcObject = null;
+							player.dom.video.pause();
+							player.dom.video.srcObject = null;
 						});
 						call.on('close', () => {
-							video.pause();
-							video.srcObject = null;
+							player.dom.video.pause();
+							player.dom.video.srcObject = null;
 						});
 					});
 				};

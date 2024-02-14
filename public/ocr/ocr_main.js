@@ -109,6 +109,7 @@ const tabsContainer = document.querySelector('#tabs'),
 	allow_video_feed = document.querySelector('#allow_video_feed'),
 	video_feed_selector = document.querySelector('#video_feed_device'),
 	video_feed = document.querySelector('#video_feed'),
+	vdo_ninja = document.querySelector('#vdo_ninja'),
 	color_matching = document.querySelector('#color_matching'),
 	palette_selector = document.querySelector('#palette'),
 	rom_selector = document.querySelector('#rom'),
@@ -269,6 +270,26 @@ const API = {
 		view_meta = null;
 		// producer is no longer player
 		stopSharingVideoFeed();
+	},
+
+	setVdoNinjaURL(url) {
+		if (url) {
+			document.querySelector('#vdo_ninja_url').textContent = url;
+
+			url = new URL(url);
+
+			const streamId =
+				url.searchParams.get('view') || u.searchParams.get('push');
+
+			url.searchParams.delete('view');
+			url.searchParams.set('push', streamId);
+			url.searchParams.set('webcam', 1);
+			url.searchParams.set('audiodevice', 0);
+			url.searchParams.set('autostart', 1);
+
+			vdo_ninja.checked = true;
+			document.querySelector('#vdoninja').src = url.toString();
+		}
 	},
 };
 
@@ -628,12 +649,63 @@ function onPrivacyChanged() {
 
 	if (config.allow_video_feed) {
 		startSharingVideoFeed();
+
+		vdo_ninja.checked = false;
+		onVdoNinjaChange();
 	} else {
 		stopSharingVideoFeed();
 	}
 }
 
 allow_video_feed.addEventListener('change', onPrivacyChanged);
+
+function onVdoNinjaChange() {
+	const iframe = document.querySelector('#vdoninja');
+
+	if (vdo_ninja.checked) {
+		// 1. start up vdo ninja
+		const chars =
+			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split(
+				''
+			);
+		const streamid = `_NTC_${Array(8)
+			.fill()
+			.map(() => chars[Math.floor(Math.random() * chars.length)])
+			.join('')}`;
+
+		const url = new URL('https://vdo.ninja/');
+		url.searchParams.set('view', streamid);
+		url.searchParams.set('cover', 1);
+		url.searchParams.set('transparent', 0);
+
+		const viewURL = url.toString();
+
+		url.searchParams.delete('view');
+		url.searchParams.delete('cover');
+		url.searchParams.set('push', streamid);
+		url.searchParams.set('webcam', 1);
+		url.searchParams.set('audiodevice', 0);
+		url.searchParams.set('autostart', 1);
+
+		iframe.src = url.toString();
+
+		connection.send(['setVdoNinjaURL', viewURL]);
+		navigator.clipboard.writeText(viewURL);
+		document.querySelector(
+			'#vdo_ninja_url'
+		).textContent = `${viewURL} (URL has been copied to clipboard)`;
+
+		// 2. cancel peerjs video
+		allow_video_feed.checked = false;
+		onPrivacyChanged();
+	} else {
+		iframe.src = '';
+		connection.send(['setVdoNinjaURL', '']);
+		document.querySelector('#vdo_ninja_url').textContent = '';
+	}
+}
+
+vdo_ninja.addEventListener('change', onVdoNinjaChange);
 
 function onFocusAlarmChanged() {
 	config.focus_alarm = !!focus_alarm.checked;

@@ -283,7 +283,7 @@ html {
 	height: calc(10px * var(--nes_pixel_size));
 }
 
-video {
+.player_vid {
 	position: absolute;
 	top: 0;
 	left: 0;

@@ -26,7 +26,7 @@
 				height: 1080px;
 			}
 
-			video.player_cam {
+			.player_vid {
 				width: 686px;
 				height: 579px;
 			}
@@ -109,7 +109,7 @@
 			</div>
 
 			<div id="playing_fields">
-				<video class="player_cam"></video>
+				<video class="player_vid"></video>
 
 				<div class="box timer">
 					<div class="content">02:00:00</div>
@@ -200,6 +200,7 @@
 
 					eff: document.querySelector(`label.eff`),
 					projection: document.querySelector(`label.projection`),
+					video: document.querySelector('.player_vid'),
 				},
 				{
 					field_pixel_size: 5,
@@ -312,6 +313,10 @@
 					startTimer(allowed_time);
 				},
 
+				setVdoNinjaURL(idx, url) {
+					player.setVdoNinjaURL(url);
+				},
+
 				scoreRecorded: getPB,
 
 				message() {}, // noop
@@ -420,28 +425,20 @@
 							video.addEventListener('resize', setSize);
 						};
 					} else {
-						video = document.querySelector('video.player_cam');
+						video = document.querySelector('.player_vid');
 					}
 
 					call.answer(); // assume correct!
 					call.on('stream', remoteStream => {
-						video.srcObject = remoteStream;
-						video.addEventListener(
-							'loadedmetadata',
-							evt => {
-								video.play();
-								if (postProcess) postProcess();
-							},
-							{ once: true }
-						);
+						player.setVideoSrcObject(remoteStream);
 					});
 					call.on('error', () => {
-						video.pause();
-						video.srcObject = null;
+						player.dom.video.pause();
+						player.dom.video.srcObject = null;
 					});
 					call.on('close', () => {
-						video.pause();
-						video.srcObject = null;
+						player.dom.video.pause();
+						player.dom.video.srcObject = null;
 					});
 				});
 			};

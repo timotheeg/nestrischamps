@@ -125,6 +125,10 @@ class TetrisCompetitionAPI {
 		getPlayer(player_idx).setAvatar(avatar_url);
 	}
 
+	setVdoNinjaURL(player_idx, url) {
+		getPlayer(player_idx).setVdoNinjaURL(url);
+	}
+
 	// Twitch like command aliases
 	setProfileImageURL(player_idx, avatar_url) {
 		this.setAvatar(player_idx, avatar_url);
@@ -352,18 +356,7 @@ export default class Competition {
 					call.on('stream', remoteStream => {
 						this.getPlayersByPeerId(call.peer) // rechecking because async!
 							.forEach(player => {
-								const video = player.dom.video;
-
-								video.srcObject = remoteStream;
-								video.addEventListener(
-									'loadedmetadata',
-									() => {
-										video.play();
-									},
-									{
-										once: true,
-									}
-								);
+								player.setVideoSrcObject(remoteStream);
 							});
 					});
 
