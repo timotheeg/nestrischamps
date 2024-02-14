@@ -274,8 +274,15 @@ const API = {
 
 	setVdoNinjaURL(url) {
 		if (url) {
+			url = new URL(url);
+
+			const streamId =
+				url.searchParams.get('view') || u.searchParams.get('push');
+			url.searchParams.delete('view');
+			url.searchParams.set('push', streamId);
+
 			vdo_ninja.checked = true;
-			document.querySelector('#vdoninja').src = url;
+			document.querySelector('#vdoninja').src = url.toString();
 		}
 	},
 };
@@ -651,10 +658,10 @@ function onVdoNinjaChange() {
 			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split(
 				''
 			);
-		const id = `NTC_${Array(8)
+		const id = `_NTC_${Array(8)
 			.fill()
 			.map(() => chars[Math.floor(Math.random() * chars.length)])
-			.join('')}_NTC`;
+			.join('')}`;
 		const pushURL = `https://vdo.ninja/?push=${id}&webcam&audiodevice=0&transparent`;
 		const viewURL = pushURL.replace('push=', 'view=');
 		iframe.src = pushURL;

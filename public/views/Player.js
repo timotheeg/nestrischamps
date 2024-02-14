@@ -757,12 +757,10 @@ export default class Player extends EventTarget {
 
 		const u = new URL(url);
 
-		const vId = u.searchParams.get('view') || u.searchParams.get('push'); // just in case someone passed the push url
+		const streamId = u.searchParams.get('view') || u.searchParams.get('push'); // just in case someone passed the push url
 
-		u.searchParams.delete('view');
 		u.searchParams.delete('push');
-
-		u.searchParams.set('view', vId);
+		u.searchParams.set('view', streamId);
 		u.searchParams.set('cover', 1);
 		u.searchParams.set('cleanviewer', 1);
 		u.searchParams.set('cleanoutput', 1);
@@ -786,12 +784,15 @@ export default class Player extends EventTarget {
 
 	setCameraState(camera_state) {
 		this.camera_state = camera_state;
-		if (camera_state?.mirror) {
-			this.dom.video.style.transform = 'scale(-1, 1)';
-		} else {
-			this.dom.video.style.transform = null;
-			delete this.dom.video.style.transform;
-		}
+		[this.dom.video, this.dom._video_iframe].forEach(element => {
+			if (!element) return;
+			if (camera_state?.mirror) {
+				element.style.transform = 'scale(-1, 1)';
+			} else {
+				element.style.transform = null;
+				delete element.style.transform;
+			}
+		});
 	}
 
 	setCountryCode(code) {
