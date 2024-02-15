@@ -59,6 +59,7 @@
 		<!-- Audio -->
 
 		<script type="module">
+			import QueryString from '/js/QueryString.js';
 			import '/views/bg.js';
 			import Connection from '/js/connection.js';
 			import { readableScoreFomatter } from '/views/utils.js';
@@ -79,7 +80,7 @@
 					drought: document.querySelector(`.drought .value`),
 				},
 				{
-					tetris_sound: 0,
+					tetris_sound: QueryString.get('tetris_sound') === '1',
 					reliable_field: 0,
 					format_score: v => readableScoreFomatter(v),
 				}

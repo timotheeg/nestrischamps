@@ -640,6 +640,7 @@
 		<!-- End Stream BG -->
 
 		<script type="module">
+			import QueryString from '/js/QueryString.js';
 			import { setOnTetris } from '/views/main.js';
 			import '/views/bg.js';
 
@@ -663,6 +664,9 @@
 				stream_bg.prepend(bg);
 			}
 
+			const tetris_sound = new Audio('/views/Tetris_Clear.mp3');
+			tetris_sound.volume = 0.35;
+
 			setOnTetris(function () {
 				let remaining_frames = 12;
 
@@ -677,6 +681,7 @@
 				}
 
 				window.requestAnimationFrame(steps);
+				if (QueryString.get('tetris_sound') === '1') tetris_sound.play();
 			});
 		</script>
 	</body>

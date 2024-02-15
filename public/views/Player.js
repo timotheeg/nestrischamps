@@ -405,20 +405,24 @@ export default class Player extends EventTarget {
 		// buils audio objects
 		this.audioContext = new AudioContext();
 		this.sounds = {
-			tetris: new Audio('/views/Tetris_Clear.mp3'),
+			tetris: {
+				audio: new Audio('/views/Tetris_Clear.mp3'),
+				gain: 0.35,
+			},
 		};
-
-		this.sounds.tetris.volume = 0.35;
-
 		this.options.stereo = clamp(this.options.stereo, -1, 1);
 
-		Object.entries(this.sounds).forEach(([sound, audio]) => {
+		Object.entries(this.sounds).forEach(([sound, { audio, gain }]) => {
 			const track = this.audioContext.createMediaElementSource(audio);
+			const gainNode = new GainNode(this.audioContext, { gain });
 			const stereoNode = new StereoPannerNode(this.audioContext, {
 				pan: this.options.stereo,
 			});
 
-			track.connect(stereoNode).connect(this.audioContext.destination);
+			track
+				.connect(gainNode)
+				.connect(stereoNode)
+				.connect(this.audioContext.destination);
 
 			this.sounds[sound] = () => {
 				if (this.audioContext.state === 'suspended') {

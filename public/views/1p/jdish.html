@@ -350,7 +350,7 @@
 						preview_pixel_size: 4,
 						field_pixel_size: 5,
 						running_trt_dot_size: 5,
-						tetris_sound: 0,
+						tetris_sound: QueryString.get('tetris_sound') === '1',
 						reliable_field: 0,
 						format_score: v => readableScoreFomatter(v), // need wrapper function to ignore the padding
 					}

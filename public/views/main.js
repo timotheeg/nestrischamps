@@ -67,6 +67,9 @@ const API = {
 	scoreRecorded: getStats,
 };
 
+const tetris_sound = new Audio('/views/Tetris_Clear.mp3');
+tetris_sound.volume = 0.35;
+
 function onTetris() {
 	let remaining_frames = 12;
 
@@ -81,6 +84,7 @@ function onTetris() {
 	}
 
 	window.requestAnimationFrame(steps);
+	if (QueryString.get('tetris_sound') === '1') tetris_sound.play();
 }
 
 const user_colors = {};

@@ -207,7 +207,7 @@
 					preview_pixel_size: 5,
 					running_trt_dot_size: 6,
 					tetris_flash: 0,
-					tetris_sound: 0,
+					tetris_sound: QueryString.get('tetris_sound') === '1',
 					format_score,
 					format_drought: v => v.toString().padStart(3, '0'),
 				}
