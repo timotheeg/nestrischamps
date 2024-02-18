@@ -39,7 +39,7 @@ export default class GameTracker {
 
 		this.tetris_ocr.onMessage = this._prefillFrameBuffer;
 
-		this.gameid = 1;
+		this.gameid = this.getNextGameId();
 		this.in_game = false;
 		this.start_level = 0;
 
@@ -64,6 +64,18 @@ export default class GameTracker {
 		if (!this.transition) return GameTracker.digitsToValue(ocr_level_digits);
 		if (lines < this.transition) return this.start_level;
 		return this.start_level + 1 + Math.floor((lines - this.transition) / 10);
+	}
+
+	getNextGameId() {
+		// we want to minimize the risk of gameid being duplicated when the producer page refreshes
+		let new_game_id =
+			this.gameid === undefined
+				? Date.now() + Math.floor(Math.random() * (1 << 30))
+				: this.gameid + 1;
+
+		new_game_id %= 0xffff; // because gameid in binary frame format is 16 bits
+
+		return new_game_id || 1; // never report gameid as 0, just because 🤷‍♂️
 	}
 
 	async processFrame(bitmap, half_height) {
@@ -208,7 +220,7 @@ export default class GameTracker {
 						GameTracker.arrEqual(dispatch_frame.lines, [0, 2, 5]))) || // mode B
 				this.cur_lines === undefined
 			) {
-				this.gameid++;
+				this.gameid = this.getNextGameId();
 
 				this.score_fixer.reset();
 				this.score_fixer.fix(dispatch_frame.score);
