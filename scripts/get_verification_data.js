@@ -27,6 +27,7 @@ export async function getReplayGame(gameid) {
 		frame_size,
 	});
 
+	const raw_frames = [];
 	const game = new BaseGame({});
 	game._gameid = gameid; // game has a client id, this records the server id too, can be used later on
 
@@ -37,7 +38,10 @@ export async function getReplayGame(gameid) {
 	while (idx < buffer.length) {
 		const binary_frame = buffer.slice(idx, idx + frame_size);
 		const frame_data = BinaryFrame.parse(binary_frame);
+
+		raw_frames.push(frame_data);
 		game.setFrame(frame_data);
+
 		idx += frame_size;
 	}
 
@@ -50,6 +54,7 @@ export async function getReplayGame(gameid) {
 	return {
 		gamedata,
 		game,
+		raw_frames,
 	};
 }
 
@@ -76,7 +81,7 @@ function getSrtTimestamp(elapsed) {
 (async function () {
 	const gameid = process.argv[2] || 241366;
 	const video_offset_ms = parseInt(process.argv[3], 10) || 0; // offset in ms to align with video file
-	const { gamedata, game } = await getReplayGame(gameid);
+	const { gamedata, game, raw_frames } = await getReplayGame(gameid);
 
 	if (!game) {
 		console.log('Unable to fetch game');
@@ -167,11 +172,10 @@ function getSrtTimestamp(elapsed) {
 
 	// generate all-frames report
 	console.log(`Writing frame report into file ${file_name}_frames.csv`);
-	const frames_csv = game.frames.map(f => {
-		const data = { ...f.raw };
+	const frames_csv = raw_frames.map(data => {
 		data.field = data.field.join('');
 		return Object.values(data);
 	});
-	frames_csv.unshift(Object.keys(game.frames[0].raw));
+	frames_csv.unshift(Object.keys(raw_frames[0]));
 	fs.writeFile(`${file_name}_frames.csv`, frames_csv.join('\n'), noop);
 })();
