@@ -618,7 +618,16 @@ export default class Player extends EventTarget {
 			if (seconds--) {
 				this.count_down_timer = setTimeout(showRemainingTime, 1000);
 			} else {
+				// count down is over, and new game hasn't started yet (or has not been detected)
+				// Since count down represents the admin's intention that a new game is coming, we force setup a new game right now!
+				// Note: if the game was started but the game start event was missed, it means we potentially will be missing a few frames
+				// and worst case scenario, the start_level will not be detected correctly
+				// but, *by right*, within 5 second of a game start, the level would not have increased yet and things should work
 				this.count_down_timer = null;
+				this._gameReset(); // warning: this kick starts showing curtain
+				this.clearFieldOverlays(); // this clear everything including hides the curtain
+
+				// Note: because the above clears the game state entirely, if the players data is still frames from the prior game (top out fields), that will be shown 🤷‍♂️
 			}
 		};
 
