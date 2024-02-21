@@ -194,8 +194,8 @@ class MatchRoom extends Room {
 				view_meta.concurrent_2_matches =
 					view_meta.concurrent_2_matches === 'true';
 			}
-			if ('players' in view_meta) {
-				view_meta.players = parseInt(view_meta.players, 10);
+			if ('_players' in view_meta) {
+				view_meta._players = parseInt(view_meta._players, 10);
 			}
 
 			if (this.state.concurrent_2_matches !== view_meta.concurrent_2_matches) {
@@ -294,7 +294,7 @@ class MatchRoom extends Room {
 	}
 
 	getMaxPossiblePlayers() {
-		return Math.min(this.getViewMeta().players || Infinity, MAX_PLAYERS);
+		return Math.min(this.getViewMeta()._players || Infinity, MAX_PLAYERS);
 	}
 
 	doAutoJoin() {

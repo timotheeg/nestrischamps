@@ -262,6 +262,9 @@ const API = {
 		is_player = true;
 		view_meta = _view_meta;
 
+		if (roomIFrame) {
+			loadRoomView(view_meta);
+		}
 		startSharingVideoFeed();
 	},
 
@@ -1859,20 +1862,44 @@ function destroyRoomView() {
 	roomIFrame = null;
 }
 
+function getLayout(layout) {
+	return layout && /^[a-z0-9_]+$/.test(layout) ? layout : null;
+}
+
+function getViewURL() {
+	const producer_url = new URL(document.location);
+	const mainViewLayout = getLayout(view_meta._layout);
+	const newPathname = producer_url.pathname.replace(
+		/\/producer$/,
+		`/view/${mainViewLayout || 'ctwc23'}`
+	);
+
+	const searchParams = new URLSearchParams(view_meta);
+
+	searchParams.delete('_layout');
+	searchParams.set('tetris_sound', 0);
+	searchParams.set('video', 0);
+	searchParams.set('bg', 0);
+	searchParams.set('in_producer', 1);
+
+	return new URL(`${producer_url.origin}${newPathname}?${searchParams}`);
+}
+
 function loadRoomView() {
 	if (!is_match_room) {
 		console.warn('View in private room is not supported');
 		return;
 	}
 
-	const url = new URL(document.location);
-	url.pathname = url.pathname.replace(/\/producer$/, '/view/ctwc23'); // is a 1080p layout
-	url.search = new URLSearchParams({
-		tetris_sound: 0,
-		video: 0,
-		bg: 0,
-		in_producer: 1,
-	});
+	const view_url = getViewURL();
+
+	if (roomIFrame) {
+		if (roomIFrame.getAttribute('src') === view_url.toString()) return; // same view, nothing to do
+
+		// there's already an iframe, but we need to reload the correct layout
+		// clear first and fall through
+		destroyRoomView();
+	}
 
 	const iFrameStyles = {
 		border: 0,
@@ -1885,7 +1912,7 @@ function loadRoomView() {
 	resizeRoomIFrame();
 	roomIFrame.setAttribute('width', 1920);
 	roomIFrame.setAttribute('height', 1080);
-	roomIFrame.setAttribute('src', url);
+	roomIFrame.setAttribute('src', view_url);
 
 	room.querySelector('.view').appendChild(roomIFrame);
 
@@ -1896,6 +1923,7 @@ function resizeRoomIFrame() {
 	if (!roomIFrame) return;
 
 	if (room.clientWidth >= 1920) {
+		// TODO: handle 720p layouts 😓
 		if (!roomIFrame.style.transform) return;
 		roomIFrame.style.transform = null;
 	} else {
@@ -1934,7 +1962,6 @@ function initTabControls() {
 
 			if (target === 'room') {
 				destroyRoomViewTO = clearTimeout(destroyRoomViewTO);
-				if (roomIFrame) return;
 				loadRoomView();
 			} else if (roomIFrame) {
 				destroyRoomViewTO = setTimeout(destroyRoomView, 15000); // 15 seconds to allow users to click around

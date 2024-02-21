@@ -71,6 +71,8 @@ export default function init(server, wss) {
 				user_secret: m[2],
 			};
 
+			request.nc_url.searchParams.set('_layout', request.tetris.view.layout_id);
+
 			// connection from the non-session-ed views (from OBS)
 			const user = await UserDAO.getUserBySecret(
 				request.tetris.view.user_secret
