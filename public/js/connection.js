@@ -18,7 +18,8 @@ export default class Connection {
 
 		if (extra_search_params) {
 			extra_search_params.forEach((value, key) => {
-				url.searchParams.set(key, value); // should this use .append() ?
+				if (key === 'players') key = '_players'; // do not reserve the key 'players'!
+				url.searchParams.set(key, value);
 			});
 		}
 
