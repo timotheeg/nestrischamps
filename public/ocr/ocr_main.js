@@ -1919,10 +1919,20 @@ function loadRoomView() {
 
 	roomIFrame = document.createElement('iframe');
 	Object.assign(roomIFrame.style, iFrameStyles);
-	resizeRoomIFrame();
-	roomIFrame.setAttribute('width', 1920);
-	roomIFrame.setAttribute('height', 1080);
 	roomIFrame.setAttribute('src', view_url);
+
+	if (view_meta?._size === '720') {
+		roomIFrame.setAttribute('width', 1280);
+		roomIFrame.setAttribute('height', 720);
+	} else if (view_meta?._size === '750') {
+		roomIFrame.setAttribute('width', 1334);
+		roomIFrame.setAttribute('height', 750);
+	} else {
+		roomIFrame.setAttribute('width', 1920);
+		roomIFrame.setAttribute('height', 1080);
+	}
+
+	resizeRoomIFrame();
 
 	room.querySelector('.view').appendChild(roomIFrame);
 
@@ -1932,12 +1942,18 @@ function loadRoomView() {
 function resizeRoomIFrame() {
 	if (!roomIFrame) return;
 
-	if (room.clientWidth >= 1920) {
-		// TODO: handle 720p layouts 😓
+	const size =
+		view_meta?._size === '720'
+			? 1280
+			: view_meta?._size === '750'
+			? 1334
+			: 1920;
+
+	if (room.clientWidth >= size) {
 		if (!roomIFrame.style.transform) return;
 		roomIFrame.style.transform = null;
 	} else {
-		const scale = room.clientWidth / 1920;
+		const scale = room.clientWidth / size;
 		roomIFrame.style.transform = `scale(${scale})`;
 	}
 }
