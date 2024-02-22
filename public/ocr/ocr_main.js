@@ -263,7 +263,7 @@ const API = {
 		view_meta = _view_meta;
 
 		if (roomIFrame) {
-			loadRoomView(view_meta);
+			loadRoomView();
 		}
 		startSharingVideoFeed();
 	},
@@ -362,7 +362,7 @@ async function startSharingVideoFeed() {
 
 	if (!allow_video_feed.checked) return;
 	if (!video_feed_selector.value) return;
-	if (!is_player || !peer || !view_peer_id || !view_meta || !view_meta.video)
+	if (!is_player || !peer || !view_peer_id || !view_meta || !view_meta._video)
 		return;
 
 	const video_constraints = {
@@ -371,7 +371,7 @@ async function startSharingVideoFeed() {
 		frameRate: { ideal: 15 }, // players hardly move... no need high fps?
 	};
 
-	const m = view_meta.video.match(/^(\d+)x(\d+)$/);
+	const m = (view_meta._video || '').match(/^(\d+)x(\d+)$/);
 
 	if (m) {
 		video_constraints.width.ideal = parseInt(m[1], 10);
@@ -396,7 +396,7 @@ async function startSharingVideoFeed() {
 		// 1. player cam
 		ongoing_call = peer.call(view_peer_id, stream);
 
-		if (view_meta.raw) {
+		if (view_meta.raw === '1') {
 			// 2. raw capture
 			const xywh = [...config.tasks.field.crop];
 
@@ -1868,21 +1868,31 @@ function getLayout(layout) {
 
 function getViewURL() {
 	const producer_url = new URL(document.location);
-	const mainViewLayout = getLayout(view_meta._layout);
+	const searchParams = new URLSearchParams();
+
+	let mainViewLayout;
+
+	if (view_meta) {
+		mainViewLayout = getLayout(view_meta._layout);
+
+		// add remote view settings (all except private keys)
+		Object.entries(view_meta)
+			.filter(([key, _]) => !key.startsWith('_'))
+			.forEach(([key, value]) => searchParams.set(key, value));
+	}
+
 	const newPathname = producer_url.pathname.replace(
 		/\/producer$/,
 		`/view/${mainViewLayout || 'ctwc23'}`
 	);
 
-	const searchParams = new URLSearchParams(view_meta);
-
-	searchParams.delete('_layout');
+	// add specific settings
 	searchParams.set('tetris_sound', 0);
 	searchParams.set('video', 0);
 	searchParams.set('bg', 0);
 	searchParams.set('in_producer', 1);
 
-	return new URL(`${producer_url.origin}${newPathname}?${searchParams}`);
+	return `${producer_url.origin}${newPathname}?${searchParams}`;
 }
 
 function loadRoomView() {
@@ -1894,7 +1904,7 @@ function loadRoomView() {
 	const view_url = getViewURL();
 
 	if (roomIFrame) {
-		if (roomIFrame.getAttribute('src') === view_url.toString()) return; // same view, nothing to do
+		if (roomIFrame.getAttribute('src') === view_url) return; // same view, nothing to do
 
 		// there's already an iframe, but we need to reload the correct layout
 		// clear first and fall through
