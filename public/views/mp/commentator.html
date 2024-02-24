@@ -33,9 +33,9 @@
 			}
 
 			.score {
-				width: 333px;
+				width: 313px;
 				padding-right: 0;
-				height: 112px;
+				height: 139px;
 				top: 0;
 			}
 
@@ -46,8 +46,8 @@
 
 			.score .aligner {
 				display: inline-block;
-				font-size: 36.01px;
-				line-height: 40px;
+				font-size: 32.01px;
+				line-height: 36px;
 			}
 
 			.score .aligner .diff {
@@ -56,20 +56,12 @@
 			}
 
 			.score .tetris_diff {
-				margin-top: -40px;
-				line-height: 40px;
-				animation: 0.5s ease-out fadeOut;
-				opacity: 0;
+				margin-top: 6px;
+				font-size: 16.01px;
 			}
 
-			.score.with_tdiff .tetris_diff {
-				animation: 0.5s ease-out fadeIn;
-				opacity: 1;
-			}
-
-			.score.with_tdiff .aligner .diff {
-				animation: 0.5s ease-out fadeOut;
-				opacity: 0;
+			.score .tetris_diff .value {
+				font-size: 24.01px;
 			}
 
 			.aligner div {
@@ -77,54 +69,70 @@
 			}
 
 			.lines,
+			.tr_value,
+			.burn,
+			.burn_max,
+			.next_piece,
+			.level {
+				top: 166px;
+			}
+
+			.lines,
 			.next_piece {
-				top: 139px;
-				width: 151px;
+				width: 141px;
 				height: 56px;
 			}
 
 			.lines {
 				padding-top: 6px;
-				width: 155px;
+				width: 145px;
 				padding-right: 0;
-				--offset: 178px;
+				--offset: 168px;
 			}
 
 			.next_piece {
 				height: 59px;
 			}
 
+			.board,
+			.drought {
+				top: 252px;
+			}
+
 			.board {
 				--border-size: 12;
 				padding: 3px;
-				width: 336px;
-				height: 676px;
-				top: 225px;
+				width: 316px;
+				height: 636px;
 			}
 
 			.name,
 			.tetris_rate,
+			.burn,
+			.burn_max,
+			.efficiency,
 			.drought,
-			.level {
+			.level,
+			.tr_value {
 				padding-right: 0;
 			}
 
 			.name,
 			.flag {
-				top: 923px;
+				top: 910px;
 			}
 
 			.name {
 				--offset: 0;
-				width: 336px;
+				width: 316px;
 				padding: 3px 0;
-				height: 64px;
+				height: 77px;
 				text-transform: uppercase;
 			}
 
 			.name .header {
 				font-size: 32.01px; /* sad -_- */
-				padding-top: 21px;
+				padding-top: 29px;
 				padding-bottom: 9px;
 			}
 
@@ -154,12 +162,14 @@
 			.tetris_rate,
 			.drought,
 			.flag,
-			.running_trt {
-				--offset: 357px;
+			.burn,
+			.efficiency,
+			.runways {
+				--offset: 337px;
 			}
 
 			.hearts {
-				bottom: -766px;
+				bottom: -919px;
 				width: 24px;
 				padding-right: 0;
 				height: unset;
@@ -182,35 +192,81 @@
 			}
 
 			.level,
+			.tr_value,
 			.tetris_rate,
+			.burn,
+			.burn_max,
+			.efficiency,
 			.drought {
 				padding-top: 5px;
 				width: 78px;
 				height: 54px;
 			}
 
-			.tetris_rate,
-			.drought {
-				top: 840px;
+			.level,
+			.tr_value,
+			.burn,
+			.burn_max {
+				height: 57px;
 			}
 
-			.level {
-				top: 757px;
-				width: 56px;
+			.tr_value {
+				width: 177px;
+				--offset: 439px;
+			}
+
+			.burn,
+			.drought,
+			.burn_max {
+				width: 132px;
+			}
+
+			.burn {
+				--offset: 640px;
+			}
+
+			.burn_max {
+				--offset: 796px;
+			}
+
+			.burn .header span,
+			.burn_max .header span,
+			.drought .header span {
+				font-size: 16.01px;
+			}
+
+			.tetris_rate {
+				top: 0;
+			}
+
+			.efficiency {
+				top: 83px;
 			}
 
 			.drought {
-				color: red;
-				display: none;
+				width: 120px;
+				height: 57px;
+				padding-left: 1px;
+			}
+
+			.drought.last {
+				width: 135px;
+				--offset: 479px;
+			}
+
+			.drought.max {
+				--offset: 636px;
+			}
+
+			.drought.count {
+				width: 152px;
+				--offset: 778px;
 			}
 
 			.drought.active {
+				color: red;
 				display: block;
 				animation: 0.5s ease-out fadeIn;
-			}
-
-			.drought .header {
-				padding-bottom: 4px; /* because the bar is thinner than text */
 			}
 
 			.drought .header img {
@@ -222,31 +278,28 @@
 
 			.flag {
 				padding: 0;
-				width: 105px;
-				height: 70px;
+				width: 125px;
+				height: 83px;
 			}
 
 			.running_trt {
-				top: 0;
 				padding: 0;
+				top: 0;
+				--offset: 439px;
 				right: var(--offset);
-				width: 573px;
-				height: 90px;
+				width: 491px;
+				height: 145px;
 			}
 
 			.runways {
 				display: none;
 				justify-content: space-between;
 				color: #888;
-				font-size: 24.01px;
-				line-height: 24px;
-				--offset: 483px;
 				right: var(--offset);
-				width: 444px;
+				width: 591px;
 				height: unset;
-				bottom: -1023px;
-				--border-size: 12;
-				padding: 3px 3px 1px 6px;
+				top: 338px;
+				line-height: 28px;
 			}
 
 			.runways.hide19 .lv19,
@@ -265,6 +318,11 @@
 
 			.runways .value {
 				text-align: right;
+			}
+
+			.runways .tdiff {
+				text-align: right;
+				font-size: 16.01px;
 			}
 
 			.runways .active {
@@ -293,14 +351,14 @@
 
 			.player_vid {
 				position: absolute;
-				top: 0;
-				width: 600px;
-				height: 1023px;
+				top: 455px;
+				width: 614px;
+				height: 565px;
 				padding: 0;
 				object-fit: cover;
 				/* background: yellow; /**/
 
-				--offset: 360px;
+				--offset: 346px;
 				right: var(--offset);
 			}
 
@@ -463,8 +521,23 @@
 				</div>
 
 				<div class="box level">
-					<div class="header">LV</div>
+					<div class="header">LVL</div>
 					<div class="content">00</div>
+				</div>
+
+				<div class="box tr_value">
+					<div class="header">TR VAL</div>
+					<div class="content">000&#x202F;000</div>
+				</div>
+
+				<div class="box burn">
+					<div class="header">BRN<span>CUR</span></div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box burn_max">
+					<div class="header">BRN<span>MAX</span></div>
+					<div class="content">---</div>
 				</div>
 
 				<div class="box tetris_rate">
@@ -472,8 +545,28 @@
 					<div class="content">---</div>
 				</div>
 
+				<div class="box efficiency">
+					<div class="header">EFF</div>
+					<div class="content">---</div>
+				</div>
+
 				<div class="box drought">
-					<div class="header"><img src="/views/red_bar.png" /></div>
+					<div class="header">DRT<span>CUR</span></div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box drought last">
+					<div class="header">DRT<span>LAST</span></div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box drought max">
+					<div class="header">DRT<span>MAX</span></div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box drought count">
+					<div class="header">DRT<span>COUNT</span></div>
 					<div class="value">99</div>
 				</div>
 
@@ -490,6 +583,11 @@
 						<div class="lv19">000&#x202F;000</div>
 						<div class="lv29">0&#x202F;000&#x202F;000</div>
 						<div class="lv39">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div class="tdiff">
+						<div class="lv19">+0.00T</div>
+						<div class="lv29">+0.00T</div>
+						<div class="lv39">+0.00T</div>
 					</div>
 				</div>
 
@@ -567,10 +665,6 @@
 			const SIMUL_TETRIS_DELAY = SHOW_SIMUL_TETRIS
 				? parseInt(QueryString.get('simultris'), 10)
 				: 120;
-
-			const CYCLE_TDIFF = /^[1-9]\d*$/.test(QueryString.get('cycle_tdiff'))
-				? parseInt(QueryString.get('cycle_tdiff'), 10)
-				: 0;
 
 			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
 				? parseInt(QueryString.get('sponsorimg'), 10)
@@ -685,6 +779,8 @@
 							level: player_node.querySelector(`.level .content`),
 							lines: player_node.querySelector(`.lines .content`),
 							trt: player_node.querySelector(`.tetris_rate .content`),
+							eff: player_node.querySelector(`.efficiency .content`),
+							burn: player_node.querySelector(`.burn .content`),
 							preview: player_node.querySelector(`.next_piece`),
 							field: player_node.querySelector(`.board`),
 							drought: player_node.querySelector(`.drought .value`),
@@ -714,8 +810,8 @@
 						{
 							biglogo: true,
 							bigntc: true,
-							field_pixel_size: 4.25,
-							running_trt_dot_size: 5,
+							field_pixel_size: 4,
+							running_trt_dot_size: 4,
 							preview_pixel_size: 3.75,
 							format_score: v => readableScoreFomatter(v),
 							stereo: translate([1, 2], [-1, 1], player_num),
@@ -724,10 +820,6 @@
 
 					if (QueryString.get('invisible') === '1') {
 						InvisibleMixin(player);
-					}
-
-					if (!CYCLE_TDIFF) {
-						player.dom.score_box.querySelector('.tetris_diff').remove();
 					}
 
 					if (show_runways === true) {
@@ -1010,14 +1102,6 @@
 					commentatorBot = new MatchCommentatorBot(match_players);
 				}
 			});
-
-			if (CYCLE_TDIFF) {
-				setInterval(() => {
-					players.forEach(player => {
-						player.dom.score_box.classList.toggle('with_tdiff');
-					});
-				}, CYCLE_TDIFF * 1000);
-			}
 
 			const competition = new Competition(players);
 
