@@ -382,47 +382,94 @@
 			}
 
 			.match.small {
-				transform: scale(0.7245042492917847); /* (1080-57)/706/2 */
+				transform: scale(0.7680180180180181); /* (1080-57)/666/2 */
 			}
 			#match2.small {
 				top: 511px;
 			}
 
-			.match.small .runways {
-				display: none;
+			.match.small .score,
+			.match.small .running_trt,
+			.match.small .tetris_rate {
+				top: 104px;
 			}
 
+			.match.small .efficiency {
+				top: 187px;
+			}
+
+			.match.small .name,
 			.match.small .score,
 			.match.small .lines,
 			.match.small .next_piece {
-				--offset: 357px;
+				--offset: 337px;
 			}
 
-			.match.small .next_piece {
-				z-index: 4;
-				top: 139px;
+			.match.small .lines,
+			.match.small .level,
+			.match.small .tetris_value,
+			.match.small .burn,
+			.match.small .burn_max {
+				top: 270px;
+			}
+
+			.match.small .burn.max {
+				--offset: 984px;
+			}
+			.match.small .burn {
+				--offset: 828px;
+			}
+			.match.small .tetris_value {
+				--offset: 627px;
+			}
+			.match.small .level {
+				width: 88px;
+				--offset: 515px;
 			}
 
 			.match.small .lines {
-				z-index: 3;
 				width: 154px;
-				top: 225px;
 			}
 
-			.match.small .level {
-				z-index: 2;
-				top: 311px;
-				width: 78px;
+			.match.small .running_trt {
+				--offset: 729px;
+			}
+
+			.match.small .next_piece,
+			.match.small .drought {
+				top: 356px;
+			}
+
+			.match.small .next_piece {
+				width: 148px;
+				padding-left: 6px;
+			}
+
+			.match.small .drought.current {
+				--offset: 515px;
+			}
+			.match.small .drought.last {
+				--offset: 657px;
+			}
+			.match.small .drought.max {
+				--offset: 814px;
+			}
+			.match.small .drought.count {
+				--offset: 956px;
 			}
 
 			.match.small .tetris_rate,
-			.match.small .drought {
-				top: 394px;
+			.match.small .efficiency {
+				--offset: 627px;
 				z-index: 1;
 			}
 
+			.match.small .tetris_rate {
+				top: 104px;
+			}
+
 			.match.small .score {
-				width: 302px;
+				width: 266px;
 			}
 
 			.match.small .board {
@@ -434,7 +481,12 @@
 			}
 			.match.small .hearts {
 				bottom: unset;
-				top: 477px;
+				top: 553px;
+				width: unset;
+				display: flex;
+			}
+			.match.small .hearts span {
+				display: inline-block;
 			}
 			.match.small .flag,
 			.match.small .name {
@@ -442,21 +494,22 @@
 				top: 0;
 			}
 			.match.small .name {
-				width: 486px;
-				--offset: 683px;
+				width: 737px;
 			}
 			.match.small .flag {
-				--offset: 1190px;
-			}
-			.match.small .player_vid {
-				top: 96px;
-				width: 965px;
-				height: 609px;
+				--offset: 1095px;
 			}
 
-			.match.small .simul-tetris {
-				top: 250px;
-				--offset: 574px;
+			.match.small .player_vid,
+			.match.small .runways {
+				top: 442px;
+			}
+
+			.match.small .player_vid {
+				top: 448px;
+				--offset: 960px;
+				width: 290px;
+				height: 215px;
 			}
 
 			.match.small .p2 > * {
