@@ -323,6 +323,22 @@
 				color: #fff;
 			}
 
+			.runways .active.leader {
+				color: #0eff0e;
+			}
+
+			.runways .active.laggard {
+				color: #fd0009;
+			}
+
+			.runways .leader {
+				color: #008d00;
+			}
+
+			.runways .laggard {
+				color: #880005;
+			}
+
 			.simul-tetris {
 				display: none;
 				position: absolute;
@@ -584,7 +600,7 @@
 		<script src="/vendor/peerjs.1.5.1.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
-			import { peerServerOptions } from '/views/constants.js';
+			import { peerServerOptions, TRANSITIONS } from '/views/constants.js';
 			import {
 				peek,
 				noop,
@@ -593,17 +609,113 @@
 			} from '/views/utils.js';
 			import QueryString from '/js/QueryString.js';
 			import CompetitionPlayer from '/views/CompetitionPlayer.js';
-			import { Competition, getTetrisDiff } from '/views/competition.js';
+			import {
+				Competition,
+				getTetrisValue,
+				getTetrisDiff,
+			} from '/views/competition.js';
 			import InvisibleMixin from '/views/InvisibleMixin.js';
 
 			const player_template = document.getElementById('player');
 			const players = [];
 
+			function getLevelLines(player, level) {
+				if (player.game.data.start_level >= level) return 0;
+				if (level === player.game.data.start_level + 1)
+					return TRANSITIONS[player.game.data.start_level];
+				return level * 10 - TRANSITIONS[player.game.data.start_level];
+			}
+
+			function computeRunwayDiff(players, level) {
+				function getter() {
+					return this.game?.data.score.runways[`LV${level}`] || 0;
+				}
+
+				function setter(value) {
+					const formatted_value = this.options.format_tetris_diff(value);
+					const elmt = this.dom[`runway_tdiff_lv${level}`];
+
+					if (value < 0) {
+						elmt.textContent = `${formatted_value}`;
+						elmt.parentNode.classList.add('laggard');
+						elmt.parentNode.classList.remove('leader');
+						return;
+					}
+
+					elmt.parentNode.classList.remove('laggard');
+					elmt.parentNode.classList.add('leader');
+
+					if (value === 0) {
+						elmt.textContent = formatted_value;
+					} else {
+						elmt.textContent = `+${formatted_value}`;
+					}
+				}
+
+				const [leader, laggard] = [...players].sort(
+					(p1, p2) => getter.apply(p2) - getter.apply(p1)
+				);
+
+				const leader_score = getter.apply(leader);
+				const laggard_score = getter.apply(laggard);
+
+				if (leader_score === laggard_score) return 0;
+				if (!laggard.game?.data) return 0; // stupid value 🤷
+
+				const start_level = laggard.game.data.start_level;
+				const transition = TRANSITIONS[start_level];
+
+				let { lines: lgLines, level: lgLevel } = laggard.game.data;
+				let tetrises = 0;
+				let diff = leader_score - laggard_score;
+
+				if (lgLevel >= level) {
+					// the runway is passed, so we're basically computing the transition lead
+					// make some assumption on line threshold, otherwise it's too complicated
+					lgLevel = level;
+					lgLines = getLevelLines(laggard, level);
+				}
+
+				// console.log(level, [lgLevel, lgLines], [leader_score, laggard_score], diff);
+
+				while (diff > 0) {
+					if (lgLines >= transition - 4) {
+						// below transition, level doesn't change every 10 lines
+						if (lgLines % 10 >= 6) {
+							// the tetris is counted at end level, not start level
+							lgLevel += 1;
+						}
+					}
+
+					lgLines += 4;
+					tetrises += 1;
+
+					diff -= getTetrisValue(lgLevel);
+				}
+
+				//  correct the overshot
+				//  note: diff is negative, to this statement *reduces* the tetrises value
+				tetrises += diff / getTetrisValue(lgLevel);
+
+				setter.call(leader, tetrises);
+				setter.call(laggard, -tetrises);
+			}
+
+			function computeRunwayDiffs(players) {
+				const min_level = players.reduce(
+					(acc, p) => Math.min(acc, p.game?.data.level || 0),
+					Infinity
+				);
+				const levels = [19, 29, 39].filter(l => l > min_level);
+
+				for (const level of levels) {
+					computeRunwayDiff(players, level);
+				}
+			}
+
 			[1, 2].forEach(match_num => {
 				const match_node = document.getElementById(`match${match_num}`);
-
 				const match_players = [];
-				const sync_timers = [];
 
 				[1, 2].forEach((player_num, player_idx) => {
 					const player_fragment = document.importNode(
@@ -635,6 +747,16 @@
 							runway_lv19: player_node.querySelector(`.runways .value .lv19`),
 							runway_lv29: player_node.querySelector(`.runways .value .lv29`),
 							runway_lv39: player_node.querySelector(`.runways .value .lv39`),
+
+							runway_tdiff_lv19: player_node.querySelector(
+								`.runways .tdiff .lv19 span`
+							),
+							runway_tdiff_lv29: player_node.querySelector(
+								`.runways .tdiff .lv29 span`
+							),
+							runway_tdiff_lv39: player_node.querySelector(
+								`.runways .tdiff .lv39 span`
+							),
 
 							diff: player_node.querySelector(`.score .diff`),
 							t_diff: player_node.querySelector(`.score .tetris_diff .value`),
@@ -689,7 +811,7 @@
 
 					player.onLevel = frame => {
 						player.dom.tetris_value.textContent = readableScoreFomatter(
-							frame.raw.level * 1200
+							getTetrisValue(frame.raw.level)
 						);
 
 						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
@@ -790,6 +912,8 @@
 						player.dom.runways_box.classList[
 							start_level >= 19 ? 'add' : 'remove'
 						]('hide19');
+
+						computeRunwayDiffs(match_players);
 					};
 
 					player.onGameOver = () => {
@@ -804,6 +928,10 @@
 								other_player.dom.runways_box.classList.add('visible');
 							}
 						}
+
+						player.dom.runways_box.querySelectorAll('.active').forEach(elmt => {
+							elmt.classList.remove('active');
+						});
 					};
 
 					match_players.push(player);
@@ -861,6 +989,7 @@
 
 				const updateMatchStats = () => {
 					competition.computeScoreDifferentials(match_players);
+					computeRunwayDiffs(match_players);
 				};
 
 				match_players.forEach(player => {
