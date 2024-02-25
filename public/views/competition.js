@@ -260,7 +260,7 @@ class TetrisCompetitionAPI {
 }
 
 // TODO: modularize this file better
-export default class Competition {
+export class Competition {
 	constructor(_players, api_overrides = {}) {
 		this.players = players = _players;
 
@@ -420,3 +420,5 @@ export default class Competition {
 		return this.players.filter(player => player.peerid === peerid);
 	}
 }
+
+export default Competition;
