@@ -3,7 +3,7 @@ import renderBlock from '/views/renderBlock.js';
 import FrameBuffer from '/views/FrameBuffer.js';
 import BaseGame from '/views/BaseGame.js';
 import { css_size, clamp, getPercent, peek } from '/views/utils.js';
-
+import Gradient from '/views/gradient.js';
 import { PIECE_COLORS, DOM_DEV_NULL, LINES } from '/views/constants.js';
 
 const WINNER_FACE_BLOCKS = [
@@ -128,6 +128,8 @@ const fake_piece_evt = {
 		bad: 0,
 	},
 };
+
+const whiteToBlackGradient = new Gradient('#FFFFFF', '#000000');
 
 /*
 dom: {
@@ -368,15 +370,12 @@ export default class Player extends EventTarget {
 			border: 0,
 			margin: 0,
 			padding: 0,
-			background: 'rgba(0, 0, 0, 0.95)',
+			background: '#000',
 			overflow: 'hidden',
 			display: 'none',
 			justifyContent: 'center',
 			alignItems: 'center',
-			fontSize: '36px', // hardcoded is bad :'(
-			lineHeight: '36px',
 		});
-		this.comp_messages.hidden = true;
 		this.dom.field.appendChild(this.comp_messages);
 
 		this.profile_card = document.createElement('iframe');
@@ -547,46 +546,64 @@ export default class Player extends EventTarget {
 			if (elapsed < duration) {
 				this.curtain_animation_ID = window.requestAnimationFrame(steps);
 			} else {
+				this.curtain_animation_ID = null;
 				this.onCurtainDown();
 			}
 		};
 
-		this.curtain_animation_ID = window.requestAnimationFrame(steps);
+		steps();
 	}
 
 	_hideCurtain() {
 		if (!this.has_curtain) return;
 
-		window.cancelAnimationFrame(this.curtain_animation_ID);
+		this.curtain_animation_ID = window.cancelAnimationFrame(
+			this.curtain_animation_ID
+		);
 
 		this.curtain_viewport.hidden = true;
 		this.curtain_container.style.top = `-${this.bg_height}px`;
 	}
 
-	showCompMessage(message, large = false, fade = 0) {
+	showCompMessage(message, large = false, fadeDuration = 0) {
+		this.comp_message_animation_ID = window.cancelAnimationFrame(
+			this.comp_message_animation_ID
+		);
+
 		Object.assign(this.comp_messages.style, {
-			transition: null,
-			color: 'white',
+			color: '#fff',
 			display: 'flex',
 			fontSize: large ? '48px' : '36px',
+			lineHeight: large ? '48px' : '36px',
 		});
-		this.comp_messages.innerText = message;
+		this.comp_messages.textContent = message;
 
-		if (message && fade) {
-			setTimeout(
-				() =>
-					Object.assign(this.comp_messages.style, {
-						transition: `color ${fade}ms linear`,
-						color: 'black',
-					}),
-				20
-			); // urgh, this delay sucks T_T !!
+		if (message && fadeDuration) {
+			const start_ts = Date.now();
+
+			const steps = () => {
+				const elapsed = Date.now() - start_ts;
+
+				this.comp_messages.style.color = whiteToBlackGradient
+					.getColorAt(elapsed / fadeDuration) // getColorAt() clamps ratio to [0,1]
+					.toHexString();
+
+				this.comp_message_animation_ID =
+					elapsed < fadeDuration ? window.requestAnimationFrame(steps) : null;
+			};
+
+			steps();
 		}
 	}
 
 	_hideCompMessage() {
 		if (this.count_down_timer) {
 			this.count_down_timer = clearTimeout(this.count_down_timer);
+		}
+		if (this.comp_message_animation_ID) {
+			this.comp_message_animation_ID = window.cancelAnimationFrame(
+				this.comp_message_animation_ID
+			);
 		}
 		this.comp_messages.style.display = 'none';
 	}
