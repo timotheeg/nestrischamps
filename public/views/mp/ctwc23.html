@@ -428,6 +428,24 @@
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 110px" />
 			</div>
 		</template>
+		<template id="curtain_2">
+			<div class="custom_curtain">
+				<br />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img
+					src="/images/sponsors/redbull-logo-png-transparent.m.png"
+					style="width: 280px"
+				/>
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.png" />
+			</div>
+		</template>
 		<template id="player">
 			<div class="player">
 				<video class="player_vid"></video>
@@ -571,7 +589,7 @@
 				: 0;
 
 			let curtain_template;
-			if (/^[01]$/.test(QueryString.get('curtain'))) {
+			if (/^[012]$/.test(QueryString.get('curtain'))) {
 				curtain_template = document.getElementById(
 					`curtain_${QueryString.get('curtain')}`
 				);
