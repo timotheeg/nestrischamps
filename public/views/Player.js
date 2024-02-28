@@ -966,12 +966,7 @@ export default class Player extends EventTarget {
 		this.createGame();
 		this.game.setFrame(frame);
 
-		const last_frame = peek(this.game.frames);
-
-		this._renderScore(last_frame);
-		this._renderLevel(last_frame);
-		this._renderLines(last_frame);
-		this._renderPiece(last_frame);
+		this._renderGameStart();
 
 		if (this.hide_profile_card_on_next_game) {
 			this.showProfileCard(false);
@@ -979,6 +974,17 @@ export default class Player extends EventTarget {
 		this.hide_profile_card_on_next_game = false;
 
 		this._hideCompMessage();
+	}
+
+	_renderGameStart() {
+		const last_frame = peek(this.game.frames);
+
+		if (last_frame) {
+			this._renderScore(last_frame);
+			this._renderLevel(last_frame);
+			this._renderLines(last_frame);
+			this._renderPiece(last_frame);
+		}
 	}
 
 	_renderValidFrame(frame) {
@@ -1079,6 +1085,7 @@ export default class Player extends EventTarget {
 	}
 
 	_onGameStart(frame) {
+		this._renderGameStart();
 		this.onGameStart();
 		this.dispatchEvent(new Event('gamestart'));
 	}
