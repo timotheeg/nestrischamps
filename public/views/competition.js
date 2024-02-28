@@ -37,12 +37,12 @@ function getPlayer(idx) {
 	return players[idx];
 }
 
-function tetris_value(level) {
+export function getTetrisValue(level) {
 	return 1200 * (level + 1);
 }
 
 function getSortedPlayers(players, getter = 'getScore') {
-	return players.concat().sort((p1, p2) => {
+	return [...players].sort((p1, p2) => {
 		const p1_score = p1[getter]();
 		const p2_score = p2[getter]();
 
@@ -79,12 +79,12 @@ export function getTetrisDiff(leader, laggard, getter = 'getScore') {
 		lines += 4;
 		tetrises += 1;
 
-		diff -= tetris_value(level);
+		diff -= getTetrisValue(level);
 	}
 
 	//  correct the overshot
 	//  note: diff is negative, to this statement *reduces* the tetrises value
-	tetrises += diff / tetris_value(level);
+	tetrises += diff / getTetrisValue(level);
 
 	return tetrises;
 }
@@ -260,7 +260,7 @@ class TetrisCompetitionAPI {
 }
 
 // TODO: modularize this file better
-export default class Competition {
+export class Competition {
 	constructor(_players, api_overrides = {}) {
 		this.players = players = _players;
 
@@ -420,3 +420,5 @@ export default class Competition {
 		return this.players.filter(player => player.peerid === peerid);
 	}
 }
+
+export default Competition;

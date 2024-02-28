@@ -199,6 +199,7 @@ const DEFAULT_OPTIONS = {
 	stereo: 0, // [-1, 1] representing left:-1 to right:1
 	reliable_field: 1,
 	draw_field: 1,
+	avatar: QueryString.get('avatar') !== '0',
 	curtain: 1,
 	buffer_time,
 	format_score: (v, size) => {
@@ -288,7 +289,7 @@ export default class Player extends EventTarget {
 		this.dom.field.prepend(this.field_bg);
 
 		// Avatar Block
-		if (QueryString.get('avatar') !== '0') {
+		if (this.options.avatar) {
 			this.avatar = document.createElement('div');
 			this.avatar.classList.add('avatar');
 			Object.assign(this.avatar.style, {

@@ -364,20 +364,25 @@ export default class BaseGame {
 		this.data.score.runways = { ...this.data.score.runways };
 		this.data.score.projections = { ...this.data.score.projections };
 
-		// pin the runway to whatever the final score is
-		for (const threshold_level of [39, 29, 19]) {
-			if (this.data.level >= threshold_level) break;
-
-			this.data.score.projections[`LV${threshold_level}`] =
-				this.data.score.runways[`LV${threshold_level}`] = death_score;
-		}
-
 		const last_point_evt = peek(last_frame?.points || []);
 
 		if (last_point_evt) {
 			last_point_evt.score.runway = death_score;
 			last_point_evt.score.projection = death_score;
 			last_point_evt.score.tr_runway = this.data.score.tr_runway;
+		}
+
+		// pin the runway to whatever the final score is
+		for (const threshold_level of [39, 29, 19]) {
+			if (this.data.level >= threshold_level) break;
+
+			this.data.score.projections[`LV${threshold_level}`] =
+				this.data.score.runways[`LV${threshold_level}`] = death_score;
+
+			if (!last_point_evt) continue;
+
+			last_point_evt.score.projections[`LV${threshold_level}`] =
+				last_point_evt.score.runways[`LV${threshold_level}`] = death_score;
 		}
 
 		this.onGameOver(last_frame);
