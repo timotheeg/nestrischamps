@@ -782,7 +782,7 @@ export default class Player extends EventTarget {
 				'allow',
 				'autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;'
 			);
-			iframe.classList.add('player_vid');
+			iframe.classList.add(...this.dom.video.classList.values());
 			iframe.style.border = 0;
 		}
 
