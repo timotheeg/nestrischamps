@@ -215,7 +215,7 @@ To contribute, make sure you first set project to run locally (see previous sect
 
 Many issues and ideas for improvements are listed in the [github issues](https://github.com/timotheeg/nestrischamps/issues).
 
-The code is sort of messy, and yet, I have some standards hidden in this mess. Until I document them, please ask on [the discord server](https://discord.gg/gaCEe5aX) before submitting PRs.
+The code is sort of messy, and yet, I have some standards hidden in this mess. Until I document them, please ask on [the discord server](https://discord.gg/Wzr4YdQWa4) before submitting PRs.
 
 
 
