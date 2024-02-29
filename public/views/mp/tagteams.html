@@ -4,30 +4,44 @@
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
 		<style>
-			.running_trt {
-				height: 79px;
-			}
-
 			.team {
 				position: absolute;
-				top: 230px;
-				left: 40px;
+				top: 110px;
+				left: 335px;
 			}
 
 			#team2 {
-				left: 990px;
+				left: 980px;
+			}
+
+			.team .player_vid {
+				position: absolute;
+				object-fit: cover;
+				width: 312px;
+				height: 312px;
+				top: 9px;
+				background: black;
+			}
+
+			.team .player_vid.p2 {
+				top: 492px;
+			}
+
+			#team1 .player_vid {
+				right: 10px;
+			}
+			#team2 .player_vid {
+				left: 615px;
 			}
 
 			.team-score {
-				width: 855px;
-				font-size: 48px;
-				line-height: 60px;
-				height: 114px;
-				top: -135px;
-			}
-
-			.team-score .diff {
-				margin-top: -3px;
+				width: 575px;
+				font-size: 42px;
+				line-height: 48px;
+				padding-top: 12px;
+				padding-bottom: 12px;
+				height: 92px;
+				top: 0;
 			}
 
 			.aligner {
@@ -35,8 +49,34 @@
 				text-align: right;
 			}
 
-			.no-video .team {
-				top: 300px;
+			.board {
+				top: 230px;
+				width: 277px;
+				height: 557px;
+			}
+
+			.board .lines {
+				font-size: 20px;
+				top: 3px;
+			}
+
+			.board .next_piece {
+				width: 93px;
+				height: 45px;
+			}
+
+			.score {
+				top: 137px;
+				width: 277px;
+				height: 60px;
+				padding-top: 6px;
+				padding-bottom: 6px;
+			}
+
+			.score .header,
+			.score .value {
+				font-size: 24px;
+				line-height: 28px;
 			}
 		</style>
 	</head>
@@ -63,6 +103,7 @@
 
 			<template id="player">
 				<div class="player">
+					<video class="player_vid"></video>
 					<div class="box board">
 						<div class="lines">000</div>
 						<div class="next_piece"></div>
@@ -72,10 +113,6 @@
 						<div class="header">PLAYER</div>
 						<div class="value">0&#x202F;000&#x202F;000</div>
 					</div>
-
-					<div class="box running_trt"></div>
-
-					<video class="box"></video>
 				</div>
 			</template>
 		</div>
@@ -85,8 +122,8 @@
 		<script>
 			// custom view parameters which will be passed in the websocket URI
 			const view_meta = new URLSearchParams({
-				video: '352x240',
-				players: 8,
+				video: '640x480',
+				players: 4,
 			});
 		</script>
 		<script src="/vendor/peerjs.1.5.1.min.js"></script>
@@ -105,11 +142,11 @@
 
 			// Check team configuration
 			let team_setup = [
-				[1, 2, 3, 4],
-				[1, 2, 3, 4],
+				[1, 2],
+				[1, 2],
 			];
 
-			const player_setup_re = /^[1234]-[1234]$/;
+			const player_setup_re = /^[12]-[12]$/;
 
 			if (player_setup_re.test(QueryString.get('players'))) {
 				team_setup = QueryString.get('players')
@@ -150,11 +187,21 @@
 				const green = '#0eff0e';
 				const red = '#fd0009';
 
-				team1_diff_node.textContent = readableScoreFomatter(diff);
-				team2_diff_node.textContent = readableScoreFomatter(diff);
+				if (team1_score >= team2_score) {
+					team1_diff_node.textContent =
+						(diff > 0 ? '+' : '') + readableScoreFomatter(diff);
+					team2_diff_node.textContent = readableScoreFomatter(-diff);
 
-				team1_diff_node.style.color = team1_score >= team2_score ? green : red;
-				team2_diff_node.style.color = team2_score >= team1_score ? green : red;
+					team1_diff_node.style.color = green;
+					team2_diff_node.style.color = red;
+				} else {
+					team2_diff_node.textContent =
+						(diff > 0 ? '+' : '') + readableScoreFomatter(diff);
+					team1_diff_node.textContent = readableScoreFomatter(-diff);
+
+					team2_diff_node.style.color = green;
+					team1_diff_node.style.color = red;
+				}
 			}
 
 			function setWinner(player_idx) {
@@ -175,16 +222,15 @@
 
 			window.onload = () => {
 				// wait for css
-				const player_width = 219;
+				const player_width = 298;
 
 				let player_num = 0;
 
 				team_setup.forEach((player_setup, team_idx) => {
-					const team_node = document.querySelector(
-						`#team${team_idx + 1} .players`
+					const team_node = document.querySelector(`#team${team_idx + 1}`);
+					const base_offset_x = Math.round(
+						((2 - player_setup.length) * player_width) / 2
 					);
-
-					const base_offset_x = ((4 - player_setup.length) * player_width) / 2;
 
 					player_setup.forEach(col_num => {
 						const player_idx = player_num++;
@@ -195,7 +241,11 @@
 						const player_node = player_fragment.querySelector('.player');
 
 						player_node.classList.add(`p${player_num}`);
-						team_node.appendChild(player_node);
+						team_node.querySelector('.players').appendChild(player_node);
+
+						const video_node = player_node.querySelector(`.player_vid`);
+						video_node.classList.add(`p${col_num}`);
+						team_node.prepend(video_node);
 
 						const player = new Player(
 							{
@@ -204,12 +254,11 @@
 								lines: player_node.querySelector(`.board .lines`),
 								preview: player_node.querySelector(`.board .next_piece`),
 								field: player_node.querySelector(`.board`),
-								running_trt: player_node.querySelector(`.running_trt`),
-								video: player_node.querySelector(`video`),
+								video: video_node,
 							},
 							{
-								field_pixel_size: 2.5,
-								preview_pixel_size: 2,
+								field_pixel_size: 3.5,
+								preview_pixel_size: 3,
 								preview_align: 'tr',
 								stereo: translate([0, 1], [-1, 1], team_idx),
 								format_score: readableScoreFomatter,
@@ -230,13 +279,13 @@
 
 						players.push(player);
 
+						if (QueryString.get('video') === '0') {
+							video_node.remove();
+						}
+
 						Object.assign(player_node.style, {
 							left: `${base_offset_x + (col_num - 1) * player_width}px`,
 						});
-
-						if (QueryString.get('rtrt') === '0') {
-							player.dom.running_trt.remove();
-						}
 					});
 				});
 
@@ -245,10 +294,6 @@
 				players.forEach(player => {
 					player.onScore = udpatePlayerScore;
 				});
-
-				if (!competition.has_video) {
-					stream_bg.classList.add('no-video');
-				}
 			};
 		</script>
 	</body>
