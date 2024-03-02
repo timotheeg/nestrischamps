@@ -8,7 +8,6 @@
 // node scripts/insert_local_users.js
 
 import pg from 'pg';
-import fs from 'fs';
 import { parse } from 'csv-parse/sync';
 import ULID from 'ulid';
 import got from 'got';
@@ -36,7 +35,7 @@ const sheet_csv_url =
 		skip_empty_lines: true,
 	});
 
-	await pool.query('DELETE FROM scores WHERE player_id>32');
+	await pool.query('DELETE FROM scores WHERE player_id>32 AND frame_file is NULL or frame_file = \'\'');
 	await pool.query('DELETE FROM twitch_users WHERE id>32');
 
 	records.shift(); // drop header row from csv
