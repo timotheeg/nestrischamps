@@ -74,7 +74,7 @@ const sheet_csv_url =
 				`__user${id}@nestrischamps.io`,
 				ULID.ulid(),
 				description,
-				`${seed}. ${display_name}`,
+				seed ? `${seed}. ${display_name}` : display_name,
 				pronouns,
 				profile_image_url,
 				dob,
