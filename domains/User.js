@@ -67,6 +67,7 @@ class User extends EventEmitter {
 
 		this.email = user_object.email;
 		this.display_name = user_object.display_name;
+		this.pronouns = user_object.pronouns;
 		this.description = user_object.description;
 		this.profile_image_url = user_object.profile_image_url;
 		this.dob = user_object.dob;

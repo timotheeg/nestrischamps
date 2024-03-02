@@ -55,6 +55,10 @@ h1 {
 	line-height: 48px;
 }
 
+#name h1 .pronouns {
+	font-size: 12px;
+}
+
 .container {
 	flex: 1;
 	padding: 0 6px;
@@ -118,7 +122,7 @@ p {
 
 <div class="frame">
 	<section id="name">
-		<h1><%= (user.display_name || '').replace(/^\d+\.\s+/, '') %></h1>
+		<h1><%= (user.display_name || '').replace(/^\d+\.\s+/, '') %><% if (user.pronouns) { %> <span class="pronouns"><%= user.pronouns %></span><% } %></h1>
 	</section>
 
 	<div class="container">

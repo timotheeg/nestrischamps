@@ -10,6 +10,7 @@ CREATE TABLE twitch_users (
 	type VARCHAR ( 128 ),
 	description TEXT,
 	display_name VARCHAR ( 255 ),
+	pronouns VARCHAR ( 128 ),
 	profile_image_url VARCHAR ( 255 ),
 
 	dob date,
