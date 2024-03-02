@@ -2,14 +2,21 @@
 // https://docs.google.com/spreadsheets/d/13ylAk77UR_5V3zyVxpAlYFiHtouKiIoQu9DVOcyTibM/edit?usp=sharing
 // 1. Make a copy
 // 2. Fill it
-// 3. Download as csv
-// 4 run script as:
-// node scripts/insert_local_users.js attendees.csv
+// 3. Publish Sheet 1 to Web as CSV
+// 4. update the sheet csv export URL below
+// 5. run script as:
+// node scripts/insert_local_users.js
 
 import pg from 'pg';
 import fs from 'fs';
 import { parse } from 'csv-parse/sync';
 import ULID from 'ulid';
+import got from 'got';
+
+// replace this URL by the sheet that contains your data
+// get the url by doing: File > Share > Publish to web > Sheet 1 > CSV
+const sheet_csv_url =
+	'https://docs.google.com/spreadsheets/d/e/2PACX-1vTnEyEvhOVg6shbkhpex4L_diKZ_EfAlLJd0-8MEd1rfT0-uh-zAO07iv05CXC0c6ItvRCigiGLgGpX/pub?gid=0&single=true&output=csv';
 
 (async function () {
 	const db_conn_str = process.env.DATABASE_URL;
@@ -24,12 +31,12 @@ import ULID from 'ulid';
 		connectionString: db_conn_str,
 	});
 
-	const records_file = process.argv[2];
-	const records = parse(fs.readFileSync(records_file), {
+	const records_csv_content = await got(sheet_csv_url).text();
+	const records = parse(records_csv_content, {
 		skip_empty_lines: true,
 	});
 
-	await pool.query('DELETE FROM scores WHERE player_id>32 AND frame_file is NULL or frame_file = \'\'');
+	await pool.query('DELETE FROM scores WHERE player_id>32');
 	await pool.query('DELETE FROM twitch_users WHERE id>32');
 
 	records.shift(); // drop header row from csv
@@ -60,7 +67,7 @@ import ULID from 'ulid';
 			`INSERT INTO twitch_users
 			(id, login, email, secret, description, display_name, pronouns, profile_image_url, dob, country_code, city, interests, style, elo_rank, elo_rating, created_on, last_login)
 			VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
 			`,
 			[
 				id,
