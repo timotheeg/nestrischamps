@@ -29,7 +29,7 @@ import ULID from 'ulid';
 		skip_empty_lines: true,
 	});
 
-	await pool.query('DELETE FROM scores WHERE player_id>32');
+	await pool.query('DELETE FROM scores WHERE player_id>32 AND frame_file is NULL or frame_file = \'\'');
 	await pool.query('DELETE FROM twitch_users WHERE id>32');
 
 	records.shift(); // drop header row from csv
@@ -41,23 +41,24 @@ import ULID from 'ulid';
 			seed,
 			login,
 			display_name,
+			pronouns,
 			personal_best,
 			elo_rank,
 			elo_rating,
 			description,
-			profile_image_url,
 			dob,
 			country_code,
 			city,
 			interests,
 			style,
+			profile_image_url,
 		] = record;
 
 		console.log(record);
 
 		await pool.query(
 			`INSERT INTO twitch_users
-			(id, login, email, secret, description, display_name, profile_image_url, dob, country_code, city, interests, style, elo_rank, elo_rating, created_on, last_login)
+			(id, login, email, secret, description, display_name, pronouns, profile_image_url, dob, country_code, city, interests, style, elo_rank, elo_rating, created_on, last_login)
 			VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
 			`,
@@ -68,6 +69,7 @@ import ULID from 'ulid';
 				ULID.ulid(),
 				description,
 				`${seed}. ${display_name}`,
+				pronouns,
 				profile_image_url,
 				dob,
 				country_code,
