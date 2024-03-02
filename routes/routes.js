@@ -31,6 +31,11 @@ router.get(
 		} else {
 			data.users = await UserDAO.getAssignableUsers();
 
+			// Drop seed (if any) - seed does not matter in admin view
+			// Being able to search by players by name is much more important!
+			data.users.forEach(
+				u => (u.display_name = u.display_name?.replace(/^\d+\.\s+/, '') || '')
+			);
 			data.users.sort((u1, u2) => {
 				return u1.display_name.toLowerCase() < u2.display_name.toLowerCase()
 					? -1
