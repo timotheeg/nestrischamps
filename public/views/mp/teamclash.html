@@ -18,23 +18,12 @@
 				border-image-source: url('/views/border_3px_red.png');
 			}
 
-			.team .player_vid {
-				width: 200px;
-				height: 200px;
+			.team .video.box {
+				--width: 200px;
+				--height: 200px;
 				top: 58px;
 				left: 219px;
 				background: black;
-			}
-
-			.team .player_vid .vid {
-				position: absolute;
-				top: 0;
-				left: 0;
-				object-fit: cover;
-				width: 200px;
-				height: 200px;
-				border: 0;
-				padding: 0;
 			}
 
 			.box.team-score {
@@ -123,7 +112,7 @@
 
 			<template id="player">
 				<div class="player">
-					<div class="box player_vid"><video class="vid"></video></div>
+					<div class="box video"><video class="player_vid"></video></div>
 					<div class="box score">
 						<div class="value">0&#x202F;000&#x202F;000</div>
 					</div>
@@ -249,7 +238,7 @@
 								lines: player_node.querySelector(`.board .lines`),
 								preview: player_node.querySelector(`.board .next_piece`),
 								field: player_node.querySelector(`.board`),
-								video: player_node.querySelector(`.player_vid .vid`),
+								video: player_node.querySelector(`video`),
 							},
 							{
 								field_pixel_size: 2.5,
