@@ -75,16 +75,30 @@
 	top: 629px;
 }
 
-video.box {
+.video.box {
 	top: 0;
-	width: 198px;
-	height: 112px;
+	--width: 198px;
+	--height: 112px;
+	width: var(--width);
+	height: var(--height);
+}
+
+.video.box .player_vid {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--width);
+	height: var(--height);
 	object-fit: cover;
 }
 
 .aligner {
 	display: inline-block;
 	text-align: right;
+}
+
+.no-video .video.box {
+	display: none;
 }
 
 .no-video .score {

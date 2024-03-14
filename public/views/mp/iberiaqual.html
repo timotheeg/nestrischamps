@@ -19,10 +19,11 @@
 			.thin .box {
 				border-image-source: url(/views/border_3px_iberia2.png);
 			}
-			video.box {
+
+			.video.box {
 				/* background: yellow; */
-				height: 181px;
-				width: 338px;
+				--height: 180px;
+				--width: 338px;
 			}
 
 			.board {
@@ -94,12 +95,12 @@
 				left: 50px;
 			}
 
-			.player.focus video.box {
+			.player.focus .video.box {
 				border: 0;
 				border-image-slice: unset;
 				border-image-source: unset;
-				width: 1920px;
-				height: 1080px;
+				--width: 1920px;
+				--height: 1080px;
 				left: -50px;
 				top: 80px;
 			}
@@ -109,7 +110,7 @@
 		<div id="stream_bg">
 			<template id="player">
 				<div class="player">
-					<video class="box"></video>
+					<div class="box video"><video class="player_vid"></video></div>
 
 					<div class="info">
 						<div class="box score">

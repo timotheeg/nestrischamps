@@ -138,24 +138,35 @@
 				top: 688px;
 			}
 
-			video.box {
+			.video.box {
 				position: absolute;
 				top: 95px;
-				width: 200px;
-				height: 150px;
+				--width: 200px;
+				--height: 150px;
+				width: var(--width);
+				height: var(--height);
 				left: 251px;
 				object-fit: cover;
 			}
 
-			.players3 video.box {
-				width: 112px;
+			.video.box .player_vid {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: var(--width);
+				height: var(--height);
+				object-fit: cover;
 			}
 
-			.players4 video.box {
+			.players3 .video.box {
+				--width: 112px;
+			}
+
+			.players4 .video.box {
 				position: absolute;
 				top: 637px;
-				width: 57px;
-				height: 58px;
+				--width: 57px;
+				--height: 58px;
 				left: 260px;
 				border: 0;
 				padding: 0;
@@ -218,7 +229,7 @@
 					<div class="value">---</div>
 				</div>
 
-				<video class="box"></video>
+				<div class="box video"><video class="player_vid"></video></div>
 
 				<div class="box board">
 					<div class="level"></div>
