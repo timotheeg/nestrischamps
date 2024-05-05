@@ -35,7 +35,7 @@
 			}
 
 			#team1 .player {
-				left: 101px;
+				left: 139px;
 			}
 
 			#team1 .player .video {
@@ -47,6 +47,26 @@
 				top: 151px;
 				width: 277px;
 				height: 557px;
+			}
+
+			#team1 .player .score {
+				transform-origin: top right;
+				transform: rotate(-90deg);
+				width: 708px;
+				height: 40px;
+				top: 0;
+				left: -805px;
+				font-size: 32px;
+				line-height: 40px;
+			}
+
+			#team1 .player .header {
+				font-size: 32px;
+				line-height: 40px;
+			}
+
+			#team1 .player .score .value {
+				display: none;
 			}
 
 			.team-score .diff {
@@ -217,7 +237,6 @@
 
 				// We don't show the Running Tetris Rate for the Boss
 				player.dom.running_trt.remove();
-				player_node.querySelector(`.score`).remove();
 
 				player.onGameStart = function () {
 					this.dom.lines.hidden = false;
