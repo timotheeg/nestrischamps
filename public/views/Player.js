@@ -571,7 +571,7 @@ export default class Player extends EventTarget {
 
 			this.curtain_container.style.top = `${top}px`;
 
-			if (elapsed < duration) {
+			if (elapsed <= duration) {
 				this.curtain_animation_ID = window.requestAnimationFrame(steps);
 			} else {
 				this.curtain_animation_ID = null;
@@ -617,7 +617,7 @@ export default class Player extends EventTarget {
 					.toHexString();
 
 				this.comp_message_animation_ID =
-					elapsed < fadeDuration ? window.requestAnimationFrame(steps) : null;
+					elapsed <= fadeDuration ? window.requestAnimationFrame(steps) : null;
 			};
 
 			steps();
@@ -696,7 +696,7 @@ export default class Player extends EventTarget {
 				const flashing = (elapsed / 1000) % (5 / 60) < 2 / 60; // flash for 2 "frames" every 5 "frames"
 				this.field_bg.style.background = flashing ? 'white' : final_black;
 
-				if (elapsed < duration) {
+				if (elapsed <= duration) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
 					// make sure we don't end on white
@@ -715,7 +715,7 @@ export default class Player extends EventTarget {
 					.getColorAt(elapsed / duration) // getColorAt() clamps ratio to [0,1]
 					.toRGBAString();
 
-				if (elapsed < duration) {
+				if (elapsed <= duration) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
 					this.field_bg.style.removeProperty('background');
@@ -745,7 +745,7 @@ export default class Player extends EventTarget {
 
 				Object.assign(this.field_bg_inner.style, props);
 
-				if (elapsed < duration) {
+				if (elapsed <= duration) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
 					this.field_bg.style.removeProperty('background');
