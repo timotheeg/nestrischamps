@@ -130,6 +130,7 @@ const fake_piece_evt = {
 };
 
 const whiteToBlackGradient = new Gradient('#FFFFFF', '#000000');
+const whiteToTransparentGradient = new Gradient('#FFFFFF', [255, 255, 255, 0]);
 
 /*
 dom: {
@@ -149,8 +150,17 @@ options: {
 }
 */
 
+// Easing functions from Robert Penner
 function easeOutQuart(t, b, c, d) {
 	return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+}
+
+function easeOutQuad(t, b, c, d) {
+	return -c * (t /= d) * (t - 2) + b;
+}
+
+function easeInQuad(t, b, c, d) {
+	return c * (t /= d) * t + b;
 }
 
 // One time check of Query String args
@@ -194,7 +204,12 @@ const DEFAULT_OPTIONS = {
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
-	tetris_flash: QueryString.get('tetris_flash') !== '0',
+	tetris_flash: parseInt(
+		/^[0123]$/.test(QueryString.get('tetris_flash'))
+			? QueryString.get('tetris_flash')
+			: '1',
+		10
+	),
 	tetris_sound: QueryString.get('tetris_sound') !== '0',
 	stereo: 0, // [-1, 1] representing left:-1 to right:1
 	reliable_field: 1,
@@ -288,6 +303,18 @@ export default class Player extends EventTarget {
 		});
 		this.dom.field.prepend(this.field_bg);
 
+		if (this.options.tetris_flash === 3) {
+			this.field_bg_inner = document.createElement('div');
+			Object.assign(this.field_bg_inner.style, {
+				position: 'absolute',
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+			});
+			this.field_bg.appendChild(this.field_bg_inner);
+		}
+
 		// Avatar Block
 		if (this.options.avatar) {
 			this.avatar = document.createElement('div');
@@ -324,6 +351,10 @@ export default class Player extends EventTarget {
 
 			this[`${name}_ctx`] = canvas.getContext('2d');
 		});
+
+		this.field_ctx.canvas.style.top = `${bg_offset + field_canva_offset_t}px`;
+		this.field_ctx.canvas.style.left = `${bg_offset + field_canva_offset_l}px`;
+		this.field_bg.after(this.field_ctx.canvas);
 
 		this.has_curtain = this.options.curtain || this.dom.curtain;
 
@@ -393,10 +424,6 @@ export default class Player extends EventTarget {
 		});
 		this.profile_card.hidden = true;
 		this.dom.field.appendChild(this.profile_card);
-
-		this.field_ctx.canvas.style.top = `${field_canva_offset_t}px`;
-		this.field_ctx.canvas.style.left = `${field_canva_offset_l}px`;
-		this.field_bg.appendChild(this.field_ctx.canvas);
 
 		if (this.render_running_trt_rtl && this.running_trt_ctx) {
 			this.running_trt_ctx.canvas.style.transform = 'scale(-1, 1)';
@@ -544,7 +571,7 @@ export default class Player extends EventTarget {
 
 			this.curtain_container.style.top = `${top}px`;
 
-			if (elapsed < duration) {
+			if (elapsed <= duration) {
 				this.curtain_animation_ID = window.requestAnimationFrame(steps);
 			} else {
 				this.curtain_animation_ID = null;
@@ -590,7 +617,7 @@ export default class Player extends EventTarget {
 					.toHexString();
 
 				this.comp_message_animation_ID =
-					elapsed < fadeDuration ? window.requestAnimationFrame(steps) : null;
+					elapsed <= fadeDuration ? window.requestAnimationFrame(steps) : null;
 			};
 
 			steps();
@@ -653,25 +680,80 @@ export default class Player extends EventTarget {
 	}
 
 	_doTetris() {
+		const start = Date.now();
+		const final_black = 'rgba(0,0,0,0)';
+		const duration = (25 / 60) * 1000;
+
 		if (this.options.tetris_flash) {
-			const start = Date.now();
+			this.field_bg.style.display = 'block';
+		}
 
+		if (this.options.tetris_flash === 1) {
+			// classic flash
 			const steps = () => {
-				const elapsed = (Date.now() - start) / 1000;
-				const flashing = elapsed % (5 / 60) < 2 / 60; // flash for 2 "frame" every 5 "frames"
-				let bg_color = flashing ? 'white' : 'rgba(0,0,0,0)';
+				const elapsed = Date.now() - start;
 
-				if (elapsed < 25 / 60) {
+				const flashing = (elapsed / 1000) % (5 / 60) < 2 / 60; // flash for 2 "frames" every 5 "frames"
+				this.field_bg.style.background = flashing ? 'white' : final_black;
+
+				if (elapsed <= duration) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
 					// make sure we don't end on white
-					bg_color = 'rgba(0,0,0,0)';
+					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
 				}
-
-				this.field_bg.style.background = bg_color;
 			};
 
-			this.tetris_animation_ID = window.requestAnimationFrame(steps);
+			steps();
+		} else if (this.options.tetris_flash === 2) {
+			// Extended flash then fade
+			const steps = () => {
+				const elapsed = Date.now() - start;
+
+				this.field_bg.style.background = whiteToTransparentGradient
+					.getColorAt(elapsed / duration) // getColorAt() clamps ratio to [0,1]
+					.toRGBAString();
+
+				if (elapsed <= duration) {
+					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+				} else {
+					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
+				}
+			};
+
+			steps();
+		} else if (this.options.tetris_flash === 3) {
+			this.field_bg_inner.style.background = 'white';
+
+			// Fade in-out swipe
+			const steps = () => {
+				const elapsed = Date.now() - start;
+				let ratio = Math.min(elapsed / duration, 1);
+
+				const props = { top: 0 };
+
+				if (elapsed < duration / 2) {
+					const real_ratio = ratio * 2;
+					props.height = `${real_ratio * 100}%`;
+				} else {
+					const real_ratio = (ratio - 0.5) * 2;
+					props.top = `${real_ratio * 100}%`;
+					props.height = `${(1 - real_ratio) * 100}%`;
+				}
+
+				Object.assign(this.field_bg_inner.style, props);
+
+				if (elapsed <= duration) {
+					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+				} else {
+					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
+				}
+			};
+
+			steps();
 		}
 
 		if (this.options.tetris_sound) {
