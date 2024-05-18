@@ -130,6 +130,7 @@ const fake_piece_evt = {
 };
 
 const whiteToBlackGradient = new Gradient('#FFFFFF', '#000000');
+const whiteToTransparentGradient = new Gradient('#FFFFFF', [255, 255, 255, 0]);
 
 /*
 dom: {
@@ -194,7 +195,7 @@ const DEFAULT_OPTIONS = {
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
-	tetris_flash: QueryString.get('tetris_flash') !== '0',
+	tetris_flash: QueryString.get('tetris_flash') || '1',
 	tetris_sound: QueryString.get('tetris_sound') !== '0',
 	stereo: 0, // [-1, 1] representing left:-1 to right:1
 	reliable_field: 1,
@@ -653,25 +654,43 @@ export default class Player extends EventTarget {
 	}
 
 	_doTetris() {
-		if (this.options.tetris_flash) {
-			const start = Date.now();
+		const start = Date.now();
+		const duration = (25 / 60) * 1000;
+		const final_black = 'rgba(0,0,0,0)';
 
+		if (this.options.tetris_flash === '1') {
 			const steps = () => {
-				const elapsed = (Date.now() - start) / 1000;
-				const flashing = elapsed % (5 / 60) < 2 / 60; // flash for 2 "frame" every 5 "frames"
-				let bg_color = flashing ? 'white' : 'rgba(0,0,0,0)';
+				const elapsed = Date.now() - start;
 
-				if (elapsed < 25 / 60) {
+				const flashing = (elapsed / 1000) % (5 / 60) < 2 / 60; // flash for 2 "frames" every 5 "frames"
+				this.field_bg.style.background = flashing ? 'white' : final_black;
+
+				if (elapsed < duration) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
 					// make sure we don't end on white
-					bg_color = 'rgba(0,0,0,0)';
+					this.field_bg.style.removeProperty('background');
 				}
-
-				this.field_bg.style.background = bg_color;
 			};
 
-			this.tetris_animation_ID = window.requestAnimationFrame(steps);
+			steps();
+		}
+		else if (this.options.tetris_flash === '2') {
+			const steps = () => {
+				const elapsed = Date.now() - start;
+
+				this.field_bg.style.background = whiteToTransparentGradient
+					.getColorAt(elapsed / duration) // getColorAt() clamps ratio to [0,1]
+					.toRGBAString();
+
+				if (elapsed < duration) {
+					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+				} else {
+					this.field_bg.style.removeProperty('background');
+				}
+			};
+
+			steps();
 		}
 
 		if (this.options.tetris_sound) {
