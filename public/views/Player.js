@@ -310,7 +310,7 @@ export default class Player extends EventTarget {
 		});
 		this.dom.field.prepend(this.field_bg);
 
-		if (this.options.tetris_flash === 3) {
+		if (this.options.tetris_flash >= 3) {
 			this.field_bg_inner = document.createElement('div');
 			Object.assign(this.field_bg_inner.style, {
 				position: 'absolute',
@@ -713,9 +713,10 @@ export default class Player extends EventTarget {
 			// Extended flash then fade
 			const steps = () => {
 				const elapsed = Date.now() - start;
+				const ratio = Math.min(elapsed / duration, 1);
 
 				this.field_bg.style.background = whiteToTransparentGradient
-					.getColorAt(elapsed / duration) // getColorAt() clamps ratio to [0,1]
+					.getColorAt(easeInQuad(ratio, 0, 1, 1))
 					.toRGBAString();
 
 				if (elapsed <= duration) {
@@ -733,7 +734,7 @@ export default class Player extends EventTarget {
 			// Fade in-out swipe
 			const steps = () => {
 				const elapsed = Date.now() - start;
-				let ratio = Math.min(elapsed / duration, 1);
+				const ratio = Math.min(elapsed / duration, 1);
 
 				const props = { top: 0 };
 
