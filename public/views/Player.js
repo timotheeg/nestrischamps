@@ -326,6 +326,10 @@ export default class Player extends EventTarget {
 			this[`${name}_ctx`] = canvas.getContext('2d');
 		});
 
+		this.field_ctx.canvas.style.top = `${bg_offset + field_canva_offset_t}px`;
+		this.field_ctx.canvas.style.left = `${bg_offset + field_canva_offset_l}px`;
+		this.field.appendChild(this.field_ctx.canvas);	
+
 		this.has_curtain = this.options.curtain || this.dom.curtain;
 
 		if (this.has_curtain) {
@@ -394,10 +398,6 @@ export default class Player extends EventTarget {
 		});
 		this.profile_card.hidden = true;
 		this.dom.field.appendChild(this.profile_card);
-
-		this.field_ctx.canvas.style.top = `${field_canva_offset_t}px`;
-		this.field_ctx.canvas.style.left = `${field_canva_offset_l}px`;
-		this.field_bg.appendChild(this.field_ctx.canvas);
 
 		if (this.render_running_trt_rtl && this.running_trt_ctx) {
 			this.running_trt_ctx.canvas.style.transform = 'scale(-1, 1)';
