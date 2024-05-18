@@ -150,9 +150,19 @@ options: {
 }
 */
 
+// Easing functions from Robert Penner
 function easeOutQuart(t, b, c, d) {
 	return -c * ((t = t / d - 1) * t * t * t - 1) + b;
 }
+
+function easeOutQuad(t, b, c, d) {
+	return -c * (t /= d) * (t - 2) + b;
+}
+
+function easeInQuad(t, b, c, d) {
+	return c * (t /= d) * t + b;
+}
+
 
 // One time check of Query String args
 // Bit dirty to have Player.js access query String
@@ -195,7 +205,12 @@ const DEFAULT_OPTIONS = {
 	preview_align: 'c',
 	running_trt_rtl: 0,
 	wins_rtl: 0,
-	tetris_flash: QueryString.get('tetris_flash') || '1',
+	tetris_flash: parseInt(
+		/^[0123]$/.test(QueryString.get('tetris_flash'))
+			? QueryString.get('tetris_flash')
+			: '1',
+		10
+	),
 	tetris_sound: QueryString.get('tetris_sound') !== '0',
 	stereo: 0, // [-1, 1] representing left:-1 to right:1
 	reliable_field: 1,
@@ -289,6 +304,18 @@ export default class Player extends EventTarget {
 		});
 		this.dom.field.prepend(this.field_bg);
 
+		if (this.options.tetris_flash === 3) {
+			this.field_bg_inner = document.createElement('div');
+			Object.assign(this.field_bg_inner.style, {
+				position: 'absolute',
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+			});
+			this.field_bg.appendChild(this.field_bg_inner);
+		}
+
 		// Avatar Block
 		if (this.options.avatar) {
 			this.avatar = document.createElement('div');
@@ -328,7 +355,7 @@ export default class Player extends EventTarget {
 
 		this.field_ctx.canvas.style.top = `${bg_offset + field_canva_offset_t}px`;
 		this.field_ctx.canvas.style.left = `${bg_offset + field_canva_offset_l}px`;
-		this.field.appendChild(this.field_ctx.canvas);	
+		this.field_bg.after(this.field_ctx.canvas);
 
 		this.has_curtain = this.options.curtain || this.dom.curtain;
 
@@ -655,10 +682,15 @@ export default class Player extends EventTarget {
 
 	_doTetris() {
 		const start = Date.now();
-		const duration = (25 / 60) * 1000;
 		const final_black = 'rgba(0,0,0,0)';
+		let duration = (25 / 60) * 1000;
 
-		if (this.options.tetris_flash === '1') {
+		if (this.options.tetris_flash) {
+			this.field_bg.style.display = 'block';
+		}
+
+		if (this.options.tetris_flash === 1) {
+			// classic flash
 			const steps = () => {
 				const elapsed = Date.now() - start;
 
@@ -670,12 +702,13 @@ export default class Player extends EventTarget {
 				} else {
 					// make sure we don't end on white
 					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
 				}
 			};
 
 			steps();
-		}
-		else if (this.options.tetris_flash === '2') {
+		} else if (this.options.tetris_flash === 2) {
+			// Extended flash then fade
 			const steps = () => {
 				const elapsed = Date.now() - start;
 
@@ -687,6 +720,42 @@ export default class Player extends EventTarget {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
 					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
+				}
+			};
+
+			steps();
+		} else if (this.options.tetris_flash === 3) {
+			// Fade in-out swipe
+			duration = 500;
+			const steps = () => {
+				const elapsed = Date.now() - start;
+				let ratio = Math.min(elapsed / duration, 1);
+
+				const props = { top: 0 };
+
+				if (elapsed < duration / 2) {
+					const real_ratio = ratio * 2;
+					props.height = `${easeOutQuad(real_ratio, 0, 100, 1)}%`;
+					props.background = whiteToTransparentGradient
+						.getColorAt(1 - real_ratio)
+						.toRGBAString();
+				} else {
+					const real_ratio = (ratio - 0.5) * 2;
+					props.top = `${easeInQuad(real_ratio, 0, 100, 1)}%`;
+					props.height = `${easeInQuad(real_ratio, 100, -100, 1)}%`;
+					props.background = whiteToTransparentGradient
+						.getColorAt(real_ratio)
+						.toRGBAString();
+				}
+
+				Object.assign(this.field_bg_inner.style, props);
+
+				if (elapsed < duration) {
+					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+				} else {
+					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
 				}
 			};
 
