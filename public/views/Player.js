@@ -163,7 +163,6 @@ function easeInQuad(t, b, c, d) {
 	return c * (t /= d) * t + b;
 }
 
-
 // One time check of Query String args
 // Bit dirty to have Player.js access query String
 // But that's the most covenient way to share the functionality
@@ -683,7 +682,7 @@ export default class Player extends EventTarget {
 	_doTetris() {
 		const start = Date.now();
 		const final_black = 'rgba(0,0,0,0)';
-		let duration = (25 / 60) * 1000;
+		const duration = (25 / 60) * 1000;
 
 		if (this.options.tetris_flash) {
 			this.field_bg.style.display = 'block';
@@ -726,8 +725,9 @@ export default class Player extends EventTarget {
 
 			steps();
 		} else if (this.options.tetris_flash === 3) {
+			this.field_bg_inner.style.background = 'white';
+
 			// Fade in-out swipe
-			duration = 500;
 			const steps = () => {
 				const elapsed = Date.now() - start;
 				let ratio = Math.min(elapsed / duration, 1);
@@ -736,17 +736,11 @@ export default class Player extends EventTarget {
 
 				if (elapsed < duration / 2) {
 					const real_ratio = ratio * 2;
-					props.height = `${easeOutQuad(real_ratio, 0, 100, 1)}%`;
-					props.background = whiteToTransparentGradient
-						.getColorAt(1 - real_ratio)
-						.toRGBAString();
+					props.height = `${real_ratio * 100}%`;
 				} else {
 					const real_ratio = (ratio - 0.5) * 2;
-					props.top = `${easeInQuad(real_ratio, 0, 100, 1)}%`;
-					props.height = `${easeInQuad(real_ratio, 100, -100, 1)}%`;
-					props.background = whiteToTransparentGradient
-						.getColorAt(real_ratio)
-						.toRGBAString();
+					props.top = `${real_ratio * 100}%`;
+					props.height = `${(1 - real_ratio) * 100}%`;
 				}
 
 				Object.assign(this.field_bg_inner.style, props);
