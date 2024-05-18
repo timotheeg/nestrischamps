@@ -151,6 +151,10 @@ options: {
 */
 
 // Easing functions from Robert Penner
+function linear(t, b, c, d) {
+	return b + (c * t) / d;
+}
+
 function easeOutQuart(t, b, c, d) {
 	return -c * ((t = t / d - 1) * t * t * t - 1) + b;
 }
@@ -161,6 +165,9 @@ function easeOutQuad(t, b, c, d) {
 
 function easeInQuad(t, b, c, d) {
 	return c * (t /= d) * t + b;
+}
+function easeInQuint(t, b, c, d) {
+	return c * (t /= d) * t * t * t * t + b;
 }
 
 // One time check of Query String args
@@ -205,7 +212,7 @@ const DEFAULT_OPTIONS = {
 	running_trt_rtl: 0,
 	wins_rtl: 0,
 	tetris_flash: parseInt(
-		/^[0123]$/.test(QueryString.get('tetris_flash'))
+		/^[01234]$/.test(QueryString.get('tetris_flash'))
 			? QueryString.get('tetris_flash')
 			: '1',
 		10
@@ -560,14 +567,10 @@ export default class Player extends EventTarget {
 		const duration = 1000;
 
 		const steps = () => {
-			const elapsed = Math.min(Date.now() - start_ts, duration);
+			const elapsed = Date.now() - start_ts;
+			const ratio = Math.min(elapsed / duration, 1);
 
-			const top = easeOutQuart(
-				elapsed,
-				-this.bg_height,
-				this.bg_height,
-				duration
-			);
+			const top = easeOutQuart(ratio, -this.bg_height, this.bg_height, 1);
 
 			this.curtain_container.style.top = `${top}px`;
 
@@ -748,7 +751,30 @@ export default class Player extends EventTarget {
 				if (elapsed <= duration) {
 					this.tetris_animation_ID = window.requestAnimationFrame(steps);
 				} else {
-					this.field_bg.style.removeProperty('background');
+					this.field_bg.style.display = 'none';
+				}
+			};
+
+			steps();
+		} else if (this.options.tetris_flash === 4) {
+			this.field_bg_inner.style.background = 'white';
+
+			// Fade in-out swipe
+			const steps = () => {
+				const elapsed = Date.now() - start;
+				let ratio = Math.min(elapsed / duration, 1);
+
+				const props = {
+					top: `${easeOutQuad(ratio, 50, -50, 1)}%`,
+					height: `${easeOutQuad(ratio, 0, 100, 1)}%`,
+					opacity: `${easeInQuint(ratio, 1, -1, 1)}`,
+				};
+
+				Object.assign(this.field_bg_inner.style, props);
+
+				if (elapsed <= duration) {
+					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+				} else {
 					this.field_bg.style.display = 'none';
 				}
 			};
