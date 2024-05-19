@@ -773,9 +773,8 @@ export default class BaseGame {
 		// when we reach here, block_diff is a *valid* negative diff
 		// we look for 2 valid consecutive negative diffs to detect a line clear animation
 
-		// We only use the full rows data for triple and tetris
-		// That is in the hope that we can fire the Tetris Flash
-		if (this.full_rows.length > 2) {
+		// If there were full rows prior to the negative diff, use that to determine the clear type
+		if (this.full_rows.length) {
 			const clears = CLEAR_DIFFS[this.full_rows.length - 1];
 			const clear_frame_idx = clears.indexOf(block_diff);
 
