@@ -64,6 +64,13 @@ export default class ScoreFixer {
 			) {
 				digits[0] = 0xb;
 			}
+			// should it have been a D? WTF ...  -_- https://discord.com/channels/817528744565932043/817528917590016020/1241837618489196605
+			else if (
+				this.last_good_digits[0] === 0xc ||
+				this.last_good_digits[0] === 0xd
+			) {
+				digits[0] = 0xd;
+			}
 		} else if (digits[0] === 0xb) {
 			// B, should it have been a 8?
 			if (
@@ -71,6 +78,13 @@ export default class ScoreFixer {
 				this.last_good_digits[0] === 0x8
 			) {
 				digits[0] = 0x8;
+			}
+			// should it have been a D? WTF ...  -_- https://discord.com/channels/817528744565932043/817528917590016020/1241885852121038908
+			else if (
+				this.last_good_digits[0] === 0xc ||
+				this.last_good_digits[0] === 0xd
+			) {
+				digits[0] = 0xd;
 			}
 		} else if (digits[0] === 0x0) {
 			// 0, should it have been a D?
