@@ -271,8 +271,8 @@ export default class GameTracker {
 
 		if (dispatch_frame.lines === null) {
 			lines = null;
-		} else if (this.cur_lines >= 300) {
-			// booohoo hardcoded value T_T
+		} else if (this.cur_lines >= 340) {
+			// Take over at level 40, which is after super kill screen (39) - Too bad for the harcoded value -_-'
 			const new_lines_units = peek(dispatch_frame.lines);
 			const cur_lines_units = this.cur_lines % 10;
 
