@@ -44,6 +44,7 @@ export default class GameTracker {
 		this.start_level = 0;
 
 		this.score_frame_delay = 0;
+		this.lines_frame_delay = 0;
 		this.piece_frame_delay = 0;
 
 		this.palette = Array(10).fill();
@@ -116,14 +117,26 @@ export default class GameTracker {
 		} else if (this.score_frame_delay === 0) {
 			this.frame_buffer.forEach(frame => {
 				frame.score = last_frame.score;
-				frame.lines = last_frame.lines;
-				frame.level = last_frame.level;
 			});
 		} else if (
 			!last_frame.gym_pause_active &&
 			!GameTracker.arrEqual(last_frame.score, peek(this.frame_buffer).score)
 		) {
 			this.score_frame_delay = this.frame_buffer.length;
+		}
+
+		if (--this.lines_frame_delay > 0) {
+			// just wait
+		} else if (this.lines_frame_delay === 0) {
+			this.frame_buffer.forEach(frame => {
+				frame.lines = last_frame.lines;
+				frame.level = last_frame.level;
+			});
+		} else if (
+			!last_frame.gym_pause_active &&
+			!GameTracker.arrEqual(last_frame.lines, peek(this.frame_buffer).lines)
+		) {
+			this.lines_frame_delay = this.frame_buffer.length;
 		}
 
 		// mutually exclusive checks for piece checks based on selected rom (classic, das trainer, minimal)
