@@ -418,6 +418,22 @@
 				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
 				<br />
 				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 110px" />
+			</div>
+		</template>
+		<template id="curtain_2">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
+				<br />
+				<br />
 				<p style="font-size: 12px">Presented by</p>
 				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" />
 				<br />
@@ -428,7 +444,7 @@
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
 			</div>
 		</template>
-		<template id="curtain_2">
+		<template id="curtain_3">
 			<div class="custom_curtain">
 				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
 				<br />
@@ -587,7 +603,7 @@
 				: 0;
 
 			let curtain_template;
-			if (/^[012]$/.test(QueryString.get('curtain'))) {
+			if (/^[0123]$/.test(QueryString.get('curtain'))) {
 				curtain_template = document.getElementById(
 					`curtain_${QueryString.get('curtain')}`
 				);
