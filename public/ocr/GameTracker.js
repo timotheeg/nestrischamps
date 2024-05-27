@@ -2,7 +2,7 @@ import ScoreFixer from '/ocr/ScoreFixer.js';
 import { PIECES, TRANSITIONS } from '/views/constants.js';
 import TetrisOCR from '/ocr/TetrisOCR.js';
 
-const BUFFER_MAXSIZE = 2; // all tracked changes are stable over 2 frames
+const BUFFER_MAXSIZE = 3; // all tracked changes are stable over 2 frames - using 3 for safety
 
 function peek(arr, offset = 0) {
 	return arr[arr.length - (offset + 1)];
