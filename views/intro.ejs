@@ -364,12 +364,14 @@ VNTPYN</pre>
 		</h1>
 		<p>NestrisChamps sometimes gets feedback that it's hard to use. Calibration is not auto-magically good. The auto calibration is working in most cases, but fine-tuning should <strong>always</strong> be performed. This section explains the philosophy of NestrisChamps.</p>
 		<h2>NestrisChamps for individuals</h2>
-		<p>NestrisChamps first and foremost is meant for individual players. There's nothing to install locally to use NestrisChamps, and while the complexity of setup is a little high initially, it is a one time affair. NestrisChamps aims to provide features valuable for individual players.</p>
+		<p>NestrisChamps first and foremost is meant for individual players. There's nothing to install locally to use NestrisChamps, and while the complexity of setup is a little high initially, it is a one time <em>investment</em> to get valuable features and benefits:</p>
 		<ul>
 			<li>Details stats are tracked per game so if a game "feels" odd, you can check what happened. Maybe there were multiple droughts going on at the same time for example.</li>
-			<li>The renderers are sharpeners of sorts, allowing you to stream in crisp HD glory.</li>
+			<li>The renderers are sharpeners of sorts, allowing you to stream in glorious crisp HD.</li>
 			<li>All your scores and stats are tracked. You can see your progress over time.</li>
-			<li>You can replay and share your games, and ask <a href="https://github.com/GregoryCannon/StackRabbit">StackRabbit AI</a> for placement advice when you review your games.</li>
+			<li>You can replay and share your games with speedups</li>
+			<li>You can ask <a href="https://github.com/GregoryCannon/StackRabbit">StackRabbit AI</a> for placement advice when you review your games.</li>
+			<li>You can have real time full score, rather than be stuck with maxout scores at 999,999, or from the 1.6M rollover.</li>
 			<li>You can make your own renderers to use whatever branding you want.</li>
 		</ul>
 
@@ -382,19 +384,20 @@ VNTPYN</pre>
 		<ul>
 			<li>The restreamer is reading the raw video streams of players, requiring a high input bandwidth.</li>
 			<li>Twitch video streams for the players typically do not have the same delivery lag, so even though players start games at the same time (done via the use of the Twitch chat count-down), the lag makes the start of the game appears like one player starts before the other.</li>
-			<li>The visual result is not consistent. Both players use whatever capture device they have, and the quality of the resulting videos, and the colors, are obvioulsy not matching in any restreamer's setup.</li>
+			<li>The visual result is not consistent. Both players use whatever capture device they have, and the quality of the resulting videos, and the colors, are not matching in any restreamer's setup.</li>
 			<li>There's no comparative stats. For their commentary, restreamers need to compute in their heads some stats and score differentials, and estimate the lead in terms of number of tetrises.</li>
 		</ul>
 
 		<h3>Trade-Offs</h3>
 		<p>Unlike classical restreaming, which puts a higher burden of work on the restreamer than on the players, NestrisChamps puts the bulk of the work squarely onto players. Players are the ones who need to spend the effort to setup and calibrate properly. As mentioned above, doing so is meant to be worthwhile for them individually, so they may benefit from the features and tracking NestrisChamps offers.</p> 
-		<p>For a restreamer to host 2 players who have <strong>already</strong> setup NestrisChamps for capture, using NestrisChamps is dead easy. The Game host sets up the competition layout renderer in their OBS, and once players connect to the game host's room, their gameplay and comparative stats would "just work".</p>
+		<p>For a restreamer to host 2 players who have <strong>already</strong> setup NestrisChamps for capture, using NestrisChamps is dead easy. The game host sets up the competition layout renderer in their OBS, and once players connect to the game host's room, their gameplay and comparative stats would "just work".</p>
 		<p>Doing that specifically addresses the issues with classical restreaming:</p>
 		<ul>
-			<li>Players send data streams, not video streams. That requires very little bandwidth (in the order of 4KB/s or less).</li>
+			<li>Players send data streams, not video streams. That requires very little bandwidth (in the order of 4KB/s or less per player).</li>
 			<li>Data streams are real time, without Twitch as an intermediary video broadcaster. When both players start a game at the same time on count-down, the match in the game host's stream will show both players starting at the same time.</li>
 			<li>The renderer draws players' fields in exactly the same way. Perfect alignment and matching colors for a consistent render in crisp HD.</li>
 			<li>The comparative stats just work out of the box. The game host can chose amongst a variety of layouts with more or less stats, to their taste.</li>
+			<li>Some creative layouts and stats can be implemented with real time computations. For example aggregating and comparing scores of teams of multiple players.</li>
 		</ul>
 		<p>Additionally, classical restreamers need to slice the player video feed from the stencil area. That, or they may require a separate video feed with something else like <a href="https://vdo.ninja/">vdo.ninja</a>. Doing that requires coordination between the game host and the players, and the game host must set up the video ares correctly in their OBS setup. Not so with NestrisChamps. Since NestrisChamps capture player cams natively, the video stream is already positionned in the layout with zero effort from the game host.</p>
 
