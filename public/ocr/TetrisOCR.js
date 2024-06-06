@@ -108,7 +108,8 @@ export default class TetrisOCR extends EventTarget {
 
 		const all_tasks = { ...this.config.tasks };
 
-		if (!this.config.tasks.instant_das) {
+		if (false) {
+			// !this.config.tasks.instant_das) {
 			const field_crop = this.config.tasks.field.crop;
 
 			const scaleX = field_crop[2] / TASK_RESIZE.field[0];
