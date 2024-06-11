@@ -782,11 +782,12 @@
 						const m = (name || '').match(/^(\d+)\. (.+)$/);
 
 						if (m) {
-							if (QueryString.get('seed') === '1') {
-								this.dom.name_box.classList.add('seed');
-							}
 							this._setName(m[2]);
-							this.dom.seed.textContent = `seed ${m[1]}`;
+
+							if (QueryString.get('seed') !== '0') {
+								this.dom.name_box.classList.add('seed');
+								this.dom.seed.textContent = `seed ${m[1]}`;
+							}
 						} else {
 							this._setName(name);
 						}
