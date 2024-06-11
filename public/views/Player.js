@@ -214,7 +214,7 @@ const DEFAULT_OPTIONS = {
 	tetris_flash: parseInt(
 		/^[01234]$/.test(QueryString.get('tetris_flash'))
 			? QueryString.get('tetris_flash')
-			: '1',
+			: '2',
 		10
 	),
 	tetris_sound: QueryString.get('tetris_sound') !== '0',
