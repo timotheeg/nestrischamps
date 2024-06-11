@@ -590,9 +590,10 @@
 				? parseInt(QueryString.get('simultris'), 10)
 				: 120;
 
-			const CYCLE_TDIFF = /^[1-9]\d*$/.test(QueryString.get('cycle_tdiff'))
+			// supply 0 to disable
+			const CYCLE_TDIFF = /^\d+$/.test(QueryString.get('cycle_tdiff'))
 				? parseInt(QueryString.get('cycle_tdiff'), 10)
-				: 0;
+				: 5; // default cycle is 5s
 
 			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
 				? parseInt(QueryString.get('sponsorimg'), 10)
