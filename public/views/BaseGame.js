@@ -490,7 +490,11 @@ export default class BaseGame {
 
 		if (data.score === 999999) {
 			this.pending_score = data.lines != this.data.lines;
+		} else if (data.score >= 1600000) {
+			// if data.score reads over 1.6M, score OCR is 7-digits. We can do a simple score comparison to detect changes
+			this.pending_score = data.score != this.data.score.current;
 		} else {
+			// Assume 1.6M rollovers must be accounted for
 			const high_score = this.data.score.current / 1600000;
 
 			if (high_score >= 1) {
@@ -520,7 +524,10 @@ export default class BaseGame {
 		) {
 			// Compute score beyond maxout
 			real_score = this.data.score.current + lines_score;
-		} else if (data.score < this.data.score.current) {
+		} else if (
+			data.score < this.data.score.current &&
+			data.score < 1600000 // if data.score reads over 1.6M, score OCR is 7-digits, and so 1.6M rollovers do not apply. We ignore the weird reading and accept data.score as-is. Should we exit even?
+		) {
 			const num_wraps = Math.floor(
 				(this.data.score.current + lines_score) / 1600000
 			);
