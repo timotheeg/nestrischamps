@@ -1029,7 +1029,7 @@ export default class Player extends EventTarget {
 
 	_resetFrameBuffer() {
 		if (this.frame_buffer) {
-			this.frame_buffer.destroy();
+			this.frame_buffer._destroy();
 		}
 
 		if (this.options.buffer_time) {
