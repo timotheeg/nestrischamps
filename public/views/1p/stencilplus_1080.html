@@ -390,12 +390,13 @@
 
 				peer.on('call', call => {
 					let video;
-					let postProcess;
 
 					console.log(call.metadata);
 
 					if (call.metadata?.raw) {
 						video = document.querySelector('video.capture');
+
+						video.autoplay = true;
 
 						function setSize() {
 							// video at full size
@@ -420,26 +421,36 @@
 							positionRawCapture();
 						}
 
-						postProcess = function () {
+						const postProcess = function () {
 							setSize();
 							video.addEventListener('resize', setSize);
 						};
+
+						call.on('stream', remoteStream => {
+							video.addEventListener('loadedmetadata', postProcess, {
+								once: true,
+							});
+							video.srcObject = remoteStream;
+						});
 					} else {
 						video = document.querySelector('.player_vid');
+
+						call.on('stream', remoteStream => {
+							player.setVideoSrcObject(remoteStream);
+						});
 					}
 
-					call.answer(); // assume correct!
-					call.on('stream', remoteStream => {
-						player.setVideoSrcObject(remoteStream);
-					});
 					call.on('error', () => {
-						player.dom.video.pause();
-						player.dom.video.srcObject = null;
+						video.pause();
+						video.srcObject = null;
 					});
+
 					call.on('close', () => {
-						player.dom.video.pause();
-						player.dom.video.srcObject = null;
+						video.pause();
+						video.srcObject = null;
 					});
+
+					call.answer(); // assume correct!
 				});
 			};
 		</script>

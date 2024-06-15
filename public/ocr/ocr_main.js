@@ -396,7 +396,7 @@ async function startSharingVideoFeed() {
 		// 1. player cam
 		ongoing_call = peer.call(view_peer_id, stream);
 
-		if (view_meta.raw === '1') {
+		if (view_meta._raw === '1') {
 			// 2. raw capture
 			const xywh = [...config.tasks.field.crop];
 

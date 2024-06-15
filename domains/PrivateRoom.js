@@ -20,7 +20,7 @@ class PrivateRoom extends Room {
 		connection.send(['setVdoNinjaURL', 0, this.owner.vdo_ninja_url]);
 
 		// last video-enabled view always wins the video feed
-		if (connection.meta.video) {
+		if (connection.meta._video) {
 			this.last_view_peer_id = connection.id;
 			this.last_view_meta = connection.meta;
 			this.owner.makePlayer();
