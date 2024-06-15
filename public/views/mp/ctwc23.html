@@ -547,7 +547,7 @@
 				players: 4,
 			});
 		</script>
-		<script src="/vendor/peerjs.1.5.1.min.js"></script>
+		<script src="/vendor/peerjs.1.5.4.min.js"></script>
 		<script type="module">
 			import '/views/bg.js';
 			import { peerServerOptions } from '/views/constants.js';
@@ -1109,9 +1109,12 @@
 			const match_value = QueryString.get('match');
 
 			if (/^([01]|both)$/.test(match_value)) {
+				// show the requested view
 				competition.API.setMatch(
 					match_value == 'both' ? null : parseInt(match_value, 10)
 				);
+				// and then lock the view by disabling changes
+				competition.API.setMatch = () => {};
 			} else {
 				// Layout starts 1 match view
 				competition.API.setMatch(0);
