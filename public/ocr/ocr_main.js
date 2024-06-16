@@ -241,7 +241,6 @@ function resetNotice() {
 }
 
 let peer = null;
-let peer_opened = false;
 let view_peer_id = null;
 let is_player = false;
 let view_meta = null;
@@ -335,13 +334,11 @@ function connect() {
 			peer.removeAllListeners();
 			peer.destroy();
 			peer = null;
-			peer_opened = false;
 		}
 
 		peer = new Peer(connection.id, peerServerOptions);
 
 		peer.on('open', err => {
-			peer_opened = true;
 			startSharingVideoFeed();
 		});
 
@@ -425,10 +422,7 @@ async function startSharingVideoFeed() {
 		}
 	}
 
-	if (!peer_opened) {
-		peer.removeAllListeners('open');
-		peer.on('open', startSharing, { once: true });
-	} else {
+	if (peer._open) {
 		startSharing();
 	}
 }
