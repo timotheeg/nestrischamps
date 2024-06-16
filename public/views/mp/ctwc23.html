@@ -456,6 +456,21 @@
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
 			</div>
 		</template>
+		<template id="curtain_4">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img src="/images/ctwc_singapore.webp" style="max-width: 260px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 100px" />
+			</div>
+		</template>
 		<template id="player">
 			<div class="player">
 				<video class="player_vid"></video>
@@ -600,7 +615,7 @@
 				: 0;
 
 			let curtain_template;
-			if (/^[0123]$/.test(QueryString.get('curtain'))) {
+			if (/^[0-4]$/.test(QueryString.get('curtain'))) {
 				curtain_template = document.getElementById(
 					`curtain_${QueryString.get('curtain')}`
 				);
