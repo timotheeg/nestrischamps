@@ -1,4 +1,6 @@
-export const peerServerOptions = {
+const isLocalRpi = false;
+
+const defaultPeerjsOptions = {
 	host: '0.peerjs.com',
 	path: '/',
 	port: 443,
@@ -10,6 +12,27 @@ export const peerServerOptions = {
 		],
 	},
 };
+
+const rpiPeerjsOptions = {
+	host: 'nestrischamps.local',
+	path: '/',
+	port: 9000,
+	secure: true,
+	config: {
+		iceServers: [
+			{ url: 'stun:nestrischamps.local:3478' },
+			{
+				url: 'turn:nestrischamps.local:3478',
+				username: 'ntc',
+				credential: 'ntc',
+			},
+		],
+	},
+};
+
+export const peerServerOptions = isLocalRpi
+	? rpiPeerjsOptions
+	: defaultPeerjsOptions;
 
 export const DOM_DEV_NULL =
 	(typeof document !== 'undefined' && document.createElement('div')) || {};
