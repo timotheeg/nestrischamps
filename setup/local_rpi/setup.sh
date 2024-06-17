@@ -34,6 +34,16 @@ sudo apt install -y nodejs
 npm install
 sudo npm install peer -g
 
+# generate the server keys
+openssl req -x509 \
+  -sha256 \
+  -nodes \
+  -newkey rsa:2048 \
+  -days 3650 \
+  -subj "/C=SG/O=Yobi/OU=Nestrischamps/CN=nestrischamps.local/" \
+  -keyout nestrischamps.local.key \
+  -out nestrischamps.local.crt
+
 sed -e -i 's/isRpiLocal = false/isRpiLocal = true/g' public/views/constants.js
 
 SESSION_SECRET=$(echo "console.log(require('ulid').ulid())" | node)
