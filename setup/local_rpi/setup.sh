@@ -4,9 +4,6 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install -y git build-essential vim zsh gawk postgresql iptables coturn
 
-yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-
 echo "CREATE USER nestrischamps with encrypted password 'nestrischamps'; CREATE DATABASE nestrischamps with owner=nestrischamps;" | sudo -u postgres psql
 
 DB_URL="postgres://nestrischamps:nestrischamps@localhost:5432/nestrischamps?sslmode=disable"
@@ -44,12 +41,12 @@ openssl req -x509 \
   -keyout nestrischamps.local.key \
   -out nestrischamps.local.crt
 
-sed -e -i 's/isRpiLocal = false/isRpiLocal = true/g' public/views/constants.js
+sed -r -i 's/isLocalRpi = false/isLocalRpi = true/g' public/views/constants.js
 
 SESSION_SECRET=$(echo "console.log(require('ulid').ulid())" | node)
 PORT=5443
 TLS_KEY_PATH=/home/yobi/src/nestrischamps/nestrischamps.local.key
-TLS_CERT_PATH=/home/yobi/src/nestrischamps/nestrischamps.local.cert
+TLS_CERT_PATH=/home/yobi/src/nestrischamps/nestrischamps.local.crt
 
 tee .env > /dev/null << EOF
 TLS_KEY=${TLS_KEY_PATH}
@@ -140,4 +137,4 @@ sudo apt install -y iptables-persistent
 PUB_KEY_FINGERPRINT=$(openssl x509 -in ${TLS_CERT_PATH} -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64)
 
 echo "Start OBS at the command line with this argument:"
-exho "--ignore-certificate-errors-spki-list=${PUB_KEY_FINGERPRINT}"
+echo "--ignore-certificate-errors-spki-list=${PUB_KEY_FINGERPRINT}"
