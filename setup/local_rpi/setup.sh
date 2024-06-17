@@ -1,10 +1,10 @@
+#!/bin/bash
+
 sudo apt update
 sudo apt upgrade -y
 sudo apt install -y git build-essential vim zsh gawk postgresql iptables coturn
 
-# TODO: make this line install without user prompt
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
+yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 
 echo "CREATE USER nestrischamps with encrypted password 'nestrischamps'; CREATE DATABASE nestrischamps with owner=nestrischamps;" | sudo -u postgres psql
