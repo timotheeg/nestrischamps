@@ -381,6 +381,7 @@
 			}
 
 			connection.onInit = () => {
+				console.log(Date.now(), 'connection.onInit');
 				if (peer) {
 					peer.destroy();
 					peer = null;
@@ -391,7 +392,7 @@
 				peer.on('call', call => {
 					let video;
 
-					console.log(call.metadata);
+					console.log(Date.now(), 'onCall', call.metadata);
 
 					if (call.metadata?.raw) {
 						video = document.querySelector('video.capture');

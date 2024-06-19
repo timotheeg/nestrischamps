@@ -339,6 +339,7 @@ function connect() {
 		peer = new Peer(connection.id, peerServerOptions);
 
 		peer.on('open', err => {
+			console.log(Date.now(), 'peer opened', peer.id);
 			startSharingVideoFeed();
 		});
 
@@ -356,6 +357,15 @@ async function startSharingVideoFeed() {
 	console.log('startSharingVideoFeed', view_meta);
 
 	stopSharingVideoFeed();
+
+	console.log(Date.now(), {
+		allow_video_feed: allow_video_feed.checked,
+		video_feed_selector: video_feed_selector.value,
+		is_player,
+		peer: !!peer,
+		view_peer_id,
+		view_meta,
+	});
 
 	if (!allow_video_feed.checked) return;
 	if (!video_feed_selector.value) return;
@@ -381,6 +391,8 @@ async function startSharingVideoFeed() {
 		video_constraints.deviceId = { exact: video_feed_selector.value };
 	}
 
+	console.log(Date.now(), 'Probing for cam feed');
+
 	const stream = await navigator.mediaDevices.getUserMedia({
 		audio: QueryString.get('webcam_audio') === '1',
 		video: video_constraints,
@@ -390,6 +402,8 @@ async function startSharingVideoFeed() {
 	video_feed.play();
 
 	function startSharing() {
+		console.log(Date.now(), `startSharing ${peer.id} -> ${view_peer_id}`);
+
 		// 1. player cam
 		ongoing_call = peer.call(view_peer_id, stream);
 
@@ -833,6 +847,8 @@ function updatePaletteList() {
 
 // Updates the select element with the provided set of cameras
 function updateDeviceList(devices) {
+	console.log(Date.now(), 'updateDeviceList');
+
 	// Make sure we show devices with their IDs
 	const mappedDevices = devices.map(camera => {
 		const device = { label: camera.label, deviceId: camera.deviceId };
@@ -888,6 +904,7 @@ function updateDeviceList(devices) {
 
 	// Then populate for video feed
 	// TODO: handle case of no webcam
+	console.log(Date.now(), 'updateDeviceList: populate video_feed_selector');
 	video_feed_selector.innerHTML = '';
 	[
 		{
@@ -2009,7 +2026,6 @@ function showProducerUI() {
 	palettes = await loadPalettes();
 
 	// showTemplates(templates);
-	connect();
 
 	await updatePaletteList();
 
@@ -2067,5 +2083,10 @@ function showProducerUI() {
 		video.classList.add('is-hidden');
 		wizard.append(video);
 		wizard.classList.remove('is-hidden');
+
+		// TODO: await completion of the calibration before connecting
 	}
+
+	// we connect last so UI is ready before we try to send any data or video feed
+	connect();
 })();
