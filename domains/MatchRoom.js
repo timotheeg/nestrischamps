@@ -384,10 +384,13 @@ class MatchRoom extends Room {
 		const peerid = user ? user.getProducer().getPeerId() : '';
 
 		// Send data to all views
-		this.sendToViews(['setPeerId', p_num, peerid]);
 		this.sendPlayerInfoToViews(p_num);
 
-		// inform producer it is a now a player
+		// Do this after the main info so peerid doesn't get nuked
+		// TODO: only send to main view
+		this.sendToViews(['setPeerId', p_num, peerid]);
+
+		// inform producer it is a now a player to restart the video
 		if (user) {
 			user.getProducer().send(['makePlayer', p_num, this.getViewMeta()]);
 		}
