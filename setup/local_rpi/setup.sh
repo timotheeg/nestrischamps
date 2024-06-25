@@ -136,5 +136,8 @@ sudo apt install -y iptables-persistent
 # generate public key fingerprint to tell OBS we trust the server
 PUB_KEY_FINGERPRINT=$(openssl x509 -in ${TLS_CERT_PATH} -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64)
 
+echo
+echo ========== IMPORTANT ==========
+echo
 echo "Start OBS at the command line with this argument:"
 echo "--ignore-certificate-errors-spki-list=${PUB_KEY_FINGERPRINT}"
