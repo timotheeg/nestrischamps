@@ -571,9 +571,6 @@
 			import CompetitionPlayer from '/views/CompetitionPlayer.js';
 			import Competition from '/views/competition.js';
 			import InvisibleMixin from '/views/InvisibleMixin.js';
-			import { MatchCommentatorBot } from '/views/commentator_bot.js';
-
-			let commentatorBot;
 
 			// Penner easing
 			// http://robertpenner.com/easing/
@@ -1050,10 +1047,6 @@
 					match_players.push(player);
 					players.push(player);
 				});
-
-				if (match_num === 1 && QueryString.get('combot') === '1') {
-					commentatorBot = new MatchCommentatorBot(match_players);
-				}
 			});
 
 			if (CYCLE_TDIFF) {
