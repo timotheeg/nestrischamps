@@ -2,9 +2,9 @@ import QueryString from '/js/QueryString.js';
 import { assignUserVoice, speak } from '/views/tts.js';
 
 const botName = '_ntc_commentator_bot';
-const lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
+const lang = /^(en|fr)(-[A-Z]{2})?$/.test(QueryString.get('lang')) // only 2 languages supported, French and English
 	? QueryString.get('lang')
-	: navigator.languages?.[0] || 'en';
+	: 'en';
 const voiceNameRe =
 	QueryString.get('botvoice') && /^[a-z]+$/i.test(QueryString.get('botvoice'))
 		? new RegExp(`^${QueryString.get('botvoice')}`, 'i')
@@ -21,7 +21,7 @@ export class MatchCommentatorBot {
 			return;
 		}
 
-		assignUserVoice(botName, { voiceNameRe });
+		assignUserVoice(botName, { voiceNameRe, lang });
 
 		this.players = players;
 

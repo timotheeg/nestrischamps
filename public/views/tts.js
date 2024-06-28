@@ -9,7 +9,7 @@ const SPEECH_PAUSE = 1000;
 const VOICES_DELAY = 50;
 
 const synth = window.speechSynthesis;
-const lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
+const _lang = /^[a-z]{2}(-[A-Z]{2})?$/.test(QueryString.get('lang'))
 	? QueryString.get('lang')
 	: navigator.languages?.[0] || 'en-GB';
 const voice_map = {};
@@ -67,7 +67,7 @@ function getVoices() {
 	}
 
 	while (pending_voice_assignements.length) {
-		const { username, voiceNameRe } = pending_voice_assignements.shift();
+		const { username, voiceNameRe, lang } = pending_voice_assignements.shift(); // note: lang is guaranteed to be provided
 		const voice = getVoice(voiceNameRe, lang);
 		console.log(
 			`delayed voice assignment for ${username}:`,
@@ -77,28 +77,31 @@ function getVoices() {
 		voice_map[username] = voice;
 	}
 
-	voices = shuffle(all_voices.filter(v => langMatch(lang, v.lang)));
+	voices = shuffle(all_voices.filter(v => langMatch(_lang, v.lang)));
 
-	if (voices.length <= 0 && lang.includes('-')) {
+	if (voices.length <= 0 && _lang.includes('-')) {
 		voices = shuffle(
-			all_voices.filter(v => langMatch(lang.split('-')[0], v.lang))
+			all_voices.filter(v => langMatch(_lang.split('-')[0], v.lang))
 		);
 	}
 
 	// Assign Daniel UK as system voice
-	voice_map._system = getVoice(/^daniel/i, lang);
+	voice_map._system = getVoice(/^daniel/i, _lang);
 }
 
 function hasVoice(username) {
 	return !!voice_map[username];
 }
 
-export function assignUserVoice(username, { voice, voiceNameRe }) {
+export function assignUserVoice(username, { voice, voiceNameRe, lang }) {
+	if (lang) console.warn();
+	lang = lang || _lang;
+
 	if (voice) {
 		voice_map[username] = voice;
 	} else if (voiceNameRe) {
 		if (all_voices.length <= 0) {
-			pending_voice_assignements.push({ username, voiceNameRe });
+			pending_voice_assignements.push({ username, voiceNameRe, lang });
 		} else {
 			voice_map[username] = getVoice(voiceNameRe, lang);
 		}
@@ -116,7 +119,7 @@ function getUserVoice(username) {
 		voice = voices[cur_voice_index];
 		cur_voice_index = ++cur_voice_index % voices.length;
 
-		assignUserVoice(username, { voice });
+		assignUserVoice(username, { voice, lang: _lang });
 	}
 
 	return voice;
