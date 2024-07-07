@@ -1,4 +1,4 @@
-# Query String Arguments in NestrisChamps
+# Query String Arguments in NesTrisChamps
 
 ## Context
 
@@ -36,7 +36,8 @@ Caveat: global args apply to **MOST** layouts, but some layouts
 | `lang` | `en`: Commentary bot in English<br>`fr`: Commentary bot in French | `en` | This argument controls the `combot` (see above)|
 
 
-## Layout-Specific Args
+
+## Layout-specific arguments
 
 ### CTWC23
 
@@ -82,7 +83,7 @@ Caveat: global args apply to **MOST** layouts, but some layouts
 | Argument  | Possible values | Default | Notes |
 | --- | --- | --- | --- |
 | `players` | `2`: Show 2 concurrent players<br>`3`: Show 3 concurrent players<br>`4`: Show 4 concurrent players<br>`5`: Show 5 concurrent players<br>`6`: Show 6 concurrent players<br>`7`: Show 7 concurrent players<br>`8`: Show 8 concurrent players | `8` | |
-| `rtrt` | `0`: DON'T show Runnint Tetris Rate graph<br>`1`: Show Running Tetris Rate Graph | `1` | |
+| `rtrt` | `0`: DON'T show Running Tetris Rate graph<br>`1`: Show Running Tetris Rate Graph | `1` | |
 
 ### Jdish
 
