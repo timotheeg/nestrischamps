@@ -1,0 +1,69 @@
+# Query String Arguments in NestrisChamps
+
+## Context
+
+NesTrischamps is a web application and uses standard [query string arguments](https://en.wikipedia.org/wiki/Query_string) to give some control to users. For example some arguments allow renderers to change background, or disable tetris sound.
+
+When loading a url, query string arguments are key/value pairs, separated by the character '&', like this: `name=yobi&state=online`.
+
+The query string as a whole is appended to the page url after the character `?` for example: `https://nestrischamps.io/view/ctwc23/SECRET?name=yobi&state=online`.
+
+
+## Capture page arguments
+
+The capture page (a.k.a. producer page) supports some query string arguments as follows:
+
+| Argument  | Possible values | Default | Notes |
+| --- | --- | --- | --- |
+| `disable_half_height`  | `0`: Deinterlace the input by halving the capture size before processing<br>`1`: DON'T deinterlace the input by halving the capture size before processing | `0` | Changing this value will change the capture size and thus breaks the calibration. You need to calibrate from scratch. |
+| `tts`  | `0`: DON'T speak Twitch chat message<br>`1`: Use browser's [Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) to speak Twitch chat messages | `0` | |
+| `webcam_audio` | `0`: DON'T send audio stream with player webcam feed<br>`1`: Send audio input with player webcam feed| `0` | |
+
+
+## Global view arguments
+
+Caveat: global args apply to **MOST** layouts, but some layouts
+
+| Argument  | Possible values | Default | Notes |
+| --- | --- | --- | --- |
+| `bg`  | `0`: Transparent background<br>`1`: Gold Tetris blocks on a black background<br>`2`: green NTC name moving accross the screen<br>`3`: Rainbow NTC name moving the screen<br>`4`: Wavy green NTC name moving across the screen <br>`5`: NTC trophies (not working well)| `1` | In OBS, prefer to set `bg=0` to save on resources on the browser source. |
+| `tetris_sound` | `0`: DON'T play tetris sounds<br>`1`: Play tetris sounds| `1` | Some Layout defaults to `0` instead, use `1` teexplicitly to activa (e.g. `jdish` layout) |
+| `tetris_flash` | `0`: NO Flash<br>`1`: Classic flash<br>`2`: Fade Flash<br>`3`: Swipe Flash<br>`4`: Explode Flash | `2` | Classic Flash may cause discomfort for viewers with light sensitivity |
+| `avatar` | `0`: NO avatar underneath the playfield<br>`1`: Show avatars underneath the playfield | `1` | Avatar images are taken from Twitch<br>Avatar images can be overridden to custom images in the admin page |
+| `video` | `0`: DON'T display player video<br>`1`: Play player video | `1` | Even if video is not set to zero, video only show if users agree to share their video in their producer page |
+| `buffer_time` | An integer value representing the number of milliseconds for frames to be buffered before they are rendered. E.g. `500` | `0` (i.e. buffer is not used) | A buffer can be useful if the network is not very stable and rendering is choppy. Noe that putting in a large value for `buffer_time` can cause the game play to be perceivably delayed compared to the player video feed, and look "weird" (player reacts before the thing they were doing happens!). |
+| `combot` | `0`: No commentary bot<br>`1`: Activate commentary bot | `0` | Commentary bot uses the browser [Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) to give score updates for the first match in an NTC room (between player 1 and 2)|
+| `lang` | `en`: Commentary bot in English<br>`fr`: Commentary bot in French | `en` | This argument controls the `combot` (see above)|
+
+
+## Layout-Specific Args
+
+### CTWC23
+
+| Argument  | Possible values | Default | Notes |
+| --- | --- | --- | --- |
+| `cycle_tdiff` | An integer value representing the time in second before the score differential changes from score diff to tetris diff. E.g. `5` | `5` | To disable cycling, set to `0` |
+| `curtain` | `{not set}`: use the default NTC curtain<br>`0`: CTWC DAS logo with experion sponsor logo<br>`1`: CTWC logo<br>`2`: CTWC logo with GFuel sponsor logo<br>`3`: CTWC logo with Red Bull sponsor logo<br>`4`: CTWC Singapore logo  | `{not set}` | Do not use CTWC logos without permission. Do not display "sponsored" curtain unless the company is actually sponsoring the event |
+| `runways` | `{not set}`: DON'T show runways<br>`1`: Always show runways<br>`transitions`: Show runways 10 lines before transisions and on chase downs<br>`{duration},{interval}`: show the transition for `duration` seconds, every `interval` seconds (e.g. `10,60`)| `{not set}` ||
+| `style` | `roll`: Show runways for level 19, 29, 39<br>`das`: show runways for level 19, 29 | `roll` | |
+| `qual` | `0`: Show score/tetris diff and runways<br>`1`: DON'T show score/tetris diff and runways | `0` | `qual=1` activates "qual mode". Not showing the score/tetris diff helps indicate the players are NOT competing, they are just playing their games independently |
+| `seed` | `0`: Don't show the seed underneath the player name<br>`1`: Show the seed underneath the player name | `1` | Players' seeds can be set by convention by prepending number-dot-space to the player name. E.g. `1. Dog` or `22. Yobi` |
+| `match` | `{not set}`: show match 1 and wait for admin command to switch view<br>`0`: always show match 1<br>`2`: always show match 2<br>`both`: always show both matches | `{not set}` | Warning: Setting to `0`, `1`, `both` ignores admin commands to switch view!|
+| `simultris` | An integer value representing the time difference in milliseconds where 2 tetrises are considered "simulatenous" | `0` | Shows an animated graphic "Simul-Tetris!" above the player cams. If the argument is omitted, or set to `0`, the graphic will not be displayed |
+| `invisible` | `0`: Don't draw invisible ghost blocks as ghost blocks <br>`1`: With invisible tetris, draw the invisible blocks as ghost blocks | `0` | This setting is only useful if the game is played in Invisible Tetris mode |
+
+
+
+## Finding query string arguments
+
+NestrisChamps is open source, so query string arguments can be found in code. Use the one liner below at the root of the codebase to find all flags by file:
+```bash
+git grep -E -i -o "QueryString\.get\('[^']+'\)" | sed -E -e "s/^(.+):.+'([^']+)'.+\$/\1:\2/" | sort | uniq
+```
+And then check the source files to see what the flag actually do.
+
+
+
+
+
+
