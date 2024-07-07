@@ -4,7 +4,7 @@
 
 NesTrischamps is a web application and uses standard [query string arguments](https://en.wikipedia.org/wiki/Query_string) to give some control to users. For example some arguments allow renderers to change background, or disable tetris sound.
 
-When loading a url, query string arguments are key/value pairs, separated by the character '&', like this: `name=yobi&state=online`.
+When loading a url, query string arguments are key/value pairs, separated by the character `&`, like this: `name=yobi&state=online`.
 
 The query string as a whole is appended to the page url after the character `?` for example: `https://nestrischamps.io/view/ctwc23/SECRET?name=yobi&state=online`.
 
