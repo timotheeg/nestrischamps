@@ -2,18 +2,23 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install -y git build-essential vim zsh gawk postgresql
 
+sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+sudo sysctl -w net.ipv4.ip_unprivileged_port_start=443
+
+
 echo "CREATE USER nestrischamps with encrypted password 'nestrischamps'; CREATE DATABASE nestrischamps with owner=nestrischamps;" | sudo -u postgres psql
 
 DB_URL="postgres://nestrischamps:nestrischamps@localhost:5432/nestrischamps?sslmode=disable"
 
 curl -q "https://raw.githubusercontent.com/timotheeg/nestrischamps/main/setup/db.sql" | psql "${DB_URL}"
 
-mkdir -p src
-cd src
+su - ubuntu
+mkdir -p /home/ubuntu/src
+cd /home/ubuntu/src
 git clone https://github.com/timotheeg/nestrischamps.git
 cd nestrischamps
 mkdir -p logs
-git checkout local_https
+git checkout main
 echo "DATABASE_URL=${DB_URL}" > .env
 
 sudo apt-get install -y ca-certificates curl gnupg
@@ -30,9 +35,9 @@ sudo apt-get install -y nodejs
 npm install
 
 SESSION_SECRET=$(echo "console.log(require('ulid').ulid())" | node)
-PORT=5443
-TLS_KEY_PATH=/home/ubuntu/src/nestrischamps/nestrischamps.local.key
-TLS_CERT_PATH=/home/ubuntu/src/nestrischamps/nestrischamps.local.crt
+PORT=443
+TLS_KEY_PATH=/home/ubuntu/key.pem
+TLS_CERT_PATH=/home/ubuntu/cert.pem
 
 tee .env > /dev/null << EOF
 TLS_KEY=${TLS_KEY_PATH}
@@ -42,8 +47,6 @@ SESSION_SECRET=${SESSION_SECRET}
 FF_SAVE_GAME_FRAMES=0
 IS_PUBLIC_SERVER=TRUE
 PORT=${PORT}
-TWITCH_CLIENT_ID=TWITCH_CLIENT_ID
-TWITCH_CLIENT_SECRET=TWITCH_CLIENT_SECRET
 EOF
 
 
