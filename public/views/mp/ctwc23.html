@@ -399,10 +399,13 @@
 			<div class="custom_curtain">
 				<br />
 				<br />
-				<img src="/images/ctwc_das_400.png" style="max-width: 220px" />
+				<img
+					src="/images/CTWC_DAS_LOGO_noxperion.webp"
+					style="max-width: 250px"
+				/>
 				<br />
 				<br />
-				<p style="font-size: 12px">Presented by</p>
+				<p style="font-size: 12px">hosted by</p>
 				<img src="/images/sponsors/logo-experion.svg" style="width: 280px" />
 				<br />
 				<br />
@@ -410,7 +413,7 @@
 				<br />
 				<br />
 				<br />
-				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
 			</div>
 		</template>
 		<template id="curtain_1">
@@ -474,6 +477,23 @@
 				<br />
 				<br />
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 100px" />
+			</div>
+		</template>
+		<template id="curtain_5">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img
+					src="/images/CTWC_DAS_LOGO_xperion.webp"
+					style="max-width: 260px"
+				/>
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
 			</div>
 		</template>
 		<template id="player">
@@ -617,7 +637,7 @@
 				: 0;
 
 			let curtain_template;
-			if (/^[0-4]$/.test(QueryString.get('curtain'))) {
+			if (/^[0-5]$/.test(QueryString.get('curtain'))) {
 				curtain_template = document.getElementById(
 					`curtain_${QueryString.get('curtain')}`
 				);
