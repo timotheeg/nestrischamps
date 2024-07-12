@@ -59,7 +59,7 @@ Requires=postgresql.service
 User=ubuntu
 Type=simple
 WorkingDirectory=/home/ubuntu/src/nestrischamps
-ExecStart=/usr/bin/node -r dotenv /home/ubuntu/src/nestrischamps/server.js
+ExecStart=/usr/bin/node -r dotenv/config server.js
 StandardOutput=file:/home/ubuntu/src/nestrischamps/logs/stdouterr.log
 Restart=always
 
