@@ -761,7 +761,7 @@
 
 					if (QueryString.get('qual') === '1') {
 						player.dom.hearts.remove();
-						player_node.querySelector(`.runways`).remove();
+						player.dom.runways_box.remove();
 						player_node.querySelector(`.score .tetris_diff`).remove();
 						player_node.querySelector(`.score .diff`).remove();
 						player_node.classList.add('qual');
@@ -773,7 +773,7 @@
 
 					if (show_runways === true) {
 						// permanently visible
-						player_node.querySelector(`.runways`).classList.add('visible');
+						player.dom.runways_box.classList.add('visible');
 					} else if (Array.isArray(show_runways)) {
 						// visible on interval and on transition
 						player.onTransition = () => {
@@ -783,7 +783,7 @@
 					}
 
 					if (isDAS) {
-						player_node.querySelector(`.runways`).classList.add('hide39');
+						player.dom.runways_box.classList.add('hide39');
 					}
 
 					player._setName = player.setName;
