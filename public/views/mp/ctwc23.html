@@ -1020,7 +1020,7 @@
 							match_players.forEach(player => {
 								// show sponsor block
 								player.show_sponsor_block =
-									sponsor_img_index === 1 || player.game.data.level === 18;
+									sponsor_img_index === 1 || player.game?.data.level === 18;
 
 								if (!SHOW_SIMUL_TETRIS) return;
 

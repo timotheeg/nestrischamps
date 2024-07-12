@@ -44,7 +44,7 @@ Caveat: global args apply to **MOST** layouts, but some layouts
 | Argument  | Possible values | Default | Notes |
 | --- | --- | --- | --- |
 | `cycle_tdiff` | An integer value representing the time in second before the score differential changes from score diff to tetris diff. E.g. `5` | `5` | To disable cycling, set to `0` |
-| `curtain` | `{not set}`: use the default NTC curtain<br>`0`: CTWC DAS logo with experion sponsor logo<br>`1`: CTWC logo<br>`2`: CTWC logo with GFuel sponsor logo<br>`3`: CTWC logo with Red Bull sponsor logo<br>`4`: CTWC Singapore logo  | `{not set}` | Do not use CTWC logos without permission. Do not display "sponsored" curtain unless the company is actually sponsoring the event |
+| `curtain` | `{not set}`: use the default NTC curtain<br>`0`: CTWC DAS logo with experion sponsor logo<br>`1`: CTWC logo<br>`2`: CTWC logo with GFuel sponsor logo<br>`3`: CTWC logo with Red Bull sponsor logo<br>`4`: CTWC Singapore logo<br>`5`: CTWC DAS with Experion logo and url   | `{not set}` | Do not use CTWC logos without permission. Do not display "sponsored" curtain unless the company is actually sponsoring the event |
 | `runways` | `{not set}`: DON'T show runways<br>`1`: Always show runways<br>`transitions`: Show runways 10 lines before transitions and on chase downs<br>`{duration},{interval}`: show the runways for `duration` seconds, every `interval` seconds (e.g. `10,60`)| `{not set}` ||
 | `rbox` | `bottom`: Show runways box at the bottom<br>`top`: Show runways box at the top| `bottom` ||
 | `style` | `roll`: Show runways for level `19`, `29`, `39`<br>`das`: show runways for level `19`, `29` | `roll` | |
