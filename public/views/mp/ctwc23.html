@@ -255,6 +255,11 @@
 				animation: 0.5s ease-out fadeIn;
 			}
 
+			.runways.top {
+				bottom: unset;
+				--offset: 421px;
+			}
+
 			.runways .label {
 				text-align: left;
 			}
@@ -784,6 +789,10 @@
 
 					if (isDAS) {
 						player.dom.runways_box.classList.add('hide39');
+					}
+
+					if (QueryString.get('rbox') === 'top') {
+						player.dom.runways_box.classList.add('top');
 					}
 
 					player._setName = player.setName;
