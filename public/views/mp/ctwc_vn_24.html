@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<style>
+			@font-face {
+				font-family: 'SVN Gotham';
+				src: url('/fonts/SVN-Gotham_Black.otf');
+			}
+
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.match {
+				position: absolute;
+				left: 960px;
+				top: 0;
+			}
+
+			.header {
+				font-family: 'SVN Gotham';
+			}
+
+			.box {
+				padding: 3px;
+				font-size: 24.01px;
+				line-height: 24px;
+				height: 51px;
+				right: var(--offset);
+				border-image-source: url(/views/border_3px_ctwcvn.png);
+			}
+
+			.box .header {
+				padding-bottom: 6px;
+			}
+
+			.board,
+			.score,
+			.next_piece {
+				--offset: 0;
+			}
+
+			.score {
+				width: 333px;
+				padding-right: 0;
+				height: 112px;
+				top: 0;
+			}
+
+			.score .header {
+				padding-top: 2px;
+				padding-bottom: 8px;
+			}
+
+			.qual .score .header {
+				padding-bottom: 28px;
+			}
+
+			.score .aligner {
+				display: inline-block;
+				font-size: 36.01px;
+				line-height: 40px;
+			}
+
+			.score .aligner .diff {
+				animation: 0.5s ease-out fadeIn;
+				opacity: 1;
+			}
+
+			.score .tetris_diff {
+				margin-top: -40px;
+				line-height: 40px;
+				animation: 0.5s ease-out fadeOut;
+				opacity: 0;
+			}
+
+			.score.with_tdiff .tetris_diff {
+				animation: 0.5s ease-out fadeIn;
+				opacity: 1;
+			}
+
+			.score.with_tdiff .aligner .diff {
+				animation: 0.5s ease-out fadeOut;
+				opacity: 0;
+			}
+
+			.aligner div {
+				text-align: right;
+			}
+
+			.lines,
+			.next_piece {
+				top: 139px;
+				width: 151px;
+				height: 56px;
+			}
+
+			.lines {
+				padding-top: 6px;
+				width: 155px;
+				padding-right: 0;
+				--offset: 178px;
+			}
+
+			.next_piece {
+				height: 59px;
+			}
+
+			.board {
+				--border-size: 12;
+				padding: 3px;
+				width: 336px;
+				height: 676px;
+				top: 225px;
+			}
+
+			.name,
+			.tetris_rate,
+			.drought,
+			.level {
+				padding-right: 0;
+			}
+
+			.name,
+			.flag {
+				top: 923px;
+			}
+
+			.name {
+				--offset: 0;
+				width: 336px;
+				padding: 3px 0;
+				height: 64px;
+				text-transform: uppercase;
+			}
+
+			.name .header {
+				font-size: 32.01px; /* sad -_- */
+				line-height: 32px; /* sad -_- */
+				padding-top: 18px;
+				padding-bottom: 9px;
+			}
+
+			.name .content {
+				display: none;
+				color: #b0afb0;
+				letter-spacing: 5px;
+				text-indent: 5px;
+			}
+
+			.name .content .win {
+				color: #fb0204;
+			}
+
+			.name.seed .header {
+				padding-top: 7px;
+				padding-bottom: 0;
+			}
+
+			.name.seed .content {
+				display: unset;
+				font-size: 16.01px;
+			}
+
+			.hearts,
+			.level,
+			.tetris_rate,
+			.drought,
+			.flag {
+				--offset: 357px;
+			}
+
+			.hearts {
+				bottom: -766px;
+				width: 24px;
+				padding-right: 0;
+				height: unset;
+				font-size: 0px;
+				line-height: 32px;
+			}
+
+			.hearts span {
+				width: 24px;
+				height: 30px;
+				overflow: hidden;
+				background: url(/views/heart_grey.png);
+				background-repeat: no-repeat;
+				background-position: center left;
+				display: block;
+			}
+
+			.hearts span.win {
+				background-image: url(/views/heart_red.png);
+			}
+
+			.level,
+			.tetris_rate,
+			.drought {
+				padding-top: 5px;
+				width: 78px;
+				height: 54px;
+			}
+
+			.tetris_rate,
+			.drought {
+				top: 840px;
+			}
+
+			.level {
+				top: 757px;
+				width: 56px;
+			}
+
+			.drought {
+				color: red;
+				display: none;
+			}
+
+			.drought.active {
+				display: block;
+				animation: 0.5s ease-out fadeIn;
+			}
+
+			.drought .header {
+				padding-bottom: 4px; /* because the bar is thinner than text */
+			}
+
+			.drought .header img {
+				padding-top: 3px;
+				margin-left: -2px;
+				vertical-align: top;
+				animation: 1s linear infinite fadeOut;
+			}
+
+			.flag {
+				padding: 0;
+				width: 105px;
+				height: 70px;
+			}
+
+			.runways {
+				display: none;
+				justify-content: space-between;
+				color: #888;
+				font-size: 24.01px;
+				line-height: 24px;
+				--offset: 483px;
+				right: var(--offset);
+				width: 444px;
+				height: unset;
+				bottom: -1023px;
+				--border-size: 12;
+				padding: 3px 3px 1px 6px;
+			}
+
+			.runways.hide19 .lv19,
+			.runways.hide39 .lv39 {
+				display: none;
+			}
+
+			.runways.visible {
+				display: flex;
+				animation: 0.5s ease-out fadeIn;
+			}
+
+			.runways.top {
+				bottom: unset;
+				--offset: 421px;
+			}
+
+			.runways .label {
+				text-align: left;
+			}
+
+			.runways .value {
+				text-align: right;
+			}
+
+			.runways .active {
+				color: #fff;
+			}
+
+			.simul-tetris {
+				display: none;
+				position: absolute;
+				transform-origin: 50% 50%;
+				top: 150px;
+				--offset: 341px;
+				right: var(--offset);
+			}
+
+			.p2 > * {
+				left: var(--offset);
+			}
+
+			.p2 .lines {
+				left: 0;
+			}
+			.p2 .next_piece {
+				left: 179px;
+			}
+
+			.player_vid {
+				position: absolute;
+				top: 0;
+				width: 600px;
+				height: 1023px;
+				padding: 0;
+				object-fit: cover;
+				/* background: yellow; /**/
+
+				--offset: 360px;
+				right: var(--offset);
+			}
+
+			#ticker {
+				position: absolute;
+				width: 1920px;
+				height: 57px;
+				top: 1023px;
+				/* background: orange;
+				opacity: 0.5; /**/
+			}
+
+			.match.small {
+				transform: scale(0.7245042492917847); /* (1080-57)/706/2 */
+			}
+			#match2.small {
+				top: 511px;
+			}
+
+			.match.small .runways {
+				display: none;
+			}
+
+			.match.small .score,
+			.match.small .lines,
+			.match.small .next_piece {
+				--offset: 357px;
+			}
+
+			.match.small .next_piece {
+				z-index: 4;
+				top: 139px;
+			}
+
+			.match.small .lines {
+				z-index: 3;
+				width: 154px;
+				top: 225px;
+			}
+
+			.match.small .level {
+				z-index: 2;
+				top: 311px;
+				width: 78px;
+			}
+
+			.match.small .tetris_rate,
+			.match.small .drought {
+				top: 394px;
+				z-index: 1;
+			}
+
+			.match.small .board {
+				top: 0;
+				z-index: 8;
+			}
+			.match.small .score {
+				width: 326px;
+				z-index: 7;
+			}
+			.match.small .hearts {
+				bottom: unset;
+				top: 477px;
+			}
+			.match.small .flag,
+			.match.small .name {
+				z-index: 6;
+				top: 0;
+			}
+			.match.small .name {
+				width: 462px;
+				--offset: 707px;
+			}
+			.match.small .flag {
+				--offset: 1190px;
+			}
+			.match.small .player_vid {
+				top: 96px;
+				width: 965px;
+				height: 609px;
+			}
+
+			.match.small .simul-tetris {
+				top: 250px;
+				--offset: 574px;
+			}
+
+			.match.small .p2 > * {
+				left: var(--offset);
+			}
+		</style>
+	</head>
+	<body>
+		<template id="curtain_0">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<img
+					src="/images/CTWC_DAS_LOGO_noxperion.webp"
+					style="max-width: 250px"
+				/>
+				<br />
+				<br />
+				<p style="font-size: 12px">hosted by</p>
+				<img src="/images/sponsors/logo-experion.svg" style="width: 280px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
+			</div>
+		</template>
+		<template id="curtain_1">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 260px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 100px" />
+			</div>
+		</template>
+		<template id="curtain_2">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 260px" />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
+			</div>
+		</template>
+		<template id="curtain_3">
+			<div class="custom_curtain">
+				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
+				<br />
+				<br />
+				<p style="font-size: 12px">Presented by</p>
+				<img
+					src="/images/sponsors/redbull-logo-png-transparent.m.png"
+					style="width: 280px"
+				/>
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
+			</div>
+		</template>
+		<template id="curtain_4">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img src="/images/ctwc_singapore.webp" style="max-width: 260px" />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 100px" />
+			</div>
+		</template>
+		<template id="curtain_5">
+			<div class="custom_curtain">
+				<br />
+				<br />
+				<br />
+				<img
+					src="/images/CTWC_DAS_LOGO_xperion.webp"
+					style="max-width: 260px"
+				/>
+				<br />
+				<br />
+				<br />
+				<br />
+				<br />
+				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
+			</div>
+		</template>
+		<template id="player">
+			<div class="player">
+				<video class="player_vid"></video>
+
+				<div class="box hearts">&nbsp;</div>
+
+				<div class="box name">
+					<div class="header">NGƯỜI CHƠI 1</div>
+					<div class="content"></div>
+				</div>
+
+				<div class="box lines">
+					<div class="header">DÒNG</div>
+					<div class="content">000</div>
+				</div>
+
+				<div class="box next_piece"></div>
+
+				<div class="box score">
+					<div class="header">ĐIỂM</div>
+					<div class="aligner">
+						<div class="value">0&#x202F;000&#x202F;000</div>
+						<div class="diff winning">0&#x202F;000&#x202F;000</div>
+					</div>
+					<div class="tetris_diff">
+						<span class="value">0.00</span>&#x202F;TETRIS
+					</div>
+				</div>
+
+				<div class="box level">
+					<div class="header">LV</div>
+					<div class="content">00</div>
+				</div>
+
+				<div class="box tetris_rate">
+					<div class="header">TRT</div>
+					<div class="content">---</div>
+				</div>
+
+				<div class="box drought">
+					<div class="header"><img src="/views/red_bar.png" /></div>
+					<div class="value">99</div>
+				</div>
+
+				<div class="box board"></div>
+
+				<div class="box runways">
+					<div class="label">
+						<div class="lv19">L19&#x202F;RUNWAY</div>
+						<div class="lv29">L29&#x202F;RUNWAY</div>
+						<div class="lv39">L39&#x202F;RUNWAY</div>
+					</div>
+					<div class="value">
+						<div class="lv19">000&#x202F;000</div>
+						<div class="lv29">0&#x202F;000&#x202F;000</div>
+						<div class="lv39">0&#x202F;000&#x202F;000</div>
+					</div>
+				</div>
+
+				<div class="box flag"></div>
+
+				<img class="simul-tetris" src="/images/simul-tetris.png" />
+			</div>
+		</template>
+
+		<div id="stream_bg">
+			<div id="match1" class="match small"></div>
+			<div id="match2" class="match small"></div>
+
+			<div id="ticker"></div>
+
+			<div id="playing_fields">
+				<!-- divider -->
+
+				<!-- Player 1 -->
+				<!-- Player 2 -->
+			</div>
+			<!-- End Playing Fields -->
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '1920x1080', // urgh, so big for so much space wasted :(
+				concurrent_2_matches: true,
+				players: 4,
+			});
+		</script>
+		<script src="/vendor/peerjs.1.5.4.min.js"></script>
+		<script type="module">
+			import '/views/bg.js';
+			import { peerServerOptions } from '/views/constants.js';
+			import { noop, translate, readableScoreFomatter } from '/views/utils.js';
+			import QueryString from '/js/QueryString.js';
+			import CompetitionPlayer from '/views/CompetitionPlayer.js';
+			import Competition from '/views/competition.js';
+			import InvisibleMixin from '/views/InvisibleMixin.js';
+
+			// Penner easing
+			// http://robertpenner.com/easing/
+			function easeOutElastic(t, b, c, d) {
+				var s = 1.70158;
+				var p = 0;
+				var a = c;
+				if (t == 0) return b;
+				if ((t /= d) >= 1) return b + c;
+				if (!p) p = d * 0.3;
+				if (a < Math.abs(c)) {
+					a = c;
+					var s = p / 4;
+				} else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+				return (
+					a *
+						Math.pow(2, -10 * t) *
+						Math.sin(((t * d - s) * (2 * Math.PI)) / p) +
+					c +
+					b
+				);
+			}
+
+			const isDAS = QueryString.get('style') === 'das';
+			const hasAds = QueryString.get('ads') === '1';
+
+			const SHOW_SIMUL_TETRIS = /^[1-9]\d*$/.test(QueryString.get('simultris'));
+			const SIMUL_TETRIS_DELAY = SHOW_SIMUL_TETRIS
+				? parseInt(QueryString.get('simultris'), 10)
+				: 120;
+
+			// supply 0 to disable
+			const CYCLE_TDIFF = /^\d+$/.test(QueryString.get('cycle_tdiff'))
+				? parseInt(QueryString.get('cycle_tdiff'), 10)
+				: 5; // default cycle is 5s
+
+			const sponsor_img_index = /^\d+$/.test(QueryString.get('sponsorimg'))
+				? parseInt(QueryString.get('sponsorimg'), 10)
+				: 0;
+
+			let curtain_template;
+			if (/^[0-5]$/.test(QueryString.get('curtain'))) {
+				curtain_template = document.getElementById(
+					`curtain_${QueryString.get('curtain')}`
+				);
+			}
+
+			// triple-typed variable... that is disgusting -_-
+			// false: never show runways (default)
+			// 1 -> true: always show runways
+			// 'transitions' -> 'transitions': show slightly before transitions
+			// x,y -> [x, y]: show runways for x seconds every y seconds
+			let show_runways = false;
+			if (QueryString.get('runways') === '1') {
+				show_runways = true;
+			} else if (QueryString.get('runways') === 'transitions') {
+				show_runways = 'transitions';
+			} else {
+				const m = (QueryString.get('runways') || '').match(
+					/^([1-9]\d*),([1-9]\d*)$/
+				);
+				if (m) {
+					const show_for = parseInt(m[1], 10);
+					const repeat_in = parseInt(m[2], 10);
+					if (show_for < repeat_in) show_runways = [show_for, repeat_in];
+				}
+			}
+
+			let images;
+
+			if (hasAds) {
+				images = [
+					'/images/sponsors/ctwcdas_inner_20.png',
+					'/images/sponsors/gfuel_30.png',
+				].map(url => {
+					const img = new Image();
+					img.src = url;
+					return img;
+				});
+			}
+
+			const player_template = document.getElementById('player');
+			const players = [];
+
+			[1, 2].forEach(match_num => {
+				const match_node = document.getElementById(`match${match_num}`);
+
+				const match_players = [];
+				const sync_timers = [];
+
+				let runways_interval = null;
+				let runways_timeout = null;
+
+				// function is only used when show_runways is an array
+				const showRunways = () => {
+					runways_timeout = clearTimeout(runways_timeout);
+
+					match_players.forEach(player => {
+						player.dom.runways_box.classList.add('visible');
+					});
+
+					runways_timeout = setTimeout(hideRunways, show_runways[0] * 1000);
+				};
+
+				const hideRunways = () => {
+					match_players.forEach(player => {
+						player.dom.runways_box.classList.remove('visible');
+					});
+				};
+
+				const resetRunways = Array.isArray(show_runways)
+					? (hide = true) => {
+							runways_interval = clearInterval(runways_interval);
+
+							if (hide) hideRunways();
+
+							runways_interval = setInterval(
+								showRunways,
+								show_runways[1] * 1000
+							);
+					  }
+					: noop;
+
+				[1, 2].forEach((player_num, player_idx) => {
+					const player_fragment = document.importNode(
+						player_template.content,
+						true
+					);
+					const player_node = player_fragment.querySelector('.player');
+
+					player_node.classList.add(`p${player_num}`);
+					match_node.appendChild(player_node);
+
+					let curtain;
+					if (curtain_template) {
+						const curtain_fragment = document.importNode(
+							curtain_template.content,
+							true
+						);
+						curtain = curtain_fragment.querySelector('.custom_curtain');
+					}
+
+					const player = new CompetitionPlayer(
+						{
+							name: player_node.querySelector(`.name .header`),
+							score: player_node.querySelector(`.score .value`),
+							level: player_node.querySelector(`.level .content`),
+							lines: player_node.querySelector(`.lines .content`),
+							trt: player_node.querySelector(`.tetris_rate .content`),
+							preview: player_node.querySelector(`.next_piece`),
+							field: player_node.querySelector(`.board`),
+							drought: player_node.querySelector(`.drought .value`),
+
+							runway_lv19: player_node.querySelector(`.runways .value .lv19`),
+							runway_lv29: player_node.querySelector(`.runways .value .lv29`),
+							runway_lv39: player_node.querySelector(`.runways .value .lv39`),
+
+							diff: player_node.querySelector(`.score .diff`),
+							t_diff: player_node.querySelector(`.score .tetris_diff .value`),
+
+							runways_box: player_node.querySelector(`.runways`),
+
+							hearts: player_node.querySelector(`.hearts.box`),
+							drought_box: player_node.querySelector(`.drought`),
+							video: player_node.querySelector(`.player_vid`),
+							flag: player_node.querySelector(`.flag`),
+							score_box: player_node.querySelector(`.score`),
+							name_box: player_node.querySelector(`.name`),
+							seed: player_node.querySelector(`.name .content`),
+
+							curtain,
+							simul_tetris: player_node.querySelector(`.simul-tetris`),
+						},
+						{
+							biglogo: true,
+							bigntc: true,
+							field_pixel_size: 4.25,
+							running_trt_dot_size: 5,
+							preview_pixel_size: 3.75,
+							format_score: v => readableScoreFomatter(v),
+							stereo: translate([1, 2], [-1, 1], player_num),
+						}
+					);
+
+					if (QueryString.get('invisible') === '1') {
+						InvisibleMixin(player);
+					}
+
+					if (QueryString.get('qual') === '1') {
+						player.dom.hearts.remove();
+						player.dom.runways_box.remove();
+						player_node.querySelector(`.score .tetris_diff`).remove();
+						player_node.querySelector(`.score .diff`).remove();
+						player_node.classList.add('qual');
+					}
+
+					if (!CYCLE_TDIFF) {
+						player_node.querySelector(`.score .tetris_diff`)?.remove();
+					}
+
+					if (show_runways === true) {
+						// permanently visible
+						player.dom.runways_box.classList.add('visible');
+					} else if (Array.isArray(show_runways)) {
+						// visible on interval and on transition
+						player.onTransition = () => {
+							resetRunways(false);
+							showRunways();
+						};
+					}
+
+					if (isDAS) {
+						player.dom.runways_box.classList.add('hide39');
+					}
+
+					if (QueryString.get('rbox') === 'top') {
+						player.dom.runways_box.classList.add('top');
+					}
+
+					player._setName = player.setName;
+					player.setName = function (name) {
+						this.dom.seed.textContent = '';
+						this.dom.name_box.classList.remove('seed');
+
+						const m = (name || '').match(/^(\d+)\. (.+)$/);
+
+						if (m) {
+							this._setName(m[2]);
+
+							if (QueryString.get('seed') !== '0') {
+								this.dom.name_box.classList.add('seed');
+								this.dom.seed.textContent = `seed ${m[1]}`;
+							}
+						} else {
+							this._setName(name);
+						}
+					};
+
+					if (show_runways === 'transitions') {
+						player.onLines = frame => {
+							if (player.game.data.start_level !== 18) return; // we only cater for level 18 (for now)
+							if (player.is_chasing_down) return;
+							if (
+								(frame.raw.lines >= 120 && frame.raw.lines < 135) ||
+								(frame.raw.lines >= 220 && frame.raw.lines < 235) ||
+								(frame.raw.lines >= 320 && frame.raw.lines < 335)
+							) {
+								player.dom.runways_box.classList.add('visible');
+							} else {
+								player.dom.runways_box.classList.remove('visible');
+							}
+						};
+					}
+
+					if (show_runways) {
+						player.onLevel = frame => {
+							[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+								elmt => {
+									elmt.classList.remove('active');
+								}
+							);
+
+							for (const threshold_level of [19, 29, 39]) {
+								if (frame.raw.level < threshold_level) {
+									[
+										...player.dom.runways_box.querySelectorAll(
+											`.lv${threshold_level}`
+										),
+									].forEach(elmt => {
+										elmt.classList.add('active');
+									});
+									break;
+								} else if (frame.raw.level === threshold_level) {
+									player.dom.runways_box.querySelector(
+										`.label .lv${threshold_level}`
+									).textContent = `L${frame.raw.level} SCORE`;
+								}
+							}
+						};
+					}
+
+					player.onDroughtStart = () => {
+						player.dom.drought_box.classList.add('active');
+					};
+
+					player.onDroughtEnd = () => {
+						player.dom.drought_box.classList.remove('active');
+					};
+
+					player.onGameStart = () => {
+						player.is_chasing_down = false;
+						player.dom.drought_box.classList.remove('active');
+
+						if (!show_runways) return;
+
+						[...player.dom.runways_box.querySelectorAll('.active')].forEach(
+							elmt => {
+								elmt.classList.remove('active');
+							}
+						);
+
+						[19, 29, 39].forEach(level => {
+							player.dom.runways_box.querySelector(
+								`.label .lv${level}`
+							).textContent = `L${level} RUNWAY`;
+
+							player.dom.runways_box.querySelector(
+								`.value .lv${level}`
+							).textContent = `0`;
+						});
+
+						const start_level = player.game?.data?.start_level || 18;
+
+						player.dom.runways_box.classList[
+							start_level >= 19 ? 'add' : 'remove'
+						]('hide19');
+
+						if (show_runways === 'transitions') {
+							player.dom.runways_box.classList.remove('visible');
+						} else {
+							resetRunways();
+						}
+
+						if (show_runways === true) {
+							player.dom.runways_box.classList.add('visible');
+						}
+					};
+
+					player.onGameOver = () => {
+						if (show_runways) {
+							const score = player.game.data.score.current;
+							const other_player = match_players.find(
+								_player => _player !== player
+							);
+							if (other_player.game && !other_player.game.over) {
+								const other_player_score = other_player.game.data.score.current;
+								if (other_player_score < score) {
+									other_player.is_chasing_down = true;
+									other_player.dom.runways_box.classList.add('visible');
+								}
+							}
+						}
+						if (show_runways !== true) {
+							player.dom.runways_box.classList.remove('visible');
+						}
+					};
+
+					if (hasAds) {
+						// custom branding
+						player._renderField = player.renderField;
+
+						const img = images[sponsor_img_index];
+
+						player.renderField = function (level, field) {
+							this._renderField(level, field);
+
+							if (this.show_sponsor_block) {
+								const pixels_per_block = this.field_pixel_size * (7 + 1);
+
+								const ctx = this.field_ctx;
+
+								ctx.fillStyle = 'rgba(0,0,0,0)';
+
+								if (sponsor_img_index === 1) {
+									// gfuel
+									for (let x = 0; x < 10; x++) {
+										for (let y = 0; y < 20; y++) {
+											if (field[y * 10 + x] === 1) {
+												const pos_x = x * pixels_per_block - 1;
+												const pos_y = y * pixels_per_block - 1;
+
+												ctx.clearRect(
+													pos_x,
+													pos_y,
+													this.field_pixel_size * 8,
+													this.field_pixel_size * 8
+												);
+												ctx.drawImage(img, pos_x, pos_y);
+											}
+										}
+									}
+								} else if (sponsor_img_index === 0) {
+									// xperion inner
+									for (let x = 0; x < 10; x++) {
+										for (let y = 0; y < 20; y++) {
+											if (field[y * 10 + x] === 2) {
+												// replace blue blocks
+												// we clear the inside of the block, but keep the border
+												const pos_x =
+													x * pixels_per_block + this.field_pixel_size;
+												const pos_y =
+													y * pixels_per_block + this.field_pixel_size;
+
+												ctx.clearRect(
+													pos_x,
+													pos_y,
+													this.field_pixel_size * 5,
+													this.field_pixel_size * 5
+												);
+												ctx.drawImage(img, pos_x, pos_y);
+											}
+										}
+									}
+								}
+							}
+						};
+					}
+
+					player.onTetris = function () {
+						const now = Date.now();
+
+						player.last_tetris_time = now;
+
+						if (
+							match_players.every(
+								player => player.last_tetris_time >= now - SIMUL_TETRIS_DELAY
+							)
+						) {
+							// clear all ongoing simul-tetris timers for this match
+							while (sync_timers.length) clearTimeout(sync_timers.pop());
+
+							match_players.forEach(player => {
+								// show sponsor block
+								player.show_sponsor_block =
+									sponsor_img_index === 1 || player.game?.data.level === 18;
+
+								if (!SHOW_SIMUL_TETRIS) return;
+
+								window.cancelAnimationFrame(player.animationId);
+
+								// show the simul-tetris sign
+								const scale_start = 0;
+								const scale_end = 0.85 + Math.random() * 0.1;
+								const scale_change = scale_end - scale_start;
+								const angle = -10 + Math.random() * 20;
+								const duration = 750;
+
+								player.dom.simul_tetris.style.display = 'inline';
+								player.dom.simul_tetris.style.transform = `scale(${scale_start}) rotate(${angle}deg)`;
+
+								const start_time = Date.now();
+
+								function step() {
+									const elapsed = Date.now() - start_time;
+									const scale = easeOutElastic(
+										elapsed,
+										scale_start,
+										scale_change,
+										duration
+									);
+
+									player.dom.simul_tetris.style.transform = `scale(${scale}) rotate(${angle}deg)`;
+
+									if (elapsed < duration) {
+										player.animationId = window.requestAnimationFrame(step);
+									} else {
+										sync_timers.push(
+											setTimeout(() => {
+												player.dom.simul_tetris.style.display = 'none';
+											}, 500)
+										);
+									}
+								}
+
+								player.animationId = window.requestAnimationFrame(step);
+							});
+
+							sync_timers.push(
+								setTimeout(() => {
+									players.forEach(player => {
+										player.show_sponsor_block = false;
+									});
+								}, 6000)
+							);
+						}
+					};
+
+					match_players.push(player);
+					players.push(player);
+				});
+			});
+
+			if (CYCLE_TDIFF) {
+				setInterval(() => {
+					players.forEach(player => {
+						player.dom.score_box.classList.toggle('with_tdiff');
+					});
+				}, CYCLE_TDIFF * 1000);
+			}
+
+			const competition = new Competition(players);
+
+			competition.API.setMatch = function (match_idx) {
+				if (match_idx !== 0 && match_idx !== 1) {
+					document.querySelectorAll('.match').forEach(match_node => {
+						match_node.classList.add('small');
+						match_node.style.display = null;
+					});
+
+					return;
+				}
+
+				let show_match, hide_match;
+
+				if (match_idx === 0) {
+					show_match = document.querySelector('#match1');
+					hide_match = document.querySelector('#match2');
+				} else {
+					show_match = document.querySelector('#match2');
+					hide_match = document.querySelector('#match1');
+				}
+
+				show_match.classList.remove('small');
+
+				hide_match.style.display = 'none';
+				show_match.style.display = null;
+			};
+
+			competition.API.showProfileCard = function (visible, match_idx) {
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
+
+				match_players.forEach(player => player.showProfileCard(visible));
+			};
+
+			competition.API.setWinner = function (player_idx) {
+				const match_idx = player_idx < 2 ? 0 : 1;
+				const match_players = players.slice(2 * match_idx, 2 * match_idx + 2);
+
+				const winner = players[player_idx];
+				const loser = match_players.find(player => player !== winner);
+
+				loser.showLoserFrame();
+				winner.playWinnerAnimation();
+			};
+
+			for (let player_idx = 0; player_idx < players.length; player_idx += 2) {
+				const match_players = players.slice(player_idx, player_idx + 2);
+
+				const updateMatchStats = () => {
+					competition.computeScoreDifferentials(match_players);
+				};
+
+				match_players.forEach(player => {
+					player.onScore = updateMatchStats;
+				});
+			}
+
+			const match_value = QueryString.get('match');
+
+			if (/^([01]|both)$/.test(match_value)) {
+				// show the requested view
+				competition.API.setMatch(
+					match_value == 'both' ? null : parseInt(match_value, 10)
+				);
+				// and then lock the view by disabling changes
+				competition.API.setMatch = () => {};
+			} else {
+				// Layout starts 1 match view
+				competition.API.setMatch(0);
+			}
+
+			// expose API into window for debugging
+			window._players = players;
+			window._NTC_API = competition.API;
+
+			window._NTC_API.showRunways = () => {
+				players.forEach(player => {
+					player.dom.runways_box.classList.add('visible');
+				});
+			};
+			window._NTC_API.hideRunways = () => {
+				players.forEach(player => {
+					player.dom.runways_box.classList.remove('visible');
+				});
+			};
+		</script>
+	</body>
+</html>
