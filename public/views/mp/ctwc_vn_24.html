@@ -139,7 +139,7 @@
 			.name .header {
 				font-size: 32.01px; /* sad -_- */
 				line-height: 32px; /* sad -_- */
-				padding-top: 18px;
+				padding-top: 13px;
 				padding-bottom: 9px;
 			}
 
@@ -154,13 +154,14 @@
 				color: #fb0204;
 			}
 
-			.name.seed .header {
+			.name.subtext .header {
 				padding-top: 7px;
 				padding-bottom: 0;
 			}
 
-			.name.seed .content {
+			.name.subtext .content {
 				display: unset;
+				font-family: 'SVN Gotham';
 				font-size: 16.01px;
 			}
 
@@ -213,6 +214,10 @@
 				width: 56px;
 			}
 
+			:is(.lines, .level, .tetris_rate, .drought) > .header {
+				margin-top: -3px; /* let's hope this does not screw up drought counter */
+			}
+
 			.drought {
 				color: red;
 				display: none;
@@ -245,7 +250,7 @@
 				justify-content: space-between;
 				color: #888;
 				font-size: 24.01px;
-				line-height: 24px;
+				line-height: 28px;
 				--offset: 483px;
 				right: var(--offset);
 				width: 444px;
@@ -270,12 +275,16 @@
 				--offset: 421px;
 			}
 
+			/* adjustments to make Vietnamese runway labels bearable */
 			.runways .label {
 				text-align: left;
+				font-family: 'SVN Gotham';
+				margin-bottom: 10px;
 			}
 
 			.runways .value {
 				text-align: right;
+				margin-top: 5px;
 			}
 
 			.runways .active {
@@ -409,100 +418,30 @@
 			<div class="custom_curtain">
 				<br />
 				<br />
-				<img
-					src="/images/CTWC_DAS_LOGO_noxperion.webp"
-					style="max-width: 250px"
-				/>
-				<br />
-				<br />
-				<p style="font-size: 12px">hosted by</p>
-				<img src="/images/sponsors/logo-experion.svg" style="width: 280px" />
+				<img src="/images/ctwc_regional_vn.png" style="max-width: 333px" />
 				<br />
 				<br />
 				<br />
 				<br />
 				<br />
 				<br />
+				<br />
+				<br />
+				<br />
+				<p style="font-family: 'SVN Gotham'; font-size: 15px">CHẠY TRÊN</p>
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
 			</div>
 		</template>
 		<template id="curtain_1">
 			<div class="custom_curtain">
-				<br />
-				<br />
-				<br />
-				<img src="/images/ctwc_logo.jpeg" style="max-width: 260px" />
-				<br />
-				<br />
-				<br />
-				<br />
-				<br />
-				<br />
-				<img src="/brand/logo.v3.white.3x.png" style="max-width: 100px" />
-			</div>
-		</template>
-		<template id="curtain_2">
-			<div class="custom_curtain">
-				<br />
-				<br />
-				<img src="/images/ctwc_logo.jpeg" style="max-width: 260px" />
-				<br />
-				<br />
-				<p style="font-size: 12px">Presented by</p>
-				<img src="/images/sponsors/G_Fuel_logo.svg" style="width: 260px" />
-				<br />
-				<br />
-				<br />
-				<br />
-				<br />
-				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
-			</div>
-		</template>
-		<template id="curtain_3">
-			<div class="custom_curtain">
-				<img src="/images/ctwc_logo.jpeg" style="max-width: 240px" />
-				<br />
-				<br />
-				<p style="font-size: 12px">Presented by</p>
-				<img
-					src="/images/sponsors/redbull-logo-png-transparent.m.png"
-					style="width: 280px"
-				/>
-				<br />
-				<br />
-				<br />
-				<img src="/brand/logo.v3.white.3x.png" style="max-width: 80px" />
-			</div>
-		</template>
-		<template id="curtain_4">
-			<div class="custom_curtain">
-				<br />
-				<br />
-				<br />
-				<img src="/images/ctwc_singapore.webp" style="max-width: 260px" />
+				<img src="/images/ctvn_logo.png" style="max-width: 333px" />
 				<br />
 				<br />
 				<br />
 				<br />
 				<br />
 				<br />
-				<img src="/brand/logo.v3.white.3x.png" style="max-width: 100px" />
-			</div>
-		</template>
-		<template id="curtain_5">
-			<div class="custom_curtain">
-				<br />
-				<br />
-				<br />
-				<img
-					src="/images/CTWC_DAS_LOGO_xperion.webp"
-					style="max-width: 260px"
-				/>
-				<br />
-				<br />
-				<br />
-				<br />
-				<br />
+				<p style="font-family: 'SVN Gotham'; font-size: 15px">CHẠY TRÊN</p>
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
 			</div>
 		</template>
@@ -518,7 +457,7 @@
 				</div>
 
 				<div class="box lines">
-					<div class="header">DÒNG</div>
+					<div class="header">HÀNG</div>
 					<div class="content">000</div>
 				</div>
 
@@ -536,7 +475,7 @@
 				</div>
 
 				<div class="box level">
-					<div class="header">LV</div>
+					<div class="header">LVL</div>
 					<div class="content">00</div>
 				</div>
 
@@ -554,9 +493,9 @@
 
 				<div class="box runways">
 					<div class="label">
-						<div class="lv19">L19&#x202F;RUNWAY</div>
-						<div class="lv29">L29&#x202F;RUNWAY</div>
-						<div class="lv39">L39&#x202F;RUNWAY</div>
+						<div class="lv19">LVL 19&#x202F;TỐI ĐA</div>
+						<div class="lv29">LVL 29&#x202F;TỐI ĐA</div>
+						<div class="lv39">LVL 39&#x202F;TỐI ĐA</div>
 					</div>
 					<div class="value">
 						<div class="lv19">000&#x202F;000</div>
@@ -677,10 +616,7 @@
 			let images;
 
 			if (hasAds) {
-				images = [
-					'/images/sponsors/ctwcdas_inner_20.png',
-					'/images/sponsors/gfuel_30.png',
-				].map(url => {
+				images = [].map(url => {
 					const img = new Image();
 					img.src = url;
 					return img;
@@ -774,7 +710,7 @@
 							flag: player_node.querySelector(`.flag`),
 							score_box: player_node.querySelector(`.score`),
 							name_box: player_node.querySelector(`.name`),
-							seed: player_node.querySelector(`.name .content`),
+							subtext: player_node.querySelector(`.name .content`),
 
 							curtain,
 							simul_tetris: player_node.querySelector(`.simul-tetris`),
@@ -827,17 +763,18 @@
 
 					player._setName = player.setName;
 					player.setName = function (name) {
-						this.dom.seed.textContent = '';
-						this.dom.name_box.classList.remove('seed');
+						// changed seed to a subtext system inspired by VCT
+						this.dom.subtext.textContent = '';
+						this.dom.name_box.classList.remove('subtext');
 
-						const m = (name || '').match(/^(\d+)\. (.+)$/);
+						const m = (name || '').match(/^(.+) \[(.+)\]$/);
 
 						if (m) {
-							this._setName(m[2]);
+							this._setName(m[1]);
 
-							if (QueryString.get('seed') !== '0') {
-								this.dom.name_box.classList.add('seed');
-								this.dom.seed.textContent = `seed ${m[1]}`;
+							if (QueryString.get('subtext') !== '0') {
+								this.dom.name_box.classList.add('subtext');
+								this.dom.subtext.textContent = `${m[2]}`;
 							}
 						} else {
 							this._setName(name);
@@ -881,7 +818,7 @@
 								} else if (frame.raw.level === threshold_level) {
 									player.dom.runways_box.querySelector(
 										`.label .lv${threshold_level}`
-									).textContent = `L${frame.raw.level} SCORE`;
+									).textContent = `LVL ${frame.raw.level} ĐẠT ĐƯỢC`;
 								}
 							}
 						};
@@ -910,7 +847,7 @@
 						[19, 29, 39].forEach(level => {
 							player.dom.runways_box.querySelector(
 								`.label .lv${level}`
-							).textContent = `L${level} RUNWAY`;
+							).textContent = `LVL ${level} TỐI ĐA`;
 
 							player.dom.runways_box.querySelector(
 								`.value .lv${level}`
