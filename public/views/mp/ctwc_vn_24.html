@@ -29,7 +29,7 @@
 				line-height: 24px;
 				height: 51px;
 				right: var(--offset);
-				border-image-source: url(/views/border_3px_ctwcvn.png);
+				border-image-source: url(/views/border_3px_ctwcvn.webp);
 			}
 
 			.box .header {
@@ -155,7 +155,7 @@
 			}
 
 			.name.subtext .header {
-				padding-top: 7px;
+				padding-top: 5px;
 				padding-bottom: 0;
 			}
 
@@ -418,7 +418,7 @@
 			<div class="custom_curtain">
 				<br />
 				<br />
-				<img src="/images/ctwc_regional_vn.png" style="max-width: 333px" />
+				<img src="/images/ctwc_regional_vn.webp" style="max-width: 333px" />
 				<br />
 				<br />
 				<br />
@@ -434,7 +434,7 @@
 		</template>
 		<template id="curtain_1">
 			<div class="custom_curtain">
-				<img src="/images/ctvn_logo.png" style="max-width: 333px" />
+				<img src="/images/ctvn_logo.webp" style="max-width: 333px" />
 				<br />
 				<br />
 				<br />
@@ -586,7 +586,7 @@
 				: 0;
 
 			let curtain_template;
-			if (/^[0-5]$/.test(QueryString.get('curtain'))) {
+			if (/^[01]$/.test(QueryString.get('curtain'))) {
 				curtain_template = document.getElementById(
 					`curtain_${QueryString.get('curtain')}`
 				);
