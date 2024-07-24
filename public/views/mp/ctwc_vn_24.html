@@ -427,7 +427,9 @@
 				<br />
 				<br />
 				<br />
-				<p style="font-family: 'SVN Gotham'; font-size: 15px">CHẠY TRÊN</p>
+				<p class="runs_on" style="font-family: 'SVN Gotham'; font-size: 15px">
+					CHẠY TRÊN
+				</p>
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
 			</div>
 		</template>
@@ -440,7 +442,9 @@
 				<br />
 				<br />
 				<br />
-				<p style="font-family: 'SVN Gotham'; font-size: 15px">CHẠY TRÊN</p>
+				<p class="runs_on" style="font-family: 'SVN Gotham'; font-size: 15px">
+					CHẠY TRÊN
+				</p>
 				<img src="/brand/logo.v3.white.3x.png" style="max-width: 90px" />
 			</div>
 		</template>
@@ -1030,6 +1034,34 @@
 					match_players.push(player);
 					players.push(player);
 				});
+			});
+
+			// handle localizations (poor man system)
+			const strings = {
+				en: {
+					player_1: 'PLAYER 1',
+					score: 'SCORE',
+					lines: 'LINES',
+					runs_on: 'RUNS ON',
+				},
+				vn: {
+					player_1: 'NGƯỜI CHƠI 1',
+					score: 'ĐIỂM',
+					lines: 'HÀNG',
+					runs_on: 'CHẠY TRÊN',
+				},
+			}[
+				/^en$/.test(QueryString.get('ui_lang'))
+					? QueryString.get('ui_lang')
+					: 'vn'
+			];
+
+			[...document.querySelectorAll('.player')].forEach(player_node => {
+				player_node.querySelector('.name .header').textContent =
+					strings.player_1;
+				player_node.querySelector('.score .header').textContent = strings.score;
+				player_node.querySelector('.lines .header').textContent = strings.lines;
+				player_node.querySelector('.runs_on').textContent = strings.runs_on;
 			});
 
 			if (CYCLE_TDIFF) {
