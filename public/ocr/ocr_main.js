@@ -541,7 +541,12 @@ video.addEventListener('click', async evt => {
 	);
 
 	// get field coordinates via flood-fill (includes borders on all sides)
-	const field_w_borders_xywh = getFieldCoordinates(img_data, floodStartPoint);
+	const field_w_borders_xywh = getFieldCoordinates(
+		img_data,
+		floodStartPoint,
+		[0, 0, 0], // targeting black
+		40 // 40 is a very high tolerance, but this is to work around a "washed out colors" bug in chrome
+	);
 	console.log('field coordinates', field_w_borders_xywh);
 
 	let [ox, oy, ow, oh] = getCaptureCoordinates(
