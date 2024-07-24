@@ -29,7 +29,6 @@
 				line-height: 24px;
 				height: 51px;
 				right: var(--offset);
-				border-image-source: url(/views/border_3px_ctwcvn.webp);
 			}
 
 			.box .header {
@@ -611,6 +610,14 @@
 					const repeat_in = parseInt(m[2], 10);
 					if (show_for < repeat_in) show_runways = [show_for, repeat_in];
 				}
+			}
+
+			if (QueryString.get('box_border') === 'vn') {
+				const stylesheet = new CSSStyleSheet();
+				stylesheet.replaceSync(
+					'.box { border-image-source: url(/views/border_3px_ctwcvn.webp) }'
+				);
+				document.adoptedStyleSheets = [stylesheet];
 			}
 
 			let images;
