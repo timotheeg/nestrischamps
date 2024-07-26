@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-if [[ -n $HTTPS ]]; then
+if [[ -n "$HTTPS" ]]; then
     echo "Generating self signed cert"
     openssl req \
         -x509 \
@@ -11,14 +11,11 @@ if [[ -n $HTTPS ]]; then
         -days 3650 \
         -nodes \
         -subj "/C=XX/ST=State/L=City/O=NTC/OU=NTC/CN=localhost"
-    mv *.pem nestrischamps/
+    mv ./*.pem nestrischamps/
 fi
 
-docker-compose build nc --build-arg HTTPS=$HTTPS
-
-if [[ -n $HTTPS ]]; then
-    rm nestrischamps/*.pem
-fi
+docker-compose build nc --build-arg HTTPS="$HTTPS"
+rm -f nestrischamps/*.pem
 
 docker create -ti --name cpsql nestrischamps bash
 docker cp cpsql:/nestrischamps/setup/db.sql postgresql/
