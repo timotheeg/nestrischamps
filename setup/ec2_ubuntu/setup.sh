@@ -2,8 +2,16 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install -y git build-essential vim zsh gawk postgresql
 
-sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+# prep ports now and for reboot
 sudo sysctl -w net.ipv4.ip_unprivileged_port_start=443
+
+sudo tee -a /etc/sysctl.conf > /dev/null << EOF
+
+# Allow NesTrisChamps to run on port 443
+net.ipv4.ip_unprivileged_port_start=443
+EOF
+
+# TODO: create local user nestrischamps, do all checkouts under that user and run server under that user
 
 
 echo "CREATE USER nestrischamps with encrypted password 'nestrischamps'; CREATE DATABASE nestrischamps with owner=nestrischamps;" | sudo -u postgres psql
