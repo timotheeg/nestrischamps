@@ -6,20 +6,17 @@
 const gym6_data_maps = {
 	gameMode: [0xc0, 1], // gameMode
 	playState: [0x48, 1], // gameModeState
-
-	score: [0x8, 4], // binScore
-	level: [0x44, 1], // levelNumber
-	lines: [0x50, 2], // lines
-
+	completedRowXClear: [0x52, 1], // rowY (rowY is a terrible name in Rom)
 	completedRows: [0x4a, 4], // completedRow
+	lines: [0x50, 2], // lines
+	level: [0x44, 1], // levelNumber
+	score: [0x8, 4], // binScore
+	nextPieceOrientation: [0xbf, 1], // nextPiece
+	tetriminoOrientation: [0x42, 1], // currentPiece
 	tetriminoX: [0x40, 1], // tetriminoX
 	tetriminoY: [0x41, 1], // tetriminoY
-	tetriminoOrientation: [0x42, 1], // currentPiece
-	nextPieceOrientation: [0xbf, 1], // nextPiece
-
 	frameCounter: [0xb1, 2], // frameCounter
 	autoRepeatX: [0x46, 1], // autorepeatX
-
 	stats: [0x3f0, 7 * 2], // statsByType
 	field: [0x400, 200], // playfield
 };
