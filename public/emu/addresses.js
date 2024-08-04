@@ -1,3 +1,7 @@
+// offsets extracted from
+// https://github.com/kirjavascript/TetrisGYM/blob/master/src/ram.asm
+// and
+// https://github.com/zohassadar/TetrisGYM/blob/ed2ntc/src/nmi/ed2ntc.asm
 // id to [address, num_bytes]
 const gym6_data_maps = {
 	gameMode: [0xc0, 1], // gameMode
@@ -17,12 +21,19 @@ const gym6_data_maps = {
 	autoRepeatX: [0x46, 1], // autorepeatX
 
 	stats: [0x3f0, 7 * 2], // statsByType
-	field: [0x100, 200], // playfield
+	field: [0x400, 200], // playfield
 };
 
 export const address_maps = {
 	gym6: gym6_data_maps,
 };
+
+const TILE_ID_TO_NTC_BLOCK_ID = new Map([
+	[0xef, 0],
+	[0x7b, 1],
+	[0x7d, 2],
+	[0x7c, 3],
+]);
 
 function _bcdToDecimal(byte1, byte2) {
 	return byte2 * 100 + (byte1 >> 4) * 10 + (byte1 & 0xf);
@@ -94,6 +105,11 @@ export function assignData(rawData, definition) {
 	result.I = _bcdToDecimal(
 		result.stats[statsByteIndex++],
 		result.stats[statsByteIndex++]
+	);
+	delete result.stats;
+
+	result.field = result.field.map(
+		tileId => TILE_ID_TO_NTC_BLOCK_ID.get(tileId) ?? tileId
 	);
 
 	return result;
