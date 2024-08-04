@@ -1,12 +1,12 @@
 // id to [address, num_bytes]
 const gym6_data_maps = {
-	score: [0x8, 4], // binScore
-	level: [0x44, 1], // levelNumber
-	lines: [0x50, 1], // lines
-	field: [0x100, 200], // playfield
-
 	gameMode: [0xc0, 1], // gameMode
 	playState: [0x48, 1], // gameModeState
+
+	score: [0x8, 4], // binScore
+	level: [0x44, 1], // levelNumber
+	lines: [0x50, 2], // lines
+
 	completedRows: [0x4a, 4], // completedRow
 	tetriminoX: [0x40, 1], // tetriminoX
 	tetriminoY: [0x41, 1], // tetriminoY
@@ -17,8 +17,84 @@ const gym6_data_maps = {
 	autoRepeatX: [0x46, 1], // autorepeatX
 
 	stats: [0x3f0, 7 * 2], // statsByType
+	field: [0x100, 200], // playfield
 };
 
 export const address_maps = {
 	gym6: gym6_data_maps,
 };
+
+function _bcdToDecimal(byte1, byte2) {
+	return byte2 * 100 + (byte1 >> 4) * 10 + (byte1 & 0xf);
+}
+
+// The 2 functions below work because Javascript guarantees iteration order for objects
+export function getDataAddresses(definition) {
+	const values = Object.values(definition);
+	const size = values.reduce((acc, [_addr, size]) => acc + size, 0);
+	const res = new Uint16Array(size);
+
+	values.forEach(([addr, size], idx) => {
+		res[idx * 2] = addr;
+		res[idx * 2 + 1] = size;
+	});
+
+	return res;
+}
+
+export function assignData(rawData, definition) {
+	const entries = Object.entries(definition);
+	const result = { ...definition };
+
+	// raw assignments first
+	let offset = 0;
+	entries.forEach(([key, [_addr, size]]) => {
+		if (size === 1) {
+			result[key] = rawData[offset];
+		} else {
+			result[key] = rawData.slice(offset, offset + size);
+		}
+		offset += size;
+	});
+
+	// data transformation
+	result.score =
+		(result.score[3] << 24) |
+		(result.score[2] << 16) |
+		(result.score[1] << 8) |
+		result.score[0];
+	result.frameCounter = (result.frameCounter[1] << 8) | result.frameCounter[0];
+	result.lines = _bcdToDecimal(result.lines[0], result.lines[1]);
+
+	let statsByteIndex = 0;
+	result.T = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+	result.J = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+	result.Z = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+	result.O = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+	result.S = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+	result.L = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+	result.I = _bcdToDecimal(
+		result.stats[statsByteIndex++],
+		result.stats[statsByteIndex++]
+	);
+
+	return result;
+}

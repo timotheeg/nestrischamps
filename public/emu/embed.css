@@ -1,0 +1,23 @@
+/* note: minimal new styling here, mostly this just hides elements on the main interface
+   that we don't want to display in the embedded one. */
+
+#navbar {
+	display: none;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	box-shadow: none;
+}
+
+#content_area {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+#playfield div.canvas_container {
+	width: 100%;
+	height: 100%;
+}

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link href="style.css" rel="stylesheet" />
+		<link href="embed.css" rel="stylesheet" />
+		<script src="./rustico_wasm.js"></script>
+		<script src="./touch.js"></script>
+		<script src="./input.js"></script>
+		<script type="module" src="./main.js"></script>
+	</head>
+	<body>
+		<div id="navbar">
+			<ul id="main_menu">
+				<li id="power_light"><div id="led" class=""></div></li>
+				<li><button name="playfield" class="active">Play</button></li>
+				<li>
+					<label for="file-loader">Load</label
+					><input type="file" id="file-loader" name="file-loader" />
+				</li>
+				<li><button name="configure_input">Input</button></li>
+			</ul>
+		</div>
+		<div id="content_area">
+			<div class="tab_content first_time" id="load_rom">
+				<button>
+					Select the original Tetris ROM
+					<pre>Tetris (U) [!].nes</pre>
+				</button>
+			</div>
+			<div class="tab_content active" id="playfield">
+				<div class="canvas_container">
+					<canvas id="pixels" width="256" height="240"></canvas>
+				</div>
+			</div>
+			<div class="tab_content" id="configure_input">
+				<div class="flex_columns">
+					<div>
+						<h1>P1 - Standard</h1>
+						<table>
+							<tr>
+								<td>A</td>
+								<td>
+									<button
+										id="p1_a"
+										data-controller="standard"
+										data-slot="1"
+										data-key="0"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>B</td>
+								<td>
+									<button
+										id="p1_b"
+										data-controller="standard"
+										data-slot="1"
+										data-key="1"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Select</td>
+								<td>
+									<button
+										id="p1_select"
+										data-controller="standard"
+										data-slot="1"
+										data-key="2"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Start</td>
+								<td>
+									<button
+										id="p1_start"
+										data-controller="standard"
+										data-slot="1"
+										data-key="3"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Up</td>
+								<td>
+									<button
+										id="p1_up"
+										data-controller="standard"
+										data-slot="1"
+										data-key="4"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Down</td>
+								<td>
+									<button
+										id="p1_down"
+										data-controller="standard"
+										data-slot="1"
+										data-key="5"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Left</td>
+								<td>
+									<button
+										id="p1_left"
+										data-controller="standard"
+										data-slot="1"
+										data-key="6"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Right</td>
+								<td>
+									<button
+										id="p1_right"
+										data-controller="standard"
+										data-slot="1"
+										data-key="7"
+									></button>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div>
+						<h1>P2 - Standard</h1>
+						<table>
+							<tr>
+								<td>A</td>
+								<td>
+									<button
+										id="p2_a"
+										data-controller="standard"
+										data-slot="2"
+										data-key="0"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>B</td>
+								<td>
+									<button
+										id="p2_b"
+										data-controller="standard"
+										data-slot="2"
+										data-key="1"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Select</td>
+								<td>
+									<button
+										id="p2_select"
+										data-controller="standard"
+										data-slot="2"
+										data-key="2"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Start</td>
+								<td>
+									<button
+										id="p2_start"
+										data-controller="standard"
+										data-slot="2"
+										data-key="3"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Up</td>
+								<td>
+									<button
+										id="p2_up"
+										data-controller="standard"
+										data-slot="2"
+										data-key="4"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Down</td>
+								<td>
+									<button
+										id="p2_down"
+										data-controller="standard"
+										data-slot="2"
+										data-key="5"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Left</td>
+								<td>
+									<button
+										id="p2_left"
+										data-controller="standard"
+										data-slot="2"
+										data-key="6"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Right</td>
+								<td>
+									<button
+										id="p2_right"
+										data-controller="standard"
+										data-slot="2"
+										data-key="7"
+									></button>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

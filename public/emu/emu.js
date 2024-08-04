@@ -1,3 +1,4 @@
+import { Nostalgist } from 'https://esm.run/nostalgist';
 import { MarcFile, parseBPSFile } from '/emu/bps.js';
 
 function showOpenFilePickerPolyfill(options) {
@@ -36,13 +37,17 @@ if (typeof window.showOpenFilePicker !== 'function') {
 const first_time = document.querySelector('.first_time');
 const patch_url = '/emu/TetrisGYM-6.0.0.bps';
 
-function _arrayBufferToBase64(buffer) {
-	return btoa(
-		new Uint8Array(buffer).reduce(
-			(data, byte) => data + String.fromCharCode(byte),
-			''
-		)
+let emulator;
+
+function binArrayToBinString(buffer) {
+	return new Uint8Array(buffer).reduce(
+		(data, byte) => data + String.fromCharCode(byte),
+		''
 	);
+}
+
+function _arrayBufferToBase64(buffer) {
+	return btoa(binArrayToBinString(buffer));
 }
 
 function _base64ToArrayBuffer(base64) {
@@ -86,10 +91,26 @@ async function patchVanillaRom(romContent) {
 
 	const gymFile = bps.apply(romFile, true);
 
-	await Nostalgist.nes({
+	/*
+	const nostalgist = await Nostalgist.nes({
 		fileName: 'Tetris_Gym_v6.nes',
 		fileContent: new Blob([gymFile._u8array]),
 	});
+
+    const { AL, Browser, exit, JSEvents, Module } = nostalgist.getEmscripten()
+    Module.print = console.log
+    /**/
+
+	var nes = new jsnes.NES({
+		onFrame: function (frameBuffer) {
+			console.log(frameBuffer);
+			console.log(nes);
+			debugger;
+		},
+	});
+
+	nes.loadROM(binArrayToBinString(gymFile._u8array));
+	nes.frame();
 }
 
 function run() {
