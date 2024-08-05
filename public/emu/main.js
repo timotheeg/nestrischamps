@@ -15,7 +15,6 @@ let g_audio_overrun_sample_threshold = 8192; // over which we *drop* samples
 let g_game_checksum = -1;
 
 let g_screen_buffers = [];
-let g_piano_roll_buffers = [];
 let g_next_free_buffer_index = 0;
 let g_last_rendered_buffer_index = 0;
 let g_total_buffers = 16;
@@ -45,7 +44,6 @@ let g_gym_addresses = getDataAddresses(address_maps.gym6);
 for (let i = 0; i < g_total_buffers; i++) {
 	// Allocate a good number of screen buffers
 	g_screen_buffers[i] = new ArrayBuffer(256 * 240 * 4);
-	g_piano_roll_buffers[i] = new ArrayBuffer(480 * 270 * 4);
 }
 
 // ========== Worker Setup and Utility ==========
@@ -83,10 +81,6 @@ function startWorker() {
 				for (let panel of e.data.panels) {
 					if (panel.id == 'screen') {
 						g_screen_buffers[g_last_rendered_buffer_index] = panel.image_buffer;
-					}
-					if (panel.id == 'piano_roll_window') {
-						g_piano_roll_buffers[g_last_rendered_buffer_index] =
-							panel.image_buffer;
 					}
 				}
 				g_last_rendered_buffer_index += 1;
@@ -294,16 +288,7 @@ function init_ui_events() {
 	document
 		.querySelector('#playfield')
 		.addEventListener('dblclick', enterFullscreen);
-	document.addEventListener('fullscreenchange', handleFullscreenSwitch);
-	document.addEventListener('webkitfullscreenchange', handleFullscreenSwitch);
-	document.addEventListener('mozfullscreenchange', handleFullscreenSwitch);
-	document.addEventListener('MSFullscreenChange', handleFullscreenSwitch);
-
-	if (document.querySelector('#piano_roll_window')) {
-		document
-			.querySelector('#piano_roll_window')
-			.addEventListener('click', handle_piano_roll_window_click);
-	}
+	window.addEventListener('resize', handleFullscreenSwitch);
 
 	register_touch_button('#button_a');
 	register_touch_button('#button_b');
@@ -312,6 +297,8 @@ function init_ui_events() {
 	register_touch_button('#button_start');
 	register_d_pad('#d_pad');
 	initialize_touch('#playfield');
+
+	handleFullscreenSwitch();
 }
 
 // ========== Cartridge Management ==========
@@ -467,10 +454,7 @@ async function save_sram() {
 		try {
 			var sram_uint8 = await rpc('get_sram', [sram]);
 			// Make it a normal array
-			var sram = [];
-			for (var i = 0; i < sram_uint8.length; i++) {
-				sram[i] = sram_uint8[i];
-			}
+			var sram = [...sram_uint8];
 			window.localStorage.setItem(g_game_checksum, JSON.stringify(sram));
 			console.log('SRAM Saved!', g_game_checksum);
 		} catch (e) {
@@ -530,16 +514,17 @@ function clickTab() {
 
 function enterFullscreen() {
 	var viewport = document.querySelector('#playfield');
-	if (viewport.requestFullscreen) {
-		viewport.requestFullscreen();
-	} else if (viewport.mozRequestFullScreen) {
-		viewport.mozRequestFullScreen();
-	} else if (viewport.webkitRequestFullscreen) {
-		viewport.webkitRequestFullscreen();
-	}
+	(
+		viewport.requestFullscreen ||
+		viewport.mozRequestFullScreen ||
+		viewport.webkitRequestFullscreen
+	).call(viewport);
 }
 
 function handleFullscreenSwitch() {
+	const viewport = document.querySelector('#playfield');
+	const canvas_container = viewport.querySelector('div.canvas_container');
+
 	if (
 		document.fullscreenElement ||
 		document.mozFullScreenElement ||
@@ -548,50 +533,45 @@ function handleFullscreenSwitch() {
 	) {
 		console.log('Entering fullscreen...');
 		// Entering fullscreen
-		var viewport = document.querySelector('#playfield');
 		viewport.classList.add('fullscreen');
-		viewport.classList.remove('horizontal');
-		viewport.classList.remove('vertical');
+		viewport.classList.remove('horizontal', 'vertical');
 		if (is_touch_detected) {
 			viewport.classList.add('touchscreen');
 		} else {
 			viewport.classList.remove('touchscreen');
 		}
-
-		setTimeout(function () {
-			var viewport = document.querySelector('#playfield');
-
-			var viewport_width = viewport.clientWidth;
-			var viewport_height = viewport.clientHeight;
-
-			var canvas_container = document.querySelector(
-				'#playfield div.canvas_container'
-			);
-			if ((viewport_width / 256) * 240 > viewport_height) {
-				var target_height = viewport_height;
-				var target_width = (target_height / 240) * 256;
-				canvas_container.style.width = target_width + 'px';
-				canvas_container.style.height = target_height + 'px';
-				viewport.classList.add('horizontal');
-			} else {
-				var target_width = viewport_width;
-				var target_height = (target_width / 256) * 240;
-				canvas_container.style.width = target_width + 'px';
-				canvas_container.style.height = target_height + 'px';
-				viewport.classList.add('vertical');
-			}
-		}, 100);
 	} else {
 		// Exiting fullscreen
 		console.log('Exiting fullscreen...');
-		var viewport = document.querySelector('#playfield');
-		var canvas_container = document.querySelector(
-			'#playfield div.canvas_container'
+		viewport.classList.remove(
+			'fullscreen',
+			'touchscreen',
+			'horizontal',
+			'vertical'
 		);
-		viewport.classList.remove('fullscreen');
 		canvas_container.style.width = '';
 		canvas_container.style.height = '';
 	}
+
+	const viewport_width = viewport.clientWidth;
+	const viewport_height = viewport.clientHeight;
+	const viewport_ratio = viewport_width / viewport_height;
+	const target_ratio = 256 / 240;
+
+	let target_height, target_width;
+
+	if (viewport_ratio > target_ratio) {
+		target_height = viewport_height;
+		target_width = target_height * target_ratio;
+		viewport.classList.add('horizontal');
+	} else {
+		target_width = viewport_width;
+		target_height = target_width / target_ratio;
+		viewport.classList.add('vertical');
+	}
+
+	canvas_container.style.width = target_width + 'px';
+	canvas_container.style.height = target_height + 'px';
 }
 
 function hide_banners() {
@@ -607,10 +587,6 @@ function display_banner(cartridge_name) {
 	if (banner_elements.length == 1) {
 		banner_elements[0].classList.add('active');
 	}
-}
-
-function handle_piano_roll_window_click(e) {
-	rpc('handle_piano_roll_window_click', [e.offsetX / 2, e.offsetY / 2]).then();
 }
 
 // ========== NTC rom management ==========
