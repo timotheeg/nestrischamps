@@ -1,5 +1,8 @@
 import { MarcFile, parseBPSFile } from '/emu/bps.js';
 import { address_maps, getDataAddresses, assignData } from '/emu/addresses.js';
+import Connection from '/js/connection.js';
+import BinaryFrame from '/js/BinaryFrame.js';
+import EDGameTracker from '/ocr/EDGameTracker.js';
 
 // ========== Global Application State ==========
 
@@ -39,6 +42,41 @@ let g_decrease_frameskip_headroom = 1.5; // percent of the time taken to render 
 let g_gymFile = null;
 let g_gym_addresses = getDataAddresses(address_maps.gym6);
 
+const g_connection = new Connection();
+const g_edGameTracker = new EDGameTracker();
+
+let last_frame = { field: [] };
+
+g_connection.onMessage = () => {}; // ignore everything for now
+
+g_edGameTracker.onFrame = data => {
+	if (!data) return;
+
+	// 6. transmit frame to NTC server if necessary
+	check_equal: do {
+		for (let key in data) {
+			if (key[0] === '_') continue;
+			if (key === 'ctime') continue;
+			if (key === 'field') {
+				if (!data.field.every((v, i) => last_frame.field[i] === v)) {
+					break check_equal;
+				}
+			} else if (data[key] != last_frame[key]) {
+				break check_equal;
+			}
+		}
+
+		// all fields equal, do a sanity check on time
+		if (data.ctime - last_frame.ctime >= 250) break; // max 1 in 15 frames (4fps)
+
+		// no need to send frame
+		return;
+	} while (false);
+
+	last_frame = data;
+	g_connection.send(BinaryFrame.encode(data));
+};
+
 // ========== Init which does not depend on DOM ========
 
 for (let i = 0; i < g_total_buffers; i++) {
@@ -67,7 +105,7 @@ function rpc(task, args) {
 }
 
 function startWorker() {
-	worker = new Worker('emu_worker.js');
+	worker = new Worker('/emu/emu_worker.js');
 
 	worker.onmessage = function (e) {
 		if (e.data.type == 'init') {
@@ -106,8 +144,7 @@ function startWorker() {
 				g_rendered_frames.shift(); // and throw it away
 			}
 
-			const ramData = assignData(e.data.mem_values, address_maps.gym6);
-			console.log(ramData);
+			g_edGameTracker.setData(e.data.mem_values);
 		}
 
 		if (e.data.type == 'reportPerformance') {
@@ -216,7 +253,7 @@ async function init_audio_context() {
 		latencyHint: 'interactive',
 		sampleRate: 44100,
 	});
-	await g_audio_context.audioWorklet.addModule('audio_processor.js');
+	await g_audio_context.audioWorklet.addModule('/emu/audio_processor.js');
 	g_nes_audio_node = new AudioWorkletNode(
 		g_audio_context,
 		'nes-audio-processor'

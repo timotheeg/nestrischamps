@@ -66,27 +66,42 @@ router.get(
 /**/
 
 router.get(
-	'/room/producer',
+	/^\/room\/(producer|emu)/,
 	middlewares.assertSession,
 	middlewares.checkToken,
 	(req, res) => {
-		res.sendFile(path.join(path.resolve(), 'public/ocr/ocr.html'));
+		req.originalUrl;
+		res.sendFile(
+			path.join(
+				path.resolve(),
+				`public${
+					/producer/.test(req.path) ? '/ocr/ocr.html' : '/emu/index.html'
+				}`
+			)
+		);
 	}
 );
 
 router.get(
-	'/room/u/:login/producer',
+	/^\/room\/u\/([a-zA-Z0-9]+)\/(producer|emu)/,
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
-		const target_user = await UserDAO.getUserByLogin(req.params.login);
+		const target_user = await UserDAO.getUserByLogin(req.params[0]);
 
 		if (!target_user) {
 			res.status(404).send('Target User Not found');
 			return;
 		}
 
-		res.sendFile(path.join(path.resolve(), 'public/ocr/ocr.html'));
+		res.sendFile(
+			path.join(
+				path.resolve(),
+				`public${
+					/producer/.test(req.path) ? '/ocr/ocr.html' : '/emu/index.html'
+				}`
+			)
+		);
 	}
 );
 
