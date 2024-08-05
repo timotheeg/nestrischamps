@@ -388,6 +388,7 @@ function requestFrame() {
 			type: 'requestFrame',
 			p1: keys[1] | touch_keys[1],
 			p2: keys[2] | touch_keys[2],
+			mem_peek: g_gym_addresses,
 			panels: [],
 		});
 		g_frame_delay -= 1;
