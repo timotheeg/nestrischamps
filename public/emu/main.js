@@ -45,9 +45,50 @@ let g_gym_addresses = getDataAddresses(address_maps.gym6);
 const g_connection = new Connection();
 const g_edGameTracker = new EDGameTracker();
 
+const API = {
+	makePlayer(player_index, _view_meta) {
+		// producer is player, anyway to show the room view?
+	},
+
+	dropPlayer() {},
+
+	setVdoNinjaURL(url) {
+		if (url) {
+			// document.querySelector('#vdoninja_url').textContent = url;
+
+			url = new URL(url);
+
+			const streamId =
+				url.searchParams.get('view') || u.searchParams.get('push');
+
+			url.searchParams.delete('view');
+			url.searchParams.set('push', streamId);
+			url.searchParams.set('webcam', 1);
+			url.searchParams.set('audiodevice', 0);
+			url.searchParams.set('autostart', 1);
+
+			cb_vdoninja.checked = true;
+			document.querySelector('#vdoninja').src = url.toString();
+		}
+	},
+};
+
 let last_frame = { field: [] };
 
-g_connection.onMessage = () => {}; // ignore everything for now
+g_connection.onMessage = function (frame) {
+	try {
+		const [method, ...args] = frame;
+
+		if (API.hasOwnProperty(method)) {
+			API[method](...args);
+		} else {
+			console.log(`Command ${method} received but not supported`);
+		}
+	} catch (e) {
+		console.log(`Could not process command ${frame[0]}`);
+		console.error(e);
+	}
+};
 
 g_edGameTracker.onFrame = data => {
 	if (!data) return;
@@ -295,6 +336,55 @@ function handle_audio_message(e) {
 
 // ========== Main ==========
 
+function onVdoNinjaChange() {
+	const iframe = document.querySelector('#vdoninja');
+
+	if (document.querySelector('#cb_vdoninja')?.checked) {
+		// 1. start up vdo ninja
+		const chars =
+			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split(
+				''
+			);
+		const streamid = `_NTC_${Array(8)
+			.fill()
+			.map(() => chars[Math.floor(Math.random() * chars.length)])
+			.join('')}`;
+
+		const url = new URL('https://vdo.ninja/');
+		url.searchParams.set('view', streamid);
+		url.searchParams.set('cover', 1);
+		url.searchParams.set('transparent', 0);
+
+		const viewURL = url.toString();
+
+		url.searchParams.delete('view');
+		url.searchParams.delete('cover');
+		url.searchParams.set('push', streamid);
+		url.searchParams.set('webcam', 1);
+		url.searchParams.set('audiodevice', 0);
+		url.searchParams.set('autostart', 1);
+
+		iframe.src = url.toString();
+
+		g_connection.send(['setVdoNinjaURL', viewURL]);
+		navigator.clipboard.writeText(viewURL);
+
+		/*
+		document.querySelector(
+			'#vdoninja_url'
+		).textContent = `${viewURL} (URL has been copied to clipboard)`;
+		/**/
+
+		// 2. cancel peerjs video
+		allow_video_feed.checked = false;
+		onPrivacyChanged();
+	} else {
+		iframe.src = '';
+		g_connection.send(['setVdoNinjaURL', '']);
+		document.querySelector('#vdoninja_url').textContent = '';
+	}
+}
+
 async function onready() {
 	// Initialize audio context, this will also begin audio playback
 	await init_audio_context();
@@ -322,6 +412,10 @@ function init_main_ui_events() {
 	buttons.forEach(function (button) {
 		button.addEventListener('click', clickTab);
 	});
+
+	document
+		.querySelector('#cb_vdoninja')
+		?.addEventListener('change', onVdoNinjaChange);
 }
 
 function init_game_ui_events() {

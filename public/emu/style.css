@@ -156,6 +156,7 @@ body {
 	align-items: center;
 }
 
+#playercam,
 #credits,
 #setup {
 	color: #666;
@@ -178,6 +179,22 @@ body {
 #setup .error {
 	text-align: center;
 	color: #c33;
+}
+
+#playercam {
+	flex-direction: column;
+	justify-content: center;
+}
+
+#playercam .controls {
+	padding: 1em 0;
+}
+
+#vdoninja {
+	flex-grow: 1;
+	border: 0;
+	width: 100%;
+	height: 100%;
 }
 
 #playfield.active {

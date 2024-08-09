@@ -25,6 +25,7 @@
 				<li><button name="playfield">Play</button></li>
 				<li><button name="configure_input">Input</button></li>
 				<li><button name="fullscreen">Fullscreen</button></li>
+				<li><button name="playercam">Camera</button></li>
 				<li><button name="credits">Credits</button></li>
 			</ul>
 			<div id="fps-counter">FPS: -</div>
@@ -409,6 +410,17 @@
 						</table>
 					</div>
 				</div>
+			</div>
+			<div class="tab_content" id="playercam">
+				<div class="controls">
+					<input type="checkbox" id="cb_vdoninja" />
+					<label for="cb_vdoninja">Share video cam with vdo.ninja</label>
+					<span id="vdoninja_url"></span>
+				</div>
+				<iframe
+					allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;"
+					id="vdoninja"
+				></iframe>
 			</div>
 		</div>
 	</body>
