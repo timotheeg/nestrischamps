@@ -316,3 +316,54 @@ canvas {
 	width: 200px;
 	margin-left: 500px;
 }
+
+/* Containers to PUT the button bits in */
+/* TODO: guard these on touch being detected */
+
+.round-button-area {
+	display: none;
+	position: absolute;
+	bottom: 40px;
+	right: 40px;
+	width: 210px;
+	height: 150px;
+}
+
+.fullscreen.touchscreen .round-button-area {
+	display: block;
+}
+
+.pill-button-area {
+	display: none;
+	position: absolute;
+	width: 200px;
+	height: 30px;
+}
+
+.horizontal .pill-button-area {
+	top: 40px;
+	left: 40px;
+}
+
+.vertical .pill-button-area {
+	bottom: 40px;
+	left: 50%;
+	margin-left: -100px;
+}
+
+.fullscreen.touchscreen .pill-button-area {
+	display: block;
+}
+
+.dpad-area {
+	display: none;
+	position: absolute;
+	width: 180px;
+	height: 180px;
+	left: 40px;
+	bottom: 40px;
+}
+
+.fullscreen.touchscreen .dpad-area {
+	display: block;
+}
