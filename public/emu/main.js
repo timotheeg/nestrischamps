@@ -714,7 +714,7 @@ function initFirstTime() {
 	const button = document.querySelector('#setup button');
 
 	button.addEventListener('click', async () => {
-		document.querySelector('#setup .error').textContent = '';
+		document.querySelector('#setup .error').innerHTML = '&nbsp;';
 
 		const [fileHandle] = await showOpenFilePicker({
 			multiple: false,
