@@ -88,6 +88,26 @@ for (let i = 0; i < g_total_buffers; i++) {
 
 let worker;
 
+function binArrayToBinString(buffer) {
+	return new Uint8Array(buffer).reduce(
+		(data, byte) => data + String.fromCharCode(byte),
+		''
+	);
+}
+
+function _arrayBufferToBase64(buffer) {
+	return btoa(binArrayToBinString(buffer));
+}
+
+function _base64ToArrayBuffer(base64) {
+	var binaryString = atob(base64);
+	var bytes = new Uint8Array(binaryString.length);
+	for (var i = 0; i < binaryString.length; i++) {
+		bytes[i] = binaryString.charCodeAt(i);
+	}
+	return bytes.buffer;
+}
+
 function rpc(task, args) {
 	return new Promise((resolve, reject) => {
 		const channel = new MessageChannel();
@@ -474,8 +494,7 @@ async function load_sram() {
 		try {
 			var sram_str = window.localStorage.getItem(g_game_checksum);
 			if (sram_str) {
-				var sram = JSON.parse(sram_str);
-				await rpc('set_sram', [sram]);
+				await rpc('set_sram', [_base64ToArrayBuffer(sram_str)]);
 				console.log('SRAM Loaded!', g_game_checksum);
 			}
 		} catch (e) {
@@ -489,10 +508,12 @@ async function load_sram() {
 async function save_sram() {
 	if (await rpc('has_sram')) {
 		try {
-			var sram_uint8 = await rpc('get_sram', [sram]);
+			const sram_uint8 = await rpc('get_sram', []);
 			// Make it a normal array
-			var sram = [...sram_uint8];
-			window.localStorage.setItem(g_game_checksum, JSON.stringify(sram));
+			window.localStorage.setItem(
+				g_game_checksum,
+				_arrayBufferToBase64(sram_uint8)
+			);
 			console.log('SRAM Saved!', g_game_checksum);
 		} catch (e) {
 			console.log(
@@ -671,26 +692,6 @@ const g_first_time = document.querySelector('#load_rom');
 const patch_url = '/emu/TetrisGYM-6.0.0.bps';
 
 let emulator;
-
-function binArrayToBinString(buffer) {
-	return new Uint8Array(buffer).reduce(
-		(data, byte) => data + String.fromCharCode(byte),
-		''
-	);
-}
-
-function _arrayBufferToBase64(buffer) {
-	return btoa(binArrayToBinString(buffer));
-}
-
-function _base64ToArrayBuffer(base64) {
-	var binaryString = atob(base64);
-	var bytes = new Uint8Array(binaryString.length);
-	for (var i = 0; i < binaryString.length; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes.buffer;
-}
 
 function initFirstTime() {
 	// Make the user to perform the only action that matters at this point: selecting the tetris rom
