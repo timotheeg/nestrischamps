@@ -306,7 +306,11 @@ function connect() {
 		try {
 			const [method, ...args] = frame;
 
-			API[method](...args);
+			if (API.hasOwnProperty(method)) {
+				API[method](...args);
+			} else {
+				console.log(`Command ${method} received but not supported`);
+			}
 		} catch (e) {
 			console.log(`Could not process command ${frame[0]}`);
 			console.error(e);
