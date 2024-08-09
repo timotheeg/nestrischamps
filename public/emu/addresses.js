@@ -25,17 +25,6 @@ export const address_maps = {
 	gym6: gym6_data_maps,
 };
 
-const TILE_ID_TO_NTC_BLOCK_ID = new Map([
-	[0xef, 0],
-	[0x7b, 1],
-	[0x7d, 2],
-	[0x7c, 3],
-]);
-
-function _bcdToDecimal(byte1, byte2) {
-	return byte2 * 100 + (byte1 >> 4) * 10 + (byte1 & 0xf);
-}
-
 // The 2 functions below work because Javascript guarantees iteration order for objects
 export function getDataAddresses(definition) {
 	const values = Object.values(definition);

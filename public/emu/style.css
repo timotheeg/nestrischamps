@@ -23,10 +23,8 @@ body {
 }
 
 #header {
-	position: relative;
 	padding-left: 16px;
-	padding-right: 16px;
-	padding-top: 31px;
+	padding-right: 64px;
 }
 
 #header h1 {
@@ -34,7 +32,7 @@ body {
 	font-size: 25px;
 	margin: 0px;
 	padding: 0px;
-	line-height: 25px;
+	line-height: 64px;
 	flex-grow: 0;
 }
 
@@ -52,40 +50,22 @@ body {
 #main_menu {
 	display: flex;
 	flex-direction: row;
-	width: 100%;
 	margin: 0px;
 	padding: 0px;
 	flex-grow: 1;
 }
 
-#credits {
-	height: 48px;
-	padding-top: 8px;
-	font-size: 0.6em;
-	width: 450px;
+#fps-counter {
+	line-height: 64px;
+	font-size: 0.8em;
 	text-align: right;
 	padding-right: 12px;
 	font-weight: bold;
-	color: #444;
-}
-
-#credits a {
-	color: #444;
-	text-decoration: none;
-}
-
-#credits a:hover {
 	color: #666;
 }
 
-#credits img {
-	display: inline;
-	margin-left: 4px;
-	margin-right: 4px;
-}
-
 #main_menu li {
-	padding-top: 16px;
+	padding-top: 10px;
 	height: 32px;
 	display: block;
 	margin: 6px;
@@ -98,7 +78,7 @@ body {
 #main_menu li label {
 	display: block;
 	padding-top: 10px;
-	padding-left: 15px;
+	padding-left: 10px;
 	padding-right: 5px;
 	padding-bottom: 5px;
 	font-size: 12px;
@@ -140,7 +120,7 @@ body {
 	box-shadow: none;
 }
 
-#main_menu #power_light #led {
+#led {
 	width: 10px;
 	height: 10px;
 	margin-left: 10px;
@@ -148,9 +128,9 @@ body {
 	background-color: #353233;
 }
 
-#main_menu #power_light #led.powered {
-	background-color: #84b;
-	box-shadow: 0px 0px 4px #629;
+#led.powered {
+	background-color: #8b0000;
+	box-shadow: 0px 0px 4px #6a0000;
 }
 
 #content_area {
@@ -162,10 +142,27 @@ body {
 .tab_content {
 	display: none;
 	color: #dddddd;
+	height: 100%;
+	overflow: hidden;
 }
 
 .tab_content.active {
-	display: block;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#credits {
+	color: #666;
+}
+
+#credits a {
+	color: #888;
+}
+
+#credits dt {
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
 }
 
 #playfield.active {
@@ -188,36 +185,6 @@ body {
 	height: 720px;
 	margin-left: auto;
 	margin-right: auto;
-	overflow: hidden;
-}
-
-#jam.active {
-	display: flex;
-	height: 100%;
-	flex-direction: column;
-	justify-content: center;
-}
-
-#jam div.canvas_container {
-	position: relative;
-	overflow: hidden;
-}
-
-#jam div.jam_pixels_container {
-	width: 256px;
-	height: 240px;
-	overflow: hidden;
-}
-
-#jam div.jam_apu_container {
-	width: 240px;
-	height: 500px;
-	overflow: hidden;
-}
-
-#jam div.piano_roll_container {
-	width: 960px;
-	height: 540px;
 	overflow: hidden;
 }
 
@@ -247,35 +214,15 @@ canvas {
 	image-rendering: pixelated;
 }
 
-input#file-loader {
-	width: 0.1px;
-	height: 0.1px;
-	opacity: 0;
-	overflow: hidden;
-	position: absolute;
-	z-index: -1;
-}
-
 .flex_columns {
 	display: flex;
 	flex-direction: row;
+	gap: 5em;
 }
 
 .flex_rows {
 	display: flex;
 	flex-direction: column;
-}
-
-#jam .flex_columns {
-	justify-content: center;
-}
-
-#jam .flex_rows {
-	justify-content: center;
-}
-
-#jam .flex_columns div {
-	margin: 8px;
 }
 
 #configure_input .flex_columns div {

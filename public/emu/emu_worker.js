@@ -1,3 +1,5 @@
+// note: this needs the ram reader patch to work
+// see forked branch at https://github.com/timotheeg/rustico/tree/memory_access
 importScripts('./rustico_wasm.js');
 
 const {

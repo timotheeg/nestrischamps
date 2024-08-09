@@ -1,5 +1,5 @@
 import { MarcFile, parseBPSFile } from '/emu/bps.js';
-import { address_maps, getDataAddresses, assignData } from '/emu/addresses.js';
+import { address_maps, getDataAddresses } from '/emu/addresses.js';
 import Connection from '/js/connection.js';
 import BinaryFrame from '/js/BinaryFrame.js';
 import EDGameTracker from '/ocr/EDGameTracker.js';
@@ -380,7 +380,6 @@ function sync_to_audio() {
 function requestFrame() {
 	updateTouchKeys();
 	g_trouble_detector.frames_requested += 1;
-	let active_tab = document.querySelector('.tab_content.active').id;
 	if (g_frame_delay > 0) {
 		// frameskip: advance the emulation, but do not populate or render
 		// any panels this time around
@@ -519,29 +518,31 @@ function compute_fps() {
 }
 
 function clearTabs() {
-	var buttons = document.querySelectorAll('#main_menu button');
+	const buttons = document.querySelectorAll('#main_menu button');
 	buttons.forEach(function (button) {
 		button.classList.remove('active');
 	});
 
-	var tabs = document.querySelectorAll('div.tab_content');
+	const tabs = document.querySelectorAll('div.tab_content');
 	tabs.forEach(function (tab) {
 		tab.classList.remove('active');
 	});
 }
 
 function switchToTab(tab_name) {
-	tab_elements = document.getElementsByName(tab_name);
+	const tab_elements = document.getElementsByName(tab_name);
 	if (tab_elements.length == 1) {
 		clearTabs();
 		tab_elements[0].classList.add('active');
-		content_element = document.getElementById(tab_name);
-		content_element.classList.add('active');
 	}
+
+	const content_element = document.getElementById(tab_name);
+	content_element?.classList.add('active');
 }
 
 function clickTab() {
-	let tabName = this.getAttribute('name');
+	const tabName = this.getAttribute('name');
+
 	if (tabName == 'fullscreen') {
 		switchToTab('playfield');
 		enterFullscreen();
@@ -559,16 +560,20 @@ function enterFullscreen() {
 	).call(viewport);
 }
 
-function handleFullscreenSwitch() {
-	const viewport = document.querySelector('#playfield');
-	const canvas_container = viewport.querySelector('div.canvas_container');
-
-	if (
+function isFullScreen() {
+	return !!(
 		document.fullscreenElement ||
 		document.mozFullScreenElement ||
 		document.webkitFullscreenElement ||
 		document.msFullscreenElement
-	) {
+	);
+}
+
+function handleFullscreenSwitch() {
+	const viewport = document.querySelector('#playfield');
+	const canvas_container = viewport.querySelector('div.canvas_container');
+
+	if (isFullScreen()) {
 		console.log('Entering fullscreen...');
 		// Entering fullscreen
 		viewport.classList.add('fullscreen');
@@ -662,7 +667,7 @@ if (typeof window.showOpenFilePicker !== 'function') {
 	window.showOpenFilePicker = showOpenFilePickerPolyfill;
 }
 
-const first_time = document.querySelector('.first_time');
+const g_first_time = document.querySelector('#load_rom');
 const patch_url = '/emu/TetrisGYM-6.0.0.bps';
 
 let emulator;
@@ -688,7 +693,14 @@ function _base64ToArrayBuffer(base64) {
 }
 
 function initFirstTime() {
-	const button = first_time.querySelector('button');
+	// Make the user to perform the only action that matters at this point: selecting the tetris rom
+	// Hide controls and banners
+	document.querySelector('#main_menu').style.display = 'none';
+	document.querySelector('#fps-counter').style.display = 'none';
+	document.querySelector('.banner.active').classList.remove('active');
+	switchToTab('load_rom');
+
+	const button = g_first_time.querySelector('button');
 
 	button.addEventListener('click', async () => {
 		const [fileHandle] = await showOpenFilePicker({
@@ -699,15 +711,13 @@ function initFirstTime() {
 
 		localStorage.setItem('tetris.nes', _arrayBufferToBase64(content));
 
-		first_time.remove();
+		g_first_time.remove();
 
-		patchVanillaRom(content);
+		patchVanillaRomAndStart(content);
 	});
-
-	first_time.style.display = 'block';
 }
 
-async function patchVanillaRom(romContent) {
+async function patchVanillaRomAndStart(romContent) {
 	// fetch patch - store patch in local storage?
 	const response = await fetch(patch_url);
 	const patchContent = await response.arrayBuffer();
@@ -719,30 +729,10 @@ async function patchVanillaRom(romContent) {
 
 	g_gymFile = bps.apply(romFile, true);
 
+	document.querySelector('#main_menu').style.display = null;
+	document.querySelector('#fps-counter').style.display = null;
+
 	startWorker();
-
-	/*
-	const nostalgist = await Nostalgist.nes({
-		fileName: 'Tetris_Gym_v6.nes',
-		fileContent: new Blob([gymFile._u8array]),
-	});
-
-    const { AL, Browser, exit, JSEvents, Module } = nostalgist.getEmscripten()
-    Module.print = console.log
-    /**/
-
-	/*
-    var nes = new jsnes.NES({
-        onFrame: function(frameBuffer) {
-            console.log(frameBuffer);
-            console.log(nes);
-            debugger;
-        },
-    });
-
-    nes.loadROM(binArrayToBinString(gymFile._u8array));
-    nes.frame();
-    /** */
 }
 
 function run() {
@@ -750,7 +740,7 @@ function run() {
 	if (!encoded64VanillaRomContent) {
 		initFirstTime();
 	} else {
-		patchVanillaRom(_base64ToArrayBuffer(encoded64VanillaRomContent));
+		patchVanillaRomAndStart(_base64ToArrayBuffer(encoded64VanillaRomContent));
 	}
 }
 
