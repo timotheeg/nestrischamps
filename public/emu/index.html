@@ -21,7 +21,7 @@
 			</div>
 			<ul id="main_menu">
 				<li id="power_light"><div id="led" class=""></div></li>
-				<li><button name="playfield" class="active">Play</button></li>
+				<li><button name="playfield">Play</button></li>
 				<li><button name="configure_input">Input</button></li>
 				<li><button name="fullscreen">Fullscreen</button></li>
 				<li><button name="credits">Credits</button></li>
@@ -39,12 +39,41 @@
 		<div id="content_area">
 			<div class="tab_content first_time" id="load_rom">
 				<div class="button_container">
-					<button>
-						Click to select the original Tetris ROM<br />
-						<br />
-						Typically:
-						<pre>Tetris (U) [!].nes</pre>
-					</button>
+					<p>
+						NesTrisChamps includes <strong>NO</strong> copyrighted material.
+					</p>
+					<p>
+						To play NES Classic Tetris in the emulator provided by
+						NesTrisChamps, you <strong>MUST</strong> provide the Classic Tetris
+						rom yourself.
+					</p>
+					<p>Click the button below to select the rom and start.</p>
+					<p>
+						Note 1: the rom will <strong>NOT</strong> be uploaded to
+						NesTrisChamps. It will stay in your browser's local storage.
+					</p>
+					<p>
+						Note 2: the rom will be patched into
+						<a href="https://github.com/kirjavascript/TetrisGYM" target="_blank"
+							>Tetris Gym v6</a
+						>.
+					</p>
+					<p>The rom details are as follow:</p>
+					<ul>
+						<li>Name: <span class="code">Tetris (U) [!].nes</span></li>
+						<li>CRC32: <span class="code">6d72c53a</span></li>
+						<li>
+							MD5: <span class="code">ec58574d96bee8c8927884ae6e7a2508</span>
+						</li>
+					</ul>
+
+					<p>&nbsp;</p>
+
+					<p align="center">
+						<button>Click to select the original Tetris ROM</button>
+					</p>
+
+					<p class="error"></p>
 				</div>
 			</div>
 			<div class="tab_content" id="credits">
@@ -110,7 +139,7 @@
 					<dd>Legendary creator of Tetris</dd>
 				</dl>
 			</div>
-			<div class="tab_content active" id="playfield">
+			<div class="tab_content" id="playfield">
 				<div class="canvas_container">
 					<canvas id="pixels" width="256" height="240"></canvas>
 				</div>

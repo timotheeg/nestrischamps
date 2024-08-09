@@ -75,7 +75,7 @@ router.get(
 			path.join(
 				path.resolve(),
 				`public${
-					/producer/.test(req.path) ? '/ocr/ocr.html' : '/emu/temp_index.html'
+					/producer/.test(req.path) ? '/ocr/ocr.html' : '/emu/index.html'
 				}`
 			)
 		);

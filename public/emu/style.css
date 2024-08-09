@@ -6,6 +6,10 @@ html {
 	font-family: sans-serif;
 }
 
+.code {
+	font-family: monospace;
+}
+
 html {
 	background-color: #080808;
 	height: 100%;
@@ -156,13 +160,23 @@ body {
 	color: #666;
 }
 
-#credits a {
+#credits a,
+#load_rom a {
 	color: #888;
 }
 
 #credits dt {
 	margin-top: 1.5em;
 	margin-bottom: 0.5em;
+}
+
+#load_rom button {
+	padding: 1em;
+}
+
+#load_rom .error {
+	text-align: center;
+	color: #c33;
 }
 
 #playfield.active {

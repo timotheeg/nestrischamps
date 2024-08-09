@@ -551,11 +551,10 @@ function clearTabs() {
 }
 
 function switchToTab(tab_name) {
+	clearTabs();
+
 	const tab_elements = document.getElementsByName(tab_name);
-	if (tab_elements.length == 1) {
-		clearTabs();
-		tab_elements[0].classList.add('active');
-	}
+	tab_elements[0]?.classList.add('active');
 
 	const content_element = document.getElementById(tab_name);
 	content_element?.classList.add('active');
@@ -704,15 +703,13 @@ function initFirstTime() {
 	const button = g_first_time.querySelector('button');
 
 	button.addEventListener('click', async () => {
+		g_first_time.querySelector('.error').textContent = '';
+
 		const [fileHandle] = await showOpenFilePicker({
 			multiple: false,
 		});
 		const file = await fileHandle.getFile();
 		const content = await file.arrayBuffer();
-
-		localStorage.setItem('tetris.nes', _arrayBufferToBase64(content));
-
-		g_first_time.remove();
 
 		patchVanillaRomAndStart(content);
 	});
@@ -728,10 +725,34 @@ async function patchVanillaRomAndStart(romContent) {
 
 	const bps = parseBPSFile(patchFile);
 
-	g_gymFile = bps.apply(romFile, true);
+	try {
+		g_gymFile = bps.apply(romFile, true);
+	} catch (err) {
+		const error = g_first_time.querySelector('.error');
+
+		if (err.message === 'error_crc_input') {
+			error.textContent = 'Checksum does not match, invalid rom provided.';
+		} else {
+			error.textContent = `Unexpected patch error: ${err.message}`;
+		}
+
+		return;
+	}
+
+	// if we reach here, patching is OK, attempt to save the rom, but ignore if unable to
+	try {
+		localStorage.setItem('tetris.nes', _arrayBufferToBase64(romContent));
+	} catch (err) {
+		console.warn(
+			`Unable to save tetris rom to local storage. You will need to provide the rom again if you refresh.`
+		);
+	}
+
+	g_first_time.remove();
 
 	document.querySelector('#main_menu').style.display = null;
 	document.querySelector('#fps-counter').style.display = null;
+	switchToTab('playfield');
 
 	startWorker();
 }
