@@ -28,8 +28,7 @@ export const address_maps = {
 // The 2 functions below work because Javascript guarantees iteration order for objects
 export function getDataAddresses(definition) {
 	const values = Object.values(definition);
-	const size = values.reduce((acc, [_addr, size]) => acc + size, 0);
-	const res = new Uint16Array(size);
+	const res = new Uint16Array(values.length * 2);
 
 	values.forEach(([addr, size], idx) => {
 		res[idx * 2] = addr;
