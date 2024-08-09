@@ -88,24 +88,13 @@ for (let i = 0; i < g_total_buffers; i++) {
 
 let worker;
 
-function binArrayToBinString(buffer) {
-	return new Uint8Array(buffer).reduce(
-		(data, byte) => data + String.fromCharCode(byte),
-		''
-	);
+// the base64 functions below cannot handle very large payloads, but for nes roms and sram, they will do just fine
+function bytesToBase64(bytes) {
+	return btoa(String.fromCharCode(...bytes));
 }
 
-function _arrayBufferToBase64(buffer) {
-	return btoa(binArrayToBinString(buffer));
-}
-
-function _base64ToArrayBuffer(base64) {
-	var binaryString = atob(base64);
-	var bytes = new Uint8Array(binaryString.length);
-	for (var i = 0; i < binaryString.length; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes.buffer;
+function base64ToBytes(str) {
+	return Uint8Array.from(atob(str), c => c.charCodeAt(0));
 }
 
 function rpc(task, args) {
@@ -494,7 +483,7 @@ async function load_sram() {
 		try {
 			var sram_str = window.localStorage.getItem(g_game_checksum);
 			if (sram_str) {
-				await rpc('set_sram', [_base64ToArrayBuffer(sram_str)]);
+				await rpc('set_sram', [base64ToBytes(sram_str)]);
 				console.log('SRAM Loaded!', g_game_checksum);
 			}
 		} catch (e) {
@@ -510,10 +499,7 @@ async function save_sram() {
 		try {
 			const sram_uint8 = await rpc('get_sram', []);
 			// Make it a normal array
-			window.localStorage.setItem(
-				g_game_checksum,
-				_arrayBufferToBase64(sram_uint8)
-			);
+			window.localStorage.setItem(g_game_checksum, bytesToBase64(sram_uint8));
 			console.log('SRAM Saved!', g_game_checksum);
 		} catch (e) {
 			console.log(
@@ -709,7 +695,7 @@ function initFirstTime() {
 			multiple: false,
 		});
 		const file = await fileHandle.getFile();
-		const content = await file.arrayBuffer();
+		const content = new Uint8Array(await file.arrayBuffer());
 
 		patchVanillaRomAndStart(content);
 	});
@@ -741,10 +727,11 @@ async function patchVanillaRomAndStart(romContent) {
 
 	// if we reach here, patching is OK, attempt to save the rom, but ignore if unable to
 	try {
-		localStorage.setItem('tetris.nes', _arrayBufferToBase64(romContent));
+		localStorage.setItem('tetris.nes', bytesToBase64(romContent));
 	} catch (err) {
 		console.warn(
-			`Unable to save tetris rom to local storage. You will need to provide the rom again if you refresh.`
+			`Unable to save tetris rom to local storage. You will need to provide the rom again if you refresh.`,
+			err
 		);
 	}
 
@@ -762,7 +749,7 @@ function run() {
 	if (!encoded64VanillaRomContent) {
 		initFirstTime();
 	} else {
-		patchVanillaRomAndStart(_base64ToArrayBuffer(encoded64VanillaRomContent));
+		patchVanillaRomAndStart(base64ToBytes(encoded64VanillaRomContent));
 	}
 }
 
