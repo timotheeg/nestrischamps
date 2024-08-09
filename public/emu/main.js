@@ -300,7 +300,7 @@ async function onready() {
 	await init_audio_context();
 
 	// Initialize everything else
-	init_ui_events();
+	init_game_ui_events();
 	initializeButtonMappings();
 
 	// Kick off the events that will drive emulation
@@ -317,15 +317,14 @@ async function onready() {
 	load_cartridge(g_gymFile._u8array);
 }
 
-function init_ui_events() {
-	// Setup UI events
-	// document.getElementById('file-loader').addEventListener('change', load_cartridge_by_file, false);
-
+function init_main_ui_events() {
 	var buttons = document.querySelectorAll('#main_menu button');
 	buttons.forEach(function (button) {
 		button.addEventListener('click', clickTab);
 	});
+}
 
+function init_game_ui_events() {
 	window.addEventListener('click', function () {
 		// Needed to play audio in certain browsers, notably Chrome, which restricts playback until user action.
 		g_audio_context.resume();
@@ -524,6 +523,18 @@ function compute_fps() {
 	g_frames_since_last_fps_count = 0;
 }
 
+function hideAllTabs() {
+	[...document.querySelectorAll('#main_menu button')].forEach(
+		btn => (btn.parentElement.style.display = 'none')
+	);
+}
+
+function showAllTabs() {
+	[...document.querySelectorAll('#main_menu button')].forEach(
+		btn => (btn.parentElement.style.display = null)
+	);
+}
+
 function clearTabs() {
 	const buttons = document.querySelectorAll('#main_menu button');
 	buttons.forEach(function (button) {
@@ -679,7 +690,6 @@ if (typeof window.showOpenFilePicker !== 'function') {
 	window.showOpenFilePicker = showOpenFilePickerPolyfill;
 }
 
-const g_first_time = document.querySelector('#load_rom');
 const patch_url = '/emu/TetrisGYM-6.0.0.bps';
 
 let emulator;
@@ -687,15 +697,24 @@ let emulator;
 function initFirstTime() {
 	// Make the user to perform the only action that matters at this point: selecting the tetris rom
 	// Hide controls and banners
-	document.querySelector('#main_menu').style.display = 'none';
+	hideAllTabs();
 	document.querySelector('#fps-counter').style.display = 'none';
 	document.querySelector('.banner.active').classList.remove('active');
-	switchToTab('load_rom');
 
-	const button = g_first_time.querySelector('button');
+	// show just the menu element we want
+	document.querySelector(
+		'#main_menu button[name=setup]'
+	).parentElement.style.display = null;
+	document.querySelector(
+		'#main_menu button[name=credits]'
+	).parentElement.style.display = null;
+
+	switchToTab('setup');
+
+	const button = document.querySelector('#setup button');
 
 	button.addEventListener('click', async () => {
-		g_first_time.querySelector('.error').textContent = '';
+		document.querySelector('#setup .error').textContent = '';
 
 		const [fileHandle] = await showOpenFilePicker({
 			multiple: false,
@@ -720,7 +739,7 @@ async function patchVanillaRomAndStart(romContent) {
 	try {
 		g_gymFile = bps.apply(romFile, true);
 	} catch (err) {
-		const error = g_first_time.querySelector('.error');
+		const error = document.querySelector('#setup .error');
 
 		if (err.message === 'error_crc_input') {
 			error.textContent = 'Checksum does not match, invalid rom provided.';
@@ -741,16 +760,19 @@ async function patchVanillaRomAndStart(romContent) {
 		);
 	}
 
-	g_first_time.remove();
+	document.querySelector('.setup').remove();
 
-	document.querySelector('#main_menu').style.display = null;
+	showAllTabs();
 	document.querySelector('#fps-counter').style.display = null;
+
 	switchToTab('playfield');
 
 	startWorker();
 }
 
 function run() {
+	init_main_ui_events();
+
 	const encoded64VanillaRomContent = localStorage.getItem('tetris.nes');
 	if (!encoded64VanillaRomContent) {
 		initFirstTime();

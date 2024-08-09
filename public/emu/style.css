@@ -156,12 +156,13 @@ body {
 	align-items: center;
 }
 
-#credits {
+#credits,
+#setup {
 	color: #666;
 }
 
 #credits a,
-#load_rom a {
+#setup a {
 	color: #888;
 }
 
@@ -170,11 +171,11 @@ body {
 	margin-bottom: 0.5em;
 }
 
-#load_rom button {
+#setup button {
 	padding: 1em;
 }
 
-#load_rom .error {
+#setup .error {
 	text-align: center;
 	color: #c33;
 }
