@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>NesTrisChamps Emulator</title>
+		<base href="/emu/" target="_blank" />
+		<link
+			rel="shortcut icon"
+			type="image/png"
+			href="/brand/trophies/1.2x.png"
+		/>
+		<meta charset="utf-8" />
+		<link href="./style.css" rel="stylesheet" />
+		<script src="./input.js"></script>
+		<script src="./touch.js"></script>
+		<script type="module" src="./main.js"></script>
+	</head>
+	<body>
+		<div id="navbar">
+			<div id="header">
+				<h1>Tetris Gym on Rustico Direct to NesTrisChamps</h1>
+			</div>
+			<ul id="main_menu">
+				<li id="power_light"><div id="led" class=""></div></li>
+				<li><button name="playfield">Play</button></li>
+				<li><button name="configure_input">Input</button></li>
+				<li><button name="fullscreen">Fullscreen</button></li>
+				<li><button name="credits">Credits</button></li>
+			</ul>
+			<div id="fps-counter">FPS: -</div>
+		</div>
+		<div class="banner active error" id="audio-context-warning">
+			<b>Waiting for Audio Context...</b> (You may need to click the page.)
+		</div>
+		<div class="debug-box" id="debug-box">
+			<b>=== Profiling Results ===</b><br />
+			<pre id="profiling-results">would go here</pre>
+		</div>
+
+		<div id="content_area">
+			<div class="tab_content first_time" id="load_rom">
+				<div class="button_container">
+					<p>
+						NesTrisChamps includes <strong>NO</strong> copyrighted material.
+					</p>
+					<p>
+						To play NES Classic Tetris in the emulator provided by
+						NesTrisChamps, you <strong>MUST</strong> provide the Classic Tetris
+						rom yourself.
+					</p>
+					<p>Click the button below to select the rom and start.</p>
+					<p>
+						Note 1: the rom will <strong>NOT</strong> be uploaded to
+						NesTrisChamps. It will stay in your browser's local storage.
+					</p>
+					<p>
+						Note 2: the rom will be patched into
+						<a href="https://github.com/kirjavascript/TetrisGYM" target="_blank"
+							>Tetris Gym v6</a
+						>.
+					</p>
+					<p>The rom details are as follow:</p>
+					<ul>
+						<li>Name: <span class="code">Tetris (U) [!].nes</span></li>
+						<li>CRC32: <span class="code">6d72c53a</span></li>
+						<li>
+							MD5: <span class="code">ec58574d96bee8c8927884ae6e7a2508</span>
+						</li>
+					</ul>
+
+					<p>&nbsp;</p>
+
+					<p align="center">
+						<button>Click to select the original Tetris ROM</button>
+					</p>
+
+					<p class="error"></p>
+				</div>
+			</div>
+			<div class="tab_content" id="credits">
+				<dl>
+					<dt>
+						<a href="https://github.com/zeta0134/rustico" target="_blank"
+							>Rustico</a
+						>
+					</dt>
+					<dd>
+						An awesome NES emulator written in Rust, and compiled into high
+						performance Web Assembly<br />
+						Created by
+						<a href="https://github.com/zeta0134" target="_blank">Zeta</a> -
+						<a href="https://www.patreon.com/user?u=2900989" target="_blank"
+							>support on Patreon</a
+						>
+					</dd>
+					<dt>
+						<a href="https://github.com/kirjavascript/TetrisGYM" target="_blank"
+							>Tetris Gym v6</a
+						>
+					</dt>
+					<dd>
+						The de-facto standard Classic Tetris Practice mod<br />
+						Created by
+						<a href="https://github.com/kirjavascript" target="_blank"
+							>KirJava</a
+						>
+					</dd>
+					<dt>
+						<a href="https://www.marcrobledo.com/RomPatcher.js/" target="_blank"
+							>RomPatcher.js</a
+						>
+					</dt>
+					<dd>
+						An awesome rom patcher for bps/ips and more<br />
+						Created by
+						<a href="https://www.marcrobledo.com/" target="_blank"
+							>Marc Robledo</a
+						>
+						-
+						<a href="https://www.paypal.me/marcrobledo/5" target="_blank"
+							>donate</a
+						>
+					</dd>
+					<dt>
+						<a href="https://zohassadar.github.io/" target="_blank"
+							>Zohassadar</a
+						>
+					</dt>
+					<dd>
+						Great NES hacker who encouraged me to implement direct Tetris memory
+						access to feed data into NesTrisChamps
+					</dd>
+					<dt>
+						<a
+							href="https://en.wikipedia.org/wiki/Alexey_Pajitnov"
+							target="_blank"
+							>Alexey Pajitnov</a
+						>
+					</dt>
+					<dd>Legendary creator of Tetris</dd>
+				</dl>
+			</div>
+			<div class="tab_content" id="playfield">
+				<div class="canvas_container">
+					<canvas id="pixels" width="256" height="240"></canvas>
+				</div>
+			</div>
+			<div class="tab_content" id="configure_input">
+				<div class="flex_columns">
+					<div>
+						<h1>P1 - Standard</h1>
+						<table>
+							<tr>
+								<td>A</td>
+								<td>
+									<button
+										id="p1_a"
+										data-controller="standard"
+										data-slot="1"
+										data-key="0"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>B</td>
+								<td>
+									<button
+										id="p1_b"
+										data-controller="standard"
+										data-slot="1"
+										data-key="1"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Select</td>
+								<td>
+									<button
+										id="p1_select"
+										data-controller="standard"
+										data-slot="1"
+										data-key="2"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Start</td>
+								<td>
+									<button
+										id="p1_start"
+										data-controller="standard"
+										data-slot="1"
+										data-key="3"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Up</td>
+								<td>
+									<button
+										id="p1_up"
+										data-controller="standard"
+										data-slot="1"
+										data-key="4"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Down</td>
+								<td>
+									<button
+										id="p1_down"
+										data-controller="standard"
+										data-slot="1"
+										data-key="5"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Left</td>
+								<td>
+									<button
+										id="p1_left"
+										data-controller="standard"
+										data-slot="1"
+										data-key="6"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Right</td>
+								<td>
+									<button
+										id="p1_right"
+										data-controller="standard"
+										data-slot="1"
+										data-key="7"
+									></button>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div>
+						<h1>P2 - Standard</h1>
+						<table>
+							<tr>
+								<td>A</td>
+								<td>
+									<button
+										id="p2_a"
+										data-controller="standard"
+										data-slot="2"
+										data-key="0"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>B</td>
+								<td>
+									<button
+										id="p2_b"
+										data-controller="standard"
+										data-slot="2"
+										data-key="1"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Select</td>
+								<td>
+									<button
+										id="p2_select"
+										data-controller="standard"
+										data-slot="2"
+										data-key="2"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Start</td>
+								<td>
+									<button
+										id="p2_start"
+										data-controller="standard"
+										data-slot="2"
+										data-key="3"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Up</td>
+								<td>
+									<button
+										id="p2_up"
+										data-controller="standard"
+										data-slot="2"
+										data-key="4"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Down</td>
+								<td>
+									<button
+										id="p2_down"
+										data-controller="standard"
+										data-slot="2"
+										data-key="5"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Left</td>
+								<td>
+									<button
+										id="p2_left"
+										data-controller="standard"
+										data-slot="2"
+										data-key="6"
+									></button>
+								</td>
+							</tr>
+							<tr>
+								<td>Right</td>
+								<td>
+									<button
+										id="p2_right"
+										data-controller="standard"
+										data-slot="2"
+										data-key="7"
+									></button>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
