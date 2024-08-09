@@ -83,7 +83,7 @@ router.get(
 );
 
 router.get(
-	/^\/room\/u\/([a-zA-Z0-9]+)\/(producer|emu)/,
+	/^\/room\/u\/([^/]+)\/(producer|emu)/,
 	middlewares.assertSession,
 	middlewares.checkToken,
 	async (req, res) => {
