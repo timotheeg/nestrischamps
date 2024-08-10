@@ -45,7 +45,7 @@ class User extends EventEmitter {
 		this.leave_room_to = null;
 
 		// keep track of all socket for the user
-		// dangerous, could lead to memory if not managed well
+		// dangerous, could lead to memory leak if not managed well
 		this.destroy_to = null;
 		this.connections = new Set();
 
@@ -156,7 +156,7 @@ class User extends EventEmitter {
 
 	setTwitchToken(token) {
 		// in memory only, not in DB
-		this.token = token;
+		this.twitch_token = token;
 
 		if (this.connections.length) {
 			this._connectToTwitchChat();
@@ -164,7 +164,7 @@ class User extends EventEmitter {
 	}
 
 	hasTwitchToken() {
-		return !!this.token;
+		return !!this.twitch_token;
 	}
 
 	addConnection(conn) {
@@ -267,19 +267,19 @@ class User extends EventEmitter {
 
 	_onTwitchTokenRefreshed({ accessToken, refreshToken, expiresIn }) {
 		// How to update the session object(s) directly?
-		this.token.access_token = accessToken;
-		this.token.refresh_token = refreshToken;
-		this.token.expires_in = expiresIn;
+		this.twitch_token.access_token = accessToken;
+		this.twitch_token.refresh_token = refreshToken;
+		this.twitch_token.expires_in = expiresIn;
 	}
 
 	async _connectToTwitchChat() {
-		if (this.chat_client || !this.token) {
+		if (this.chat_client || !this.twitch_token) {
 			return;
 		}
 
 		const twurpleToken = {
-			accessToken: this.token.access_token,
-			refreshToken: this.token.refresh_token,
+			accessToken: this.twitch_token.access_token,
+			refreshToken: this.twitch_token.refresh_token,
 			expiresIn: 0,
 			obtainmentTimestamp: 0,
 		};

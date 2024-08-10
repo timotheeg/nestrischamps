@@ -32,37 +32,98 @@ class UserDAO {
 		this.users_by_secret.delete(user.secret);
 	}
 
-	async createUser(user_data) {
-		await dbPool.query(
-			`INSERT INTO twitch_users
-			(id, login, email, secret, type, description, display_name, profile_image_url, created_on, last_login)
+	async createUser(user_data, options) {
+		console.log('createUser', user_data, options);
+
+		const identity = await dbPool.query(
+			`INSERT INTO user_identities
+			(provider, provider_user_id)
 			VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
-			ON CONFLICT(id)
-			DO UPDATE SET login=$2, email=$3, type=$5, description=$6, display_name=$7, profile_image_url=$8, last_login=NOW();
+			($1, $2)
+			ON CONFLICT(provider, provider_user_id)
+			DO UPDATE SET last_login_at=NOW()
+			RETURNING user_id
 			`,
-			[
-				user_data.id,
-				user_data.login,
-				user_data.email,
-				user_data.secret,
-				user_data.type,
-				user_data.description,
-				user_data.display_name,
-				user_data.profile_image_url,
-			]
+			[options.provider, user_data.id]
 		);
+
+		let user_id = identity.rows?.[0]?.user_id;
+
+		console.log({ user_id });
+
+		if (user_id) {
+			// we already have a user mapping, so we take the opportunity to update it with the lastest values, depending on the provider
+			if (options.provider === 'twitch') {
+				await dbPool.query(
+					`UPDATE users
+					SET email=$1, type=$2, description=$3, display_name=$4, profile_image_url=$5, last_login_at=NOW();
+					`,
+					[
+						user_data.email,
+						user_data.type,
+						user_data.description,
+						user_data.display_name,
+						user_data.profile_image_url,
+					]
+				);
+			} else if (options.provider === 'google') {
+				// TODO: including finding a login
+			}
+		} else {
+			console.log('creating user');
+			// user is not already mapped, we must create a new user now, and link it to the identity
+			if (options.provider === 'twitch') {
+				const res = await dbPool.query(
+					`INSERT INTO users
+					(login, email, secret, type, description, display_name, profile_image_url)
+					VALUES
+					($1, $2, $3, $4, $5, $6, $7)
+					ON CONFLICT(login)
+					DO UPDATE SET login=concat('t_', $1), email=$2, type=$4, description=$5, display_name=$6, profile_image_url=$7, last_login_at=NOW()
+					RETURNING id
+					`,
+					[
+						user_data.login,
+						user_data.email,
+						user_data.secret,
+						user_data.type,
+						user_data.description,
+						user_data.display_name,
+						user_data.profile_image_url,
+					]
+				);
+
+				user_id = res.rows?.[0]?.id;
+			} else if (provider === 'google') {
+				// TODO: including finding a login
+			}
+
+			console.log('updating user_identities', [
+				user_id,
+				options.provider,
+				user_data.id,
+			]);
+
+			await dbPool.query(
+				`UPDATE user_identities
+				SET user_id=$1
+				WHERE
+				provider=$2 AND provider_user_id=$3
+				`,
+				[user_id, options.provider, user_data.id]
+			);
+		}
 
 		// we force fetch to:
 		// 1) get the correct data shape
 		// 2) ensure we get the latest secret
-		return this.getUserById(user_data.id);
+		return this.getUserById(user_id);
 	}
 
 	async deleteUser(user) {
 		this.removeUser(user);
 
-		await dbPool.query('DELETE FROM twitch_users WHERE id=$1;', [user.id]);
+		await dbPool.query('DELETE FROM users WHERE id=$1;', [user.id]);
 	}
 
 	async updateSecret(user, new_secret) {
@@ -72,7 +133,7 @@ class UserDAO {
 		try {
 			// then update DB ... dubious order, the whole thing should be a transaction
 			await dbPool.query(
-				`UPDATE twitch_users
+				`UPDATE users
 				set secret=$1
 				WHERE id=$2
 				`,
@@ -94,10 +155,9 @@ class UserDAO {
 		let user = this.users_by_id.get(id);
 
 		if (!user || force_fetch) {
-			const result = await dbPool.query(
-				'SELECT * FROM twitch_users WHERE id=$1',
-				[id]
-			);
+			const result = await dbPool.query('SELECT * FROM users WHERE id=$1', [
+				id,
+			]);
 
 			if (result.rows.length) {
 				// we have the latest data, but another process may have
@@ -120,10 +180,9 @@ class UserDAO {
 		let user = this.users_by_login.get(login);
 
 		if (!user || force_fetch) {
-			const result = await dbPool.query(
-				'SELECT * FROM twitch_users WHERE login=$1',
-				[login]
-			);
+			const result = await dbPool.query('SELECT * FROM users WHERE login=$1', [
+				login,
+			]);
 
 			if (result.rows.length) {
 				// async double-check for sanity
@@ -144,10 +203,9 @@ class UserDAO {
 		let user = this.users_by_secret.get(secret);
 
 		if (!user) {
-			const result = await dbPool.query(
-				'SELECT * FROM twitch_users WHERE secret=$1',
-				[secret]
-			);
+			const result = await dbPool.query('SELECT * FROM users WHERE secret=$1', [
+				secret,
+			]);
 
 			if (result.rows.length) {
 				// async double-check for sanity
@@ -164,7 +222,7 @@ class UserDAO {
 
 	async updateProfile(user_id, update) {
 		await dbPool.query(
-			`UPDATE twitch_users
+			`UPDATE users
 			SET dob=$1, country_code=$2, city=$3, style=$4, interests=$5, timezone=$6
 			WHERE id=$7;
 			`,
@@ -196,7 +254,7 @@ class UserDAO {
 	async getAssignableUsers() {
 		const results = await dbPool.query(`
 			SELECT id, login, display_name
-			FROM twitch_users
+			FROM users
 			WHERE id > 32
 		`);
 

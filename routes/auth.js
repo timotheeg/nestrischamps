@@ -2,6 +2,14 @@ import express from 'express';
 import ULID from 'ulid';
 import got from 'got';
 
+import { OAuth2Client as GoogleOAuth2Client } from 'google-auth-library';
+
+const googleOAuth2Client = new GoogleOAuth2Client(
+	process.env.GOOGLE_AUTH_CLIENT_ID,
+	process.env.GOOGLE_AUTH_CLIENT_SECRET,
+	process.env.GOOGLE_AUTH_REDIRECT_URL
+);
+
 import UserDAO from '../daos/UserDAO.js';
 
 const router = express.Router();
@@ -13,6 +21,14 @@ if (process.env.IS_PUBLIC_SERVER) {
 			redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
 			twitch_scope: 'user:read:email',
 		});
+	});
+	router.get('/google', (req, res) => {
+		const url = googleOAuth2Client.generateAuthUrl({
+			access_type: 'offline',
+			scope: ['profile', 'email'],
+		});
+		console.log({ url });
+		res.redirect(url);
 	});
 } else {
 	router.get('/', (req, res) => {
@@ -105,6 +121,8 @@ router.get('/twitch/callback', async (req, res) => {
 			}
 		);
 
+		console.log({ data: user_data_response.body.data });
+
 		const user_object = user_data_response.body.data[0];
 
 		console.log(
@@ -114,7 +132,12 @@ router.get('/twitch/callback', async (req, res) => {
 		// augment use object with data we retrieve previously
 		user_object.secret = ULID.ulid();
 
-		const user = await UserDAO.createUser(user_object);
+		// NEED more logic here to check BOTh the users and oauth users table sigh...
+		const user = await UserDAO.createUser(user_object, {
+			provider: 'twitch',
+			current_user: req.session.user,
+			pending_linkage: req.session.pending_linkage,
+		});
 
 		console.log(
 			`Retrieved user object from DB for ${user_response.body.user_id} (${user_object.login})`
@@ -122,7 +145,11 @@ router.get('/twitch/callback', async (req, res) => {
 
 		user.setTwitchToken(token);
 
-		req.session.token = token;
+		// TODO: modify when adding google auth
+		req.session.token = {
+			twitch: token,
+		};
+
 		req.session.user = {
 			id: user.id,
 			login: user.login,
@@ -148,6 +175,62 @@ router.get('/twitch/callback', async (req, res) => {
 				`An unexpected error occured with your Twich login: ${err.message}. Please try again later`
 			);
 	}
+});
+
+router.get('/google/callback', async (req, res) => {
+	const code = req.query.code;
+	if (code) {
+		try {
+			const { tokens } = await googleOAuth2Client.getToken(code);
+			googleOAuth2Client.setCredentials(tokens);
+
+			// Save the token to the session
+			req.session.token = tokens;
+
+			// Get user info from Google
+			const ticket = await googleOAuth2Client.verifyIdToken({
+				idToken: tokens.id_token,
+				audience: process.env.GOOGLE_AUTH_CLIENT_ID,
+			});
+			const payload = ticket.getPayload();
+
+			console.log(payload);
+
+			// Save user info to the session
+			req.session.user = {
+				id: payload.sub,
+				email: payload.email,
+				name: payload.name,
+				picture: payload.picture,
+			};
+
+			res.redirect('/auth/profile');
+		} catch (error) {
+			console.error('Error during authentication:', error);
+			res.redirect('/');
+		}
+	} else {
+		res.redirect('/');
+	}
+});
+
+// Middleware to check if user is authenticated
+const isAuthenticated = (req, res, next) => {
+	if (req.session.token) {
+		return next();
+	}
+	res.redirect('/');
+};
+
+router.get('/profile', isAuthenticated, (req, res) => {
+	res.send(`
+	  <h1>Profile</h1>
+	  <p>Name: ${req.session.user.name}</p>
+	  <p>Email: ${req.session.user.email}</p>
+	  <img src="${req.session.user.picture}" alt="Profile Picture">
+	  <br><br>
+	  <a href="/logout">Logout</a>
+	`);
 });
 
 export default router;
