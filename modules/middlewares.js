@@ -47,12 +47,11 @@ export default {
 					// set the session token to be the same as user token
 					req.session.token = {
 						...stoken,
-						twitch: user.twitch_token
+						twitch: user.twitch_token,
 					};
 				}
 			}
-		}
-		else if (stoken?.access_token) {
+		} else if (stoken?.access_token) {
 			// old style - twitch only
 			// convert to new style
 			// TODO: modify when adding google auth
@@ -69,11 +68,12 @@ export default {
 
 		if (user.hasTwitchToken() && !stoken?.twitch) {
 			req.session.token = {
-				twitch: user.twitch_token
+				twitch: user.twitch_token,
 			};
 		}
 
-		if (stoken.google) {} // TODO
+		if (stoken.google) {
+		} // TODO
 
 		if (next) next();
 	},
