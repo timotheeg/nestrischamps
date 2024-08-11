@@ -91,23 +91,38 @@ class UserDAO {
 
 					if (res.rows.length === 1) {
 						console.log(`Found one matching user`);
+						// verify that user is not already linked to an identity from the same provider.
+						// If he/she was, then it's a case of different accounts from one provider using the same email
+						// and we should not link the 2 identities to the same user.
 
-						user_id = res.rows[0].user_id;
+						const temp_user_id = res.rows[0].user_id;
 
-						// bingo, only one user has this email address, we link the identity to that user
-						// is this safe/desirable to do? what id the user uses the same email with different accounts on the same provider? 🤔
-						await dbPool.query(
-							`UPDATE user_identities
-							SET user_id=$1 
-							WHERE provider=$2 AND provider_user_id=$3
+						const res2 = await dbPool.query(
+							`SELECT count(*)
+							FROM user_identities
+							WHERE user_id = $1 AND provider = $2
 							`,
-							[user_id, options.provider, user_data.id]
+							[temp_user_id, options.provider]
 						);
 
-						// TODO: verify one row was modified as expected
-						// TODO: should we update the user record with latest login info? 🤔
+						if (parseInt(res2.rows[0]?.count, 10) <= 0) {
+							user_id = temp_user_id;
 
-						break; // everything is done! Identity, User, Email are all set
+							// bingo, only one user has this email address, we link the identity to that user
+							// still... is it safe/desirable to do even so in this case?? What if the user does not want to auto link the same email from different provider? 🤔
+							await dbPool.query(
+								`UPDATE user_identities
+								SET user_id=$1 
+								WHERE provider=$2 AND provider_user_id=$3
+								`,
+								[user_id, options.provider, user_data.id]
+							);
+
+							// TODO: verify one row was modified as expected
+							// TODO: should we update the user record with latest login info? 🤔
+
+							break; // everything is done! Identity, User, Email are all set
+						}
 					}
 				}
 

@@ -35,6 +35,11 @@ export default {
 		// synchronizes the oauth provider tokens if needed
 		const user = await UserDAO.getUserById(req.session.user.id);
 
+		if (!user) {
+			if (next) next();
+			return;
+		}
+
 		// TODO: remove `|| token` when all sessions have expired - possibly truncate the session table to force
 		const stoken = req.session.token;
 
