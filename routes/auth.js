@@ -37,7 +37,7 @@ function getTwitchAuthUrl(req) {
 	return `${TWITCH_LOGIN_BASE_URI}${qs}`;
 }
 
-function getGoogleAuthUrl(_req) {
+function getGoogleAuthUrl() {
 	return googleOAuth2Client.generateAuthUrl({
 		access_type: 'offline',
 		scope: ['profile', 'email'],
@@ -45,7 +45,7 @@ function getGoogleAuthUrl(_req) {
 }
 
 if (process.env.IS_PUBLIC_SERVER) {
-	router.get('/', (req, res) => {
+	router.get('/', (_req, res) => {
 		res.render('login');
 	});
 
@@ -57,7 +57,7 @@ if (process.env.IS_PUBLIC_SERVER) {
 		res.redirect(getGoogleAuthUrl(req));
 	});
 } else {
-	router.get('/', (req, res) => {
+	router.get('/', (_req, res) => {
 		res.render('local_login');
 	});
 

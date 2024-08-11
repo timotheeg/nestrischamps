@@ -236,7 +236,7 @@ class UserDAO {
 					[user_id, user_data.email.toLowerCase()]
 				);
 			}
-		} while (false);
+		} while (false); // eslint-disable-line no-constant-condition
 
 		// we force fetch to:
 		// 1) get the correct data shape
@@ -370,7 +370,7 @@ class UserDAO {
 	}
 
 	async updateProfile(user_id, update) {
-		const result = await dbPool.query(
+		await dbPool.query(
 			`UPDATE users
 			SET login=$1, display_name=$2, dob=$3, country_code=$4, city=$5, style=$6, interests=$7, timezone=$8
 			WHERE id=$9;
