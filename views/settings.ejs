@@ -11,21 +11,17 @@
 			}
 
 			.fieldset {
-				background-color: #fff;
 				border-radius: 6px;
 				box-shadow: 0 0.5em 1em -0.125em rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.02);
-				color: #4a4a4a;
 				display: block;
 				padding: 1.25rem;
 				border: 1px solid #ccc
 			}
 
 			.fieldset > legend {
-				color: #363636;
 				display: block;
 				font-size: 1rem;
 				font-weight: 700;
-				background-color: #fff;
 				padding: 0 5px;
 				width: max-content;
 				border: 0 none
@@ -65,16 +61,16 @@
 					<p>In competition layouts, profile information can be displayed on the board by a game host.</p>
 
 					<div class="field">
-						<label class="label">ID <em>(from <a href="https://www.twitch.tv/settings/profile" target="twitch">Twitch</a>)</em></label>
+						<label class="label">URL ID <em>(alphanumerical and underscore only)</em></label>
 						<div class="control">
-							<input class="input" type="text" value="<%= db_user.login %>" readonly="readonly" />
+							<input id="login" class="input" type="text" value="<%= db_user.login %>" />
 						</div>
 					</div>
 
 					<div class="field">
-						<label class="label">Display Name <em>(from <a href="https://www.twitch.tv/settings/profile" target="twitch">Twitch</a>)</em></label>
+						<label class="label">Display Name <em>(keep below 10 characters if possible)</em></label>
 						<div class="control">
-							<input class="input" type="text" value="<%= db_user.display_name %>" readonly="readonly" />
+							<input id="display_name" class="input" type="text" value="<%= db_user.display_name %>" />
 						</div>
 					</div>
 
@@ -231,6 +227,8 @@
 </section>
 <script type="text/javascript">
 const profile_nodes = {
+	login: document.getElementById('login'),
+	display_name: document.getElementById('display_name'),
 	dob: document.getElementById('dob'),
 	country_code: document.getElementById('country_code'),
 	city: document.getElementById('city'),
@@ -267,10 +265,20 @@ document.getElementById('update_profile_btn').addEventListener('click', async ()
 	const data = {};
 
 	for (const [key, node] of Object.entries(profile_nodes)) {
-		data[key] = node.value;
+		data[key] = (node.value || '').trim();
+	}
+
+	// validate input client side
+	const errors = []
+	if (!/^[a-z0-9_]+$/.test(data.login)) {
+		errors.push('Invalid format for URL ID - use alphanumerical and underscrore only');
 	}
 
 	try {
+		if (errors.length) {
+			throw new Error('Unable to submit');
+		}
+
 		const response = await fetch('/settings/update_profile', {
 			method: 'POST',
 			cache: 'no-cache',
@@ -298,6 +306,8 @@ document.getElementById('update_profile_btn').addEventListener('click', async ()
 		console.error(err);
 		feedback.classList.add('is_danger');
 		feedback.textContent = `Profile could not be updated`;
+
+		if (errors.length) feedback.textContent += `: ${errors.join(', ')}`;
 	}
 
 	feedback.style.display = 'block';

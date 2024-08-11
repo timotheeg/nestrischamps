@@ -169,7 +169,7 @@ class UserDAO {
 							RETURNING id
 							`,
 							[
-								ULID.ulid(), // this means the user cannot share his room via his twitch login 🥲. User should go update his login later to something more easily usable
+								ULID.ulid().toLowerCase(), // this means the user cannot share his room via his twitch login 🥲. User should go update his login later to something more easily usable
 								user_data.secret,
 								user_data.type,
 								user_data.description,
@@ -370,12 +370,14 @@ class UserDAO {
 	}
 
 	async updateProfile(user_id, update) {
-		await dbPool.query(
+		const result = await dbPool.query(
 			`UPDATE users
-			SET dob=$1, country_code=$2, city=$3, style=$4, interests=$5, timezone=$6
-			WHERE id=$7;
+			SET login=$1, display_name=$2, dob=$3, country_code=$4, city=$5, style=$6, interests=$7, timezone=$8
+			WHERE id=$9;
 			`,
 			[
+				update.login,
+				update.display_name,
 				update.dob,
 				update.country_code,
 				update.city,

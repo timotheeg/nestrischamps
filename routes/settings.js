@@ -76,13 +76,23 @@ router.post('/update_profile', express.json(), async (req, res) => {
 	const errors = [];
 	const update = {};
 
+	if (req.body.login) {
+		if (/^[a-z0-9_]+$/.test(req.body.login.trim())) {
+			update.login = req.body.login.trim().toLowerCase();
+		} else {
+			errors.push('URL ID is not valid');
+		}
+	}
+
+	if (req.body.display_name) {
+		update.display_name = req.body.display_name;
+	}
+
 	if (/^(das|tap|roll|hybrid)$/i.test(req.body.style)) {
 		update.style = req.body.style.toLowerCase();
 	} else {
 		errors.push('Style is not valid');
 	}
-
-	const code = (req.body.country_code || '').toUpperCase();
 
 	// crude string test first, and then date test
 	if (
@@ -91,7 +101,7 @@ router.post('/update_profile', express.json(), async (req, res) => {
 		const age = getAge(req.body.dob);
 
 		// arbitrary age boundaries
-		if (age < 10 || age > 100) {
+		if (age < 5 || age > 120) {
 			update.dob = null;
 			// errors.push('Dob is not valid');
 		} else {
@@ -101,6 +111,8 @@ router.post('/update_profile', express.json(), async (req, res) => {
 		update.dob = null;
 		// errors.push('Dob is not valid');
 	}
+
+	const code = (req.body.country_code || '').toUpperCase();
 
 	if (code && countries.some(country => country.code === code)) {
 		update.country_code = code;
@@ -133,8 +145,21 @@ router.post('/update_profile', express.json(), async (req, res) => {
 		console.log({ errors });
 		res.status(400).json({ errors });
 	} else {
-		await UserDAO.updateProfile(req.session.user.id, update);
-		res.status(200).json({});
+		try {
+			await UserDAO.updateProfile(req.session.user.id, update);
+			res.status(200).json({});
+		} catch (err) {
+			if (/violates.*twitch_users_login_key/.test(err.message)) {
+				errors.push(
+					`URL ID "${req.body.login}" is already in use - pick another ID`
+				);
+				res.status(400).json({ errors });
+			} else {
+				res
+					.status(500)
+					.json({ errors: ['unexpected error - please try again later'] });
+			}
+		}
 	}
 });
 

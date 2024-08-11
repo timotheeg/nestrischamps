@@ -191,12 +191,7 @@ router.get('/twitch/callback', async (req, res) => {
 
 		req.session.save(() => {
 			console.log('Stored session user as', req.session.user);
-
-			if (req.session.auth_success_redirect) {
-				res.redirect(req.session.auth_success_redirect);
-			} else {
-				res.redirect('/');
-			}
+			res.redirect(req.session.auth_success_redirect || '/');
 		});
 	} catch (err) {
 		console.error(`Error when processing Twitch callback`);
@@ -224,12 +219,14 @@ router.get('/google/callback', async (req, res) => {
 			const payload = ticket.getPayload();
 
 			// mimic twitch shape
+			const login = ULID.ulid().toLowerCase();
 			const user_object = {
 				id: payload.sub,
 				secret: ULID.ulid(),
 				type: '',
 				description: '',
-				login: ULID.ulid(),
+				login,
+				display_name: login.slice(-10).toUpperCase(),
 				email: payload.email,
 				profile_image_url: payload.picture,
 			};
@@ -263,12 +260,7 @@ router.get('/google/callback', async (req, res) => {
 
 			req.session.save(() => {
 				console.log('Stored session user as', req.session.user);
-
-				if (req.session.auth_success_redirect) {
-					res.redirect(req.session.auth_success_redirect);
-				} else {
-					res.redirect('/');
-				}
+				res.redirect(req.session.auth_success_redirect || '/');
 			});
 		} catch (error) {
 			console.error('Error during authentication:', error);
