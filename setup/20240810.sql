@@ -11,7 +11,7 @@ ALTER TABLE users ALTER COLUMN last_login_at SET DEFAULT NOW();
 ALTER TABLE users RENAME COLUMN created_at TO created_at;
 ALTER TABLE users ALTER COLUMN created_at SET DEFAULT NOW();
 
-CREATE TYPE identity_provider AS ENUM ('google', 'twitch', 'github', 'discord', 'facebook');
+CREATE TYPE identity_provider AS ENUM ('google', 'twitch', 'github', 'discord', 'facebook', 'slack');
 
 CREATE TABLE user_identities (
     id BIGSERIAL PRIMARY KEY,
