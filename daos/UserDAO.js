@@ -34,7 +34,7 @@ class UserDAO {
 	}
 
 	async createUser(user_data, options) {
-		console.log('createUser', user_data, options);
+		// console.log('createUser', user_data, options);
 
 		// TODO: wrap all the queries here in a transaction
 
@@ -96,8 +96,6 @@ class UserDAO {
 						`,
 						[user_data.email.toLowerCase()]
 					);
-
-					console.log(res.rows);
 
 					if (res.rows.length === 1) {
 						console.log(`Found one matching user`);

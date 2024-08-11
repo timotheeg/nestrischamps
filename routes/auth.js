@@ -147,7 +147,7 @@ router.get('/twitch/callback', async (req, res) => {
 			}
 		);
 
-		console.log({ data: user_data_response.body.data });
+		// console.log({ data: user_data_response.body.data });
 
 		const user_object = user_data_response.body.data[0];
 

@@ -149,7 +149,7 @@ router.post('/update_profile', express.json(), async (req, res) => {
 			await UserDAO.updateProfile(req.session.user.id, update);
 			res.status(200).json({});
 		} catch (err) {
-			if (/violates.*twitch_users_login_key/.test(err.message)) {
+			if (/violates.*users_login_key/.test(err.message)) {
 				errors.push(
 					`URL ID "${req.body.login}" is already in use - pick another ID`
 				);
