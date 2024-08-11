@@ -205,7 +205,7 @@ router.get('/google/callback', async (req, res) => {
 			googleOAuth2Client.setCredentials(tokens);
 
 			// Save the token to the session
-			req.session.token = tokens;
+			req.session.token = { google: tokens };
 
 			// Get user info from Google
 			const ticket = await googleOAuth2Client.verifyIdToken({
