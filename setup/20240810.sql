@@ -8,7 +8,7 @@ ALTER TABLE users ALTER COLUMN login TYPE VARCHAR(40);
 ALTER TABLE users RENAME COLUMN last_login TO last_login_at;
 ALTER TABLE users ALTER COLUMN last_login_at SET DEFAULT NOW();
 
-ALTER TABLE users RENAME COLUMN created_at TO created_at;
+ALTER TABLE users RENAME COLUMN created_on TO created_at;
 ALTER TABLE users ALTER COLUMN created_at SET DEFAULT NOW();
 
 CREATE TYPE identity_provider AS ENUM ('google', 'twitch', 'github', 'discord', 'facebook', 'slack');
@@ -49,8 +49,8 @@ CREATE TABLE user_emails (
 );
 
 CREATE UNIQUE INDEX IDX_user_emails on user_emails (user_id, email);
-CREATE UNIQUE INDEX IDX_user_emails_id on user_emails (user_id);
-CREATE UNIQUE INDEX IDX_user_emails_email on user_emails (email);
+CREATE INDEX IDX_user_emails_id on user_emails (user_id);
+CREATE INDEX IDX_user_emails_email on user_emails (email);
 
 
 -- the loop below 
@@ -66,14 +66,18 @@ begin
            order by created_at asc
     loop
         update users set id=new_user_id where id=f.id; -- doing this also updates ALL the scores!
-        insert into user_emails
-            (user_id, email)
-            values
-            (new_user_id, f.email);
+
+        if f.email is not null then
+            insert into user_emails
+                (user_id, email)
+                values
+                (new_user_id, lower(f.email));
+        end if;
+        
         insert into user_identities
-            (provider, provider_user_id, user_id, created_at, updated_at, last_login_at)
+            (provider, provider_user_id, user_id, login, created_at, updated_at, last_login_at)
             values
-            ('twitch', f.id, new_user_id, f.created_at, f.created_at, f.last_login_at);
+            ('twitch', f.id, new_user_id, f.login, f.created_at, f.created_at, f.last_login_at);
         new_user_id := new_user_id + 1;
     end loop;
 end;

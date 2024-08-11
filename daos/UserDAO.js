@@ -36,6 +36,8 @@ class UserDAO {
 	async createUser(user_data, options) {
 		console.log('createUser', user_data, options);
 
+		// TODO: wrap all the queries here in a transaction
+
 		const identity = await dbPool.query(
 			`INSERT INTO user_identities
 			(provider, provider_user_id, login)
@@ -45,54 +47,73 @@ class UserDAO {
 			DO UPDATE SET login=$3, last_login_at=NOW()
 			RETURNING user_id
 			`,
-			[options.provider, user_data.id, user_data.id || null]
+			[options.provider, user_data.id, user_data.login || null]
 		);
 
 		let user_id = identity.rows?.[0]?.user_id;
 
-		if (user_id) {
-			// we already have a user mapping
-			// so we take the opportunity to update it with the lastest values - should we though? what if the data had been updated from another provider, or manually by the user?
-			if (options.provider === 'twitch') {
-				await dbPool.query(
-					`UPDATE users
-					SET type=$1, description=$2, display_name=$3, profile_image_url=$4, last_login_at=NOW();
-					`,
-					[
-						user_data.type,
-						user_data.description,
-						user_data.display_name,
-						user_data.profile_image_url,
-					]
-				);
-			} else if (options.provider === 'google') {
-				// TODO: including finding a login
-			}
-		} else {
-			console.log('creating user');
-			// user is not already mapped, we must create a new user now, and link it to the identity
-			if (options.provider === 'twitch') {
-				const res = await dbPool.query(
-					`INSERT INTO users
-					(login, secret, type, description, display_name, profile_image_url)
-					VALUES
-					($1, $2, $3, $4, $5, $6)
-					ON CONFLICT(login) DO NOTHING
-					RETURNING id
-					`,
-					[
-						user_data.login,
-						user_data.secret,
-						user_data.type,
-						user_data.description,
-						user_data.display_name,
-						user_data.profile_image_url,
-					]
-				);
+		do {
+			if (user_id) {
+				// we already have a user mapping
+				// so we take the opportunity to update it with the lastest values - should we though? what if the data had been updated from another provider, or manually by the user?
+				if (options.provider === 'twitch') {
+					await dbPool.query(
+						`UPDATE users
+						SET type=$1, description=$2, display_name=$3, profile_image_url=$4, last_login_at=NOW();
+						`,
+						[
+							user_data.type,
+							user_data.description,
+							user_data.display_name,
+							user_data.profile_image_url,
+						]
+					);
+				} else if (options.provider === 'google') {
+					// TODO: including finding a login
+				}
+			} else {
+				// no existing user mapped, which means we just created a new identity
+				// let's see if we can find a user that has the email that came in
+				if (user_data.email) {
+					console.log('trying to find user', {
+						email: user_data.email.toLowerCase(),
+					});
 
-				user_id = res.rows?.[0]?.id;
+					const res = await dbPool.query(
+						`SELECT user_id
+						FROM user_emails
+						WHERE email=$1
+						`,
+						[user_data.email.toLowerCase()]
+					);
 
-				if (!user_id) {
+					console.log(res.rows);
+
+					if (res.rows.length === 1) {
+						console.log(`Found one matching user`);
+
+						user_id = res.rows[0].user_id;
+
+						// bingo, only one user has this email address, we link the identity to that user
+						// is this safe/desirable to do? what id the user uses the same email with different accounts on the same provider? 🤔
+						await dbPool.query(
+							`UPDATE user_identities
+							SET user_id=$1 
+							WHERE provider=$2 AND provider_user_id=$3
+							`,
+							[user_id, options.provider, user_data.id]
+						);
+
+						// TODO: verify one row was modified as expected
+						// TODO: should we update the user record with latest login info? 🤔
+
+						break; // everything is done! Identity, User, Email are all set
+					}
+				}
+
+				console.log('creating user');
+				// user is not already mapped, we must create a new user now, and link it to the identity
+				if (options.provider === 'twitch') {
 					const res = await dbPool.query(
 						`INSERT INTO users
 						(login, secret, type, description, display_name, profile_image_url)
@@ -102,7 +123,7 @@ class UserDAO {
 						RETURNING id
 						`,
 						[
-							ULID.ulid(), // this means the user cannot share his room via his twitch login 🥲. User should go update his login later.
+							user_data.login,
 							user_data.secret,
 							user_data.type,
 							user_data.description,
@@ -114,41 +135,65 @@ class UserDAO {
 					user_id = res.rows?.[0]?.id;
 
 					if (!user_id) {
-						throw new Error(`Unable to create twitch user ${user_data.login}`);
+						const res = await dbPool.query(
+							`INSERT INTO users
+							(login, secret, type, description, display_name, profile_image_url)
+							VALUES
+							($1, $2, $3, $4, $5, $6)
+							ON CONFLICT(login) DO NOTHING
+							RETURNING id
+							`,
+							[
+								ULID.ulid(), // this means the user cannot share his room via his twitch login 🥲. User should go update his login later to something more easily usable
+								user_data.secret,
+								user_data.type,
+								user_data.description,
+								user_data.display_name,
+								user_data.profile_image_url,
+							]
+						);
+
+						user_id = res.rows?.[0]?.id;
+
+						if (!user_id) {
+							throw new Error(
+								`Error: Unable to create twitch user ${user_data.login}`
+							);
+						}
 					}
+				} else if (provider === 'google') {
+					// TODO: including finding a login
 				}
-			} else if (provider === 'google') {
-				// TODO: including finding a login
+
+				console.log('updating user_identities', [
+					user_id,
+					options.provider,
+					user_data.id,
+				]);
+
+				await dbPool.query(
+					`UPDATE user_identities
+					SET user_id=$1
+					WHERE
+					provider=$2 AND provider_user_id=$3
+					`,
+					[user_id, options.provider, user_data.id]
+				);
 			}
 
-			console.log('updating user_identities', [
-				user_id,
-				options.provider,
-				user_data.id,
-			]);
-
-			await dbPool.query(
-				`UPDATE user_identities
-				SET user_id=$1
-				WHERE
-				provider=$2 AND provider_user_id=$3
-				`,
-				[user_id, options.provider, user_data.id]
-			);
-		}
-
-		// if email is supplied, we save it now too
-		if (user_data.email) {
-			await dbPool.query(
-				`INSERT INTO user_emails
-				(user_id, email)
-				VALUES
-				($1, $2)
-				ON CONFLICT DO NOTHING
-				`,
-				[user_id, user_data.email.toLowerCase()]
-			);
-		}
+			// if email is supplied, we save it now too
+			if (user_data.email) {
+				await dbPool.query(
+					`INSERT INTO user_emails
+					(user_id, email)
+					VALUES
+					($1, $2)
+					ON CONFLICT DO NOTHING
+					`,
+					[user_id, user_data.email.toLowerCase()]
+				);
+			}
+		} while (false);
 
 		// we force fetch to:
 		// 1) get the correct data shape
