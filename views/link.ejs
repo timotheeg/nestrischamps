@@ -16,11 +16,76 @@
 <section class="section">
 	<div class="container">
 		<h1 class="title is-1">
-			Link your account to a other identity providers
+			Link your account to other identity providers
 		</h1>
-        <p>One account may at most be linked to ONE Twitch account and ONE Google account.</p>
-        <p>Show if linked to Twitch</p>
-        <p>Show if linked to Google</p>
+
+        <div class="block">
+            <p>NTC user details</p>
+        </div>
+        
+        <div class="block">
+            <ul>
+                <li>NTC user ID: <strong><%= user.id %></strong></li>
+                <li>NTC username (used in room links): <strong><%= user.login %></strong></li>
+            </dl>
+        </div>
+    
+        <div class="block">
+            <table class="table is-bordered is-striped is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Created at</th>
+                        <th>Last Login at</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% identities.forEach((id, idx) => { %>
+                        <tr>
+                            <td>
+                                <img title="<%= id.provider %>" width="30" height="30" src="/images/identity_providers/<%= id.provider %>.png" />
+                            </td>
+                            <td>
+                                <%= id.provider_user_id %>
+                            </td>
+                            <td>
+                                <%= id.login %>
+                            </td>
+                            <td>
+                                <%= id.email %>
+                            </td>
+                            <td>
+                                <%= id.created_at.toISOString().slice(0, 19).replace('T', ' ') %>
+                            </td>
+                            <td>
+                                <%= id.last_login_at.toISOString().slice(0, 19).replace('T', ' ') %>
+                            </td>
+                            <td>
+                                <a class="button" href="/auth/unlink/<%= id.id %>">
+                                    delete
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>        
+                </tbody>
+            </table>
+        </div>
+        <div class="block">
+            <% if (!providers.google) { %>
+                <a class="button" href="/auth/link/google">
+                    <img src="/images/identity_providers/google.png" width="30" height="30" />&nbsp;Link Google account
+                </a>
+            <% } %>
+            <% if (!providers.twitch) { %>
+                <a class="button" href="/auth/link/twitch">
+                    <img src="/images/identity_providers/twitch.png" width="30" height="30" />&nbsp;Link Twitch account
+                </a>
+            <% } %>
+        </div>
 	</div>
 </section>
 

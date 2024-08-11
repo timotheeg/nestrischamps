@@ -280,20 +280,28 @@ router.get('/google/callback', async (req, res) => {
 });
 
 router.get('/link/twitch', middlewares.assertSession, async (req, res) => {
-	req.session.auth_success_redirect = '/auth/link/twitch/success';
+	req.session.auth_success_redirect = '/auth/link';
 	req.session.pending_linkage_expiry = Date.now() + 120000; // 2 minute max to complete linkage
 	res.redirect(getTwitchAuthUrl(req));
 });
 
 router.get('/link/google', middlewares.assertSession, async (req, res) => {
-	req.session.auth_success_redirect = '/auth/link/google/success';
+	req.session.auth_success_redirect = '/auth/link';
 	req.session.pending_linkage_expiry = Date.now() + 120000; // 2 minute max to complete linkage
 	res.redirect(getGoogleAuthUrl(req));
 });
 
-router.get('/link', middlewares.assertSession, async (_req, res) => {
-	// TODO: 
-	res.render('link');
+router.get('/link', middlewares.assertSession, async (req, res) => {
+	const identities = await UserDAO.getIdentities(req.session.user.id);
+	const providers = identities.reduce((acc, identity) => {
+		acc[identity.provider] |= 0;
+		acc[identity.provider] += 1;
+		return acc;
+	}, {});
+	res.render('link', {
+		providers,
+		identities,
+	});
 });
 
 export default router;
