@@ -77,7 +77,7 @@ export default {
 			};
 		}
 
-		if (stoken.google) {
+		if (stoken?.google) {
 			if (!user.hasGoogleToken()) {
 				// assumes token applies to use as-is
 				user.setGoogleToken(stoken.google);
