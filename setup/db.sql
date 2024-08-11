@@ -2,7 +2,7 @@ CREATE TYPE play_style AS ENUM ('das', 'tap', 'roll', 'hybrid');
 CREATE TYPE identity_provider AS ENUM ('google', 'twitch', 'github', 'discord', 'facebook', 'slack');
 
 CREATE TABLE users (
-	id BIGINT PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	login VARCHAR ( 40 ) UNIQUE NOT NULL,
 	secret VARCHAR ( 36 ) UNIQUE NOT NULL,
 
@@ -26,7 +26,7 @@ CREATE TABLE users (
 	last_login_at timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IDX_users_email ON users (email);
+ALTER SEQUENCE users_id_seq RESTART WITH 1000;
 
 CREATE TABLE scores (
 	id BIGSERIAL PRIMARY KEY,
@@ -53,7 +53,7 @@ CREATE TABLE scores (
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)
 			REFERENCES users(id)
-				ON DELETE CASCADE ON UPDATE CASCADE;
+				ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE UNIQUE INDEX IDX_scores_manual_scores on scores (player_id, start_level, competition) where manual;
@@ -63,8 +63,6 @@ CREATE INDEX IDX_scores_player_session ON scores (player_id, session);
 CREATE INDEX IDX_scores_player_level ON scores (player_id, start_level);
 CREATE INDEX IDX_scores_player_datetime ON scores (player_id, datetime);
 CREATE INDEX IDX_scores_datetime ON scores (datetime);
-
-SELECT setval(pg_get_serial_sequence('users', 'id'), 1000 , false) from users;
 
 CREATE TABLE user_identities (
     id BIGSERIAL PRIMARY KEY,
