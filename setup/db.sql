@@ -1,10 +1,9 @@
 CREATE TYPE play_style AS ENUM ('das', 'tap', 'roll', 'hybrid');
+CREATE TYPE identity_provider AS ENUM ('google', 'twitch', 'github', 'discord', 'facebook', 'slack');
 
-CREATE TABLE twitch_users (
+CREATE TABLE users (
 	id BIGINT PRIMARY KEY,
-	login VARCHAR ( 25 ) UNIQUE NOT NULL,
-	email VARCHAR ( 255 ) NOT NULL,
-
+	login VARCHAR ( 40 ) UNIQUE NOT NULL,
 	secret VARCHAR ( 36 ) UNIQUE NOT NULL,
 
 	type VARCHAR ( 128 ),
@@ -23,14 +22,14 @@ CREATE TABLE twitch_users (
 	elo_rank INTEGER NOT NULL DEFAULT 0,
 	elo_rating DOUBLE PRECISION NOT NULL DEFAULT 0,
 
-	created_on timestamptz NOT NULL,
-	last_login timestamptz NOT NULL
+	created_at timestamptz NOT NULL DEFAULT NOW(),
+	last_login_at timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IDX_users_email ON twitch_users (email);
+CREATE INDEX IDX_users_email ON users (email);
 
 CREATE TABLE scores (
-	id SERIAL PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	datetime timestamptz NOT NULL,
 	player_id BIGINT NOT NULL,
 	session INTEGER DEFAULT 1,
@@ -53,7 +52,8 @@ CREATE TABLE scores (
 
 	CONSTRAINT fk_player
 		FOREIGN KEY(player_id)
-			REFERENCES twitch_users(id)
+			REFERENCES users(id)
+				ON DELETE CASCADE ON UPDATE CASCADE;
 );
 
 CREATE UNIQUE INDEX IDX_scores_manual_scores on scores (player_id, start_level, competition) where manual;
@@ -63,6 +63,49 @@ CREATE INDEX IDX_scores_player_session ON scores (player_id, session);
 CREATE INDEX IDX_scores_player_level ON scores (player_id, start_level);
 CREATE INDEX IDX_scores_player_datetime ON scores (player_id, datetime);
 CREATE INDEX IDX_scores_datetime ON scores (datetime);
+
+SELECT setval(pg_get_serial_sequence('users', 'id'), 1000 , false) from users;
+
+CREATE TABLE user_identities (
+    id BIGSERIAL PRIMARY KEY,
+
+    provider identity_provider NOT NULL,
+    provider_user_id VARCHAR ( 36 ) NOT NULL,
+
+    user_id BIGINT,
+    login VARCHAR(40) DEFAULT NULL,
+    email VARCHAR ( 255 ),
+
+	created_at timestamptz NOT NULL DEFAULT NOW(),
+	updated_at timestamptz NOT NULL DEFAULT NOW(),
+    last_login_at timestamptz NOT NULL DEFAULT NOW(),
+
+    access_token varchar( 128 ),
+    refresh_token varchar( 128 ),
+
+	CONSTRAINT fk_user
+		FOREIGN KEY(user_id)
+			REFERENCES users(id)
+            ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE UNIQUE INDEX IDX_user_identity on user_identities (provider, provider_user_id);
+CREATE UNIQUE INDEX IDX_user_identity_login on user_identities (provider, login);
+CREATE INDEX IDX_user_identity_email on user_identities (email);
+
+CREATE TABLE user_emails (
+    user_id BIGINT NOT NULL,
+    email VARCHAR ( 255 ) NOT NULL,
+
+	CONSTRAINT fk_user_emails
+		FOREIGN KEY(user_id)
+			REFERENCES users(id)
+            ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE UNIQUE INDEX IDX_user_emails on user_emails (user_id, email);
+CREATE INDEX IDX_user_emails_id on user_emails (user_id);
+CREATE INDEX IDX_user_emails_email on user_emails (email);
 
 CREATE TABLE sessions (
 	sid varchar NOT NULL COLLATE "default",
@@ -76,38 +119,38 @@ ALTER TABLE sessions ADD CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABL
 CREATE INDEX IDX_session_expire ON sessions (expire);
 
 
-INSERT INTO twitch_users
-(id, login, email, secret, type, description, display_name, profile_image_url, dob, country_code, city, interests, style, timezone, created_on, last_login)
+INSERT INTO users
+(id, login, secret, type, description, display_name, profile_image_url, dob, country_code, city, interests)
 VALUES
-(1,  'player1',  'player1@nestrischamps.io',  'PLAYER1',  '', '', 'Player 1',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(2,  'player2',  'player2@nestrischamps.io',  'PLAYER2',  '', '', 'Player 2',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(3,  'player3',  'player3@nestrischamps.io',  'PLAYER3',  '', '', 'Player 3',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(4,  'player4',  'player4@nestrischamps.io',  'PLAYER4',  '', '', 'Player 4',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(5,  'player5',  'player5@nestrischamps.io',  'PLAYER5',  '', '', 'Player 5',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(6,  'player6',  'player6@nestrischamps.io',  'PLAYER6',  '', '', 'Player 6',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(7,  'player7',  'player7@nestrischamps.io',  'PLAYER7',  '', '', 'Player 7',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(8,  'player8',  'player8@nestrischamps.io',  'PLAYER8',  '', '', 'Player 8',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(9,  'player9',  'player9@nestrischamps.io',  'PLAYER9',  '', '', 'Player 9',  '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(10, 'player10', 'player10@nestrischamps.io', 'PLAYER10', '', '', 'Player 10', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(11, 'player11', 'player11@nestrischamps.io', 'PLAYER11', '', '', 'Player 11', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(12, 'player12', 'player12@nestrischamps.io', 'PLAYER12', '', '', 'Player 12', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(13, 'player13', 'player13@nestrischamps.io', 'PLAYER13', '', '', 'Player 13', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(14, 'player14', 'player14@nestrischamps.io', 'PLAYER14', '', '', 'Player 14', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(15, 'player15', 'player15@nestrischamps.io', 'PLAYER15', '', '', 'Player 15', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(16, 'player16', 'player16@nestrischamps.io', 'PLAYER16', '', '', 'Player 16', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(17, 'player17', 'player17@nestrischamps.io', 'PLAYER17', '', '', 'Player 17', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(18, 'player18', 'player18@nestrischamps.io', 'PLAYER18', '', '', 'Player 18', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(19, 'player19', 'player19@nestrischamps.io', 'PLAYER19', '', '', 'Player 19', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(20, 'player20', 'player20@nestrischamps.io', 'PLAYER20', '', '', 'Player 20', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(21, 'player21', 'player21@nestrischamps.io', 'PLAYER21', '', '', 'Player 21', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(22, 'player22', 'player22@nestrischamps.io', 'PLAYER22', '', '', 'Player 22', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(23, 'player23', 'player23@nestrischamps.io', 'PLAYER23', '', '', 'Player 23', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(24, 'player24', 'player24@nestrischamps.io', 'PLAYER24', '', '', 'Player 24', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(25, 'player25', 'player25@nestrischamps.io', 'PLAYER25', '', '', 'Player 25', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(26, 'player26', 'player26@nestrischamps.io', 'PLAYER26', '', '', 'Player 26', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(27, 'player27', 'player27@nestrischamps.io', 'PLAYER27', '', '', 'Player 27', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(28, 'player28', 'player28@nestrischamps.io', 'PLAYER28', '', '', 'Player 28', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(29, 'player29', 'player29@nestrischamps.io', 'PLAYER29', '', '', 'Player 29', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(30, 'player30', 'player30@nestrischamps.io', 'PLAYER30', '', '', 'Player 30', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(31, 'player31', 'player31@nestrischamps.io', 'PLAYER31', '', '', 'Player 31', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW()),
-(32, 'player32', 'player32@nestrischamps.io', 'PLAYER32', '', '', 'Player 32', '', NOW(), '', '', '', 'das', 'UTC', NOW(), NOW());
+(1,  'player1',  'PLAYER1',  '', '', 'Player 1',  '', NOW(), '', '', ''),
+(2,  'player2',  'PLAYER2',  '', '', 'Player 2',  '', NOW(), '', '', ''),
+(3,  'player3',  'PLAYER3',  '', '', 'Player 3',  '', NOW(), '', '', ''),
+(4,  'player4',  'PLAYER4',  '', '', 'Player 4',  '', NOW(), '', '', ''),
+(5,  'player5',  'PLAYER5',  '', '', 'Player 5',  '', NOW(), '', '', ''),
+(6,  'player6',  'PLAYER6',  '', '', 'Player 6',  '', NOW(), '', '', ''),
+(7,  'player7',  'PLAYER7',  '', '', 'Player 7',  '', NOW(), '', '', ''),
+(8,  'player8',  'PLAYER8',  '', '', 'Player 8',  '', NOW(), '', '', ''),
+(9,  'player9',  'PLAYER9',  '', '', 'Player 9',  '', NOW(), '', '', ''),
+(10, 'player10', 'PLAYER10', '', '', 'Player 10', '', NOW(), '', '', ''),
+(11, 'player11', 'PLAYER11', '', '', 'Player 11', '', NOW(), '', '', ''),
+(12, 'player12', 'PLAYER12', '', '', 'Player 12', '', NOW(), '', '', ''),
+(13, 'player13', 'PLAYER13', '', '', 'Player 13', '', NOW(), '', '', ''),
+(14, 'player14', 'PLAYER14', '', '', 'Player 14', '', NOW(), '', '', ''),
+(15, 'player15', 'PLAYER15', '', '', 'Player 15', '', NOW(), '', '', ''),
+(16, 'player16', 'PLAYER16', '', '', 'Player 16', '', NOW(), '', '', ''),
+(17, 'player17', 'PLAYER17', '', '', 'Player 17', '', NOW(), '', '', ''),
+(18, 'player18', 'PLAYER18', '', '', 'Player 18', '', NOW(), '', '', ''),
+(19, 'player19', 'PLAYER19', '', '', 'Player 19', '', NOW(), '', '', ''),
+(20, 'player20', 'PLAYER20', '', '', 'Player 20', '', NOW(), '', '', ''),
+(21, 'player21', 'PLAYER21', '', '', 'Player 21', '', NOW(), '', '', ''),
+(22, 'player22', 'PLAYER22', '', '', 'Player 22', '', NOW(), '', '', ''),
+(23, 'player23', 'PLAYER23', '', '', 'Player 23', '', NOW(), '', '', ''),
+(24, 'player24', 'PLAYER24', '', '', 'Player 24', '', NOW(), '', '', ''),
+(25, 'player25', 'PLAYER25', '', '', 'Player 25', '', NOW(), '', '', ''),
+(26, 'player26', 'PLAYER26', '', '', 'Player 26', '', NOW(), '', '', ''),
+(27, 'player27', 'PLAYER27', '', '', 'Player 27', '', NOW(), '', '', ''),
+(28, 'player28', 'PLAYER28', '', '', 'Player 28', '', NOW(), '', '', ''),
+(29, 'player29', 'PLAYER29', '', '', 'Player 29', '', NOW(), '', '', ''),
+(30, 'player30', 'PLAYER30', '', '', 'Player 30', '', NOW(), '', '', ''),
+(31, 'player31', 'PLAYER31', '', '', 'Player 31', '', NOW(), '', '', ''),
+(32, 'player32', 'PLAYER32', '', '', 'Player 32', '', NOW(), '', '', '');
