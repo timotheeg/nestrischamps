@@ -304,4 +304,32 @@ router.get('/link', middlewares.assertSession, async (req, res) => {
 	});
 });
 
+router.get(
+	'/unlink/:identity_id',
+	middlewares.assertSession,
+	async (req, res) => {
+		// sanity check before deleting
+		const identities = await UserDAO.getIdentities(req.session.user.id);
+		const identity = identities.find(
+			identity => (identity.id = req.params.identity_id)
+		);
+
+		// we obnly accept to remove an identity if it's not the last one
+		if (identity && identities.length > 1) {
+			const res = await UserDAO.removeIdentity(
+				req.session.user.id,
+				identity.id
+			);
+
+			const new_token = { ...req.session.token };
+
+			delete new_token[res.provider]; // we clear the identity tokens from the session
+
+			req.session.token = new_token;
+		}
+
+		res.redirect('/auth/link');
+	}
+);
+
 export default router;

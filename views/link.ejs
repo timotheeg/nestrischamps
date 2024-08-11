@@ -8,6 +8,11 @@
 	<meta name="description" content="Login to access NestrisChamps tracking features" />
 
 	<link rel="stylesheet" href="/vendor/bulma.1.0.2.min.css">
+    <style>
+		.navbar-item img {
+        	max-height: 2.5rem;
+		}
+    </style>
 </head>
 <body>
 
@@ -19,10 +24,6 @@
 			Link your account to other identity providers
 		</h1>
 
-        <div class="block">
-            <p>NTC user details</p>
-        </div>
-        
         <div class="block">
             <ul>
                 <li>NTC user ID: <strong><%= user.id %></strong></li>
@@ -46,28 +47,30 @@
                 <tbody>
                     <% identities.forEach((id, idx) => { %>
                         <tr>
-                            <td>
+                            <td class="has-text-centered is-vcentered">
                                 <img title="<%= id.provider %>" width="30" height="30" src="/images/identity_providers/<%= id.provider %>.png" />
                             </td>
-                            <td>
+                            <td class="has-text-centered is-vcentered">
                                 <%= id.provider_user_id %>
                             </td>
-                            <td>
+                            <td class="has-text-centered is-vcentered">
                                 <%= id.login %>
                             </td>
-                            <td>
+                            <td class="has-text-centered is-vcentered">
                                 <%= id.email %>
                             </td>
-                            <td>
+                            <td class="has-text-centered is-vcentered">
                                 <%= id.created_at.toISOString().slice(0, 19).replace('T', ' ') %>
                             </td>
-                            <td>
+                            <td class="has-text-centered is-vcentered">
                                 <%= id.last_login_at.toISOString().slice(0, 19).replace('T', ' ') %>
                             </td>
-                            <td>
-                                <a class="button" href="/auth/unlink/<%= id.id %>">
-                                    delete
-                                </a>
+                            <td class="has-text-centered is-vcentered">
+                                <% if (identities.length <= 1) { %>
+                                    <button class="button" disabled>delete</button>
+                                <% } else { %>
+                                    <a class="button" href="/auth/unlink/<%= id.id %>">delete</a>
+                                <% } %>
                             </td>
                         </tr>
                     <% }) %>        
