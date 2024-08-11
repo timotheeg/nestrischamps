@@ -10,27 +10,47 @@ const googleOAuth2Client = new GoogleOAuth2Client(
 	process.env.GOOGLE_AUTH_REDIRECT_URL
 );
 
+const TWITCH_LOGIN_BASE_URI = 'https://id.twitch.tv/oauth2/authorize?';
+const TWITCH_LOGIN_QS = new URLSearchParams({
+	client_id: process.env.TWITCH_CLIENT_ID,
+	scope: 'user:read:email chat:read',
+	response_type: 'code',
+	force_verify: true,
+});
+
 import UserDAO from '../daos/UserDAO.js';
 
 const router = express.Router();
 
 if (process.env.IS_PUBLIC_SERVER) {
 	router.get('/', (req, res) => {
-		res.render('login', {
-			client_id: process.env.TWITCH_CLIENT_ID,
-			redirect_uri: `${req.protocol}://${req.get('host')}/auth/twitch/callback`,
-			twitch_scope: 'user:read:email',
-		});
+		res.render('login');
 	});
+
+	router.get('/twitch', (req, res) => {
+		TWITCH_LOGIN_QS.set(
+			'redirect_uri',
+			`${process.env.IS_PUBLIC_SERVER ? 'https' : req.protocol}://${req.get(
+				'host'
+			)}/auth/twitch/callback`
+		);
+
+		const qs = TWITCH_LOGIN_QS.toString();
+		const url = `${TWITCH_LOGIN_BASE_URI}${qs}`;
+
+		res.redirect(url);
+	});
+
 	router.get('/google', (req, res) => {
 		const url = googleOAuth2Client.generateAuthUrl({
 			access_type: 'offline',
 			scope: ['profile', 'email'],
 		});
-		console.log({ url });
 		res.redirect(url);
 	});
+
 } else {
+
 	router.get('/', (req, res) => {
 		res.render('local_login');
 	});

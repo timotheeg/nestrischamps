@@ -1,5 +1,6 @@
 import User from '../domains/User.js';
 import dbPool from '../modules/db.js';
+import ULID from 'ulid';
 
 class UserDAO {
 	constructor() {
@@ -37,29 +38,27 @@ class UserDAO {
 
 		const identity = await dbPool.query(
 			`INSERT INTO user_identities
-			(provider, provider_user_id)
+			(provider, provider_user_id, login)
 			VALUES
-			($1, $2)
+			($1, $2, $3)
 			ON CONFLICT(provider, provider_user_id)
-			DO UPDATE SET last_login_at=NOW()
+			DO UPDATE SET login=$3, last_login_at=NOW()
 			RETURNING user_id
 			`,
-			[options.provider, user_data.id]
+			[options.provider, user_data.id, user_data.id || null]
 		);
 
 		let user_id = identity.rows?.[0]?.user_id;
 
-		console.log({ user_id });
-
 		if (user_id) {
-			// we already have a user mapping, so we take the opportunity to update it with the lastest values, depending on the provider
+			// we already have a user mapping
+			// so we take the opportunity to update it with the lastest values - should we though? what if the data had been updated from another provider, or manually by the user?
 			if (options.provider === 'twitch') {
 				await dbPool.query(
 					`UPDATE users
-					SET email=$1, type=$2, description=$3, display_name=$4, profile_image_url=$5, last_login_at=NOW();
+					SET type=$1, description=$2, display_name=$3, profile_image_url=$4, last_login_at=NOW();
 					`,
 					[
-						user_data.email,
 						user_data.type,
 						user_data.description,
 						user_data.display_name,
@@ -75,16 +74,14 @@ class UserDAO {
 			if (options.provider === 'twitch') {
 				const res = await dbPool.query(
 					`INSERT INTO users
-					(login, email, secret, type, description, display_name, profile_image_url)
+					(login, secret, type, description, display_name, profile_image_url)
 					VALUES
-					($1, $2, $3, $4, $5, $6, $7)
-					ON CONFLICT(login)
-					DO UPDATE SET login=concat('t_', $1), email=$2, type=$4, description=$5, display_name=$6, profile_image_url=$7, last_login_at=NOW()
+					($1, $2, $3, $4, $5, $6)
+					ON CONFLICT(login) DO NOTHING
 					RETURNING id
 					`,
 					[
 						user_data.login,
-						user_data.email,
 						user_data.secret,
 						user_data.type,
 						user_data.description,
@@ -94,6 +91,32 @@ class UserDAO {
 				);
 
 				user_id = res.rows?.[0]?.id;
+
+				if (!user_id) {
+					const res = await dbPool.query(
+						`INSERT INTO users
+						(login, secret, type, description, display_name, profile_image_url)
+						VALUES
+						($1, $2, $3, $4, $5, $6)
+						ON CONFLICT(login) DO NOTHING
+						RETURNING id
+						`,
+						[
+							ULID.ulid(), // this means the user cannot share his room via his twitch login 🥲. User should go update his login later.
+							user_data.secret,
+							user_data.type,
+							user_data.description,
+							user_data.display_name,
+							user_data.profile_image_url,
+						]
+					);
+
+					user_id = res.rows?.[0]?.id;
+
+					if (!user_id) {
+						throw new Error(`Unable to create twitch user ${user_data.login}`);
+					}
+				}
 			} else if (provider === 'google') {
 				// TODO: including finding a login
 			}
@@ -111,6 +134,19 @@ class UserDAO {
 				provider=$2 AND provider_user_id=$3
 				`,
 				[user_id, options.provider, user_data.id]
+			);
+		}
+
+		// if email is supplied, we save it now too
+		if (user_data.email) {
+			await dbPool.query(
+				`INSERT INTO user_emails
+				(user_id, email)
+				VALUES
+				($1, $2)
+				ON CONFLICT DO NOTHING
+				`,
+				[user_id, user_data.email.toLowerCase()]
 			);
 		}
 
