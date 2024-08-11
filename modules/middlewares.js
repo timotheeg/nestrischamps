@@ -23,7 +23,7 @@ export default {
 	}),
 
 	assertSession(req, res, next) {
-		if (!req.session || !req.session.user) {
+		if (!req.session?.user) {
 			req.session.auth_success_redirect = req.originalUrl;
 			res.redirect('/auth');
 		} else {
@@ -78,7 +78,19 @@ export default {
 		}
 
 		if (stoken.google) {
-		} // TODO
+			if (!user.hasGoogleToken()) {
+				// assumes token applies to use as-is
+				user.setGoogleToken(stoken.google);
+			} else {
+				if (user.google_token.access_token != stoken.google.access_token) {
+					// set the session token to be the same as user token
+					req.session.token = {
+						...stoken,
+						google: user.google_token,
+					};
+				}
+			}
+		}
 
 		if (next) next();
 	},

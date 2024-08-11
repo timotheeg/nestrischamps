@@ -21,6 +21,7 @@ CREATE TABLE user_identities (
 
     user_id BIGINT,
     login VARCHAR(40) DEFAULT NULL,
+    email VARCHAR ( 255 ),
 
 	created_at timestamptz NOT NULL DEFAULT NOW(),
 	updated_at timestamptz NOT NULL DEFAULT NOW(),
@@ -37,6 +38,7 @@ CREATE TABLE user_identities (
 
 CREATE UNIQUE INDEX IDX_user_identity on user_identities (provider, provider_user_id);
 CREATE UNIQUE INDEX IDX_user_identity_login on user_identities (provider, login);
+CREATE INDEX IDX_user_identity_email on user_identities (email);
 
 CREATE TABLE user_emails (
     user_id BIGINT NOT NULL,
@@ -75,9 +77,9 @@ begin
         end if;
         
         insert into user_identities
-            (provider, provider_user_id, user_id, login, created_at, updated_at, last_login_at)
+            (provider, provider_user_id, user_id, login, email, created_at, updated_at, last_login_at)
             values
-            ('twitch', f.id, new_user_id, f.login, f.created_at, f.created_at, f.last_login_at);
+            ('twitch', f.id, new_user_id, f.login, f.email, f.created_at, f.created_at, f.last_login_at);
         new_user_id := new_user_id + 1;
     end loop;
 end;

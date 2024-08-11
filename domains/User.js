@@ -167,6 +167,15 @@ class User extends EventEmitter {
 		return !!this.twitch_token;
 	}
 
+	setGoogleToken(token) {
+		// in memory only, not in DB
+		this.google_token = token;
+	}
+
+	hasGoogleToken() {
+		return !!this.google_token;
+	}
+
 	addConnection(conn) {
 		this.connections.add(conn);
 

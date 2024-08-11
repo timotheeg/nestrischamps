@@ -40,14 +40,19 @@ class UserDAO {
 
 		const identity = await dbPool.query(
 			`INSERT INTO user_identities
-			(provider, provider_user_id, login)
+			(provider, provider_user_id, login, email)
 			VALUES
-			($1, $2, $3)
+			($1, $2, $3, $4)
 			ON CONFLICT(provider, provider_user_id)
-			DO UPDATE SET login=$3, last_login_at=NOW()
+			DO UPDATE SET last_login_at=NOW()
 			RETURNING user_id
 			`,
-			[options.provider, user_data.id, user_data.login || null]
+			[
+				options.provider,
+				user_data.id,
+				user_data.login || null,
+				(user_data.email || '').toLowerCase() || null,
+			]
 		);
 
 		let user_id = identity.rows?.[0]?.user_id;
@@ -69,7 +74,12 @@ class UserDAO {
 						]
 					);
 				} else if (options.provider === 'google') {
-					// TODO: including finding a login
+					await dbPool.query(
+						`UPDATE users
+						SET profile_image_url=$1, last_login_at=NOW();
+						`,
+						[user_data.profile_image_url]
+					);
 				}
 			} else {
 				// no existing user mapped, which means we just created a new identity
@@ -176,8 +186,26 @@ class UserDAO {
 							);
 						}
 					}
-				} else if (provider === 'google') {
-					// TODO: including finding a login
+				} else if (options.provider === 'google') {
+					const res = await dbPool.query(
+						`INSERT INTO users
+						(login, secret, type, description, display_name, profile_image_url)
+						VALUES
+						($1, $2, $3, $4, $5, $6)
+						ON CONFLICT(login) DO NOTHING
+						RETURNING id
+						`,
+						[
+							user_data.login,
+							user_data.secret,
+							user_data.type,
+							user_data.description,
+							user_data.display_name,
+							user_data.profile_image_url,
+						]
+					);
+
+					user_id = res.rows?.[0]?.id;
 				}
 
 				console.log('updating user_identities', [
