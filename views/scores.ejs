@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>NestrisChamps: user settings</title>
-		<link rel="stylesheet" href="/vendor/bulma.0.9.4.min.css">
+		<link rel="stylesheet" href="/vendor/bulma.1.0.2.min.css">
 		<style>
 			.navbar-item img {
 				max-height: 2.5rem;
@@ -16,10 +16,6 @@
 
 			#scores td, #scores dd {
 				overflow-wrap: anywhere;
-			}
-
-			#scores tr.even {
-				background-color: #eee;
 			}
 		</style>
 </head>
@@ -41,7 +37,7 @@
 		<%- include('partials/pagination') %>
 
 		<!-- TODO: implement sort by field score and date -->
-		<table class="table is-bordered" id="scores">
+		<table class="table is-bordered is-striped is-hoverable" id="scores">
 		<thead>
 			<tr>
 				<th class="sorter" data-field="datetime">Date/Time</th>
@@ -60,8 +56,7 @@
 		<tbody>
 			<% scores.forEach((score, idx) => { %>
 			<% const datetime = score.datetime.toISOString(); %>
-			<tr class="<%= idx % 2 ? 'odd': 'even' %>">
-
+			<tr>
 				<td title="<%=datetime%>"><%= datetime.substr(0, 16).replace('T', ' ') %></td>
 				<td class="data-number" align="right"><%= score.start_level %></td>
 				<td class="data-number" align="right"><%= score.end_level %></td>

@@ -23,7 +23,7 @@ export default {
 	}),
 
 	assertSession(req, res, next) {
-		if (!req.session || !req.session.user) {
+		if (!req.session?.user) {
 			req.session.auth_success_redirect = req.originalUrl;
 			res.redirect('/auth');
 		} else {
@@ -31,25 +31,65 @@ export default {
 		}
 	},
 
-	async checkToken(req, res, next) {
+	async checkToken(req, _res, next) {
+		// synchronizes the oauth provider tokens if needed
 		const user = await UserDAO.getUserById(req.session.user.id);
 
-		if (req.session.token) {
-			if (!user.hasTwitchToken()) {
-				// assumes session has token!
-				user.setTwitchToken(req.session.token);
-			} else {
-				// verify if the user token has been refreshed and if the session should be updated accordingly
-				const utoken = user.token;
-				const stoken = req.session.token;
+		if (!user) {
+			if (next) next();
+			return;
+		}
 
-				if (utoken.access_token != stoken.access_token) {
+		// TODO: remove `|| token` when all sessions have expired - possibly truncate the session table to force
+		const stoken = req.session.token;
+
+		if (stoken?.twitch) {
+			if (!user.hasTwitchToken()) {
+				// assumes token applies to use as-is
+				user.setTwitchToken(stoken.twitch);
+			} else {
+				if (user.twitch_token.access_token != stoken.twitch.access_token) {
 					// set the session token to be the same as user token
-					req.session.token = utoken;
+					req.session.token = {
+						...stoken,
+						twitch: user.twitch_token,
+					};
 				}
 			}
-		} else if (user.hasTwitchToken()) {
-			req.session.token = user.token;
+		} else if (stoken?.access_token) {
+			// old style - twitch only
+			// convert to new style
+			// TODO: modify when adding google auth
+			if (!user.hasTwitchToken()) {
+				// assumes token applies to use as-is
+				user.setTwitchToken(stoken);
+			} else {
+				if (user.twitch_token.access_token != stoken.access_token) {
+					// set the session token to be the same as user token
+					req.session.token = { twitch: user.twitch_token };
+				}
+			}
+		}
+
+		if (user.hasTwitchToken() && !stoken?.twitch) {
+			req.session.token = {
+				twitch: user.twitch_token,
+			};
+		}
+
+		if (stoken?.google) {
+			if (!user.hasGoogleToken()) {
+				// assumes token applies to use as-is
+				user.setGoogleToken(stoken.google);
+			} else {
+				if (user.google_token.access_token != stoken.google.access_token) {
+					// set the session token to be the same as user token
+					req.session.token = {
+						...stoken,
+						google: user.google_token,
+					};
+				}
+			}
 		}
 
 		if (next) next();

@@ -7,7 +7,12 @@
 	<title>NestrisChamps: Login with Twitch</title>
 	<meta name="description" content="Login to access NestrisChamps tracking features" />
 
-	<link rel="stylesheet" href="/vendor/bulma.0.9.4.min.css">
+	<link rel="stylesheet" href="/vendor/bulma.1.0.2.min.css">
+	<style>
+		.navbar-item img {
+        	max-height: 2.5rem;
+		}
+    </style>
 </head>
 <body>
 
@@ -18,11 +23,18 @@
 		<h1 class="title is-1">
 			Login is required
 		</h1>
-		<p>In order to use NestrisChamps's features, you must be logged in. Click the button below to get started.</p>
-		<p class="buttons">
-			<a class="button is-primary" href="<%= twitch_login_url %>">
-				<strong>Log in with Twitch</strong>
+		<p class="block">In order to use NestrisChamps's features, you must be logged in. Click the button below to get started.</p>
+		
+		<p class="block buttons are-medium">
+			<a class="button" href="/auth/twitch">
+				<img src="/images/identity_providers/twitch.png" width="30" height="30" />&nbsp;Log in with Twitch
 			</a>
+
+			<!--
+			<a class="button" href="/auth/google">
+				<img src="/images/identity_providers/google.png" width="30" height="30" />&nbsp;Log in with Google
+			</a>
+			-->
 		</p>
 	</div>
 </section>

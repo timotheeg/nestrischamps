@@ -19,6 +19,14 @@ router.get('/', (req, res) => {
 	res.render('intro');
 });
 
+router.get('/privacy', (req, res) => {
+	res.render('privacy');
+});
+
+router.get('/terms', (req, res) => {
+	res.render('terms');
+});
+
 router.get(
 	'/room/admin',
 	middlewares.assertSession,

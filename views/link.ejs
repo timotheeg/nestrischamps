@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>NestrisChamps: Login with Twitch</title>
+	<meta name="description" content="Login to access NestrisChamps tracking features" />
+
+	<link rel="stylesheet" href="/vendor/bulma.1.0.2.min.css">
+    <style>
+		.navbar-item img {
+        	max-height: 2.5rem;
+		}
+    </style>
+</head>
+<body>
+
+<%- include('header'); %>
+
+<section class="section">
+	<div class="container">
+		<h1 class="title is-1">
+			Link your account to other identity providers
+		</h1>
+
+        <div class="block">
+            <ul>
+                <li>NTC user ID: <strong><%= user.id %></strong></li>
+                <li>NTC username (used in room links): <strong><%= user.login %></strong></li>
+            </dl>
+        </div>
+    
+        <div class="block">
+            <table class="table is-bordered is-striped is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Created at</th>
+                        <th>Last Login at</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% identities.forEach((id, idx) => { %>
+                        <tr>
+                            <td class="has-text-centered is-vcentered">
+                                <img title="<%= id.provider %>" width="30" height="30" src="/images/identity_providers/<%= id.provider %>.png" />
+                            </td>
+                            <td class="has-text-centered is-vcentered">
+                                <%= id.provider_user_id %>
+                            </td>
+                            <td class="has-text-centered is-vcentered">
+                                <%= id.login %>
+                            </td>
+                            <td class="has-text-centered is-vcentered">
+                                <%= id.email %>
+                            </td>
+                            <td class="has-text-centered is-vcentered">
+                                <%= id.created_at.toISOString().slice(0, 19).replace('T', ' ') %>
+                            </td>
+                            <td class="has-text-centered is-vcentered">
+                                <%= id.last_login_at.toISOString().slice(0, 19).replace('T', ' ') %>
+                            </td>
+                            <td class="has-text-centered is-vcentered">
+                                <% if (identities.length <= 1) { %>
+                                    <button class="button" disabled>delete</button>
+                                <% } else { %>
+                                    <a class="button" href="/auth/unlink/<%= id.id %>">delete</a>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>        
+                </tbody>
+            </table>
+        </div>
+        <div class="block">
+            <% if (!providers.google) { %>
+                <a class="button" href="/auth/link/google">
+                    <img src="/images/identity_providers/google.png" width="30" height="30" />&nbsp;Link Google account
+                </a>
+            <% } %>
+            <% if (!providers.twitch) { %>
+                <a class="button" href="/auth/link/twitch">
+                    <img src="/images/identity_providers/twitch.png" width="30" height="30" />&nbsp;Link Twitch account
+                </a>
+            <% } %>
+        </div>
+	</div>
+</section>
+
+</body>
+</html>

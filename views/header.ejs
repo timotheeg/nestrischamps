@@ -1,7 +1,12 @@
 <nav class="navbar" role="navigation" aria-label="main navigation">
 	<div class="navbar-brand">
 		<a class="navbar-item" href="/">
-			<img src="/brand/logo_header.2.png" width="180" height="34">
+			<picture>
+				<source 
+				  srcset="/brand/logo_header.2.dark.png" 
+				  media="(prefers-color-scheme: dark)" />
+				  <img src="/brand/logo_header.2.png" width="180" height="34">
+			</picture>
 		</a>
 	</div>
 
@@ -35,11 +40,25 @@
 					<a class="navbar-item" href="/#philosophy">
 						Philosophy
 					</a>
+
 					<hr class="navbar-divider">
+
 					<a class="navbar-item" href="https://discord.gg/ZsMFdhzyk3">
 						Join discord
 					</a>
+
 					<hr class="navbar-divider">
+
+					<a class="navbar-item" href="/privacy">
+						Privacy statement
+					</a>
+
+					<a class="navbar-item" href="/terms">
+						Terms of Service
+					</a>
+
+					<hr class="navbar-divider">
+
 					<a class="navbar-item" href="https://github.com/timotheeg/nestrischamps/issues/new">
 						Report an issue
 					</a>
@@ -81,7 +100,9 @@
 						<a class="navbar-item" href="/stats/progress">
 							My progress chart
 						</a>
+
 						<hr class="navbar-divider">
+
 						<a class="navbar-item" href="/settings">
 							My settings
 						</a>
@@ -93,19 +114,28 @@
 
 			<% } else { %>
 
-				<div class="navbar-item">
-					<div class="buttons">
-						<% if (process.env.TWITCH_CLIENT_ID) { %>
-							<a class="button is-primary" href="<%= twitch_login_url %>">
-								<strong>Log in with Twitch</strong>
-							</a>
-						<% } else { %>
-							<a class="button is-primary" href="/settings">
-								<strong>Local log in</strong>
-							</a>
-						<% } %>
+				<% if (!process.env.IS_PUBLIC_SERVER) { %>
+					<div class="navbar-item">
+						<a class="button is-primary" href="/settings">
+							<strong>Local log in</strong>
+						</a>
 					</div>
-				</div>
+				<% } else { %>
+					<div class="navbar-item has-dropdown is-hoverable">
+						<a class="navbar-link" href="/auth/login">Log in</a>
+
+						<div class="navbar-dropdown is-right">
+							<a class="navbar-item" href="/auth/twitch">
+								<img src="/images/identity_providers/twitch.png" width="20" height="20" /><strong>Log in with Twitch</strong>
+							</a>
+							<!--
+							<a class="navbar-item" href="/auth/google">
+								<img src="/images/identity_providers/google.png" width="20" height="20" /><strong>Log in with Google</strong>
+							</a>
+							-->
+						</div>
+					</div>
+				<% } %>
 
 			<% } %>
 

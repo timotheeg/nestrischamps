@@ -363,7 +363,7 @@ class ScoreDAO {
 		const result = await dbPool.query(
 			`
 			SELECT s.*, u.login, u.display_name, u.profile_image_url, u.country_code
-			FROM scores s, twitch_users u
+			FROM scores s, users u
 			WHERE s.player_id=u.id
 				AND s.id=$1
 			`,
