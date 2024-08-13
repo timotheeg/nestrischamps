@@ -17,6 +17,29 @@ app.set('view engine', 'ejs');
 app.set('trust proxy', 1); // trust first proxy (i.e. heroku) -- needed to get req.protocol correctly
 
 app.use(cors());
+
+const pMap = {
+	http: 'https',
+	https: 'https',
+	ws: 'wss',
+	wss: 'wss',
+};
+
+// heroku redirector
+app.use((req, res, next) => {
+	if (process.env.IS_LIVE_HEROKU) {
+		if (req.hostname === 'nestrischamps.herokuapp.com') {
+			res.redirect(
+				301,
+				`${pMap[req.protocol]}://nestrischamps.io${req.originalUrl}`
+			);
+			return;
+		}
+	}
+
+	next();
+});
+
 app.use(express.static('public'));
 app.use(middlewares.sessionMiddleware);
 
