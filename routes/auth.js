@@ -49,6 +49,10 @@ if (process.env.IS_PUBLIC_SERVER) {
 		res.render('login');
 	});
 
+	router.get('/login', (_req, res) => {
+		res.render('login');
+	});
+
 	router.get('/twitch', (req, res) => {
 		res.redirect(getTwitchAuthUrl(req));
 	});
