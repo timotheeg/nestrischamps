@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-
+	<%- include('partials/gtm_head') %>
 	<title>NestrisChamps: Capture your NES Classic Tetris gameplay</title>
 	<meta name="description" content="NestrisChamps: capture NES Classic Tetris data and see awesome stats. Record all your games. See your progression. Play with friends and organise tournaments!" />
-
 	<meta property="og:url" content="https://nestrischamps.io/" />
 	<meta property="og:type" content="website" />
 	<meta property="og:image" content="https://nestrischamps.io/views/1p/das_trainer.jpg" />
@@ -46,7 +43,7 @@
 		}
 	</script>
 </head>
-<body>
+<body><%- include('partials/gtm_body') %>
 
 <%- include('header'); %>
 
