@@ -78,8 +78,9 @@ class UserDAO {
 				await dbPool.query(
 					`UPDATE users
 					SET profile_image_url=$1, last_login_at=NOW();
+					WHERE id=$2
 					`,
-					[user_data.profile_image_url]
+					[user_data.profile_image_url, user_id]
 				);
 			} else {
 				// no existing user mapped, which means we just created a new identity
