@@ -94,6 +94,7 @@ class UserDAO {
 						`SELECT user_id
 						FROM user_emails
 						WHERE email=$1
+						LIMIT 2
 						`,
 						[user_data.email.toLowerCase()]
 					);
