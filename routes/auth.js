@@ -20,6 +20,14 @@ const TWITCH_LOGIN_QS = new URLSearchParams({
 	force_verify: true,
 });
 
+const DISCORD_LOGIN_BASE_URI = 'https://discord.com/oauth2/authorize?';
+const DISCORD_LOGIN_QS = new URLSearchParams({
+	client_id: process.env.DISCORD_CLIENT_ID,
+	scope: 'identify email',
+	response_type: 'code',
+	force_verify: true,
+});
+
 import UserDAO from '../daos/UserDAO.js';
 
 const router = express.Router();
@@ -44,6 +52,16 @@ function getGoogleAuthUrl() {
 	});
 }
 
+function getDiscordAuthUrl(req) {
+	DISCORD_LOGIN_QS.set(
+		'redirect_uri',
+		`${req.protocol}://${req.get('host')}/auth/discord/callback`
+	);
+
+	const qs = DISCORD_LOGIN_QS.toString();
+
+	return `${DISCORD_LOGIN_BASE_URI}${qs}`;
+}
 if (process.env.IS_PUBLIC_SERVER) {
 	router.get('/', (_req, res) => {
 		res.render('login');
@@ -59,6 +77,9 @@ if (process.env.IS_PUBLIC_SERVER) {
 
 	router.get('/google', (req, res) => {
 		res.redirect(getGoogleAuthUrl(req));
+	});
+	router.get('/discord', (req, res) => {
+		res.redirect(getDiscordAuthUrl(req));
 	});
 } else {
 	router.get('/', (_req, res) => {
@@ -275,6 +296,105 @@ router.get('/google/callback', async (req, res) => {
 	}
 });
 
+router.get('/discord/callback', async (req, res) => {
+	console.log(`Discord callback received with code [${req.query.code}]`);
+
+	if (!req.query.code) {
+		res
+			.status(400)
+			.send(
+				`Unable to authenticate [${req.query.error}]: ${req.query.error_description}`
+			);
+		return;
+	}
+
+	console.log(`Discord get access token`);
+
+	try {
+		const { body: token } = await got.post(
+			'https://discord.com/api/oauth2/token',
+			{
+				username: process.env.DISCORD_CLIENT_ID,
+				password: process.env.DISCORD_CLIENT_SECRET,
+				form: {
+					code: req.query.code,
+					grant_type: 'authorization_code',
+					redirect_uri: `${req.protocol}://${req.get(
+						'host'
+					)}/auth/discord/callback`,
+				},
+				responseType: 'json',
+			}
+		);
+
+		console.log(`Retrieved oauth token`, token);
+
+		// finally can get user data from user id
+		const { body: user_object } = await got.get(
+			'https://discord.com/api/users/@me',
+			{
+				headers: {
+					authorization: `${token.token_type} ${token.access_token}`,
+				},
+				responseType: 'json',
+			}
+		);
+
+		console.log({ data: user_object });
+
+		// transform discord response into twitch-like user object
+		user_object.profile_image_url = `https://cdn.discordapp.com/avatars/${user_object.id}/${user_object.avatar}?size=512`;
+		user_object.login = user_object.username;
+		user_object.secret = ULID.ulid();
+		user_object.type = '';
+		user_object.display_name = user_object.global_name;
+
+		// NEED more logic here to check BOTh the users and oauth users table sigh...
+		const user = await UserDAO.createUser(user_object, {
+			provider: 'discord',
+			current_user: req.session?.user,
+			pending_linkage: req.session?.pending_linkage_expiry > Date.now(),
+		});
+
+		// pending linkage is single use
+		if (req.session?.pending_linkage_expiry) {
+			req.session.pending_linkage_expiry = null;
+			delete req.session.pending_linkage_expiry;
+		}
+
+		console.log(
+			`Retrieved user object from DB for ${user_object.id} (${user_object.login})`
+		);
+
+		user.setDiscordToken(token);
+
+		// TODO: modify when adding google auth
+		req.session.token = {
+			discord: token,
+		};
+
+		req.session.user = {
+			id: user.id,
+			login: user.login,
+			secret: user.secret,
+			profile_image_url: user.profile_image_url,
+		};
+
+		req.session.save(() => {
+			console.log('Stored session user as', req.session.user);
+			res.redirect(req.session.auth_success_redirect || '/');
+		});
+	} catch (err) {
+		console.error(`Error when processing Discord callback`);
+		console.error(err);
+		res
+			.status(500)
+			.send(
+				`An unexpected error occured with your Twich login: ${err.message}. Please try again later`
+			);
+	}
+});
+
 router.get('/link/twitch', middlewares.assertSession, async (req, res) => {
 	req.session.auth_success_redirect = '/auth/link';
 	req.session.pending_linkage_expiry = Date.now() + 120000; // 2 minute max to complete linkage
@@ -285,6 +405,12 @@ router.get('/link/google', middlewares.assertSession, async (req, res) => {
 	req.session.auth_success_redirect = '/auth/link';
 	req.session.pending_linkage_expiry = Date.now() + 120000; // 2 minute max to complete linkage
 	res.redirect(getGoogleAuthUrl(req));
+});
+
+router.get('/link/discord', middlewares.assertSession, async (req, res) => {
+	req.session.auth_success_redirect = '/auth/link';
+	req.session.pending_linkage_expiry = Date.now() + 120000; // 2 minute max to complete linkage
+	res.redirect(getDiscordAuthUrl(req));
 });
 
 router.get('/link', middlewares.assertSession, async (req, res) => {
@@ -310,7 +436,7 @@ router.get(
 			identity => (identity.id = req.params.identity_id)
 		);
 
-		// we obnly accept to remove an identity if it's not the last one
+		// we only accept to remove an identity if it's not the last one
 		if (identity && identities.length > 1) {
 			const res = await UserDAO.removeIdentity(
 				req.session.user.id,
