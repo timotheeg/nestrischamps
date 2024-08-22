@@ -167,6 +167,15 @@ class User extends EventEmitter {
 		return !!this.twitch_token;
 	}
 
+	setDiscordToken(token) {
+		// in memory only, not in DB
+		this.discord_token = token;
+	}
+
+	hasDiscordToken() {
+		return !!this.discord_token;
+	}
+
 	setGoogleToken(token) {
 		// in memory only, not in DB
 		this.google_token = token;

@@ -86,6 +86,11 @@
                     <img src="/images/identity_providers/twitch.png" width="30" height="30" />&nbsp;Link Twitch account
                 </a>
             <% } %>
+            <% if (!providers.discord) { %>
+                <a class="button" href="/auth/link/discord">
+                    <img src="/images/identity_providers/discord.png" width="30" height="30" />&nbsp;Link Discord account
+                </a>
+            <% } %>
         </div>
 	</div>
 </section>
