@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/stats-boxes_1080.css" />
+		<style>
+			#board_stats {
+				top: 896px;
+				height: 153px;
+			}
+
+			#piece_stats {
+				top: 632px;
+			}
+
+			#high_scores {
+				height: 465px;
+			}
+
+			#high_scores .header {
+				padding-bottom: 18px;
+			}
+
+			#tetris_rate {
+				left: 696px;
+				top: 440px;
+				--border-size: 12;
+				padding: 3px 0;
+			}
+
+			#points {
+				top: 210px;
+				height: 209px;
+			}
+
+			#lines_stats {
+				height: 181px;
+			}
+
+			#points {
+				top: 205px;
+				height: 214px;
+			}
+
+			#lines_stats .content,
+			#points .content {
+				padding-top: 0;
+			}
+
+			#video {
+				top: 267px;
+			}
+
+			#chat {
+				top: 502px;
+				height: 547px;
+			}
+
+			#chat .content {
+				height: 511px;
+			}
+
+			#das {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div class="box external" id="video">
+				PLAYER VIDEO FEED<br />GOES HERE
+			</div>
+
+			<div class="box" id="tetris_stage">
+				<canvas width="395" height="795" />
+			</div>
+
+			<div class="box" id="chat">
+				<div class="header">CHAT</div>
+				<div class="content"></div>
+			</div>
+
+			<div class="box" id="pbs">
+				<div class="header">PBs</div>
+				<table class="content" align="center">
+					<thead>
+						<tr>
+							<th>Start</th>
+							<th>End</th>
+							<th>Score</th>
+							<th>Lines</th>
+							<th>Das</th>
+							<th>Trt</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="s18">
+							<td class="start_level">18</td>
+							<td class="end_level">--</td>
+							<td class="score">-------</td>
+							<td class="lines">---</td>
+							<td class="das_avg">--.-</td>
+							<td class="tetris_rate">--%</td>
+						</tr>
+						<tr class="s19">
+							<td class="start_level">19</td>
+							<td class="end_level">--</td>
+							<td class="score">-----</td>
+							<td class="lines">---</td>
+							<td class="das_avg">--.-</td>
+							<td class="tetris_rate">--%</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="box" id="high_scores">
+				<div class="header">HIGH SCORES</div>
+				<table class="content">
+					<tr>
+						<th>SESSION</th>
+						<th>OVERALL</th>
+					</tr>
+					<tr>
+						<td class="session">
+							<table>
+								<thead>
+									<tr>
+										<th>Start</th>
+										<th>Score</th>
+										<th>Trt</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+								</tbody>
+
+								<tbody></tbody>
+							</table>
+						</td>
+						<td class="overall">
+							<table>
+								<thead>
+									<tr>
+										<th>Start</th>
+										<th>Score</th>
+										<th>Trt</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+									<tr>
+										<td>00</td>
+										<td>0000000</td>
+										<td>00%</td>
+									</tr>
+								</tbody>
+
+								<tbody></tbody>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="box" id="next_piece">
+				<div class="content">
+					<canvas width="174" height="91" />
+				</div>
+			</div>
+
+			<div class="box" id="tetris_rate">
+				<div class="header">TRT <span class="value">00%</span></div>
+				<div class="content">
+					<canvas class="bounded" width="381" height="130" />
+				</div>
+			</div>
+
+			<div class="box" id="level">
+				<div class="header">LEVEL</div>
+				<div class="content value">00</div>
+			</div>
+
+			<div class="box" id="lines">
+				<div class="header">LINES</div>
+				<div class="content">000</div>
+			</div>
+
+			<div class="box" id="burn">
+				<div class="header">BRN</div>
+				<div class="content">00</div>
+			</div>
+
+			<div class="box" id="efficiency">
+				<div class="header">EFF</div>
+				<div class="content">000</div>
+			</div>
+
+			<div class="box" id="score">
+				<div class="header">SCORE</div>
+				<table class="content">
+					<tr class="running">
+						<th>R</th>
+						<td class="value">0000000</td>
+					</tr>
+					<tr class="transition">
+						<th>T</th>
+						<td class="value">-------</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="box" id="droughts">
+				<div class="header">I-DRT <span class="count">000</span></div>
+				<table class="content">
+					<tr class="hgauge current">
+						<th>Cur</th>
+						<td class="gauge"><canvas width="290" height="22" /></td>
+						<td class="value">00</td>
+					</tr>
+					<tr class="hgauge last">
+						<th>Last</th>
+						<td class="gauge"><canvas width="290" height="22" /></td>
+						<td class="value">00</td>
+					</tr>
+					<tr class="hgauge max">
+						<th>Max</th>
+						<td class="gauge"><canvas width="290" height="22" /></td>
+						<td class="value">00</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="box" id="piece_stats">
+				<table class="content">
+					<thead>
+						<tr class="headers">
+							<th class="header distribution" colspan="7">
+								PIECES
+								<span class="count">000</span>
+								- DEV
+
+								<i>28</i><span class="deviation_28">00.0</span> <i>56</i
+								><span class="deviation_56">00.0</span> <i>all</i
+								><span class="deviation_all">00.0</span>
+							</th>
+						</tr>
+
+						<tr class="headers">
+							<th></th>
+							<th class="count">#</th>
+							<th class="percent">%</th>
+							<th class=""></th>
+							<th class="drought">DRT</th>
+							<th class="drought">MAX</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="piece T">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece J">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece Z">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece O">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece S">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece L">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece I">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="box" id="board_stats">
+				<div class="header">
+					<span class="label">HEIGHT &amp; STATE</span>
+					<span class="info_labels">
+						<span class="label tetris_ready">Tetris ready</span>
+						-
+						<span class="label clean_slope">Clean Slope</span>
+						-
+						<span class="label double_well">Double Well</span>
+						-
+						<span class="label drought">Drought</span>
+					</span>
+				</div>
+				<div class="content">
+					<canvas class="bounded" width="1068" height="126" />
+				</div>
+			</div>
+
+			<div class="box" id="runway">
+				<div class="header">GAME RUNWAY</div>
+				<div class="content">0000000</div>
+			</div>
+
+			<div class="box" id="lines_stats">
+				<div class="header">LINES <span class="count">000</span></div>
+				<div class="content">
+					<table>
+						<tr class="singles">
+							<th>Singles</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="doubles">
+							<th>Doubles</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="triples">
+							<th>Triples</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="tetris">
+							<th>Tetris</th>
+							<td class="count">000</td>
+							<td class="line_count">000</td>
+							<td class="percent">00%</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<div class="box" id="points">
+				<div class="header">POINTS <span class="count">0000000</span></div>
+				<div class="content">
+					<table>
+						<tr class="drops">
+							<th>Drops</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="singles">
+							<th>Singles</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="doubles">
+							<th>Doubles</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="triples">
+							<th>Triples</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+						<tr class="tetris">
+							<th>Tetris</th>
+							<td class="count">000000</td>
+							<td class="percent">00%</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- End Stream BG -->
+
+		<script>
+			const PREVIEW_PIXEL_SIZE = 5;
+			const BOARD_PIXEL_SIZE = 5;
+			const DOT_SIZE_TRT = 5;
+			const DOT_SIZE_PIECE_DISTRIBUTION = 5;
+			const BAR_WIDTH_DROUGHT_GAUGE = 3;
+			const BAR_WIDTH_INSTANT_DAS = 4;
+			const DOT_SIZE_DAS_N_BOARD = 5;
+			const BOARD_HEIGHT_BLOCK_HEIGHT = 3;
+			const BOARD_HEIGHT_STAT_BARS_GAP = 2;
+			const NUM_HIGH_SCORES = 11;
+
+			const view_meta = new URLSearchParams({
+				video: '320x240',
+			});
+		</script>
+		<script type="module" src="/views/main.js"></script>
+	</body>
+</html>
