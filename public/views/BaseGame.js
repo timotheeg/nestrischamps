@@ -298,6 +298,7 @@ export default class BaseGame {
 				count: 0,
 				percent: 0,
 				drought: 0,
+				max_drought: 0,
 				indexes: [],
 			};
 
@@ -872,14 +873,18 @@ export default class BaseGame {
 
 		this.data.pieces.count++;
 		this.data.pieces[cur_piece].count++;
+		this.data.pieces[cur_piece].drought = 0;
 
 		// handle droughts
 		PIECES.forEach(name => {
-			const stats = this.data.pieces[name];
-			stats.drought++; // all droughts increase
 			stats.percent = stats.count / this.data.pieces.count;
+
+			if (cur_piece === name) return;
+
+			const stats = this.data.pieces[name];
+			stats.drought++;
+			if (stats.drought > stats.max_drought) stats.max_drought = stats.drought;
 		});
-		this.data.pieces[cur_piece].drought = 0; // current piece drought resets
 
 		// handle I droughts
 		if (cur_piece === 'I') {
