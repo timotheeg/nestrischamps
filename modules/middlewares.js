@@ -12,7 +12,7 @@ export default {
 		resave: false,
 		saveUninitialized: true,
 		cookie: {
-			secure: !!process.env.IS_PUBLIC_SERVER,
+			secure: process.env.IS_PUBLIC_SERVER === '1',
 		},
 		genid: uuidv4,
 		store: new pgSession({

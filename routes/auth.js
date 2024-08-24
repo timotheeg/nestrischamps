@@ -62,7 +62,7 @@ function getDiscordAuthUrl(req) {
 
 	return `${DISCORD_LOGIN_BASE_URI}${qs}`;
 }
-if (process.env.IS_PUBLIC_SERVER) {
+if (process.env.IS_PUBLIC_SERVER === '1') {
 	router.get('/', (_req, res) => {
 		res.render('login');
 	});

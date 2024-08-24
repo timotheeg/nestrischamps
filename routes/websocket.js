@@ -167,7 +167,7 @@ export default function init(server, wss) {
 			return;
 		}
 
-		if (!process.env.IS_PUBLIC_SERVER) {
+		if (process.env.IS_PUBLIC_SERVER !== '1') {
 			m = request.nc_url.pathname.match(/^\/ws\/room\/admin\/([a-zA-Z0-9-]+)/);
 
 			request.is_secret_admin = !!m;

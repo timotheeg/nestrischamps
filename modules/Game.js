@@ -65,7 +65,7 @@ class Game {
 							`Unable to upload game file ${this.frame_file}: ${err.message}`
 						)
 				);
-			} else if (!process.env.IS_PUBLIC_SERVER) {
+			} else if (process.env.IS_PUBLIC_SERVER !== '1') {
 				// Saving on local filesystem
 
 				fs.mkdirSync(dir, { recursive: true }); // sync action is no good! Can we do without the sync? 😰

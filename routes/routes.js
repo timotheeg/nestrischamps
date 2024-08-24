@@ -34,7 +34,7 @@ router.get(
 	async (req, res) => {
 		const data = { countries };
 
-		if (process.env.IS_PUBLIC_SERVER) {
+		if (process.env.IS_PUBLIC_SERVER === '1') {
 			data.users = null;
 		} else {
 			data.users = await UserDAO.getAssignableUsers();
