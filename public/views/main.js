@@ -656,8 +656,6 @@ function renderDasNBoardStats(frame) {
 		),
 		to_draw = frame.pieces.slice(-1 * max_pixels);
 
-	let cur_x = 0;
-
 	dom.board_stats.ctx.fillStyle = BOARD_COLORS.floor;
 	dom.board_stats.ctx.fillRect(0, 60, dom.board_stats.ctx.canvas.width, 1);
 
