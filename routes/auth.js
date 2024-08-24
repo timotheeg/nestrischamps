@@ -155,7 +155,9 @@ router.get('/twitch/callback', async (req, res) => {
 			}
 		);
 
-		console.log(`Completed token validation for ${user_response.body.user_id}`);
+		const twitch_user_id = user_response.body.user_id;
+
+		console.log(`Completed token validation for ${twitch_user_id}`);
 
 		// finally can get user data from user id
 		const user_data_response = await got.get(
@@ -166,7 +168,7 @@ router.get('/twitch/callback', async (req, res) => {
 					'Authorization': `Bearer ${token.access_token}`,
 				},
 				searchParams: {
-					id: user_response.body.user_id,
+					id: twitch_user_id,
 				},
 				responseType: 'json',
 			}
@@ -177,7 +179,7 @@ router.get('/twitch/callback', async (req, res) => {
 		const user_object = user_data_response.body.data[0];
 
 		console.log(
-			`Retrieved user data for ${user_response.body.user_id} (${user_object.login})`
+			`Retrieved user data for ${user_object.id} (${user_object.login})`
 		);
 
 		// augment use object with data we retrieve previously
@@ -197,14 +199,20 @@ router.get('/twitch/callback', async (req, res) => {
 		}
 
 		console.log(
-			`Retrieved user object from DB for ${user_response.body.user_id} (${user_object.login})`
+			`Retrieved user object from DB for user id ${user.id} via Twitch user (${twitch_user_id} - ${user_object.login})`
 		);
 
-		user.setTwitchToken(token);
+		const augmented_twitch_token = {
+			...token,
+			id: user_object.id,
+			login: user_object.login,
+		};
+
+		user.setTwitchToken(augmented_twitch_token);
 
 		// TODO: modify when adding google auth
 		req.session.token = {
-			twitch: token,
+			twitch: augmented_twitch_token,
 		};
 
 		req.session.user = {

@@ -291,7 +291,7 @@ class User extends EventEmitter {
 	}
 
 	async _connectToTwitchChat() {
-		if (this.chat_client || !this.twitch_token) {
+		if (this.chat_client || !this.twitch_token?.id) {
 			return;
 		}
 
@@ -302,13 +302,18 @@ class User extends EventEmitter {
 			obtainmentTimestamp: 0,
 		};
 
-		twitchRefreshEmitter.addListener(this.id, this._onTwitchTokenRefreshed);
-		authProvider.addUser(this.id, twurpleToken, [`chat:${this.id}`]);
+		twitchRefreshEmitter.addListener(
+			this.twitch_token.id,
+			this._onTwitchTokenRefreshed
+		);
+		authProvider.addUser(this.twitch_token.id, twurpleToken, [
+			`chat:${this.twitch_token.id}`,
+		]);
 
 		this.chat_client = new ChatClient({
 			authProvider,
-			authIntents: [`chat:${this.id}`],
-			channels: [this.login],
+			authIntents: [`chat:${this.twitch_token.id}`],
+			channels: [this.twitch_token.login],
 			readOnly: true,
 			logger: {
 				minLevel: 'info',
@@ -336,8 +341,8 @@ class User extends EventEmitter {
 			this.send([
 				'message',
 				{
-					user: this.login,
-					username: this.login,
+					user: this.twitch_token.login,
+					username: this.twitch_token.login,
 					display_name: this.display_name,
 					message: `Thanks to ${user} for subscribing to the channel!`,
 				},
@@ -348,8 +353,8 @@ class User extends EventEmitter {
 			this.send([
 				'message',
 				{
-					user: this.login,
-					username: this.login,
+					user: user,
+					username: user,
 					display_name: raidInfo.displayName,
 					message: `Woohoo! ${raidInfo.displayName} is raiding with a party of ${raidInfo.viewerCount}. Thanks for the raid ${raidInfo.displayName}!`,
 				},
@@ -358,7 +363,9 @@ class User extends EventEmitter {
 
 		await this.chat_client.connect();
 
-		console.log(`TWITCH: chat_client connected for ${this.login}`);
+		console.log(
+			`TWITCH: chat_client connected for ${this.twitch_token.login} - ${this.twitch_token.id}`
+		);
 	}
 }
 
