@@ -859,15 +859,15 @@ export default class BaseGame {
 		this.prior_preview = data.preview;
 		this.pending_prior_preview = true;
 
-		if (this.is_classic_rom) {
-			// fake das stats
-			this.data.das.cur = -1;
-		} else if (data.cur_piece_das !== null) {
+		if (data.cur_piece_das !== null) {
 			// record real das stats
 			this.data.das.cur = data.cur_piece_das;
 			this.data.das.total += data.cur_piece_das;
 			this.data.das.avg = this.data.das.total / (this.pieces.length + 1); // +1 because we add piece event to array later
 			this.data.das[DAS_THRESHOLDS[this.data.das.cur]]++; // great, ok, bad
+		} else {
+			// fake das stats
+			this.data.das.cur = -1;
 		}
 
 		this.data.pieces.count++;
