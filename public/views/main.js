@@ -722,11 +722,14 @@ function renderDasNBoardStats(frame) {
 			);
 		}
 
+		const state_bars_y_baseline =
+			board_state_v_separator + 1 + BOARD_HEIGHT_STAT_BARS_GAP;
+
 		if (board_stats.tetris_ready) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.tetris_ready;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				board_state_v_separator + 1 + BOARD_HEIGHT_STAT_BARS_GAP,
+				state_bars_y_baseline,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -736,9 +739,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.clean_slope;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				board_state_v_separator +
-					1 +
-					(BOARD_HEIGHT_STAT_BARS_GAP + pixel_size) * 1,
+				state_bars_y_baseline + (BOARD_HEIGHT_STAT_BARS_GAP + pixel_size) * 1,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -748,9 +749,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.double_well;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				board_state_v_separator +
-					1 +
-					(BOARD_HEIGHT_STAT_BARS_GAP + pixel_size) * 2,
+				state_bars_y_baseline + (BOARD_HEIGHT_STAT_BARS_GAP + pixel_size) * 2,
 				pixel_size + 1,
 				pixel_size
 			);
@@ -760,9 +759,7 @@ function renderDasNBoardStats(frame) {
 			dom.board_stats.ctx.fillStyle = BOARD_COLORS.drought;
 			dom.board_stats.ctx.fillRect(
 				idx * (pixel_size + 1) - 1,
-				board_state_v_separator +
-					1 +
-					(BOARD_HEIGHT_STAT_BARS_GAP + pixel_size) * 3,
+				state_bars_y_baseline + (BOARD_HEIGHT_STAT_BARS_GAP + pixel_size) * 3,
 				pixel_size + 1,
 				pixel_size
 			);
