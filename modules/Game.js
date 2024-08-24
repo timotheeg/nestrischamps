@@ -379,7 +379,9 @@ class Game {
 	onPiece(data) {
 		let cur_piece;
 
-		if (this.IS_CLASSIC_ROM) {
+		if (data.cur_piece !== null) {
+			cur_piece = data.cur_piece; // 💪
+		} else if (this.IS_CLASSIC_ROM) {
 			if (this.num_pieces === 0) {
 				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
 			} else {
@@ -389,9 +391,6 @@ class Game {
 			// record new state
 			this.num_pieces = this._getNumPieces(data);
 			PIECES.forEach(p => (this.data[p] = data[p]));
-		} else if (data.cur_piece_das !== null) {
-			cur_piece = data.cur_piece; // 💪
-			this.das_total += data.cur_piece_das;
 		} else {
 			cur_piece = this.prior_preview;
 		}
@@ -409,6 +408,10 @@ class Game {
 			if (++this.cur_drought === 13) {
 				this.num_droughts += 1;
 			}
+		}
+
+		if (data.cur_piece_das !== null) {
+			this.das_total += data.cur_piece_das;
 		}
 	}
 
