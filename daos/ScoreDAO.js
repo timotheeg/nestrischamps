@@ -54,7 +54,7 @@ class ScoreDAO {
 			FROM scores
 			WHERE player_id=$1
 			ORDER BY score DESC
-			LIMIT 10
+			LIMIT 16
 			`,
 			[user.id]
 		);
@@ -71,7 +71,7 @@ class ScoreDAO {
 				AND datetime >= NOW() - interval '24 hours'
 				AND datetime <= NOW()
 			ORDER BY score DESC
-			LIMIT 10
+			LIMIT 16
 			`,
 			[user.id]
 		);
@@ -88,7 +88,7 @@ class ScoreDAO {
 			WHERE player_id=$1
 				AND session=$2
 			ORDER BY score DESC
-			LIMIT 10
+			LIMIT 16
 			`,
 			[user.id, session]
 		);
