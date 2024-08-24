@@ -4,6 +4,8 @@ import { PIECES } from '/views/constants.js';
 
 export default class DomRefs {
 	constructor(doc) {
+		const DUMMY_EL = doc.createElement('div');
+
 		this.stream_bg = {
 			element: doc.querySelector('#stream_bg'),
 		};
@@ -231,6 +233,7 @@ export default class DomRefs {
 			this.pieces[name] = {
 				count: piece_row.querySelector('.count'),
 				drought: piece_row.querySelector('.drought'),
+				max_drought: piece_row.querySelector('.max_drought') || DUMMY_EL,
 				percent: piece_row.querySelector('.percent'),
 				ctx: piece_row.querySelector('canvas').getContext('2d'),
 			};

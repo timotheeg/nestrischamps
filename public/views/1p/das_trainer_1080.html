@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
-		<link rel="stylesheet" type="text/css" href="/views/stats-boxes.css" />
+		<link rel="stylesheet" type="text/css" href="/views/stats-boxes_1080.css" />
 		<style>
 			#lines_stats .header,
 			#points .header {
@@ -17,7 +17,7 @@
 			</div>
 
 			<div class="box" id="tetris_stage">
-				<canvas width="237" height="477" />
+				<canvas width="395" height="795" />
 			</div>
 
 			<div class="box" id="chat">
@@ -152,16 +152,15 @@
 			</div>
 
 			<div class="box" id="next_piece">
-				<div class="header">NEXT</div>
 				<div class="content">
-					<canvas width="93" height="45" />
+					<canvas width="174" height="91" />
 				</div>
 			</div>
 
 			<div class="box" id="tetris_rate">
 				<div class="header">TRT <span class="value">00%</span></div>
 				<div class="content">
-					<canvas class="bounded" width="238" height="89" />
+					<canvas class="bounded" width="381" height="130" />
 				</div>
 			</div>
 
@@ -204,17 +203,17 @@
 				<table class="content">
 					<tr class="hgauge current">
 						<th>Cur</th>
-						<td class="gauge"><canvas width="168" height="16" /></td>
+						<td class="gauge"><canvas width="290" height="22" /></td>
 						<td class="value">00</td>
 					</tr>
 					<tr class="hgauge last">
 						<th>Last</th>
-						<td class="gauge"><canvas width="168" height="16" /></td>
+						<td class="gauge"><canvas width="290" height="22" /></td>
 						<td class="value">00</td>
 					</tr>
 					<tr class="hgauge max">
 						<th>Max</th>
-						<td class="gauge"><canvas width="168" height="16" /></td>
+						<td class="gauge"><canvas width="290" height="22" /></td>
 						<td class="value">00</td>
 					</tr>
 				</table>
@@ -222,70 +221,86 @@
 
 			<div class="box" id="piece_stats">
 				<table class="content">
-					<tr class="headers">
-						<th></th>
-						<th class="count">#</th>
-						<th class="percent">%</th>
-						<th class="header distribution">
-							PIECES
-							<span class="count">000</span>
-							- DEV
+					<thead>
+						<tr class="headers">
+							<th class="header distribution" colspan="7">
+								PIECES
+								<span class="count">000</span>
+								- DEV
 
-							<i>28</i><span class="deviation_28">00.0</span> <i>56</i
-							><span class="deviation_56">00.0</span> <i>all</i
-							><span class="deviation_all">00.0</span>
-						</th>
-						<th class="drought">DRT</th>
-					</tr>
-					<tr class="piece T">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
-					<tr class="piece J">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
-					<tr class="piece Z">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
-					<tr class="piece O">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
-					<tr class="piece S">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
-					<tr class="piece L">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
-					<tr class="piece I">
-						<th></th>
-						<td class="count">000</td>
-						<td class="percent">00%</td>
-						<td class="distribution"><canvas width="600" height="4" /></td>
-						<td class="drought">00</td>
-					</tr>
+								<i>28</i><span class="deviation_28">00.0</span> <i>56</i
+								><span class="deviation_56">00.0</span> <i>all</i
+								><span class="deviation_all">00.0</span>
+							</th>
+						</tr>
+
+						<tr class="headers">
+							<th></th>
+							<th class="count">#</th>
+							<th class="percent">%</th>
+							<th class=""></th>
+							<th class="drought">DRT</th>
+							<th class="drought">MAX</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="piece T">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece J">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece Z">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece O">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece S">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece L">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+						<tr class="piece I">
+							<th></th>
+							<td class="count">000</td>
+							<td class="percent">00%</td>
+							<td class="distribution"><canvas width="836" height="5" /></td>
+							<td class="drought">00</td>
+							<td class="max_drought">00</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 
@@ -294,7 +309,7 @@
 					<span class="label">DAS</span>
 					-
 					<span class="instant">00</span>
-					<span class="gauge"><canvas width="63" height="14" /></span>
+					<span class="gauge"><canvas width="79" height="21" /></span>
 					-
 					<span class="avg"
 						><span class="label">AVG </span
@@ -315,7 +330,7 @@
 					>
 				</div>
 				<div class="content">
-					<canvas class="bounded" width="730" height="51" />
+					<canvas class="bounded" width="1068" height="85" />
 				</div>
 			</div>
 
@@ -333,7 +348,7 @@
 					</span>
 				</div>
 				<div class="content">
-					<canvas class="bounded" width="730" height="81" />
+					<canvas class="bounded" width="1068" height="126" />
 				</div>
 			</div>
 
@@ -410,16 +425,16 @@
 		<!-- End Stream BG -->
 
 		<script>
-			const PREVIEW_PIXEL_SIZE = 3;
-			const BOARD_PIXEL_SIZE = 3;
-			const DOT_SIZE_TRT = 4;
-			const DOT_SIZE_PIECE_DISTRIBUTION = 4;
-			const BAR_WIDTH_DROUGHT_GAUGE = 2;
-			const BAR_WIDTH_INSTANT_DAS = 3;
-			const DOT_SIZE_DAS_N_BOARD = 4;
-			const BOARD_HEIGHT_BLOCK_HEIGHT = 2;
-			const BOARD_HEIGHT_STAT_BARS_GAP = 1;
-			const NUM_HIGH_SCORES = 10;
+			const PREVIEW_PIXEL_SIZE = 5;
+			const BOARD_PIXEL_SIZE = 5;
+			const DOT_SIZE_TRT = 5;
+			const DOT_SIZE_PIECE_DISTRIBUTION = 5;
+			const BAR_WIDTH_DROUGHT_GAUGE = 3;
+			const BAR_WIDTH_INSTANT_DAS = 4;
+			const DOT_SIZE_DAS_N_BOARD = 5;
+			const BOARD_HEIGHT_BLOCK_HEIGHT = 3;
+			const BOARD_HEIGHT_STAT_BARS_GAP = 2;
+			const NUM_HIGH_SCORES = 7;
 
 			const view_meta = new URLSearchParams({
 				video: '320x240',

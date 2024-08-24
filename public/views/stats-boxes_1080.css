@@ -1,25 +1,39 @@
 #stream_bg {
 	background-color: #000;
+	width: 1920px;
+	height: 1080px;
+}
+
+#tetris_stage,
+#droughts,
+#score {
+	left: 1092px;
 }
 
 #tetris_stage {
-	top: 103px;
-	left: 760px;
-	width: 237px;
-	height: 477px;
+	top: 115px;
+	width: 395px;
+	height: 795px;
 }
 
 .box {
-	width: 105px;
-	height: 41px;
-	padding: 2px;
+	width: 180px;
+	height: 67px;
+	padding: 0;
 
-	--border-size: 8;
-	border-image-source: url('/views/border_no_black.png');
+	font-size: 24px;
+	line-height: 24px;
+
+	--border-size: 15;
+	border-image-source: url('/views/border_3px_no_black.png');
+}
+
+.box .header {
+	padding: 6px 0 9px;
 }
 
 i {
-	font-size: 8px;
+	font-size: 12px;
 	font-style: normal;
 }
 
@@ -37,64 +51,75 @@ i {
 	border-width: 1px 0;
 }
 
-.box .header {
-	padding-bottom: 2px;
+#runway,
+#chat,
+#lines,
+#efficiency,
+#tetris_rate,
+#video {
+	left: 1508px;
+}
+
+#runway,
+#score,
+#next_piece,
+#pbs,
+#lines_stats {
+	top: 3px;
+}
+
+#pbs,
+#high_scores,
+#piece_stats,
+#das,
+#board_stats {
+	left: 3px;
 }
 
 #tetris_rate {
-	left: 1021px;
-	top: 201px;
-	width: 238px;
-	height: 110px;
+	top: 267px;
+	width: 381px;
+	height: 170px;
 	padding-right: 0;
 	padding-left: 0;
 }
 
 #runway {
-	left: 1021px;
-	top: 6px;
-	width: 234px;
+	width: 381px;
 }
 
+#lines,
 #level {
-	left: 1150px;
-	top: 71px;
+	top: 91px;
 }
 
-#lines {
-	left: 1021px;
-	top: 71px;
-}
-
-#efficiency {
-	left: 1021px;
-	top: 136px;
-}
-
+#level,
 #burn {
-	left: 1150px;
-	top: 136px;
+	left: 1709px;
+}
+
+#efficiency,
+#burn {
+	top: 179px;
 }
 
 #score {
-	left: 760px;
-	top: 6px;
-	width: 124px;
-	height: 73px;
-	padding: 2px 0;
+	width: 200px;
+	height: 91px;
 }
 
 #score .header {
-	padding-bottom: 6px;
+	padding-bottom: 5px;
 }
 
 #score .content {
+	margin: auto;
 	text-align: left;
 }
 
 #score .content th {
-	font-size: 8px;
-	padding-right: 0px;
+	font-size: 12px;
+	padding-right: 4px;
 }
 
 #score .content td.value {
@@ -103,15 +128,13 @@ i {
 }
 
 #droughts {
-	left: 760px;
-	top: 604px;
-	width: 241px;
-	height: 90px;
-	padding: 2px 0;
+	top: 931px;
+	width: 395px;
+	height: 118px;
 }
 
 #droughts .header {
-	padding-bottom: 6px;
+	padding-bottom: 4px;
 }
 
 #droughts .content {
@@ -119,7 +142,7 @@ i {
 }
 
 .hgauge th {
-	font-size: 8px;
+	font-size: 12px;
 }
 
 .hgauge .value {
@@ -146,22 +169,31 @@ i {
 	}
 }
 
+#das,
+#board_stats,
 #piece_stats {
-	left: 6px;
-	top: 316px;
-	width: 730px;
-	height: 144px;
+	width: 1068px;
+}
+
+#piece_stats {
+	top: 475px;
+	height: 242px;
+	padding-top: 0;
 }
 
 #piece_stats .content {
-	font-size: 8px;
-	line-height: 8px;
+	font-size: 12px;
+	line-height: 12px;
+	border-spacing: 3px;
+}
+
+#piece_stats .header {
+	padding: 6px 0 0;
 }
 
 #piece_stats .headers .header {
-	font-size: 16px;
-	line-height: 20px;
-	padding-bottom: 2px;
+	font-size: 24px;
+	line-height: 24px;
 }
 
 #piece_stats .content .headers th {
@@ -170,51 +202,54 @@ i {
 
 #piece_stats .content .piece th {
 	display: inline-block;
-	background: url(/views/small_pieces_sprites.png);
+	background: url(/views/pieces_sprites.png);
 	background-repeat: no-repeat;
 	background-position-x: 0px;
-	width: 23px;
-	height: 15px;
+	background-size: 396px 164px;
+	--width: 36px;
+	--height: 24px;
+	width: var(--width);
+	height: var(--height);
 }
 
 #piece_stats.l0 .content .piece th {
-	background-position-x: -24px;
+	background-position-x: calc(-1 * var(--width));
 }
 
 #piece_stats.l1 .content .piece th {
-	background-position-x: -48px;
+	background-position-x: calc(-2 * var(--width));
 }
 
 #piece_stats.l2 .content .piece th {
-	background-position-x: -72px;
+	background-position-x: calc(-3 * var(--width));
 }
 
 #piece_stats.l3 .content .piece th {
-	background-position-x: -96px;
+	background-position-x: calc(-4 * var(--width));
 }
 
 #piece_stats.l4 .content .piece th {
-	background-position-x: -120px;
+	background-position-x: calc(-5 * var(--width));
 }
 
 #piece_stats.l5 .content .piece th {
-	background-position-x: -144px;
+	background-position-x: calc(-6 * var(--width));
 }
 
 #piece_stats.l6 .content .piece th {
-	background-position-x: -168px;
+	background-position-x: calc(-7 * var(--width));
 }
 
 #piece_stats.l7 .content .piece th {
-	background-position-x: -192px;
+	background-position-x: calc(-8 * var(--width));
 }
 
 #piece_stats.l8 .content .piece th {
-	background-position-x: -216px;
+	background-position-x: calc(-9 * var(--width));
 }
 
 #piece_stats.l9 .content .piece th {
-	background-position-x: -240px;
+	background-position-x: calc(-10 * var(--width));
 }
 
 #piece_stats .content .piece.T th {
@@ -222,34 +257,35 @@ i {
 }
 
 #piece_stats .content .piece.J th {
-	background-position-y: -16px;
+	background-position-y: calc(-1 * var(--height));
 }
 
 #piece_stats .content .piece.Z th {
-	background-position-y: -32px;
+	background-position-y: calc(-2 * var(--height));
 }
 
 #piece_stats .content .piece.O th {
-	background-position-y: -48px;
+	background-position-y: calc(-3 * var(--height));
 }
 
 #piece_stats .content .piece.S th {
-	background-position-y: -64px;
+	background-position-y: calc(-4 * var(--height));
 }
 
 #piece_stats .content .piece.L th {
-	background-position-y: -80px;
+	background-position-y: calc(-5 * var(--height));
 }
 
 #piece_stats .content .piece.I th {
-	background-position-y: -96px;
+	background-position-y: calc(-6 * var(--height));
 }
 
 #piece_stats .content .count {
 	padding-left: 9px;
 }
 
-#piece_stats .content .drought {
+#piece_stats .content .drought,
+#piece_stats .content .max_drought {
 	color: lightgrey;
 	padding-left: 4px;
 }
@@ -264,14 +300,8 @@ i {
 }
 
 #das {
-	left: 6px;
-	top: 484px;
-	width: 730px;
-	height: 78px;
-}
-
-#das .header {
-	padding-bottom: 6px;
+	top: 738px;
+	height: 127px;
 }
 
 #das .gauge canvas {
@@ -281,39 +311,47 @@ i {
 }
 
 #board_stats {
-	left: 6px;
-	top: 586px;
-	width: 730px;
-	height: 108px;
-}
-
-#board_stats .header {
-	padding-bottom: 5px;
+	top: 885px;
+	height: 164px;
 }
 
 #board_stats .header .info_labels {
-	font-size: 8px;
+	font-size: 12px;
 }
 
 #board_stats .bounded {
 	border-width: 1px 0 0 0;
 }
 
+#lines_stats,
+#points {
+	left: 696px;
+	width: 375px;
+}
+
+#lines_stats .content,
+#points .content {
+	line-height: 32px;
+	padding-top: 7px;
+}
+
+#lines_stats table,
+#points table {
+	margin: auto;
+}
+
 #lines_stats {
-	top: 6px;
-	left: 486px;
-	width: 250px;
-	height: 120px;
+	height: 186px;
 }
 
 #lines_stats th {
 	text-align: left;
-	font-size: 8px;
+	font-size: 12px;
 }
 
 #lines_stats td {
 	text-align: right;
-	padding-left: 13px;
+	padding-left: 20px;
 	white-space: pre;
 }
 
@@ -328,15 +366,13 @@ i {
 }
 
 #points {
-	top: 150px;
-	left: 486px;
-	width: 250px;
-	height: 142px;
+	top: 217px;
+	height: 237px;
 }
 
 #points th {
 	text-align: left;
-	font-size: 8px;
+	font-size: 12px;
 }
 
 #points .drops th {
@@ -345,51 +381,45 @@ i {
 
 #points td {
 	text-align: right;
-	padding-left: 13px;
+	padding-left: 20px;
 }
 
 #points td.count {
-	width: 115px;
+	width: 165px;
 }
 
 #next_piece {
-	width: 97px;
-	height: 73px;
-	top: 6px;
-	left: 904px;
-	padding: 2px 0;
+	width: 174px;
+	height: 91px;
+	left: 1313px;
 }
 
 #next_piece .header {
-	padding-bottom: 5px;
+	padding: 4px 0 2px;
 }
 
 #video {
-	top: 335px;
-	left: 1021px;
-	width: 238px;
-	height: 132px;
+	top: 458px;
+	width: 381px;
+	height: 214px;
+	line-height: 32px;
 	padding: 0;
 }
 
-#video video {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	border: 0;
-}
-
+#video video,
 #video iframe {
 	width: 100%;
 	height: 100%;
-	border: 0;
+	object-fit: cover;
+}
+
+#pbs,
+#high_scores {
+	width: 672px;
 }
 
 #pbs {
-	top: 6px;
-	left: 6px;
-	width: 456px;
-	height: 85px;
+	height: 122px;
 }
 
 #pbs .header {
@@ -400,9 +430,13 @@ i {
 	margin: 0 auto;
 }
 
+#pbs tbody {
+	line-height: 30px;
+}
+
 #pbs th {
 	padding: 0;
-	font-size: 8px;
+	font-size: 12px;
 	text-align: center;
 }
 
@@ -413,10 +447,8 @@ i {
 }
 
 #high_scores {
-	top: 115px;
-	left: 6px;
-	width: 456px;
-	height: 177px;
+	top: 146px;
+	height: 308px;
 }
 
 #high_scores table {
@@ -434,12 +466,12 @@ i {
 }
 
 #high_scores td.session {
-	padding-right: 16px;
+	padding-right: 28px;
 }
 
 #high_scores th {
 	line-height: 16px;
-	font-size: 8px;
+	font-size: 12px;
 	vertical-align: bottom;
 }
 
@@ -451,14 +483,13 @@ i {
 }
 
 #high_scores td table {
-	line-height: 21px;
+	line-height: 33px;
 }
 
 #chat {
-	top: 487px;
-	left: 1021px;
-	width: 234px;
-	height: 207px;
+	top: 693px;
+	width: 381px;
+	height: 356px;
 	overflow: hidden;
 }
 
@@ -467,10 +498,10 @@ i {
 }
 
 #chat .content {
-	font-size: 10px;
-	line-height: 10px;
+	font-size: 16px;
+	line-height: 16px;
 	width: 100%;
-	height: 183px;
+	height: 320px;
 	overflow: hidden;
 	text-align: left;
 }

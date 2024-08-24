@@ -470,11 +470,21 @@
 		<!-- End Stream BG -->
 
 		<script>
+			const PREVIEW_PIXEL_SIZE = 3;
+			const BOARD_PIXEL_SIZE = 3;
+			const DOT_SIZE_TRT = 4;
+			const DOT_SIZE_PIECE_DISTRIBUTION = 4;
+			const BAR_WIDTH_DROUGHT_GAUGE = 2;
+			const BAR_WIDTH_INSTANT_DAS = 3;
+			const DOT_SIZE_DAS_N_BOARD = 4;
+			const BOARD_HEIGHT_BLOCK_HEIGHT = 2;
+			const BOARD_HEIGHT_STAT_BARS_GAP = 1;
+			const NUM_HIGH_SCORES = 10;
+
 			const view_meta = new URLSearchParams({
 				video: '320x240',
 			});
 		</script>
-		<script src="/vendor/peerjs.1.5.4.min.js"></script>
 		<script type="module" src="/views/main.js"></script>
 	</body>
 </html>

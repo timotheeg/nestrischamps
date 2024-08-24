@@ -68,14 +68,6 @@ function fuzzyBinarySearchWithLowerBias(array, path, target_value) {
 	return array[mid];
 }
 
-class PieceData {
-	constructor() {}
-}
-
-class PointData {
-	constructor() {}
-}
-
 const DEFAULT_OPTIONS = {
 	usePieceStats: false,
 	seekableFrames: true,
@@ -877,11 +869,12 @@ export default class BaseGame {
 
 		// handle droughts
 		PIECES.forEach(name => {
+			const stats = this.data.pieces[name];
+
 			stats.percent = stats.count / this.data.pieces.count;
 
 			if (cur_piece === name) return;
 
-			const stats = this.data.pieces[name];
 			stats.drought++;
 			if (stats.drought > stats.max_drought) stats.max_drought = stats.drought;
 		});
