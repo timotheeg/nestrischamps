@@ -898,40 +898,42 @@ function updateDeviceList(devices) {
 		device_selector.after('(For EverDrive Capture, use Chrome)');
 	}
 
-	device_selector.innerHTML = '';
-	[...default_devices, ...mappedDevices].forEach(camera => {
-		const camera_option = document.createElement('option');
-		camera_option.text = camera.label;
-		camera_option.value = camera.deviceId;
+	device_selector.replaceChildren(
+		...[...default_devices, ...mappedDevices].map(camera => {
+			const camera_option = document.createElement('option');
+			camera_option.text = camera.label;
+			camera_option.value = camera.deviceId;
 
-		if (config && config.device_id === camera.deviceId) {
-			camera_option.selected = true;
-		}
+			if (config && config.device_id === camera.deviceId) {
+				camera_option.selected = true;
+			}
 
-		device_selector.appendChild(camera_option);
-	});
+			return camera_option;
+		})
+	);
 
 	// Then populate for video feed
 	// TODO: handle case of no webcam
 	console.log(Date.now(), 'updateDeviceList: populate video_feed_selector');
-	video_feed_selector.innerHTML = '';
-	[
-		{
-			label: 'Default',
-			deviceId: 'default',
-		},
-		...mappedDevices,
-	].forEach(camera => {
-		const camera_option = document.createElement('option');
-		camera_option.text = camera.label;
-		camera_option.value = camera.deviceId;
+	video_feed_selector.replaceChildren(
+		...[
+			{
+				label: 'Default',
+				deviceId: 'default',
+			},
+			...mappedDevices,
+		].map(camera => {
+			const camera_option = document.createElement('option');
+			camera_option.text = camera.label;
+			camera_option.value = camera.deviceId;
 
-		if (config && config.video_feed_device_id === camera.deviceId) {
-			camera_option.selected = true;
-		}
+			if (config && config.video_feed_device_id === camera.deviceId) {
+				camera_option.selected = true;
+			}
 
-		video_feed_selector.appendChild(camera_option);
-	});
+			return camera_option;
+		})
+	);
 }
 
 async function getConnectedDevices(type) {
