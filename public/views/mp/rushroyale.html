@@ -354,7 +354,7 @@
 						cdToId = clearTimeout(cdToId);
 
 						players.forEach(player =>
-							player.full_node.classList.remove('eliminated')
+							player.dom.full_node.classList.remove('eliminated')
 						);
 
 						this.__startCountDown(seconds);
