@@ -205,6 +205,14 @@
 			let rafId;
 			let toId;
 
+			function reset() {
+				timer.querySelector('.value').textContent = '';
+				timer.classList.remove('warn', 'panic');
+
+				toId = clearInterval(toId);
+				rafId = window.cancelAnimationFrame(rafId);
+			}
+
 			function startRound() {
 				start_ts = Date.now();
 				checkTime();
@@ -255,15 +263,13 @@
 						// there's just one player left, that's the winner
 						sorted_players[0].game?.end();
 						sorted_players[0].playWinnerAnimation();
-						timer.querySelector('.value').textContent = '';
 					} else {
 						return;
 					}
 				}
 
-				// round is over, stop all timer
-				toId = clearInterval(toId);
-				rafId = window.cancelAnimationFrame(rafId);
+				// round is over
+				reset();
 			}
 
 			window.players = players;
@@ -352,6 +358,7 @@
 				const competition = new Competition(players, {
 					startCountDown: function (seconds) {
 						cdToId = clearTimeout(cdToId);
+						reset();
 
 						players.forEach(player =>
 							player.dom.full_node.classList.remove('eliminated')
