@@ -52,6 +52,10 @@
 				animation: panic_colorize_wr 0.25s infinite;
 				animation-direction: alternate;
 			}
+
+			.player.eliminated {
+				filter: grayscale(1) brightness(0.5);
+			}
 		</style>
 	</head>
 	<body>
@@ -136,7 +140,7 @@
 			}
 
 			const cycle_match = (QueryString.get('cycle') || '').match(
-				/^\d{2,},(\d+,\d+)?$/
+				/^[1-9]\d+(,\d+,\d+)?$/
 			);
 			const cycle_settings = {
 				seconds: 30,
@@ -181,19 +185,19 @@
 
 				sorted_players.forEach((player, idx) => {
 					if (!player.game?.over) {
-						player.rank_node.style.color = rank_colors[idx];
+						player.dom.rank_node.style.color = rank_colors[idx];
 					}
-					player.rank_node.querySelector('.rank').textContent = idx + 1;
+					player.dom.rank_node.querySelector('.rank').textContent = idx + 1;
 
 					if (idx > 0) {
 						const diff = player.getScore() - sorted_players[idx - 1].getScore(); // is always negative!
-						player.rank_node.querySelector('.diff').textContent =
+						player.dom.rank_node.querySelector('.diff').textContent =
 							readableScoreFomatter(diff);
 					} else {
-						player.rank_node.querySelector('.diff').textContent = '';
+						player.dom.rank_node.querySelector('.diff').textContent = '';
 					}
 
-					leaderboard_values.appendChild(player.rank_node);
+					leaderboard_values.appendChild(player.dom.rank_node);
 				});
 			}
 
@@ -202,6 +206,9 @@
 			let toId;
 
 			function startRound() {
+				players.forEach(player =>
+					player.full_node.classList.remove('eliminated')
+				);
 				start_ts = Date.now();
 				checkTime();
 				toId = setInterval(kickPlayer, cycle_settings.seconds * 1000);
@@ -244,7 +251,8 @@
 
 				if (lastPlayer) {
 					lastPlayer.game?.end();
-					lastPlayer.rank_node.style.color = 'grey';
+					lastPlayer.dom.rank_node.style.color = 'grey';
+					lastPlayer.dom.full_node.classList.add('eliminated');
 
 					if (sorted_players.indexOf(lastPlayer) <= 1) {
 						// there's just one player left, that's the winner
@@ -295,6 +303,9 @@
 								field: player_node.querySelector(`.board`),
 								running_trt: player_node.querySelector(`.running_trt`),
 								video: player_node.querySelector(`video`),
+
+								full_node: player_node,
+								rank_node,
 							},
 							{
 								field_pixel_size: 2.5,
@@ -307,12 +318,12 @@
 
 						// adding extra properties to track
 						player.idx = player_idx; // For stable sort -_-
-						player.rank_node = rank_node;
 
 						player.__setName = player.setName;
 						player.setName = function (name) {
 							this.__setName(name);
-							this.rank_node.querySelector('.name').textContent = name || '';
+							this.dom.rank_node.querySelector('.name').textContent =
+								name || '';
 						};
 
 						player.onGameStart = function () {
@@ -353,7 +364,7 @@
 
 				players.forEach(player => {
 					player.onScore = () => {
-						player.rank_node.querySelector('.score2').textContent =
+						player.dom.rank_node.querySelector('.score2').textContent =
 							readableScoreFomatter(player.getScore());
 						updateScore();
 					};
