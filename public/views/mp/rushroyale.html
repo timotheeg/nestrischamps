@@ -206,9 +206,6 @@
 			let toId;
 
 			function startRound() {
-				players.forEach(player =>
-					player.full_node.classList.remove('eliminated')
-				);
 				start_ts = Date.now();
 				checkTime();
 				toId = setInterval(kickPlayer, cycle_settings.seconds * 1000);
@@ -355,6 +352,11 @@
 				const competition = new Competition(players, {
 					startCountDown: function (seconds) {
 						cdToId = clearTimeout(cdToId);
+
+						players.forEach(player =>
+							player.full_node.classList.remove('eliminated')
+						);
+
 						this.__startCountDown(seconds);
 						cdToId = setTimeout(startRound, seconds * 1000);
 						timer.querySelector('.value').textContent =
