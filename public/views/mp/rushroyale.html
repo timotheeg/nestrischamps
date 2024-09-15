@@ -18,8 +18,8 @@
 
 			.timer {
 				top: 10px;
-				left: 500px;
-				width: 500px;
+				left: 766px;
+				width: 340px;
 				height: 80px;
 				font-size: 24px;
 				line-height: 30px;
@@ -33,12 +33,31 @@
 			.timer .value {
 				text-align: center;
 			}
+
+			@keyframes panic_colorize_wr {
+				from {
+					color: white;
+				}
+				to {
+					color: red;
+				}
+			}
+
+			.timer.warn .value {
+				animation: panic_colorize_wr 0.5s infinite;
+				animation-direction: alternate;
+			}
+
+			.timer.panic .value {
+				animation: panic_colorize_wr 0.25s infinite;
+				animation-direction: alternate;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="stream_bg">
 			<div id="timer" class="box timer">
-				<div class="header">TIMER</div>
+				<div class="header">ROUND TIMER</div>
 				<div class="value"></div>
 			</div>
 
@@ -116,13 +135,33 @@
 				num_players = parseInt(QueryString.get('players'), 10);
 			}
 
-			const time_re = /^\d+$/;
-			let cycle_seconds = 30;
+			const cycle_match = (QueryString.get('cycle') || '').match(
+				/^\d{2,},(\d+,\d+)?$/
+			);
+			const cycle_settings = {
+				seconds: 30,
+				warn: 16,
+				panic: 8,
+			};
 
-			if (time_re.test(QueryString.get('cycle'))) {
-				const cycle_seconds_tentative = parseInt(QueryString.get('cycle'), 10);
-				if (cycle_seconds_tentative >= 10) {
-					cycle_seconds = cycle_seconds_tentative;
+			if (cycle_match) {
+				const values = QueryString.get('cycle')
+					.split(',')
+					.map(v => parseInt(v, 10));
+				if (!cycle_match[1]) {
+					if (values[0] >= 10) {
+						cycle_settings.seconds = values[0];
+					}
+				} else {
+					if (
+						values[0] >= 10 &&
+						values[0] >= values[1] &&
+						values[1] >= values[2]
+					) {
+						cycle_settings.seconds = values[0];
+						cycle_settings.warn = values[1];
+						cycle_settings.panic = values[2];
+					}
 				}
 			}
 
@@ -165,16 +204,29 @@
 			function startRound() {
 				start_ts = Date.now();
 				checkTime();
-
-				toId = setInterval(kickPlayer, cycle_seconds * 1000);
+				toId = setInterval(kickPlayer, cycle_settings.seconds * 1000);
 			}
 
 			function checkTime() {
 				const elapsed = Date.now() - start_ts;
-				const elapsed_slice = elapsed % (cycle_seconds * 1000);
-				const remainder = (cycle_seconds * 1000 - elapsed_slice) / 1000;
+				const elapsed_slice = elapsed % (cycle_settings.seconds * 1000);
+				const remainder =
+					(cycle_settings.seconds * 1000 - elapsed_slice) / 1000;
 
-				timer.querySelector('.value').textContent = remainder.toFixed(2);
+				let content = remainder.toFixed(2);
+
+				if (remainder < cycle_settings.panic) {
+					timer.classList.remove('warn');
+					timer.classList.add('panic');
+					content = `!! ${content} !!`;
+				} else if (remainder < cycle_settings.warn) {
+					timer.classList.add('warn');
+					content = `! ${content} !`;
+				} else {
+					timer.classList.remove('warn', 'panic');
+				}
+
+				timer.querySelector('.value').textContent = content;
 
 				rafId = window.requestAnimationFrame(checkTime);
 			}
@@ -186,16 +238,17 @@
 					return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
 				});
 
-				const lastPlayer = sorted_players.findLast(player => !player.game.over);
+				const lastPlayer = sorted_players.findLast(
+					player => !player.game?.over
+				);
 
 				if (lastPlayer) {
-					console.log('kick player');
-					lastPlayer.game.end();
+					lastPlayer.game?.end();
 					lastPlayer.rank_node.style.color = 'grey';
 
 					if (sorted_players.indexOf(lastPlayer) <= 1) {
 						// there's just one player left, that's the winner
-						sorted_players[0].game.end();
+						sorted_players[0].game?.end();
 						sorted_players[0].playWinnerAnimation();
 						timer.querySelector('.value').textContent = '';
 					} else {
@@ -204,7 +257,6 @@
 				}
 
 				// round is over, stop all timer
-				console.log('round over');
 				toId = clearInterval(toId);
 				rafId = window.cancelAnimationFrame(rafId);
 			}
@@ -288,7 +340,16 @@
 						}
 					});
 
-				const competition = new Competition(players);
+				let cdToId;
+				const competition = new Competition(players, {
+					startCountDown: function (seconds) {
+						cdToId = clearTimeout(cdToId);
+						this.__startCountDown(seconds);
+						cdToId = setTimeout(startRound, seconds * 1000);
+						timer.querySelector('.value').textContent =
+							cycle_settings.seconds.toFixed(2);
+					},
+				});
 
 				players.forEach(player => {
 					player.onScore = () => {

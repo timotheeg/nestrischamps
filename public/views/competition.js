@@ -284,7 +284,13 @@ export class Competition {
 
 		this.API = new TetrisCompetitionAPI();
 
-		Object.assign(this.API, api_overrides);
+		// make old methods available - equivalent to super)
+		const originals = {};
+		for (const name in api_overrides) {
+			originals[`__${name}`] = this.API[name];
+		}
+
+		Object.assign(this.API, originals, api_overrides);
 
 		this.connection = new Connection(null, this.view_meta);
 
