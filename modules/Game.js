@@ -379,20 +379,24 @@ class Game {
 	onPiece(data) {
 		let cur_piece;
 
-		if (data.cur_piece !== null) {
-			cur_piece = data.cur_piece; // 💪
-		} else if (this.IS_CLASSIC_ROM) {
-			if (this.num_pieces === 0) {
-				cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
-			} else {
-				cur_piece = this.prior_preview; // should be in sync 🤞
+		do {
+			if (data.cur_piece !== null) {
+				cur_piece = data.cur_piece; // 💪
+				break;
+			} else if (this.IS_CLASSIC_ROM) {
+				if (this.num_pieces === 0) {
+					cur_piece = PIECES.find(p => data[p]); // first truthy value is piece
+					break;
+				}
 			}
 
+			cur_piece = this.prior_preview; // should be in sync 🤞
+		} while (false);
+
+		if (this.IS_CLASSIC_ROM) {
 			// record new state
 			this.num_pieces = this._getNumPieces(data);
 			PIECES.forEach(p => (this.data[p] = data[p]));
-		} else {
-			cur_piece = this.prior_preview;
 		}
 
 		this.pieces.push(cur_piece);
