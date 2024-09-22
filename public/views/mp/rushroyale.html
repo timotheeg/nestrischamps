@@ -1,37 +1,120 @@
-<!DOCTYPE html>
+1<!DOCTYPE html>
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
 		<style>
 			.player {
-				top: 341px;
+				--p-row1-top: 10px;
+				--p-row2-top: 525px;
+				--p-offset: 352px;
+				--p-left-x: 40px;
+				--p-right-x: 1300px;
+
+				top: var(--p-row1-top);
 			}
 
-			.no-video .player {
-				top: 410px;
+			.player .score {
+				top: 0;
+			}
+			.player .board {
+				top: 77px;
 			}
 
-			.running_trt {
-				height: 79px;
+			.player .video {
+				width: 112px;
 			}
 
-			.timer {
+			.player.left .video {
+				top: 110px;
+				left: 219px;
+			}
+
+			.player.right .video {
+				top: 336px;
+				left: -133px;
+			}
+
+			.player.first .box {
+				border-image-source: url(/views/border_3px_lead.png);
+			}
+
+			.player.penultimate .box {
+				border-image-source: url(/views/border_3px_penultimate.png);
+			}
+
+			.player.last .box {
+				border-image-source: url(/views/border_3px_last.png);
+			}
+
+			.player.p1 {
+				left: var(--p-left-x);
+			}
+			.player.p2 {
+				left: var(--p-right-x);
+			}
+			.player.p3 {
+				left: calc(var(--p-left-x) + var(--p-offset));
+			}
+			.player.p4 {
+				left: calc(var(--p-right-x) + var(--p-offset));
+			}
+			.player.p5 {
+				top: var(--p-row2-top);
+				left: var(--p-left-x);
+			}
+			.player.p6 {
+				top: var(--p-row2-top);
+				left: var(--p-right-x);
+			}
+			.player.p7 {
+				top: var(--p-row2-top);
+				left: calc(var(--p-left-x) + var(--p-offset));
+			}
+			.player.p8 {
+				top: var(--p-row2-top);
+				left: calc(var(--p-right-x) + var(--p-offset));
+			}
+
+			.leaderboard {
+				padding: 6px 18px;
 				top: 10px;
-				left: 766px;
-				width: 340px;
-				height: 80px;
-				font-size: 24px;
-				line-height: 30px;
-				padding: 6px 9px 0 9px;
+				left: 677px;
+				width: 500px;
+				height: 978px;
 			}
 
-			.timer .header {
-				padding-bottom: 12px;
+			.leaderboard .header {
+				font-size: 64px;
+				line-height: 88px;
+				padding-bottom: 1em;
 			}
 
-			.timer .value {
-				text-align: center;
+			.leaderboard .value {
+				columns: 1;
+			}
+
+			.leaderboard .value .entry {
+				color: white;
+				margin-bottom: 1.5em;
+			}
+
+			.leaderboard .value .entry.first {
+				color: #0eff0e;
+			}
+
+			.leaderboard .value .entry.penultimate {
+				color: #ffa500;
+			}
+
+			.leaderboard .value .entry.last {
+				color: #fd0009;
+			}
+
+			.leaderboard .value .entry .name {
+				display: block;
+				text-align: left;
+				width: 100%;
 			}
 
 			@keyframes panic_colorize_wr {
@@ -43,12 +126,12 @@
 				}
 			}
 
-			.timer.warn .value {
+			.leaderboard.warn .header {
 				animation: panic_colorize_wr 0.5s infinite;
 				animation-direction: alternate;
 			}
 
-			.timer.panic .value {
+			.leaderboard.panic .header {
 				animation: panic_colorize_wr 0.25s infinite;
 				animation-direction: alternate;
 			}
@@ -60,18 +143,15 @@
 	</head>
 	<body>
 		<div id="stream_bg">
-			<div id="timer" class="box timer">
-				<div class="header">ROUND TIMER</div>
-				<div class="value"></div>
-			</div>
-
 			<div class="box leaderboard">
-				<div class="header">RANKING</div>
+				<div class="header">00.00</div>
 				<div class="value"></div>
 			</div>
 
 			<template id="player">
 				<div class="player">
+					<div class="box video"><video class="player_vid"></video></div>
+
 					<div class="box board">
 						<div class="lines">000</div>
 						<div class="next_piece"></div>
@@ -81,16 +161,11 @@
 						<div class="header">PLAYER</div>
 						<div class="value">0000000</div>
 					</div>
-
-					<div class="box running_trt"></div>
-
-					<div class="box video"><video class="player_vid"></video></div>
 				</div>
 			</template>
 
 			<template id="rank">
 				<div class="entry">
-					<span class="rank">1</span>
 					<span class="name">PLAYER</span>
 					<span class="score2">0</span>
 					<span class="diff">0</span>
@@ -111,23 +186,21 @@
 		<script type="module">
 			import '/views/bg.js';
 			import QueryString from '/js/QueryString.js';
-			import Color from '/views/color.js';
-			import Gradient from '/views/gradient.js';
 			import { peerServerOptions } from '/views/constants.js';
-			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import { translate, readableScoreFomatter, peek } from '/views/utils.js';
 			import Player from '/views/Player.js';
 			import Competition from '/views/competition.js';
 
 			const stream_bg = document.getElementById('stream_bg');
-			const timer = document.getElementById('timer');
 			const rank_template = document.getElementById('rank');
 			const player_template = document.getElementById('player');
+			const leaderboard = document.querySelector('.leaderboard');
 			const leaderboard_values = document.querySelector('.leaderboard  .value');
-			const color_gradient = new Gradient( // green - orange - red
-				'#0eff0e',
-				new Color(255, 165, 0),
-				'#fd0009'
-			);
+			// const color_gradient = new Gradient( // green - orange - red
+			// 	'#0eff0e',
+			// 	new Color(255, 165, 0),
+			// 	'#fd0009'
+			// );
 
 			const players_re = /^[2345678]$/;
 			const player_width = 228;
@@ -140,10 +213,11 @@
 			}
 
 			const cycle_match = (QueryString.get('cycle') || '').match(
-				/^[1-9]\d+(,\d+,\d+)?$/
+				/^[1-9]\d+,[1-9]\d+(,\d+,\d+)?$/
 			);
 			const cycle_settings = {
-				seconds: 30,
+				initial_round: 90,
+				subsequent_rounds: 60,
 				warn: 16,
 				panic: 8,
 			};
@@ -153,41 +227,47 @@
 					.split(',')
 					.map(v => parseInt(v, 10));
 				if (!cycle_match[1]) {
-					if (values[0] >= 10) {
-						cycle_settings.seconds = values[0];
+					if (values[0] >= 10 && values[0] >= values[1]) {
+						cycle_settings.initial_round = values[0];
+						cycle_settings.subsequent_rounds = values[1];
 					}
 				} else {
 					if (
 						values[0] >= 10 &&
 						values[0] >= values[1] &&
-						values[1] >= values[2]
+						values[0] >= values[2] &&
+						values[2] >= values[3]
 					) {
-						cycle_settings.seconds = values[0];
-						cycle_settings.warn = values[1];
-						cycle_settings.panic = values[2];
+						cycle_settings.initial_round = values[0];
+						cycle_settings.subsequent_rounds = values[1];
+						cycle_settings.warn = values[2];
+						cycle_settings.panic = values[3];
 					}
 				}
 			}
 
-			const spacer = (1920 - num_players * player_width) / (num_players + 1);
-			const rank_colors = Array(num_players)
-				.fill()
-				.map((_, idx) =>
-					color_gradient.getColorAt(idx / (num_players - 1)).toHexString()
-				);
-
-			function updateScore() {
+			function getSortedPlayers() {
 				const sorted_players = [...players].sort((p1, p2) => {
 					const p1_score = p1.getScore();
 					const p2_score = p2.getScore();
 					return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
 				});
 
+				const active_players = sorted_players.filter(
+					player =>
+						!player.game?.over &&
+						!player.dom.full_node.classList.contains('eliminated')
+				);
+
+				return { sorted_players, active_players };
+			}
+
+			function updateScore() {
+				const { sorted_players, active_players } = getSortedPlayers();
+
 				sorted_players.forEach((player, idx) => {
-					if (!player.game?.over) {
-						player.dom.rank_node.style.color = rank_colors[idx];
-					}
-					player.dom.rank_node.querySelector('.rank').textContent = idx + 1;
+					player.dom.full_node.classList.remove('first', 'last', 'penultimate');
+					player.dom.rank_node.classList.remove('first', 'last', 'penultimate');
 
 					if (idx > 0) {
 						const diff = player.getScore() - sorted_players[idx - 1].getScore(); // is always negative!
@@ -199,68 +279,82 @@
 
 					leaderboard_values.appendChild(player.dom.rank_node);
 				});
+
+				if (active_players.length >= 3) {
+					peek(active_players, 1).dom.full_node.classList.add('penultimate');
+					peek(active_players, 1).dom.rank_node.classList.add('penultimate');
+				}
+				if (active_players.length >= 2) {
+					peek(active_players).dom.full_node.classList.add('last');
+					peek(active_players).dom.rank_node.classList.add('last');
+				}
+				active_players[0].dom.full_node.classList.add('first');
+				active_players[0].dom.rank_node.classList.add('first');
 			}
 
-			let start_ts;
+			let cycle_end_ts;
 			let rafId;
 			let toId;
+			let cur_cycle_duration;
 
 			function reset() {
-				timer.querySelector('.value').textContent = '';
-				timer.classList.remove('warn', 'panic');
+				leaderboard.querySelector('.header').innerHTML = '&nbsp;';
+				leaderboard.classList.remove('warn', 'panic');
 
-				toId = clearInterval(toId);
+				toId = clearTimeout(toId);
 				rafId = window.cancelAnimationFrame(rafId);
 			}
 
 			function startRound() {
-				start_ts = Date.now();
+				startCycle(cycle_settings.initial_round);
 				checkTime();
-				toId = setInterval(kickPlayer, cycle_settings.seconds * 1000);
 			}
 
 			function checkTime() {
-				const elapsed = Date.now() - start_ts;
-				const elapsed_slice = elapsed % (cycle_settings.seconds * 1000);
-				const remainder =
-					(cycle_settings.seconds * 1000 - elapsed_slice) / 1000;
-
+				const remainder = (cycle_end_ts - Date.now()) / 1000;
 				let content = remainder.toFixed(2);
 
 				if (remainder < cycle_settings.panic) {
-					timer.classList.remove('warn');
-					timer.classList.add('panic');
-					content = `!! ${content} !!`;
+					leaderboard.classList.remove('warn');
+					leaderboard.classList.add('panic');
+					content = `!${content}!`;
 				} else if (remainder < cycle_settings.warn) {
-					timer.classList.add('warn');
-					content = `! ${content} !`;
+					leaderboard.classList.add('warn');
+					// content = `! ${content} !`;
 				} else {
-					timer.classList.remove('warn', 'panic');
+					leaderboard.classList.remove('warn', 'panic');
 				}
 
-				timer.querySelector('.value').textContent = content;
+				leaderboard.querySelector('.header').textContent = content;
 
 				rafId = window.requestAnimationFrame(checkTime);
 			}
 
+			function startCycle(duration) {
+				cycle_end_ts = Date.now() + duration * 1000;
+				toId = setTimeout(endCycle, duration * 1000);
+			}
+
+			function endCycle() {
+				startCycle(cycle_settings.subsequent_rounds);
+
+				// figure out who to kick
+				kickPlayer();
+			}
+
 			function kickPlayer() {
-				const sorted_players = [...players].sort((p1, p2) => {
-					const p1_score = p1.getScore();
-					const p2_score = p2.getScore();
-					return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
-				});
+				const { sorted_players, active_players } = getSortedPlayers();
 
-				const lastPlayer = sorted_players.findLast(
-					player => !player.game?.over
-				);
-
-				if (lastPlayer) {
+				if (active_players.length >= 2) {
+					const lastPlayer = peek(active_players);
 					lastPlayer.game?.end();
 					lastPlayer.dom.rank_node.style.color = 'grey';
 					lastPlayer.dom.full_node.classList.add('eliminated');
 
-					if (sorted_players.indexOf(lastPlayer) <= 1) {
-						// there's just one player left, that's the winner
+					updateScore();
+
+					if (active_players.length === 2) {
+						// there was just 2 players left, so we have a winner
 						sorted_players[0].game?.end();
 						sorted_players[0].playWinnerAnimation();
 					} else {
@@ -288,7 +382,10 @@
 						);
 						const player_node = player_fragment.querySelector('.player');
 
-						player_node.classList.add(`p${player_idx + 1}`);
+						// simple formula to determine the type of video placement
+						const video_alignment = (player_idx >> 1) % 2 ? 'right' : 'left';
+
+						player_node.classList.add(`p${player_idx + 1}`, video_alignment);
 						stream_bg.appendChild(player_node);
 
 						const rank_fragment = document.importNode(
@@ -304,7 +401,6 @@
 								lines: player_node.querySelector(`.board .lines`),
 								preview: player_node.querySelector(`.board .next_piece`),
 								field: player_node.querySelector(`.board`),
-								running_trt: player_node.querySelector(`.running_trt`),
 								video: player_node.querySelector(`video`),
 
 								full_node: player_node,
@@ -342,22 +438,12 @@
 						player.onGameOver();
 
 						players.push(player);
-
-						Object.assign(player_node.style, {
-							left: `${Math.round(
-								spacer + player_idx * (player_width + spacer)
-							)}px`,
-						});
-
-						if (QueryString.get('rtrt') === '0') {
-							player.dom.running_trt.remove();
-						}
 					});
 
-				let cdToId;
+				let countDownTimeoutId;
 				const competition = new Competition(players, {
 					startCountDown: function (seconds) {
-						cdToId = clearTimeout(cdToId);
+						countDownTimeoutId = clearTimeout(countDownTimeoutId);
 						reset();
 
 						players.forEach(player =>
@@ -365,7 +451,7 @@
 						);
 
 						this.__startCountDown(seconds);
-						cdToId = setTimeout(startRound, seconds * 1000);
+						countDownTimeoutId = setTimeout(startRound, seconds * 1000);
 						timer.querySelector('.value').textContent =
 							cycle_settings.seconds.toFixed(2);
 					},
@@ -378,10 +464,6 @@
 						updateScore();
 					};
 				});
-
-				if (!competition.has_video) {
-					stream_bg.classList.add('no-video');
-				}
 
 				window.competition = competition;
 
