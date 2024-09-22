@@ -90,8 +90,6 @@ const default_frame_rate = 60;
 
 const is_match_room = /^\/room\/u\//.test(new URL(location).pathname);
 
-let do_half_height = true;
-
 export function css_size(css_pixel_width) {
 	return parseFloat(css_pixel_width.replace(/px$/, ''));
 }
@@ -117,6 +115,7 @@ const tabsContainer = document.querySelector('#tabs'),
 	capture_rate = document.querySelector('#capture_rate'),
 	show_parts = document.querySelector('#show_parts'),
 	score7 = document.querySelector('#score7'),
+	use_half_height = document.querySelector('#use_half_height'),
 	focus_alarm = document.querySelector('#focus_alarm'),
 	clear_config = document.querySelector('#clear_config'),
 	save_game_palette = document.querySelector('#save_game_palette'),
@@ -159,6 +158,17 @@ device_selector.addEventListener('change', evt => {
 		showProducerUI();
 		tabs[1].click(); // data
 	} else {
+		if (config.device_id === 'window') {
+			config.use_half_height = false;
+			use_half_height.checked = false;
+			use_half_height.parentNode.style.display = 'none';
+		} else {
+			config.use_half_height = false;
+			use_half_height.checked = false;
+			use_half_height.parentNode.style.display = null;
+		}
+
+		saveConfig(config);
 		playVideoFromConfig();
 		checkReadyToCalibrate();
 	}
@@ -415,7 +425,7 @@ async function startSharingVideoFeed() {
 			// 2. raw capture
 			const xywh = [...config.tasks.field.crop];
 
-			if (do_half_height) {
+			if (use_half_height.checked) {
 				xywh[1] *= 2;
 				xywh[3] *= 2;
 			}
@@ -569,7 +579,7 @@ video.addEventListener('click', async evt => {
 		console.log('Found offsets!');
 	}
 
-	if (do_half_height) {
+	if (use_half_height.checked) {
 		oy /= 2;
 		oh /= 2;
 	}
@@ -661,6 +671,43 @@ function onScore7Changed() {
 }
 
 score7.addEventListener('change', onScore7Changed);
+
+function onUseHalfHeightChanged() {
+	config.use_half_height = use_half_height.checked;
+
+	// we need to update EVERYTHING :'(
+	// assume transition is valid
+	if (config.use_half_height) {
+		// half the y and height of everything
+		for (const [name, task] of Object.entries(config.tasks)) {
+			if (!task?.crop) continue;
+
+			const inputs = document.querySelectorAll(
+				`#adjustments fieldset.${name} input.coordinate_input`
+			);
+
+			inputs[1].value = Math.floor(task.crop[1] / 2);
+			inputs[3].value = Math.ceil(task.crop[3] / 2);
+
+			resetConfig(name);
+		}
+	} else {
+		for (const [name, task] of Object.entries(config.tasks)) {
+			if (!task?.crop) continue;
+
+			const inputs = document.querySelectorAll(
+				`#adjustments fieldset.${name} input.coordinate_input`
+			);
+
+			inputs[1].value = task.crop[1] * 2;
+			inputs[3].value = task.crop[3] * 2;
+
+			resetConfig(name);
+		}
+	}
+}
+
+use_half_height.addEventListener('change', onUseHalfHeightChanged);
 
 function onPrivacyChanged() {
 	config.allow_video_feed = !!allow_video_feed.checked;
@@ -1101,10 +1148,8 @@ async function playVideoFromConfig() {
 	video.classList.remove('is-hidden');
 
 	if (config.device_id === 'window') {
-		do_half_height = false;
 		await playVideoFromScreenCap(config.frame_rate);
 	} else {
-		do_half_height = true && QueryString.get('disable_half_height') != '1';
 		await playVideoFromDevice(config.device_id, config.frame_rate);
 	}
 
@@ -1113,7 +1158,7 @@ async function playVideoFromConfig() {
 		.forEach(elmt => (elmt.hidden = config.device_id === 'window'));
 }
 
-let capture_process, blob;
+let capture_process;
 let frame_count = 0;
 
 async function updateFrameRate() {
@@ -1156,11 +1201,6 @@ async function startCapture(stream) {
 			settings.height
 		}@${settings.frameRate.toFixed(1)}fps`
 	);
-
-	if (stream.asset) {
-		const response = await fetch(stream.asset);
-		blob = await response.blob();
-	}
 
 	if (show_parts.checked) {
 		adjustments.style.display = 'block';
@@ -1255,17 +1295,12 @@ async function captureFrame() {
 
 	try {
 		let bitmap;
-		let force_half_height = false;
 
 		// let's assume that pixelated resize of height divided 2 is the same as dropping every other row
 		// which is equivalent to deinterlacing *cough*
 
 		performance.mark('capture_start');
-		if (blob) {
-			force_half_height = true;
-			// images are known to be 720x480
-			bitmap = await createImageBitmap(blob, 0, 0, 720, 480);
-		} else if (video.videoWidth && video.videoHeight) {
+		if (video.videoWidth && video.videoHeight) {
 			bitmap = await createImageBitmap(
 				video,
 				0,
@@ -1277,7 +1312,7 @@ async function captureFrame() {
 		performance.mark('capture_end');
 
 		if (bitmap) {
-			game_tracker.processFrame(bitmap, do_half_height || force_half_height);
+			game_tracker.processFrame(bitmap);
 		}
 	} catch (err) {
 		console.error(err);
@@ -1652,6 +1687,7 @@ function saveConfig(config) {
 		brightness: config.brightness,
 		contrast: config.contrast,
 		score7: config.score7,
+		use_half_height: config.use_half_height,
 		tasks: {},
 	};
 
@@ -2056,7 +2092,14 @@ function showProducerUI() {
 
 		capture_rate.value = config.frame_rate || default_frame_rate;
 
+		let tmp_use_half_height = QueryString.get('disable_half_height') !== '1';
+
+		if ('use_half_height' in config) {
+			tmp_use_half_height = !!config.use_half_height;
+		}
+
 		score7.checked = config.score7 === true;
+		use_half_height.checked = tmp_use_half_height;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
 
@@ -2074,6 +2117,12 @@ function showProducerUI() {
 			removeCalibrationTab();
 			initCaptureFromEverdrive(config.frame_rate);
 		} else {
+			if (config.device_id === 'window') {
+				config.use_half_height = false;
+				use_half_height.checked = false;
+				use_half_height.parentNode.remove();
+			}
+
 			await playVideoFromConfig();
 			trackAndSendFrames();
 		}

@@ -97,6 +97,7 @@ export default class TetrisOCR extends EventTarget {
 		this.config = config;
 		this.palette = this.palettes?.[config.palette]; // will reset to undefined when needed
 
+		this.pending_capture_reinit = true;
 		this.fixPalette();
 
 		const bounds = {
@@ -250,11 +251,13 @@ export default class TetrisOCR extends EventTarget {
 		}
 	}
 
-	initCaptureContext(frame, half_height) {
+	initCaptureContext(frame) {
+		this.pending_capture_reinit = false;
 		this.capture_canvas = document.createElement('canvas');
 
 		this.capture_canvas.width = frame.width;
-		this.capture_canvas.height = frame.height >> (half_height ? 1 : 0);
+		this.capture_canvas.height =
+			frame.height >> (this.config.use_half_height ? 1 : 0);
 
 		this.capture_canvas_ctx = this.capture_canvas.getContext('2d', {
 			alpha: false,
@@ -281,9 +284,9 @@ export default class TetrisOCR extends EventTarget {
 		this.updateCaptureContextFilters();
 	}
 
-	processsFrameStep1(frame, half_height) {
-		if (!this.capture_canvas_ctx) {
-			this.initCaptureContext(frame, half_height);
+	processsFrameStep1(frame) {
+		if (!this.capture_canvas_ctx || !this.pending_capture_reinit) {
+			this.initCaptureContext(frame);
 		}
 
 		performance.mark('start');
@@ -292,7 +295,7 @@ export default class TetrisOCR extends EventTarget {
 			0,
 			0,
 			frame.width,
-			frame.height >> (half_height ? 1 : 0)
+			frame.height >> (this.config.use_half_height ? 1 : 0)
 		);
 		performance.mark('draw_end');
 		performance.measure('draw_frame', 'start', 'draw_end');

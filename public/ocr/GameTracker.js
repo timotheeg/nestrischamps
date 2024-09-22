@@ -94,9 +94,9 @@ export default class GameTracker {
 		return new_game_id;
 	}
 
-	async processFrame(bitmap, half_height) {
+	async processFrame(bitmap) {
 		// ======= OCR step 1 (Sanitize)
-		const last_frame = this.tetris_ocr.processsFrameStep1(bitmap, half_height);
+		const last_frame = this.tetris_ocr.processsFrameStep1(bitmap);
 
 		if (this.frame_buffer.length < BUFFER_MAXSIZE) {
 			this.frame_buffer.push(last_frame);
