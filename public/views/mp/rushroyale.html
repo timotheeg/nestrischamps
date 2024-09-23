@@ -301,14 +301,16 @@
 			function updateScore() {
 				const { sorted_players, active_players } = getSortedPlayers();
 
+				const top_score = sorted_players[0].getScore();
+
 				sorted_players.forEach((player, idx) => {
 					player.dom.full_node.classList.remove('first', 'last', 'penultimate');
 					player.dom.rank_node.classList.remove('first', 'last', 'penultimate');
 
 					if (idx > 0) {
-						const diff = player.getScore() - sorted_players[idx - 1].getScore(); // is always negative!
+						const diff = top_score - player.getScore();
 						player.dom.rank_node.querySelector('.diff').textContent =
-							readableScoreFomatter(diff);
+							'+' + readableScoreFomatter(diff);
 					} else {
 						player.dom.rank_node.querySelector('.diff').textContent = '';
 					}
@@ -324,6 +326,7 @@
 					peek(active_players).dom.full_node.classList.add('last');
 					peek(active_players).dom.rank_node.classList.add('last');
 				}
+
 				active_players[0].dom.full_node.classList.add('first');
 				active_players[0].dom.rank_node.classList.add('first');
 			}
@@ -356,7 +359,7 @@
 				if (remainder < cycle_settings.panic) {
 					leaderboard.classList.remove('warn');
 					leaderboard.classList.add('panic');
-					content = `!${content}!`;
+					content = `! ${content} !`;
 				} else if (remainder < cycle_settings.warn) {
 					leaderboard.classList.add('warn');
 					// content = `! ${content} !`;
