@@ -359,7 +359,7 @@
 				if (remainder < cycle_settings.panic) {
 					leaderboard.classList.remove('warn');
 					leaderboard.classList.add('panic');
-					content = `! ${content} !`;
+					content = `!${content}!`;
 				} else if (remainder < cycle_settings.warn) {
 					leaderboard.classList.add('warn');
 					// content = `! ${content} !`;
@@ -378,34 +378,57 @@
 			}
 
 			function endCycle() {
-				startCycle(cycle_settings.subsequent_rounds);
-
 				// figure out who to kick
-				kickPlayer();
+				const num_kicked = kickPlayer();
+
+				updateScore();
+
+				if (num_kicked) {
+					startCycle(cycle_settings.subsequent_rounds * num_kicked);
+				} else {
+					// round is over
+					reset();
+				}
 			}
 
 			function kickPlayer() {
 				const { sorted_players, active_players } = getSortedPlayers();
 
+				let cut_idx;
+
 				if (active_players.length >= 2) {
+					// grab all the tail players with the same score
 					const lastPlayer = peek(active_players);
-					lastPlayer.game?.end();
-					lastPlayer.dom.rank_node.style.color = 'grey';
-					lastPlayer.dom.full_node.classList.add('eliminated');
+					const lastPlayerScore = lastPlayer.getScore();
 
-					updateScore();
+					cut_idx = active_players.length - 2;
+					while (active_players[cut_idx].getScore() === lastPlayerScore)
+						cut_idx--;
 
-					if (active_players.length === 2) {
-						// there was just 2 players left, so we have a winner
-						sorted_players[0].game?.end();
-						sorted_players[0].playWinnerAnimation();
+					if (cut_idx === -1) {
+						// tie victory!
+						active_players.forEach(player => {
+							playe.game?.end();
+							playe.playWinnerAnimation();
+						});
 					} else {
-						return;
+						for (let idx = cut_idx + 1; idx < active_players.length; idx++) {
+							const player = active_players[idx];
+
+							player.game?.end();
+							player.dom.rank_node.style.color = 'grey';
+							player.dom.full_node.classList.add('eliminated');
+						}
+
+						if (cut_idx === 0) {
+							// we have a winner
+							sorted_players[0].game?.end();
+							sorted_players[0].playWinnerAnimation();
+						} else {
+							return active_players.length - cut_idx + 1; // return number of players kicked
+						}
 					}
 				}
-
-				// round is over
-				reset();
 			}
 
 			window.players = players;
