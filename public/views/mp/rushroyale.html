@@ -10,6 +10,7 @@
 				--p-offset: 374px;
 				--p-left-x: 40px;
 				--p-right-x: 1284px;
+				--p-video-width: 112px;
 
 				top: var(--p-row1-top);
 			}
@@ -22,7 +23,31 @@
 			}
 
 			.player .video {
-				width: 112px;
+				width: var(--p-video-width);
+			}
+
+			.badges {
+				position: absolute;
+				width: var(--p-video-width);
+				height: 44px;
+				/* background-color: rgb(255, 255, 0, 0.5); */
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 0.5em;
+			}
+
+			.badge {
+				display: inline-block;
+				width: 40px;
+				height: 44px;
+				overflow: hidden;
+				color: black;
+				font-size: 16px;
+				text-align: center;
+				line-height: 44px;
+				background: url(/views/badge.bg.png);
+				text-shadow: 1px 1px 1px;
 			}
 
 			.player.left .video {
@@ -30,9 +55,19 @@
 				left: 219px;
 			}
 
+			.player.left .badges {
+				top: 96px;
+				left: 234px;
+			}
+
 			.player.right .video {
 				top: 336px;
 				left: -133px;
+			}
+
+			.player.right .badges {
+				top: 322px;
+				left: -118px;
 			}
 
 			.player.first .box {
@@ -161,6 +196,7 @@
 						<div class="header">PLAYER</div>
 						<div class="value">0000000</div>
 					</div>
+					<div class="badges"></div>
 				</div>
 			</template>
 
@@ -296,6 +332,8 @@
 			let rafId;
 			let toId;
 			let cur_cycle_duration;
+			let lvl19 = null;
+			let lvl29 = null;
 
 			function reset() {
 				leaderboard.querySelector('.header').innerHTML = '&nbsp;';
@@ -307,6 +345,7 @@
 
 			function startRound() {
 				startCycle(cycle_settings.initial_round);
+				lvl19 = lvl29 = null; // to track badges
 				checkTime();
 			}
 
@@ -402,6 +441,7 @@
 								preview: player_node.querySelector(`.board .next_piece`),
 								field: player_node.querySelector(`.board`),
 								video: player_node.querySelector(`video`),
+								badges: player_node.querySelector(`.badges`),
 
 								full_node: player_node,
 								rank_node,
@@ -435,6 +475,32 @@
 							this.dom.preview.hidden = true;
 						};
 
+						player.onLevel = function (frame) {
+							if (frame.raw.level === 19) {
+								if (lvl19) return;
+
+								// first to 19!
+								lvl19 = this;
+
+								const badge = document.createElement('span');
+								badge.classList.add('badge');
+								badge.textContent = 19;
+
+								player.dom.badges.appendChild(badge);
+							} else if (frame.raw.level === 29) {
+								if (lvl29) return;
+
+								// first to 29!
+								lvl29 = this;
+
+								const badge = document.createElement('span');
+								badge.classList.add('badge');
+								badge.textContent = 29;
+
+								player.dom.badges.appendChild(badge);
+							}
+						};
+
 						player.onGameOver();
 
 						players.push(player);
@@ -446,14 +512,20 @@
 						countDownTimeoutId = clearTimeout(countDownTimeoutId);
 						reset();
 
-						players.forEach(player =>
-							player.dom.full_node.classList.remove('eliminated')
-						);
+						players.forEach(player => {
+							player.dom.full_node.classList.remove(
+								'eliminated',
+								'first',
+								'last',
+								'penultimate'
+							);
+							player.dom.badges.replaceChidlren();
+						});
 
 						this.__startCountDown(seconds);
 						countDownTimeoutId = setTimeout(startRound, seconds * 1000);
 						timer.querySelector('.value').textContent =
-							cycle_settings.seconds.toFixed(2);
+							cycle_settings.initial_round.toFixed(2);
 					},
 				});
 
