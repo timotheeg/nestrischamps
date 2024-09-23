@@ -425,7 +425,7 @@
 							sorted_players[0].game?.end();
 							sorted_players[0].playWinnerAnimation();
 						} else {
-							return active_players.length - cut_idx + 1; // return number of players kicked
+							return active_players.length - cut_idx - 1; // return number of players kicked
 						}
 					}
 				}
