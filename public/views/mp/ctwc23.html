@@ -164,11 +164,12 @@
 
 			.hearts {
 				bottom: -766px;
-				width: 24px;
 				padding-right: 0;
 				height: unset;
 				font-size: 0px;
 				line-height: 32px;
+				display: flex;
+				flex-direction: column;
 			}
 
 			.hearts span {
@@ -178,7 +179,7 @@
 				background: url(/views/heart_grey.png);
 				background-repeat: no-repeat;
 				background-position: center left;
-				display: block;
+				display: inline-block;
 			}
 
 			.hearts span.win {
@@ -282,6 +283,7 @@
 			}
 
 			.p2 > * {
+				right: unset;
 				left: var(--offset);
 			}
 
@@ -366,6 +368,44 @@
 				bottom: unset;
 				top: 477px;
 			}
+
+			.heartpos1 .match.small .hearts {
+				top: 311px;
+				--offset: 459px;
+			}
+
+			.heartpos2 .match.small .hearts {
+				top: 139px;
+				--offset: 535px;
+			}
+
+			.heartpos3 .match.small .hearts,
+			.heartpos4 .match.small .hearts {
+				--border-size: 14;
+				width: unset;
+				top: 91px;
+				--offset: 707px;
+				height: 29px;
+				padding: 0 6px 0 9px;
+				gap: 2px;
+				flex-direction: row;
+			}
+
+			.heartpos3 .match.small .p2 .hearts,
+			.heartpos4 .match.small .p2 .hearts {
+				right: unset;
+			}
+
+			.heartpos4 .match.small .hearts {
+				left: -1325px;
+				right: unset;
+			}
+
+			.heartpos4 .match.small .p2 .hearts {
+				left: unset;
+				right: -1325px;
+			}
+
 			.match.small .flag,
 			.match.small .name {
 				z-index: 6;
@@ -617,6 +657,12 @@
 					c +
 					b
 				);
+			}
+
+			if (/^[1234]$/.test(QueryString.get('heartpos'))) {
+				document
+					.querySelector('#stream_bg')
+					.classList.add(`heartpos${QueryString.get('heartpos')}`);
 			}
 
 			const isDAS = QueryString.get('style') === 'das';
