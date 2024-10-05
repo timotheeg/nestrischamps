@@ -123,6 +123,7 @@
 				font-size: 64px;
 				line-height: 88px;
 				padding-bottom: 1em;
+				padding-top: 0.5em;
 			}
 
 			.leaderboard .value {
@@ -132,6 +133,7 @@
 			.leaderboard .value .entry {
 				color: white;
 				margin-bottom: 1.5em;
+				position: absolute;
 			}
 
 			.leaderboard .value .entry.first {
@@ -150,6 +152,7 @@
 				display: block;
 				text-align: left;
 				width: 100%;
+				padding-bottom: 0.25em;
 			}
 
 			@keyframes panic_colorize_wr {
@@ -227,6 +230,12 @@
 			import Player from '/views/Player.js';
 			import Competition from '/views/competition.js';
 
+			function easeOutQuart(t, b, c, d) {
+				return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+			}
+
+			let adjusRankToID;
+
 			const stream_bg = document.getElementById('stream_bg');
 			const rank_template = document.getElementById('rank');
 			const player_template = document.getElementById('player');
@@ -237,6 +246,8 @@
 			// 	new Color(255, 165, 0),
 			// 	'#fd0009'
 			// );
+
+			const rankYOffsets = [190, 292, 394, 496, 598, 700, 802, 904];
 
 			const players_re = /^[2345678]$/;
 			const player_width = 228;
@@ -306,6 +317,7 @@
 				sorted_players.forEach((player, idx) => {
 					player.dom.full_node.classList.remove('first', 'last', 'penultimate');
 					player.dom.rank_node.classList.remove('first', 'last', 'penultimate');
+					player.dom.rank_node.targetTop = rankYOffsets[idx];
 
 					if (idx > 0) {
 						const diff = top_score - player.getScore();
@@ -314,8 +326,6 @@
 					} else {
 						player.dom.rank_node.querySelector('.diff').textContent = '';
 					}
-
-					leaderboard_values.appendChild(player.dom.rank_node);
 				});
 
 				if (active_players.length >= 3) {
@@ -339,7 +349,7 @@
 			let lvl29 = null;
 
 			function reset() {
-				leaderboard.querySelector('.header').innerHTML = '&nbsp;';
+				leaderboard.querySelector('.header').textContent = '-';
 				leaderboard.classList.remove('warn', 'panic');
 
 				toId = clearTimeout(toId);
@@ -434,6 +444,26 @@
 			window.players = players;
 			window.startRound = startRound;
 
+			// Updating the rank positions at 60fps
+			// TODO: don't animate when there's nothing to do
+			function adjustRanks() {
+				players.forEach(p => {
+					const rank_node = p.dom.rank_node;
+
+					if (rank_node.targetTop === rank_node.curTop) return;
+
+					if (Math.abs(rank_node.targetTop - rank_node.curTop) < 0.0001) {
+						rank_node.curTop = rank_node.targetTop;
+					} else {
+						rank_node.curTop = (rank_node.targetTop + rank_node.curTop) / 2;
+					}
+
+					rank_node.style.top = `${rank_node.curTop}px`;
+				});
+			}
+
+			adjusRankToID = setInterval(adjustRanks, 1000 / 30);
+
 			window.onload = () => {
 				// wait for css
 				const base_offset_y = 20;
@@ -458,6 +488,11 @@
 							true
 						);
 						const rank_node = rank_fragment.querySelector('.entry');
+
+						// initial display into the leaderboard
+						rank_node.targetTop = rank_node.curTop = rankYOffsets[player_idx];
+						rank_node.style.top = `${rank_node.curTop}px`;
+						leaderboard_values.appendChild(rank_node);
 
 						const player = new Player(
 							{
