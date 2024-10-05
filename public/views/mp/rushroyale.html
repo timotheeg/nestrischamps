@@ -580,12 +580,13 @@
 								'last',
 								'penultimate'
 							);
-							player.dom.badges.replaceChidlren();
+							player.dom.badges.replaceChildren();
 						});
 
 						this.__startCountDown(seconds);
 						countDownTimeoutId = setTimeout(startRound, seconds * 1000);
-						timer.querySelector('.value').textContent =
+
+						leaderboard.querySelector('.header').textContent =
 							cycle_settings.initial_round.toFixed(2);
 					},
 				});
