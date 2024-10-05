@@ -285,7 +285,7 @@ export default class TetrisOCR extends EventTarget {
 	}
 
 	processsFrameStep1(frame) {
-		if (!this.capture_canvas_ctx || !this.pending_capture_reinit) {
+		if (!this.capture_canvas_ctx || this.pending_capture_reinit) {
 			this.initCaptureContext(frame);
 		}
 
