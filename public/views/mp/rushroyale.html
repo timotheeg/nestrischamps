@@ -136,6 +136,20 @@
 				position: absolute;
 			}
 
+			.leaderboard.avatar .value .entry {
+				background-size: 66px 66px;
+				background-repeat: no-repeat;
+				padding-left: 74px;
+			}
+
+			.leaderboard.avatar .value .score2 {
+				width: 200px;
+			}
+
+			.leaderboard.avatar .value .diff {
+				width: 212px;
+			}
+
 			.leaderboard .value .entry.first {
 				color: #0eff0e;
 			}
@@ -146,6 +160,10 @@
 
 			.leaderboard .value .entry.last {
 				color: #fd0009;
+			}
+
+			.leaderboard .value .entry.eliminated {
+				filter: grayscale(1) brightness(0.5);
 			}
 
 			.leaderboard .value .entry .name {
@@ -181,7 +199,7 @@
 	</head>
 	<body>
 		<div id="stream_bg">
-			<div class="box leaderboard">
+			<div class="box leaderboard avatar">
 				<div class="header">00.00</div>
 				<div class="value"></div>
 			</div>
@@ -248,6 +266,10 @@
 			// );
 
 			const rankYOffsets = [190, 292, 394, 496, 598, 700, 802, 904];
+
+			if (QueryString.get('avatar') === '0') {
+				leaderboard.classList.remove('avatar');
+			}
 
 			const players_re = /^[2345678]$/;
 			const player_width = 228;
@@ -426,8 +448,8 @@
 							const player = active_players[idx];
 
 							player.game?.end();
-							player.dom.rank_node.style.color = 'grey';
 							player.dom.full_node.classList.add('eliminated');
+							player.dom.rank_node.classList.add('eliminated');
 						}
 
 						if (cut_idx === 0) {
@@ -526,6 +548,13 @@
 								name || '';
 						};
 
+						player.__setAvatar = player.setAvatar;
+						player.setAvatar = function (url) {
+							if (QueryString.get('avatar') === '0') return;
+							this.__setAvatar(url);
+							this.dom.rank_node.style.backgroundImage = `url(${url})`; // TODO Should validate
+						};
+
 						player.onGameStart = function () {
 							this.dom.lines.hidden = false;
 							this.dom.preview.hidden = false;
@@ -574,12 +603,9 @@
 						reset();
 
 						players.forEach(player => {
-							player.dom.full_node.classList.remove(
-								'eliminated',
-								'first',
-								'last',
-								'penultimate'
-							);
+							const classes = ['eliminated', 'first', 'last', 'penultimate'];
+							player.dom.full_node.classList.remove(...classes);
+							player.dom.rank_node.classList.remove(...classes);
 							player.dom.badges.replaceChildren();
 						});
 
