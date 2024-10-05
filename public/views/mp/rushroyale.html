@@ -23,7 +23,13 @@
 			}
 
 			.player .video {
+				--width: var(--p-video-width);
 				width: var(--p-video-width);
+			}
+
+			.player .video video {
+				background-size: cover;
+				background-repeat: no-repeat;
 			}
 
 			.badges {
@@ -551,8 +557,12 @@
 						player.__setAvatar = player.setAvatar;
 						player.setAvatar = function (url) {
 							if (QueryString.get('avatar') === '0') return;
-							this.__setAvatar(url);
-							this.dom.rank_node.style.backgroundImage = `url(${url})`; // TODO Should validate
+							// TODO Should validate that url is safe for string interpolation
+							this.dom.video.style.backgroundImage = `url(${url})`;
+							this.dom.rank_node.style.backgroundImage = `url(${url})`;
+
+							// we're not calling the original avatar, because we don't want to show it the avatars in the play field
+							// this.__setAvatar(url);
 						};
 
 						player.onGameStart = function () {
