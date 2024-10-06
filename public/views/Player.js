@@ -1225,7 +1225,7 @@ export default class Player extends EventTarget {
 
 		if (!piece_evt) {
 			piece_evt = fake_piece_evt;
-		} else if (!piece_evt.recommendation) {
+		} else if (this.stackRabbitWorker && !piece_evt.recommendation) {
 			piece_evt.recommendation = 'pending';
 
 			const board = new Board(piece_evt.field);
