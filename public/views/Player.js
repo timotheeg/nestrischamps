@@ -5,6 +5,8 @@ import BaseGame from '/views/BaseGame.js';
 import { css_size, clamp, getPercent, peek } from '/views/utils.js';
 import Gradient from '/views/gradient.js';
 import { PIECE_COLORS, DOM_DEV_NULL, LINES } from '/views/constants.js';
+import Board from '/views/Board.js';
+import addStackRabbitRecommendation from '/views/addStackRabbitRecommendation.js';
 
 const WINNER_FACE_BLOCKS = [
 	[12, 3],
@@ -466,6 +468,24 @@ export default class Player extends EventTarget {
 				audio.play();
 			};
 		});
+
+		if (QueryString.get('srabbit') === '1') {
+			this.stackRabbitWorker = new Worker('/views/stackrabbit/worker.js');
+
+			this.stackRabbitWorker.rpc = (...command) => {
+				return new Promise((resolve, reject) => {
+					const channel = new MessageChannel();
+					channel.port1.onmessage = ({ data }) => {
+						if (data.error) {
+							reject(data.error);
+						} else {
+							resolve(data.result);
+						}
+					};
+					this.stackRabbitWorker.postMessage(command, [channel.port2]);
+				});
+			};
+		}
 
 		this.renderWinnerFrame = this.renderWinnerFrame.bind(this);
 		this._setFrameOuter = this._setFrameOuter.bind(this);
@@ -1099,7 +1119,25 @@ export default class Player extends EventTarget {
 
 	_renderValidFrame(frame) {
 		if (!this.game.over) {
-			this.renderField(frame.raw.level, frame.raw.field);
+			let field = frame.raw.field;
+
+			if (this.stackRabbitWorker) {
+				const piece_evt = peek(frame.pieces);
+				if (
+					piece_evt &&
+					piece_evt.recommendation &&
+					piece_evt.recommendation != 'pending' &&
+					!frame.in_clear_animation
+				) {
+					field = addStackRabbitRecommendation(
+						field,
+						piece_evt.piece,
+						piece_evt.recommendation
+					);
+				}
+			}
+
+			this.renderField(frame.raw.level, field);
 			this.renderPreview(frame.raw.level, frame.raw.preview);
 		}
 	}
@@ -1185,7 +1223,36 @@ export default class Player extends EventTarget {
 
 		let piece_evt = peek(frame.pieces);
 
-		if (!piece_evt) piece_evt = fake_piece_evt;
+		if (!piece_evt) {
+			piece_evt = fake_piece_evt;
+		} else if (!piece_evt.recommendation) {
+			piece_evt.recommendation = 'pending';
+
+			const board = new Board(piece_evt.field);
+			const params = {
+				level: frame.raw.level <= 18 ? 18 : 19,
+				lines: frame.raw.lines,
+				reactionTime: 24, // this is 400ms delay
+				inputFrameTimeline: 'X....', // this is 12 Hz, should put 10 for NTSC DAS :/
+				currentPiece: piece_evt.piece,
+				nextPiece: frame.raw.preview,
+				board: board.rows
+					.reduce((acc, row) => (acc.push(...row.cells), acc), [])
+					.map(cell => (cell ? 1 : 0))
+					.join(''),
+			};
+
+			const start = Date.now();
+			this.stackRabbitWorker.rpc('getMove', params).then(recommendation => {
+				const elapsed = Date.now() - start;
+				piece_evt.recommendation = recommendation;
+				console.log({
+					elapsed,
+					params,
+					recommendation,
+				});
+			});
+		}
 
 		this.dom.drought.textContent = this.options.format_drought(
 			piece_evt.i_droughts.cur
