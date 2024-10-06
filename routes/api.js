@@ -30,7 +30,8 @@ function parseStackRabbitRequest(query) {
 		'currentPiece',
 		'nextPiece',
 		'level',
-		'lines, reactionTime',
+		'lines',
+		'reactionTime',
 		'inputFrameTimeline',
 	]);
 }
