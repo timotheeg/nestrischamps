@@ -134,7 +134,12 @@ const ROTATIONS = {
 };
 
 // from stack rabbit evaluation, compute where the piece's final position is
-export default function addStackRabbitRecommendation(field, piece, placement) {
+export default function addStackRabbitRecommendation(
+	field,
+	piece,
+	placement,
+	onlyUseWhiteGhostBlocks = false
+) {
 	const [rotation, xshift, yshift] = placement;
 	const field_copy = [...field];
 	const shape = ROTATIONS[piece][rotation];
@@ -155,7 +160,7 @@ export default function addStackRabbitRecommendation(field, piece, placement) {
 			const target_idx = target_y * 10 + target_x;
 
 			if (!field_copy[target_idx]) {
-				field_copy[target_idx] = block;
+				field_copy[target_idx] = onlyUseWhiteGhostBlocks ? 4 : block;
 			}
 		}
 	}
