@@ -470,7 +470,9 @@ export default class Player extends EventTarget {
 		});
 
 		if (QueryString.get('srabbit') === '1') {
-			this.stackRabbitWorker = new Worker('/views/stackrabbit/worker.js');
+			this.stackRabbitWorker = new Worker(
+				'/views/stackrabbit/wasmRabbit-worker.js'
+			);
 
 			this.stackRabbitWorker.rpc = (...command) => {
 				return new Promise((resolve, reject) => {

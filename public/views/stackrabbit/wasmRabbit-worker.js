@@ -17,16 +17,11 @@ const SR_PIECES_INDEXES = {
 	Z: 6,
 };
 
+const DELIM = '|';
+
 function getStackRabbitArgString(args) {
-	const {
-		level,
-		lines,
-		reactionTime,
-		inputFrameTimeline,
-		currentPiece,
-		nextPiece,
-		board,
-	} = args;
+	const { level, lines, inputFrameTimeline, currentPiece, nextPiece, board } =
+		args;
 
 	return [
 		board,
@@ -37,16 +32,32 @@ function getStackRabbitArgString(args) {
 		inputFrameTimeline,
 		'', // playoutCount?
 		// '', // playoutLength?
-	].join('|');
+	].join(DELIM);
 }
 
 // supported methods
 const API = {
+	getLockValueLookup: args => {
+		const rawRes = Module.getLockValueLookup(getStackRabbitArgString(args));
+		return JSON.parse(rawRes);
+	},
 	getMove: args => {
-		const start = Date.now();
 		const rawRes = Module.getMove(getStackRabbitArgString(args));
-		const getMoveTime = Date.now() - start;
-		console.log({ getMoveTime });
+		return JSON.parse(rawRes);
+	},
+	getTopMoves: args => {
+		const rawRes = Module.getTopMoves(getStackRabbitArgString(args));
+		return JSON.parse(rawRes);
+	},
+	getTopMovesHybrid: args => {
+		const rawRes = Module.getTopMovesHybrid(getStackRabbitArgString(args));
+		return JSON.parse(rawRes);
+	},
+	rateMove: args => {
+		// dirty trick to account for second board
+		args.board += DELIM + args.secondBoard;
+
+		const rawRes = Module.rateMove(getStackRabbitArgString(args));
 		return JSON.parse(rawRes);
 	},
 };
@@ -74,4 +85,4 @@ function workerInit() {
 	self.onmessage = handle_message;
 }
 
-importScripts('./stackrabbit.js');
+importScripts('./wasmRabbit.js');

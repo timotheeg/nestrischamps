@@ -1,5 +1,6 @@
 public/ocr/opencv.js
 public/js/BinaryFrame.js
 public/vendor/*
+public/views/stackrabbit/wasmRabbit.js
 docs
 *.md
