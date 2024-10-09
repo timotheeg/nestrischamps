@@ -183,6 +183,15 @@ if (/^\d+$/.test(buffer_time)) {
 	buffer_time = 0;
 }
 
+const STACKRABBIT_INPUT_TIMELINES = {
+	10: 'X.....',
+	12: 'X....',
+	18: 'X..X..X...',
+	20: 'X..',
+	24: 'X.X..',
+	30: 'X.',
+};
+
 const DEFAULT_DOM_REFS = {
 	name: DOM_DEV_NULL,
 	score: DOM_DEV_NULL,
@@ -224,6 +233,13 @@ const DEFAULT_OPTIONS = {
 	reliable_field: 1,
 	draw_field: 1,
 	avatar: QueryString.get('avatar') !== '0',
+	srabbit: QueryString.get('srabbit') === '1',
+	srabbit_input_speed: (() => {
+		const sr_input = QueryString.get('srabbit_input_speed');
+		return /^\d+$/.test(sr_input) && sr_input in STACKRABBIT_INPUT_TIMELINES
+			? sr_input
+			: 12;
+	})(),
 	curtain: 1,
 	buffer_time,
 	format_score: (v, size) => {
@@ -469,7 +485,10 @@ export default class Player extends EventTarget {
 			};
 		});
 
-		if (QueryString.get('srabbit') === '1') {
+		if (this.options.srabbit) {
+			this.options.srabbit_input_timeline =
+				STACKRABBIT_INPUT_TIMELINES[this.options.srabbit_input_speed];
+
 			this.stackRabbitWorker = new Worker(
 				'/views/stackrabbit/wasmRabbit-worker.js'
 			);
@@ -1235,8 +1254,7 @@ export default class Player extends EventTarget {
 			const params = {
 				level: frame.raw.level <= 18 ? 18 : 19,
 				lines: frame.raw.lines,
-				reactionTime: 24, // this is 400ms delay
-				inputFrameTimeline: 'X....', // this is 12 Hz, should put 10 for NTSC DAS :/
+				inputFrameTimeline: this.options.srabbit_input_timeline,
 				currentPiece: piece_evt.piece,
 				nextPiece: frame.raw.preview,
 				board: board.rows
