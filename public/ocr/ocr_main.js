@@ -116,6 +116,7 @@ const tabsContainer = document.querySelector('#tabs'),
 	show_parts = document.querySelector('#show_parts'),
 	score7 = document.querySelector('#score7'),
 	use_half_height = document.querySelector('#use_half_height'),
+	use_worker_for_interval = document.querySelector('#use_worker_for_interval'),
 	focus_alarm = document.querySelector('#focus_alarm'),
 	clear_config = document.querySelector('#clear_config'),
 	save_game_palette = document.querySelector('#save_game_palette'),
@@ -709,6 +710,15 @@ function onUseHalfHeightChanged() {
 
 use_half_height.addEventListener('change', onUseHalfHeightChanged);
 
+function onUseWorkerIntervalChanged() {
+	stopCapture();
+	config.use_worker_for_interval = !!use_worker_for_interval.checked;
+	saveConfig(config);
+	startCapture();
+}
+
+use_worker_for_interval.addEventListener('change', onUseWorkerIntervalChanged);
+
 function onPrivacyChanged() {
 	config.allow_video_feed = !!allow_video_feed.checked;
 
@@ -1177,7 +1187,7 @@ async function updateFrameRate() {
 }
 
 function stopCapture() {
-	clearInterval(capture_process);
+	clearOcrInterval(config.use_worker_for_interval, capture_process);
 }
 
 async function startCapture(stream) {
@@ -1213,7 +1223,11 @@ async function startCapture(stream) {
 	console.log(
 		`Setting capture interval for ${settings.frameRate}fps (i.e. ${frame_ms}ms per frame)`
 	);
-	capture_process = setInterval(captureFrame, frame_ms);
+	capture_process = await setOcrInterval(
+		config.use_worker_for_interval,
+		captureFrame,
+		frame_ms
+	);
 }
 
 let last_frame_time = 0;
@@ -1688,6 +1702,7 @@ function saveConfig(config) {
 		contrast: config.contrast,
 		score7: config.score7,
 		use_half_height: config.use_half_height,
+		use_worker_for_interval: config.use_worker_for_interval,
 		tasks: {},
 	};
 
@@ -2060,7 +2075,73 @@ function showProducerUI() {
 	tabContentsContainer.classList.remove('is-hidden');
 }
 
+let interval_worker;
+let interval_callbacks = {};
+
+const worker_script = `
+	onmessage = e => {
+		const [mType, mData] = e.data;
+		if (mType === 'setInterval') {
+			const interval = mData[0];
+			const call_id = mData[1];
+			const handle = setInterval(() => {
+				postMessage(['intervalCallback', handle]);
+			}, interval);
+			postMessage(['setInterval', [handle, call_id]]);
+		}
+		if (mType === 'clearInterval') {
+			const handle = mData;
+			clearInterval(handle);
+		}
+	};
+`;
+
+function initOcrInterval() {
+	const blob = new Blob([worker_script], { type: 'text/javascript' });
+	interval_worker = new Worker(window.URL.createObjectURL(blob));
+	interval_worker.addEventListener('message', e => {
+		const [mType, mData] = e.data;
+		if (mType === 'intervalCallback') {
+			const handle = mData;
+			const callback = interval_callbacks[handle];
+			if (callback) {
+				callback();
+			}
+		}
+	});
+}
+
+function setOcrInterval(use_worker, callback, ms) {
+	if (!interval_worker || !use_worker) {
+		return setInterval(callback, ms);
+	}
+	return new Promise(resolve => {
+		const call_id = performance.now();
+		const set_callback = e => {
+			const [mType, mData] = e.data;
+			if (mType === 'setInterval' && mData[1] === call_id) {
+				const handle = mData[0];
+				interval_callbacks[handle] = callback;
+				interval_worker.removeEventListener('message', set_callback);
+				resolve(handle);
+			}
+		};
+		interval_worker.addEventListener('message', set_callback);
+		interval_worker.postMessage(['setInterval', [ms, call_id]]);
+	});
+}
+
+function clearOcrInterval(use_worker, handle) {
+	if (!interval_worker || !use_worker) {
+		return clearInterval(handle);
+	}
+	interval_worker.postMessage(['clearInterval', handle]);
+	delete interval_callbacks[handle];
+}
+
 (async function init() {
+	initOcrInterval();
+
 	initTabControls();
 
 	// check if timer should be made visible
@@ -2102,6 +2183,7 @@ function showProducerUI() {
 		use_half_height.checked = tmp_use_half_height;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
+		use_worker_for_interval.checked = config.use_worker_for_interval != false;
 
 		const brightness = config.brightness === undefined ? 1 : config.brightness;
 		brightness_slider.value = config.brightness = brightness;
