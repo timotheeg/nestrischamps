@@ -183,13 +183,23 @@ if (/^\d+$/.test(buffer_time)) {
 }
 
 const STACKRABBIT_INPUT_TIMELINES = {
+	2: 'X.............................',
+	6: 'X.........',
+	7: 'X.......',
+	8: 'X......',
 	10: 'X.....',
+	11: 'X.....X....X....',
 	12: 'X....',
+	13: 'X....X...',
+	13_5: 'X....X...X...',
+	14: 'X....X...X...X...',
+	15: 'X...',
 	18: 'X..X..X...',
 	20: 'X..',
 	24: 'X.X..',
 	30: 'X.',
 };
+
 
 const DEFAULT_DOM_REFS = {
 	name: DOM_DEV_NULL,
@@ -235,9 +245,9 @@ const DEFAULT_OPTIONS = {
 	srabbit: QueryString.get('srabbit') === '1',
 	srabbit_input_speed: (() => {
 		const value = QueryString.get('srabbit_input_speed');
-		return /^\d+$/.test(value) && value in STACKRABBIT_INPUT_TIMELINES
+		return /^\d+(_5)?$/.test(value) && value in STACKRABBIT_INPUT_TIMELINES
 			? value
-			: 12;
+			: '12';
 	})(),
 	srabbit_playout_length: (() => {
 		const value = QueryString.get('srabbit_playout_length');
