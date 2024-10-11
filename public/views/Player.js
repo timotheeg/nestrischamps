@@ -234,10 +234,14 @@ const DEFAULT_OPTIONS = {
 	avatar: QueryString.get('avatar') !== '0',
 	srabbit: QueryString.get('srabbit') === '1',
 	srabbit_input_speed: (() => {
-		const sr_input = QueryString.get('srabbit_input_speed');
-		return /^\d+$/.test(sr_input) && sr_input in STACKRABBIT_INPUT_TIMELINES
-			? sr_input
+		const value = QueryString.get('srabbit_input_speed');
+		return /^\d+$/.test(value) && value in STACKRABBIT_INPUT_TIMELINES
+			? value
 			: 12;
+	})(),
+	srabbit_playout_length: (() => {
+		const value = QueryString.get('srabbit_playout_length');
+		return /^[123]$/.test(value) ? parseInt(value, 10) : 2;
 	})(),
 	curtain: 1,
 	buffer_time,
@@ -1256,6 +1260,7 @@ export default class Player extends EventTarget {
 				currentPiece: piece_evt.piece,
 				nextPiece: frame.raw.preview,
 				board: piece_evt.field.map(cell => (cell ? 1 : 0)).join(''),
+				playoutLength: this.options.srabbit_playout_length,
 			};
 
 			const start = Date.now();
