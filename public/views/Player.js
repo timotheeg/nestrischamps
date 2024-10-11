@@ -5,7 +5,6 @@ import BaseGame from '/views/BaseGame.js';
 import { css_size, clamp, getPercent, peek } from '/views/utils.js';
 import Gradient from '/views/gradient.js';
 import { PIECE_COLORS, DOM_DEV_NULL, LINES } from '/views/constants.js';
-import Board from '/views/Board.js';
 import addStackRabbitRecommendation from '/views/addStackRabbitRecommendation.js';
 
 const WINNER_FACE_BLOCKS = [
@@ -1250,17 +1249,13 @@ export default class Player extends EventTarget {
 		} else if (this.stackRabbitWorker && !piece_evt.recommendation) {
 			piece_evt.recommendation = 'pending';
 
-			const board = new Board(piece_evt.field);
 			const params = {
 				level: frame.raw.level <= 18 ? 18 : 19,
 				lines: frame.raw.lines,
 				inputFrameTimeline: this.options.srabbit_input_timeline,
 				currentPiece: piece_evt.piece,
 				nextPiece: frame.raw.preview,
-				board: board.rows
-					.reduce((acc, row) => (acc.push(...row.cells), acc), [])
-					.map(cell => (cell ? 1 : 0))
-					.join(''),
+				board: piece_evt.field.map(cell => (cell ? 1 : 0)).join(''),
 			};
 
 			const start = Date.now();

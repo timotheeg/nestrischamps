@@ -1,7 +1,6 @@
 import BaseGame from '/views/BaseGame.js';
 import QueryString from '/js/QueryString.js';
 import BinaryFrame from '/js/BinaryFrame.js';
-import Board from '/views/Board.js';
 import { peek } from '/views/utils.js';
 
 function noop() {}
@@ -295,8 +294,6 @@ async function askStackRabbit() {
 	const piece_evt = peek(reference_frame.pieces); // this reference will never change in a game, so it's safe to mutate it later even if the playhead has moved.
 	const url = new URL(`${document.location.origin}/api/recommendation`);
 
-	const board = new Board(piece_evt.field);
-
 	const params = {
 		level: reference_frame.raw.level <= 18 ? 18 : 19,
 		lines: reference_frame.raw.lines,
@@ -304,10 +301,7 @@ async function askStackRabbit() {
 		inputFrameTimeline: 'X....', // this is 12 Hz, should put 10 for NTSC DAS :/
 		currentPiece: piece_evt.piece,
 		nextPiece: reference_frame.raw.preview,
-		board: board.rows
-			.reduce((acc, row) => (acc.push(...row.cells), acc), [])
-			.map(cell => (cell ? 1 : 0))
-			.join(''),
+		board: piece_evt.field.map(cell => (cell ? 1 : 0)).join(''),
 	};
 
 	Object.entries(params).forEach(([key, value]) =>

@@ -147,4 +147,9 @@ export default class Board {
 
 		return false;
 	}
+
+	// returns a flatten field
+	getField() {
+		return this.rows.reduce((acc, row) => (acc.push(...row.cells), acc), []);
+	}
 }

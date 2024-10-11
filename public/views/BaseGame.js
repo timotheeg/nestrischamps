@@ -148,10 +148,7 @@ export default class BaseGame {
 		// Warning: order of the 3 operations below matters!
 		const score_events = this._checkScore(frame);
 		const piece_events = this._checkPiece(frame);
-		const last_frame = this._addFrame(frame, {
-			score_events,
-			piece_events,
-		});
+		const last_frame = this._addFrame(frame);
 
 		// Check for das loss
 		if (last_frame.raw.instant_das === 0 && this.pieces.length >= 1) {
@@ -907,7 +904,7 @@ export default class BaseGame {
 			}
 		}
 
-		// record piece event before calculating deviation, so the array fuly represents the sequence
+		// record piece event before calculating deviation, so the array fully represents the sequence
 		// we will update piece event with the deviation reactively
 		this._recordPieceEvent(cur_piece, data);
 
@@ -966,6 +963,7 @@ export default class BaseGame {
 	}
 
 	_recordPieceEvent(piece, data) {
+		const board = new Board(data.field);
 		const evt = {
 			piece,
 			in_drought: this.data.i_droughts.cur >= DROUGHT_PANIC_THRESHOLD,
@@ -973,8 +971,8 @@ export default class BaseGame {
 			i_droughts: { ...this.data.i_droughts },
 			das: { ...this.data.das }, // TODO, make this more efficient for classic rom, no need to carry das object copies
 			pieces: { ...this.data.pieces }, // copy all including pieces - duplicate action below :'(
-			board: new Board(data.field).stats,
-			field: data.field, // Recorded for Stack rabbit integration - Ideally we should store the version WITHOUT The falling piece
+			board: board.stats,
+			field: board.getField(), // Recorded for Stack rabbit integration
 		};
 
 		// update tracker arrays
