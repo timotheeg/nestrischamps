@@ -1271,38 +1271,43 @@ export default class Player extends EventTarget {
 							: this.options.srabbit_playout_length,
 					};
 
-					this.stackRabbitWorker.rpc('rateMove', moveParams).then(ratings => {
-						const { playerMoveAfterAdjustment, bestMoveAfterAdjustment } =
-							ratings;
-						let grade = null;
+					this.stackRabbitWorker
+						.rpc('rateMove', moveParams)
+						.then(ratings => {
+							const { playerMoveAfterAdjustment, bestMoveAfterAdjustment } =
+								ratings;
+							let grade = null;
 
-						if (playerMoveAfterAdjustment >= bestMoveAfterAdjustment - 1) {
-							grade = 4;
-						} else if (playerMoveAfterAdjustment >= bestMoveAfterAdjustment - 3) {
-							grade = 3;
-						} else if (
-							playerMoveAfterAdjustment >=
-							bestMoveAfterAdjustment - 6
-						) {
-							grade = 2;
-						} else if (
-							playerMoveAfterAdjustment >=
-							bestMoveAfterAdjustment - 15
-						) {
-							grade = 1;
-						}
-						else {
-							grade = 0;
-						}
+							if (playerMoveAfterAdjustment >= bestMoveAfterAdjustment - 1) {
+								grade = 4;
+							} else if (
+								playerMoveAfterAdjustment >=
+								bestMoveAfterAdjustment - 3
+							) {
+								grade = 3;
+							} else if (
+								playerMoveAfterAdjustment >=
+								bestMoveAfterAdjustment - 6
+							) {
+								grade = 2;
+							} else if (
+								playerMoveAfterAdjustment >=
+								bestMoveAfterAdjustment - 15
+							) {
+								grade = 1;
+							} else {
+								grade = 0;
+							}
 
-						this.onMoveRating({ params: moveParams, ratings, grade });
-					}).catch(err => {
-						console.error(err);
-					})
+							this.onMoveRating({ params: moveParams, ratings, grade });
+						})
+						.catch(err => {
+							console.error(err);
+						});
 				})
 				.catch(err => {
 					console.error(err);
-				})
+				});
 		}
 
 		this.dom.drought.textContent = this.options.format_drought(
