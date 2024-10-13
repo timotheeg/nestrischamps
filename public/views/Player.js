@@ -6,6 +6,12 @@ import { css_size, clamp, getPercent, peek } from '/views/utils.js';
 import Gradient from '/views/gradient.js';
 import { PIECE_COLORS, DOM_DEV_NULL, LINES } from '/views/constants.js';
 import addStackRabbitRecommendation from '/views/addStackRabbitRecommendation.js';
+import {
+	easeInQuad,
+	easeInQuint,
+	easeOutQuart,
+	easeOutQuad,
+} from '/js/anim.js';
 
 const WINNER_FACE_BLOCKS = [
 	[12, 3],
@@ -133,55 +139,6 @@ const fake_piece_evt = {
 const whiteToBlackGradient = new Gradient('#FFFFFF', '#000000');
 const whiteToTransparentGradient = new Gradient('#FFFFFF', [255, 255, 255, 0]);
 
-/*
-dom: {
-	score:   text element
-	level:   text element
-	lines:   text element
-	trt:     text element
-	preview: div for canva
-	field:   div for canva
-}
-
-options: {
-	preview_pixel_size: int,
-	field_pixel_size: int,
-	running_trt_rtl: bool,
-	wins_rtl: bool,
-}
-*/
-
-// Easing functions from Robert Penner
-function linear(t, b, c, d) {
-	return b + (c * t) / d;
-}
-
-function easeOutQuart(t, b, c, d) {
-	return -c * ((t = t / d - 1) * t * t * t - 1) + b;
-}
-
-function easeOutQuad(t, b, c, d) {
-	return -c * (t /= d) * (t - 2) + b;
-}
-
-function easeInQuad(t, b, c, d) {
-	return c * (t /= d) * t + b;
-}
-function easeInQuint(t, b, c, d) {
-	return c * (t /= d) * t * t * t * t + b;
-}
-
-// One time check of Query String args
-// Bit dirty to have Player.js access query String
-// But that's the most covenient way to share the functionality
-let buffer_time = QueryString.get('buffer_time') || '';
-
-if (/^\d+$/.test(buffer_time)) {
-	buffer_time = parseInt(buffer_time, 10);
-} else {
-	buffer_time = 0;
-}
-
 const STACKRABBIT_INPUT_TIMELINES = {
 	2: 'X.............................',
 	6: 'X.........',
@@ -199,7 +156,6 @@ const STACKRABBIT_INPUT_TIMELINES = {
 	24: 'X.X..',
 	30: 'X.',
 };
-
 
 const DEFAULT_DOM_REFS = {
 	name: DOM_DEV_NULL,
@@ -255,7 +211,10 @@ const DEFAULT_OPTIONS = {
 	})(),
 	srabbit_rate: QueryString.get('srabbit_rate') === '1',
 	curtain: 1,
-	buffer_time,
+	buffer_time: (() => {
+		const value = QueryString.get('buffer_time');
+		return /^\d+$/.test(value) ? parseInt(value, 10) : 0;
+	})(),
 	format_score: (v, size) => {
 		if (!size) {
 			size = 7;
@@ -619,11 +578,11 @@ export default class Player extends EventTarget {
 		this._hideCurtain();
 		this.curtain_viewport.hidden = false;
 
-		const start_ts = Date.now();
+		const start = Date.now();
 		const duration = 1000;
 
-		const steps = () => {
-			const elapsed = Date.now() - start_ts;
+		const step = () => {
+			const elapsed = Date.now() - start;
 			const ratio = Math.min(elapsed / duration, 1);
 
 			const top = easeOutQuart(ratio, -this.bg_height, this.bg_height, 1);
@@ -631,14 +590,14 @@ export default class Player extends EventTarget {
 			this.curtain_container.style.top = `${top}px`;
 
 			if (elapsed <= duration) {
-				this.curtain_animation_ID = window.requestAnimationFrame(steps);
+				this.curtain_animation_ID = window.requestAnimationFrame(step);
 			} else {
 				this.curtain_animation_ID = null;
 				this.onCurtainDown();
 			}
 		};
 
-		steps();
+		step();
 	}
 
 	_hideCurtain() {
@@ -666,20 +625,20 @@ export default class Player extends EventTarget {
 		this.comp_messages.textContent = message;
 
 		if (message && fadeDuration) {
-			const start_ts = Date.now();
+			const start = Date.now();
 
-			const steps = () => {
-				const elapsed = Date.now() - start_ts;
+			const step = () => {
+				const elapsed = Date.now() - start;
 
 				this.comp_messages.style.color = whiteToBlackGradient
 					.getColorAt(elapsed / fadeDuration) // getColorAt() clamps ratio to [0,1]
 					.toHexString();
 
 				this.comp_message_animation_ID =
-					elapsed <= fadeDuration ? window.requestAnimationFrame(steps) : null;
+					elapsed <= fadeDuration ? window.requestAnimationFrame(step) : null;
 			};
 
-			steps();
+			step();
 		}
 	}
 
@@ -739,9 +698,10 @@ export default class Player extends EventTarget {
 	}
 
 	_doTetris() {
-		const start = Date.now();
 		const final_black = 'rgba(0,0,0,0)';
 		const duration = (25 / 60) * 1000;
+
+		const start = Date.now();
 
 		if (this.options.tetris_flash) {
 			this.field_bg.style.display = 'block';
@@ -749,14 +709,14 @@ export default class Player extends EventTarget {
 
 		if (this.options.tetris_flash === 1) {
 			// classic flash
-			const steps = () => {
+			const step = () => {
 				const elapsed = Date.now() - start;
 
 				const flashing = (elapsed / 1000) % (5 / 60) < 2 / 60; // flash for 2 "frames" every 5 "frames"
 				this.field_bg.style.background = flashing ? 'white' : final_black;
 
 				if (elapsed <= duration) {
-					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+					this.tetris_animation_ID = window.requestAnimationFrame(step);
 				} else {
 					// make sure we don't end on white
 					this.field_bg.style.removeProperty('background');
@@ -764,10 +724,10 @@ export default class Player extends EventTarget {
 				}
 			};
 
-			steps();
+			step();
 		} else if (this.options.tetris_flash === 2) {
 			// Extended flash then fade
-			const steps = () => {
+			const step = () => {
 				const elapsed = Date.now() - start;
 				const ratio = Math.min(elapsed / duration, 1);
 
@@ -776,19 +736,19 @@ export default class Player extends EventTarget {
 					.toRGBAString();
 
 				if (elapsed <= duration) {
-					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+					this.tetris_animation_ID = window.requestAnimationFrame(step);
 				} else {
 					this.field_bg.style.removeProperty('background');
 					this.field_bg.style.display = 'none';
 				}
 			};
 
-			steps();
+			step();
 		} else if (this.options.tetris_flash === 3) {
 			this.field_bg_inner.style.background = 'white';
 
 			// Fade in-out swipe
-			const steps = () => {
+			const step = () => {
 				const elapsed = Date.now() - start;
 				const ratio = Math.min(elapsed / duration, 1);
 
@@ -806,20 +766,20 @@ export default class Player extends EventTarget {
 				Object.assign(this.field_bg_inner.style, props);
 
 				if (elapsed <= duration) {
-					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+					this.tetris_animation_ID = window.requestAnimationFrame(step);
 				} else {
 					this.field_bg.style.display = 'none';
 				}
 			};
 
-			steps();
+			step();
 		} else if (this.options.tetris_flash === 4) {
 			this.field_bg_inner.style.background = 'white';
 
 			// Fade in-out swipe
-			const steps = () => {
+			const step = () => {
 				const elapsed = Date.now() - start;
-				let ratio = Math.min(elapsed / duration, 1);
+				const ratio = Math.min(elapsed / duration, 1);
 
 				const props = {
 					top: `${easeOutQuad(ratio, 50, -50, 1)}%`,
@@ -830,13 +790,13 @@ export default class Player extends EventTarget {
 				Object.assign(this.field_bg_inner.style, props);
 
 				if (elapsed <= duration) {
-					this.tetris_animation_ID = window.requestAnimationFrame(steps);
+					this.tetris_animation_ID = window.requestAnimationFrame(step);
 				} else {
 					this.field_bg.style.display = 'none';
 				}
 			};
 
-			steps();
+			step();
 		}
 
 		if (this.options.tetris_sound) {
@@ -1291,7 +1251,7 @@ export default class Player extends EventTarget {
 				})
 				.then(() => {
 					if (!this.options.srabbit_rate) return null;
-					
+
 					const prior_piece_evt = peek(frame.pieces, 1);
 
 					if (!prior_piece_evt) return null;
