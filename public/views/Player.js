@@ -253,6 +253,7 @@ const DEFAULT_OPTIONS = {
 		const value = QueryString.get('srabbit_playout_length');
 		return /^[123]$/.test(value) ? parseInt(value, 10) : 2;
 	})(),
+	srabbit_rate: QueryString.get('srabbit_rate') === '1',
 	curtain: 1,
 	buffer_time,
 	format_score: (v, size) => {
@@ -550,6 +551,7 @@ export default class Player extends EventTarget {
 	onGameOver() {}
 	onCurtainDown() {}
 	onTetris() {}
+	onMoveRating() {}
 
 	setHideProfileCardOnNextGame(do_hide) {
 		this.hide_profile_card_on_next_game = !!do_hide;
@@ -1270,19 +1272,77 @@ export default class Player extends EventTarget {
 				currentPiece: piece_evt.piece,
 				nextPiece: frame.raw.preview,
 				board: piece_evt.field.map(cell => (cell ? 1 : 0)).join(''),
-				playoutLength: this.options.srabbit_playout_length,
+				playoutLength: this.options.srabbit_rate
+					? 1
+					: this.options.srabbit_playout_length,
 			};
 
 			const start = Date.now();
-			this.stackRabbitWorker.rpc('getMove', params).then(recommendation => {
-				const elapsed = Date.now() - start;
-				piece_evt.recommendation = recommendation;
-				console.log({
-					elapsed,
-					params,
-					recommendation,
-				});
-			});
+			this.stackRabbitWorker
+				.rpc('getMove', params)
+				.then(recommendation => {
+					const elapsed = Date.now() - start;
+					piece_evt.recommendation = recommendation;
+					console.log({
+						elapsed,
+						params,
+						recommendation,
+					});
+				})
+				.then(() => {
+					if (!this.options.srabbit_rate) return null;
+					
+					const prior_piece_evt = peek(frame.pieces, 1);
+
+					if (!prior_piece_evt) return null;
+
+					const prior_frame = prior_piece_evt.frame;
+
+					const moveParams = {
+						level: prior_frame.raw.level <= 18 ? 18 : 19,
+						lines: prior_frame.raw.lines,
+						inputFrameTimeline: this.options.srabbit_input_timeline,
+						currentPiece: prior_piece_evt.piece,
+						nextPiece: piece_evt.piece,
+						board: prior_piece_evt.field.map(cell => (cell ? 1 : 0)).join(''),
+						secondBoard: params.board,
+						playoutLength: this.options.srabbit_rate
+							? 1
+							: this.options.srabbit_playout_length,
+					};
+
+					this.stackRabbitWorker.rpc('rateMove', moveParams).then(ratings => {
+						const { playerMoveAfterAdjustment, bestMoveAfterAdjustment } =
+							ratings;
+						let grade = null;
+
+						if (playerMoveAfterAdjustment >= bestMoveAfterAdjustment - 1) {
+							grade = 4;
+						} else if (playerMoveAfterAdjustment >= bestMoveAfterAdjustment - 3) {
+							grade = 3;
+						} else if (
+							playerMoveAfterAdjustment >=
+							bestMoveAfterAdjustment - 6
+						) {
+							grade = 2;
+						} else if (
+							playerMoveAfterAdjustment >=
+							bestMoveAfterAdjustment - 15
+						) {
+							grade = 1;
+						}
+						else {
+							grade = 0;
+						}
+
+						this.onMoveRating({ params: moveParams, ratings, grade });
+					}).catch(err => {
+						console.error(err);
+					})
+				})
+				.catch(err => {
+					console.error(err);
+				})
 		}
 
 		this.dom.drought.textContent = this.options.format_drought(
