@@ -440,7 +440,7 @@
 							'Facepalm!',
 							'This is a new low',
 							"I'm not mad, just disappointed",
-							'Wow… just wow',
+							'Wow... just wow',
 							'We need to talk',
 							'You did WHAT?!',
 							'Congratulations, you broke reality',
@@ -537,12 +537,19 @@
 					if (animId) cancelAnimationFrame(animId);
 					if (disappearId) clearTimeout(disappearId);
 
-					const feedbacks = Object.values(srabbit_ratings).find(
+					const feedbackObj = Object.values(srabbit_ratings).find(
 						rating => rating.score === grade
-					).feedbacks;
-					if (!feedbacks) return;
+					);
+					if (!feedbackObj) return;
+					if (
+						!feedbackObj.idx ||
+						feedbackObj.idx >= feedbackObj.feedbacks.length
+					) {
+						feedbackObj.idx = 0;
+						shuffle(feedbackObj.feedbacks);
+					}
+					const feedback = feedbackObj.feedbacks[feedbackObj.idx++];
 
-					const feedback = shuffle(feedbacks)[0];
 					gradeText = document.createElement('div');
 					gradeText.classList.add('srabbit_rating');
 
