@@ -44,6 +44,7 @@ export function flood(
 		const squared_distances = distances.map(d => d * d);
 
 		const error_data = {
+			msg: 'Starting point does not match color',
 			target: color,
 			selected: [
 				data[start_index + 0],
@@ -59,9 +60,9 @@ export function flood(
 			squared_distances,
 		};
 
-		console.error({ error_data });
+		console.error(JSON.stringify(error_data, null, 2));
 
-		throw new Error('Starting point does not match color', {
+		throw new Error(error_data.msg, {
 			cause: error_data,
 		});
 	}

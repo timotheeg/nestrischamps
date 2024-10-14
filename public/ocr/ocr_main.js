@@ -556,12 +556,28 @@ video.addEventListener('click', async evt => {
 
 	// Get field coordinates via flood-fill (includes borders on all sides)
 	// Question: instead of targetting black, should we just take the selected color as reference?
-	const field_w_borders_xywh = getFieldCoordinates(
-		img_data,
-		floodStartPoint,
-		[0, 0, 0], // targeting black
-		42 // 42 is a very high tolerance, but this is to work around a "washed out colors" bug in chrome
-	);
+	let field_w_borders_xywh;
+	try {
+		field_w_borders_xywh = getFieldCoordinates(
+			img_data,
+			floodStartPoint,
+			[0, 0, 0], // targeting black
+			42 // 42 is a very high tolerance, but this is to work around a "washed out colors" bug in chrome
+		);
+	} catch (err) {
+		let message = `Unable to find field coordinates: ${err.message}`;
+
+		if (err.cause) {
+			if (err.cause.msg) delete err.cause.msg;
+			message += `\n\n${JSON.stringify(err.cause)}`;
+		}
+
+		message += `\n\nTry again, or contact NesTrisChamps devs for assistance.`;
+
+		alert(message);
+		return;
+	}
+
 	console.log('field coordinates', field_w_borders_xywh);
 
 	let [ox, oy, ow, oh] = getCaptureCoordinates(
