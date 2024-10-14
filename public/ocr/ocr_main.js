@@ -1734,10 +1734,10 @@ function saveConfig(config) {
 
 function hasConfig() {
 	const maybeConfig = localStorage.getItem('config');
-	if (!config) return false;
+	if (!maybeConfig) return false;
 
-	// minimal checks for validitu of the config object
-	// could add coimprehensive verification later
+	// minimal checks for validity of the config object
+	// could add comprehensive verification later
 	// for now guard against initial calibration not completed
 	try {
 		const parsed = JSON.parse(maybeConfig);
