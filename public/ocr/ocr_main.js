@@ -1706,7 +1706,24 @@ function saveConfig(config) {
 }
 
 function hasConfig() {
-	return !!localStorage.getItem('config');
+	const maybeConfig = localStorage.getItem('config');
+	if (!config) return false;
+
+	// minimal checks for validitu of the config object
+	// could add coimprehensive verification later
+	// for now guard against initial calibration not completed
+	try {
+		const parsed = JSON.parse(maybeConfig);
+		if (!parsed || !parsed.tasks) return false;
+
+		const tasks = Object.values(parsed.tasks);
+		if (tasks.length <= 0) return false;
+		if (!tasks.every(task => !!task.crop)) return false;
+	} catch (err) {
+		return false;
+	}
+
+	return true;
 }
 
 function getGameTypeFromTasks(tasks) {
