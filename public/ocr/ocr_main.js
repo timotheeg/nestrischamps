@@ -116,13 +116,13 @@ const tabsContainer = document.querySelector('#tabs'),
 	show_parts = document.querySelector('#show_parts'),
 	score7 = document.querySelector('#score7'),
 	use_half_height = document.querySelector('#use_half_height'),
+	use_worker_for_interval = document.querySelector('#use_worker_for_interval'),
 	focus_alarm = document.querySelector('#focus_alarm'),
 	clear_config = document.querySelector('#clear_config'),
 	save_game_palette = document.querySelector('#save_game_palette'),
 	timer_control = document.querySelector('#timer_control'),
 	start_timer = document.querySelector('#start_timer'),
 	video = document.querySelector('#device_video'),
-	ocr_results = document.querySelector('#ocr_results'),
 	frame_data = document.querySelector('#frame_data'),
 	perf_data = document.querySelector('#perf_data'),
 	capture = document.querySelector('#capture'),
@@ -726,6 +726,16 @@ function onUseHalfHeightChanged() {
 
 use_half_height.addEventListener('change', onUseHalfHeightChanged);
 
+function onUseWorkerIntervalChanged() {
+	stopCapture();
+	config.use_worker_for_interval = !!use_worker_for_interval.checked;
+	timer = config.use_worker_for_interval ? workerTimer : stdTimer;
+	saveConfig(config);
+	startCapture();
+}
+
+use_worker_for_interval.addEventListener('change', onUseWorkerIntervalChanged);
+
 function onPrivacyChanged() {
 	config.allow_video_feed = !!allow_video_feed.checked;
 
@@ -1194,7 +1204,7 @@ async function updateFrameRate() {
 }
 
 function stopCapture() {
-	clearInterval(capture_process);
+	timer.clearInterval(capture_process);
 }
 
 async function startCapture(stream) {
@@ -1222,7 +1232,7 @@ async function startCapture(stream) {
 	if (show_parts.checked) {
 		adjustments.style.display = 'block';
 		// image_corrections.style.display = 'block';
-		ocr_results.classList.remove('is-hidden');
+		tabs[2].click(); // calibration
 	}
 
 	const frame_ms = 1000 / settings.frameRate;
@@ -1230,7 +1240,7 @@ async function startCapture(stream) {
 	console.log(
 		`Setting capture interval for ${settings.frameRate}fps (i.e. ${frame_ms}ms per frame)`
 	);
-	capture_process = setInterval(captureFrame, frame_ms);
+	capture_process = timer.setInterval(captureFrame, frame_ms);
 }
 
 let last_frame_time = 0;
@@ -1705,6 +1715,7 @@ function saveConfig(config) {
 		contrast: config.contrast,
 		score7: config.score7,
 		use_half_height: config.use_half_height,
+		use_worker_for_interval: config.use_worker_for_interval,
 		tasks: {},
 	};
 
@@ -2094,7 +2105,69 @@ function showProducerUI() {
 	tabContentsContainer.classList.remove('is-hidden');
 }
 
+// the 2 candidates timer systems
+const stdTimer = {
+	setInterval: setInterval.bind(window),
+	clearInterval: clearInterval.bind(window),
+};
+
+const workerTimer = {
+	callid: 0,
+	callbacks: {},
+	worker: null,
+	setInterval: function (callback, ms) {
+		this.callbacks[++this.callid] = callback;
+		this.worker.postMessage(['setInterval', ms, this.callid]);
+		return this.callid;
+	},
+	clearInterval: function (id) {
+		delete this.callbacks[id];
+		this.worker.postMessage(['clearInterval', id]);
+	},
+	init: function () {
+		return new Promise(resolve => {
+			const blob = new Blob([worker_script], { type: 'text/javascript' });
+			this.worker = new Worker(window.URL.createObjectURL(blob));
+			this.worker.addEventListener('message', e => {
+				const [cmd, ...args] = e.data;
+				if (cmd === 'interval') {
+					const [callid] = args;
+					console.log({ cmd, callid });
+					this.callbacks[callid]?.();
+				} else if (cmd === 'init') {
+					resolve();
+				}
+			});
+		});
+	},
+};
+
+const worker_script = `
+	idMap = {};
+	onmessage = e => {
+		const [cmd, ...args] = e.data;
+		if (cmd === 'setInterval') {
+			const [interval, callid] = args;
+			idMap[callid] = setInterval(() => {
+				postMessage(['interval', callid]);
+			}, interval);
+		}
+		else if (cmd === 'clearInterval') {
+			const [callid] = args;
+			delete idMap[callid];
+			clearInterval(callid);
+		}
+	};
+	postMessage(['init']);
+`;
+
+// the timer 'smile' we can atomically swap
+let timer = stdTimer;
+
 (async function init() {
+	// unfortunate bootstrap delay, but makes everything else simpler later on
+	await workerTimer.init();
+
 	initTabControls();
 
 	// check if timer should be made visible
@@ -2136,6 +2209,11 @@ function showProducerUI() {
 		use_half_height.checked = tmp_use_half_height;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
+		use_worker_for_interval.checked = config.use_worker_for_interval === true;
+
+		if (use_worker_for_interval.checked) {
+			timer = workerTimer;
+		}
 
 		const brightness = config.brightness === undefined ? 1 : config.brightness;
 		brightness_slider.value = config.brightness = brightness;
