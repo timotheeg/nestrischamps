@@ -2128,16 +2128,23 @@ const workerTimer = {
 		return new Promise(resolve => {
 			const blob = new Blob([worker_script], { type: 'text/javascript' });
 			this.worker = new Worker(window.URL.createObjectURL(blob));
-			this.worker.addEventListener('message', e => {
+
+			const handleWorkerMessage = e => {
 				const [cmd, ...args] = e.data;
 				if (cmd === 'interval') {
 					const [callid] = args;
-					console.log({ cmd, callid });
 					this.callbacks[callid]?.();
-				} else if (cmd === 'init') {
-					resolve();
 				}
-			});
+			};
+
+			const handleWorkerInit = () => {
+				this.worker.removeEventListener('message', handleWorkerInit);
+				this.worker.addEventListener('message', handleWorkerMessage);
+				resolve();
+			};
+
+			// by convention the first message is guaranteed to be the init message, so we don't need to check the details
+			this.worker.addEventListener('message', handleWorkerInit);
 		});
 	},
 };
