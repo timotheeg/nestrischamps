@@ -554,12 +554,13 @@ video.addEventListener('click', async evt => {
 		video.videoHeight
 	);
 
-	// get field coordinates via flood-fill (includes borders on all sides)
+	// Get field coordinates via flood-fill (includes borders on all sides)
+	// Question: instead of targetting black, should we just take the selected color as reference?
 	const field_w_borders_xywh = getFieldCoordinates(
 		img_data,
 		floodStartPoint,
 		[0, 0, 0], // targeting black
-		40 // 40 is a very high tolerance, but this is to work around a "washed out colors" bug in chrome
+		42 // 42 is a very high tolerance, but this is to work around a "washed out colors" bug in chrome
 	);
 	console.log('field coordinates', field_w_borders_xywh);
 

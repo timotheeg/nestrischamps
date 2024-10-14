@@ -4,8 +4,13 @@ export function flood(
 	color = [0, 0, 0],
 	tolerance = 25
 ) {
-	console.log(startX, startY);
-	tolerance *= tolerance;
+	console.log({
+		msg: 'Initiating flood-fill',
+		startX,
+		startY,
+	});
+
+	const squared_tolerance = tolerance * tolerance;
 
 	const seen = new Array(img_data.width)
 		.fill()
@@ -15,9 +20,9 @@ export function flood(
 		const start_index = 4 * (y * img_data.width + x);
 		const data = img_data.data;
 		return (
-			Math.pow(data[start_index + 0] - color[0], 2) < tolerance &&
-			Math.pow(data[start_index + 1] - color[1], 2) < tolerance &&
-			Math.pow(data[start_index + 2] - color[2], 2) < tolerance
+			Math.pow(data[start_index + 0] - color[0], 2) < squared_tolerance &&
+			Math.pow(data[start_index + 1] - color[1], 2) < squared_tolerance &&
+			Math.pow(data[start_index + 2] - color[2], 2) < squared_tolerance
 		);
 	}
 
@@ -26,7 +31,39 @@ export function flood(
 	}
 
 	if (!check(startX, startY)) {
-		throw new Error('Starting point does not match color');
+		// Unfortunate failure to even start the flood-fill T_T
+		// Let's gather more information to make the errors more descriptive, and thus troubleshooting easier
+
+		const start_index = 4 * (startY * img_data.width + startX);
+		const data = img_data.data;
+		const distances = [
+			data[start_index + 0] - color[0],
+			data[start_index + 1] - color[1],
+			data[start_index + 2] - color[2],
+		];
+		const squared_distances = distances.map(d => d * d);
+
+		const error_data = {
+			target: color,
+			selected: [
+				data[start_index + 0],
+				data[start_index + 1],
+				data[start_index + 2],
+			],
+			tolerance,
+			distances,
+			euclidian_distance: Math.sqrt(
+				squared_distances.reduce((acc, v) => acc + v, 0)
+			),
+			squared_tolerance,
+			squared_distances,
+		};
+
+		console.error({ error_data });
+
+		throw new Error('Starting point does not match color', {
+			cause: error_data,
+		});
 	}
 
 	function maybeAddToQueue(tx, ty) {
