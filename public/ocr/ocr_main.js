@@ -123,7 +123,6 @@ const tabsContainer = document.querySelector('#tabs'),
 	timer_control = document.querySelector('#timer_control'),
 	start_timer = document.querySelector('#start_timer'),
 	video = document.querySelector('#device_video'),
-	ocr_results = document.querySelector('#ocr_results'),
 	frame_data = document.querySelector('#frame_data'),
 	perf_data = document.querySelector('#perf_data'),
 	capture = document.querySelector('#capture'),
@@ -713,6 +712,7 @@ use_half_height.addEventListener('change', onUseHalfHeightChanged);
 function onUseWorkerIntervalChanged() {
 	stopCapture();
 	config.use_worker_for_interval = !!use_worker_for_interval.checked;
+	timer = config.use_worker_for_interval ? workerTimer : stdTimer;
 	saveConfig(config);
 	startCapture();
 }
@@ -1187,7 +1187,7 @@ async function updateFrameRate() {
 }
 
 function stopCapture() {
-	clearOcrInterval(config.use_worker_for_interval, capture_process);
+	timer.clearInterval(capture_process);
 }
 
 async function startCapture(stream) {
@@ -1215,7 +1215,7 @@ async function startCapture(stream) {
 	if (show_parts.checked) {
 		adjustments.style.display = 'block';
 		// image_corrections.style.display = 'block';
-		ocr_results.classList.remove('is-hidden');
+		tabs[2].click(); // calibration
 	}
 
 	const frame_ms = 1000 / settings.frameRate;
@@ -1223,11 +1223,7 @@ async function startCapture(stream) {
 	console.log(
 		`Setting capture interval for ${settings.frameRate}fps (i.e. ${frame_ms}ms per frame)`
 	);
-	capture_process = await setOcrInterval(
-		config.use_worker_for_interval,
-		captureFrame,
-		frame_ms
-	);
+	capture_process = timer.setInterval(captureFrame, frame_ms);
 }
 
 let last_frame_time = 0;
@@ -2075,72 +2071,68 @@ function showProducerUI() {
 	tabContentsContainer.classList.remove('is-hidden');
 }
 
-let interval_worker;
-let interval_callbacks = {};
+// the 2 candidates timer systems
+const stdTimer = {
+	setInterval: setInterval.bind(window),
+	clearInterval: clearInterval.bind(window),
+};
+
+const workerTimer = {
+	callid: 0,
+	callbacks: {},
+	worker: null,
+	setInterval: function (callback, ms) {
+		this.callbacks[++this.callid] = callback;
+		this.worker.postMessage(['setInterval', ms, this.callid]);
+		return this.callid;
+	},
+	clearInterval: function (id) {
+		delete this.callbacks[id];
+		this.worker.postMessage(['clearInterval', id]);
+	},
+	init: function () {
+		return new Promise(resolve => {
+			const blob = new Blob([worker_script], { type: 'text/javascript' });
+			this.worker = new Worker(window.URL.createObjectURL(blob));
+			this.worker.addEventListener('message', e => {
+				const [cmd, ...args] = e.data;
+				if (cmd === 'interval') {
+					const [callid] = args;
+					console.log({ cmd, callid });
+					this.callbacks[callid]?.();
+				} else if (cmd === 'init') {
+					resolve();
+				}
+			});
+		});
+	},
+};
 
 const worker_script = `
+	idMap = {};
 	onmessage = e => {
-		const [mType, mData] = e.data;
-		if (mType === 'setInterval') {
-			const interval = mData[0];
-			const call_id = mData[1];
-			const handle = setInterval(() => {
-				postMessage(['intervalCallback', handle]);
+		const [cmd, ...args] = e.data;
+		if (cmd === 'setInterval') {
+			const [interval, callid] = args;
+			idMap[callid] = setInterval(() => {
+				postMessage(['interval', callid]);
 			}, interval);
-			postMessage(['setInterval', [handle, call_id]]);
 		}
-		if (mType === 'clearInterval') {
-			const handle = mData;
-			clearInterval(handle);
+		else if (cmd === 'clearInterval') {
+			const [callid] = args;
+			delete idMap[callid];
+			clearInterval(callid);
 		}
 	};
+	postMessage(['init']);
 `;
 
-function initOcrInterval() {
-	const blob = new Blob([worker_script], { type: 'text/javascript' });
-	interval_worker = new Worker(window.URL.createObjectURL(blob));
-	interval_worker.addEventListener('message', e => {
-		const [mType, mData] = e.data;
-		if (mType === 'intervalCallback') {
-			const handle = mData;
-			const callback = interval_callbacks[handle];
-			if (callback) {
-				callback();
-			}
-		}
-	});
-}
-
-function setOcrInterval(use_worker, callback, ms) {
-	if (!interval_worker || !use_worker) {
-		return setInterval(callback, ms);
-	}
-	return new Promise(resolve => {
-		const call_id = performance.now();
-		const set_callback = e => {
-			const [mType, mData] = e.data;
-			if (mType === 'setInterval' && mData[1] === call_id) {
-				const handle = mData[0];
-				interval_callbacks[handle] = callback;
-				interval_worker.removeEventListener('message', set_callback);
-				resolve(handle);
-			}
-		};
-		interval_worker.addEventListener('message', set_callback);
-		interval_worker.postMessage(['setInterval', [ms, call_id]]);
-	});
-}
-
-function clearOcrInterval(use_worker, handle) {
-	if (!interval_worker || !use_worker) {
-		return clearInterval(handle);
-	}
-	interval_worker.postMessage(['clearInterval', handle]);
-	delete interval_callbacks[handle];
-}
+// the timer 'smile' we can atomically swap
+let timer = stdTimer;
 
 (async function init() {
-	initOcrInterval();
+	// unfortunate bootstrap delay, but makes everything else simpler later on
+	await workerTimer.init();
 
 	initTabControls();
 
@@ -2183,7 +2175,11 @@ function clearOcrInterval(use_worker, handle) {
 		use_half_height.checked = tmp_use_half_height;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
-		use_worker_for_interval.checked = config.use_worker_for_interval != false;
+		use_worker_for_interval.checked = config.use_worker_for_interval === true;
+
+		if (use_worker_for_interval.checked) {
+			timer = workerTimer;
+		}
 
 		const brightness = config.brightness === undefined ? 1 : config.brightness;
 		brightness_slider.value = config.brightness = brightness;
