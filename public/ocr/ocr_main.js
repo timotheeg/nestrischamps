@@ -2216,7 +2216,7 @@ let timer = stdTimer;
 		use_half_height.checked = tmp_use_half_height;
 		allow_video_feed.checked = config.allow_video_feed != false;
 		focus_alarm.checked = config.focus_alarm != false;
-		use_worker_for_interval.checked = config.use_worker_for_interval === true;
+		use_worker_for_interval.checked = config.use_worker_for_interval != false;
 
 		if (use_worker_for_interval.checked) {
 			timer = workerTimer;
