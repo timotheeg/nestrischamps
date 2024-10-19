@@ -690,11 +690,11 @@ class MatchRoom extends Room {
 
 		if (Array.isArray(message) && message[0] === 'setVdoNinjaURL') {
 			user.vdo_ninja_url = message[1];
-			this.state.players
-				.filter(p => p.id === user.id)
-				.forEach(p => {
-					p.vdo_ninja_url = message[1];
-				});
+			this.state.players.forEach((p, p_idx) => {
+				if (p.id !== user.id) return;
+				p.vdo_ninja_url = user.vdo_ninja_url;
+				this.tellAdmin(['setVdoNinjaURL', p_idx, user.vdo_ninja_url]);
+			});
 		}
 
 		this.state.players.forEach((player, p_idx) => {
