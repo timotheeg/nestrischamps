@@ -31,7 +31,7 @@ class Room extends EventEmitter {
 
 	sendGameFrameToViews(message) {
 		this.views.forEach(connection => {
-			if (!connection.no_frames) {
+			if (!connection.meta._no_game_frames) {
 				connection => connection.send(message);
 			}
 		});

@@ -79,7 +79,7 @@ class Connection extends EventEmitter {
 
 	ping() {
 		this.is_alive = false;
-		this.socket.ping(_.noop); // TODO: handle pingt timeout (pong not coming back)
+		this.socket.ping(_.noop); // TODO: handle ping timeout (pong not coming back)
 	}
 
 	doClose(code, reason) {
