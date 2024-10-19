@@ -222,6 +222,15 @@
 				right: var(--offset);
 			}
 
+			.player_vid.focused {
+				width: 1920px;
+				height: 1080px;
+				top: 0;
+				left: -960px;
+				right: 960px;
+				z-index: 10;
+			}
+
 			#ticker {
 				position: absolute;
 				width: 1920px;
@@ -508,7 +517,22 @@
 				}, CYCLE_TDIFF * 1000);
 			}
 
-			const competition = new Competition(players);
+			let focusedPlayer = null;
+
+			const competition = new Competition(players, {
+				focusPlayer: pidx => {
+					if (focusedPlayer?.dom?._video_iframe) {
+						focusedPlayer.dom._video_iframe.classList.remove('focused');
+					}
+					if (pidx === null) {
+						focusedPlayer = null;
+						return;
+					} else if (players[pidx]) {
+						focusedPlayer = players[pidx];
+						focusedPlayer.dom._video_iframe?.classList.add('focused');
+					}
+				},
+			});
 
 			// expose API into window for debugging
 			window._players = players;
