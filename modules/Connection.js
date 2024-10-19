@@ -53,10 +53,6 @@ class Connection extends EventEmitter {
 				id: this.id,
 			},
 		]);
-
-		// for backward compatibility
-		// TODO: remove after a while
-		this.send(['_id', this.id]);
 	}
 
 	send(message) {
