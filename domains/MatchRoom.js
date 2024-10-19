@@ -430,8 +430,8 @@ class MatchRoom extends Room {
 		}
 	}
 
-	sendPlayerInfoToViews(pidx) {
-		const player = this.state.players[pidx];
+	sendPlayerInfoToViews(pidx, data = null) {
+		const player = data || this.state.players[pidx];
 
 		this.sendToViews(['setId', pidx, player.id]); // resets the player and game in frontend
 		this.sendToViews(['setLogin', pidx, player.login]);
@@ -639,7 +639,10 @@ class MatchRoom extends Room {
 					// finally send dummy data to clear last player
 					// warning: this clears the player data, but it doens't cler the player object itself :(
 					// TODO: implement an actual removePlayer() API in views
-					updatePlayer(getBasePlayerData(), this.state.players.length);
+					this.sendPlayerInfoToViews(
+						this.state.players.length,
+						getBasePlayerData()
+					);
 
 					forward_to_views = false;
 					break;
@@ -690,11 +693,11 @@ class MatchRoom extends Room {
 
 		if (Array.isArray(message) && message[0] === 'setVdoNinjaURL') {
 			user.vdo_ninja_url = message[1];
-			this.state.players
-				.filter(p => p.id === user.id)
-				.forEach(p => {
-					p.vdo_ninja_url = message[1];
-				});
+			this.state.players.forEach((p, p_idx) => {
+				if (p.id !== user.id) return;
+				p.vdo_ninja_url = user.vdo_ninja_url;
+				this.tellAdmin(['setVdoNinjaURL', p_idx, user.vdo_ninja_url]);
+			});
 		}
 
 		this.state.players.forEach((player, p_idx) => {
@@ -709,13 +712,13 @@ class MatchRoom extends Room {
 					message = new Uint8Array(message);
 				}
 				message[0] = (message[0] & 0b11111000) | p_idx; // sets player number in header byte of binary message
-				this.sendToViews(message);
+				this.sendGameFrameToViews(message);
 			} else if (Array.isArray(message)) {
 				this.sendToViews([message[0], p_idx, ...message.slice(1)]);
 				// TODO: send message to admin page as well?
 			} else {
 				// assume frame
-				this.sendToViews(['frame', p_idx, message]);
+				this.sendGameFrameToViews(['frame', p_idx, message]);
 			}
 		});
 	}

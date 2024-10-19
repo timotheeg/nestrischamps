@@ -92,6 +92,18 @@
 				height: 60px;
 			}
 
+			iframe {
+				display: inline-block;
+				border: solid 1px white;
+				margin: 0.5em;
+				width: 106px;
+				height: 60px;
+				background: url(/images/Spinner@1x-1.0s-60px-60px.gif);
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: auto;
+			}
+
 			#players {
 				display: flex;
 				flex-wrap: wrap;
@@ -109,6 +121,27 @@
 				position: absolute;
 				right: 0;
 				top: 0;
+				cursor: pointer;
+			}
+
+			.vdo_ninja_url {
+				display: none;
+			}
+
+			.vdo_ninja_url a {
+				color: white;
+				text-decoration: none;
+			}
+
+			.vdo_ninja_url a:hover {
+				color: grey;
+			}
+
+			.vdo_ninja_url svg.result {
+				display: none;
+			}
+
+			.vdo_ninja_url svg.action {
 				cursor: pointer;
 			}
 
@@ -227,6 +260,43 @@
 							<% }) %>
 						</select>	
 					</div>
+				</div>
+				<div class="vdo_ninja_url">
+					<span></span>
+					<svg class="action clipboard-copy" title="Copy to Clipboard" fill="currentColor" height="20px" width="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
+						<g>
+							<g>
+							<path d="M480.6,109.1h-87.5V31.4c0-11.3-9.1-20.4-20.4-20.4H31.4C20.1,11,11,20.1,11,31.4v351c0,11.3,9.1,20.4,20.4,20.4h87.5    v77.7c0,11.3,9.1,20.4,20.4,20.4h341.3c11.3,0,20.4-9.1,20.4-20.4v-351C501,118.3,491.9,109.1,480.6,109.1z M51.8,362V51.8h300.4    v57.3H139.3c-11.3,0-20.4,9.1-20.4,20.4V362H51.8z M460.2,460.2H159.7V150h300.4V460.2z"/>
+							<path d="m233.3,254.4h155.8c11.3,0 20.4-9.1 20.4-20.4 0-11.3-9.1-20.4-20.4-20.4h-155.8c-11.3,0-20.4,9.1-20.4,20.4 0,11.2 9.1,20.4 20.4,20.4z"/>
+							<path d="m233.3,396.6h155.8c11.3,0 20.4-9.1 20.4-20.4 0-11.3-9.1-20.4-20.4-20.4h-155.8c-11.3,0-20.4,9.1-20.4,20.4 0,11.3 9.1,20.4 20.4,20.4z"/>
+							</g>
+						</g>
+					</svg>
+					<svg class="result fail clipboard-fail" fill="currentColor" height="20px" width="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
+					<g>
+						<g>
+						<path d="m458.5,93h-84.2v-28.2c0-11.3-9.1-20.4-20.4-20.4h-77.4v-13c0-11.3-9.1-20.4-20.4-20.4-11.3,0-20.4,9.1-20.4,20.4v13h-77.4c-11.3,0-20.4,9.1-20.4,20.4v28.2h-84.4c-11.3,0-20.4,9.1-20.4,20.4v339.7c0,26.4 21.5,47.9 47.9,47.9h350c26.4,0 47.9-21.5 47.9-47.9v-339.6c0-11.3-9.2-20.5-20.4-20.5zm-279.9-7.8h154.8v53.7h-154.8v-53.7zm259.5,367.9c0,3.9-3.2,7-7,7h-350.1c-3.9,0-7-3.2-7-7v-319.2h63.8v25.5c0,11.3 9.1,20.4 20.4,20.4h195.7c11.3,0 20.4-9.1 20.4-20.4v-25.5h63.8v319.2z"/>
+						<path d="m308,255.3l-76.2,76.2-28.6-26c-8.4-7.6-21.3-7-28.8,1.4-7.6,8.3-7,21.3 1.4,28.8l43,39.1c3.9,3.5 8.8,5.3 13.7,5.3 5.2,0 10.5-2 14.4-6l89.9-89.9c8-8 8-20.9 0-28.9-7.9-8-20.8-8-28.8-2.84217e-14z"/>
+						</g>
+					</g>
+					</svg>
+					<svg class="result success clipboard-success" fill="currentColor" height="20px" width="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
+					<g>
+						<g>
+						<path d="m458.5,93h-84.2v-28.2c0-11.3-9.1-20.4-20.4-20.4h-77.4v-13c0-11.3-9.1-20.4-20.4-20.4-11.3,0-20.4,9.1-20.4,20.4v13h-77.4c-11.3,0-20.4,9.1-20.4,20.4v28.2h-84.4c-11.3,0-20.4,9.1-20.4,20.4v339.7c0,26.4 21.5,47.9 47.9,47.9h350c26.4,0 47.9-21.5 47.9-47.9v-339.6c0-11.3-9.2-20.5-20.4-20.5zm-279.9-7.8h154.8v53.7h-154.8v-53.7zm259.5,367.9c0,3.9-3.2,7-7,7h-350.1c-3.9,0-7-3.2-7-7v-319.2h63.8v25.5c0,11.3 9.1,20.4 20.4,20.4h195.7c11.3,0 20.4-9.1 20.4-20.4v-25.5h63.8v319.2z"/>
+						<path d="m308,255.3l-76.2,76.2-28.6-26c-8.4-7.6-21.3-7-28.8,1.4-7.6,8.3-7,21.3 1.4,28.8l43,39.1c3.9,3.5 8.8,5.3 13.7,5.3 5.2,0 10.5-2 14.4-6l89.9-89.9c8-8 8-20.9 0-28.9-7.9-8-20.8-8-28.8-2.84217e-14z"/>
+						</g>
+					</g>
+					</svg>					
+					<svg class="action vdo-play" title="Play video locally for 30s" fill="currentColor" height="20px" width="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
+					<g>
+						<g>
+						<path d="M464.3,11H47.7C27.5,11,11,27.5,11,47.7v416.5c0,20.3,16.5,36.7,36.7,36.7h416.5c20.3,0,36.7-16.5,36.7-36.7V47.7    C501,27.5,484.5,11,464.3,11z M460.2,460.2H51.8V51.8h408.3V460.2z"/>
+						<path d="m109.9,413h19v12.6c0,11.3 9.1,20.4 20.4,20.4 11.3,0 20.4-9.1 20.4-20.4v-12.6h232.4c11.3,0 20.4-9.1 20.4-20.4 0-11.3-9.1-20.4-20.4-20.4h-232.3v-12.6c0-11.3-9.1-20.4-20.4-20.4-11.3,0-20.4,9.1-20.4,20.4v12.6h-19c-11.3,0-20.4,9.1-20.4,20.4-0.1,11.2 9,20.4 20.3,20.4z"/>
+						<path d="m181.6,294c10.3,4.2 18.7,0.9 22.4-1.3l128.9-77.4c5.7-3.4 9.1-9 9.1-15 0-6-3.4-11.6-9.1-15l-128.9-77.4c-6.6-4-15.3-4.5-22.4-1.3-7.2,3.2-11.7,9.4-11.7,16.3v154.7c0,6.9 4.4,13.4 11.7,16.4zm31.6-135.6l69.8,41.9-69.8,41.9v-83.8z"/>
+						</g>
+					</g>
+					</svg>
 				</div>
 				<div class="images">
 					<img class="avatar" />

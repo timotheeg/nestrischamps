@@ -85,6 +85,71 @@ class Player {
 			};
 		}
 
+		let copying = false;
+		this.dom.vdo_ninja_url.querySelector('svg.action.clipboard-copy').onclick =
+			async () => {
+				if (copying) return;
+				copying = true;
+
+				const icon = this.dom.vdo_ninja_url.querySelector(
+					'svg.action.clipboard-copy'
+				);
+
+				[...this.dom.vdo_ninja_url.querySelectorAll('svg.result')].forEach(
+					icon => (icon.style.display = 'none')
+				);
+
+				try {
+					await navigator.clipboard.writeText(
+						this.dom.vdo_ninja_url.querySelector('a').href
+					);
+					icon.style.display = 'none';
+					this.dom.vdo_ninja_url.querySelector('svg.success').style.display =
+						'inline';
+				} catch (err) {
+					icon.display = 'none';
+					this.dom.vdo_ninja_url.querySelector('svg.failure').style.display =
+						'inline';
+					console.error('Umable to write to clipboard');
+				}
+
+				setTimeout(() => {
+					[...this.dom.vdo_ninja_url.querySelectorAll('svg.result')].forEach(
+						icon => (icon.style.display = 'none')
+					);
+					icon.style.display = 'inline';
+					copying = false;
+				}, 650);
+			};
+
+		let playing;
+		this.dom.vdo_ninja_url.querySelector('svg.action.vdo-play').onclick =
+			async () => {
+				if (playing) return;
+				playing = true;
+
+				const icon = this.dom.vdo_ninja_url.querySelector(
+					'svg.action.vdo-play'
+				);
+
+				icon.style.display = 'none';
+
+				const iframe = document.createElement('iframe');
+				iframe.setAttribute(
+					'allow',
+					'autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;'
+				);
+				iframe.src = this.dom.vdo_ninja_url.querySelector('a').href;
+
+				this.dom.images.append(iframe);
+
+				setTimeout(() => {
+					iframe.remove();
+					icon.style.display = 'inline';
+					playing = false;
+				}, 30000);
+			};
+
 		this.dom.win_btn.onclick = () => {
 			remoteAPI.setWinner(this.idx);
 		};
@@ -122,6 +187,36 @@ class Player {
 	setFlag(country_code) {
 		this.dom.country_code_img.src =
 			this.dom.country_code_img.dataset.url.replace('{code}', country_code);
+	}
+
+	setVdoNinjaURL(url) {
+		if (!url) {
+			this.dom.vdo_ninja_url.querySelector('span').replaceChildren();
+			this.dom.vdo_ninja_url.style.display = 'none';
+			return;
+		}
+
+		const u = new URL(url);
+
+		const streamId = u.searchParams.get('view') || u.searchParams.get('push'); // just in case someone passed the push url
+
+		u.searchParams.delete('push');
+		u.searchParams.set('view', streamId);
+		u.searchParams.set('cover', 1);
+		u.searchParams.set('cleanviewer', 1);
+		u.searchParams.set('cleanoutput', 1);
+		u.searchParams.set('transparent', 1);
+		u.searchParams.set('autostart', 1);
+
+		const full_url = u.toString();
+
+		const a = document.createElement('a');
+		a.href = full_url;
+		a.target = '_blank';
+		a.textContent = url.replace(/^https?:\/\//, '').replace(/&.+$/, '');
+
+		this.dom.vdo_ninja_url.querySelector('span').replaceChildren(a);
+		this.dom.vdo_ninja_url.style.display = 'block';
 	}
 
 	setProducers(producers) {
@@ -210,6 +305,10 @@ class Player {
 		this.dom.avatar_url.value = state.profile_image_url;
 		this.dom.avatar_img.src = state.profile_image_url;
 
+		if (state.vdo_ninja_url) {
+			this.setVdoNinjaURL(state.vdo_ninja_url);
+		}
+
 		this.dom.country_code_select.value = state.country_code;
 		this.setFlag(state.country_code);
 	}
@@ -295,6 +394,7 @@ function addPlayer() {
 		users: player_node.querySelector('.users select'),
 		name: player_node.querySelector('.name'),
 		avatar_url: player_node.querySelector('input.avatar'),
+		images: player_node.querySelector('.images'),
 		avatar_img: player_node.querySelector('img.avatar'),
 		country_code_select: player_node.querySelector('select.country_code'),
 		country_code_img: player_node.querySelector('img.country_code'),
@@ -306,6 +406,7 @@ function addPlayer() {
 		camera_restart_btn: player_node.querySelector('.camera_restart'),
 		camera_mirror_btn: player_node.querySelector('.camera_mirror'),
 		focus_player_btn: player_node.querySelector('.focus_player'),
+		vdo_ninja_url: player_node.querySelector('.vdo_ninja_url'),
 	});
 
 	players_node.appendChild(player_node);
@@ -390,6 +491,12 @@ function bootstrap() {
 		switch (command) {
 			case 'state': {
 				setState(args[0]);
+				break;
+			}
+
+			case 'setVdoNinjaURL': {
+				const [pidx, url] = args;
+				players[pidx].setVdoNinjaURL(url);
 				break;
 			}
 

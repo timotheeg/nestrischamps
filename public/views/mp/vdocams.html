@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+
+			#stream_bg {
+				width: 1920px;
+				height: 1080px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			#players {
+				display: grid;
+				grid-auto-rows: 1fr;
+				height: 100%;
+			}
+
+			#players:has(.player:nth-child(1)) {
+				grid-template-columns: repeat(1, 1fr);
+			}
+
+			#players:has(.player:nth-child(2)) {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			#players:has(.player:nth-child(3)),
+			#players:has(.player:nth-child(4)) {
+				grid-template-columns: repeat(2, 1fr);
+				grid-template-rows: repeat(2, 1fr);
+			}
+
+			/* If we have 5 to 6 children, distribute them in 2 rows with up to 3 columns */
+			#players:has(.player:nth-child(5)),
+			#players:has(.player:nth-child(6)) {
+				grid-template-columns: repeat(3, 1fr);
+				grid-template-rows: repeat(2, 1fr);
+			}
+
+			/* If we have 7 or 8 children, we distribute them over 2 rows, with 4 per row */
+			#players:has(.player:nth-child(7)),
+			#players:has(.player:nth-child(8)) {
+				grid-template-columns: repeat(4, 1fr);
+				grid-template-rows: repeat(2, 1fr);
+			}
+
+			.player {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				border: none;
+				z-index: 0; /* Default z-index */
+			}
+
+			.player.focused {
+				z-index: 1;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				transform: translate(0, 0);
+			}
+
+			.player iframe {
+				width: 100%;
+				height: 100%;
+				border: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="players"></div>
+		</div>
+		<!-- End Stream BG -->
+
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				no_game_frames: true,
+				players: 8,
+			});
+		</script>
+		<script type="module">
+			import QueryString from '/js/QueryString.js';
+			import '/views/bg.js';
+			import Connection from '/js/connection.js';
+
+			const only_focused = QueryString.get('only_focused') === '1';
+
+			const players = [];
+			const playersNode = document.querySelector('#players');
+
+			let curMaxPlayersIdx = -1;
+
+			const updatePlayers = num_players => {
+				if (num_players <= players.length) return;
+
+				for (let pidx = players.length; pidx < num_players; pidx++) {
+					const div = document.createElement('div');
+					div.classList.add('player', `p${pidx + 1}`);
+					players[pidx] = div;
+					playersNode.appendChild(div);
+				}
+			};
+
+			const API = {
+				curFocusedIdx: null,
+				setLogin: (pidx, login) => {
+					updatePlayers(pidx + 1);
+				},
+				setVdoNinjaURL: (pidx, url, force = false) => {
+					updatePlayers(pidx + 1);
+					players[pidx].querySelector('iframe')?.remove();
+
+					if (!url) return;
+
+					const u = new URL(url);
+
+					const streamId =
+						u.searchParams.get('view') || u.searchParams.get('push'); // just in case someone passed the push url
+
+					u.searchParams.delete('push');
+					u.searchParams.set('view', streamId);
+					u.searchParams.set('cover', 1);
+					u.searchParams.set('cleanviewer', 1);
+					u.searchParams.set('cleanoutput', 1);
+					u.searchParams.set('transparent', 1);
+					u.searchParams.set('autostart', 1);
+
+					const full_url = u.toString();
+
+					players[pidx].vdo_url = full_url;
+
+					const iframe = document.createElement('iframe');
+					iframe.setAttribute(
+						'allow',
+						'autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;midi;geolocation;gyroscope;'
+					);
+					iframe.src = u.toString();
+
+					if (only_focused) {
+						players[pidx].vdo_iframe = iframe;
+					} else {
+						players[pidx].appendChild(iframe);
+					}
+				},
+				focusPlayer: pidx => {
+					if (API.curFocusedIdx === pidx) return;
+
+					if (API.curFocusedIdx !== null) {
+						players[API.curFocusedIdx].classList.remove('focused');
+						if (only_focused) {
+							players[API.curFocusedIdx].vdo_iframe?.remove();
+						}
+					}
+
+					API.curFocusedIdx = pidx;
+
+					if (pidx === null) return;
+
+					players[pidx].classList.add('focused');
+					if (only_focused) {
+						players[pidx].replaceChildren(players[pidx].vdo_iframe);
+					}
+				},
+			};
+
+			// wait for css
+			window.onload = () => {
+				const connection = new Connection(null, view_meta);
+
+				connection.onMessage = frame => {
+					try {
+						const [method, ...args] = frame;
+						API[method](...args);
+					} catch (e) {
+						console.error(e);
+					}
+				};
+			};
+		</script>
+	</body>
+</html>
