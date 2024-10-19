@@ -709,13 +709,13 @@ class MatchRoom extends Room {
 					message = new Uint8Array(message);
 				}
 				message[0] = (message[0] & 0b11111000) | p_idx; // sets player number in header byte of binary message
-				this.sendToViews(message);
+				this.sendGameFrameToViews(message);
 			} else if (Array.isArray(message)) {
 				this.sendToViews([message[0], p_idx, ...message.slice(1)]);
 				// TODO: send message to admin page as well?
 			} else {
 				// assume frame
-				this.sendToViews(['frame', p_idx, message]);
+				this.sendGameFrameToViews(['frame', p_idx, message]);
 			}
 		});
 	}

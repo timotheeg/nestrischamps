@@ -29,6 +29,14 @@ class Room extends EventEmitter {
 		this.views.forEach(connection => connection.send(message));
 	}
 
+	sendGameFrameToViews(message) {
+		this.views.forEach(connection => {
+			if (!connection.no_frames) {
+				connection => connection.send(message);
+			}
+		});
+	}
+
 	close(reason) {
 		this.views.forEach(connection => connection.kick(reason));
 		this.views.clear();
@@ -36,14 +44,14 @@ class Room extends EventEmitter {
 
 	handleProducerMessage(user, message) {
 		if (message instanceof Uint8Array) {
-			this.sendToViews(message);
+			this.sendGameFrameToViews(message);
 		} else if (Array.isArray(message)) {
 			if (message[0] === 'setVdoNinjaURL') {
 				user.vdo_ninja_url = message[1];
 			}
 			this.sendToViews([message[0], 0, ...message.slice(1)]);
 		} else {
-			this.sendToViews(['frame', 0, message]);
+			this.sendGameFrameToViews(['frame', 0, message]);
 		}
 	}
 }
