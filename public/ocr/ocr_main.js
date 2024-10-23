@@ -1993,6 +1993,8 @@ function getViewURL() {
 	searchParams.set('tetris_sound', 0);
 	searchParams.set('video', 0);
 	searchParams.set('bg', 0);
+	searchParams.set('simultris', 0);
+	searchParams.set('srabbit', 0);
 	searchParams.set('in_producer', 1);
 
 	return `${producer_url.origin}${newPathname}?${searchParams}`;
