@@ -22,7 +22,7 @@ The capture page (a.k.a. producer page) supports some query string arguments as 
 
 ## Global view arguments
 
-Caveat: global args apply to **MOST** layouts, but some layouts
+Caveat: global args apply to **MOST** layouts, but some layouts may not understand the values
 
 | Argument  | Possible values | Default | Notes |
 | --- | --- | --- | --- |
@@ -34,6 +34,9 @@ Caveat: global args apply to **MOST** layouts, but some layouts
 | `buffer_time` | An integer value representing the number of milliseconds for frames to be buffered before they are rendered. E.g. `500` | `0` (i.e. buffer is not used) | A buffer can be useful if the network is not very stable and rendering is choppy. Note that putting in a large value for `buffer_time` can cause the gameplay to be perceivably delayed compared to the player video feed, and look "weird" (player reacts before the thing they were doing happens!). |
 | `combot` | `0`: No commentary bot<br>`1`: Activate commentary bot | `0` | Commentary bot uses the browser [Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) to give score updates for the first match in an NTC room (between player 1 and 2)|
 | `lang` | `en`: Commentary bot in English<br>`fr`: Commentary bot in French | `en` | This argument controls the `combot` (see above)|
+| `srabbit` | `0`: DON'T show Stack Rabbit placement recommendations<br>`1`: Show Stack Rabbit placement recommendations | `0` | |
+| `srabbit_input_speed` | `2`<br>`6`<br>`7`<br>`8`<br>`10`<br>`11`<br>`12`<br>`13`<br>`13_5`<br>`14`<br>`15`<br>`18`<br>`20`<br>`24`<br>`30` | `12` | This controls the tapping speed in Hz Stack Rabbit assumes to give recommendations.|
+| `srabbit_playout_length` | `0`: Stack Rabbit checks NO piece beyond current and preview <br>`1`: Stack Rabbit checks 1 piece beyond current and preview<br>`2`: Stack Rabbit checks 2 pieces beyond current and preview<br>`3`: Stack Rabbit checks 3 pieces beyond current and preview | `2` | This lets StackRabbit play out more possible combinations of future pieces into the board to give its recommendation. The higher the number the number the slower it gets.|
 
 
 
@@ -54,6 +57,7 @@ Caveat: global args apply to **MOST** layouts, but some layouts
 | `simultris` | An integer value representing the time difference in milliseconds where 2 tetrises are considered "simulatenous" | `0` | Shows an animated graphic "Simul-Tetris!" above the player cams. If the argument is omitted, or set to `0`, the graphic will not be displayed. Recommended value is `120` milliseconds. |
 | `invisible` | `0`: Don't draw invisible ghost blocks as ghost blocks <br>`1`: With invisible tetris, draw the invisible blocks as ghost blocks | `0` | This setting is only useful if the game is played in Invisible Tetris mode |
 | `heartpos` | `0`: bottom, vertical<br>`1`: next to LV/TRT, vertical<br>`2`: next to Lines/next, vertical<br>`3`: next to score, horizontal<br>`4`: under flag, horizontal | `0` | This setting affect the position of hearts in the 2-match view |
+| `srabbit_rate` | `0`: No placement ratings<br>`1`: Show placement ratings | `0` | This only works if `srabbit=1` is added |
 
 ### League
 
