@@ -789,7 +789,8 @@ function renderStage(frame, force = false) {
 		field = addStackRabbitRecommendation(
 			field,
 			piece_evt.piece,
-			piece_evt.recommendation
+			piece_evt.recommendation,
+			true
 		);
 	}
 
