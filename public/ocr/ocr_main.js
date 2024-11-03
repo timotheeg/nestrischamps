@@ -1741,7 +1741,11 @@ function hasConfig() {
 	// for now guard against initial calibration not completed
 	try {
 		const parsed = JSON.parse(maybeConfig);
-		if (!parsed || !parsed.tasks) return false;
+		if (parsed?.device_id === 'everdrive') return true;
+
+		// For OCR capture, we check that the task list is valid
+
+		if (!parsed?.tasks) return false;
 
 		const tasks = Object.values(parsed.tasks);
 		if (tasks.length <= 0) return false;
