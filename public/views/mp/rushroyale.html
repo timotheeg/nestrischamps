@@ -336,20 +336,12 @@
 			function updateScore() {
 				const { sorted_players, active_players } = getSortedPlayers();
 
-				const top_score = sorted_players[0].getScore();
-
+				// reset everything
 				sorted_players.forEach((player, idx) => {
 					player.dom.full_node.classList.remove('first', 'last', 'penultimate');
 					player.dom.rank_node.classList.remove('first', 'last', 'penultimate');
 					player.dom.rank_node.targetTop = rankYOffsets[idx];
-
-					if (idx > 0) {
-						const diff = top_score - player.getScore();
-						player.dom.rank_node.querySelector('.diff').textContent =
-							'+' + readableScoreFomatter(diff);
-					} else {
-						player.dom.rank_node.querySelector('.diff').textContent = '';
-					}
+					player.dom.rank_node.querySelector('.diff').textContent = '';
 				});
 
 				if (active_players.length >= 3) {
@@ -357,8 +349,22 @@
 					peek(active_players, 1).dom.rank_node.classList.add('penultimate');
 				}
 				if (active_players.length >= 2) {
-					peek(active_players).dom.full_node.classList.add('last');
-					peek(active_players).dom.rank_node.classList.add('last');
+					const laggard_active_player = peek(active_players);
+
+					laggard_active_player.dom.full_node.classList.add('last');
+					laggard_active_player.dom.rank_node.classList.add('last');
+					laggard_active_player.dom.rank_node.querySelector(
+						'.diff'
+					).textContent = 'DANGER';
+
+					const low_score = laggard_active_player.getScore();
+
+					for (let idx = active_players.length - 1; idx--; ) {
+						const player = active_players[idx];
+						const diff = player.getScore() - low_score;
+						player.dom.rank_node.querySelector('.diff').textContent =
+							'+' + readableScoreFomatter(diff);
+					}
 				}
 
 				sorted_players[0].dom.full_node.classList.add('first');
