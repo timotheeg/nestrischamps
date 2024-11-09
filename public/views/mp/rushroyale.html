@@ -344,31 +344,70 @@
 					player.dom.rank_node.querySelector('.diff').textContent = '';
 				});
 
-				if (active_players.length >= 3) {
-					peek(active_players, 1).dom.full_node.classList.add('penultimate');
-					peek(active_players, 1).dom.rank_node.classList.add('penultimate');
-				}
 				if (active_players.length >= 2) {
-					const laggard_active_player = peek(active_players);
+					// grab all the tail players with the same score
+					const lastPlayer = peek(active_players);
+					const lastPlayerScore = lastPlayer.getScore();
 
-					laggard_active_player.dom.full_node.classList.add('last');
-					laggard_active_player.dom.rank_node.classList.add('last');
-					laggard_active_player.dom.rank_node.querySelector(
-						'.diff'
-					).textContent = 'DANGER';
+					let cut_idx = active_players.length - 2;
 
-					const low_score = laggard_active_player.getScore();
+					while (
+						cut_idx >= 0 &&
+						active_players[cut_idx].getScore() === lastPlayerScore
+					)
+						cut_idx--;
 
-					for (let idx = active_players.length - 1; idx--; ) {
-						const player = active_players[idx];
-						const diff = player.getScore() - low_score;
-						player.dom.rank_node.querySelector('.diff').textContent =
-							'+' + readableScoreFomatter(diff);
+					if (cut_idx === -1) {
+						// everyone is tied, they are all first place
+						active_players.forEach(player => {
+							player.dom.full_node.classList.add('first');
+							player.dom.rank_node.classList.add('first');
+						});
+					} else {
+						// handled tied last players
+						for (let idx = cut_idx + 1; idx < active_players.length; idx++) {
+							const player = active_players[idx];
+
+							player.dom.full_node.classList.add('last');
+							player.dom.rank_node.classList.add('last');
+							player.dom.rank_node.querySelector('.diff').textContent =
+								'DANGER';
+						}
+
+						// show score diff for anyone not tied for last
+						for (let idx = cut_idx + 1; idx--; ) {
+							const player = active_players[idx];
+							const diff = player.getScore() - lastPlayerScore;
+
+							player.dom.rank_node.querySelector('.diff').textContent =
+								'+' + readableScoreFomatter(diff);
+						}
+
+						// show penutimate player
+						if (cut_idx > 0) {
+							sorted_players[cut_idx].dom.full_node.classList.add(
+								'penultimate'
+							);
+							sorted_players[cut_idx].dom.rank_node.classList.add(
+								'penultimate'
+							);
+						}
+
+						// show tied first players
+						const top_score = active_players[0].getScore();
+						for (let idx = 0; idx < active_players.length; idx++) {
+							const player = active_players[idx];
+
+							if (player.getScore() < top_score) break;
+
+							player.dom.full_node.classList.add('first');
+							player.dom.rank_node.classList.add('first');
+						}
 					}
+				} else {
+					sorted_players[0].dom.full_node.classList.add('first');
+					sorted_players[0].dom.rank_node.classList.add('first');
 				}
-
-				sorted_players[0].dom.full_node.classList.add('first');
-				sorted_players[0].dom.rank_node.classList.add('first');
 			}
 
 			let cycle_end_ts;
