@@ -2000,6 +2000,9 @@ function getViewURL() {
 	searchParams.set('simultris', 0);
 	searchParams.set('srabbit', 0);
 	searchParams.set('in_producer', 1);
+	if (QueryString.get('combot', null) !== null) {
+		searchParams.set('combot', QueryString.get('combot'));
+	}
 
 	return `${producer_url.origin}${newPathname}?${searchParams}`;
 }
