@@ -1999,10 +1999,9 @@ function getViewURL() {
 	searchParams.set('bg', 0);
 	searchParams.set('simultris', 0);
 	searchParams.set('srabbit', 0);
+	// disable commentator bot, unless the player has specifically activated it
+	searchParams.set('combot', QueryString.get('combot') === '1' ? '1' : '0');
 	searchParams.set('in_producer', 1);
-	if (QueryString.get('combot', null) !== null) {
-		searchParams.set('combot', QueryString.get('combot'));
-	}
 
 	return `${producer_url.origin}${newPathname}?${searchParams}`;
 }
