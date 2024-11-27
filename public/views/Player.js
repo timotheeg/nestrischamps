@@ -1260,13 +1260,13 @@ export default class Player extends EventTarget {
 			this.stackRabbitWorker
 				.rpc('getMove', params)
 				.then(recommendation => {
-					const elapsed = Date.now() - start;
+					// const elapsed = Date.now() - start;
 					piece_evt.recommendation = recommendation;
-					console.log({
-						elapsed,
-						params,
-						recommendation,
-					});
+					// console.log({
+					// 	elapsed,
+					// 	params,
+					// 	recommendation,
+					// });
 				})
 				.then(() => {
 					if (!this.options.srabbit_rate) return null;
