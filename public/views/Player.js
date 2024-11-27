@@ -233,6 +233,15 @@ const DEFAULT_OPTIONS = {
 	format_drought: v => v,
 };
 
+const SOUNDS = {
+	tetris: {
+		source: '/views/Tetris_Clear.mp3',
+		gain: 0.35,
+	},
+};
+
+const AUDIO_CONTEXT = new AudioContext();
+
 export default class Player extends EventTarget {
 	constructor(dom, options) {
 		super();
@@ -428,35 +437,8 @@ export default class Player extends EventTarget {
 		}
 
 		// buils audio objects
-		this.audioContext = new AudioContext();
-		this.sounds = {
-			tetris: {
-				audio: new Audio('/views/Tetris_Clear.mp3'),
-				gain: 0.35,
-			},
-		};
-		this.options.stereo = clamp(this.options.stereo, -1, 1);
-
-		Object.entries(this.sounds).forEach(([sound, { audio, gain }]) => {
-			const track = this.audioContext.createMediaElementSource(audio);
-			const gainNode = new GainNode(this.audioContext, { gain });
-			const stereoNode = new StereoPannerNode(this.audioContext, {
-				pan: this.options.stereo,
-			});
-
-			track
-				.connect(gainNode)
-				.connect(stereoNode)
-				.connect(this.audioContext.destination);
-
-			this.sounds[sound] = () => {
-				if (this.audioContext.state === 'suspended') {
-					this.audioContext.resume();
-				}
-
-				audio.play();
-			};
-		});
+		this.setupSounds();
+		this.panSounds(this.options.stereo);
 
 		if (this.options.srabbit) {
 			this.options.srabbit_input_timeline =
@@ -511,6 +493,43 @@ export default class Player extends EventTarget {
 	onCurtainDown() {}
 	onTetris() {}
 	onMoveRating() {}
+
+	setupSounds() {
+		this.sounds = {};
+		this.options.stereo = clamp(this.options.stereo, -1, 1);
+
+		Object.entries(SOUNDS).forEach(([sound, { source, gain }]) => {
+			const audio = new Audio(source);
+			const track = AUDIO_CONTEXT.createMediaElementSource(audio);
+			const gainNode = new GainNode(AUDIO_CONTEXT, { gain });
+			const stereoNode = new StereoPannerNode(AUDIO_CONTEXT, {
+				pan: this.options.stereo,
+			});
+
+			track
+				.connect(gainNode)
+				.connect(stereoNode)
+				.connect(AUDIO_CONTEXT.destination);
+
+			this.sounds[sound] = () => {
+				if (AUDIO_CONTEXT.state === 'suspended') {
+					AUDIO_CONTEXT.resume();
+				}
+
+				audio.play();
+			};
+
+			this.sounds[sound].pan = stereoNode.pan;
+		});
+	}
+
+	panSounds(stereoValue) {
+		this.options.stereo = stereoValue = clamp(stereoValue, -1, 1);
+
+		Object.values(this.sounds).forEach(soundFunction =>
+			soundFunction.pan.setValueAtTime(stereoValue, 0)
+		);
+	}
 
 	setHideProfileCardOnNextGame(do_hide) {
 		this.hide_profile_card_on_next_game = !!do_hide;
