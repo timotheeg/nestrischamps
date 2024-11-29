@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
+		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
+		<style>
+			.running_trt {
+				height: 79px;
+			}
+
+			.team {
+				position: absolute;
+				top: 198px;
+				left: 40px;
+			}
+
+			.team-score {
+				width: 855px;
+				font-size: 48px;
+				line-height: 60px;
+				height: 57px;
+				top: -96px;
+				padding-top: 9px;
+				padding-bottom: 9px;
+			}
+
+			.aligner {
+				display: inline-block;
+				text-align: right;
+			}
+
+			.no-video .team {
+				top: 250px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="stream_bg">
+			<div id="team" class="team">
+				<div class="players"></div>
+				<div class="box team-score">
+					<div class="aligner">
+						<div class="sum">00&#x202F;000&#x202F;000</div>
+					</div>
+				</div>
+			</div>
+
+			<template id="player">
+				<div class="player">
+					<div class="box board">
+						<div class="lines">000</div>
+						<div class="next_piece"></div>
+					</div>
+
+					<div class="box score">
+						<div class="header">PLAYER</div>
+						<div class="value">0&#x202F;000&#x202F;000</div>
+					</div>
+
+					<div class="box running_trt"></div>
+
+					<div class="box video"><video class="player_vid"></video></div>
+				</div>
+			</template>
+		</div>
+		<!-- End Stream BG -->
+
+		<!-- Audio -->
+		<script>
+			// custom view parameters which will be passed in the websocket URI
+			const view_meta = new URLSearchParams({
+				video: '352x240',
+				players: 8,
+			});
+		</script>
+		<script src="/vendor/peerjs.1.5.4.min.js"></script>
+		<script type="module">
+			import QueryString from '/js/QueryString.js';
+			import '/views/bg.js';
+			import { translate, readableScoreFomatter } from '/views/utils.js';
+			import Player from '/views/Player.js';
+			import Competition from '/views/competition.js';
+
+			const stream_bg = document.querySelector('#stream_bg');
+			const player_template = document.getElementById('player');
+
+			let players = [];
+
+			const num_players = (() => {
+				const value = QueryString.get('players');
+				return /^[3-8]$/.test(value) ? parseInt(value, 10) : 8;
+			})();
+
+			const team_node = document.querySelector(`#team`);
+			const team_score_node = team_node.querySelector(`.team-score`);
+			const players_node = team_node.querySelector(`.players`);
+
+			function udpatePlayerScore(player) {
+				// team1 score
+				const team_score = players.reduce(
+					(acc, player) => acc + player.getScore(),
+					0
+				);
+
+				team_score_node.querySelector('.sum').textContent =
+					readableScoreFomatter(team_score);
+			}
+
+			const base_offset_x = 0;
+
+			window.onload = () => {
+				// wait for css
+				const player_width = 219;
+
+				// handle size and position
+				const actual_width = player_width * num_players - 21; // account for 1 border + 1 overlap
+				const total_width = actual_width + 30; // include borders
+
+				team_score_node.style.width = `${actual_width}px`;
+
+				team_node.style.left = `${Math.floor((1920 - total_width) / 2)}px`;
+
+				Array(num_players)
+					.fill()
+					.map((_, player_idx) => {
+						const player_fragment = document.importNode(
+							player_template.content,
+							true
+						);
+						const player_node = player_fragment.querySelector('.player');
+
+						player_node.classList.add(`p${player_idx + 1}`);
+						player_node.classList.add(`p${player_idx + 1}`);
+						players_node.appendChild(player_node);
+
+						const player = new Player(
+							{
+								name: player_node.querySelector(`.score .header`),
+								score: player_node.querySelector(`.score .value`),
+								lines: player_node.querySelector(`.board .lines`),
+								preview: player_node.querySelector(`.board .next_piece`),
+								field: player_node.querySelector(`.board`),
+								running_trt: player_node.querySelector(`.running_trt`),
+								video: player_node.querySelector(`video`),
+							},
+							{
+								field_pixel_size: 2.5,
+								preview_pixel_size: 2,
+								preview_align: 'tr',
+								stereo: translate([0, num_players - 1], [-1, 1], player_idx),
+								format_score: readableScoreFomatter,
+							}
+						);
+
+						player.onGameStart = function () {
+							this.dom.lines.hidden = false;
+							this.dom.preview.hidden = false;
+						};
+
+						player.onGameOver = function () {
+							this.dom.lines.hidden = true;
+							this.dom.preview.hidden = true;
+						};
+
+						player.onGameOver();
+
+						Object.assign(player_node.style, {
+							left: `${player_idx * player_width}px`,
+						});
+
+						if (QueryString.get('rtrt') === '0') {
+							player.dom.running_trt.remove();
+						}
+
+						players.push(player);
+					});
+
+				const competition = new Competition(players);
+
+				players.forEach(player => {
+					player.onScore = udpatePlayerScore;
+				});
+
+				if (!competition.has_video) {
+					stream_bg.classList.add('no-video');
+				}
+			};
+		</script>
+	</body>
+</html>
