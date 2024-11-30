@@ -13,6 +13,8 @@
 				--p-video-width: 112px;
 
 				top: var(--p-row1-top);
+
+				transition: transform 0.6s ease-out;
 			}
 
 			.player .score {
@@ -200,6 +202,7 @@
 
 			.player.eliminated {
 				filter: grayscale(1) brightness(0.3);
+				/* transform: scale(0); */
 			}
 		</style>
 	</head>
@@ -317,11 +320,31 @@
 				}
 			}
 
+			function byScoreDescending(p1, p2) {
+				const p1_score = p1.getScore();
+				const p2_score = p2.getScore();
+				return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
+			}
+
 			function getSortedPlayers() {
 				const sorted_players = [...players].sort((p1, p2) => {
-					const p1_score = p1.getScore();
-					const p2_score = p2.getScore();
-					return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
+					if (p1.rank == null) {
+						if (p2.rank == null) {
+							// both players still active
+							return byScoreDescending(p1, p2);
+						} else {
+							// player 1 active, player 2 eliminated
+							return -1;
+						}
+					} else {
+						if (p2.rank == null) {
+							// player 1 active, player 2 eliminated
+							return 1;
+						} else {
+							// both players eliminated - order by rank
+							return p1.rank - p2.rank;
+						}
+					}
 				});
 
 				const active_players = sorted_players.filter(
@@ -416,6 +439,7 @@
 			let cur_cycle_duration;
 			let lvl19 = null;
 			let lvl29 = null;
+			let next_rank;
 
 			function reset() {
 				leaderboard.querySelector('.header').textContent = '-';
@@ -425,7 +449,22 @@
 				rafId = window.cancelAnimationFrame(rafId);
 			}
 
+			function roundInit() {
+				next_rank = players.length;
+
+				players.forEach(player => {
+					delete player.rank;
+
+					const classes = ['eliminated', 'first', 'last', 'penultimate'];
+					player.dom.full_node.classList.remove(...classes);
+					player.dom.rank_node.classList.remove(...classes);
+
+					player.dom.badges.replaceChildren();
+				});
+			}
+
 			function startRound() {
+				roundInit();
 				startCycle(cycle_settings.initial_round);
 				lvl19 = lvl29 = null; // to track badges
 				checkTime();
@@ -487,16 +526,14 @@
 					if (cut_idx === -1) {
 						// tie victory!
 						active_players.forEach(player => {
-							playe.game?.end();
-							playe.playWinnerAnimation();
+							player.game?.end();
+							player.playWinnerAnimation();
 						});
 					} else {
 						for (let idx = cut_idx + 1; idx < active_players.length; idx++) {
 							const player = active_players[idx];
 
 							player.game?.end();
-							player.dom.full_node.classList.add('eliminated');
-							player.dom.rank_node.classList.add('eliminated');
 						}
 
 						if (cut_idx === 0) {
@@ -623,8 +660,23 @@
 						};
 
 						player.onGameOver = function () {
+							this.rank = next_rank--;
+
 							this.dom.lines.hidden = true;
 							this.dom.preview.hidden = true;
+
+							this.dom.full_node.classList.add('eliminated');
+							this.dom.rank_node.classList.add('eliminated');
+
+							updateScore();
+						};
+
+						player._playWinnerAnimation = player.playWinnerAnimation;
+
+						player.playWinnerAnimation = function () {
+							this.dom.full_node.classList.remove('eliminated');
+							this.dom.rank_node.classList.remove('eliminated');
+							player._playWinnerAnimation();
 						};
 
 						player.onLevel = function (frame) {
@@ -653,7 +705,7 @@
 							}
 						};
 
-						player.onGameOver();
+						// player.onGameOver();
 
 						players.push(player);
 					});
@@ -664,12 +716,7 @@
 						countDownTimeoutId = clearTimeout(countDownTimeoutId);
 						reset();
 
-						players.forEach(player => {
-							const classes = ['eliminated', 'first', 'last', 'penultimate'];
-							player.dom.full_node.classList.remove(...classes);
-							player.dom.rank_node.classList.remove(...classes);
-							player.dom.badges.replaceChildren();
-						});
+						roundInit();
 
 						this.__startCountDown(seconds);
 						countDownTimeoutId = setTimeout(startRound, seconds * 1000);
