@@ -495,7 +495,10 @@
 				toId = setTimeout(endCycle, duration * 1000);
 			}
 
+			let endingCycle = false;
+
 			function endCycle() {
+				endingCycle = true;
 				// figure out who to kick
 				const num_kicked = kickPlayer();
 
@@ -507,12 +510,24 @@
 					// round is over
 					reset();
 				}
+
+				endingCycle = false;
 			}
 
-			function kickPlayer() {
+			function kickPlayer(topOutPlayer) {
 				const { sorted_players, active_players } = getSortedPlayers();
 
 				let cut_idx;
+
+				// special handling for top out players to ensure the winner is shown
+				if (topOutPlayer) {
+					if (active_players.length === 1) {
+						active_players[0].game?.end();
+						active_players[0].playWinnerAnimation();
+						reset();
+					}
+					return;
+				}
 
 				if (active_players.length >= 2) {
 					// grab all the tail players with the same score
@@ -668,7 +683,10 @@
 							this.dom.full_node.classList.add('eliminated');
 							this.dom.rank_node.classList.add('eliminated');
 
-							updateScore();
+							if (!endingCycle) {
+								updateScore();
+								kickPlayer(this);
+							}
 						};
 
 						player._playWinnerAnimation = player.playWinnerAnimation;
@@ -704,8 +722,6 @@
 								player.dom.badges.appendChild(badge);
 							}
 						};
-
-						// player.onGameOver();
 
 						players.push(player);
 					});
