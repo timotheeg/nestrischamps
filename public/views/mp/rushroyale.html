@@ -4,13 +4,32 @@
 		<link rel="stylesheet" type="text/css" href="/views/tetris.css" />
 		<link rel="stylesheet" type="text/css" href="/views/mmp.css" />
 		<style>
+			@font-face {
+				font-family: 'SilkScreen-Bold';
+				src: url('/fonts/Silkscreen-Bold.ttf');
+			}
+
+			html,
+			body,
+			table,
+			tr,
+			th,
+			td {
+				font-family: 'SilkScreen-Bold', 'Press Start K', monospace;
+			}
+
+			.box {
+				--border-size: 6;
+				border-image-source: url('/views/black.webp');
+			}
+
 			.player {
-				--p-row1-top: 10px;
-				--p-row2-top: 525px;
-				--p-offset: 374px;
-				--p-left-x: 38px;
-				--p-right-x: 1280px;
-				--p-video-width: 112px;
+				--p-row1-top: 40px;
+				--p-row2-top: 540px;
+				--p-left-x1: 60px;
+				--p-left-x2: 720px;
+				--p-offset: 380px;
+				--p-video-width: 140px;
 
 				top: var(--p-row1-top);
 
@@ -19,14 +38,31 @@
 
 			.player .score {
 				top: 0;
+				height: 28px;
 			}
+
+			.player .score .value {
+				font-size: 24px;
+			}
+
 			.player .board {
-				top: 77px;
+				top: 42px;
 			}
 
 			.player .video {
 				--width: var(--p-video-width);
+				--height: var(--p-video-width);
 				width: var(--p-video-width);
+				height: calc(var(--p-video-width) + 20px);
+				background: black;
+			}
+
+			.player .name {
+				position: absolute;
+				top: var(--p-video-width);
+				width: var(--p-video-width);
+				color: #f3ed55;
+				overflow: hidden;
 			}
 
 			.player .video video {
@@ -37,6 +73,7 @@
 			.badges {
 				position: absolute;
 				width: var(--p-video-width);
+				top: -20px;
 				height: 44px;
 				/* background-color: rgb(255, 255, 0, 0.5); */
 				display: flex;
@@ -59,71 +96,61 @@
 			}
 
 			.player.left .video {
-				top: 110px;
-				left: 219px;
-			}
-
-			.player.left .badges {
-				top: 96px;
-				left: 234px;
+				top: 0;
+				left: 206px;
 			}
 
 			.player.right .video {
-				top: 336px;
-				left: -133px;
+				top: 280px;
+				left: -148px;
 			}
 
-			.player.right .badges {
-				top: 322px;
-				left: -118px;
+			.player.first .rank_indicator {
+				background: linear-gradient(rgb(0, 128, 0), rgb(0, 0, 0));
 			}
 
-			.player.first .box {
-				border-image-source: url(/views/border_3px_lead.png);
+			.player.penultimate .rank_indicator {
+				background: linear-gradient(rgb(128, 78, 0), rgb(0, 0, 0));
 			}
 
-			.player.penultimate .box {
-				border-image-source: url(/views/border_3px_penultimate.png);
-			}
-
-			.player.last .box {
-				border-image-source: url(/views/border_3px_last.png);
+			.player.last .rank_indicator {
+				background: linear-gradient(rgb(128, 0, 0), rgb(0, 0, 0));
 			}
 
 			.player.p1 {
-				left: var(--p-left-x);
+				left: var(--p-left-x1);
 			}
 			.player.p2 {
-				left: var(--p-right-x);
+				left: var(--p-left-x2);
 			}
 			.player.p3 {
-				left: calc(var(--p-left-x) + var(--p-offset));
+				left: calc(var(--p-left-x1) + var(--p-offset));
 			}
 			.player.p4 {
-				left: calc(var(--p-right-x) + var(--p-offset));
+				left: calc(var(--p-left-x2) + var(--p-offset));
 			}
 			.player.p5 {
 				top: var(--p-row2-top);
-				left: var(--p-left-x);
+				left: var(--p-left-x1);
 			}
 			.player.p6 {
 				top: var(--p-row2-top);
-				left: var(--p-right-x);
+				left: var(--p-left-x2);
 			}
 			.player.p7 {
 				top: var(--p-row2-top);
-				left: calc(var(--p-left-x) + var(--p-offset));
+				left: calc(var(--p-left-x1) + var(--p-offset));
 			}
 			.player.p8 {
 				top: var(--p-row2-top);
-				left: calc(var(--p-right-x) + var(--p-offset));
+				left: calc(var(--p-left-x2) + var(--p-offset));
 			}
 
 			.leaderboard {
 				padding: 6px 18px;
-				top: 10px;
-				left: 677px;
-				width: 500px;
+				top: 20px;
+				left: 1368px;
+				width: 450px;
 				height: 978px;
 			}
 
@@ -132,6 +159,7 @@
 				line-height: 88px;
 				padding-bottom: 1em;
 				padding-top: 0.5em;
+				font-family: 'Press Start K', monospace;
 			}
 
 			.leaderboard .value {
@@ -151,11 +179,11 @@
 			}
 
 			.leaderboard.avatar .value .score2 {
-				width: 200px;
+				width: 180px;
 			}
 
 			.leaderboard.avatar .value .diff {
-				width: 212px;
+				width: 185px;
 			}
 
 			.leaderboard .value .entry.first {
@@ -178,7 +206,7 @@
 				display: block;
 				text-align: left;
 				width: 100%;
-				padding-bottom: 0.25em;
+				padding-bottom: 0.15em;
 			}
 
 			@keyframes panic_colorize_wr {
@@ -215,7 +243,11 @@
 
 			<template id="player">
 				<div class="player">
-					<div class="box video"><video class="player_vid"></video></div>
+					<div class="box video">
+						<video class="player_vid"></video>
+						<div class="name">hello</div>
+						<div class="badges"></div>
+					</div>
 
 					<div class="box board">
 						<div class="lines">000</div>
@@ -223,10 +255,8 @@
 					</div>
 
 					<div class="box score">
-						<div class="header">PLAYER</div>
 						<div class="value">0000000</div>
 					</div>
-					<div class="badges"></div>
 				</div>
 			</template>
 
@@ -628,7 +658,7 @@
 
 						const player = new Player(
 							{
-								name: player_node.querySelector(`.score .header`),
+								name: player_node.querySelector(`.name`),
 								score: player_node.querySelector(`.score .value`),
 								lines: player_node.querySelector(`.board .lines`),
 								preview: player_node.querySelector(`.board .next_piece`),
@@ -651,12 +681,26 @@
 						// adding extra properties to track
 						player.idx = player_idx; // For stable sort -_-
 
+						const rank_indicator = player.dom.field
+							.querySelector('.background')
+							.cloneNode();
+						rank_indicator.classList.remove('background');
+						rank_indicator.classList.add('rank_indicator');
+						rank_indicator.style.display = 'block';
+
+						player.dom.rank_indicator = rank_indicator;
+
+						player.dom.field.prepend(rank_indicator);
+
 						player.__setName = player.setName;
 						player.setName = function (name) {
 							this.__setName(name);
 							this.dom.rank_node.querySelector('.name').textContent =
 								name || '';
 						};
+
+						// show logo in background
+						player.setAvatar('/images/ctk.webp');
 
 						player.__setAvatar = player.setAvatar;
 						player.setAvatar = function (url) {
