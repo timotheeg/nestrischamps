@@ -448,6 +448,14 @@
 							running_trt_dot_size: 5,
 							preview_pixel_size: 3.5,
 							format_score: v => readableScoreFomatter(v),
+							format_tetris_diff: v => {
+								// ensure result is at most 3 char long
+								if (v > 10) {
+									return Math.round(v);
+								} else {
+									return v.toFixed(1);
+								}
+							},
 							stereo: translate([1, 2], [-1, 1], player_num),
 						}
 					);
