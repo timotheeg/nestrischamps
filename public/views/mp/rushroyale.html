@@ -24,8 +24,8 @@
 			}
 
 			.player {
-				--p-row1-top: 40px;
-				--p-row2-top: 540px;
+				--p-row1-top: 20px;
+				--p-row2-top: 570px;
 				--p-left-x1: 60px;
 				--p-left-x2: 720px;
 				--p-offset: 380px;
@@ -146,20 +146,24 @@
 				left: calc(var(--p-left-x2) + var(--p-offset));
 			}
 
-			.leaderboard {
-				padding: 6px 18px;
-				top: 20px;
-				left: 1368px;
-				width: 450px;
-				height: 978px;
+			.timer {
+				background: black;
+				width: 410px;
+				height: unset;
+				top: 478px;
+				left: 474px;
+				font-size: 64px;
+				line-height: 64px;
+				padding: 8px 0 1px 0;
+				font-family: 'Press Start K', monospace;
 			}
 
-			.leaderboard .header {
-				font-size: 64px;
-				line-height: 88px;
-				padding-bottom: 1em;
-				padding-top: 0.5em;
-				font-family: 'Press Start K', monospace;
+			.leaderboard {
+				padding: 6px 18px;
+				top: 110px;
+				left: 1368px;
+				width: 450px;
+				height: 810px;
 			}
 
 			.leaderboard .value {
@@ -218,12 +222,12 @@
 				}
 			}
 
-			.leaderboard.warn .header {
+			.timer.warn {
 				animation: panic_colorize_wr 0.5s infinite;
 				animation-direction: alternate;
 			}
 
-			.leaderboard.panic .header {
+			.timer.panic {
 				animation: panic_colorize_wr 0.25s infinite;
 				animation-direction: alternate;
 			}
@@ -237,9 +241,10 @@
 	<body>
 		<div id="stream_bg">
 			<div class="box leaderboard avatar">
-				<div class="header">00.00</div>
 				<div class="value"></div>
 			</div>
+
+			<div class="box timer">00:00</div>
 
 			<template id="player">
 				<div class="player">
@@ -292,10 +297,11 @@
 			const stream_bg = document.getElementById('stream_bg');
 			const rank_template = document.getElementById('rank');
 			const player_template = document.getElementById('player');
+			const timer = document.querySelector('.timer');
 			const leaderboard = document.querySelector('.leaderboard');
 			const leaderboard_values = document.querySelector('.leaderboard  .value');
 
-			const rankYOffsets = [190, 292, 394, 496, 598, 700, 802, 904];
+			const rankYOffsets = [20, 122, 224, 326, 428, 530, 632, 734];
 
 			if (QueryString.get('avatar') === '0') {
 				leaderboard.classList.remove('avatar');
@@ -532,8 +538,8 @@
 			let next_death_rank;
 
 			function reset() {
-				leaderboard.querySelector('.header').textContent = '-';
-				leaderboard.classList.remove('warn', 'panic');
+				timer.textContent = '-';
+				timer.classList.remove('warn', 'panic');
 
 				toId = clearTimeout(toId);
 				rafId = window.cancelAnimationFrame(rafId);
@@ -569,17 +575,17 @@
 				let content = remainder.toFixed(2);
 
 				if (remainder < cycle_settings.panic) {
-					leaderboard.classList.remove('warn');
-					leaderboard.classList.add('panic');
+					timer.classList.remove('warn');
+					timer.classList.add('panic');
 					content = `!${content}!`;
 				} else if (remainder < cycle_settings.warn) {
-					leaderboard.classList.add('warn');
+					timer.classList.add('warn');
 					// content = `! ${content} !`;
 				} else {
-					leaderboard.classList.remove('warn', 'panic');
+					timer.classList.remove('warn', 'panic');
 				}
 
-				leaderboard.querySelector('.header').textContent = content;
+				timer.textContent = content;
 
 				rafId = window.requestAnimationFrame(checkTime);
 			}
@@ -885,8 +891,7 @@
 						this.__startCountDown(seconds);
 						countDownTimeoutId = setTimeout(startRound, seconds * 1000);
 
-						leaderboard.querySelector('.header').textContent =
-							cycle_settings.initial_round.toFixed(2);
+						timer.textContent = cycle_settings.initial_round.toFixed(2);
 					},
 				});
 
