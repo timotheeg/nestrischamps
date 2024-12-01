@@ -506,12 +506,7 @@
 
 						// show penutimate player
 						if (cut_idx > 0) {
-							sorted_players[cut_idx].dom.full_node.classList.add(
-								'penultimate'
-							);
-							sorted_players[cut_idx].dom.rank_node.classList.add(
-								'penultimate'
-							);
+							sorted_players[cut_idx].addStateClass('penultimate');
 						}
 
 						// show tied first players
@@ -623,6 +618,8 @@
 
 				// special handling for top out players to ensure the winner is shown
 				if (topOutPlayer) {
+					// having topOutPlayer here means we are in death mode
+					// which means if there is only one active player, that player IS the lastplayer standing and is the winner
 					if (active_players.length === 1) {
 						active_players[0].game?.end();
 						active_players[0].playWinnerAnimation();
@@ -635,9 +632,11 @@
 				}
 
 				if (active_players.length == 1 && endingCycle) {
-					// when there's just one active player at cycle end, then it was a chase down
+					// when there's just one active player at cycle end,
+					// then we're in score mode and this is the end of a failed chase down
+					// we know it's a failed chased down, because successful chase down are captured in the scoreUpdate() function
 					const player = active_players[0];
-					player.game?.end();
+					player.game?.end(); // marks the player eliminated as side effect
 					sorted_players[0].playWinnerAnimation();
 					return;
 				}
