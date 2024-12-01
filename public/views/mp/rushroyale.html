@@ -88,9 +88,9 @@
 				height: 44px;
 				overflow: hidden;
 				color: black;
-				font-size: 16px;
+				font-size: 20px;
 				text-align: center;
-				line-height: 44px;
+				line-height: 36px;
 				background: url(/views/badge.bg.png);
 				text-shadow: 1px 1px 1px;
 			}
@@ -294,11 +294,6 @@
 			const player_template = document.getElementById('player');
 			const leaderboard = document.querySelector('.leaderboard');
 			const leaderboard_values = document.querySelector('.leaderboard  .value');
-			// const color_gradient = new Gradient( // green - orange - red
-			// 	'#0eff0e',
-			// 	new Color(255, 165, 0),
-			// 	'#fd0009'
-			// );
 
 			const rankYOffsets = [190, 292, 394, 496, 598, 700, 802, 904];
 
@@ -670,6 +665,7 @@
 								rank_node,
 							},
 							{
+								avatar: 1, // forced to 1 regardless or query string value, so we can hijack it for the CTK event logo
 								field_pixel_size: 2.5,
 								preview_pixel_size: 2,
 								preview_align: 'tr',
