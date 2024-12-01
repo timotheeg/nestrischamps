@@ -345,52 +345,121 @@
 				}
 			}
 
+			const rank_mode =
+				QueryString.get('rank_mode') === 'score' ? 'score' : 'death'; // death is default
+
+			// order by score, tdeath rank, and player index (?)
 			function byScoreDescending(p1, p2) {
 				const p1_score = p1.getScore();
 				const p2_score = p2.getScore();
-				return p1_score === p2_score ? p1.idx - p2.idx : p2_score - p1_score;
-			}
 
-			function getSortedPlayers() {
-				const sorted_players = [...players].sort((p1, p2) => {
-					if (p1.rank == null) {
-						if (p2.rank == null) {
-							// both players still active
-							return byScoreDescending(p1, p2);
+				if (p1_score === p2_score) {
+					if (p1.death_rank == null) {
+						if (p2.death_rank == null) {
+							// both players still active, order by index
+							return p1.idx - p2.idx;
 						} else {
 							// player 1 active, player 2 eliminated
 							return -1;
 						}
 					} else {
-						if (p2.rank == null) {
+						if (p2.death_rank == null) {
 							// player 1 active, player 2 eliminated
 							return 1;
 						} else {
 							// both players eliminated - order by rank
-							return p1.rank - p2.rank;
+							return p1.death_rank - p2.death_rank;
 						}
 					}
-				});
+				} else {
+					return p2_score - p1_score;
+				}
+			}
 
-				const active_players = sorted_players.filter(
-					player =>
-						!player.game?.over &&
-						!player.dom.full_node.classList.contains('eliminated')
-				);
+			function getSortedPlayers() {
+				const sorted_players =
+					rank_mode === 'score'
+						? [...players].sort(byScoreDescending)
+						: [...players].sort((p1, p2) => {
+								if (p1.death_rank == null) {
+									if (p2.death_rank == null) {
+										// both players still active
+										return byScoreDescending(p1, p2);
+									} else {
+										// player 1 active, player 2 eliminated
+										return -1;
+									}
+								} else {
+									if (p2.death_rank == null) {
+										// player 1 active, player 2 eliminated
+										return 1;
+									} else {
+										// both players eliminated - order by rank
+										return p1.death_rank - p2.death_rank;
+									}
+								}
+						  });
+
+				const active_players = sorted_players.filter(player => {
+					if (rank_mode === 'score') {
+						return !player.hasState('eliminated');
+					} else {
+						return !player.game?.over && !player.hasState('eliminated');
+					}
+				});
 
 				return { sorted_players, active_players };
 			}
 
 			function updateScore() {
-				const { sorted_players, active_players } = getSortedPlayers();
+				let { sorted_players, active_players } = getSortedPlayers();
 
 				// reset everything
 				sorted_players.forEach((player, idx) => {
-					player.dom.full_node.classList.remove('first', 'last', 'penultimate');
-					player.dom.rank_node.classList.remove('first', 'last', 'penultimate');
+					player.removeStateClass('first', 'last', 'penultimate');
 					player.dom.rank_node.targetTop = rankYOffsets[idx];
 					player.dom.rank_node.querySelector('.diff').textContent = '';
 				});
+
+				if (rank_mode === 'score') {
+					// in score mode, a score update may end the game: that happens on completing a chase down
+					const alive_players = active_players.filter(
+						player => !player.game?.over
+					);
+
+					if (alive_players.length === 1) {
+						if (alive_players[0] === sorted_players[0]) {
+							// it's a win! (chase down completion)
+							active_players.forEach(player => {
+								player.addStateClass('eliminated');
+							});
+							alive_players[0].addStateClass('first');
+							alive_players[0].playWinnerAnimation();
+							reset();
+							return;
+						}
+					}
+
+					// in score rank mode, topped out players who are at the bottom obviously cannot come back,
+					// so they should be marked eliminated right away
+					let needs_change = 0;
+					for (let p_idx = sorted_players.length; p_idx--; ) {
+						const player = sorted_players[p_idx];
+
+						if (!player.game?.over) break;
+						if (!player.hasState('eliminated')) {
+							player.addStateClass('eliminated');
+							needs_change += 1;
+						}
+					}
+
+					if (needs_change) {
+						startCycle(cycle_settings.subsequent_rounds * needs_change);
+						const resorted = getSortedPlayers();
+						sorted_players = resorted.sorted_players;
+						active_players = resorted.active_players;
+					}
+				}
 
 				if (active_players.length >= 2) {
 					// grab all the tail players with the same score
@@ -408,16 +477,14 @@
 					if (cut_idx === -1) {
 						// everyone is tied, they are all first place
 						active_players.forEach(player => {
-							player.dom.full_node.classList.add('first');
-							player.dom.rank_node.classList.add('first');
+							player.addStateClass('first');
 						});
 					} else {
 						// handled tied last players
 						for (let idx = cut_idx + 1; idx < active_players.length; idx++) {
 							const player = active_players[idx];
 
-							player.dom.full_node.classList.add('last');
-							player.dom.rank_node.classList.add('last');
+							player.addStateClass('last');
 							player.dom.rank_node.querySelector('.diff').textContent =
 								'DANGER';
 						}
@@ -448,13 +515,11 @@
 
 							if (player.getScore() < top_score) break;
 
-							player.dom.full_node.classList.add('first');
-							player.dom.rank_node.classList.add('first');
+							player.addStateClass('first');
 						}
 					}
 				} else {
-					sorted_players[0].dom.full_node.classList.add('first');
-					sorted_players[0].dom.rank_node.classList.add('first');
+					sorted_players[0].addStateClass('first');
 				}
 			}
 
@@ -464,7 +529,7 @@
 			let cur_cycle_duration;
 			let lvl19 = null;
 			let lvl29 = null;
-			let next_rank;
+			let next_death_rank;
 
 			function reset() {
 				leaderboard.querySelector('.header').textContent = '-';
@@ -475,14 +540,19 @@
 			}
 
 			function roundInit() {
-				next_rank = players.length;
+				lvl19 = lvl29 = null; // to track badges
+				next_death_rank = players.length;
 
 				players.forEach(player => {
-					delete player.rank;
+					delete player.death_rank;
 
-					const classes = ['eliminated', 'first', 'last', 'penultimate'];
-					player.dom.full_node.classList.remove(...classes);
-					player.dom.rank_node.classList.remove(...classes);
+					player.removeStateClass(
+						'eliminated',
+						'first',
+						'last',
+						'penultimate',
+						'topout'
+					);
 
 					player.dom.badges.replaceChildren();
 				});
@@ -491,7 +561,6 @@
 			function startRound() {
 				roundInit();
 				startCycle(cycle_settings.initial_round);
-				lvl19 = lvl29 = null; // to track badges
 				checkTime();
 			}
 
@@ -516,6 +585,9 @@
 			}
 
 			function startCycle(duration) {
+				if (!duration) duration = cycle_settings.subsequent_rounds;
+
+				toId = clearTimeout(toId);
 				cycle_end_ts = Date.now() + duration * 1000;
 				toId = setTimeout(endCycle, duration * 1000);
 			}
@@ -527,9 +599,8 @@
 				// figure out who to kick
 				const num_kicked = kickPlayer();
 
-				updateScore();
-
 				if (num_kicked) {
+					updateScore();
 					startCycle(cycle_settings.subsequent_rounds * num_kicked);
 				} else {
 					// round is over
@@ -550,7 +621,18 @@
 						active_players[0].game?.end();
 						active_players[0].playWinnerAnimation();
 						reset();
+					} else {
+						startCycle();
 					}
+
+					return;
+				}
+
+				if (active_players.length == 1 && endingCycle) {
+					// when there's just one active player at cycle end, then it was a chase down
+					const player = active_players[0];
+					player.game?.end();
+					sorted_players[0].playWinnerAnimation();
 					return;
 				}
 
@@ -574,6 +656,10 @@
 							const player = active_players[idx];
 
 							player.game?.end();
+
+							// must set alimited explicitly here (in addition than inside the gameover handler)
+							// because player could be topped out, and so the gameover handler wouldn't run
+							player.addStateClass('eliminated');
 						}
 
 						if (cut_idx === 0) {
@@ -592,7 +678,7 @@
 
 			// Updating the rank positions at 60fps
 			// TODO: don't animate when there's nothing to do
-			function adjustRanks() {
+			function adjustRankPositions() {
 				players.forEach(p => {
 					const rank_node = p.dom.rank_node;
 
@@ -608,7 +694,7 @@
 				});
 			}
 
-			adjusRankToID = setInterval(adjustRanks, 1000 / 30);
+			adjusRankToID = setInterval(adjustRankPositions, 1000 / 30);
 
 			window.onload = () => {
 				// wait for css
@@ -674,6 +760,20 @@
 							}
 						);
 
+						player.addStateClass = function (...klasses) {
+							this.dom.full_node.classList.add(...klasses);
+							this.dom.rank_node.classList.add(...klasses);
+						};
+
+						player.removeStateClass = function (...klasses) {
+							this.dom.full_node.classList.remove(...klasses);
+							this.dom.rank_node.classList.remove(...klasses);
+						};
+
+						player.hasState = function (klass) {
+							return this.dom.full_node.classList.contains(klass);
+						};
+
 						// adding extra properties to track
 						player.idx = player_idx; // For stable sort -_-
 
@@ -715,25 +815,33 @@
 						};
 
 						player.onGameOver = function () {
-							this.rank = next_rank--;
+							this.death_rank = next_death_rank--;
 
 							this.dom.lines.hidden = true;
 							this.dom.preview.hidden = true;
 
-							this.dom.full_node.classList.add('eliminated');
-							this.dom.rank_node.classList.add('eliminated');
+							if (endingCycle) {
+								this.addStateClass('eliminated');
+							} else {
+								this.addStateClass('topout');
+								player.dom.rank_node.querySelector('.diff').textContent =
+									'TOPOUT';
 
-							if (!endingCycle) {
-								updateScore();
-								kickPlayer(this);
+								if (rank_mode === 'death') {
+									this.addStateClass('eliminated');
+
+									updateScore();
+									kickPlayer(this);
+								}
 							}
 						};
 
 						player._playWinnerAnimation = player.playWinnerAnimation;
 
 						player.playWinnerAnimation = function () {
-							this.dom.full_node.classList.remove('eliminated');
-							this.dom.rank_node.classList.remove('eliminated');
+							this.removeStateClass('eliminated');
+							this.dom.lines.hidden = true;
+							this.dom.preview.hidden = true;
 							player._playWinnerAnimation();
 						};
 
