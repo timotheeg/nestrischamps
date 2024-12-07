@@ -1087,7 +1087,12 @@
 					strings.player_1;
 				player_node.querySelector('.score .header').textContent = strings.score;
 				player_node.querySelector('.lines .header').textContent = strings.lines;
-				player_node.querySelector('.runs_on').textContent = strings.runs_on;
+
+				const runs_on = player_node.querySelector('.runs_on');
+
+				if (runs_on) {
+					runs_on.textContent = strings.runs_on;
+				}
 			});
 
 			if (CYCLE_TDIFF) {
