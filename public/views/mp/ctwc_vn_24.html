@@ -124,7 +124,7 @@
 
 			.name,
 			.flag {
-				top: 923px;
+				top: 922px;
 			}
 
 			.name {
@@ -173,12 +173,13 @@
 			}
 
 			.hearts {
-				bottom: -766px;
-				width: 24px;
+				bottom: -765px;
 				padding-right: 0;
 				height: unset;
 				font-size: 0px;
 				line-height: 32px;
+				display: flex;
+				flex-direction: column;
 			}
 
 			.hearts span {
@@ -188,7 +189,7 @@
 				background: url(/views/heart_grey.png);
 				background-repeat: no-repeat;
 				background-position: center left;
-				display: block;
+				display: inline-block;
 			}
 
 			.hearts span.win {
@@ -205,11 +206,11 @@
 
 			.tetris_rate,
 			.drought {
-				top: 840px;
+				top: 839px;
 			}
 
 			.level {
-				top: 757px;
+				top: 756px;
 				width: 56px;
 			}
 
@@ -300,6 +301,7 @@
 			}
 
 			.p2 > * {
+				right: unset;
 				left: var(--offset);
 			}
 
@@ -384,6 +386,39 @@
 				bottom: unset;
 				top: 477px;
 			}
+
+			.heartpos1 .match.small .hearts {
+				top: 311px;
+				--offset: 459px;
+			}
+			.heartpos2 .match.small .hearts {
+				top: 139px;
+				--offset: 535px;
+			}
+			.heartpos3 .match.small .hearts,
+			.heartpos4 .match.small .hearts {
+				--border-size: 14;
+				width: unset;
+				top: 91px;
+				--offset: 707px;
+				height: 29px;
+				padding: 0 6px 0 9px;
+				gap: 2px;
+				flex-direction: row;
+			}
+			.heartpos3 .match.small .p2 .hearts,
+			.heartpos4 .match.small .p2 .hearts {
+				right: unset;
+			}
+			.heartpos4 .match.small .hearts {
+				left: -1325px;
+				right: unset;
+			}
+			.heartpos4 .match.small .p2 .hearts {
+				left: unset;
+				right: -1325px;
+			}
+
 			.match.small .flag,
 			.match.small .name {
 				z-index: 6;
@@ -550,6 +585,12 @@
 			import InvisibleMixin from '/views/InvisibleMixin.js';
 			import { easeOutElastic } from '/js/anim.js';
 
+			if (/^[1234]$/.test(QueryString.get('heartpos'))) {
+				document
+					.querySelector('#stream_bg')
+					.classList.add(`heartpos${QueryString.get('heartpos')}`);
+			}
+
 			const isDAS = QueryString.get('style') === 'das';
 			const hasAds = QueryString.get('ads') === '1';
 
@@ -595,10 +636,16 @@
 				}
 			}
 
-			if (QueryString.get('box_border') === 'vn') {
+			const borders = {
+				vn: '/views/border_3px_ctwcvn.webp',
+				vswinter: '/views/border_3px_ctvswinter.webp',
+			};
+
+			const qs_box_border = QueryString.get('box_border');
+			if (qs_box_border && Object.hasOwn(borders, qs_box_border)) {
 				const stylesheet = new CSSStyleSheet();
 				stylesheet.replaceSync(
-					'.box { border-image-source: url(/views/border_3px_ctwcvn.webp) }'
+					`.box { border-image-source: url(${borders[qs_box_border]}) }`
 				);
 				document.adoptedStyleSheets = [stylesheet];
 			}
@@ -1040,7 +1087,12 @@
 					strings.player_1;
 				player_node.querySelector('.score .header').textContent = strings.score;
 				player_node.querySelector('.lines .header').textContent = strings.lines;
-				player_node.querySelector('.runs_on').textContent = strings.runs_on;
+
+				const runs_on = player_node.querySelector('.runs_on');
+
+				if (runs_on) {
+					runs_on.textContent = strings.runs_on;
+				}
 			});
 
 			if (CYCLE_TDIFF) {
