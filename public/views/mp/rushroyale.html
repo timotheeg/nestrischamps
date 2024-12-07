@@ -310,6 +310,7 @@
 			const players_re = /^[2345678]$/;
 			const player_width = 228;
 			const players = [];
+			let sorted_players = [];
 
 			let num_players = 8;
 
@@ -370,10 +371,10 @@
 						}
 					} else {
 						if (p2.death_rank == null) {
-							// player 1 active, player 2 eliminated
+							// player 1 eliminated, player 2 active
 							return 1;
 						} else {
-							// both players eliminated - order by rank
+							// both players eliminated - order by death rank
 							return p1.death_rank - p2.death_rank;
 						}
 					}
@@ -382,43 +383,38 @@
 				}
 			}
 
-			function getSortedPlayers() {
-				const sorted_players =
-					rank_mode === 'score'
-						? [...players].sort(byScoreDescending)
-						: [...players].sort((p1, p2) => {
-								if (p1.death_rank == null) {
-									if (p2.death_rank == null) {
-										// both players still active
-										return byScoreDescending(p1, p2);
-									} else {
-										// player 1 active, player 2 eliminated
-										return -1;
-									}
-								} else {
-									if (p2.death_rank == null) {
-										// player 1 active, player 2 eliminated
-										return 1;
-									} else {
-										// both players eliminated - order by rank
-										return p1.death_rank - p2.death_rank;
-									}
-								}
-						  });
-
-				const active_players = sorted_players.filter(player => {
-					if (rank_mode === 'score') {
-						return !player.hasState('eliminated');
-					} else {
-						return !player.game?.over && !player.hasState('eliminated');
-					}
-				});
-
-				return { sorted_players, active_players };
+			function computeSortedPlayers() {
+				if (rank_mode === 'score') {
+					sorted_players = [...players].sort(byScoreDescending);
+				} else {
+					sorted_players = [...players].sort((p1, p2) => {
+						if (p1.death_rank == null) {
+							if (p2.death_rank == null) {
+								// both players still active
+								return byScoreDescending(p1, p2);
+							} else {
+								// player 1 active, player 2 eliminated
+								return -1;
+							}
+						} else {
+							if (p2.death_rank == null) {
+								// player 1 eliminated, player 2 active
+								return 1;
+							} else {
+								// both players eliminated - order by rank
+								return p1.death_rank - p2.death_rank;
+							}
+						}
+					});
+				}
 			}
 
-			function updateScore() {
-				let { sorted_players, active_players } = getSortedPlayers();
+			function getActivePlayers() {
+				return sorted_players.filter(player => !player.hasState('eliminated')); // NB: in death mode, eliminated and dead are equivalent
+			}
+
+			function renderPlayerList() {
+				const active_players = getActivePlayers();
 
 				// reset everything
 				sorted_players.forEach((player, idx) => {
@@ -426,46 +422,6 @@
 					player.dom.rank_node.targetTop = rankYOffsets[idx];
 					player.dom.rank_node.querySelector('.diff').textContent = '';
 				});
-
-				if (rank_mode === 'score') {
-					// in score mode, a score update may end the game: that happens on completing a chase down
-					const alive_players = active_players.filter(
-						player => !player.game?.over
-					);
-
-					if (alive_players.length === 1) {
-						if (alive_players[0] === sorted_players[0]) {
-							// it's a win! (chase down completion)
-							active_players.forEach(player => {
-								player.addStateClass('eliminated');
-							});
-							alive_players[0].addStateClass('first');
-							alive_players[0].playWinnerAnimation();
-							reset();
-							return;
-						}
-					}
-
-					// in score rank mode, topped out players who are at the bottom obviously cannot come back,
-					// so they should be marked eliminated right away
-					let needs_change = 0;
-					for (let p_idx = sorted_players.length; p_idx--; ) {
-						const player = sorted_players[p_idx];
-
-						if (!player.game?.over) break;
-						if (!player.hasState('eliminated')) {
-							player.addStateClass('eliminated');
-							needs_change += 1;
-						}
-					}
-
-					if (needs_change) {
-						startCycle(cycle_settings.subsequent_rounds * needs_change);
-						const resorted = getSortedPlayers();
-						sorted_players = resorted.sorted_players;
-						active_players = resorted.active_players;
-					}
-				}
 
 				if (active_players.length >= 2) {
 					// grab all the tail players with the same score
@@ -524,6 +480,130 @@
 				}
 			}
 
+			function checkWinner() {
+				const active_players = getActivePlayers();
+
+				if (active_players.length > 1) return null;
+
+				const winner = sorted_players[0];
+
+				winner.addStateClass('first');
+				winner.addStateClass('first');
+				winner.playWinnerAnimation();
+
+				reset();
+
+				return winner;
+			}
+
+			function eliminateBottomDeadPlayers() {
+				// players who are ranked last and are dead obviously cannot come back, so we need to eliminate them explicitly
+				// so they should be marked eliminated right away
+				const eliminated = [];
+
+				for (let p_idx = sorted_players.length; p_idx--; ) {
+					const player = sorted_players[p_idx];
+
+					if (!player.game?.over) break;
+					if (!player.hasState('eliminated')) {
+						player.addStateClass('eliminated');
+						eliminated.push(player);
+					}
+				}
+
+				return eliminated;
+			}
+
+			function handlePlayerScoreUpdate(player) {
+				computeSortedPlayers();
+
+				if (rank_mode === 'score') {
+					const num_kicked = eliminateBottomDeadPlayers().length;
+
+					if (num_kicked) {
+						if (checkWinner()) {
+							reset();
+						} else {
+							startCycle(cycle_settings.subsequent_rounds * num_kicked);
+						}
+					}
+				}
+
+				renderPlayerList();
+			}
+
+			function handlePlayerTopOut(player) {
+				player.addStateClass('topout');
+				player.dom.rank_node.querySelector('.diff').textContent = 'TOPOUT';
+
+				let num_kicked = 0;
+
+				if (rank_mode === 'death') {
+					// in death mode, topout is always a straight elimination
+					player.addStateClass('eliminated');
+					num_kicked = 1;
+				} else {
+					// players who topped out might be getting kicked
+					// but maybe not if he/she is not the lowest active score
+					// (in which case the topout does eliminate anyone!)
+					num_kicked = eliminateBottomDeadPlayers().length;
+				}
+
+				if (num_kicked) {
+					computeSortedPlayers();
+					renderPlayerList();
+
+					if (checkWinner()) {
+						reset();
+					} else {
+						startCycle(cycle_settings.subsequent_rounds * num_kicked);
+					}
+				}
+			}
+
+			let endingCycle = false;
+
+			function handleCycleEnd() {
+				endingCycle = true;
+
+				// figure out who to kick
+				const kicked_players = kickBottomPlayers();
+
+				let num_kicked = kicked_players.length;
+
+				if (num_kicked <= 0) {
+					// Nobody is kicked, so it's a tie win!
+					getActivePlayers().forEach(player => {
+						player.playWinnerAnimation();
+					});
+					reset();
+					endingCycle = false;
+					return;
+				}
+
+				if (checkWinner()) {
+					reset();
+					renderPlayerList();
+					endingCycle = false;
+					return;
+				}
+
+				if (rank_mode === 'score') {
+					// since someone was kicked, it's possible there are now dead players at the bottom, need to eliminate them as well
+					num_kicked += eliminateBottomDeadPlayers().length;
+				}
+
+				if (checkWinner()) {
+					reset();
+				} else {
+					startCycle(cycle_settings.subsequent_rounds * num_kicked);
+				}
+
+				renderPlayerList();
+
+				endingCycle = false;
+			}
+
 			let cycle_end_ts;
 			let rafId;
 			let toId;
@@ -562,10 +642,10 @@
 			function startRound() {
 				roundInit();
 				startCycle(cycle_settings.initial_round);
-				checkTime();
+				updateTime();
 			}
 
-			function checkTime() {
+			function updateTime() {
 				const remainder = (cycle_end_ts - Date.now()) / 1000;
 				let content = remainder.toFixed(2);
 
@@ -582,7 +662,7 @@
 
 				timer.textContent = content;
 
-				rafId = window.requestAnimationFrame(checkTime);
+				rafId = window.requestAnimationFrame(updateTime);
 			}
 
 			function startCycle(duration) {
@@ -590,92 +670,36 @@
 
 				toId = clearTimeout(toId);
 				cycle_end_ts = Date.now() + duration * 1000;
-				toId = setTimeout(endCycle, duration * 1000);
+				toId = setTimeout(handleCycleEnd, duration * 1000);
 			}
 
-			let endingCycle = false;
+			function kickBottomPlayers() {
+				const active_players = getActivePlayers();
 
-			function endCycle() {
-				endingCycle = true;
-				// figure out who to kick
-				const num_kicked = kickPlayer();
-
-				if (num_kicked) {
-					updateScore();
-					startCycle(cycle_settings.subsequent_rounds * num_kicked);
-				} else {
-					// round is over
-					reset();
-				}
-
-				endingCycle = false;
-			}
-
-			function kickPlayer(topOutPlayer) {
-				const { sorted_players, active_players } = getSortedPlayers();
-
-				let cut_idx;
-
-				// special handling for top out players to ensure the winner is shown
-				if (topOutPlayer) {
-					// having topOutPlayer here means we are in death mode
-					// which means if there is only one active player, that player IS the lastplayer standing and is the winner
-					if (active_players.length === 1) {
-						active_players[0].game?.end();
-						active_players[0].playWinnerAnimation();
-						reset();
-					} else {
-						startCycle();
-					}
-
-					return;
-				}
-
-				if (active_players.length == 1 && endingCycle) {
-					// when there's just one active player at cycle end,
-					// then we're in score mode and this is the end of a failed chase down
-					// we know it's a failed chased down, because successful chase down are captured in the scoreUpdate() function
-					const player = active_players[0];
-					player.game?.end(); // marks the player eliminated as side effect
-					sorted_players[0].playWinnerAnimation();
-					return;
-				}
+				const kicked = [];
 
 				if (active_players.length >= 2) {
 					// grab all the tail players with the same score
 					const lastPlayer = peek(active_players);
 					const lastPlayerScore = lastPlayer.getScore();
 
-					cut_idx = active_players.length - 2;
+					let cut_idx = active_players.length - 2;
 					while (active_players[cut_idx].getScore() === lastPlayerScore)
 						cut_idx--;
 
-					if (cut_idx === -1) {
-						// tie victory!
-						active_players.forEach(player => {
-							player.game?.end();
-							player.playWinnerAnimation();
-						});
-					} else {
+					if (cut_idx >= 0) {
 						for (let idx = cut_idx + 1; idx < active_players.length; idx++) {
 							const player = active_players[idx];
 
 							player.game?.end();
-
-							// must set alimited explicitly here (in addition than inside the gameover handler)
-							// because player could be topped out, and so the gameover handler wouldn't run
 							player.addStateClass('eliminated');
-						}
 
-						if (cut_idx === 0) {
-							// we have a winner
-							sorted_players[0].game?.end();
-							sorted_players[0].playWinnerAnimation();
-						} else {
-							return active_players.length - cut_idx - 1; // return number of players kicked
+							kicked.push(player);
 						}
 					}
 				}
+
+				return kicked;
 			}
 
 			window.players = players;
@@ -828,16 +852,7 @@
 							if (endingCycle) {
 								this.addStateClass('eliminated');
 							} else {
-								this.addStateClass('topout');
-								player.dom.rank_node.querySelector('.diff').textContent =
-									'TOPOUT';
-
-								if (rank_mode === 'death') {
-									this.addStateClass('eliminated');
-
-									updateScore();
-									kickPlayer(this);
-								}
+								handlePlayerTopOut(this);
 							}
 						};
 
@@ -884,7 +899,6 @@
 					startCountDown: function (seconds) {
 						countDownTimeoutId = clearTimeout(countDownTimeoutId);
 						reset();
-
 						roundInit();
 
 						this.__startCountDown(seconds);
@@ -896,15 +910,19 @@
 
 				players.forEach(player => {
 					player.onScore = () => {
+						if (endingCycle) return; // discard "fake" score update from death
+
 						player.dom.rank_node.querySelector('.score2').textContent =
 							readableScoreFomatter(player.getScore());
-						updateScore();
+
+						handlePlayerScoreUpdate(player);
 					};
 				});
 
 				window.competition = competition;
 
-				updateScore();
+				computeSortedPlayers();
+				renderPlayerList();
 			};
 
 			if (/^\/replay\//.test(location.pathname)) {
