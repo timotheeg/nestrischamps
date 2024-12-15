@@ -95,6 +95,16 @@
 				text-shadow: 1px 1px 1px;
 			}
 
+			.timer_marker {
+				position: absolute;
+				left: -10px;
+				width: 10px;
+				height: 452px;
+				bottom: -452px;
+				background: gray;
+				transform-origin: bottom left;
+			}
+
 			.player.left .video {
 				top: 0;
 				left: 206px;
@@ -105,16 +115,32 @@
 				left: -148px;
 			}
 
+			.player.right .timer_marker {
+				left: 210px;
+			}
+
 			.player.first .rank_indicator {
 				background: linear-gradient(rgb(0, 128, 0), rgb(0, 0, 0));
+			}
+
+			.player.first .timer_marker {
+				background: green;
 			}
 
 			.player.penultimate .rank_indicator {
 				background: linear-gradient(rgb(128, 78, 0), rgb(0, 0, 0));
 			}
 
+			.player.penultimate .timer_marker {
+				background: rgb(255, 156, 0);
+			}
+
 			.player.last .rank_indicator {
 				background: linear-gradient(rgb(128, 0, 0), rgb(0, 0, 0));
+			}
+
+			.player.last .timer_marker {
+				background: red;
 			}
 
 			.player.p1 {
@@ -262,6 +288,8 @@
 					<div class="box score">
 						<div class="value">0000000</div>
 					</div>
+
+					<div class="timer_marker"></div>
 				</div>
 			</template>
 
@@ -604,6 +632,7 @@
 				endingCycle = false;
 			}
 
+			let cycle_start_ts;
 			let cycle_end_ts;
 			let rafId;
 			let toId;
@@ -651,6 +680,7 @@
 			}
 
 			function updateTime() {
+				const total = (cycle_end_ts - cycle_start_ts) / 1000;
 				const remainder = (cycle_end_ts - Date.now()) / 1000;
 				let content = remainder.toFixed(2);
 
@@ -667,6 +697,16 @@
 
 				timer.textContent = content;
 
+				const scale = `scaleY(${remainder / total})`;
+				players.forEach(player => {
+					if (player.game?.over) {
+						player.dom.timer_marker.style.display = 'none';
+					} else {
+						player.dom.timer_marker.style.display = 'block';
+						player.dom.timer_marker.style.transform = scale;
+					}
+				});
+
 				rafId = window.requestAnimationFrame(updateTime);
 			}
 
@@ -674,7 +714,8 @@
 				if (!duration) duration = cycle_settings.subsequent_rounds;
 
 				toId = clearTimeout(toId);
-				cycle_end_ts = Date.now() + duration * 1000;
+				cycle_start_ts = Date.now();
+				cycle_end_ts = cycle_start_ts + duration * 1000;
 				toId = setTimeout(handleCycleEnd, duration * 1000);
 			}
 
@@ -783,6 +824,7 @@
 
 								full_node: player_node,
 								rank_node,
+								timer_marker: player_node.querySelector(`.timer_marker`),
 							},
 							{
 								avatar: 1, // forced to 1 regardless or query string value, so we can hijack it for the CTK event logo
