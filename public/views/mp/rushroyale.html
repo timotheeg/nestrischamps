@@ -636,6 +636,11 @@
 					);
 
 					player.dom.badges.replaceChildren();
+
+					// force score to be shown as zero
+					player.dom.score.textContent = player.options.format_score(0);
+					player.dom.rank_node.querySelector('.score2').textContent =
+						readableScoreFomatter(0);
 				});
 			}
 
