@@ -913,6 +913,8 @@
 					},
 				});
 
+				// we must overwrite the onScore callback AFTER the Competition is instantiated, to take it over
+				// actually TODO then: is the Competition instance even needed in this knock out format?
 				players.forEach(player => {
 					player.onScore = () => {
 						if (endingCycle) return; // discard "fake" score update from death
