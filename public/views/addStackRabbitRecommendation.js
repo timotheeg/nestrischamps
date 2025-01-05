@@ -143,6 +143,15 @@ export default function addStackRabbitRecommendation(
 	const [rotation, xshift, yshift] = placement;
 	const field_copy = [...field];
 	const shape = ROTATIONS[piece][rotation];
+
+	if (!shape) {
+		// should not happen but paranoid check
+		console.warn(
+			`Unexpected recommendation rotation found: (${piece}, ${rotation}) with placement data [${placement}]`
+		);
+		return field_copy;
+	}
+
 	const offset_x = OFFSET_X + xshift;
 	const offset_y = OFFSET_Y + yshift;
 
