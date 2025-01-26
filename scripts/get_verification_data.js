@@ -105,6 +105,7 @@ function getSrtTimestamp(elapsed) {
 			const ts = p.frame.raw.ctime - start_ctime;
 			return {
 				ts,
+				gameid: p.frame.raw.gameid,
 				time: getSrtTimestamp(ts),
 				lines: p.frame.raw.lines,
 				level: p.frame.raw.level,
