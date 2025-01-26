@@ -88,7 +88,7 @@ export async function getGameFrames(gameid) {
         UPDATE scores
         SET
             start_level=${game.frames[2].raw.level},
-            tetris_rate=${lastClear.tetris_rate},
+            tetris_rate=${lastClear?.tetris_rate ?? null},
             num_droughts=${lastPiece.i_droughts.count},
             max_drought=${lastPiece.i_droughts.max},
             das_avg=${lastPiece.das.avg},
