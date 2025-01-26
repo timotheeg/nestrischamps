@@ -1,8 +1,9 @@
 import BinaryFrame from '../public/js/BinaryFrame.js';
 import { peek } from '../public/views/utils.js';
 import { Upload } from '@aws-sdk/lib-storage';
-import { S3Client } from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import zlib from 'zlib';
+import BaseGame from '../public/views/BaseGame.js';
 
 export async function getGameFrames(gameid) {
 	const game_url = `https://nestrischamps.io/api/games/${gameid}`;
@@ -53,16 +54,20 @@ export async function getGameFrames(gameid) {
 }
 
 (async function () {
+	const s3Client = new S3Client({ region: process.env.GAME_FRAMES_REGION });
 	const gameids = process.argv.slice(2);
 	const games = await Promise.all(gameids.map(gameid => getGameFrames(gameid)));
-	const frame_file = peek(games)
-		.gamedata.frame_url.replace(/^https:\/\/[^/]+\//, '')
-		.replace(/ngf$/, 'concat.ngf');
+	const file_keys = games.map(game =>
+		game.gamedata.frame_url.replace(/^https:\/\/[^/]+\//, '')
+	);
+	const frame_file = peek(file_keys).replace(/\.ngf$/, '.concat.ngf');
+
+	console.log(`writing to ${frame_file}`);
 
 	const frame_stream = zlib.createGzip();
 
 	const upload = new Upload({
-		client: new S3Client({ region: process.env.GAME_FRAMES_REGION }),
+		client: s3Client,
 		leavePartsOnError: false,
 		params: {
 			Bucket: process.env.GAME_FRAMES_BUCKET,
@@ -76,12 +81,15 @@ export async function getGameFrames(gameid) {
 		},
 	});
 
+	const game = new BaseGame({});
+
 	games
 		.map(game => game.frames)
 		.flat()
 		.forEach(frame => {
 			frame.gameid = 1;
 			frame_stream.write(BinaryFrame.encode(frame));
+			game.setFrame(frame);
 		});
 
 	frame_stream.end();
@@ -89,4 +97,56 @@ export async function getGameFrames(gameid) {
 	await upload.done();
 
 	console.log(`written to ${frame_file}`);
+
+	// prep update statement
+	const lastGameId = peek(gameids);
+	const lastPieces = peek(game.pieces);
+	const lastPoints = peek(game.points);
+	const lastClear = peek(game.clears);
+
+	// gross sql creation via string interpolation, but it's meant to be run by hand on console 🤷
+	// operator should check!
+	const sqls = [
+		`
+update scores
+set
+    start_level=${game.frames[2].raw.level}
+  , tetris_rate=${lastClear.tetris_rate}
+  , num_droughts=${lastPieces.i_droughts.count}
+  , max_drought=${lastPieces.i_droughts.max}
+  , das_avg=${lastPieces.das.avg}
+  , duration=${game.duration}
+  , clears='${game.clears.map(clear => clear.cleared).join('')}'
+  , pieces='${game.pieces.map(piece => piece.piece).join('')}'
+  , transition=${lastPoints.score.transition}
+  , num_frames=${game.frames.length}
+  , frame_file='${frame_file}'
+where
+  id=${lastGameId}
+;
+`,
+		...gameids
+			.slice(0, -1)
+			.map(gameid => `delete from scores where id=${gameid};`),
+	];
+
+	console.log('SQL commands to tun to update DB:');
+	console.log(sqls.join('\n'));
+	console.log('==========:');
+
+	// WARNING: Below is destructive!! It drops the objects from S3, there's no turning back!
+
+	const input = {
+		// DeleteObjectsRequest
+		Bucket: process.env.GAME_FRAMES_BUCKET,
+		Delete: {
+			// Delete
+			Objects: file_keys.map(key => ({ Key: key })),
+			Quiet: false,
+		},
+	};
+	const command = new DeleteObjectsCommand(input);
+
+	console.log(`Deleting old files: \n${file_keys.join('\n')}`);
+	await s3Client.send(command);
 })();
