@@ -896,13 +896,6 @@ function resetShowPartsTimer() {
 	hide_show_parts_timer = setTimeout(hideParts, 45000); // parts stop showing after 45s of static config
 }
 
-function loadImage(img, src) {
-	return new Promise(resolve => {
-		img.onload = resolve;
-		img.src = src;
-	});
-}
-
 function updatePaletteList() {
 	palette_selector.innerHTML = '';
 
@@ -1548,11 +1541,19 @@ async function showParts(data) {
 		if (config.palette && name.startsWith('color')) continue;
 
 		const task = config.tasks[name];
-		const scale_factor = name.startsWith('color') ? 4 : 2;
 
 		if (!task) continue;
 
 		const holder = document.querySelector(`fieldset.${name} div.results`);
+
+		if (!holder) {
+			console.warn(
+				`Config controls for [${name}] are not present on page, skipping showing part.`
+			);
+			continue;
+		}
+
+		const scale_factor = name.startsWith('color') ? 4 : 2;
 		let separator;
 
 		if (!task.crop_canvas_ctx) {
